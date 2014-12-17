@@ -123,6 +123,7 @@
     <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
     <Compile Include="Mappings\tblICStorageUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Stored Procedures\Posting\PostInventoryReceipt.cs" />
     <Compile Include="Tables\tblICEquipmentLength.cs" />
     <Compile Include="Tables\tblICItemFactory.cs" />
     <Compile Include="Tables\tblICItemOwner.cs" />
