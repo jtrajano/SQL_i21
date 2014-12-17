@@ -3,7 +3,7 @@
     [intInvoiceId]       INT             NOT NULL,
 	[intCompanyLocationId]      INT      NOT NULL DEFAULT ((0)),
     [intItemId]          INT             NULL,
-    [strItemDescription] NVARCHAR (250)  NULL,
+    [strItemDescription] NVARCHAR (250)  COLLATE Latin1_General_CI_AS  NULL,
 	[intItemUOMId]       INT             NULL,
     [dblQtyOrdered]      NUMERIC (18, 6) NULL,
     [dblQtyShipped]      NUMERIC (18, 6) NULL,
