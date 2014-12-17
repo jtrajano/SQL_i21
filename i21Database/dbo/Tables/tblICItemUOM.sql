@@ -7,6 +7,7 @@
     [dblSellQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strUpcCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnStockUnit] BIT NULL DEFAULT ((0)),
 	[ysnAllowPurchase] BIT NULL DEFAULT ((0)),
 	[ysnAllowSale] BIT NULL DEFAULT ((0)),
