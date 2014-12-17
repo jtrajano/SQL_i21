@@ -6,12 +6,11 @@ BEGIN
 
 DECLARE @isOpen BIT = 0 
 
-SELECT TOP 1 
-		@isOpen = 1 
-FROM	tblGLFiscalYearPeriod 
-WHERE	CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME) BETWEEN CAST(FLOOR(CAST(dtmStartDate AS FLOAT)) AS DATETIME) AND CAST(FLOOR(CAST(dtmEndDate AS FLOAT)) AS DATETIME)  
+SELECT TOP 1 @isOpen = 1 
+FROM	dbo.tblGLFiscalYearPeriod 
+WHERE	dbo.fnDateGreaterThanEquals(@dtmDate, dtmStartDate) = 1
+		AND dbo.fnDateLessThanEquals(@dtmDate, dtmEndDate) = 1
 		AND ISNULL(ysnOpen, 0) = 1
-
 RETURN @isOpen
 
 END

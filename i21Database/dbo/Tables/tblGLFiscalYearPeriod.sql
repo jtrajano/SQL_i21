@@ -9,4 +9,21 @@
     CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED ([intGLFiscalYearPeriodId] ASC, [intFiscalYearId] ASC),
     CONSTRAINT [FK_tblGLPeriod_tblGLFiscalYearPeriod] FOREIGN KEY ([intFiscalYearId]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId]) ON DELETE CASCADE
 );
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblGLFiscalYearPeriod_intFiscalYearId]
+    ON [dbo].[tblGLFiscalYearPeriod](intFiscalYearId ASC)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGLFiscalYearPeriod_ysnOpen]
+    ON [dbo].[tblGLFiscalYearPeriod]([ysnOpen] ASC)
+	INCLUDE ([dtmStartDate], [dtmEndDate])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGLFiscalYearPeriod_dtmStartDate]
+    ON [dbo].[tblGLFiscalYearPeriod]([dtmStartDate] ASC)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGLFiscalYearPeriod_dtmEndDate]
+    ON [dbo].[tblGLFiscalYearPeriod]([dtmEndDate] ASC)
+GO
