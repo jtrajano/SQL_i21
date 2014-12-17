@@ -1512,4 +1512,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strMandatory" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="cad25024-07f6-4500-820d-9e41e00f7e15" ChangeDateTime="12/16/2014 07:29:53">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractText].[intTextCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractText]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strTextCode" />
+  </Operation>
 </Operations>
