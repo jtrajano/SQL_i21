@@ -26,5 +26,17 @@ namespace iRely.Inventory.Model
                 new SqlParameter("@intEntityId", entityId)
             );            
         }
+
+        public void UnpostInventoryReceipt(bool ysnRecap, string transactionId, int userId, int entityId)
+        {
+            this.Database.ExecuteSqlCommand(
+                "dbo.uspICPostInventoryReceipt @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId",
+                new SqlParameter("@ysnPost", false),
+                new SqlParameter("@ysnRecap", ysnRecap),
+                new SqlParameter("@strTransactionId", transactionId),
+                new SqlParameter("@intUserId", userId),
+                new SqlParameter("@intEntityId", entityId)
+            );
+        }
     }
 }
