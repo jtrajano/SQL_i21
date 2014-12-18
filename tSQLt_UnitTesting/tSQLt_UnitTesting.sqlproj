@@ -539,6 +539,26 @@
     <Build Include="testi21Database\Scripts\test the standard collation Latin1_General_CI_AS on all i21 columns.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for the basics.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for open periods.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for closed periods.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for empty periods.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for multiple periods.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50001.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50001 _non-null and invalid account id_.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50003.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50005.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for the valid GL Entries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for invalid GL Entries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

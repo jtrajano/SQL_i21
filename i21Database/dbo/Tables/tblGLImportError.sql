@@ -1,5 +1,5 @@
 ﻿/* used by Import Budget CSV as temporary table*/
-CREATE TABLE [dbo].[tblTempError]
+CREATE TABLE [dbo].[tblGLImportError]
 (
 	[intId] [int] IDENTITY(1,1) NOT NULL,
 	[guidSessionId] [uniqueidentifier] NOT NULL,

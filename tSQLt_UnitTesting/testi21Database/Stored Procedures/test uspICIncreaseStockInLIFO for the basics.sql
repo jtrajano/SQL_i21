@@ -45,6 +45,8 @@ BEGIN
 				,@QtyOffset AS NUMERIC(18,6)
 				,@NewLIFOId AS INT 
 				,@UpdatedLIFOId AS INT 
+				,@strRelatedTransactionId AS NVARCHAR(40)
+				,@intRelatedTransactionId AS INT 
 	END 
 	
 	-- Act
@@ -65,6 +67,8 @@ BEGIN
 			,@QtyOffset OUTPUT 
 			,@NewLIFOId OUTPUT 
 			,@UpdatedLIFOId OUTPUT 
+			,@strRelatedTransactionId OUTPUT 
+			,@intRelatedTransactionId OUTPUT 
 
 		INSERT INTO actual (
 				[intItemId] 

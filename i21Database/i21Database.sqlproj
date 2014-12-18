@@ -791,9 +791,9 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFO.sql" />
     <Build Include="dbo\Tables\tblGRStorageType.sql" />
     <Build Include="dbo\Functions\fnDateNotEquals.sql" />
-    <Build Include="dbo\Functions\fnDateLessThan.sql" />
-    <Build Include="dbo\Functions\fnDateGreaterThanEquals.sql" />
     <Build Include="dbo\Functions\fnDateLessThanEquals.sql" />
+    <Build Include="dbo\Functions\fnDateGreaterThanEquals.sql" />
+    <Build Include="dbo\Functions\fnDateLessThan.sql" />
     <Build Include="dbo\Functions\fnDateGreaterThan.sql" />
     <Build Include="dbo\Functions\fnDateEquals.sql" />
     <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
@@ -912,7 +912,7 @@
     <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
     <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
-    <Build Include="dbo\Tables\tblTempError.sql" />
+    <Build Include="dbo\Tables\tblGLImportError.sql" />
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDDivider.sql" />
@@ -933,6 +933,15 @@
     <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
     <Build Include="dbo\Tables\tblICEquipmentLength.sql" />
     <Build Include="dbo\Tables\tblMFQAProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFO.sql" />
+    <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryReceipt.sql" />
+    <Build Include="dbo\Tables\tblICLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLBookEntries.sql" />
+    <Build Include="dbo\Functions\fnGetGLEntriesErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLValidateGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
