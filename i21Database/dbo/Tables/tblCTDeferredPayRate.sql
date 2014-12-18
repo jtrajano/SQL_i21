@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblCTDeferredPayRate](
 	[intDeferredPayId] [int] NOT NULL,
 	[dtmFromDate] [datetime] NOT NULL,
 	[dtmToDate] [datetime] NOT NULL,
-	[dblDeferPayRate] [numeric](5, 4) NOT NULL,
+	[dblDeferPayRate] [numeric](8, 4) NOT NULL,
  CONSTRAINT [PK_tblCTDeferredPayRate_intDeferPayRateId] PRIMARY KEY CLUSTERED 
 (
 	[intDeferPayRateId] ASC

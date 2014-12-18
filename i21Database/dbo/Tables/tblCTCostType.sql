@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[tblCTCostType](
 	[ysnMTM] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnMTM]  DEFAULT ((0)),
 	[ysnPrice] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnPrice]  DEFAULT ((0)),
 	[intCostMethod] [int] NOT NULL,
-	[dblAmount] [numeric](5, 4) NOT NULL,
+	[dblAmount] [numeric](12, 4) NOT NULL,
 	[intUnitMeasureId] [int] NULL,
 	[intCurrencyId] [int] NOT NULL,
 	[ysnFreightRelated] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnFreightRelated]  DEFAULT ((0)),

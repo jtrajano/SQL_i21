@@ -4,11 +4,11 @@ CREATE TABLE [dbo].[tblCTContractOption](
 	[intContractDetailId] [int] NOT NULL,
 	[intBuySell] [int] NOT NULL,
 	[intPutCall] [int] NOT NULL,
-	[dblStrike] [numeric](5, 4) NOT NULL,
-	[dblPremium] [numeric](5, 4) NOT NULL,
-	[dblServiceFee] [numeric](5, 4) NOT NULL,
+	[dblStrike] [numeric](8, 4) NOT NULL,
+	[dblPremium] [numeric](8, 4) NOT NULL,
+	[dblServiceFee] [numeric](6, 4) NOT NULL,
 	[dtmExpiration] [datetime] NOT NULL,
-	[dblTargetPrice] [numeric](5, 4) NULL,
+	[dblTargetPrice] [numeric](8, 4) NULL,
 	[intPremFee] [int] NOT NULL,
  CONSTRAINT [PK_tblCTContractOption_intContractOptionId] PRIMARY KEY CLUSTERED 
 (

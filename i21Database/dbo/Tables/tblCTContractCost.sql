@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[intCostTypeId] [int] NOT NULL,
 	[intVendorId] [int] NULL,
 	[intCostMethod] [int] NOT NULL,
-	[dblRate] [numeric](5, 4) NOT NULL,
+	[dblRate] [numeric](10, 4) NOT NULL,
 	[intItemUOMId] [int] NULL,
 	[intCurrencyId] [int] NOT NULL,
 	[ysnAccrue] [bit] NOT NULL CONSTRAINT [DF_tblCTContractCost_ysnAccrue]  DEFAULT ((1)),
