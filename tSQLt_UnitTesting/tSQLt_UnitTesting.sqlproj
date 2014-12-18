@@ -539,6 +539,11 @@
     <Build Include="testi21Database\Scripts\test the standard collation Latin1_General_CI_AS on all i21 columns.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for the basics.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for open periods.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for closed periods.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for empty periods.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for multiple periods.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
