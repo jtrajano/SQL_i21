@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryReceipt', {
     extend: 'Ext.window.Window',
-    alias: 'widget.icinventoryreceipt',
+    alias: 'widget.inventoryreceipt',
 
     requires: [
         'Inventory.view.Filter1',
@@ -1131,9 +1131,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colQualityPropertyName',
                                                         width: 82,
+                                                        dataIndex: 'string',
                                                         text: 'Quality Property Name',
                                                         flex: 1
                                                     }

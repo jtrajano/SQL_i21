@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryShipment', {
     extend: 'Ext.window.Window',
-    alias: 'widget.icinventoryshipment',
+    alias: 'widget.inventoryshipment',
 
     requires: [
         'Inventory.view.Filter1',
@@ -28,13 +28,13 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
+        'Ext.form.Label',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
-        'Ext.form.field.Number',
-        'Ext.grid.column.Action',
+        'Ext.grid.column.Date',
+        'Ext.grid.column.Check',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
-        'Ext.form.Label',
         'Ext.toolbar.Paging'
     ],
 
@@ -151,7 +151,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         itemId: 'btnShip',
                                         width: 52,
                                         iconAlign: 'top',
-                                        iconCls: 'large-generate-invoice',
+                                        iconCls: 'large-ship-via',
                                         scale: 'large',
                                         text: 'Ship'
                                     },
@@ -545,18 +545,33 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         },
                                                         items: [
                                                             {
+                                                                xtype: 'label',
+                                                                margin: '0 7 0 5',
+                                                                text: 'Items'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnEditInventoryReceipt',
+                                                                itemId: 'btnAddItem',
+                                                                iconCls: 'small-add',
+                                                                text: 'Add'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnEditItem',
                                                                 iconCls: 'small-edit',
                                                                 text: 'Edit'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnDeleteInventoryReceipt',
+                                                                itemId: 'btnDeleteItem',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -573,205 +588,160 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colItemNo',
+                                                        dataIndex: 'strBatchName',
+                                                        itemId: 'colBatchName',
                                                         width: 100,
-                                                        dataIndex: 'strItemNo',
-                                                        text: 'Item No.',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strItemNo',
-                                                                    dataType: 'string',
-                                                                    text: 'Item Number',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strType',
-                                                                    dataType: 'string',
-                                                                    text: 'Item Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboItem',
-                                                            displayField: 'strItemNo',
-                                                            valueField: 'strItemNo'
-                                                        }
+                                                        text: 'Batch Name'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colSONumber',
+                                                        width: 100,
+                                                        dataIndex: 'strSONumber',
+                                                        text: 'SO Number'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colPONumber',
+                                                        width: 90,
+                                                        dataIndex: 'strPONumber',
+                                                        text: 'PO Number'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colItemNumber',
+                                                        width: 100,
+                                                        dataIndex: 'strItemNumber',
+                                                        text: 'Item No.'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDescription',
-                                                        width: 175,
+                                                        width: 150,
                                                         dataIndex: 'strDescription',
                                                         text: 'Description'
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colSubLocation',
-                                                        width: 90,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'Sublocation'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colLotTracking',
-                                                        width: 100,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'Lot Tracking'
-                                                    },
-                                                    {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered',
+                                                        itemId: 'colQuantity',
                                                         width: 80,
                                                         align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Ordered',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colOpenReceive',
-                                                        width: 105,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Open to Receive',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colReceived',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Received',
+                                                        dataIndex: 'dblQuantity',
+                                                        text: 'Quantity',
                                                         format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colUOM',
-                                                        width: 76,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'UOM',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intUnitMeasureId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Unit Of Measure ID',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Measure',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitType',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'ysnDefault',
-                                                                    dataType: 'boolean',
-                                                                    text: 'Default',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboItemUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
-                                                        }
+                                                        width: 100,
+                                                        dataIndex: 'strUOM',
+                                                        text: 'UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNotes',
+                                                        width: 100,
+                                                        dataIndex: 'strNotes',
+                                                        text: 'Notes'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        itemId: 'colPackages',
-                                                        width: 72,
+                                                        itemId: 'colManifestQty',
+                                                        width: 105,
                                                         align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Packages',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtPackages'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colPackageType',
-                                                        width: 85,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'Package Type',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intPackTypeId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Pack Type Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strPackName',
-                                                                    dataType: 'string',
-                                                                    text: 'Pack Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboItemPackType',
-                                                            displayField: 'strPackName',
-                                                            valueField: 'strPackName'
-                                                        }
+                                                        dataIndex: 'dblManifestQty',
+                                                        text: 'Manifest Qty',
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        itemId: 'colUnitCost',
-                                                        width: 95,
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Unit Cost',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'txtUnitCost'
-                                                        }
+                                                        dataType: 'numeric',
+                                                        itemId: 'colDifference',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblDifference',
+                                                        text: 'Difference',
+                                                        format: '0,000.##'
                                                     },
                                                     {
-                                                        xtype: 'actioncolumn',
-                                                        itemId: 'colTaxDetails',
-                                                        align: 'center',
-                                                        menuText: 'Tax Details',
-                                                        text: 'Tax Details',
-                                                        altText: 'View',
-                                                        items: [
-                                                            {
-                                                                altText: 'View',
-                                                                iconCls: 'small-edit',
-                                                                tooltip: 'View Tax Details'
-                                                            }
-                                                        ]
+                                                        xtype: 'datecolumn',
+                                                        text: 'Delivery Period'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDONumber',
+                                                        width: 100,
+                                                        dataIndex: 'strDONumber',
+                                                        text: 'DO Number'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colWarehouseCargoNumber',
+                                                        width: 105,
+                                                        dataIndex: 'strWarehouseCargoNumber',
+                                                        text: 'Whse Cargo No.'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colGrossWeight',
+                                                        width: 93,
+                                                        align: 'right',
+                                                        dataIndex: 'dblGrossWeight',
+                                                        text: 'Gross Weight',
+                                                        format: '0,000'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colTareWeight',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblTareWeight',
+                                                        text: 'Tare Weight',
+                                                        format: '0,000'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colNetWeight',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblNetWeight',
+                                                        text: 'Net Weight',
+                                                        format: '0,000'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        width: 43,
+                                                        text: 'B/O'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colPckgBkrd',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblPckgBkrd',
+                                                        text: 'Pckg Bkrd',
+                                                        format: '0,000'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colUnitPrice',
+                                                        width: 81,
+                                                        align: 'right',
+                                                        dataIndex: 'dblUnitPrice',
+                                                        text: 'Unit Price',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        width: 43,
+                                                        text: 'Lot'
                                                     }
                                                 ],
                                                 plugins: [
@@ -781,15 +751,25 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     })
                                                 ],
                                                 viewConfig: {
-                                                    itemId: 'grvInventoryReceipt'
+                                                    itemId: 'grvInventoryShipment'
                                                 }
-                                            },
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        title: 'Lot Details',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
                                             {
                                                 xtype: 'advancefiltergrid',
                                                 flex: 1,
                                                 reference: 'grdLotTracking',
                                                 itemId: 'grdLotTracking',
-                                                margin: '7 0 0 0',
+                                                margin: -1,
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -811,7 +791,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnEditInventoryReceipt',
+                                                                itemId: 'btnAddLot',
+                                                                margin: '0 0 0 5',
+                                                                iconCls: 'small-add',
+                                                                text: 'Add'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnEditLot',
                                                                 margin: '0 0 0 5',
                                                                 iconCls: 'small-edit',
                                                                 text: 'Edit'
@@ -819,9 +807,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnDeleteInventoryReceipt',
+                                                                itemId: 'btnDeleteLot',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -838,136 +826,46 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colItemNumber',
                                                         width: 100,
-                                                        dataIndex: 'strItemNo',
-                                                        text: 'Item No.'
+                                                        dataIndex: 'strItemNumber',
+                                                        text: 'Item No.',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        width: 175,
+                                                        itemId: 'colDescription',
+                                                        width: 100,
                                                         dataIndex: 'strDescription',
-                                                        text: 'Parent Lot ID'
+                                                        text: 'Description',
+                                                        flex: 2
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colItemNo2',
+                                                        itemId: 'colLotID',
                                                         width: 100,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'Lot ID'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colItemNo5',
-                                                        width: 100,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'Container No'
+                                                        dataIndex: 'strLotID',
+                                                        text: 'Lot ID',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered',
+                                                        itemId: 'colQuantity',
                                                         width: 80,
                                                         align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
+                                                        dataIndex: 'dblQuantity',
                                                         text: 'Quantity',
+                                                        flex: 1,
                                                         format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colItemNo6',
+                                                        itemId: 'colUOM',
                                                         width: 75,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered1',
-                                                        width: 105,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'No. of Units',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered2',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Unit UOM',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered6',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Units/Pallet',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered7',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Gross Weight',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered8',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Tare Weight',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered9',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Net Weight',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered10',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Wt. per Unit UOM',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered11',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Stated Gross Per Unit',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQtyOrdered12',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
-                                                        text: 'Stated Tare Per Unit',
-                                                        format: '0,000.##'
+                                                        dataIndex: 'strUOM',
+                                                        text: 'UOM',
+                                                        flex: 1
                                                     }
                                                 ],
                                                 plugins: [
@@ -977,6 +875,122 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 ],
                                                 viewConfig: {
                                                     itemId: 'grvLotTracking'
+                                                }
+                                            },
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                flex: 1,
+                                                reference: 'grdLotSplit',
+                                                itemId: 'grdLotSplit',
+                                                margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbToolbarGrid',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'label',
+                                                                margin: '0 7 0 5',
+                                                                text: 'Split'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnAddLot',
+                                                                margin: '0 0 0 5',
+                                                                iconCls: 'small-add',
+                                                                text: 'Add'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnEditLot',
+                                                                margin: '0 0 0 5',
+                                                                iconCls: 'small-edit',
+                                                                text: 'Edit'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteLot',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Remove'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                }),
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNewLotID',
+                                                        width: 100,
+                                                        dataIndex: 'strNewLotID',
+                                                        text: 'New Lot ID',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colQuantity',
+                                                        width: 80,
+                                                        align: 'right',
+                                                        dataIndex: 'dblQuantity',
+                                                        text: 'Quantity',
+                                                        flex: 1,
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colLotID',
+                                                        width: 100,
+                                                        dataIndex: 'strLotID',
+                                                        text: 'Lot ID',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colBalanceQuantity',
+                                                        width: 80,
+                                                        align: 'right',
+                                                        dataIndex: 'dblBalanceQuantity',
+                                                        text: 'Balance Quantity',
+                                                        flex: 1,
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colUOM',
+                                                        width: 75,
+                                                        dataIndex: 'strUOM',
+                                                        text: 'UOM',
+                                                        flex: 1
+                                                    }
+                                                ],
+                                                plugins: [
+                                                    Ext.create('Ext.grid.plugin.CellEditing', {
+                                                        clicksToEdit: 1
+                                                    })
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvLotSplit'
                                                 }
                                             }
                                         ]
@@ -1007,9 +1021,16 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnAddNotes',
+                                                                iconCls: 'small-add',
+                                                                text: 'Add'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
                                                                 itemId: 'btnDeleteNotes',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -1023,22 +1044,22 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colNoteLocation',
+                                                        dataIndex: 'string',
                                                         text: 'Location',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colNoteType',
+                                                        dataIndex: 'string',
                                                         text: 'Note Type',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colNote',
+                                                        dataIndex: 'string',
                                                         text: 'Notes',
                                                         flex: 3
                                                     }
