@@ -549,6 +549,15 @@
     <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50001 _non-null and invalid account id_.sql" />
     <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50003.sql" />
     <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50005.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for the valid GL Entries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for invalid GL Entries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

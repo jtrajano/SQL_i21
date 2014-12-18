@@ -50,7 +50,7 @@ BEGIN
 			,[intConcurrencyId]
 	)
 	SELECT 
-			[dtmDate]
+			dbo.fnRemoveTimeOnDate([dtmDate])
 			,[strBatchId]
 			,[intAccountId]
 			,[dblDebit] = Debit.Value
@@ -63,7 +63,7 @@ BEGIN
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[dtmDateEntered]
-			,[dtmTransactionDate]
+			,dbo.fnRemoveTimeOnDate([dtmTransactionDate])
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
 			,[ysnIsUnposted]
@@ -91,14 +91,17 @@ BEGIN
 	USING (
 				SELECT	intAccountId
 						,dtmDate = dbo.fnRemoveTimeOnDate(GLEntries.dtmDate)
-						,dblDebit = CASE WHEN @ysnPost = 1 THEN Debit.Value ELSE Credit.Value * -1 END 
-						,dblCredit = CASE WHEN @ysnPost = 1 THEN Credit.Value ELSE Debit.Value * -1 END 
-						,dblDebitUnit 
-						,dblCreditUnit
 						,strCode
+						,dblDebit = SUM(CASE WHEN @ysnPost = 1 THEN Debit.Value ELSE Credit.Value * -1 END)
+						,dblCredit = SUM(CASE WHEN @ysnPost = 1 THEN Credit.Value ELSE Debit.Value * -1 END)
+						,dblDebitUnit = SUM(CASE WHEN @ysnPost = 1 THEN DebitUnit.Value ELSE CreditUnit.Value * -1 END)
+						,dblCreditUnit = SUM(CASE WHEN @ysnPost = 1 THEN CreditUnit.Value ELSE DebitUnit.Value * -1 END)						
 				FROM	@GLEntries GLEntries
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
+						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0)) DebitUnit
+						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitUnit, 0) - ISNULL(GLEntries.dblCreditUnit, 0))  CreditUnit
+				GROUP BY intAccountId, dbo.fnRemoveTimeOnDate(GLEntries.dtmDate), strCode
 	) AS Source_Query  
 		ON gl_summary.intAccountId = Source_Query.intAccountId
 		AND gl_summary.strCode = Source_Query.strCode 
@@ -109,7 +112,7 @@ BEGIN
 		UPDATE 
 		SET		dblDebit = gl_summary.dblDebit + Source_Query.dblDebit 
 				,dblCredit = gl_summary.dblCredit + Source_Query.dblCredit 
-				,intConcurrencyId = intConcurrencyId + 1
+				,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 
 	-- Insert a new gl summary record 
 	WHEN NOT MATCHED  THEN 
