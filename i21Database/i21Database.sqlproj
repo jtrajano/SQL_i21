@@ -938,8 +938,10 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostLIFO.sql" />
     <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceipt.sql" />
-	<Build Include="dbo\Tables\tblICLot.sql" />
+    <Build Include="dbo\Tables\tblICLot.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBookEntries.sql" />
+    <Build Include="dbo\Functions\fnGetGLEntriesErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLValidateGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

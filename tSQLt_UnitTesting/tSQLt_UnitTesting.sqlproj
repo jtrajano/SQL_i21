@@ -544,6 +544,11 @@
     <Build Include="testi21Database\Functions\test isOpenAccountingDate for closed periods.sql" />
     <Build Include="testi21Database\Functions\test isOpenAccountingDate for empty periods.sql" />
     <Build Include="testi21Database\Functions\test isOpenAccountingDate for multiple periods.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50001.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50001 _non-null and invalid account id_.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50003.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50005.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
