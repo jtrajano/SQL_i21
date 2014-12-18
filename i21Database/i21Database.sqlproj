@@ -912,7 +912,7 @@
     <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
     <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
-    <Build Include="dbo\Tables\tblTempError.sql" />
+    <Build Include="dbo\Tables\tblGLImportError.sql" />
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDDivider.sql" />
