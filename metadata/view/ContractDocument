@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "contractdocument",
+        "designer|userAlias": "iccontractdocument",
         "designer|userClassName": "ContractDocument",
         "height": 250,
         "hidden": false,

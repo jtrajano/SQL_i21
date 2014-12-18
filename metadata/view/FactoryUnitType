@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "factoryunittype",
+        "designer|userAlias": "icfactoryunittype",
         "designer|userClassName": "FactoryUnitType",
         "height": 380,
         "hidden": false,

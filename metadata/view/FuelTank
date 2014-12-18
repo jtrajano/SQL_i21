@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "fueltank",
+        "designer|userAlias": "icfueltank",
         "designer|userClassName": "FuelTank",
         "height": 621,
         "hidden": false,

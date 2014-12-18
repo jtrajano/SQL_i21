@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "manufacturingcell",
+        "designer|userAlias": "icmanufacturingcell",
         "designer|userClassName": "ManufacturingCell",
         "height": 442,
         "hidden": false,
@@ -749,7 +749,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter150",
+                                                    "name": "filter148",
                                                     "designerId": "c9ec8acc-5eda-44f2-b041-640223eb1297",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

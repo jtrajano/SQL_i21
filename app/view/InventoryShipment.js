@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryShipment', {
     extend: 'Ext.window.Window',
-    alias: 'widget.inventoryshipment',
+    alias: 'widget.icinventoryshipment',
 
     requires: [
         'Inventory.view.Filter1',
@@ -588,9 +588,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strBatchName',
                                                         itemId: 'colBatchName',
                                                         width: 100,
+                                                        dataIndex: 'strBatchName',
                                                         text: 'Batch Name'
                                                     },
                                                     {

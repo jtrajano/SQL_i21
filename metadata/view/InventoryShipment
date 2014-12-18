@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": "cboVendorId",
-        "designer|userAlias": "inventoryshipment",
+        "designer|userAlias": "icinventoryshipment",
         "designer|userClassName": "InventoryShipment",
         "height": 700,
         "helpURL": null,
@@ -2576,7 +2576,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter12",
                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

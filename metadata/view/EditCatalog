@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "editcatalog",
+        "designer|userAlias": "iceditcatalog",
         "designer|userClassName": "EditCatalog",
         "height": 200,
         "hidden": false,

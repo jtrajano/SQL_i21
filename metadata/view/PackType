@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "packtype",
+        "designer|userAlias": "icpacktype",
         "designer|userClassName": "PackType",
         "height": 525,
         "hidden": false,
@@ -377,7 +377,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter111",
+                                    "name": "filter149",
                                     "designerId": "c39762ed-6d5b-4268-95f3-6514bb2f553b",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -615,7 +615,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging119",
                     "designerId": "d35ca290-fbac-4426-80de-75a0826117ac",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

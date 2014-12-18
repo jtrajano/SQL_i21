@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "catalog",
+        "designer|userAlias": "iccatalog",
         "designer|userClassName": "Catalog",
         "height": 586,
         "hidden": false,
@@ -272,7 +272,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter110",
+                                    "name": "filter14",
                                     "designerId": "568d3548-425d-4c8c-9bac-abf415d0610f",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
