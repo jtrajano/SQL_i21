@@ -15,8 +15,8 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------  
 -- Initialize   
 --------------------------------------------------------------------------------------------    
--- Transaction Name
-DECLARE @TransactionName AS VARCHAR(20) = 'Inventory Receipt Transaction';
+-- Create a unique transaction name. 
+DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Receipt Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
 DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 2  
@@ -42,7 +42,7 @@ BEGIN
 	FROM	dbo.tblICInventoryReceipt   
 	WHERE	strReceiptNumber = @strTransactionId  
 END  
-   
+
 -- Read the user preference  
 BEGIN  
 	SELECT	@ysnAllowUserSelfPost = 1  
@@ -194,7 +194,7 @@ BEGIN
 				,@intUserId
 	END
 END   
-  
+
 --------------------------------------------------------------------------------------------  
 -- If UNPOST, call the Unpost routines  
 --------------------------------------------------------------------------------------------  
@@ -213,10 +213,9 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 1
 BEGIN 
-	EXEC dbo.uspCMPostRecap @GLEntries
-
 	ROLLBACK TRAN @TransactionName
-	GOTO Post_Exit
+	EXEC dbo.uspCMPostRecap @GLEntries
+	COMMIT TRAN @TransactionName
 END 
 
 --------------------------------------------------------------------------------------------  
