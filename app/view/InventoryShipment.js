@@ -26,13 +26,12 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.tab.Tab',
         'Ext.form.field.Date',
         'Ext.form.field.ComboBox',
+        'Ext.form.field.TextArea',
         'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
         'Ext.form.Label',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
-        'Ext.grid.column.Date',
-        'Ext.grid.column.Check',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.toolbar.Paging'
@@ -252,73 +251,197 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             {
                                                 xtype: 'container',
                                                 layout: {
-                                                    type: 'hbox',
+                                                    type: 'vbox',
                                                     align: 'stretch'
                                                 },
                                                 items: [
                                                     {
                                                         xtype: 'container',
-                                                        flex: 3,
+                                                        flex: 1,
+                                                        margin: '0 0 5 0',
                                                         layout: {
                                                             type: 'hbox',
                                                             align: 'stretch'
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'container',
+                                                                xtype: 'textfield',
                                                                 flex: 1,
-                                                                margin: '0 5 0 0',
+                                                                itemId: 'txtBOLNumber',
+                                                                fieldLabel: 'BOL No',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'datefield',
+                                                                itemId: 'dtmShipDate',
+                                                                margin: '0 5',
+                                                                maxWidth: 100,
+                                                                fieldLabel: 'Ship Date',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                flex: 1,
+                                                                itemId: 'cboOrderType',
+                                                                fieldLabel: 'Order Type',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                flex: 1,
+                                                                itemId: 'txtReferenceNumber',
+                                                                margin: '0 5',
+                                                                fieldLabel: 'Reference Number',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'datefield',
+                                                                itemId: 'dtmRequestedArrival',
+                                                                maxWidth: 115,
+                                                                fieldLabel: 'Requested Arrival',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                flex: 1,
+                                                                itemId: 'cboFreightTerms',
+                                                                margin: '0 5',
+                                                                fieldLabel: 'Freight Terms',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                itemId: 'cboCustomer',
+                                                                fieldLabel: 'Customer',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 60
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                flex: 1.5,
+                                                                itemId: 'txtCustomerName',
+                                                                margin: '0 0 0 5',
+                                                                fieldLabel: 'Customer Name',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 3,
+                                                        height: 196,
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'panel',
+                                                                flex: 2,
+                                                                bodyPadding: '5 5 0 5',
+                                                                title: 'Shipping Details',
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtBOLNumber',
-                                                                        fieldLabel: 'BOL No',
-                                                                        labelWidth: 110
+                                                                        xtype: 'container',
+                                                                        flex: 2,
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'container',
+                                                                                flex: 1.1,
+                                                                                layout: {
+                                                                                    type: 'vbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'combobox',
+                                                                                        itemId: 'cboShipFromAddress',
+                                                                                        fieldLabel: 'Ship From',
+                                                                                        labelWidth: 70
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'textfield',
+                                                                                        flex: 1,
+                                                                                        itemId: 'txtShipFromAddress',
+                                                                                        margin: '-6 0 5 75',
+                                                                                        labelWidth: 60
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                xtype: 'container',
+                                                                                flex: 1,
+                                                                                margin: '0 0 0 5',
+                                                                                layout: {
+                                                                                    type: 'vbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'combobox',
+                                                                                        itemId: 'cboShipToAddress',
+                                                                                        fieldLabel: 'Ship To',
+                                                                                        labelWidth: 50
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'textfield',
+                                                                                        flex: 1,
+                                                                                        itemId: 'txtShipToAddress',
+                                                                                        margin: '-6 0 5 55',
+                                                                                        labelWidth: 60
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ]
                                                                     },
                                                                     {
-                                                                        xtype: 'datefield',
-                                                                        itemId: 'dtmShipDate',
-                                                                        fieldLabel: 'Ship Date',
-                                                                        labelWidth: 110
+                                                                        xtype: 'textareafield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtDeliveryInstructions',
+                                                                        fieldLabel: 'Instructions',
+                                                                        labelWidth: 70,
+                                                                        grow: true
                                                                     },
                                                                     {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboOrderType',
-                                                                        fieldLabel: 'Order Type',
-                                                                        labelWidth: 110
-                                                                    },
+                                                                        xtype: 'textareafield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtComments',
+                                                                        fieldLabel: 'Comments',
+                                                                        labelWidth: 70,
+                                                                        grow: true
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'panel',
+                                                                flex: 1,
+                                                                margin: '0 5',
+                                                                bodyPadding: 5,
+                                                                title: 'Shipping Company',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
                                                                     {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtReferenceNumber',
-                                                                        fieldLabel: 'Reference Number',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'datefield',
-                                                                        itemId: 'dtmRequestedArrival',
-                                                                        fieldLabel: 'Requested Arrival',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboShipFromAddress',
-                                                                        fieldLabel: 'Ship From Address',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboShipToAddress',
-                                                                        fieldLabel: 'Ship To Address',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboCustomer',
-                                                                        fieldLabel: 'Customer',
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkDirectShipment',
+                                                                        fieldLabel: 'Direct Shipment',
                                                                         labelWidth: 110
                                                                     },
                                                                     {
@@ -326,46 +449,17 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'cboCarrier',
                                                                         fieldLabel: 'Carrier',
                                                                         labelWidth: 110
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                flex: 1,
-                                                                margin: '0 0 0 5',
-                                                                layout: {
-                                                                    type: 'vbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        itemId: 'cboStagingLocation',
-                                                                        fieldLabel: 'Staging Location',
-                                                                        labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        itemId: 'txtDockDoor',
-                                                                        fieldLabel: 'Dock Door',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtSealNumber',
-                                                                        fieldLabel: 'Seal Number',
+                                                                        itemId: 'txtVesselVehicle',
+                                                                        fieldLabel: 'Vessel/Vehicle',
                                                                         labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
                                                                         itemId: 'txtProNumber',
-                                                                        fieldLabel: 'Pro Number',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtVehicleNumber',
-                                                                        fieldLabel: 'Vehicle Number',
+                                                                        fieldLabel: 'Pro No',
                                                                         labelWidth: 110
                                                                     },
                                                                     {
@@ -375,29 +469,18 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboFreightTerms',
-                                                                        fieldLabel: 'Freight Terms',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
                                                                         xtype: 'textfield',
-                                                                        itemId: 'txtAppointmentTime',
-                                                                        fieldLabel: 'Appointment Time',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        itemId: 'txtArrivalTime',
-                                                                        fieldLabel: 'Arrival Time',
+                                                                        itemId: 'txtSealNumber',
+                                                                        fieldLabel: 'Seal Number',
                                                                         labelWidth: 110
                                                                     }
                                                                 ]
                                                             },
                                                             {
-                                                                xtype: 'container',
-                                                                flex: 1,
-                                                                margin: '0 0 0 5',
+                                                                xtype: 'panel',
+                                                                flex: 0.8,
+                                                                bodyPadding: 5,
+                                                                title: 'Delivery',
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
@@ -405,124 +488,41 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
+                                                                        itemId: 'txtAppointmentTime',
+                                                                        fieldLabel: 'Appointment Time',
+                                                                        labelWidth: 110
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
                                                                         itemId: 'txtDepartureTime',
                                                                         fieldLabel: 'Departure Time',
-                                                                        labelWidth: 125
+                                                                        labelWidth: 110
                                                                     },
                                                                     {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtComments',
-                                                                        fieldLabel: 'Comments',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtDeliveryInstructions',
-                                                                        fieldLabel: 'Delivery Instructions',
-                                                                        labelWidth: 125
+                                                                        xtype: 'gridcombobox',
+                                                                        itemId: 'txtArrivalTime',
+                                                                        fieldLabel: 'Arrival Time',
+                                                                        labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'datefield',
                                                                         itemId: 'dtmDelivered',
                                                                         fieldLabel: 'Delivered Date',
-                                                                        labelWidth: 125
+                                                                        labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'datefield',
                                                                         itemId: 'dtmFreeTime',
                                                                         fieldLabel: 'Free Time',
-                                                                        labelWidth: 125
+                                                                        labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        itemId: 'txtNonPrintableRemarks',
-                                                                        fieldLabel: 'NonPrintable Remarks',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        itemId: 'cboShipType',
-                                                                        fieldLabel: 'Ship Type',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkShipOrder',
-                                                                        fieldLabel: 'Ship Order',
-                                                                        labelWidth: 125
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkRptTaxes',
-                                                                        fieldLabel: 'Rpt Taxes',
-                                                                        labelWidth: 125
+                                                                        itemId: 'txtReceivedBy',
+                                                                        fieldLabel: 'Received By',
+                                                                        labelWidth: 110
                                                                     }
                                                                 ]
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 0 0 5',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtSplit',
-                                                                fieldLabel: 'Split',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtSalesperson',
-                                                                fieldLabel: 'Salesperson',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtServiceCharge',
-                                                                fieldLabel: 'Service Charge',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtPriceLevel',
-                                                                fieldLabel: 'Price Level',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtReleaseNumber',
-                                                                fieldLabel: 'Release Number',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtReceivedBy',
-                                                                fieldLabel: 'Received By',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtAccountStatus',
-                                                                fieldLabel: 'Account Status',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtOrderTotal',
-                                                                fieldLabel: 'Order Total',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtShipTotal',
-                                                                fieldLabel: 'Ship Total',
-                                                                labelWidth: 110
                                                             }
                                                         ]
                                                     }
@@ -588,24 +588,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colBatchName',
-                                                        width: 100,
-                                                        dataIndex: 'strBatchName',
-                                                        text: 'Batch Name'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colSONumber',
-                                                        width: 100,
-                                                        dataIndex: 'strSONumber',
-                                                        text: 'SO Number'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colPONumber',
+                                                        itemId: 'colReferenceNumber',
                                                         width: 90,
-                                                        dataIndex: 'strPONumber',
-                                                        text: 'PO Number'
+                                                        dataIndex: 'strReferenceNumber',
+                                                        text: 'Reference No.'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -622,10 +608,17 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         text: 'Description'
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colSubLocation',
+                                                        width: 100,
+                                                        dataIndex: 'strSubLocation',
+                                                        text: 'Sub Location'
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
                                                         itemId: 'colQuantity',
-                                                        width: 80,
+                                                        width: 65,
                                                         align: 'right',
                                                         dataIndex: 'dblQuantity',
                                                         text: 'Quantity',
@@ -634,26 +627,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colUOM',
-                                                        width: 100,
+                                                        width: 75,
                                                         dataIndex: 'strUOM',
                                                         text: 'UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNotes',
-                                                        width: 100,
-                                                        dataIndex: 'strNotes',
-                                                        text: 'Notes'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colManifestQty',
-                                                        width: 105,
-                                                        align: 'right',
-                                                        dataIndex: 'dblManifestQty',
-                                                        text: 'Manifest Qty',
-                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -666,22 +642,11 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         format: '0,000.##'
                                                     },
                                                     {
-                                                        xtype: 'datecolumn',
-                                                        text: 'Delivery Period'
-                                                    },
-                                                    {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colDONumber',
-                                                        width: 100,
-                                                        dataIndex: 'strDONumber',
-                                                        text: 'DO Number'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colWarehouseCargoNumber',
-                                                        width: 105,
-                                                        dataIndex: 'strWarehouseCargoNumber',
-                                                        text: 'Whse Cargo No.'
+                                                        itemId: 'colWeightUOM',
+                                                        width: 75,
+                                                        dataIndex: 'strWeightUOM',
+                                                        text: 'Weight UOM'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -714,21 +679,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         format: '0,000'
                                                     },
                                                     {
-                                                        xtype: 'checkcolumn',
-                                                        width: 43,
-                                                        text: 'B/O'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colPckgBkrd',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblPckgBkrd',
-                                                        text: 'Pckg Bkrd',
-                                                        format: '0,000'
-                                                    },
-                                                    {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
                                                         itemId: 'colUnitPrice',
@@ -739,9 +689,18 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         format: '0,000.##'
                                                     },
                                                     {
-                                                        xtype: 'checkcolumn',
-                                                        width: 43,
-                                                        text: 'Lot'
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDockDoor',
+                                                        width: 75,
+                                                        dataIndex: 'strDockDoor',
+                                                        text: 'Dock Door'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNotes',
+                                                        width: 250,
+                                                        dataIndex: 'strNotes',
+                                                        text: 'Notes'
                                                     }
                                                 ],
                                                 plugins: [
