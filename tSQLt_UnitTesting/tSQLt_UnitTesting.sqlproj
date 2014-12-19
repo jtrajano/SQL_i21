@@ -558,7 +558,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for invalid GL Entries.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

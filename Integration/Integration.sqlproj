@@ -127,6 +127,10 @@
     <None Include="Scripts\AP\TransferImportedTermsData.sql" />
     <None Include="Scripts\AP\TransferImportedVendorData.sql" />
     <None Include="Scripts\AP\UpdateBillPONumber.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportPaymentMethod.sql" />
+    <None Include="dbo\Stored Procedures\uspSMSyncPaymentMethod.sql" />
+    <None Include="dbo\Stored Procedures\uspARSyncTerms.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportPayments.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -224,8 +228,10 @@
     <None Include="dbo\Stored Procedures\uspARImportTaxAuthority.sql" />
     <None Include="dbo\Stored Procedures\uspARImportTerm.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportCompanyLocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql">
+    <None Include="dbo\Views\vyuAPOriginBillsWithoutPayment.sql" />
+    <None Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    </None>
+    <None Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql" />
   </ItemGroup>
 </Project>

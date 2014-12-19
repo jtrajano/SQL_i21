@@ -146,4 +146,7 @@
       <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\Drop_References_to_RecapTableType.sql" />
+  </ItemGroup>
 </Project>

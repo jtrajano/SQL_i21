@@ -5,7 +5,7 @@
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
-	@userId				AS INT				= 1,
+	@userId				AS INT,
 	@beginDate			AS DATE				= NULL,
 	@endDate			AS DATE				= NULL,
 	@beginTransaction	AS NVARCHAR(50)		= NULL,
@@ -25,6 +25,11 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 -- Start the transaction 
 BEGIN TRANSACTION
+
+IF @userId IS NULL
+BEGIN
+	RAISERROR('User is required', 16, 1);
+END
 
 --DECLARE @success BIT
 --DECLARE @successfulCount INT

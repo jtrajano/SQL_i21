@@ -53,6 +53,15 @@ BEGIN
 			SELECT ''Check'', 1
 		END
 
+		--Check if there is a payment method with a type of ''Refund''
+		IF NOT EXISTS(SELECT 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = ''Refund'')
+		BEGIN
+			--RAISERROR(''Please create Check payment method before importing bills.'', 16, 1);
+			--RETURN;
+			INSERT INTO tblSMPaymentMethod(strPaymentMethod, ysnActive)
+			SELECT ''Refund'', 1
+		END
+
 		--Check if there is check book that was not exists on tblCMBankAccount
 		IF EXISTS(SELECT 1 FROM apchkmst A 
 					LEFT JOIN tblCMBankAccount B
@@ -198,7 +207,8 @@ BEGIN
 				[dblQtyReceived],
 				[intAccountId],
 				[dblTotal],
-				[dblCost]
+				[dblCost],
+				[intLineNo]
 			)
 			SELECT 
 				A.intBillId,
@@ -207,7 +217,8 @@ BEGIN
 				1,
 				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
 				C.apegl_gl_amt,
-				C.apegl_gl_amt
+				C.apegl_gl_amt,
+				C.apegl_dist_no
 			FROM tblAPBill A
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intVendorId
@@ -227,7 +238,8 @@ BEGIN
 				[dblQtyReceived],
 				[intAccountId],
 				[dblTotal],
-				[dblCost]
+				[dblCost],
+				[intLineNo]
 			)
 			SELECT 
 				A.intBillId,
@@ -236,7 +248,8 @@ BEGIN
 				1,
 				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
 				C.aphgl_gl_amt,
-				C.aphgl_gl_amt
+				C.aphgl_gl_amt,
+				C.aphgl_dist_no
 				FROM tblAPBill A
 				INNER JOIN tblAPVendor B
 					ON A.intVendorId = B.intVendorId
@@ -546,7 +559,8 @@ BEGIN
 				[dblQtyReceived],
 				[intAccountId],
 				[dblTotal],
-				[dblCost]
+				[dblCost],
+				[intLineNo]
 			)
 			SELECT 
 				A.intBillId,
@@ -555,7 +569,8 @@ BEGIN
 				1,
 				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
 				C.apegl_gl_amt,
-				C.apegl_gl_amt
+				C.apegl_gl_amt,
+				C.apegl_dist_no
 				FROM tblAPBill A
 					INNER JOIN tblAPVendor B
 						ON A.intVendorId = B.intVendorId

@@ -2,6 +2,7 @@
 (
 	[intCompanyLocationId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [strLocationName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strLocationNumber] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
     [strLocationType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strAddress] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strZipPostalCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

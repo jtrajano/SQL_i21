@@ -40,12 +40,23 @@ FROM
 (
 	SELECT 
 	intBillId
-	,dblTotal
-	,dblAmountPaid
-	,dblAmountDue
-	,dblInterest
-	,dblDiscount
-	FROM dbo.vyuAPPayablesSummary
+	,SUM(tmpAPPayables.dblTotal) AS dblTotal
+	,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
+	,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
+	,SUM(tmpAPPayables.dblInterest) AS dblInterest
+	,(SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS dblAmountDue
+	FROM (
+		SELECT 
+		intBillId
+		,dblTotal
+		,dblAmountDue
+		,dblAmountPaid
+		,dblDiscount
+		,dblInterest
+		,dtmDate
+		FROM dbo.vyuAPPayables
+		) tmpAPPayables 
+	GROUP BY intBillId
 ) AS tmpAgingSummaryTotal
 LEFT JOIN dbo.tblAPBill A
 ON A.intBillId = tmpAgingSummaryTotal.intBillId

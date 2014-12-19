@@ -942,6 +942,17 @@
     <Build Include="dbo\Stored Procedures\uspGLBookEntries.sql" />
     <Build Include="dbo\Functions\fnGetGLEntriesErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLValidateGLEntries.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
+    <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
+    <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
+    <Build Include="dbo\Tables\tblSMRecurringHistory.sql" />
+    <Build Include="dbo\Views\vyuAPBillTotals.sql" />
+    <Build Include="dbo\Views\vyuAPBillHeaderGL.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetailGL.sql" />
+    <Build Include="dbo\Views\vyuAPBillPayment.sql" />
+    <Build Include="dbo\Views\vyuAPPaymentHeaderGL.sql" />
+    <Build Include="dbo\Views\vyuAPGLByAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
