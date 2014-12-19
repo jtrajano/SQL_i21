@@ -392,6 +392,12 @@ GO
 		VALUES ('Receive Payment Detail','Accounts Receivable',@activitiesId,'Receive Payment Detail','Screen','AccountsReceivable.view.ReceivePaymentsDetail','small-screen',1,0,0,1,3,1)
 	END
 
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Batch Posting' AND intParentMenuID = @activitiesId)
+	BEGIN
+		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
+		VALUES ('Batch Posting','Accounts Receivable',@activitiesId,'Batch Posting','Screen','AccountsReceivable.controller.BatchPosting','small-screen',1,0,0,1,3,1)
+	END
+
 	/* -------------------------------------------------- */
 	/* -- End Add Accounts Receivable Activities Menus -- */
 	/* -------------------------------------------------- */
