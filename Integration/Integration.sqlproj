@@ -232,6 +232,5 @@
     <None Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </None>
-    <None Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql" />
   </ItemGroup>
 </Project>

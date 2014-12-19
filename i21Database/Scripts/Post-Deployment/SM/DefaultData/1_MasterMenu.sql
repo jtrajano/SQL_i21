@@ -964,7 +964,6 @@ GO
 				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Time Off Types', 'Payroll', @PayrollTypesId, 'Time Off Types', 'Screen', 'Payroll.view.TimeOffType', 'small-screen', 1, 1, 0, 1, 4, 0
 
 GO
-
 	/* ------------------------------------------------------ */	
 	/* --   Add Common Info Recurring Transactions Menus   -- */
 	/* ------------------------------------------------------ */	
@@ -1078,7 +1077,6 @@ GO
 	/* --------------------------------------------------- */
 	
 GO
-
 	/* --------------------------------------------------- */
 	/* --     Create Notes Receivable Module Menu       -- */
 	/* --------------------------------------------------- */

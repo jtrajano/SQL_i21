@@ -505,8 +505,7 @@ BEGIN
 			#tmpARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			B.dblAmountDue = (B.dblPayment + B.dblDiscount)
-			AND B.dblDiscount <> 0
+			B.dblDiscount <> 0
 		GROUP BY
 			A.intPaymentId
 			,A.strRecordNumber
@@ -616,8 +615,7 @@ BEGIN
 			#tmpARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
-			AND B.dblDiscount <> 0
+			B.dblDiscount <> 0
 		GROUP BY
 			A.intPaymentId
 			,A.strRecordNumber
@@ -873,7 +871,7 @@ BEGIN
 			WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 
 			UPDATE tblARPaymentDetail
-				   SET tblARPaymentDetail.dblAmountDue = (B.dblInvoiceTotal) - (B.dblPayment + B.dblDiscount)
+				   SET tblARPaymentDetail.dblAmountDue = (B.dblInvoiceTotal) - (B.dblPayment + B.dblDiscount + (SELECT SUM(ISNULL(dblPayment,0)) FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId))
 			FROM tblARPayment A
 				LEFT JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -901,7 +899,7 @@ BEGIN
 														intInvoiceId = B.intInvoiceId
 														AND intPaymentId = A.intPaymentId																											
 												)
-					,dblPayment = A.dblAmountPaid 
+					,dblPayment = A.dblAmountPaid + ISNULL(C.dblPayment,0) 
 			FROM tblARPayment A
 						INNER JOIN tblARPaymentDetail B 
 								ON A.intPaymentId = B.intPaymentId
@@ -1128,10 +1126,7 @@ ELSE
 			#tmpARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId					
 		WHERE
-			1 = (CASE WHEN @post = 1 AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) THEN  1--fully paid when unposted
-					  WHEN  @post = 0 AND B.dblAmountDue = 0 THEN 1 --fully paid when posted
-					  ELSE 0 END)
-			AND B.dblDiscount <> 0
+			B.dblDiscount <> 0
 		GROUP BY
 			 strRecordNumber
 			,A.intPaymentId
@@ -1239,8 +1234,7 @@ ELSE
 			#tmpARReceivablePostData P
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
-			B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
-			AND B.dblDiscount <> 0
+			B.dblDiscount <> 0
 		GROUP BY
 			A.strRecordNumber
 			,A.intPaymentId

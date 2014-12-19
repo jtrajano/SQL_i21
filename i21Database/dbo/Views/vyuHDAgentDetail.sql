@@ -12,4 +12,3 @@
 		us.intEntityId is not null
 		and en.intEntityId = us.intEntityId
 		and ec.intEntityId = us.intEntityId
-
