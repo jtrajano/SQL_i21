@@ -1518,12 +1518,75 @@
     <Property Name="ParentElementName" Value="[dbo].[tblICLot]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLotId" />
-  </Operation>    
+  </Operation>
   <Operation Name="Rename Refactor" Key="cad25024-07f6-4500-820d-9e41e00f7e15" ChangeDateTime="12/16/2014 07:29:53">
     <Property Name="ElementName" Value="[dbo].[tblCTContractText].[intTextCode]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
     <Property Name="ParentElementName" Value="[dbo].[tblCTContractText]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strTextCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="085b9cbc-297f-4189-b54a-9f3149109597" ChangeDateTime="12/19/2014 14:10:44">
+    <Property Name="ElementName" Value="[dbo].[AK_tblCTCropYear_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCropYear]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCTCropYear_Column]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6e32695c-3ed2-44f4-b497-6a1463b4d8f1" ChangeDateTime="12/19/2014 14:12:50">
+    <Property Name="ElementName" Value="[dbo].[UQ_tblCTCropYear_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCropYear]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCTCropYear_intCommodityId_]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ef32cb5e-c0d9-4469-8dad-dde2801e1052" ChangeDateTime="12/19/2014 14:13:28">
+    <Property Name="ElementName" Value="[dbo].[UQ_tblCTCropYear_intCommodityId_]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCropYear]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCTCropYear_intCommodityId_strCropYear]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d9e2d6f4-87fb-481d-8731-acd7c78afbae" ChangeDateTime="12/19/2014 14:21:17">
+    <Property Name="ElementName" Value="[dbo].[AK_tblCTContractText_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractText]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[AK_tblCTContractText_intContractType_intContractPriceType_strTextCode]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7f16ab9b-0dea-4617-8d8f-dcccb379bf44" ChangeDateTime="12/21/2014 11:12:18">
+    <Property Name="ElementName" Value="[dbo].[AK_tblCTContractOptHeader_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractOptHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCTContractOptHeader_Column]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="efef5a72-ffdf-4dd2-af69-525e657ca49e" ChangeDateTime="12/21/2014 11:13:05">
+    <Property Name="ElementName" Value="[dbo].[UQ_tblCTContractOptHeader_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractOptHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCTContractOptHeader_strContractOptDesc]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e95d0e63-ecb9-4998-af0f-5ccf49e423aa" ChangeDateTime="12/21/2014 11:26:01">
+    <Property Name="ElementName" Value="[dbo].[AK_tblCTCostType_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCostType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCTCostType_intFreightTermId_strCostTypeName]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6ee434f6-6ea1-4058-a900-a447f6deb6d7" ChangeDateTime="12/21/2014 11:42:41">
+    <Property Name="ElementName" Value="[dbo].[AK_tblCTFreightRate_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTFreightRate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCTFreightRate_strOrigin_strDest]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="15619517-696e-44d7-a561-dba2e6c4619b" ChangeDateTime="12/21/2014 12:11:02">
+    <Property Name="ElementName" Value="[dbo].[AK_tblCTWeightGrade_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTWeightGrade]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblCTWeightGrade_strWeightGradeDesc]" />
   </Operation>
 </Operations>

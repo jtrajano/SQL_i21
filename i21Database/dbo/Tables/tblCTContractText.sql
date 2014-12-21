@@ -10,7 +10,8 @@ CREATE TABLE [dbo].[tblCTContractText](
  CONSTRAINT [PK_tblCTContractText_intContractTextId] PRIMARY KEY CLUSTERED 
 (
 	[intContractTextId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
+    CONSTRAINT [UQ_tblCTContractText_intContractType_intContractPriceType_strTextCode] UNIQUE ([intContractType], [intContractPriceType], [strTextCode])
 ) ON [PRIMARY]
 
 GO
