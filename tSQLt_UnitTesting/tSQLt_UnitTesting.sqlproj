@@ -574,6 +574,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple items and non-recap.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
