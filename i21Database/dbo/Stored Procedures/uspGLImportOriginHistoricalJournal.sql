@@ -9,27 +9,6 @@ SET NOCOUNT ON
 
 BEGIN TRANSACTION
 
---+++++++++++++++++++++++++++++++++
---			VALIDATIONS
---+++++++++++++++++++++++++++++++++
-DECLARE @inti21Id int
-SELECT @inti21Id = 1 FROM glhstmst LEFT OUTER JOIN tblGLCOACrossReference ON SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16 WHERE inti21Id IS NULL
-
-IF (SELECT isnull(@inti21Id, 0)) > 0
-BEGIN	
-	SET @result = 'There are accounts that does not exists at iRely Cross Reference. <br/> Kindly verify at Origin.'
-END
-ELSE IF (EXISTS(SELECT TOP 1 1 FROM (SELECT SUBSTRING(dtmDate,5,2)+'/01/'+SUBSTRING(dtmDate,1,4) as dtmDate FROM (SELECT CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),MAX(glhst_period)) AS strJournalId, CONVERT(VARCHAR(12),MAX(glhst_period)) AS dtmDate FROM glhstmst GROUP BY glhst_period, glhst_src_id, glhst_src_seq) tblA) tblB where ISDATE(dtmDate) = 0))
-BEGIN	
-	SET @result = 'There are invalid dates on Historical Transactions. <br/> Kindly verify at Origin.'
-END
-ELSE IF (EXISTS(SELECT TOP 1 1 FROM glhstmst where LEN(glhst_trans_dt) <> 8))
-BEGIN	
-	SET @result = 'There are invalid dates on Historical Transaction Details. <br/> Kindly verify at Origin.'
-END
-ELSE
-BEGIN
-
 	--+++++++++++++++++++++++++++++++++
 	--		CLEAN-UP TEMP TABLES
 	--+++++++++++++++++++++++++++++++++	
@@ -266,8 +245,6 @@ BEGIN
                                      
 	SET @result = 'SUCCESS ' + (Select (Select CAST(intJournalId AS NVARCHAR(MAX)) + ',' From (select intJournalId from tblGLJournal A left join #iRelyImptblGLJournal B on A.strJournalId = B.strJournalId COLLATE Latin1_General_CI_AS) X FOR XML PATH('')) as intJournalId)
 						
-END
-	
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
