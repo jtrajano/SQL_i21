@@ -272,7 +272,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter14",
+                                    "name": "filter116",
                                     "designerId": "568d3548-425d-4c8c-9bac-abf415d0610f",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -331,7 +331,7 @@
                 "designer|createAlias": "istatusbar",
                 "dock": "bottom"
             },
-            "name": "statusbar1",
+            "name": "statusbar11",
             "designerId": "fdab8ec9-dafc-488d-b65e-796c2112cfec",
             "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
         }

@@ -245,7 +245,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-generate-invoice",
-                                "itemId": "btnProcess",
+                                "itemId": "btnReceive",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -277,30 +277,6 @@
                             },
                             "name": "MyButton1",
                             "designerId": "665a9637-57f9-4430-ba39-a882deff87ce"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "hidden": true,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-unpost",
-                                "itemId": "btnUnpost",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Unpost",
-                                "width": 52
-                            },
-                            "name": "MyButton18",
-                            "designerId": "db03ef09-5d6d-4ba2-a8a3-1e20207087fd"
                         },
                         {
                             "type": "Ext.button.Button",

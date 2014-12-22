@@ -288,30 +288,6 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "height": 57,
-                                "hidden": true,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-unpost",
-                                "itemId": "btnUnpost",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Unpost",
-                                "width": 52
-                            },
-                            "name": "MyButton18",
-                            "designerId": "3d46ac78-01fd-4030-843c-2c06dea3aaba"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-customer",
@@ -2732,7 +2708,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDeleteNotes",
+                                                        "itemId": "btnRemoveNotes",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Remove"
@@ -2893,7 +2869,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "attachmentgrid",
-                                        "itemId": "grdBillAttachment",
+                                        "itemId": "grdAttachment",
                                         "margin": -1,
                                         "title": null
                                     },

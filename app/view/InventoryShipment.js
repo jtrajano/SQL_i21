@@ -169,18 +169,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         xtype: 'button',
                                         tabIndex: -1,
                                         height: 57,
-                                        hidden: true,
-                                        itemId: 'btnUnpost',
-                                        width: 52,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-unpost',
-                                        scale: 'large',
-                                        text: 'Unpost'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnCustomer',
                                         width: 61,
                                         iconAlign: 'top',
@@ -1111,7 +1099,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnDeleteNotes',
+                                                                itemId: 'btnRemoveNotes',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
                                                             },
@@ -1170,7 +1158,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         items: [
                                             {
                                                 xtype: 'attachmentgrid',
-                                                itemId: 'grdBillAttachment',
+                                                itemId: 'grdAttachment',
                                                 margin: -1,
                                                 columns: [
                                                     {

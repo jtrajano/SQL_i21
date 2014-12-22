@@ -150,7 +150,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         xtype: 'button',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnProcess',
+                                        itemId: 'btnReceive',
                                         width: 52,
                                         iconAlign: 'top',
                                         iconCls: 'large-generate-invoice',
@@ -167,18 +167,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         iconCls: 'large-duplicate',
                                         scale: 'large',
                                         text: 'Duplicate'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        hidden: true,
-                                        itemId: 'btnUnpost',
-                                        width: 52,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-unpost',
-                                        scale: 'large',
-                                        text: 'Unpost'
                                     },
                                     {
                                         xtype: 'button',
