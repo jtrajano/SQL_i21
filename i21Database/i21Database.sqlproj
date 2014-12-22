@@ -949,7 +949,7 @@
     <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
     <Build Include="dbo\Tables\tblSMRecurringHistory.sql" />
-	<Build Include="dbo\Views\vyuHDAgentDetail.sql" />
+    <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
     <Build Include="dbo\Views\vyuAPBillTotals.sql" />
     <Build Include="dbo\Views\vyuAPBillHeaderGL.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailGL.sql" />
@@ -957,6 +957,9 @@
     <Build Include="dbo\Views\vyuAPPaymentHeaderGL.sql" />
     <Build Include="dbo\Views\vyuAPGLByAccount.sql" />
     <Build Include="dbo\Views\vyuARGetItemAccount.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipment.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentItem.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentItemLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1518,12 +1518,54 @@
     <Property Name="ParentElementName" Value="[dbo].[tblICLot]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLotId" />
-  </Operation>    
+  </Operation>
   <Operation Name="Rename Refactor" Key="cad25024-07f6-4500-820d-9e41e00f7e15" ChangeDateTime="12/16/2014 07:29:53">
     <Property Name="ElementName" Value="[dbo].[tblCTContractText].[intTextCode]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
     <Property Name="ParentElementName" Value="[dbo].[tblCTContractText]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strTextCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="57515d61-eb8e-4d09-be97-0edff787fb1d" ChangeDateTime="12/22/2014 03:23:58">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryShipment].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryShipment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryShipmentId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8e4e513e-dbc5-4a9f-b256-1033862f8011" ChangeDateTime="12/22/2014 03:30:28">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryShipment].[strVesselVedhi]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryShipment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strVessel" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b257a6e4-dac6-488c-8e2e-4dd778c67a52" ChangeDateTime="12/22/2014 03:44:36">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryShipmentItem].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryShipmentItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryShipmentItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e35eecc3-cd7c-49ce-98a7-2b0e3e4c82bf" ChangeDateTime="12/22/2014 03:50:49">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryShipmentItem].[intWeightUom]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryShipmentItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intWeightUomId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="087b2eae-2106-4f8f-a606-5413e55b4418" ChangeDateTime="12/22/2014 03:57:38">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryShipmentItemLot].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryShipmentItemLot]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryShipmentItemLotId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a6d30df7-d769-4ef3-ad49-bd9218ac4652" ChangeDateTime="12/22/2014 05:33:08">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryShipment].[intShipFromLocation]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryShipment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intShipFromLocationId" />
   </Operation>
 </Operations>
