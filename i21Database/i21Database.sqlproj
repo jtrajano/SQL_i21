@@ -903,6 +903,7 @@
     <Build Include="dbo\Views\vyuAPPaymentHeaderGL.sql" />
     <Build Include="dbo\Views\vyuAPGLByAccount.sql" />
     <Build Include="dbo\Views\vyuARGetItemAccount.sql" />
+    <Build Include="dbo\Views\vyuARGetInventoryItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
