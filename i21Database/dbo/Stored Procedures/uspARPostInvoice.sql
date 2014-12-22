@@ -470,7 +470,7 @@ BEGIN
 			ON A.intAccountId = U.intAccountId
 	LEFT JOIN
 		tblICItemPricing IP
-			ON B.intItemId = IP.intItemId  			
+			ON B.intItemId = IP.intItemId  AND B.intCompanyLocationId = IP.intLocationId		
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
@@ -513,7 +513,7 @@ BEGIN
 			ON A.intAccountId = U.intAccountId 
 	LEFT JOIN
 		tblICItemPricing IP
-			ON B.intItemId = IP.intItemId 						
+			ON B.intItemId = IP.intItemId AND B.intCompanyLocationId = IP.intLocationId						
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
@@ -1034,7 +1034,7 @@ ELSE
 				ON A.intAccountId = U.intAccountId 	
 		LEFT JOIN
 			tblICItemPricing IP
-				ON B.intItemId = IP.intItemId 						
+				ON B.intItemId = IP.intItemId AND B.intCompanyLocationId = IP.intLocationId					
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
@@ -1078,7 +1078,7 @@ ELSE
 				ON A.intAccountId = U.intAccountId 	
 		LEFT JOIN
 			tblICItemPricing IP
-				ON B.intItemId = IP.intItemId						
+				ON B.intItemId = IP.intItemId  AND B.intCompanyLocationId = IP.intLocationId								
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
