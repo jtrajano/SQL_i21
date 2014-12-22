@@ -231,24 +231,32 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                             {
                                                                 xtype: 'combobox',
                                                                 flex: 1,
-                                                                itemId: 'cboAdjustmentType',
-                                                                fieldLabel: 'Adjustment Type',
-                                                                labelWidth: 110
+                                                                itemId: 'cboLocation',
+                                                                fieldLabel: 'Location',
+                                                                labelWidth: 70
                                                             },
                                                             {
                                                                 xtype: 'datefield',
-                                                                flex: 1,
-                                                                itemId: 'dtmAdjustmentDate',
+                                                                itemId: 'dtmDate',
                                                                 margin: '0 5',
-                                                                fieldLabel: 'Adjustment Date',
+                                                                maxWidth: 150,
+                                                                fieldLabel: 'Date',
+                                                                labelWidth: 40
+                                                            },
+                                                            {
+                                                                xtype: 'combobox',
+                                                                flex: 1,
+                                                                itemId: 'cboAdjustmentType',
+                                                                fieldLabel: 'Adjustment Type',
                                                                 labelWidth: 110
                                                             },
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
                                                                 itemId: 'txtAdjustmentNumber',
+                                                                margin: '0 0 0 5',
                                                                 fieldLabel: 'Adjustment No',
-                                                                labelWidth: 110
+                                                                labelWidth: 90
                                                             }
                                                         ]
                                                     },
@@ -257,7 +265,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         flex: 1,
                                                         itemId: 'txtDescription',
                                                         fieldLabel: 'Description',
-                                                        labelWidth: 110
+                                                        labelWidth: 70
                                                     }
                                                 ]
                                             },
@@ -321,10 +329,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colLocation',
+                                                        itemId: 'colSubLocation',
                                                         width: 100,
-                                                        dataIndex: 'strLocation',
-                                                        text: 'Location'
+                                                        dataIndex: 'strSubLocation',
+                                                        text: 'Sub Location'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

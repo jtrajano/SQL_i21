@@ -428,6 +428,74 @@
                                                     "userConfig": {
                                                         "alwaysDisplayDecimals": null,
                                                         "designer|createAlias": null,
+                                                        "fieldLabel": "Location",
+                                                        "hidden": null,
+                                                        "hideTrigger": null,
+                                                        "itemId": "cboLocation",
+                                                        "labelWidth": 70,
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "name": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyComboBox",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean"
+                                                    },
+                                                    "designerId": "7e9b36a1-3f62-4b99-b651-5593850a0b42",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "alwaysDisplayDecimals": null,
+                                                        "designer|createAlias": null,
+                                                        "fieldLabel": "Date",
+                                                        "hideTrigger": null,
+                                                        "itemId": "dtmDate",
+                                                        "labelWidth": 40,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "margin": "0 5",
+                                                        "maxWidth": 150,
+                                                        "name": null,
+                                                        "readOnly": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyDateField10",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean"
+                                                    },
+                                                    "designerId": "a2d03417-5f3f-4ab2-aa6b-d0ec33dd7726",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "alwaysDisplayDecimals": null,
+                                                        "designer|createAlias": null,
                                                         "fieldLabel": "Adjustment Type",
                                                         "hidden": null,
                                                         "hideTrigger": null,
@@ -452,40 +520,6 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Date",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "alwaysDisplayDecimals": null,
-                                                        "designer|createAlias": null,
-                                                        "fieldLabel": "Adjustment Date",
-                                                        "hideTrigger": null,
-                                                        "itemId": "dtmAdjustmentDate",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "margin": "0 5",
-                                                        "name": null,
-                                                        "readOnly": null,
-                                                        "width": null
-                                                    },
-                                                    "name": "MyDateField10",
-                                                    "configAlternates": {
-                                                        "alwaysDisplayDecimals": "boolean"
-                                                    },
-                                                    "designerId": "a2d03417-5f3f-4ab2-aa6b-d0ec33dd7726",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "alwaysDisplayDecimals",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                },
-                                                {
                                                     "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "items",
@@ -499,9 +533,10 @@
                                                         "hidden": null,
                                                         "hideTrigger": null,
                                                         "itemId": "txtAdjustmentNumber",
-                                                        "labelWidth": 110,
+                                                        "labelWidth": 90,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
+                                                        "margin": "0 0 0 5",
                                                         "name": null,
                                                         "width": null
                                                     },
@@ -530,7 +565,7 @@
                                             "userConfig": {
                                                 "fieldLabel": "Description",
                                                 "itemId": "txtDescription",
-                                                "labelWidth": 110,
+                                                "labelWidth": 70,
                                                 "layout|flex": 1
                                             },
                                             "name": "MyTextField22",
@@ -680,7 +715,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter1",
                                                     "designerId": "f7c10b11-c359-49ba-99e8-69e1af636272",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -704,9 +739,9 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "dataIndex": "strLocation",
-                                                "itemId": "colLocation",
-                                                "text": "Location",
+                                                "dataIndex": "strSubLocation",
+                                                "itemId": "colSubLocation",
+                                                "text": "Sub Location",
                                                 "width": 100
                                             },
                                             "name": "MyColumn37",
@@ -1220,7 +1255,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter129",
+                                                    "name": "filter11",
                                                     "designerId": "675f97e5-0409-46e6-8715-a4dc0129950a",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1397,7 +1432,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging1",
                     "designerId": "76244995-910a-41a2-86d9-d8e3a962e968",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
