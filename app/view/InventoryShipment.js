@@ -287,7 +287,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 itemId: 'cboOrderType',
                                                                 fieldLabel: 'Order Type',
                                                                 labelAlign: 'top',
-                                                                labelWidth: 110
+                                                                labelWidth: 110,
+                                                                displayField: 'strOrderType',
+                                                                valueField: 'intOrderType'
                                                             },
                                                             {
                                                                 xtype: 'textfield',
@@ -307,20 +309,70 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 labelWidth: 110
                                                             },
                                                             {
-                                                                xtype: 'combobox',
+                                                                xtype: 'gridcombobox',
                                                                 flex: 1,
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intFreightTermId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Freight Term Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strFreightTerm',
+                                                                        dataType: 'string',
+                                                                        text: 'Freight Term',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strFobPoint',
+                                                                        dataType: 'string',
+                                                                        text: 'FOB Point',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'ysnActive',
+                                                                        dataType: 'boolean',
+                                                                        text: 'Active',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
                                                                 itemId: 'cboFreightTerms',
                                                                 margin: '0 5',
                                                                 fieldLabel: 'Freight Terms',
                                                                 labelAlign: 'top',
-                                                                labelWidth: 110
+                                                                labelWidth: 110,
+                                                                displayField: 'strFreightTerm',
+                                                                valueField: 'intFreightTermId'
                                                             },
                                                             {
-                                                                xtype: 'combobox',
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intCustomerId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Customer Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strCustomerNumber',
+                                                                        dataType: 'string',
+                                                                        text: 'Customer No',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strType',
+                                                                        dataType: 'string',
+                                                                        text: 'Type',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
                                                                 itemId: 'cboCustomer',
                                                                 fieldLabel: 'Customer',
                                                                 labelAlign: 'top',
-                                                                labelWidth: 60
+                                                                labelWidth: 60,
+                                                                displayField: 'strCustomerNumber',
+                                                                valueField: 'intCustomerId'
                                                             },
                                                             {
                                                                 xtype: 'textfield',
@@ -369,10 +421,32 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 },
                                                                                 items: [
                                                                                     {
-                                                                                        xtype: 'combobox',
+                                                                                        xtype: 'gridcombobox',
+                                                                                        columns: [
+                                                                                            {
+                                                                                                dataIndex: 'intCompanyLocationId',
+                                                                                                dataType: 'numeric',
+                                                                                                text: 'Location Id',
+                                                                                                hidden: true
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strLocationName',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Location Name',
+                                                                                                flex: 1
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strLocationType',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Location Type',
+                                                                                                flex: 1
+                                                                                            }
+                                                                                        ],
                                                                                         itemId: 'cboShipFromAddress',
                                                                                         fieldLabel: 'Ship From',
-                                                                                        labelWidth: 70
+                                                                                        labelWidth: 70,
+                                                                                        displayField: 'strLocationName',
+                                                                                        valueField: 'intCompanyLocationId'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'textfield',

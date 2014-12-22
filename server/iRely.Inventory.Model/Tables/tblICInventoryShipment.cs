@@ -39,7 +39,57 @@ namespace iRely.Inventory.Model
         public DateTime? dtmFreeTime { get; set; }
         public string strReceivedBy { get; set; }
 
+        private string _orderType;
+        [NotMapped]
+        public string strOrderType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_orderType))
+                    if (this.intOrderType != null)
+                        switch (this.intOrderType)
+                        {
+                            case 1:
+                                return "Sales Contract";
+                            case 2:
+                                return "Sales Order";
+                            case 3:
+                                return "Transfer Order";
+                            default:
+                                return "";
+                        }
+                    else
+                        return null;
+                else
+                    return _orderType;
+            }
+            set
+            {
+                _orderType = value;
+            }
+        }
+        //private string _itemNo;
+        //[NotMapped]
+        //public string strItemNo
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_itemNo))
+        //            if (tblARCustomer != null)
+        //                return tblARCustomer;
+        //            else
+        //                return null;
+        //        else
+        //            return _itemNo;
+        //    }
+        //    set
+        //    {
+        //        _itemNo = value;
+        //    }
+        //}
+
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
+        //public tblARCustomer tblARCustomer { get; set; } 
     }
 
     public class tblICInventoryShipmentItem : BaseEntity

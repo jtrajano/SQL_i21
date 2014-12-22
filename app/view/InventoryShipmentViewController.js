@@ -13,160 +13,100 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {dataIndex: 'intInventoryShipmentId',text: "Shipment Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strBOLNumber', text: 'BOL Number', flex: 1,  dataType: 'string'},
                 {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1,  dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'intOrderType',text: 'Receipt Type', flex: 1,  dataType: 'int'}
+                {dataIndex: 'strOrderType',text: 'Order Type', flex: 1,  dataType: 'int'}
             ]
         },
         binding: {
-            txtBOLNumber: {
-                value: '{current.strReceiptType}',
-                store: '{receiptTypes}'
-            },
-            dtmShipDate: '{current.intSourceId}',
+            txtBOLNumber: '{current.strBOLNumber}',
+            dtmShipDate: '{current.dtmShipDate}',
             cboOrderType: {
-                value: '{current.intVendorId}',
-                store: '{vendor}'
+                value: '{current.intOrderType}',
+                store: '{orderTypes}'
             },
-            txtReferenceNumber: '{current.strVendorName}',
-            dtmRequestedArrival: '{current.intLocationId}',
-            cboShipFromAddress: {
-                value: '{current.intVendorId}',
-                store: '{vendor}'
-            },
-            cboShipToAddress: {
-                value: '{current.intCurrencyId}',
-                store: '{currency}'
-            },
-            cboCustomer: {
-                value: '{current.intCurrencyId}',
-                store: '{currency}'
-            },
-            cboCarrier: {
-                value: '{current.intCurrencyId}',
-                store: '{currency}'
-            },
-            txtVendorRefNumber: '{current.strVendorRefNo}',
-            txtBillOfLadingNumber: '{current.strBillOfLading}',
-            cboProductOrigin: {
-                value: '{current.intProductOrigin}',
-                store: '{country}'
-            },
-            txtReceiver: '{current.intReceiverId}',
-            txtVessel: '{current.strVessel}',
+            txtReferenceNumber: '{current.strReferenceNumber}',
+            dtmRequestedArrival: '{current.dtmRequestedArrivalDate}',
             cboFreightTerms: {
                 value: '{current.intFreightTermId}',
                 store: '{freightTerm}'
             },
-            txtFobPoint: '{current.strFobPoint}',
-            txtDeliveryPoint: '{current.strDeliveryPoint}',
-            cboAllocateFreight: {
-                value: '{current.strAllocateFreight}',
-                store: '{allocateFreights}'
+            cboCustomer: {
+                value: '{current.intCustomerId}',
+                store: '{customer}'
             },
-            cboFreightBilledBy: {
-                value: '{current.strFreightBilledBy}',
-                store: '{freightBilledBys}'
+            txtCustomerName: '{current.strVendorName}',
+            cboShipFromAddress: {
+                value: '{current.intShipFromLocationId}',
+                store: '{location}'
             },
-            txtShiftNumber: '{current.intShiftNumber}',
-            txtNotes: '{current.strNotes}',
+//            txtShipFromAddress: '{current.strShipToAddress}',
+//            cboShipToAddress: {
+//                value: '{current.intCurrencyId}',
+//                store: '{}'
+//            },
+            txtShipToAddress: '{current.strShipToAddress}',
+//            txtDeliveryInstructions: '{current.strVendorRefNo}',
+//            txtComments: '{current.strBillOfLading}',
+            chkDirectShipment: '{current.ysnDirectShipment}',
+            cboCarrier: {
+                value: '{current.intCarrierId}',
+                store: '{shipVia}'
+            },
+            txtVesselVehicle: '{current.strVessel}',
+            txtProNumber: '{current.strProNumber}',
+            txtDriverID: '{current.strDriverId}',
+            txtSealNumber: '{current.strSealNumber}',
+            txtAppointmentTime: '{current.dtmAppointmentTime}',
+            txtDepartureTime: '{current.dtmDepartureTime}',
+            txtArrivalTime: '{current.dtmArrivalTime}',
+            dtmDelivered: '{current.dtmDeliveredDate}',
+            dtmFreeTime: '{current.dtmFreeTime}',
+            txtReceivedBy: '{current.strReceivedBy}',
 
 
-            grdInventoryReceipt: {
-                colItemNo: {
+            grdInventoryShipment: {
+                colReferenceNumber: 'strReferenceNumber',
+                colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
                         store: '{items}'
                     }
                 },
                 colDescription: 'strItemDescription',
-                colSubLocation: '',
-                colLotTracking: 'strLotTracking',
-                colQtyOrdered: 'dblOrderQty',
-                colOpenReceive: 'dblOpenReceive',
-                colReceived: 'dblReceived',
+//                colSubLocation: '',
+                colQuantity: 'dblQuantity',
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{itemUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
+                            value: '{grdInventoryShipment.selection.intItemId}'
+                        }]
+                    }
+                },
+//                colDifference: '',
+                colWeightUOM: {
+                    dataIndex: 'strWeightUnitMeasure',
+                    editor: {
+                        store: '{weightUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
                             value: '{grdInventoryReceipt.selection.intItemId}'
                         }]
                     }
                 },
-                colPackages: 'intNoPackages',
-                colPackageType: {
-                    dataIndex: 'strPackName',
-                    editor: {
-                        store: '{itemPackType}'
-                    }
-                },
-                colUnitCost: 'dblUnitCost'
-            },
-
-            grdLotTracking: {
-                colParentLotId: 'strParentLotId',
-                colLotId: 'strLotId',
-                colLotContainerNo: 'strContainerNo',
-                colLotQtyOrdered: 'dblQuantity',
-                colLotUom: '',
-                colLotUnits: 'intUnits',
-                colLotUnitUom: 'intUnitUOMId',
-                colLotUnitPerPallet: 'intUnitPallet',
-                colLotGrossWeight: 'dblGrossWeight',
-                colLotTareWeight: 'dblTareWeight',
-                colLotNetWeight: '',
-                colLotWeightPerUnit: '',
-                colLotStatedGrossPerUnit: 'dblStatedGrossPerUnit',
-                colLotStatedTarePerUnit: 'dblStatedTarePerUnit'
-            },
-
-            grdIncomingInspection: {
-                colInspect: 'ysnSelected',
-                colQualityPropertyName: 'strPropertyName'
-            },
-
-            // ---- Freight and Invoice Tab
-            cboCalculationBasis: {
-                value: '{current.strCalculationBasis}',
-                store: '{calculationBasis}'
-            },
-            txtUnitsWeightMiles: {
-                value: '{current.dblUnitWeightMile}'
-            },
-            txtFreightRate: '{current.dblFreightRate}',
-            txtFuelSurcharge: '{current.dblFuelSurcharge}',
-            txtCalculatedFreight: '{getCalculatedFreight}',
-
-//            txtCalculatedAmount: '{current.strMessage}',
-            txtInvoiceAmount: '{current.dblInvoiceAmount}',
-//            txtDifference: '{current.strMessage}',
-            chkPrepaid: '{current.ysnPrepaid}',
-            chkInvoicePaid: '{current.ysnInvoicePaid}',
-            txtCheckNo: {
-                value: '{current.intCheckNo}',
-                readOnly: '{!current.ysnInvoicePaid}'
-            },
-            txtCheckDate: {
-                value: '{current.dteCheckDate}',
-                readOnly: '{!current.ysnInvoicePaid}'
-            },
-//            txtInvoiceMargin: '{current.strMessage}',
-
-            // ---- EDI tab
-            cboTrailerType: {
-                value: '{current.intTrailerTypeId}',
-                store: '{equipmentLength}'
-            },
-            txtTrailerArrivalDate: '{current.dteTrailerArrivalDate}',
-            txtTrailerArrivalTime: '{current.dteTrailerArrivalTime}',
-            txtSealNo: '{current.strSealNo}',
-            cboSealStatus: {
-                value: '{current.strSealStatus}',
-                store: '{sealStatuses}'
-            },
-            txtReceiveTime: '{current.dteReceiveTime}',
-            txtActualTempReading: '{current.dblActualTempReading}'
-
+//                colGrossWeight: '',
+                colTareWeight: 'dblTareWeight',
+                colNetWeight: 'dbNetWeight',
+                colUnitPrice: 'dblUnitPrice',
+//                colDockDoor: {
+//                    dataIndex: 'strDockDoor',
+//                    editor: {
+//                        store: '{itemPackType}'
+//                    }
+//                },
+                colNotes: 'strNotes'
+            }
         }
     },
 

@@ -7,25 +7,41 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'Inventory.store.BufferedItemUnitMeasure',
         'i21.store.CompanyLocationBuffered',
         'i21.store.FreightTermsBuffered',
+        'i21.store.ShipViaBuffered',
+        'AccountsReceivable.store.CustomerBuffered'
     ],
 
     stores: {
-        sealStatuses: {
+        orderTypes: {
             autoLoad: true,
             data: [
                 {
-                    strDescription: '01 - Intact'
+                    intOrderType: 1,
+                    strDescription: 'Sales Contract'
                 },{
-                    strDescription: '02 - Broken'
+                    intOrderType: 2,
+                    strDescription: 'Sales Order'
                 },{
-                    strDescription: '03 - Missing'
-                },{
-                    strDescription: '04 - Replaced'
+                    intOrderType: 3,
+                    strDescription: 'Transfer Order'
                 }
             ],
             fields: {
+                name: 'intOrderType',
                 name: 'strDescription'
             }
+        },
+        freightTerm: {
+            type: 'FreightTermsBuffered'
+        },
+        customer: {
+            type: 'customerbuffered'
+        },
+        location: {
+            type: 'companylocationbuffered'
+        },
+        shipVia: {
+            type: 'shipviabuffered'
         },
         items: {
             type: 'icbufferedcompactitem'
@@ -33,12 +49,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         itemUOM: {
             type: 'icbuffereditemunitmeasure'
         },
-        location: {
-            type: 'companylocationbuffered'
-        },
-        freightTerm: {
-            type: 'FreightTermsBuffered'
+        weightUOM: {
+            type: 'icbuffereditemunitmeasure'
         }
+
     }
 
 });

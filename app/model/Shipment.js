@@ -33,7 +33,9 @@ Ext.define('Inventory.model.Shipment', {
         { name: 'dtmArrivalTime', type: 'date'},
         { name: 'dtmDeliveredDate', type: 'date'},
         { name: 'dtmFreeTime', type: 'date'},
-        { name: 'strReceivedBy', type: 'string'}
+        { name: 'strReceivedBy', type: 'string'},
+
+        { name: 'strOrderType', type: 'int'}
     ],
 
     validators: [
