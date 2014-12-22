@@ -1589,4 +1589,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[UQ_tblCTWeightGrade_strWeightGradeDesc]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a75c9fb9-52e2-48e9-9f1b-19ede1a6cd6e" ChangeDateTime="12/22/2014 05:47:45">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryShipmentItemLot].[strWhseCargoNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryShipmentItemLot]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strWarehouseCargoNumber" />
+  </Operation>
 </Operations>
