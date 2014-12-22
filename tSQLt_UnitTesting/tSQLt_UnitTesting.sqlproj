@@ -564,6 +564,16 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one item and non-recap.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="tSQLt\Stored Procedures\Private_PrepareTableForFaking.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one item and recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple items and recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple items and non-recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

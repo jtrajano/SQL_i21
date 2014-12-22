@@ -1,96 +1,119 @@
 ﻿CREATE PROCEDURE [testi21Database].[test the uspCMAddDeposit stored procedure]
 AS
 BEGIN
+	-- ARRANGE 
+	BEGIN 
+		-- Constant variables
+		DECLARE @AccountId_InventoryWheat_Default AS INT = 1000
+		DECLARE @AccountId_CostOfGoods_Default AS INT = 2000
+		DECLARE @AccountId_Purchase_Default AS INT = 3000
+		DECLARE @AccountId_InventoryWheat_NewHaven AS INT = 1001
+		DECLARE @AccountId_CostOfGoods_NewHaven AS INT = 2001
+		DECLARE @AccountId_Purchase_NewHaven AS INT = 3001
+		DECLARE @AccountId_InventoryWheat_BetterHaven AS INT = 1002
+		DECLARE @AccountId_CostOfGoods_BetterHaven AS INT = 2002
+		DECLARE @AccountId_Purchase_BetterHaven AS INT = 3003
+		DECLARE @AccountId_BankAccount_Default AS INT = 4000
+		DECLARE @AccountId_BankAccount_NewHaven AS INT = 4001
+		DECLARE @AccountId_BankAccount_BetterHaven AS INT = 4002
+		DECLARE @AccountId_MiscExpenses_Default AS INT = 5000
+		DECLARE @AccountId_MiscExpenses_NewHaven AS INT = 5001
+		DECLARE @AccountId_MiscExpenses_BetterHaven AS INT = 5002	
+	
+		-- Add fake data
+		EXEC [testi21Database].[Fake data for simple COA]
 
-	-- Drop these views. It has dependencies with tblCMBankTransaction table. Can't do fake table if these exists. 
-	-- note: when tSQLt do the rollback, the views are rolled back as well. 
-	DROP VIEW vyuAPPayments
+		-- Arrange the fake table 
+		EXEC tSQLt.FakeTable 'dbo.tblCMBankTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblCMBankTransactionDetail';	
+		EXEC tSQLt.FakeTable 'dbo.tblCMBankAccount', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;
+	
+		-- Add fake bank account 	
+		INSERT INTO tblCMBankAccount (
+				ysnActive
+				,intGLAccountId
+		)
+		SELECT	1
+				,@AccountId_BankAccount_Default
 
-	-- Arrange the fake table 
-	EXEC tSQLt.FakeTable 'dbo.tblCMBankTransaction', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblCMBankTransactionDetail';
+		-- Variables used in calling the stored procedure 
+		DECLARE @intBankAccountId AS INT = 1
+				,@dtmDate AS DATETIME = '02/28/2012'
+				,@intGLAccountId AS INT = @AccountId_MiscExpenses_Default
+				,@dblAmount AS NUMERIC(18,6) = 496.88
+				,@strDescription AS NVARCHAR(255) = 'this is the description'
+				,@intUserId AS INT = 4546
+				,@isAddSuccessful AS BIT = 0;
 
-	DECLARE @p1 AS INT
-			,@p2 AS DATETIME
-			,@p3 AS INT
-			,@p4 AS NUMERIC(18,6)
-			,@p5 AS NVARCHAR(255)
-			,@p6 AS INT 
-			,@p7 AS BIT;
+		-- Create the actual table
+		CREATE TABLE actual (
+			intBankAccountId INT
+			,dtmDate DATETIME
+			,dblAmount NUMERIC(18,6)
+			,strMemo NVARCHAR(255) COLLATE Latin1_General_CI_AS
+			,intCreatedUserId INT
+		)
 
-	-- SET @p1 = 1
-	SET @p2 = '02/28/2012'
-	-- SET @p3 = 1099
-	SET @p4 = 496.88
-	SET @p5 = 'this is the description'
-	SET @p6 = 4546
-	SET @p7 = 0
+		-- Create the exepcted table
+		CREATE TABLE expected (
+			[intBankAccountId]         INT              NOT NULL,
+			[dtmDate]                  DATETIME         NOT NULL,
+			[dblAmount]                DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
+			[strMemo]                  NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
+			[intCreatedUserId]         INT              NULL
+		)
 
-	SELECT	TOP 1 
-			@p1 = intBankAccountId
-	FROM	tblCMBankAccount
+		-- Setup the expected data. 
+		INSERT INTO expected (intBankAccountId, dtmDate, dblAmount, strMemo, intCreatedUserId) 
+		SELECT @intBankAccountId, '02/28/2012', 496.88, 'this is the description', 4546
 
-	SELECT TOP 1 
-			@p3 = tblGLAccount.intAccountId
-	FROM	tblGLAccount INNER JOIN tblGLAccountGroup  
-				ON tblGLAccount.intAccountGroupId = tblGLAccountGroup.intAccountGroupId
-	WHERE	tblGLAccountGroup.strAccountGroup = 'Expenses'
+		-- Create the actual detail table 
+		CREATE TABLE actualDetail (
+			[intGLAccountId]	INT              NOT NULL,
+			[dblDebit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
+			[dblCredit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL
+		)
 
-	-- Act
-	EXEC dbo.uspCMAddDeposit 
-		@intBankAccountId = @p1, 
-		@dtmDate = @p2, 
-		@intGLAccountId = @p3, 
-		@dblAmount = @p4, 
-		@strDescription = @p5, 
-		@intUserId = @p6, 
-		@isAddSuccessful = @p7 OUTPUT
+		-- Create the expected detail table 
+		CREATE TABLE dbo.expectedDetail (
+			[intGLAccountId]	INT              NOT NULL,
+			[dblDebit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
+			[dblCredit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL
+		)
 
-	-- Assert
-	CREATE TABLE actual (
-		intBankAccountId INT
-		,dtmDate DATETIME
-		,dblAmount NUMERIC(18,6)
-		,strMemo NVARCHAR(255) COLLATE Latin1_General_CI_AS
-		,intCreatedUserId INT
-	)
+		-- Setup the expected detail data
+		INSERT INTO expectedDetail (intGLAccountId, dblDebit, dblCredit) SELECT @intGLAccountId, 0, 496.88
+	END 
 
-	INSERT actual
-	SELECT intBankAccountId, dtmDate, dblAmount, strMemo, intCreatedUserId
-	FROM dbo.tblCMBankTransaction
-
-	CREATE TABLE expected (
-		[intBankAccountId]         INT              NOT NULL,
-		[dtmDate]                  DATETIME         NOT NULL,
-		[dblAmount]                DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
-		[strMemo]                  NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
-		[intCreatedUserId]         INT              NULL
-	)
-
-	INSERT INTO expected (intBankAccountId, dtmDate, dblAmount, strMemo, intCreatedUserId) SELECT 1, '02/28/2012', 496.88, 'this is the description', 4546
+	-- ACT
+	BEGIN 
+		EXEC dbo.uspCMAddDeposit 
+			@intBankAccountId, 
+			@dtmDate, 
+			@intGLAccountId, 
+			@dblAmount, 
+			@strDescription, 
+			@intUserId, 
+			@isAddSuccessful OUTPUT
+	END 
+			
+	-- ASSERT
+	BEGIN 
+		INSERT	actual
+		SELECT	intBankAccountId, dtmDate, dblAmount, strMemo, intCreatedUserId
+		FROM	dbo.tblCMBankTransaction	
 	 
-	EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 
-	CREATE TABLE actualDetail (
-		[intGLAccountId]	INT              NOT NULL,
-		[dblDebit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
-		[dblCredit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL
-	)
+		INSERT	actualDetail
+		SELECT	intGLAccountId, dblDebit, dblCredit
+		FROM	dbo.tblCMBankTransactionDetail
 
-	INSERT	actualDetail
-	SELECT	intGLAccountId, dblDebit, dblCredit
-	FROM	dbo.tblCMBankTransactionDetail
-
-	CREATE TABLE dbo.expectedDetail (
-		[intGLAccountId]	INT              NOT NULL,
-		[dblDebit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
-		[dblCredit]			DECIMAL (18, 6)  DEFAULT 0 NOT NULL
-	)
-
-	INSERT INTO expectedDetail (intGLAccountId, dblDebit, dblCredit) SELECT @p3, 0, 496.88
-
-	EXEC tSQLt.AssertEqualsTable 'expectedDetail', 'actualDetail';
-
+		EXEC tSQLt.AssertEqualsTable 'expectedDetail', 'actualDetail';
+	END 
+	
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 
 		DROP TABLE actual
