@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activities\Receipts\Receipt_Posting.cs" />
+    <Compile Include="Activities\Shipments\Shipment.cs" />
     <Compile Include="Common\QAProperty.cs" />
     <Compile Include="Maintenance\Category.cs" />
     <Compile Include="Maintenance\Commodity.cs" />

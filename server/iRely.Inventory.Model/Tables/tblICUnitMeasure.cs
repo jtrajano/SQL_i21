@@ -49,6 +49,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
+        public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
+        public ICollection<tblICInventoryShipmentItem> WeightInventoryShipmentItems { get; set; }
     }
 
     public class tblICUnitMeasureConversion : BaseEntity

@@ -175,6 +175,10 @@ namespace iRely.Inventory.Model
         public DbSet<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
         public DbSet<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
         public DbSet<tblICInventoryReceiptItemTax> tblICInventoryReceiptItemTaxes { get; set; }
+
+        public DbSet<tblICInventoryShipment> tblICInventoryShipments { get; set; }
+        public DbSet<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
+        public DbSet<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
         
         public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
         public DbSet<tblGLAccount> tblGLAccounts { get; set; }
@@ -302,6 +306,9 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryReceiptItemMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptItemTaxMap());
 
+            modelBuilder.Configurations.Add(new tblICInventoryShipmentMap());
+            modelBuilder.Configurations.Add(new tblICInventoryShipmentItemMap());
+            modelBuilder.Configurations.Add(new tblICInventoryShipmentItemLotMap());
 
             modelBuilder.Configurations.Add(new tblSMCompanyLocationMap());
             modelBuilder.Configurations.Add(new tblGLAccountMap());
