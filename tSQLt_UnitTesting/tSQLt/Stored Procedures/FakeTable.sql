@@ -20,6 +20,8 @@ BEGIN
    
    EXEC tSQLt.Private_ValidateFakeTableParameters @SchemaName,@OrigTableName,@OrigSchemaName;
 
+   EXEC tSQLt.PrepareTableForFaking @TableName, @SchemaName;
+
    EXEC tSQLt.Private_RenameObjectToUniqueName @SchemaName, @TableName, @NewNameOfOriginalTable OUTPUT;
 
    EXEC tSQLt.Private_CreateFakeOfTable @SchemaName, @TableName, @NewNameOfOriginalTable, @Identity, @ComputedColumns, @Defaults;
