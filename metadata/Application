@@ -14,7 +14,8 @@
             "Catalog",
             "LineOfBusiness",
             "EditCatalog",
-            "InventoryShipment"
+            "InventoryShipment",
+            "BinToBinTransfer"
         ]
     },
     "name": "Application",

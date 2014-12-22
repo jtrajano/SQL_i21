@@ -8,24 +8,24 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "iccontractdocument",
-        "designer|userClassName": "ContractDocument",
-        "height": 250,
+        "designer|userAlias": "bintobintransfer",
+        "designer|userClassName": "BinToBinTransfer",
+        "height": 275,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 250,
-        "maximizable": true,
+        "maxHeight": 275,
+        "maximizable": null,
         "minHeight": 250,
         "minWidth": 400,
         "minimizable": null,
         "reference": null,
-        "title": "Contract Document",
+        "title": "Bin to Bin Transfer",
         "width": 400
     },
-    "name": "FuelType1",
-    "designerId": "1b2ad3cc-c0d7-4081-944a-78786b67346e",
+    "name": "ContractDocument1",
+    "designerId": "483bc983-652d-4090-bb1a-4d69f0ec289f",
     "viewControllerInstanceId": "a01d68fb-c827-41a9-a2ab-321695df1566",
     "viewModelInstanceId": "d33a9617-84bf-4829-8da6-eeb0898c16f7",
     "cn": [
@@ -45,7 +45,7 @@
                 "frame": null,
                 "header": false,
                 "height": 350,
-                "itemId": "frmContractDocument",
+                "itemId": "frmBinToBinTransfer",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -54,7 +54,7 @@
                 "width": 450
             },
             "name": "MyForm7",
-            "designerId": "eea5738e-b5f6-4e94-9086-8e9d32cd206f",
+            "designerId": "50573bd0-ee5e-47a9-8117-83af30ebc243",
             "cn": [
                 {
                     "type": "Ext.toolbar.Toolbar",
@@ -70,32 +70,8 @@
                         "width": 588
                     },
                     "name": "MyToolbar35",
-                    "designerId": "7a15c9f6-5089-4d3a-8aad-d5dd3687a616",
+                    "designerId": "d66e92d8-8bdd-475f-b492-33aba3c55ab1",
                     "cn": [
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-new",
-                                "itemId": "btnNew",
-                                "layout|flex": null,
-                                "layout|margins": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "New",
-                                "width": 45
-                            },
-                            "name": "MyButton93",
-                            "designerId": "4bd1d8ef-50ed-4d52-aa1f-98c2e8a27fe2"
-                        },
                         {
                             "type": "Ext.button.Button",
                             "reference": {
@@ -117,53 +93,7 @@
                                 "width": 45
                             },
                             "name": "MyButton94",
-                            "designerId": "38cb18b3-e0c3-4ace-8592-d94f8f03097c"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-search",
-                                "itemId": "btnSearch",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Search",
-                                "width": 45
-                            },
-                            "name": "MyButton95",
-                            "designerId": "b814a99d-7cbf-463d-ba3d-959c8d5c8f44"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-delete",
-                                "itemId": "btnDelete",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Delete",
-                                "width": 45
-                            },
-                            "name": "MyButton96",
-                            "designerId": "c332281e-1699-4e07-a91c-d93c08be5811"
+                            "designerId": "f4f2242d-0eb9-49c9-aa40-c16d5ef77dee"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -186,7 +116,7 @@
                                 "width": 45
                             },
                             "name": "MyButton97",
-                            "designerId": "4521f6b0-457f-4eac-94ec-95d5cae8ac84"
+                            "designerId": "35755dc0-7771-4ffb-b38a-b341713ce7a9"
                         },
                         {
                             "type": "Ext.toolbar.Separator",
@@ -201,7 +131,7 @@
                                 "layout|flex": null
                             },
                             "name": "MySeparator36",
-                            "designerId": "39f329dc-ace0-41cc-b85f-129934c69ab8"
+                            "designerId": "2e25647f-c03f-4630-a70c-90d5bace84fe"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -224,7 +154,7 @@
                                 "width": 45
                             },
                             "name": "MyButton98",
-                            "designerId": "eb2e6bec-6d27-49d2-87f4-a49e8ac8bc54"
+                            "designerId": "c0ede729-577d-47ae-9305-35e6d7f40f7e"
                         }
                     ]
                 },
@@ -246,10 +176,10 @@
                         "width": 1014
                     },
                     "name": "MyContainer55",
-                    "designerId": "3302d176-d2eb-41e0-9fcc-a29af5fa1088",
+                    "designerId": "3e4148bd-ad8b-4d9b-a79b-ebfd170bece0",
                     "cn": [
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.form.field.ComboBox",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
@@ -259,8 +189,8 @@
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
                                 "fieldCls": null,
-                                "fieldLabel": "Document Name",
-                                "itemId": "txtDocumentName",
+                                "fieldLabel": "Item No",
+                                "itemId": "cboItemNo",
                                 "labelPad": null,
                                 "labelSeparator": null,
                                 "labelWidth": 105,
@@ -273,8 +203,33 @@
                                 "value": null,
                                 "width": null
                             },
-                            "name": "MyTextField65",
-                            "designerId": "b7882fcc-a614-49d7-898c-abd87fbf02cd"
+                            "name": "MyComboBox16",
+                            "designerId": "42382e3d-ca63-4c52-9b8d-cd1285577646"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Lot ID",
+                                "itemId": "cboLotID",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 105,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "name": "MyComboBox17",
+                            "designerId": "5f8d5ff6-1388-4902-9e5b-69f812704439"
                         },
                         {
                             "type": "Ext.form.field.Text",
@@ -284,9 +239,11 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "columns": null,
+                                "designer|createAlias": null,
                                 "designer|displayName": null,
                                 "enforceMaxLength": null,
-                                "fieldLabel": "Description",
+                                "fieldLabel": "Item Description",
                                 "itemId": "txtDescription",
                                 "labelPad": null,
                                 "labelSeparator": null,
@@ -298,61 +255,11 @@
                                 "tabIndex": null,
                                 "width": null
                             },
-                            "name": "MyTextField66",
-                            "designerId": "ca5110c0-0f94-4b71-823d-1644b216aec4"
-                        },
-                        {
-                            "type": "Ext.form.field.ComboBox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "columns": [
-                                    "[",
-                                    "{",
-                                    "dataIndex: 'intCommodityId',",
-                                    "dataType: 'numeric',",
-                                    "text: 'Commodity Id',",
-                                    "hidden: true",
-                                    "},",
-                                    "{",
-                                    "dataIndex: 'strCommodityCode',",
-                                    "dataType: 'string',",
-                                    "text: 'Commodity Code',",
-                                    "flex: 1",
-                                    "},",
-                                    "{",
-                                    "dataIndex: 'strDescription',",
-                                    "dataType: 'string',",
-                                    "text: 'Description',",
-                                    "flex: 1",
-                                    "}",
-                                    "]"
-                                ],
-                                "designer|createAlias": "gridcombobox",
-                                "designer|displayName": null,
-                                "displayField": "strCommodityCode",
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Commodity",
-                                "itemId": "cboCommodity",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 105,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "valueField": "intCommodityId",
-                                "width": 170
-                            },
-                            "name": "MyComboBox66",
+                            "name": "MyTextField17",
                             "configAlternates": {
                                 "columns": "array"
                             },
-                            "designerId": "849a6ddf-b4b4-4d01-939e-8d31ed9aa315",
+                            "designerId": "62a269d2-cfbd-4e93-96e7-82ea3a51d27a",
                             "customConfigs": [
                                 {
                                     "group": "(Custom Properties)",
@@ -362,21 +269,78 @@
                             ]
                         },
                         {
-                            "type": "Ext.form.field.Checkbox",
+                            "type": "Ext.form.field.Text",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "boxLabel": null,
-                                "fieldLabel": "Standard",
-                                "itemId": "chkStandard",
+                                "columns": null,
+                                "designer|createAlias": null,
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "From Storage Bin",
+                                "itemId": "txtFromStorageBin",
+                                "labelPad": null,
+                                "labelSeparator": null,
                                 "labelWidth": 105,
-                                "layout|flex": null
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
                             },
-                            "name": "MyCheckbox64",
-                            "designerId": "7d7143cc-4393-4c96-bceb-49e7263ad9e6"
+                            "name": "MyTextField18",
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "38a5983d-6791-45b5-862f-35357e754c62",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.form.field.Text",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "columns": null,
+                                "designer|createAlias": null,
+                                "designer|displayName": null,
+                                "enforceMaxLength": null,
+                                "fieldLabel": "To Storage Bin",
+                                "itemId": "txtToStorageBin",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 105,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "width": null
+                            },
+                            "name": "MyTextField19",
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "777fa3ec-dd69-4684-a369-62453bb38137",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -388,17 +352,12 @@
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "afterPageText": null,
-                        "designer|createAlias": "ipagingstatusbar",
-                        "designer|displayName": "",
                         "dock": "bottom",
-                        "itemId": "pagingtoolbar",
-                        "layout|flex": 1,
-                        "store": null
+                        "layout|flex": 1
                     },
-                    "name": "statusbarpaging12",
-                    "designerId": "402098fb-f9d8-4138-b21f-ad603c46de1f",
-                    "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
+                    "name": "statusbar1",
+                    "designerId": "8a515ac6-f8da-4d99-b3ca-21e39338cb04",
+                    "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }
             ]
         }
