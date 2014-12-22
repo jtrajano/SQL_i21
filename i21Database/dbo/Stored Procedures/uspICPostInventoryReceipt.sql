@@ -236,5 +236,5 @@ BEGIN
 	COMMIT TRAN @TransactionName
 END 
     
--- This is our fire exit in case a fire erupted (exceptions)
+-- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
