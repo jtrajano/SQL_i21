@@ -569,7 +569,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnDeleteItem',
+                                                                itemId: 'btnRemoveItem',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
                                                             },
@@ -717,7 +717,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        title: 'Lot Details',
+                                        title: 'Lots',
                                         layout: {
                                             type: 'vbox',
                                             align: 'stretch'
@@ -758,15 +758,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnEditLot',
-                                                                margin: '0 0 0 5',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteLot',
+                                                                itemId: 'btnRemoveLot',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
                                                             },
@@ -801,6 +793,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colSubLocation',
+                                                        width: 100,
+                                                        dataIndex: 'strSubLocation',
+                                                        text: 'Sub Location',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colLotID',
                                                         width: 100,
                                                         dataIndex: 'strLotID',
@@ -825,6 +825,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         dataIndex: 'strUOM',
                                                         text: 'UOM',
                                                         flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colWarehouseCargoNumber',
+                                                        width: 124,
+                                                        dataIndex: 'strWarehouseCargoNumber',
+                                                        text: 'Warehouse Cargo No.'
                                                     }
                                                 ],
                                                 plugins: [
@@ -855,7 +862,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'label',
                                                                 margin: '0 7 0 5',
-                                                                text: 'Split'
+                                                                text: 'Split Lots'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -863,7 +870,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnAddLot',
+                                                                itemId: 'btnAddSplit',
                                                                 margin: '0 0 0 5',
                                                                 iconCls: 'small-add',
                                                                 text: 'Add'
@@ -871,15 +878,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnEditLot',
-                                                                margin: '0 0 0 5',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteLot',
+                                                                itemId: 'btnRemoveSplit',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
                                                             },
@@ -950,6 +949,131 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 ],
                                                 viewConfig: {
                                                     itemId: 'grvLotSplit'
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        title: 'Link PO',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                flex: 1,
+                                                reference: 'grdLotTracking',
+                                                itemId: 'grdLotTracking',
+                                                margin: -1,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbToolbarGrid',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'label',
+                                                                margin: '0 7 0 5',
+                                                                text: 'Linked Purchase Orders'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnAddPO',
+                                                                margin: '0 0 0 5',
+                                                                iconCls: 'small-add',
+                                                                text: 'Add'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnRemovePO',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Remove'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                    selType: 'checkboxmodel'
+                                                }),
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colSONumber',
+                                                        width: 100,
+                                                        dataIndex: 'strSONumber',
+                                                        text: 'SO Number',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colItemNumber',
+                                                        width: 100,
+                                                        dataIndex: 'strItemNumber',
+                                                        text: 'Item No.',
+                                                        flex: 2
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colShipQty',
+                                                        width: 80,
+                                                        align: 'right',
+                                                        dataIndex: 'dblShipQty',
+                                                        text: 'Ship Qty',
+                                                        flex: 1,
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colPONumber',
+                                                        width: 75,
+                                                        dataIndex: 'strPONumber',
+                                                        text: 'PO Number',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colPOItem',
+                                                        width: 124,
+                                                        dataIndex: 'strPOItem',
+                                                        text: 'PO Item'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colPOQty',
+                                                        width: 80,
+                                                        align: 'right',
+                                                        dataIndex: 'dblPOQty',
+                                                        text: 'PO Qty',
+                                                        flex: 1,
+                                                        format: '0,000.##'
+                                                    }
+                                                ],
+                                                plugins: [
+                                                    Ext.create('Ext.grid.plugin.CellEditing', {
+                                                        clicksToEdit: 1
+                                                    })
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvLotTracking'
                                                 }
                                             }
                                         ]
