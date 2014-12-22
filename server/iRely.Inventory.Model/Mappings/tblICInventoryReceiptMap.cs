@@ -123,13 +123,16 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.strContainerNo).HasColumnName("strContainerNo");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
+            this.Property(t => t.strLotId).HasColumnName("strLotId");
+            this.Property(t => t.strParentLotId).HasColumnName("strParentLotId");
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.intParentLotId).HasColumnName("intParentLotId");
             this.Property(t => t.strRemarks).HasColumnName("strRemarks");
             this.Property(t => t.strVendorLotId).HasColumnName("strVendorLotId");
 
-            this.HasRequired(p => p.tblICLot)
-                .WithOptional(p => p.tblICInventoryReceiptItemLot);
+            this.HasOptional(p => p.tblICLot)
+                .WithRequired(p => p.tblICInventoryReceiptItemLot)
+                .WillCascadeOnDelete(false);
                 
         }
     }

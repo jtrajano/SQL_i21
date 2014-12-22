@@ -235,6 +235,8 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptItemId { get; set; }
         public int? intParentLotId { get; set; }
         public int? intLotId { get; set; }
+        public string strParentLotId { get; set; }
+        public string strLotId { get; set; }
         public string strContainerNo { get; set; }
         public decimal? dblQuantity { get; set; }
         public int intUnits { get; set; }
@@ -254,6 +256,26 @@ namespace iRely.Inventory.Model
         public DateTime dtmManufacturedDate { get; set; }
         public string strRemarks { get; set; }
         public int intSort { get; set; }
+
+        private string _uom;
+        [NotMapped]
+        public string strUnitMeasure
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_uom))
+                    if (tblICInventoryReceiptItem != null)
+                        return tblICInventoryReceiptItem.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _uom;
+            }
+            set
+            {
+                _uom = value;
+            }
+        }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
         public tblICLot tblICLot { get; set; }

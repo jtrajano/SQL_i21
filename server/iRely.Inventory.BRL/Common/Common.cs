@@ -16,7 +16,8 @@ namespace iRely.Inventory.BRL
     {
         public enum StartingNumber
         {
-            InventoryReceipt = 23
+            InventoryReceipt = 23,
+            LotNumber = 24
         }
 
         public static string GetStartingNumber(StartingNumber transaction) 

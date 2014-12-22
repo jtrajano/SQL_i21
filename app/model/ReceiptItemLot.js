@@ -48,7 +48,10 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'strVendorLotId', type: 'string'},
         { name: 'dtmManufacturedDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'strRemarks', type: 'string'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intSort', type: 'int'},
+
+        { name: 'strLotId', type: 'string'},
+        { name: 'strParentLotId', type: 'string'}
     ],
 
     validators: [
