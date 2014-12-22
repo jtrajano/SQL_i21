@@ -288,30 +288,6 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "height": 57,
-                                "hidden": true,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-unpost",
-                                "itemId": "btnUnpost",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Unpost",
-                                "width": 52
-                            },
-                            "name": "MyButton18",
-                            "designerId": "3d46ac78-01fd-4030-843c-2c06dea3aaba"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-customer",
@@ -1477,7 +1453,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDeleteItem",
+                                                        "itemId": "btnRemoveItem",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Remove"
@@ -1851,7 +1827,7 @@
                             "userConfig": {
                                 "container|align": "stretch",
                                 "layout": "vbox",
-                                "title": "Lot Details"
+                                "title": "Lots"
                             },
                             "name": "MyPanel9",
                             "designerId": "1cfaa6ae-1a0e-488e-92c0-60487ec36db7",
@@ -1958,27 +1934,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-edit",
-                                                        "itemId": "btnEditLot",
-                                                        "layout|flex": null,
-                                                        "margin": "0 0 0 5",
-                                                        "tabIndex": -1,
-                                                        "text": "Edit"
-                                                    },
-                                                    "name": "MyButton21",
-                                                    "designerId": "098f3c49-ecd6-4c2e-8976-4b5bb6c45a57"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDeleteLot",
+                                                        "itemId": "btnRemoveLot",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Remove"
@@ -2068,6 +2025,23 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "dataIndex": "strSubLocation",
+                                                "flex": 1,
+                                                "itemId": "colSubLocation",
+                                                "text": "Sub Location",
+                                                "width": 100
+                                            },
+                                            "name": "MyColumn",
+                                            "designerId": "314de3b5-372b-4011-a514-179ea5b6052e"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "dataIndex": "strLotID",
                                                 "flex": 1,
                                                 "itemId": "colLotID",
@@ -2120,6 +2094,23 @@
                                             },
                                             "name": "MyColumn5",
                                             "designerId": "0c15caa2-b649-405d-853f-b5bb41fcb750"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strWarehouseCargoNumber",
+                                                "flex": null,
+                                                "itemId": "colWarehouseCargoNumber",
+                                                "text": "Warehouse Cargo No.",
+                                                "width": 124
+                                            },
+                                            "name": "MyColumn2",
+                                            "designerId": "08d4ee5b-d6ba-4b4d-a43c-5af3d65d1109"
                                         },
                                         {
                                             "type": "Ext.grid.plugin.CellEditing",
@@ -2194,7 +2185,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null,
                                                         "margin": "0 7 0 5",
-                                                        "text": "Split"
+                                                        "text": "Split Lots"
                                                     },
                                                     "name": "MyLabel2",
                                                     "designerId": "6a06a193-d1bb-45a1-94dd-d3e719817379"
@@ -2223,7 +2214,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-add",
-                                                        "itemId": "btnAddLot",
+                                                        "itemId": "btnAddSplit",
                                                         "layout|flex": null,
                                                         "margin": "0 0 0 5",
                                                         "tabIndex": -1,
@@ -2241,27 +2232,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-edit",
-                                                        "itemId": "btnEditLot",
-                                                        "layout|flex": null,
-                                                        "margin": "0 0 0 5",
-                                                        "tabIndex": -1,
-                                                        "text": "Edit"
-                                                    },
-                                                    "name": "MyButton21",
-                                                    "designerId": "e6d7e6c9-943a-47dc-84fc-d61af9a48d74"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDeleteLot",
+                                                        "itemId": "btnRemoveSplit",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Remove"
@@ -2454,6 +2426,324 @@
                             "userConfig": {
                                 "container|align": "stretch",
                                 "layout": "vbox",
+                                "title": "Link PO"
+                            },
+                            "name": "MyPanel1",
+                            "designerId": "e246a2c2-4096-4665-ad10-120ba63bca1c",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig3",
+                                    "designerId": "6958f322-dea5-4ae9-8a61-d78d43a60e3a"
+                                },
+                                {
+                                    "type": "Ext.grid.Panel",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "advancefiltergrid",
+                                        "dock": null,
+                                        "itemId": "grdLotTracking",
+                                        "layout|flex": 1,
+                                        "layout|margins": null,
+                                        "margin": -1,
+                                        "reference": "grdLotTracking",
+                                        "title": null
+                                    },
+                                    "name": "MyGridPanel",
+                                    "designerId": "8d579dfb-7ccd-4a90-9149-f8811ce5d1f5",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.toolbar.Toolbar",
+                                            "reference": {
+                                                "name": "dockedItems",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|padding": "0 0 0 1",
+                                                "dock": "top",
+                                                "itemId": "tlbToolbarGrid"
+                                            },
+                                            "name": "MyToolbar6",
+                                            "designerId": "6a760e72-c9a0-4e8f-bb29-17d6593a5852",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.Label",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "layout|flex": null,
+                                                        "margin": "0 7 0 5",
+                                                        "text": "Linked Purchase Orders"
+                                                    },
+                                                    "name": "MyLabel2",
+                                                    "designerId": "f9f809a2-a233-474a-9a14-6860c57ed365"
+                                                },
+                                                {
+                                                    "type": "Ext.toolbar.Separator",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|displayName": "separator",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MySeparator1",
+                                                    "designerId": "966cf023-e536-42f1-bdd8-d84548992394"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-add",
+                                                        "itemId": "btnAddPO",
+                                                        "layout|flex": null,
+                                                        "margin": "0 0 0 5",
+                                                        "tabIndex": -1,
+                                                        "text": "Add"
+                                                    },
+                                                    "name": "MyButton4",
+                                                    "designerId": "a2fabec1-2e74-4f66-84dd-ef13af5ca09e"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-delete",
+                                                        "itemId": "btnRemovePO",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Remove"
+                                                    },
+                                                    "name": "MyButton22",
+                                                    "designerId": "03d34596-840b-4755-a467-c9d3125b60e9"
+                                                },
+                                                {
+                                                    "type": "Ext.toolbar.Separator",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|displayName": "separator",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MySeparator7",
+                                                    "designerId": "41239729-e1b7-4fc6-aeb3-58272f9095fc"
+                                                },
+                                                {
+                                                    "type": "linkedinstance",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "filter14",
+                                                    "designerId": "1ae52a89-aba4-455b-a1f7-825e6b9b4bd9",
+                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.selection.CheckboxModel",
+                                            "reference": {
+                                                "name": "selModel",
+                                                "type": "object"
+                                            },
+                                            "codeClass": "Ext.selection.CheckboxModel",
+                                            "name": "MyCheckboxSelectionModel2",
+                                            "designerId": "e4f6bd5b-3533-48d9-834f-ffda76bcd0ff"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strSONumber",
+                                                "flex": 1,
+                                                "itemId": "colSONumber",
+                                                "text": "SO Number",
+                                                "width": 100
+                                            },
+                                            "name": "MyColumn6",
+                                            "designerId": "52066995-793c-410c-9fd7-5a152bc97ac0"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strItemNumber",
+                                                "flex": 2,
+                                                "itemId": "colItemNumber",
+                                                "text": "Item No.",
+                                                "width": 100
+                                            },
+                                            "name": "MyColumn23",
+                                            "designerId": "ae6cf864-aa48-4e0f-bb18-966a47dbeb1d"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblShipQty",
+                                                "dataType": "numeric",
+                                                "flex": 1,
+                                                "format": "0,000.##",
+                                                "itemId": "colShipQty",
+                                                "text": "Ship Qty",
+                                                "width": 80
+                                            },
+                                            "name": "MyNumberColumn",
+                                            "designerId": "d9502d81-e04c-4873-b6d0-d7f122801323",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strPONumber",
+                                                "flex": 1,
+                                                "itemId": "colPONumber",
+                                                "text": "PO Number",
+                                                "width": 75
+                                            },
+                                            "name": "MyColumn5",
+                                            "designerId": "94cc98b3-67da-45ad-ad61-98c778024197"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strPOItem",
+                                                "flex": null,
+                                                "itemId": "colPOItem",
+                                                "text": "PO Item",
+                                                "width": 124
+                                            },
+                                            "name": "MyColumn2",
+                                            "designerId": "79b3b1a3-c59e-477d-9acb-aa8143a1de8c"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblPOQty",
+                                                "dataType": "numeric",
+                                                "flex": 1,
+                                                "format": "0,000.##",
+                                                "itemId": "colPOQty",
+                                                "text": "PO Qty",
+                                                "width": 80
+                                            },
+                                            "name": "MyNumberColumn1",
+                                            "designerId": "2b7ec726-b333-450e-bb9a-b6163ace2931",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.plugin.CellEditing",
+                                            "reference": {
+                                                "name": "plugins",
+                                                "type": "array"
+                                            },
+                                            "codeClass": "Ext.grid.plugin.CellEditing",
+                                            "userConfig": {
+                                                "clicksToEdit": 1
+                                            },
+                                            "name": "MyCellEditingPlugin",
+                                            "designerId": "a08ce681-b3a8-4115-830e-af512011ad82"
+                                        },
+                                        {
+                                            "type": "Ext.grid.View",
+                                            "reference": {
+                                                "name": "viewConfig",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "grvLotTracking"
+                                            },
+                                            "name": "MyGridView2",
+                                            "designerId": "c666d4d4-060d-4163-a4da-ddb989f85983"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "container|align": "stretch",
+                                "layout": "vbox",
                                 "title": "Notes"
                             },
                             "name": "MyPanel",
@@ -2529,7 +2819,7 @@
                                                     "userConfig": {
                                                         "icon": null,
                                                         "iconCls": "small-delete",
-                                                        "itemId": "btnDeleteNotes",
+                                                        "itemId": "btnRemoveNotes",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
                                                         "text": "Remove"
@@ -2690,7 +2980,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "designer|createAlias": "attachmentgrid",
-                                        "itemId": "grdBillAttachment",
+                                        "itemId": "grdAttachment",
                                         "margin": -1,
                                         "title": null
                                     },

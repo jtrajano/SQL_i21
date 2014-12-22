@@ -245,7 +245,7 @@
                                 "icon": null,
                                 "iconAlign": "top",
                                 "iconCls": "large-generate-invoice",
-                                "itemId": "btnProcess",
+                                "itemId": "btnReceive",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
@@ -277,30 +277,6 @@
                             },
                             "name": "MyButton1",
                             "designerId": "665a9637-57f9-4430-ba39-a882deff87ce"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "hidden": true,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-unpost",
-                                "itemId": "btnUnpost",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Unpost",
-                                "width": 52
-                            },
-                            "name": "MyButton18",
-                            "designerId": "db03ef09-5d6d-4ba2-a8a3-1e20207087fd"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -1431,7 +1407,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter16",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2097,7 +2073,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter129",
+                                                    "name": "filter17",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2597,7 +2573,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter130",
+                                                    "name": "filter18",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3428,7 +3404,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter131",
+                                                    "name": "filter19",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3871,7 +3847,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -27,7 +27,10 @@ Ext.application({
         'Catalog',
         'LineOfBusiness',
         'EditCatalog',
-        'InventoryShipment'
+        'InventoryShipment',
+        'BinToBinTransfer',
+        'InventoryTransfer',
+        'InventoryAdjustment'
     ],
     name: 'Inventory',
 
