@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[tblCTContractOptDetail](
 GO
 
 ALTER TABLE [dbo].[tblCTContractOptDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractOptDetail_tblCTContractOptHeader_intContractOptHeaderId] FOREIGN KEY([intContractOptHeaderId])
-REFERENCES [dbo].[tblCTContractOptHeader] ([intContractOptHeaderId])
+REFERENCES [dbo].[tblCTContractOptHeader] ([intContractOptHeaderId]) ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblCTContractOptDetail] CHECK CONSTRAINT [FK_tblCTContractOptDetail_tblCTContractOptHeader_intContractOptHeaderId]
