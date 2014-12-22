@@ -16,7 +16,8 @@
             "EditCatalog",
             "InventoryShipment",
             "BinToBinTransfer",
-            "InventoryTransfer"
+            "InventoryTransfer",
+            "InventoryAdjustment"
         ]
     },
     "name": "Application",
