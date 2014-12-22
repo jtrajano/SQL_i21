@@ -5,7 +5,7 @@
     [intContainerId] INT NOT NULL, 
     [intExternalSystemId] INT NULL, 
     [intContainerTypeId] INT NULL, 
-    [strLastUpdatedBy] NVARCHAR(50) NULL, 
+    [strLastUpdatedBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dtmLastUpdatedOn] DATETIME NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 

@@ -2,7 +2,7 @@
 (
 	[intInventoryShipmentItemId] INT NOT NULL IDENTITY, 
 	[intInventoryShipmentId] INT NOT NULL, 
-    [strReferenceNumber] NVARCHAR(50) NULL, 
+    [strReferenceNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intItemId] INT NOT NULL, 
     [intSubLocationId] INT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
@@ -12,7 +12,7 @@
     [dbNetWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblUnitPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intDockDoorId] INT NULL, 
-    [strNotes] NVARCHAR(MAX) NULL, 
+    [strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryShipmentItem] PRIMARY KEY ([intInventoryShipmentItemId]), 

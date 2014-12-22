@@ -4,7 +4,7 @@
 	[intInventoryShipmentItemId] INT NOT NULL, 
     [intLotId] INT NOT NULL, 
     [dblQuantityShipped] NUMERIC(18, 6) NULL, 
-    [strWarehouseCargoNumber] NVARCHAR(50) NULL, 
+    [strWarehouseCargoNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryShipmentItemLot] PRIMARY KEY ([intInventoryShipmentItemLotId]), 
