@@ -964,6 +964,7 @@
       <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\User Defined Types\InventoryTranactionStockToReverse.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
