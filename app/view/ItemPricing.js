@@ -184,7 +184,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             }
                         },
                         {
-                            xtype: 'numberfield',
+                            xtype: 'moneynumber',
                             itemId: 'txtStandardCost',
                             fieldLabel: 'Standard Cost',
                             labelWidth: 110,
@@ -192,7 +192,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             hideTrigger: true
                         },
                         {
-                            xtype: 'numberfield',
+                            xtype: 'moneynumber',
                             itemId: 'txtAverageCost',
                             fieldLabel: 'Average Cost',
                             labelWidth: 110,
@@ -200,7 +200,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             hideTrigger: true
                         },
                         {
-                            xtype: 'numberfield',
+                            xtype: 'moneynumber',
                             itemId: 'txtLastCost',
                             fieldLabel: 'Last Cost',
                             labelWidth: 110,
@@ -208,7 +208,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             hideTrigger: true
                         },
                         {
-                            xtype: 'numberfield',
+                            xtype: 'moneynumber',
                             itemId: 'txtEndofMonthCost',
                             fieldLabel: 'End of Month Cost',
                             labelWidth: 110,
@@ -236,7 +236,7 @@ Ext.define('Inventory.view.ItemPricing', {
                                     }
                                 },
                                 {
-                                    xtype: 'numberfield',
+                                    xtype: 'moneynumber',
                                     itemId: 'txtAmountPercent',
                                     margin: '0 0 0 5',
                                     width: 115,
@@ -247,7 +247,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             ]
                         },
                         {
-                            xtype: 'numberfield',
+                            xtype: 'moneynumber',
                             itemId: 'txtSalePrice',
                             fieldLabel: 'Sale Price',
                             labelWidth: 110,
@@ -255,7 +255,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             hideTrigger: true
                         },
                         {
-                            xtype: 'numberfield',
+                            xtype: 'moneynumber',
                             itemId: 'txtRetailPrice',
                             fieldLabel: 'Retail Price',
                             labelWidth: 110,
@@ -263,7 +263,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             hideTrigger: true
                         },
                         {
-                            xtype: 'numberfield',
+                            xtype: 'moneynumber',
                             itemId: 'txtWholesalePrice',
                             fieldLabel: 'Wholesale Price',
                             labelWidth: 110,
@@ -271,7 +271,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             hideTrigger: true
                         },
                         {
-                            xtype: 'numberfield',
+                            xtype: 'moneynumber',
                             itemId: 'txtLargeVolumePrice',
                             fieldLabel: 'Large Volume Price',
                             labelWidth: 110,
@@ -279,7 +279,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             hideTrigger: true
                         },
                         {
-                            xtype: 'numberfield',
+                            xtype: 'moneynumber',
                             itemId: 'txtMsrp',
                             fieldLabel: 'MSRP',
                             labelWidth: 110,
