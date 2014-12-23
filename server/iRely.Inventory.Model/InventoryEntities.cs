@@ -22,7 +22,7 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-            //: base(GetConnectionString())
+            : base(GetConnectionString())
         {
 
         }

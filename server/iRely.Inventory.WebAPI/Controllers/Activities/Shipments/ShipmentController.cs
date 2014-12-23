@@ -25,13 +25,13 @@ namespace iRely.Invetory.WebAPI.Controllers
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICInventoryShipment>();
+            var predicate = ExpressionBuilder.True<InventoryShipmentView>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICInventoryShipment>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<InventoryShipmentView>(searchFilters);
 
             var data = _ShipmentBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
@@ -51,11 +51,11 @@ namespace iRely.Invetory.WebAPI.Controllers
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICInventoryShipment>();
+            var predicate = ExpressionBuilder.True<InventoryShipmentView>();
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intInventoryShipmentId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICInventoryShipment>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<InventoryShipmentView>(searchFilters, true);
 
             var total = _ShipmentBRL.GetCount(predicate);
             var data = _ShipmentBRL.GetShipments(page, start, page == 0 ? total : limit, sortSelector, predicate);

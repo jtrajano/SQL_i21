@@ -15,15 +15,15 @@ Ext.define('Inventory.model.Shipment', {
         { name: 'intInventoryShipmentId', type: 'int'},
         { name: 'strBOLNumber', type: 'string'},
         { name: 'dtmShipDate', type: 'date'},
-        { name: 'intOrderType', type: 'int'},
+        { name: 'intOrderType', type: 'int', allowNull: true},
         { name: 'strReferenceNumber', type: 'string'},
         { name: 'dtmRequestedArrivalDate', type: 'date'},
-        { name: 'intShipFromLocationId', type: 'int'},
-        { name: 'intCustomerId', type: 'int'},
-        { name: 'strShipToAddress', type: 'string'},
-        { name: 'intFreightTermId', type: 'int'},
+        { name: 'intShipFromLocationId', type: 'int', allowNull: true},
+        { name: 'intShipToLocationId', type: 'int', allowNull: true},
+        { name: 'intCustomerId', type: 'int', allowNull: true},
+        { name: 'intFreightTermId', type: 'int', allowNull: true},
         { name: 'ysnDirectShipment', type: 'boolean'},
-        { name: 'intCarrierId', type: 'int'},
+        { name: 'intCarrierId', type: 'int', allowNull: true},
         { name: 'strVessel', type: 'string'},
         { name: 'strProNumber', type: 'string'},
         { name: 'strDriverId', type: 'string'},
@@ -34,8 +34,12 @@ Ext.define('Inventory.model.Shipment', {
         { name: 'dtmDeliveredDate', type: 'date'},
         { name: 'dtmFreeTime', type: 'date'},
         { name: 'strReceivedBy', type: 'string'},
+        { name: 'strComment', type: 'string'},
+        { name: 'strDeliveryInstruction', type: 'string'},
 
-        { name: 'strOrderType', type: 'int'}
+        { name: 'strOrderType', type: 'string'},
+        { name: 'strShipFromAddress', type: 'string'},
+        { name: 'strShipToAddress', type: 'string'}
     ],
 
     validators: [
@@ -43,7 +47,7 @@ Ext.define('Inventory.model.Shipment', {
         {type: 'presence', field: 'dtmShipDate'},
         {type: 'presence', field: 'intOrderType'},
         {type: 'presence', field: 'intShipFromLocationId'},
-        {type: 'presence', field: 'strShipToAddress'},
+        {type: 'presence', field: 'intShipToLocationId'},
         {type: 'presence', field: 'intFreightTermId'}
     ]
 });

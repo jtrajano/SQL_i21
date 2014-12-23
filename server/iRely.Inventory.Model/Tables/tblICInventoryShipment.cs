@@ -23,8 +23,8 @@ namespace iRely.Inventory.Model
         public string strReferenceNumber { get; set; }
         public DateTime? dtmRequestedArrivalDate { get; set; }
         public int? intShipFromLocationId { get; set; }
+        public int? intShipToLocationId { get; set; }
         public int? intCustomerId { get; set; }
-        public string strShipToAddress { get; set; }
         public int? intFreightTermId { get; set; }
         public bool ysnDirectShipment { get; set; }
         public int? intCarrierId { get; set; }
@@ -38,58 +38,86 @@ namespace iRely.Inventory.Model
         public DateTime? dtmDeliveredDate { get; set; }
         public DateTime? dtmFreeTime { get; set; }
         public string strReceivedBy { get; set; }
+        public string strComment { get; set; }
+        public string strDeliveryInstruction { get; set; }
 
-        private string _orderType;
+        private string _shipFromAddress;
         [NotMapped]
-        public string strOrderType
+        public string strShipFromAddress
         {
             get
             {
-                if (string.IsNullOrEmpty(_orderType))
-                    if (this.intOrderType != null)
-                        switch (this.intOrderType)
-                        {
-                            case 1:
-                                return "Sales Contract";
-                            case 2:
-                                return "Sales Order";
-                            case 3:
-                                return "Transfer Order";
-                            default:
-                                return "";
-                        }
+                if (string.IsNullOrEmpty(_shipFromAddress))
+                    if (ShipFromLocation != null)
+                        return ShipFromLocation.strAddress;
                     else
                         return null;
                 else
-                    return _orderType;
+                    return _shipFromAddress;
             }
             set
             {
-                _orderType = value;
+                _shipFromAddress = value;
             }
         }
-        //private string _itemNo;
-        //[NotMapped]
-        //public string strItemNo
-        //{
-        //    get
-        //    {
-        //        if (string.IsNullOrEmpty(_itemNo))
-        //            if (tblARCustomer != null)
-        //                return tblARCustomer;
-        //            else
-        //                return null;
-        //        else
-        //            return _itemNo;
-        //    }
-        //    set
-        //    {
-        //        _itemNo = value;
-        //    }
-        //}
-
+        private string _shipToAddress;
+        [NotMapped]
+        public string strShipToAddress
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_shipToAddress))
+                    if (ShipToLocation != null)
+                        return ShipToLocation.strAddress;
+                    else
+                        return null;
+                else
+                    return _shipToAddress;
+            }
+            set
+            {
+                _shipToAddress = value;
+            }
+        }
+        
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
+        public tblSMCompanyLocation ShipFromLocation { get; set; }
+        public tblSMCompanyLocation ShipToLocation { get; set; }
         //public tblARCustomer tblARCustomer { get; set; } 
+    }
+
+    public class InventoryShipmentView
+    {
+        public int intInventoryShipmentId { get; set; }
+        public string strBOLNumber { get; set; }
+        public DateTime? dtmShipDate { get; set; }
+        public int? intOrderType { get; set; }
+        public string strOrderType { get; set; }
+        public string strReferenceNumber { get; set; }
+        public DateTime? dtmRequestedArrivalDate { get; set; }
+        public int? intShipFromLocationId { get; set; }
+        public int? intShipToLocationId { get; set; }
+        public int? intCustomerId { get; set; }
+        public string strCustomerId { get; set; }
+        public string strShipToAddress { get; set; }
+        public int? intFreightTermId { get; set; }
+        public string strFreightTermId { get; set; }
+        public bool ysnDirectShipment { get; set; }
+        public int? intCarrierId { get; set; }
+        public string strCarrierId { get; set; }
+        public string strVessel { get; set; }
+        public string strProNumber { get; set; }
+        public string strDriverId { get; set; }
+        public string strSealNumber { get; set; }
+        public DateTime? dtmAppointmentTime { get; set; }
+        public DateTime? dtmDepartureTime { get; set; }
+        public DateTime? dtmArrivalTime { get; set; }
+        public DateTime? dtmDeliveredDate { get; set; }
+        public DateTime? dtmFreeTime { get; set; }
+        public string strReceivedBy { get; set; }
+        public string strComment { get; set; }
+        public string strDeliveryInstruction { get; set; }
+
     }
 
     public class tblICInventoryShipmentItem : BaseEntity

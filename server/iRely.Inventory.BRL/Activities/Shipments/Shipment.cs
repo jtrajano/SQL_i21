@@ -21,12 +21,18 @@ namespace iRely.Inventory.BRL
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICInventoryShipment> GetSearchQuery()
+        public IQueryable<InventoryShipmentView> GetSearchQuery()
         {
-            return _db.GetQuery<tblICInventoryShipment>();
+            return _db.GetQuery<tblICInventoryShipment>().Select(p => new InventoryShipmentView { 
+                intInventoryShipmentId = p.intInventoryShipmentId,
+                strBOLNumber = p.strBOLNumber,
+                intOrderType = p.intOrderType,
+                strOrderType = (p.intOrderType == 1 ? "Sales Contract" : (p.intOrderType == 2 ? "Sales Order" : (p.intOrderType == 3 ? "Transfer Order" : ""))),
+                dtmShipDate = p.dtmShipDate
+            });
         }
-
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICInventoryShipment, bool>> predicate)
+        
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<InventoryShipmentView, bool>> predicate)
         {
             return GetSearchQuery()
                 .Where(predicate)
@@ -37,15 +43,17 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICInventoryShipment, bool>> predicate)
+        public int GetCount(Expression<Func<InventoryShipmentView, bool>> predicate)
         {
             return GetSearchQuery().Where(predicate).Count();
         }
 
-        public IQueryable<tblICInventoryShipment> GetShipments(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICInventoryShipment, bool>> predicate)
+        public IQueryable<tblICInventoryShipment> GetShipments(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<InventoryShipmentView, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICInventoryShipment>()
+                .Include(p => p.ShipFromLocation)
+                .Include(p => p.ShipToLocation)
                 .Include("tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot")
                 .Include("tblICInventoryShipmentItems.tblICItem")
                 .Include("tblICInventoryShipmentItems.tblICUnitMeasure")

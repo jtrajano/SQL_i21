@@ -17,18 +17,18 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             data: [
                 {
                     intOrderType: 1,
-                    strDescription: 'Sales Contract'
+                    strOrderType: 'Sales Contract'
                 },{
                     intOrderType: 2,
-                    strDescription: 'Sales Order'
+                    strOrderType: 'Sales Order'
                 },{
                     intOrderType: 3,
-                    strDescription: 'Transfer Order'
+                    strOrderType: 'Transfer Order'
                 }
             ],
             fields: {
                 name: 'intOrderType',
-                name: 'strDescription'
+                name: 'strOrderType'
             }
         },
         freightTerm: {
@@ -37,7 +37,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         customer: {
             type: 'customerbuffered'
         },
-        location: {
+        shipFromLocation: {
+            type: 'companylocationbuffered'
+        },
+        shipToLocation: {
             type: 'companylocationbuffered'
         },
         shipVia: {

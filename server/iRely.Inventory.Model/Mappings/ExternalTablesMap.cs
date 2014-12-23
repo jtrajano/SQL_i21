@@ -12,9 +12,18 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblSMCompanyLocation");
+            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.intProfitCenter).HasColumnName("intProfitCenter");
+            this.Property(t => t.strAddress).HasColumnName("strAddress");
+            this.Property(t => t.strCity).HasColumnName("strCity");
+            this.Property(t => t.strCountry).HasColumnName("strCountry");
+            this.Property(t => t.strFax).HasColumnName("strFax");
             this.Property(t => t.strLocationName).HasColumnName("strLocationName");
             this.Property(t => t.strLocationType).HasColumnName("strLocationType");
-            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.strPhone).HasColumnName("strPhone");
+            this.Property(t => t.strStateProvince).HasColumnName("strStateProvince");
+            this.Property(t => t.strZipPostalCode).HasColumnName("strZipPostalCode");
+            
         }
     }
 

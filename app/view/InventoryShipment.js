@@ -428,6 +428,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                                 dataType: 'string',
                                                                                                 text: 'Location Type',
                                                                                                 flex: 1
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strAddress',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Address',
+                                                                                                hidden: true
                                                                                             }
                                                                                         ],
                                                                                         itemId: 'cboShipFromAddress',
@@ -437,7 +443,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         valueField: 'intCompanyLocationId'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'textfield',
+                                                                                        xtype: 'textareafield',
                                                                                         flex: 1,
                                                                                         itemId: 'txtShipFromAddress',
                                                                                         margin: '-6 0 5 75',
@@ -455,13 +461,41 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 },
                                                                                 items: [
                                                                                     {
-                                                                                        xtype: 'combobox',
+                                                                                        xtype: 'gridcombobox',
+                                                                                        columns: [
+                                                                                            {
+                                                                                                dataIndex: 'intCompanyLocationId',
+                                                                                                dataType: 'numeric',
+                                                                                                text: 'Location Id',
+                                                                                                hidden: true
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strLocationName',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Location Name',
+                                                                                                flex: 1
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strLocationType',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Location Type',
+                                                                                                flex: 1
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strAddress',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Address',
+                                                                                                hidden: true
+                                                                                            }
+                                                                                        ],
                                                                                         itemId: 'cboShipToAddress',
                                                                                         fieldLabel: 'Ship To',
-                                                                                        labelWidth: 50
+                                                                                        labelWidth: 50,
+                                                                                        displayField: 'strLocationName',
+                                                                                        valueField: 'intCompanyLocationId'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'textfield',
+                                                                                        xtype: 'textareafield',
                                                                                         flex: 1,
                                                                                         itemId: 'txtShipToAddress',
                                                                                         margin: '-6 0 5 55',

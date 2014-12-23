@@ -36,16 +36,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             txtCustomerName: '{current.strVendorName}',
             cboShipFromAddress: {
                 value: '{current.intShipFromLocationId}',
-                store: '{location}'
+                store: '{shipFromLocation}'
             },
-//            txtShipFromAddress: '{current.strShipToAddress}',
-//            cboShipToAddress: {
-//                value: '{current.intCurrencyId}',
-//                store: '{}'
-//            },
+            txtShipFromAddress: '{current.strShipFromAddress}',
+            cboShipToAddress: {
+                value: '{current.intShipToLocationId}',
+                store: '{shipToLocation}'
+            },
             txtShipToAddress: '{current.strShipToAddress}',
-//            txtDeliveryInstructions: '{current.strVendorRefNo}',
-//            txtComments: '{current.strBillOfLading}',
+            txtDeliveryInstructions: '{current.strDeliveryInstruction}',
+            txtComments: '{current.strComment}',
             chkDirectShipment: '{current.ysnDirectShipment}',
             cboCarrier: {
                 value: '{current.intCarrierId}',
@@ -114,11 +114,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         "use strict";
         var me = this,
             win = options.window,
-            store = Ext.create('Inventory.store.Receipt', { pageSize: 1 });
+            store = Ext.create('Inventory.store.Shipment', { pageSize: 1 });
 
-        var grdInventoryReceipt = win.down('#grdInventoryReceipt'),
-            grdIncomingInspection = win.down('#grdIncomingInspection'),
-            grdLotTracking = win.down('#grdLotTracking');
+        var grdInventoryShipment = win.down('#grdInventoryShipment');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
@@ -126,56 +124,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             createRecord : me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
-                type: 'Inventory.Receipt',
+                type: 'Inventory.Shipment',
                 window: win
             }),
             details: [
                 {
-                    key: 'tblICInventoryReceiptItems',
+                    key: 'tblICInventoryShipmentItems',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: grdInventoryReceipt,
-                        deleteButton : grdInventoryReceipt.down('#btnDeleteInventoryReceipt')
-                    }),
-                    details: [
-                        {
-                            key: 'tblICInventoryReceiptItemLots',
-                            component: Ext.create('iRely.mvvm.grid.Manager', {
-                                grid: grdLotTracking,
-                                deleteButton : grdLotTracking.down('#btnDeleteInventoryReceipt')
-                            })
-                        }
-                    ]
-                },
-                {
-                    key: 'tblICInventoryReceiptInspections',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: grdIncomingInspection,
-                        position: 'none'
+                        grid: grdInventoryShipment,
+                        deleteButton : grdInventoryShipment.down('#btnRemoveItem')
                     })
-                }
+        }
             ]
         });
-
-        var colTaxDetails = grdInventoryReceipt.columns[11];
-        var btnViewTaxDetail = colTaxDetails.items[0];
-        if (btnViewTaxDetail){
-            btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
-                var current = grid.store.data.items[rowIndex];
-                me.onViewTaxDetailsClick(current.get('intInventoryReceiptItemId'));
-            }
-        }
-
-        var colReceived = grdInventoryReceipt.columns[6];
-        var txtReceived = colReceived.getEditor();
-        if (txtReceived){
-            txtReceived.on('change', me.onCalculateTotalAmount);
-        }
-        var colUnitCost = grdInventoryReceipt.columns[10];
-        var txtUnitCost = colUnitCost.getEditor();
-        if (txtUnitCost){
-            txtUnitCost.on('change', me.onCalculateTotalAmount);
-        }
-
 
         return win.context;
     },
@@ -196,7 +157,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             } else {
                 if (config.id) {
                     config.filters = [{
-                        column: 'intInventoryReceiptId',
+                        column: 'intInventoryShipmentId',
                         value: config.id
                     }];
                 }
@@ -209,193 +170,37 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     createRecord: function(config, action) {
         var today = new Date();
-        var record = Ext.create('Inventory.model.Receipt');
-        if (app.DefaultLocation > 0)
-            record.set('intLocationId', app.DefaultLocation);
-        record.set('dtmReceiptDate', today);
-        record.set('dtmReceiptDate', today);
+        var record = Ext.create('Inventory.model.Shipment');
+//        if (app.DefaultLocation > 0)
+//            record.set('intLocationId', app.DefaultLocation);
+        record.set('dtmShipDate', today);
         action(record);
     },
 
-    onVendorSelect: function(combo, records, eOpts) {
+    onShipLocationSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
-        if (current) current.set('strVendorName', records[0].get('strName'));
-    },
-
-    onFreightTermSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var win = combo.up('window');
-        var current = win.viewModel.data.current;
-
-        if (current) current.set('strFobPoint', records[0].get('strFobPoint'));
-    },
-
-    onReceiptItemSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var win = combo.up('window');
-        var grdLotTracking = win.down('#grdLotTracking');
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepItem');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colItemNo')
-        {
-            current.set('intItemId', records[0].get('intItemId'));
-            current.set('strItemDescription', records[0].get('strDescription'));
-            current.set('strLotTracking', records[0].get('strLotTracking'));
-
-            switch (records[0].get('strLotTracking')){
-                case 'Yes - Serial Number':
-                    grdLotTracking.plugins[0].enable();
-                    var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
-                        intInventoryReceiptItemId: current.get('intInventoryReceiptItemId') || current.get('strClientId'),
-                        strLotId: '',
-                        strContainerNo: '',
-                        dblQuantity: '',
-                        intUnits: '',
-                        intUnitUOMId: '',
-                        intUnitPallet: '',
-                        dblGrossWeight: '',
-                        dblTareWeight: '',
-                        intWeightUOMId: '',
-                        dblStatedGrossPerUnit: '',
-                        dblStatedTarePerUnit: ''
-                    });
-                    current.tblICInventoryReceiptItemLots().add(newLot);
-                    break;
-
-                case 'Yes - Manual':
-                    grdLotTracking.plugins[0].enable();
-                    break;
-
-                default :
-                    grdLotTracking.plugins[0].disable();
-                    break;
+        if (current){
+            if (combo.itemId === 'cboShipFromAddress'){
+                current.set('strShipFromAddress', records[0].get('strAddress'));
             }
-        }
-        else if (combo.column.itemId === 'colUOM')
-        {
-            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
-        }
-        else if (combo.column.itemId === 'colPackageType')
-        {
-            current.set('intPackTypeId', records[0].get('intPackTypeId'));
-        }
-    },
-
-    onViewTaxDetailsClick: function (ReceiptItemId) {
-        var win = window;
-        var me = win.controller;
-        var screenName = 'Inventory.view.InventoryReceiptTaxes';
-
-        Ext.require([
-            screenName,
-                screenName + 'ViewModel',
-                screenName + 'ViewController'
-        ], function() {
-            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
-            var controller = view.getController();
-            controller.show({ id: ReceiptItemId});
-        });
-    },
-
-    onCalculationBasisChange: function(obj, newValue, oldValue, eOpts) {
-        var win = obj.up('window');
-        var txtUnitsWeightMiles = win.down('#txtUnitsWeightMiles');
-        switch (newValue) {
-            case 'Per Ton':
-                txtUnitsWeightMiles.setFieldLabel('Weight');
-                break;
-            case 'Per Miles':
-                txtUnitsWeightMiles.setFieldLabel('Miles');
-                break;
-            default:
-                txtUnitsWeightMiles.setFieldLabel('Unit');
-                break;
-        }
-    },
-
-    onFreightCalculationChange: function(obj, newValue, oldValue, eOpts) {
-        var win = obj.up('window');
-        var txtUnitsWeightMiles = win.down('#txtUnitsWeightMiles');
-        var txtFreightRate = win.down('#txtFreightRate');
-        var txtFuelSurcharge = win.down('#txtFuelSurcharge');
-        var txtCalculatedFreight = win.down('#txtCalculatedFreight');
-
-        var unitRate = (txtUnitsWeightMiles.getValue() * txtFreightRate.getValue());
-        var unitRateSurcharge = (unitRate * txtFuelSurcharge.getValue());
-
-        txtCalculatedFreight.setValue(unitRate + unitRateSurcharge);
-    },
-
-    onCalculateTotalAmount: function(obj, newValue, oldValue, eOpts) {
-        var win = obj.up('window');
-        var txtCalculatedAmount = win.down('#txtCalculatedAmount');
-        var txtInvoiceAmount = win.down('#txtInvoiceAmount');
-        var txtDifference = win.down('#txtDifference');
-        var grid = win.down('#grdInventoryReceipt');
-        var store = grid.store;
-
-        if (store){
-            var data = store.data;
-            var calculatedTotal = 0
-            Ext.Array.each(data.items, function(row) {
-                var dblReceived = row.get('dblReceived');
-                var dblUnitCost = row.get('dblUnitCost');
-                if (obj.column.itemId === 'colReceived')
-                    dblReceived = newValue;
-                else if (obj.column.itemId === 'colUnitCost')
-                    dblUnitCost = newValue;
-                var rowTotal = dblReceived * dblUnitCost;
-                calculatedTotal += rowTotal;
-            })
-            txtCalculatedAmount.setValue(calculatedTotal);
-            var difference = calculatedTotal - (txtInvoiceAmount.getValue());
-            txtDifference.setValue(difference);
+            else if (combo.itemId === 'cboShipToAddress'){
+                current.set('strShipToAddress', records[0].get('strAddress'));
+            }
         }
     },
 
     init: function(application) {
         this.control({
-            "#cboVendor": {
-                select: this.onVendorSelect
+            "#cboShipFromAddress": {
+                select: this.onShipLocationSelect
             },
-            "#cboFreightTerms": {
-                select: this.onFreightTermSelect
-            },
-            "#cboItem": {
-                select: this.onReceiptItemSelect
-            },
-            "#cboItemUOM": {
-                select: this.onReceiptItemSelect
-            },
-            "#cboItemPackType": {
-                select: this.onReceiptItemSelect
-            },
-            "#cboCalculationBasis": {
-                change: this.onCalculationBasisChange
-            },
-            "#txtUnitsWeightMiles": {
-                change: this.onFreightCalculationChange
-            },
-            "#txtFreightRate": {
-                change: this.onFreightCalculationChange
-            },
-            "#txtFuelSurcharge": {
-                change: this.onFreightCalculationChange
-            },
-            "#txtInvoiceAmount": {
-                change: this.onCalculateTotalAmount
+            "#cboShipToAddress": {
+                select: this.onShipLocationSelect
             }
         })
     }
