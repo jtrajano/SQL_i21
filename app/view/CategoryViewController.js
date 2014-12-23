@@ -301,7 +301,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 screenName + 'ViewModel',
                 screenName + 'ViewController',
         ], function() {
-            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
             var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel : { type: screen.toLowerCase() } });
             view.on('destroy', me.onDestroyCategoryLocationScreen, me, { window: win });
 

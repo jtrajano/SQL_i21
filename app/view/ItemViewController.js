@@ -1419,7 +1419,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 screenName + 'ViewModel',
                 screenName + 'ViewController'
         ], function() {
-            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
             var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
             view.on('destroy', me.onDestroyItemLocationScreen, me, { window: win });
 
@@ -1659,7 +1659,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 screenName + 'ViewModel',
                 screenName + 'ViewController'
         ], function() {
-            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+            var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
             var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
             view.on('destroy', me.onDestroyItemPricingScreen, me, { window: win });
 
