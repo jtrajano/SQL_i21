@@ -61,6 +61,7 @@ FROM	(
 				WHEN MATCHED THEN 
 					UPDATE 
 					SET		ysnIsUnposted = 1
+							,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 
 				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedInventoryTransactionId, Inserted.strRelatedInventoryTransactionId, Inserted.intTransactionTypeId
 		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedInventoryTransactionId, strRelatedInventoryTransactionId, intTransactionTypeId)

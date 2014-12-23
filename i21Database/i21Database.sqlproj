@@ -62,9 +62,9 @@
     <CloseCursorOnCommitEnabled>False</CloseCursorOnCommitEnabled>
     <DefaultCursor>LOCAL</DefaultCursor>
     <AutoClose>False</AutoClose>
-    <AutoCreateStatistics>True</AutoCreateStatistics>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
     <AutoShrink>False</AutoShrink>
-    <AutoUpdateStatistics>True</AutoUpdateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
     <TornPageDetection>False</TornPageDetection>
     <DatabaseAccess>MULTI_USER</DatabaseAccess>
     <Recovery>FULL</Recovery>
@@ -965,6 +965,9 @@
     </Build>
     <Build Include="dbo\User Defined Types\InventoryTranactionStockToReverse.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
+      <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
