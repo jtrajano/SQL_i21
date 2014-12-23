@@ -197,11 +197,6 @@ Ext.define('Inventory.view.ItemViewController', {
             //-------//
             //POS Tab//
             //-------//
-            txtOrderUpcNo: '{current.strUPCNo}',
-            cboCaseUom: {
-                value: '{current.intCaseUOM}',
-                store: '{posUom}'
-            },
             txtNacsCategory: '{current.strNACSCategory}',
             cboWicCode: {
                 value: '{current.strWICCode}',
@@ -806,7 +801,6 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemStocks',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdStock,
-                        deleteButton : grdStock.down('#btnDeleteStock'),
                         position: 'none'
                     })
                 },

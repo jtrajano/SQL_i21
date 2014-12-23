@@ -1348,47 +1348,12 @@ Ext.define('Inventory.view.Item', {
                                                                         items: [
                                                                             {
                                                                                 xtype: 'textfield',
-                                                                                itemId: 'txtOrderUpcNo',
-                                                                                fieldLabel: 'Order UPC No',
-                                                                                labelWidth: 130
-                                                                            },
-                                                                            {
-                                                                                xtype: 'gridcombobox',
-                                                                                columns: [
-                                                                                    {
-                                                                                        dataIndex: 'intUnitMeasureId',
-                                                                                        dataType: 'numeric',
-                                                                                        text: 'Unit Measure Id',
-                                                                                        hidden: true
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strUnitMeasure',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Unit of Measure',
-                                                                                        flex: 1
-                                                                                    },
-                                                                                    {
-                                                                                        dataIndex: 'strUnitType',
-                                                                                        dataType: 'string',
-                                                                                        text: 'Unit Type',
-                                                                                        flex: 1
-                                                                                    }
-                                                                                ],
-                                                                                itemId: 'cboCaseUom',
-                                                                                fieldLabel: 'Case UOM',
-                                                                                labelWidth: 130,
-                                                                                displayField: 'strUnitMeasure',
-                                                                                valueField: 'intUnitMeasureId'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'textfield',
                                                                                 itemId: 'txtNacsCategory',
                                                                                 fieldLabel: 'NACS Category',
                                                                                 labelWidth: 130
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
-                                                                                flex: 1,
                                                                                 itemId: 'cboWicCode',
                                                                                 fieldLabel: 'WIC Code',
                                                                                 labelWidth: 130,
@@ -1403,7 +1368,6 @@ Ext.define('Inventory.view.Item', {
                                                                             },
                                                                             {
                                                                                 xtype: 'combobox',
-                                                                                flex: 1,
                                                                                 itemId: 'cboCountCode',
                                                                                 fieldLabel: 'Count Code',
                                                                                 labelWidth: 130,
@@ -3686,13 +3650,6 @@ Ext.define('Inventory.view.Item', {
                                                             padding: '0 0 0 1'
                                                         },
                                                         items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteStock',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Delete'
-                                                            },
                                                             {
                                                                 xtype: 'tbseparator'
                                                             },
