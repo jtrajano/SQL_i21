@@ -39,6 +39,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
 		,@AP_PAYMENT AS INT = 16
+		,@AR_PAYMENT AS INT = 18
 		
 -- Constant variables for Check number status. 
 DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
@@ -148,7 +149,7 @@ SET		ysnCheckVoid = 1
 		,intLastModifiedUserId = @intUserId
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
 		-- Condition #1:
 		AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
 		-- Condition #2:		
@@ -171,7 +172,7 @@ IF @isSuccessful = 0 GOTO Exit_BankTransactionReversal_WithErrors
 DELETE tblCMBankTransaction
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT)		
+WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT)		
 		AND (
 			-- Condition #1:
 			F.strReferenceNo IN (@CASH_PAYMENT)
