@@ -781,7 +781,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter117",
+                                                    "name": "filter128",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -995,7 +995,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter118",
+                                                    "name": "filter129",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1011,8 +1011,8 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "itemId": "colAccountDescription",
-                                                "text": "Account Description"
+                                                "itemId": "colAccountCategory",
+                                                "text": "Account Category"
                                             },
                                             "name": "MyColumn102",
                                             "designerId": "44ef482f-bf67-4181-87e9-43dfd05e01aa",
@@ -1042,13 +1042,12 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "dataIndex": "string",
                                                 "flex": 1,
                                                 "itemId": "colAccountId",
-                                                "text": "Account ID"
+                                                "text": "Account Id"
                                             },
-                                            "name": "MyColumn103",
-                                            "designerId": "97a1bc1c-4b25-4d49-a445-dfe55fbd4f15",
+                                            "name": "MyColumn",
+                                            "designerId": "afe02836-f111-47b2-830f-f164bf87ec9d",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1107,7 +1106,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "23ba5832-1d40-4249-a5e1-45ab6f79fb3a",
+                                                    "designerId": "e900d183-a7de-446d-a45e-206b18713f4c",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -1117,6 +1116,21 @@
                                                     ]
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "flex": 1,
+                                                "itemId": "colAccountDescription",
+                                                "text": "Description"
+                                            },
+                                            "name": "MyColumn24",
+                                            "designerId": "879a5e0a-8c0a-4065-a570-64cf007122ce"
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -1258,7 +1272,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter119",
+                                                    "name": "filter130",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1901,7 +1915,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter120",
+                                                    "name": "filter131",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2627,7 +2641,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging12",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

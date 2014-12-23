@@ -73,7 +73,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             },
 
             grdGlAccounts: {
-                colAccountDescription: {
+                colAccountCategory: {
                     dataIndex: 'strAccountDescription',
                     editor: {
                         store: '{accountDescriptions}'
@@ -84,7 +84,8 @@ Ext.define('Inventory.view.CategoryViewController', {
                     editor: {
                         store: '{glAccount}'
                     }
-                }
+                },
+                colAccountDescription: 'strDescription'
             },
 
             grdVendorCategoryXref: {
@@ -232,6 +233,7 @@ Ext.define('Inventory.view.CategoryViewController', {
         if (combo.column.itemId === 'colAccountId')
         {
             current.set('intAccountId', records[0].get('intAccountId'));
+            current.set('strDescription', records[0].get('strDescription'));
         }
     },
 

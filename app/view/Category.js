@@ -488,9 +488,9 @@ Ext.define('Inventory.view.Category', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colAccountDescription',
                                                         dataIndex: 'string',
-                                                        text: 'Account Description',
+                                                        itemId: 'colAccountCategory',
+                                                        text: 'Account Category',
                                                         flex: 1,
                                                         editor: {
                                                             xtype: 'combobox',
@@ -502,8 +502,7 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colAccountId',
-                                                        dataIndex: 'string',
-                                                        text: 'Account ID',
+                                                        text: 'Account Id',
                                                         flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -549,6 +548,12 @@ Ext.define('Inventory.view.Category', {
                                                             displayField: 'strAccountId',
                                                             valueField: 'strAccountId'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colAccountDescription',
+                                                        text: 'Description',
+                                                        flex: 1
                                                     }
                                                 ],
                                                 viewConfig: {

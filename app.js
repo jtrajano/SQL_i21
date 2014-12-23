@@ -20,18 +20,6 @@ Ext.Loader.setConfig({
 
 
 Ext.application({
-    views: [
-        'CertificationProgram',
-        'ContractDocument',
-        'LotStatus',
-        'Catalog',
-        'LineOfBusiness',
-        'EditCatalog',
-        'InventoryShipment',
-        'BinToBinTransfer',
-        'InventoryTransfer',
-        'InventoryAdjustment'
-    ],
     name: 'Inventory',
 
     launch: function() {
