@@ -76,18 +76,17 @@ FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN @InventoryTransactionToReverse
 WHERE	InventoryToReverse.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
 ;
 
--- If there are fifo out records, update the costing bucket where the qty came from. 
+-- If there are fifo out records, update the costing bucket. Return the out-qty back to the bucket where it came from. 
 UPDATE	fifoBucket
 SET		fifoBucket.dblStockOut = ISNULL(fifoBucket.dblStockOut, 0) - fifoOutGrouped.dblQty
 FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
 			SELECT	fifoOut.intInventoryFIFOId, dblQty = SUM(fifoOut.dblQty)
 			FROM	dbo.tblICInventoryFIFOOut fifoOut INNER JOIN @InventoryTransactionToReverse InventoryToReverse
 						ON fifoOut.intInventoryTransactionId = InventoryToReverse.intInventoryTransactionId	
-			WHERE	InventoryToReverse.intTransactionTypeId = @REVALUE_SOLD								
 			GROUP BY fifoOut.intInventoryFIFOId
 		) AS fifoOutGrouped
 			ON fifoOutGrouped.intInventoryFIFOId = fifoBucket.intInventoryFIFOId
 ;
 
--- Return the transaction to reverse to the calling code. 
+-- Return the transactions to reverse back to the calling code. 
 SELECT * FROM @InventoryTransactionToReverse

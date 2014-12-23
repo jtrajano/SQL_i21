@@ -575,6 +575,9 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for add-sell-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -34,9 +34,12 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICItemAccount', @Identity = 1;
-
 	EXEC tSQLt.FakeTable 'dbo.tblICCategory';
 	EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;
+
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
 	INSERT INTO tblSMCompanyLocation (intCompanyLocationId, strLocationName) VALUES (1, '')
 	INSERT INTO tblSMCompanyLocation (intCompanyLocationId, strLocationName) VALUES (2, 'NEW HAVEN')
