@@ -298,7 +298,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
-                                                                flex: 1,
                                                                 columns: [
                                                                     {
                                                                         dataIndex: 'intFreightTermId',
@@ -325,6 +324,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                flex: 1,
                                                                 itemId: 'cboFreightTerms',
                                                                 margin: '0 5',
                                                                 fieldLabel: 'Freight Terms',
@@ -591,189 +591,306 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 ]
                                             },
                                             {
-                                                xtype: 'advancefiltergrid',
-                                                flex: 1.2,
-                                                reference: 'grdInventoryShipment',
-                                                itemId: 'grdInventoryShipment',
-                                                margin: '7 0 0 0',
-                                                dockedItems: [
+                                                xtype: 'container',
+                                                flex: 1,
+                                                layout: {
+                                                    type: 'hbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
                                                     {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbToolbarGrid',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
+                                                        xtype: 'advancefiltergrid',
+                                                        flex: 1.6,
+                                                        reference: 'grdInventoryShipment',
+                                                        itemId: 'grdInventoryShipment',
+                                                        margin: '7 0 0 0',
+                                                        dockedItems: [
                                                             {
-                                                                xtype: 'label',
-                                                                margin: '0 7 0 5',
-                                                                text: 'Items'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnAddItem',
-                                                                iconCls: 'small-add',
-                                                                text: 'Add'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnEditItem',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnRemoveItem',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
+                                                                xtype: 'toolbar',
+                                                                dock: 'top',
+                                                                itemId: 'tlbToolbarGrid',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    padding: '0 0 0 1'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'label',
+                                                                        margin: '0 7 0 5',
+                                                                        text: 'Items'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'tbseparator'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnAddItem',
+                                                                        iconCls: 'small-add',
+                                                                        text: 'Add'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnEditItem',
+                                                                        iconCls: 'small-edit',
+                                                                        text: 'Edit'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnRemoveItem',
+                                                                        iconCls: 'small-delete',
+                                                                        text: 'Remove'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'tbseparator'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'filter1'
+                                                                    }
+                                                                ]
                                                             }
-                                                        ]
+                                                        ],
+                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                            selType: 'checkboxmodel'
+                                                        }),
+                                                        columns: [
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colReferenceNumber',
+                                                                width: 90,
+                                                                dataIndex: 'strReferenceNumber',
+                                                                text: 'Reference No.'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colItemNumber',
+                                                                width: 100,
+                                                                dataIndex: 'strItemNumber',
+                                                                text: 'Item No.'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colDescription',
+                                                                width: 150,
+                                                                dataIndex: 'strDescription',
+                                                                text: 'Description'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colSubLocation',
+                                                                width: 100,
+                                                                dataIndex: 'strSubLocation',
+                                                                text: 'Sub Location'
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                dataType: 'numeric',
+                                                                itemId: 'colQuantity',
+                                                                width: 65,
+                                                                align: 'right',
+                                                                dataIndex: 'dblQuantity',
+                                                                text: 'Quantity',
+                                                                format: '0,000.##'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colUOM',
+                                                                width: 53,
+                                                                dataIndex: 'strUOM',
+                                                                text: 'UOM'
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                dataType: 'numeric',
+                                                                itemId: 'colDifference',
+                                                                width: 81,
+                                                                align: 'right',
+                                                                dataIndex: 'dblDifference',
+                                                                text: 'Difference',
+                                                                format: '0,000.##'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colWeightUOM',
+                                                                width: 75,
+                                                                dataIndex: 'strWeightUOM',
+                                                                text: 'Weight UOM'
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                dataType: 'numeric',
+                                                                itemId: 'colGrossWeight',
+                                                                width: 93,
+                                                                align: 'right',
+                                                                dataIndex: 'dblGrossWeight',
+                                                                text: 'Gross Weight',
+                                                                format: '0,000'
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                dataType: 'numeric',
+                                                                itemId: 'colTareWeight',
+                                                                width: 81,
+                                                                align: 'right',
+                                                                dataIndex: 'dblTareWeight',
+                                                                text: 'Tare Weight',
+                                                                format: '0,000'
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                dataType: 'numeric',
+                                                                itemId: 'colNetWeight',
+                                                                width: 81,
+                                                                align: 'right',
+                                                                dataIndex: 'dblNetWeight',
+                                                                text: 'Net Weight',
+                                                                format: '0,000'
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                dataType: 'numeric',
+                                                                itemId: 'colUnitPrice',
+                                                                width: 81,
+                                                                align: 'right',
+                                                                dataIndex: 'dblUnitPrice',
+                                                                text: 'Unit Price',
+                                                                format: '0,000.##'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colDockDoor',
+                                                                width: 75,
+                                                                dataIndex: 'strDockDoor',
+                                                                text: 'Dock Door'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colNotes',
+                                                                width: 250,
+                                                                dataIndex: 'strNotes',
+                                                                text: 'Notes'
+                                                            }
+                                                        ],
+                                                        plugins: [
+                                                            Ext.create('Ext.grid.plugin.CellEditing', {
+                                                                pluginId: 'cepItem',
+                                                                clicksToEdit: 1
+                                                            })
+                                                        ],
+                                                        viewConfig: {
+                                                            itemId: 'grvInventoryShipment'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'advancefiltergrid',
+                                                        flex: 1,
+                                                        reference: 'grdLotTracking',
+                                                        itemId: 'grdLotTracking1',
+                                                        margin: '7 0 0 5',
+                                                        dockedItems: [
+                                                            {
+                                                                xtype: 'toolbar',
+                                                                dock: 'top',
+                                                                itemId: 'tlbToolbarGrid',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    padding: '0 0 0 1'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'label',
+                                                                        margin: '0 7 0 5',
+                                                                        text: 'Lot Tracking'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'tbseparator'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnAddLot',
+                                                                        margin: '0 0 0 5',
+                                                                        iconCls: 'small-add',
+                                                                        text: 'Add'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnRemoveLot',
+                                                                        iconCls: 'small-delete',
+                                                                        text: 'Remove'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnSplitLot',
+                                                                        iconCls: 'small-split',
+                                                                        text: 'Split'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'tbseparator'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'filter1'
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ],
+                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                            selType: 'checkboxmodel'
+                                                        }),
+                                                        columns: [
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colSubLocation',
+                                                                width: 80,
+                                                                dataIndex: 'strSubLocation',
+                                                                text: 'Sub Location'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colLotID',
+                                                                width: 95,
+                                                                dataIndex: 'strLotID',
+                                                                text: 'Lot ID'
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                dataType: 'numeric',
+                                                                itemId: 'colQuantity',
+                                                                width: 65,
+                                                                align: 'right',
+                                                                dataIndex: 'dblQuantity',
+                                                                text: 'Quantity',
+                                                                format: '0,000.##'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colUOM',
+                                                                width: 60,
+                                                                dataIndex: 'strUOM',
+                                                                text: 'UOM'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colWarehouseCargoNumber',
+                                                                width: 65,
+                                                                dataIndex: 'strWarehouseCargoNumber',
+                                                                text: 'Cargo No.'
+                                                            }
+                                                        ],
+                                                        plugins: [
+                                                            Ext.create('Ext.grid.plugin.CellEditing', {
+                                                                clicksToEdit: 1
+                                                            })
+                                                        ],
+                                                        viewConfig: {
+                                                            itemId: 'grvLotTracking'
+                                                        }
                                                     }
-                                                ],
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                }),
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colReferenceNumber',
-                                                        width: 90,
-                                                        dataIndex: 'strReferenceNumber',
-                                                        text: 'Reference No.'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colItemNumber',
-                                                        width: 100,
-                                                        dataIndex: 'strItemNumber',
-                                                        text: 'Item No.'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colDescription',
-                                                        width: 150,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'Description'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colSubLocation',
-                                                        width: 100,
-                                                        dataIndex: 'strSubLocation',
-                                                        text: 'Sub Location'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colQuantity',
-                                                        width: 65,
-                                                        align: 'right',
-                                                        dataIndex: 'dblQuantity',
-                                                        text: 'Quantity',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colUOM',
-                                                        width: 75,
-                                                        dataIndex: 'strUOM',
-                                                        text: 'UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colDifference',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblDifference',
-                                                        text: 'Difference',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colWeightUOM',
-                                                        width: 75,
-                                                        dataIndex: 'strWeightUOM',
-                                                        text: 'Weight UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colGrossWeight',
-                                                        width: 93,
-                                                        align: 'right',
-                                                        dataIndex: 'dblGrossWeight',
-                                                        text: 'Gross Weight',
-                                                        format: '0,000'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colTareWeight',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblTareWeight',
-                                                        text: 'Tare Weight',
-                                                        format: '0,000'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colNetWeight',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblNetWeight',
-                                                        text: 'Net Weight',
-                                                        format: '0,000'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colUnitPrice',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'dblUnitPrice',
-                                                        text: 'Unit Price',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colDockDoor',
-                                                        width: 75,
-                                                        dataIndex: 'strDockDoor',
-                                                        text: 'Dock Door'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNotes',
-                                                        width: 250,
-                                                        dataIndex: 'strNotes',
-                                                        text: 'Notes'
-                                                    }
-                                                ],
-                                                plugins: [
-                                                    Ext.create('Ext.grid.plugin.CellEditing', {
-                                                        pluginId: 'cepItem',
-                                                        clicksToEdit: 1
-                                                    })
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvInventoryShipment'
-                                                }
+                                                ]
                                             }
                                         ]
                                     },
