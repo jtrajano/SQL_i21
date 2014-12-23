@@ -768,7 +768,7 @@ BEGIN
 			
 			--Unposting Process
 			UPDATE tblARPaymentDetail
-			SET tblARPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + C.dblAmountDue + B.dblPayment ELSE (C.dblAmountDue + B.dblPayment) END)
+			SET tblARPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + (C.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)) + B.dblPayment ELSE ((C.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)) + B.dblPayment) END)
 			FROM tblARPayment A
 				LEFT JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -778,7 +778,7 @@ BEGIN
 
 			--Update dblAmountDue, dtmDatePaid and ysnPaid on tblARInvoice
 			UPDATE tblARInvoice
-				SET tblARInvoice.dblAmountDue = B.dblAmountDue,
+				SET tblARInvoice.dblAmountDue = B.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END),
 					tblARInvoice.ysnPaid = 0,
 					tblARInvoice.dtmPostDate = NULL,	
 					tblARInvoice.dblDiscount = 0,
@@ -871,7 +871,7 @@ BEGIN
 			WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 
 			UPDATE tblARPaymentDetail
-				   SET tblARPaymentDetail.dblAmountDue = (B.dblInvoiceTotal) - (B.dblPayment + B.dblDiscount + (SELECT SUM(ISNULL(dblPayment,0)) FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId))
+				   SET tblARPaymentDetail.dblAmountDue = (B.dblInvoiceTotal) - (B.dblPayment + B.dblDiscount + (SELECT SUM(ISNULL(dblPayment,0) * (CASE WHEN tblARInvoice.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)) FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId))
 			FROM tblARPayment A
 				LEFT JOIN tblARPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
@@ -880,7 +880,7 @@ BEGIN
 
 			--Update dblAmountDue, dtmDatePaid and ysnPaid on tblARInvoice
 			UPDATE tblARInvoice
-				SET tblARInvoice.dblAmountDue = B.dblAmountDue,
+				SET tblARInvoice.dblAmountDue = B.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END),
 					tblARInvoice.ysnPaid = (CASE WHEN (B.dblAmountDue) = 0 THEN 1 ELSE 0 END),
 					tblARInvoice.dtmPostDate = (CASE WHEN (B.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE NULL END)
 			FROM tblARPayment A
@@ -899,7 +899,7 @@ BEGIN
 														intInvoiceId = B.intInvoiceId
 														AND intPaymentId = A.intPaymentId																											
 												)
-					,dblPayment = A.dblAmountPaid + ISNULL(C.dblPayment,0) 
+					,dblPayment = (A.dblAmountPaid * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END) ) + ISNULL(C.dblPayment,0) 
 			FROM tblARPayment A
 						INNER JOIN tblARPaymentDetail B 
 								ON A.intPaymentId = B.intPaymentId
@@ -909,7 +909,7 @@ BEGIN
 
 			--Update Bill Amount Due associated on the other payment record
 			UPDATE tblARPaymentDetail
-			SET dblAmountDue = C.dblAmountDue
+			SET dblAmountDue = C.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)
 			FROM tblARPaymentDetail A
 				INNER JOIN tblARPayment B
 					ON A.intPaymentId = B.intPaymentId
