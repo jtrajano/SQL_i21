@@ -580,6 +580,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for add-sell-unpost sell.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-unpost sell 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add 1-add 2-unpost add 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for sell-add-unpost add.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
