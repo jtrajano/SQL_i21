@@ -139,6 +139,7 @@
     <Folder Include="Scripts\Post-Deployment\Optional Run\Reports" />
     <Folder Include="Scripts\Post-Deployment\AP\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\CT" />
+    <Folder Include="Scripts\Post-Deployment\NR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -968,6 +969,12 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
       <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Functions\fnCalculateInterestToDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCalculateInterest.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateGLJournalEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateNoteTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRGenerateAmortization.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRGetDetailsForPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -992,6 +999,7 @@
     <None Include="Scripts\Post-Deployment\AP\FixstrBillId.sql" />
     <None Include="Scripts\Post-Deployment\IC\3_DefaultData.sql" />
     <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
+    <None Include="Scripts\Post-Deployment\NR\1_NRStartingNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
