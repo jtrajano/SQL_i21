@@ -57,15 +57,6 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
--- Plug the Out-qty so that it can't be used for future out-transactions. 
-UPDATE	fifoBucket
-SET		dblStockOut = dblStockIn
-FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN @InventoryTransactionToReverse Reversal
-			ON fifoBucket.intTransactionId = Reversal.intTransactionId
-			AND fifoBucket.strTransactionId = Reversal.strTransactionId
-WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
-;
-
 -- If there are revalue records, reduce the In-qty of the negative stock buckets
 -- Since the In-qty is unposted, it must bring back these buckets back to negative qty. 
 UPDATE	fifoBucket
@@ -78,7 +69,7 @@ FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
 			GROUP BY fifoOut.intRevalueFifoId
 		) AS fifoOutGrouped
 			ON fifoOutGrouped.intRevalueFifoId = fifoBucket.intInventoryFIFOId
-
+;
 -- If there are out records, create a negative stock cost bucket 
 INSERT INTO dbo.tblICInventoryFIFO (
 		intItemId
@@ -93,22 +84,33 @@ INSERT INTO dbo.tblICInventoryFIFO (
 		,intCreatedUserId
 		,intConcurrencyId
 )
-SELECT	intItemId = InventoryTransaction.intItemId
-		,intLocationId = InventoryTransaction.intLocationId
-		,dtmDate = InventoryTransaction.dtmDate
+SELECT	intItemId = OutTransactions.intItemId
+		,intLocationId = OutTransactions.intLocationId
+		,dtmDate = OutTransactions.dtmDate
 		,dblStockIn = 0 
-		,dblStockOut = InventoryTransaction.dblUnitQty
-		,dblCost = InventoryTransaction.dblCost
-		,strTransactionId = InventoryTransaction.strTransactionId
-		,intTransactionId = InventoryTransaction.intTransactionId
+		,dblStockOut = ABS(OutTransactions.dblUnitQty)
+		,dblCost = OutTransactions.dblCost
+		,strTransactionId = OutTransactions.strTransactionId
+		,intTransactionId = OutTransactions.intTransactionId
 		,dtmCreated = GETDATE()
-		,intCreatedUserId = InventoryTransaction.intCreatedUserId
+		,intCreatedUserId = OutTransactions.intCreatedUserId
 		,intConcurrencyId = 1
-FROM	dbo.tblICInventoryFIFOOut fifoOut INNER JOIN @InventoryTransactionToReverse Reversal
-			ON fifoOut.intInventoryTransactionId = Reversal.intInventoryTransactionId
-		INNER JOIN dbo.tblICInventoryTransaction InventoryTransaction
-			ON InventoryTransaction.intInventoryTransactionId = fifoOut.intInventoryTransactionId
-WHERE	fifoOut.intRevalueFifoId IS NULL 	
-
+FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICInventoryFIFOOut fifoOut
+			ON fifo.intInventoryFIFOId = fifoOut.intInventoryFIFOId
+		INNER JOIN @InventoryTransactionToReverse Reversal
+			ON Reversal.intTransactionId = fifo.intTransactionId
+			AND Reversal.strTransactionId = fifo.strTransactionId
+		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
+			ON OutTransactions.intInventoryTransactionId = fifoOut.intInventoryTransactionId
+			AND OutTransactions.dblUnitQty < 0 
+;
+-- Plug the Out-qty so that it can't be used for future out-transactions. 
+UPDATE	fifoBucket
+SET		dblStockOut = dblStockIn
+FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN @InventoryTransactionToReverse Reversal
+			ON fifoBucket.intTransactionId = Reversal.intTransactionId
+			AND fifoBucket.strTransactionId = Reversal.strTransactionId
+WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+;
 -- Return the transactions to reverse back to the calling code. 
 SELECT * FROM @InventoryTransactionToReverse
