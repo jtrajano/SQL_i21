@@ -14,6 +14,12 @@ DECLARE @WRITE_OFF_SOLD AS INT = -1;
 DECLARE @REVALUE_SOLD AS INT = -2;
 DECLARE @AUTO_NEGATIVE AS INT = -3;
 
+-- Create the CONSTANT variables for the costing methods
+DECLARE @AVERAGECOST AS INT = 1
+		,@FIFO AS INT = 2
+		,@LIFO AS INT = 3
+		,@STANDARDCOST AS INT = 4 	
+
 DECLARE @InventoryTransactionToReverse AS dbo.InventoryTranactionStockToReverse
 
 -- Get all the inventory transaction related to the Unpost. 
@@ -46,6 +52,7 @@ FROM	(
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
 					AND inventory_transaction.strTransactionId = Source_Query.strTransactionId
 					AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intLocationId) IN (@AVERAGECOST, @FIFO) 
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
 					UPDATE 
