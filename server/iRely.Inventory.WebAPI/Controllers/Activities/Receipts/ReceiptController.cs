@@ -90,6 +90,27 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
+
+        [HttpPost]
+        public HttpResponseMessage Receive(Inventory.BRL.Common.Posting_RequestModel receipt)
+        {
+            var result = _ReceiptBRL.PostTransaction(receipt, false);
+            _ReceiptBRL.Dispose();
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                data = receipt,
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
+
         [HttpPut]
         public HttpResponseMessage PutReceipts(IEnumerable<tblICInventoryReceipt> receipts, bool continueOnConflict = false)
         {

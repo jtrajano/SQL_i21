@@ -65,6 +65,8 @@ namespace iRely.Inventory.BRL
         public void AddReceipt(tblICInventoryReceipt receipt)
         {
             receipt.strReceiptNumber = Common.GetStartingNumber(Common.StartingNumber.InventoryReceipt);
+            receipt.intCreatedUserId = iRely.Common.Security.GetUserId();
+            receipt.intEntityId = iRely.Common.Security.GetEntityId();
             _db.AddNew<tblICInventoryReceipt>(receipt);
         }
 

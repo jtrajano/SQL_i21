@@ -54,6 +54,9 @@ namespace iRely.Inventory.Model
         public string strSealStatus { get; set; }
         public DateTime? dteReceiveTime { get; set; }
         public decimal? dblActualTempReading { get; set; }
+        public bool ysnPosted { get; set; }
+        public int intCreatedUserId { get; set; }
+        public int intEntityId { get; set; }
 
         private string _vendorName;
         [NotMapped]

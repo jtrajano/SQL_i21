@@ -20,6 +20,15 @@ namespace iRely.Inventory.BRL
             LotNumber = 24
         }
 
+        public class Posting_RequestModel
+        {
+            public string strTransactionId { get; set; }
+            public bool isPost { get; set; }
+            public bool isRecap { get; set; }
+            public int intUserId { get; set; }
+            public int intEntityId { get; set; }
+        }
+
         public static string GetStartingNumber(StartingNumber transaction) 
         {
             var _db = new Repository(new Inventory.Model.InventoryEntities());

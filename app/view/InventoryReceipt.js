@@ -151,7 +151,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         tabIndex: -1,
                                         height: 57,
                                         itemId: 'btnReceive',
-                                        width: 52,
                                         iconAlign: 'top',
                                         iconCls: 'large-generate-invoice',
                                         scale: 'large',
@@ -985,38 +984,38 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblQtyOrdered',
                                                         itemId: 'colQtyOrdered',
                                                         width: 100,
                                                         align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
                                                         text: 'Ordered',
                                                         format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblQtyOrdered',
                                                         itemId: 'colReceived',
                                                         width: 100,
                                                         align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
                                                         text: 'Received',
                                                         format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblToReceive',
                                                         itemId: 'colToReceive',
                                                         width: 100,
                                                         align: 'right',
+                                                        dataIndex: 'dblToReceive',
                                                         text: 'To Receive',
                                                         format: '0,000'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strDescription',
                                                         itemId: 'colUOM',
                                                         width: 100,
+                                                        dataIndex: 'strDescription',
                                                         text: 'UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -1054,10 +1053,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblLotTotal',
                                                         itemId: 'colLotTotal',
                                                         width: 100,
                                                         align: 'right',
+                                                        dataIndex: 'dblLotTotal',
                                                         text: 'Lot Total',
                                                         format: '0,000.##'
                                                     }

@@ -127,6 +127,31 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         qaProperty: {
             type: 'icbufferedqaproperty'
         }
+    },
+
+    formulas: {
+        getInvoicePaidEnabled: function(get){
+            if (get('ysnPosted') !== false){
+                return true;
+            }
+            else {
+                if ((get('ysnInvoicePaid') !== false)){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+
+            }
+        },
+        getReceiveButtonText: function(get){
+            if (get('ysnPosted') !== false){
+                return 'Receive';
+            }
+            else {
+                return 'UnReceive';
+            }
+        }
     }
 
 });

@@ -14,7 +14,7 @@ namespace iRely.Inventory.BRL
 {
     public partial class Receipt : IDisposable
     {
-        public SaveResult PostTransaction(tblICInventoryReceipt receipt, bool isRecap)
+        public SaveResult PostTransaction(Inventory.BRL.Common.Posting_RequestModel receipt, bool isRecap)
         {
             // TODO for Lawrence
             // Save the record first 
@@ -30,7 +30,7 @@ namespace iRely.Inventory.BRL
             try
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
-                db.PostInventoryReceipt(isRecap, receipt.strReceiptNumber, iRely.Common.Security.GetUserId(), iRely.Common.Security.GetEntityId());
+                db.PostInventoryReceipt(isRecap, receipt.strTransactionId, iRely.Common.Security.GetUserId(), 1);
 
                 postResult.HasError = false;
             }

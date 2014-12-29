@@ -13,55 +13,98 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'intInventoryReceiptId',text: "Receipt Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1,  dataType: 'string'},
                 {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1,  dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strReceiptType',text: 'Receipt Type', flex: 1,  dataType: 'string'}
+                {dataIndex: 'strReceiptType',text: 'Receipt Type', flex: 1,  dataType: 'string'},
+                {dataIndex: 'ysnPosted',text: 'Posted', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
         binding: {
             cboReceiptType: {
                 value: '{current.strReceiptType}',
-                store: '{receiptTypes}'
+                store: '{receiptTypes}',
+                readOnly: '{current.ysnPosted}'
             },
-            cboReferenceNumber: '{current.intSourceId}',
+            cboReferenceNumber: {
+                value: '{current.intSourceId}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboVendor: {
                 value: '{current.intVendorId}',
-                store: '{vendor}'
+                store: '{vendor}',
+                readOnly: '{current.ysnPosted}'
             },
-            txtVendorName: '{current.strVendorName}',
+            txtVendorName: {
+                value: '{current.strVendorName}'
+            },
             cboLocation: {
                 value: '{current.intLocationId}',
-                store: '{location}'
+                store: '{location}',
+                readOnly: '{current.ysnPosted}'
             },
-            dtmReceiptDate: '{current.dtmReceiptDate}',
+            dtmReceiptDate: {
+                value: '{current.dtmReceiptDate}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboCurrency: {
                 value: '{current.intCurrencyId}',
-                store: '{currency}'
+                store: '{currency}',
+                readOnly: '{current.ysnPosted}'
             },
-            txtReceiptNumber: '{current.strReceiptNumber}',
-            txtBlanketReleaseNumber: '{current.intBlanketRelease}',
-            txtVendorRefNumber: '{current.strVendorRefNo}',
-            txtBillOfLadingNumber: '{current.strBillOfLading}',
+            txtReceiptNumber: {
+                value: '{current.strReceiptNumber}'
+            },
+            txtBlanketReleaseNumber: {
+                value: '{current.intBlanketRelease}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtVendorRefNumber: {
+                value: '{current.strVendorRefNo}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtBillOfLadingNumber: {
+                value: '{current.strBillOfLading}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboProductOrigin: {
                 value: '{current.intProductOrigin}',
-                store: '{country}'
+                store: '{country}',
+                readOnly: '{current.ysnPosted}'
             },
-            txtReceiver: '{current.intReceiverId}',
-            txtVessel: '{current.strVessel}',
+            txtReceiver: {
+                value: '{current.intReceiverId}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtVessel: {
+                value: '{current.strVessel}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboFreightTerms: {
                 value: '{current.intFreightTermId}',
-                store: '{freightTerm}'
+                store: '{freightTerm}',
+                readOnly: '{current.ysnPosted}'
             },
             txtFobPoint: '{current.strFobPoint}',
-            txtDeliveryPoint: '{current.strDeliveryPoint}',
+            txtDeliveryPoint: {
+                value: '{current.strDeliveryPoint}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboAllocateFreight: {
                 value: '{current.strAllocateFreight}',
-                store: '{allocateFreights}'
+                store: '{allocateFreights}',
+                readOnly: '{current.ysnPosted}'
             },
             cboFreightBilledBy: {
                 value: '{current.strFreightBilledBy}',
-                store: '{freightBilledBys}'
+                store: '{freightBilledBys}',
+                readOnly: '{current.ysnPosted}'
             },
-            txtShiftNumber: '{current.intShiftNumber}',
-            txtNotes: '{current.strNotes}',
+            txtShiftNumber: {
+                value: '{current.intShiftNumber}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtNotes: {
+                value: '{current.strNotes}',
+                readOnly: '{current.ysnPosted}'
+            },
 
 
             grdInventoryReceipt: {
@@ -122,44 +165,78 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // ---- Freight and Invoice Tab
             cboCalculationBasis: {
                 value: '{current.strCalculationBasis}',
-                store: '{calculationBasis}'
+                store: '{calculationBasis}',
+                readOnly: '{current.ysnPosted}'
             },
             txtUnitsWeightMiles: {
-                value: '{current.dblUnitWeightMile}'
+                value: '{current.dblUnitWeightMile}',
+                readOnly: '{current.ysnPosted}'
             },
-            txtFreightRate: '{current.dblFreightRate}',
-            txtFuelSurcharge: '{current.dblFuelSurcharge}',
+            txtFreightRate: {
+                value: '{current.dblFreightRate}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtFuelSurcharge: {
+                value: '{current.dblFuelSurcharge}',
+                readOnly: '{current.ysnPosted}'
+            },
             txtCalculatedFreight: '{getCalculatedFreight}',
 
 //            txtCalculatedAmount: '{current.strMessage}',
-            txtInvoiceAmount: '{current.dblInvoiceAmount}',
+            txtInvoiceAmount: {
+                value: '{current.dblInvoiceAmount}',
+                readOnly: '{current.ysnPosted}'
+            },
 //            txtDifference: '{current.strMessage}',
-            chkPrepaid: '{current.ysnPrepaid}',
-            chkInvoicePaid: '{current.ysnInvoicePaid}',
+            chkPrepaid: {
+                value: '{current.ysnPrepaid}',
+                readOnly: '{current.ysnPosted}'
+            },
+            chkInvoicePaid: {
+                value: '{current.ysnInvoicePaid}',
+                readOnly: '{current.ysnPosted}'
+            },
             txtCheckNo: {
                 value: '{current.intCheckNo}',
-                readOnly: '{!current.ysnInvoicePaid}'
+                readOnly: '{getInvoicePaidEnabled}'
             },
             txtCheckDate: {
                 value: '{current.dteCheckDate}',
-                readOnly: '{!current.ysnInvoicePaid}'
+                readOnly: '{getInvoicePaidEnabled}'
             },
 //            txtInvoiceMargin: '{current.strMessage}',
 
             // ---- EDI tab
             cboTrailerType: {
                 value: '{current.intTrailerTypeId}',
-                store: '{equipmentLength}'
+                store: '{equipmentLength}',
+                readOnly: '{current.ysnPosted}'
             },
-            txtTrailerArrivalDate: '{current.dteTrailerArrivalDate}',
-            txtTrailerArrivalTime: '{current.dteTrailerArrivalTime}',
-            txtSealNo: '{current.strSealNo}',
+            txtTrailerArrivalDate: {
+                value: '{current.dteTrailerArrivalDate}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtTrailerArrivalTime: {
+                value: '{current.dteTrailerArrivalTime}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtSealNo: {
+                value: '{current.strSealNo}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboSealStatus: {
                 value: '{current.strSealStatus}',
-                store: '{sealStatuses}'
+                store: '{sealStatuses}',
+                readOnly: '{current.ysnPosted}'
             },
-            txtReceiveTime: '{current.dteReceiveTime}',
-            txtActualTempReading: '{current.dblActualTempReading}'
+            txtReceiveTime: {
+                value: '{current.dteReceiveTime}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtActualTempReading: {
+                value: '{current.dblActualTempReading}',
+                readOnly: '{current.ysnPosted}'
+            }
 
         }
     },
@@ -209,6 +286,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
             ]
         });
+
+        win.context.data.store.on('load', me.onStoreLoad);
 
         var colTaxDetails = grdInventoryReceipt.columns[11];
         var btnViewTaxDetail = colTaxDetails.items[0];
@@ -267,8 +346,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         record.set('dtmReceiptDate', today);
-        record.set('dtmReceiptDate', today);
+        record.set('ysnPosted', false);
         action(record);
+    },
+
+    onStoreLoad: function(store, records, success, eOpts) {
+        if (success === true){
+            var win = Ext.WindowManager.getActive();
+            var grdInventoryReceipt = win.down('#grdInventoryReceipt');
+            var grdLotTracking = win.down('#grdLotTracking');
+            var itemPlugin = grdInventoryReceipt.plugins[0];
+            var lotPlugin = grdLotTracking.plugins[0];
+            var btnReceive = win.down('#btnReceive');
+
+            var current = records[0];
+            if (current){
+                if (current.get('ysnPosted') !== false){
+                    itemPlugin.disable();
+                    lotPlugin.disable();
+                    btnReceive.setText('UnRecieve');
+                }
+                else {
+                    itemPlugin.enable();
+                    lotPlugin.enable();
+                    btnReceive.setText('Recieve');
+                }
+            }
+        }
     },
 
     onVendorSelect: function(combo, records, eOpts) {
@@ -363,6 +467,46 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
+    onReceiveClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doPost = function() {
+            var strReceiptNumber = win.viewModel.data.current.get('strReceiptNumber')
+
+            var options = {
+                postURL             : '../Inventory/api/Receipt/Receive',
+                strTransactionId    : strReceiptNumber,
+                isPost              : true,
+                isRecap             : false,
+                callback            : me.onAfterReceive,
+                scope               : me
+            };
+
+            CashManagement.common.BusinessRules.callPostRequest(options);
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doPost();
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doPost();
+            }
+        });
+    },
+
+    onAfterReceive: function() {
+        var me = this;
+        var win = me.view;
+        win.context.data.load();
+    },
+
     onCalculationBasisChange: function(obj, newValue, oldValue, eOpts) {
         var win = obj.up('window');
         var txtUnitsWeightMiles = win.down('#txtUnitsWeightMiles');
@@ -450,6 +594,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#txtInvoiceAmount": {
                 change: this.onCalculateTotalAmount
+            },
+            "#btnReceive": {
+                click: this.onReceiveClick
             }
         })
     }
