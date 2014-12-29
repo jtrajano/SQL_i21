@@ -138,22 +138,22 @@ BEGIN
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= 'INVENTORY WHEAT-DEFAULT'
+			,strCode					= ''
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'January 12, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1
+			,intEntityId				= 1
 			,strTransactionId			= 'PURCHASE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
+			,strTransactionType			= 'Inventory Costing'
+			,strTransactionForm			= ''
+			,strModuleName				= 'Inventory'
 			,intConcurrencyId			= 1
 		UNION ALL 
 		SELECT	
@@ -164,22 +164,22 @@ BEGIN
 			,dblCredit					= 12.00
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= 'COST OF GOODS WHEAT-DEFAULT'
+			,strCode					= ''
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'January 12, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1
+			,intEntityId				= 1
 			,strTransactionId			= 'PURCHASE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
+			,strTransactionType			= 'Inventory Costing'
+			,strTransactionForm			= ''
+			,strModuleName				= 'Inventory'
 			,intConcurrencyId			= 1		
 
 	END 

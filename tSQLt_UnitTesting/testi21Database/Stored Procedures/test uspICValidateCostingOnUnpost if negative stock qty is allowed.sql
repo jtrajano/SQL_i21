@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [testi21Database].[test uspICValidateCostingOnUnpost if negative stock qty is allowed]
+﻿CREATE PROCEDURE [testi21Database].[test uspICValidateCostingOnUnpost if negative stock qty is allowed]
 AS
 BEGIN
 	-- Arrange 
@@ -19,52 +17,21 @@ BEGIN
 				,@BetterHaven AS INT = 3 -- This location does not allow negative stock
 
 		-- Create the items to validate variable. 
-		DECLARE @Items AS ItemCostingTableType
+		DECLARE @Items AS dbo.UnpostItemsTableType
 
 		-- Insert the items unpost 
 		INSERT	@Items (
 				intItemId
-				, intLocationId
-				, dtmDate
-				, dblUnitQty
-				, dblUOMQty
-				, dblCost
-				, dblSalesPrice
-				, intCurrencyId
-				, dblExchangeRate
-				, intTransactionId
-				, strTransactionId
-				, intTransactionTypeId
-				, intLotId
+				,intLocationId
+				,dblTotalQty
 		)
 		SELECT	intItemId = @WetGrains
 				,intLocationId = @Default_Location
-				,dtmDate = GETDATE()
-				,dblUnitQty = -10000
-				,dblUOMQty = 1
-				,dblCost = 1.00
-				,dblSalesPrice = 2.00
-				,intCurrencyId = 1
-				,dblExchangeRate = 1
-				,intTransactionId = 1
-				,strTransactionId = 'TRANSACTION-XXXXX'
-				,intTransactionTypeId = 1
-				,intLotId = NULL 
+				,dblTotalQty = -10000
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intLocationId = @NewHaven
-				,dtmDate = GETDATE()
-				,dblUnitQty = -10000
-				,dblUOMQty = 1
-				,dblCost = 1.00
-				,dblSalesPrice = 2.00
-				,intCurrencyId = 1
-				,dblExchangeRate = 1
-				,intTransactionId = 1
-				,strTransactionId = 'TRANSACTION-XXXXX'
-				,intTransactionTypeId = 1
-				,intLotId = NULL 
-
+				,dblTotalQty = -10000
 
 		-- Use the simple item mock data
 		EXEC testi21Database.[Fake data for simple Items]; 
@@ -79,3 +46,4 @@ BEGIN
 		EXEC dbo.uspICValidateCostingOnUnpost @ItemsToValidate = @Items
 	END 
 END 
+GO

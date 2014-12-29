@@ -55,7 +55,13 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 		
 		-- Declare the variables for the Unit of Measure
-		DECLARE @EACH AS INT = 1;		
+		DECLARE @EACH AS INT = 1;
+		
+		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
+		DECLARE @Inventory_AutoNegative AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_RevalueSold AS NVARCHAR(50) = 'Inventory Revalue Sold'  
+		DECLARE @Inventory_WriteOffSold AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
+		DECLARE @Inventory_Costing AS NVARCHAR(50) = 'Inventory Costing' 
 
 		-- Insert a fake data in the Inventory transaction table 
 		INSERT INTO tblICInventoryTransaction (
@@ -139,23 +145,26 @@ BEGIN
 			,dblCredit					= 16.50
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= tblGLAccount.strDescription
+			,strCode					= ''
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'January 17, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1
+			,intEntityId				= 1
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
+			,strTransactionType			= @Inventory_AutoNegative
 			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
+			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+		FROM dbo.tblGLAccount
+		WHERE intAccountId = @Inventory_Default
+		
 		UNION ALL 
 		SELECT	
 			dtmDate						= 'January 17, 2014'
@@ -165,23 +174,26 @@ BEGIN
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= tblGLAccount.strDescription 
+			,strCode					= ''
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'January 17, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1 
+			,intEntityId				= 1 
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
-			,intConcurrencyId			= 1		
+			,strTransactionType			= @Inventory_AutoNegative
+			,strTransactionForm			= ''
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1	
+		FROM dbo.tblGLAccount
+		WHERE intAccountId = @AutoNegative_Default
+				
 	END 
 	
 	-- Act

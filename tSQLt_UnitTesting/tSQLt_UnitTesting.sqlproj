@@ -438,7 +438,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and fifo is correct.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and coming stock and GL entries are correct.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and GL entries are correct.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and the inventory-transaction is correct.sql">

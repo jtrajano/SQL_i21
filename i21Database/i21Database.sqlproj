@@ -934,9 +934,6 @@
     <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
     <Build Include="dbo\Tables\tblICEquipmentLength.sql" />
     <Build Include="dbo\Tables\tblMFQAProperty.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostAverageCosting.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostFIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostLIFO.sql" />
     <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceipt.sql" />
     <Build Include="dbo\Tables\tblICLot.sql" />
@@ -975,7 +972,10 @@
     <Build Include="dbo\Stored Procedures\uspNRCreateNoteTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGenerateAmortization.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForPayment.sql" />
-    <Build Include="dbo\Tables\tblSMEntityMenuFavorite.sql" />
+	<Build Include="dbo\Tables\tblSMEntityMenuFavorite.sql" />	
+    <Build Include="dbo\User Defined Types\UnpostItemsTableType.sql" />
+    <Build Include="dbo\Functions\fnRecalculateAverageCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

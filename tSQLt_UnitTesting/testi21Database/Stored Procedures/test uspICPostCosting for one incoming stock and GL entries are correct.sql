@@ -52,6 +52,12 @@ BEGIN
 		DECLARE @WriteOffSold_BetterHaven AS INT = 4002
 		DECLARE @RevalueSold_BetterHaven AS INT = 5002
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
+		
+		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
+		DECLARE @Inventory_AutoNegative AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_RevalueSold AS NVARCHAR(50) = 'Inventory Revalue Sold'  
+		DECLARE @Inventory_WriteOffSold AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
+		DECLARE @Inventory_Costing AS NVARCHAR(50) = 'Inventory Costing'  		
 
 		-- Create the expected and actual tables. 
 		DECLARE @recap AS dbo.RecapTableType		
@@ -119,23 +125,26 @@ BEGIN
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= tblGLAccount.strDescription
+			,strCode					= ''
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'November 14, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 6
 			,ysnIsUnposted				= 0
 			,intUserId					= 1 -- TODO
 			,intEntityId				= 1 -- TODO
 			,strTransactionId			= 'PURCHASE-000001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
+			,strTransactionType			= @Inventory_Costing
+			,strTransactionForm			= ''
+			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+		FROM dbo.tblGLAccount   
+		WHERE tblGLAccount.intAccountId = @Inventory_Default  
+					
 		UNION ALL 
 		SELECT	
 			dtmDate						= 'November 14, 2014'
@@ -145,23 +154,26 @@ BEGIN
 			,dblCredit					= 1400.00
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= tblGLAccount.strDescription
+			,strCode					= ''
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'November 14, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 6
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1 
+			,intEntityId				= 1 
 			,strTransactionId			= 'PURCHASE-000001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
+			,strTransactionType			= @Inventory_Costing
+			,strTransactionForm			= '' 
+			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+		FROM dbo.tblGLAccount   
+		WHERE tblGLAccount.intAccountId = @CostOfGoods_Default  
+			
 	END 
 	
 	-- Act
