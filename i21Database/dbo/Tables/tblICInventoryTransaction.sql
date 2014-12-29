@@ -26,7 +26,7 @@ CREATE TABLE [dbo].[tblICInventoryTransaction]
 	[intCurrencyId] INT NULL,
 	[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
     [intTransactionId] INT NOT NULL, 
-	[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intTransactionTypeId] INT NOT NULL, 
     [intLotId] INT NULL, 

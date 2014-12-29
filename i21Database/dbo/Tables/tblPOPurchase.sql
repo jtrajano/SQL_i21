@@ -10,6 +10,7 @@
     [intShipViaId] INT NULL, 
     [intShipFromId] INT NULL, 
     [intShipToId] INT NULL, 
+	[intLocationId] INT NULL, 
     [intStoreId] INT NULL, 
 	[intEntityId] INT NOT NULL,
 	[intTermsId] INT NOT NULL,

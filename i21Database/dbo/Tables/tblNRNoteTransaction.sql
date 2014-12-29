@@ -28,5 +28,6 @@
     [intLastModifiedUserId] INT NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblNRNoteTransaction_intNoteTransId] PRIMARY KEY ([intNoteTransId]), 
-    CONSTRAINT [FK_tblNRNoteTransaction_tblNRAdjustmentType_intAdjTypeId] FOREIGN KEY ([intAdjTypeId]) REFERENCES [tblNRAdjustmentType]([intAdjTypeId])
+   	CONSTRAINT [FK_tblNRNoteTransaction_tblNRNote_intNoteId] FOREIGN KEY ([intNoteId]) REFERENCES [tblNRNote]([intNoteId]) 
+
 )
