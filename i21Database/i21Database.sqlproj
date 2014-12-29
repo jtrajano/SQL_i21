@@ -975,6 +975,7 @@
     <Build Include="dbo\Stored Procedures\uspNRCreateNoteTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGenerateAmortization.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForPayment.sql" />
+    <Build Include="dbo\Tables\tblSMEntityMenuFavorite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
