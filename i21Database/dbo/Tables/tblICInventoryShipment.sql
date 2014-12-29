@@ -7,8 +7,8 @@
     [strReferenceNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dtmRequestedArrivalDate] DATETIME NULL, 
     [intShipFromLocationId] INT NOT NULL, 
+	[intShipToLocationId] INT NOT NULL, 
     [intCustomerId] INT NULL, 
-    [strShipToAddress] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intFreightTermId] INT NOT NULL, 
     [ysnDirectShipment] BIT NULL DEFAULT ((0)), 
     [intCarrierId] INT NULL, 
@@ -22,6 +22,8 @@
     [dtmDeliveredDate] DATETIME NULL, 
     [dtmFreeTime] DATETIME NULL, 
     [strReceivedBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strDeliveryInstruction] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryShipment] PRIMARY KEY ([intInventoryShipmentId]), 
     CONSTRAINT [AK_tblICInventoryShipment_strBOLNumber] UNIQUE ([strBOLNumber]), 
@@ -103,14 +105,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intCustomerId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Ship To Address',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryShipment',
-    @level2type = N'COLUMN',
-    @level2name = N'strShipToAddress'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Freight Term Id',
@@ -237,3 +232,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryShipment',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Ship To Location',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipment',
+    @level2type = N'COLUMN',
+    @level2name = N'intShipToLocationId'
