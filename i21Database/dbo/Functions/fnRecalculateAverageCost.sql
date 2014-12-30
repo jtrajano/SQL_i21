@@ -1,5 +1,4 @@
-﻿
--- This function calculates the average cost of an item. 
+﻿-- This function recalculates the average cost of an item from positive stock records
 CREATE FUNCTION [dbo].[fnRecalculateAverageCost]
 (
 	@intItemId AS INT 
@@ -16,27 +15,28 @@ BEGIN
 
 	DECLARE @TotalQty AS NUMERIC(18,6)
 	DECLARE @TotalValue AS NUMERIC(18,6)
-
-	-- Recalculate the average cost from the fifo table 	
+	
+	IF EXISTS (SELECT 1 WHERE dbo.fnGetCostingMethod(@intItemId, @intLocationId) IN (@AVERAGECOST, @FIFO, @STANDARDCOST))
 	BEGIN 
-		SELECT	@TotalQty = SUM( CASE WHEN (ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0)) > 0 THEN (ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0)) ELSE 0 END )
-				,@TotalValue = SUM( CASE WHEN (ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0)) > 0 THEN (ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0)) * ISNULL(fifo.dblCost,0) ELSE 0 END )
+		-- Recalculate the average cost from the fifo table 	
+		SELECT	@TotalQty = SUM(ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0))
+				,@TotalValue = SUM( (ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0)) * ISNULL(fifo.dblCost,0))
 		FROM	dbo.tblICInventoryFIFO fifo 
-		WHERE	dbo.fnGetCostingMethod(fifo.intItemId, fifo.intLocationId) IN (@AVERAGECOST, @FIFO, @STANDARDCOST)
-				AND fifo.intItemId = @intItemId
+		WHERE	fifo.intItemId = @intItemId
 				AND fifo.intLocationId = @intLocationId
+				AND ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0) > 0	
 	END 
-
-	-- If the fifo table yield a null result, assume the item's costing method is LIFO. 
-	-- Recaculate the average cost from the lifo table
-	IF (@TotalQty IS NULL) 
+	ELSE 
 	BEGIN 
-		SELECT	@TotalQty = SUM( CASE WHEN (ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0)) > 0 THEN (ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0)) ELSE 0 END )
-				,@TotalValue = SUM( CASE WHEN (ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0)) > 0 THEN (ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0)) * ISNULL(lifo.dblCost,0) ELSE 0 END )
+		-- Recaculate the average cost from the lifo table
+		SELECT	@TotalQty = SUM(ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0))
+				,@TotalValue = SUM( (ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0)) * ISNULL(lifo.dblCost,0))
 		FROM	dbo.tblICInventoryLIFO lifo	
+		WHERE	lifo.intItemId = @intItemId
+				AND lifo.intLocationId = @intLocationId
+				AND ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0) > 0	
 	END 
 
 	-- Return recalculated average cost. 
 	RETURN @TotalValue / @TotalQty;
-
 END
