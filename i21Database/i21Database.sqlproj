@@ -972,10 +972,11 @@
     <Build Include="dbo\Stored Procedures\uspNRCreateNoteTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGenerateAmortization.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForPayment.sql" />
-	<Build Include="dbo\Tables\tblSMEntityMenuFavorite.sql" />	
+    <Build Include="dbo\Tables\tblSMEntityMenuFavorite.sql" />
     <Build Include="dbo\User Defined Types\UnpostItemsTableType.sql" />
     <Build Include="dbo\Functions\fnRecalculateAverageCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntries.sql" />
+    <Build Include="dbo\Tables\tblRKFutureMarket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
