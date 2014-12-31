@@ -15,9 +15,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @WRITE_OFF_SOLD AS INT = -1;
-DECLARE @REVALUE_SOLD AS INT = -2;
-DECLARE @AUTO_NEGATIVE AS INT = -3;
+DECLARE @AUTO_NEGATIVE AS INT = 1
+DECLARE @WRITE_OFF_SOLD AS INT = 2
+DECLARE @REVALUE_SOLD AS INT = 3
 
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
@@ -100,6 +100,9 @@ BEGIN
 			,[strBatchId] 
 			,[intTransactionTypeId] 
 			,[ysnIsUnposted]
+			,[intRelatedInventoryTransactionId]
+			,[intRelatedTransactionId]
+			,[strRelatedTransactionId]
 			,[dtmCreated] 
 			,[intCreatedUserId] 
 			,[intConcurrencyId] 
@@ -118,6 +121,9 @@ BEGIN
 			,[strBatchId]			= @strBatchId
 			,[intTransactionTypeId] = ActualTransaction.intTransactionTypeId
 			,[ysnIsUnposted]		= 1
+			,[intRelatedInventoryTransactionId] = ItemTransactionsToReverse.intInventoryTransactionId
+			,[intRelatedTransactionId] = ActualTransaction.intRelatedTransactionId
+			,[strRelatedTransactionId] = ActualTransaction.strRelatedTransactionId
 			,[dtmCreated]			= GETDATE()
 			,[intCreatedUserId]		= @intUserId
 			,[intConcurrencyId]		= 1
@@ -130,8 +136,8 @@ BEGIN
 	UPDATE	RelatedItemTransactions
 	SET		ysnIsUnposted = 1
 	FROM	dbo.tblICInventoryTransaction RelatedItemTransactions 
-	WHERE	RelatedItemTransactions.intRelatedInventoryTransactionId = @intTransactionId
-			AND RelatedItemTransactions.strRelatedInventoryTransactionId = @strTransactionId
+	WHERE	RelatedItemTransactions.intRelatedTransactionId = @intTransactionId
+			AND RelatedItemTransactions.strRelatedTransactionId = @strTransactionId
 			AND RelatedItemTransactions.ysnIsUnposted = 0
 
 	---------------------------------------------------

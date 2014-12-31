@@ -224,8 +224,8 @@ BEGIN
 				,[strTransactionId] 
 				,[strBatchId] 
 				,[intTransactionTypeId] 
-				,[strRelatedInventoryTransactionId]
-				,[intRelatedInventoryTransactionId]
+				,[strRelatedTransactionId]
+				,[intRelatedTransactionId]
 				,[strTransactionForm]
 				,[dtmCreated] 
 				,[intCreatedUserId] 
@@ -245,8 +245,8 @@ BEGIN
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @Inventory_Write_Off_Sold
-					,[strRelatedInventoryTransactionId] = @strRelatedTransactionId
-					,[intRelatedInventoryTransactionId] = @intRelatedTransactionId
+					,[strRelatedTransactionId] = @strRelatedTransactionId
+					,[intRelatedTransactionId] = @intRelatedTransactionId
 					,[strTransactionForm] = @TransactionTypeName
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId
@@ -267,8 +267,8 @@ BEGIN
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @Inventory_Revalue_Sold
-					,[strRelatedInventoryTransactionId] = @strRelatedTransactionId
-					,[intRelatedInventoryTransactionId] = @intRelatedTransactionId
+					,[strRelatedTransactionId] = @strRelatedTransactionId
+					,[intRelatedTransactionId] = @intRelatedTransactionId
 					,[strTransactionForm] = @TransactionTypeName
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId

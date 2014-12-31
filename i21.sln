@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21Database", "i21Database\i21Database.sqlproj", "{2E49B212-114B-4CFD-A343-2A2061E987BC}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Integration", "Integration\Integration.sqlproj", "{E9E5693B-743B-4A2D-A9F7-59F616BB4FD8}"

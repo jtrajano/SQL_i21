@@ -594,6 +594,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries for reversing GL entries.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries from inventory transaction.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake data for unposting item costing.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

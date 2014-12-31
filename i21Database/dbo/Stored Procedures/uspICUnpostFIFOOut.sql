@@ -10,9 +10,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @WRITE_OFF_SOLD AS INT = -1;
-DECLARE @REVALUE_SOLD AS INT = -2;
-DECLARE @AUTO_NEGATIVE AS INT = -3;
+DECLARE @AUTO_NEGATIVE AS INT = 1
+DECLARE @WRITE_OFF_SOLD AS INT = 2
+DECLARE @REVALUE_SOLD AS INT = 3
 
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -29,15 +29,15 @@ INSERT INTO @InventoryTransactionToReverse (
 	intInventoryTransactionId
 	,intTransactionId
 	,strTransactionId
-	,intRelatedInventoryTransactionId
-	,strRelatedInventoryTransactionId
+	,intRelatedTransactionId
+	,strRelatedTransactionId
 	,intTransactionTypeId
 )
 SELECT	Changes.intInventoryTransactionId
 		,Changes.intTransactionId
 		,Changes.strTransactionId
-		,Changes.intRelatedInventoryTransactionId
-		,Changes.strRelatedInventoryTransactionId
+		,Changes.intRelatedTransactionId
+		,Changes.strRelatedTransactionId
 		,Changes.intTransactionTypeId
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
@@ -60,8 +60,8 @@ FROM	(
 						)
 						-- Link to the related transactions 
 						OR (
-							inventory_transaction.strRelatedInventoryTransactionId = Source_Query.strTransactionId
-							AND inventory_transaction.intRelatedInventoryTransactionId = Source_Query.intTransactionId
+							inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId
+							AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId
 						)
 					)
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
@@ -70,8 +70,8 @@ FROM	(
 					SET		ysnIsUnposted = 1
 							,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedInventoryTransactionId, Inserted.strRelatedInventoryTransactionId, Inserted.intTransactionTypeId
-		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedInventoryTransactionId, strRelatedInventoryTransactionId, intTransactionTypeId)
+				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
+		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
 WHERE	Changes.Action = 'UPDATE'
 ;
 

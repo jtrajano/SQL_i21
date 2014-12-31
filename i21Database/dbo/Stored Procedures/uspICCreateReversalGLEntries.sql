@@ -12,9 +12,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @WRITE_OFF_SOLD AS INT = -1;
-DECLARE @REVALUE_SOLD AS INT = -2;
-DECLARE @AUTO_NEGATIVE AS INT = -3;
+DECLARE @AUTO_NEGATIVE AS INT = 1
+DECLARE @WRITE_OFF_SOLD AS INT = 2
+DECLARE @REVALUE_SOLD AS INT = 3
 
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 DECLARE @AUTO_NEGATIVE_TransactionType AS NVARCHAR(50) = 'Inventory Auto Negative';
@@ -27,193 +27,196 @@ DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
 DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto Negative';
 
 -- Get the GL Account ids to use
-INSERT INTO @GLAccounts (
-	intItemId 
-	,intLocationId 
-	,intInventoryId 
-	,intAutoNegativeId 
-)
-SELECT	Query.intItemId
-		,Query.intLocationId
-		,intInventoryId = Inventory.intAccountId
-		,intAutoNegativeId = AutoNegative.intAccountId
-FROM	(
-			SELECT DISTINCT intItemId, intLocationId 
-			FROM	dbo.tblICInventoryTransaction ItemTransactions 
-			WHERE	ItemTransactions.strBatchId = @strBatchId
-		) Query
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_Inventory) Inventory
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_AutoNegative) AutoNegative;
+BEGIN 
+	INSERT INTO @GLAccounts (
+		intItemId 
+		,intLocationId 
+		,intInventoryId 
+		,intAutoNegativeId 
+	)
+	SELECT	Query.intItemId
+			,Query.intLocationId
+			,intInventoryId = Inventory.intAccountId
+			,intAutoNegativeId = AutoNegative.intAccountId
+	FROM	(
+				SELECT DISTINCT intItemId, intLocationId 
+				FROM	dbo.tblICInventoryTransaction ItemTransactions 
+				WHERE	ItemTransactions.strBatchId = @strBatchId
+			) Query
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_Inventory) Inventory
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_AutoNegative) AutoNegative;
+END 
 
--- Update the ysnPostedFlag for the main transaction 
-UPDATE	GLEntries
-SET		ysnIsUnposted = 1
-FROM	dbo.tblGLDetail GLEntries
-WHERE	GLEntries.intTransactionId = @intTransactionId
-		AND GLEntries.strTransactionId = @strTransactionId
-		AND strTransactionType <> @AUTO_NEGATIVE_TransactionType
+BEGIN 
+	-------------------------------------------------------------------------------------------
+	-- Reverse the G/L entries for the main transaction 
+	-------------------------------------------------------------------------------------------
+	SELECT	
+			dtmDate						= GLEntries.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLEntries.intAccountId
+			,dblDebit					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
+			,dblCredit					= GLEntries.dblDebit	-- Reverse the Credit with Debit 
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= GLEntries.strDescription
+			,strCode					= GLEntries.strCode
+			,strReference				= GLEntries.strReference
+			,intCurrencyId				= GLEntries.intCurrencyId
+			,dblExchangeRate			= GLEntries.dblExchangeRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= GLEntries.dtmDate
+			,strJournalLineDescription	= GLEntries.strJournalLineDescription
+			,intJournalLineNo			= GLEntries.intJournalLineNo
+			,ysnIsUnposted				= 1
+			,intUserId					= @intUserId 
+			,intEntityId				= @intUserId 
+			,strTransactionId			= GLEntries.strTransactionId
+			,intTransactionId			= GLEntries.intTransactionId
+			,strTransactionType			= GLEntries.strTransactionType
+			,strTransactionForm			= GLEntries.strTransactionForm
+			,strModuleName				= GLEntries.strModuleName
+			,intConcurrencyId			= 1
+	FROM	dbo.tblGLDetail GLEntries
+	WHERE	GLEntries.intTransactionId = @intTransactionId
+			AND GLEntries.strTransactionId = @strTransactionId
+			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
+			AND strTransactionType <> @AUTO_NEGATIVE_TransactionType
 
--- Update the ysnPostedFlag for the related transactions
-UPDATE	GLEntries
-SET		ysnIsUnposted = 1
-FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction ItemTransactions 
-			ON GLEntries.intJournalLineNo = ItemTransactions.intInventoryTransactionId
-			AND GLEntries.intTransactionId = ItemTransactions.intRelatedInventoryTransactionId
-			AND GLEntries.strTransactionId = ItemTransactions.strRelatedInventoryTransactionId
-WHERE	ItemTransactions.strBatchId = @strBatchId
-		AND GLEntries.strTransactionType <> @AUTO_NEGATIVE_TransactionType
+	-------------------------------------------------------------------------------------------
+	-- Reverse the G/L entries for the related transactions 
+	-------------------------------------------------------------------------------------------
+	UNION ALL 
+	SELECT	
+			dtmDate						= GLEntries.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLEntries.intAccountId
+			,dblDebit					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
+			,dblCredit					= GLEntries.dblDebit	-- Reverse the Credit with Debit 
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= GLEntries.strDescription
+			,strCode					= GLEntries.strCode
+			,strReference				= GLEntries.strReference
+			,intCurrencyId				= GLEntries.intCurrencyId
+			,dblExchangeRate			= GLEntries.dblExchangeRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= GLEntries.dtmDate
+			,strJournalLineDescription	= GLEntries.strJournalLineDescription
+			,intJournalLineNo			= GLEntries.intJournalLineNo
+			,ysnIsUnposted				= 1
+			,intUserId					= @intUserId 
+			,intEntityId				= @intUserId 
+			,strTransactionId			= GLEntries.strTransactionId
+			,intTransactionId			= GLEntries.intTransactionId
+			,strTransactionType			= GLEntries.strTransactionType
+			,strTransactionForm			= GLEntries.strTransactionForm
+			,strModuleName				= GLEntries.strModuleName
+			,intConcurrencyId			= 1
+	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction ItemTransactions 
+				--ON GLEntries.intJournalLineNo = ItemTransactions.intInventoryTransactionId
+				ON GLEntries.intTransactionId = ItemTransactions.intRelatedTransactionId
+				AND GLEntries.strTransactionId = ItemTransactions.strRelatedTransactionId
+	WHERE	ItemTransactions.strBatchId = @strBatchId
+			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
+			AND GLEntries.strTransactionType NOT IN (@AUTO_NEGATIVE_TransactionType)
 
--------------------------------------------------------------------------------------------
--- Reverse the G/L entries for the main transaction 
--------------------------------------------------------------------------------------------
-SELECT	
-		dtmDate						= GLEntries.dtmDate
-		,strBatchId					= @strBatchId
-		,intAccountId				= GLEntries.intAccountId
-		,dblDebit					= Credit.Value	-- Reverse the Debit with Credit 
-		,dblCredit					= Debit.Value	-- Reverse the Credit with Debit 
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
-		,strDescription				= GLEntries.strDescription
-		,strCode					= GLEntries.strCode
-		,strReference				= GLEntries.strReference
-		,intCurrencyId				= GLEntries.intCurrencyId
-		,dblExchangeRate			= GLEntries.dblExchangeRate
-		,dtmDateEntered				= GETDATE()
-		,dtmTransactionDate			= GLEntries.dtmDate
-		,strJournalLineDescription	= GLEntries.strJournalLineDescription
-		,intJournalLineNo			= GLEntries.intJournalLineNo
-		,ysnIsUnposted				= 1
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
-		,strTransactionId			= GLEntries.strTransactionId
-		,intTransactionId			= GLEntries.intTransactionId
-		,strTransactionType			= GLEntries.strTransactionType
-		,strTransactionForm			= GLEntries.strTransactionForm
-		,strModuleName				= GLEntries.strModuleName
-		,intConcurrencyId			= 1
-FROM	dbo.tblGLDetail GLEntries
-		CROSS APPLY dbo.fnGetDebit(GLEntries.dblDebit - GLEntries.dblCredit) Debit
-		CROSS APPLY dbo.fnGetCredit(GLEntries.dblCredit - GLEntries.dblDebit) Credit
-WHERE	GLEntries.intTransactionId = @intTransactionId
-		AND GLEntries.strTransactionId = @strTransactionId
-		AND GLEntries.ysnIsUnposted = 0
-		AND strTransactionType <> @AUTO_NEGATIVE_TransactionType
+	-----------------------------------------------------------------------------------
+	-- Create the Auto-Negative G/L Entries
+	-----------------------------------------------------------------------------------
+	UNION ALL  
+	SELECT	
+			dtmDate						= ItemTransactions.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccounts.intInventoryId
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= tblGLAccount.strDescription
+			,strCode					= '' 
+			,strReference				= '' 
+			,intCurrencyId				= ItemTransactions.intCurrencyId
+			,dblExchangeRate			= ItemTransactions.dblExchangeRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= ItemTransactions.dtmDate
+			,strJournalLineDescription	= '' 
+			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intUserId 
+			,intEntityId				= @intUserId 
+			,strTransactionId			= ItemTransactions.strTransactionId
+			,intTransactionId			= ItemTransactions.intTransactionId
+			,strTransactionType			= @AUTO_NEGATIVE_TransactionType
+			,strTransactionForm			= ''
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
+				ON ItemTransactions.intItemId = GLAccounts.intItemId
+				AND ItemTransactions.intLocationId = GLAccounts.intLocationId
+			INNER JOIN dbo.tblGLAccount	
+				ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
+			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+	WHERE	ItemTransactions.strBatchId = @strBatchId
+			AND ItemTransactions.intTransactionTypeId = @AUTO_NEGATIVE
 
--------------------------------------------------------------------------------------------
--- Reverse the G/L entries for the related transactions 
--------------------------------------------------------------------------------------------
-UNION ALL 
-SELECT	
-		dtmDate						= GLEntries.dtmDate
-		,strBatchId					= @strBatchId
-		,intAccountId				= GLEntries.intAccountId
-		,dblDebit					= Credit.Value	-- Reverse the Debit with Credit 
-		,dblCredit					= Debit.Value	-- Reverse the Credit with Debit 
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
-		,strDescription				= GLEntries.strDescription
-		,strCode					= GLEntries.strCode
-		,strReference				= GLEntries.strReference
-		,intCurrencyId				= GLEntries.intCurrencyId
-		,dblExchangeRate			= GLEntries.dblExchangeRate
-		,dtmDateEntered				= GETDATE()
-		,dtmTransactionDate			= GLEntries.dtmDate
-		,strJournalLineDescription	= GLEntries.strJournalLineDescription
-		,intJournalLineNo			= GLEntries.intJournalLineNo
-		,ysnIsUnposted				= 1
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
-		,strTransactionId			= GLEntries.strTransactionId
-		,intTransactionId			= GLEntries.intTransactionId
-		,strTransactionType			= GLEntries.strTransactionType
-		,strTransactionForm			= GLEntries.strTransactionForm
-		,strModuleName				= GLEntries.strModuleName
-		,intConcurrencyId			= 1
-FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction ItemTransactions 
-			ON GLEntries.intJournalLineNo = ItemTransactions.intInventoryTransactionId
-			AND GLEntries.intTransactionId = ItemTransactions.intRelatedInventoryTransactionId
-			AND GLEntries.strTransactionId = ItemTransactions.strRelatedInventoryTransactionId
-		CROSS APPLY dbo.fnGetDebit(GLEntries.dblDebit - GLEntries.dblCredit) Debit
-		CROSS APPLY dbo.fnGetCredit(GLEntries.dblCredit - GLEntries.dblDebit) Credit
-WHERE	ItemTransactions.strBatchId = @strBatchId
-		AND GLEntries.ysnIsUnposted = 0
-		AND GLEntries.strTransactionType <> @AUTO_NEGATIVE_TransactionType		
-
------------------------------------------------------------------------------------
--- Create the Auto-Negative G/L Entries
------------------------------------------------------------------------------------
-UNION ALL  
-SELECT	
-		dtmDate						= ItemTransactions.dtmDate
-		,strBatchId					= @strBatchId
-		,intAccountId				= GLAccounts.intInventoryId
-		,dblDebit					= Debit.Value
-		,dblCredit					= Credit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
-		,strCode					= '' 
-		,strReference				= '' 
-		,intCurrencyId				= ItemTransactions.intCurrencyId
-		,dblExchangeRate			= ItemTransactions.dblExchangeRate
-		,dtmDateEntered				= GETDATE()
-		,dtmTransactionDate			= ItemTransactions.dtmDate
-		,strJournalLineDescription	= '' 
-		,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
-		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
-		,strTransactionId			= ItemTransactions.strTransactionId
-		,intTransactionId			= ItemTransactions.intTransactionId
-		,strTransactionType			= @AUTO_NEGATIVE_TransactionType
-		,strTransactionForm			= ''
-		,strModuleName				= @ModuleName
-		,intConcurrencyId			= 1
-FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
-			ON ItemTransactions.intItemId = GLAccounts.intItemId
-			AND ItemTransactions.intLocationId = GLAccounts.intLocationId
-		INNER JOIN dbo.tblGLAccount	
-			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-		CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
-WHERE	ItemTransactions.strBatchId = @strBatchId
-		AND ItemTransactions.intTransactionTypeId = @AUTO_NEGATIVE
-
-UNION ALL 
-SELECT	
-		dtmDate						= ItemTransactions.dtmDate
-		,strBatchId					= @strBatchId
-		,intAccountId				= GLAccounts.intAutoNegativeId
-		,dblDebit					= Credit.Value
-		,dblCredit					= Debit.Value
-		,dblDebitUnit				= 0
-		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
-		,strCode					= '' 
-		,strReference				= '' 
-		,intCurrencyId				= ItemTransactions.intCurrencyId
-		,dblExchangeRate			= ItemTransactions.dblExchangeRate
-		,dtmDateEntered				= GETDATE()
-		,dtmTransactionDate			= ItemTransactions.dtmDate
-		,strJournalLineDescription	= '' 
-		,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
-		,ysnIsUnposted				= 0
-		,intUserId					= @intUserId 
-		,intEntityId				= @intUserId 
-		,strTransactionId			= ItemTransactions.strTransactionId
-		,intTransactionId			= ItemTransactions.intTransactionId
-		,strTransactionType			= @AUTO_NEGATIVE_TransactionType
-		,strTransactionForm			= '' 
-		,strModuleName				= @ModuleName
-		,intConcurrencyId			= 1
-FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
-			ON ItemTransactions.intItemId = GLAccounts.intItemId
-			AND ItemTransactions.intLocationId = GLAccounts.intLocationId
-		INNER JOIN dbo.tblGLAccount	
-			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
-		CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
-		CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
-WHERE	ItemTransactions.strBatchId = @strBatchId
-		AND ItemTransactions.intTransactionTypeId = @AUTO_NEGATIVE
+	UNION ALL 
+	SELECT	
+			dtmDate						= ItemTransactions.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccounts.intAutoNegativeId
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0
+			,strDescription				= tblGLAccount.strDescription
+			,strCode					= '' 
+			,strReference				= '' 
+			,intCurrencyId				= ItemTransactions.intCurrencyId
+			,dblExchangeRate			= ItemTransactions.dblExchangeRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= ItemTransactions.dtmDate
+			,strJournalLineDescription	= '' 
+			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
+			,ysnIsUnposted				= 0
+			,intUserId					= @intUserId 
+			,intEntityId				= @intUserId 
+			,strTransactionId			= ItemTransactions.strTransactionId
+			,intTransactionId			= ItemTransactions.intTransactionId
+			,strTransactionType			= @AUTO_NEGATIVE_TransactionType
+			,strTransactionForm			= '' 
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
+				ON ItemTransactions.intItemId = GLAccounts.intItemId
+				AND ItemTransactions.intLocationId = GLAccounts.intLocationId
+			INNER JOIN dbo.tblGLAccount	
+				ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
+			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+	WHERE	ItemTransactions.strBatchId = @strBatchId
+			AND ItemTransactions.intTransactionTypeId = @AUTO_NEGATIVE
+END
 ;
+
+BEGIN 
+	-- Update the ysnPostedFlag for the main transaction 
+	UPDATE	GLEntries
+	SET		ysnIsUnposted = 1
+	FROM	dbo.tblGLDetail GLEntries
+	WHERE	GLEntries.intTransactionId = @intTransactionId
+			AND GLEntries.strTransactionId = @strTransactionId
+			AND strTransactionType <> @AUTO_NEGATIVE_TransactionType
+	;
+	-- Update the ysnPostedFlag for the related transactions
+	UPDATE	GLEntries
+	SET		ysnIsUnposted = 1
+	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction ItemTransactions 
+				ON GLEntries.intJournalLineNo = ItemTransactions.intInventoryTransactionId
+				AND GLEntries.intTransactionId = ItemTransactions.intRelatedTransactionId
+				AND GLEntries.strTransactionId = ItemTransactions.strRelatedTransactionId
+	WHERE	ItemTransactions.strBatchId = @strBatchId
+			AND GLEntries.strTransactionType <> @AUTO_NEGATIVE_TransactionType
+	;
+END 

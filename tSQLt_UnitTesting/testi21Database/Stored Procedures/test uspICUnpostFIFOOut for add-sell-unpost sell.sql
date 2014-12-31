@@ -18,12 +18,11 @@ BEGIN
 				,@InvalidLocation AS INT = -1
 
 		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
-		DECLARE @InventoryAdjustment AS INT = 1
-		DECLARE @InventoryReceipt AS INT = 2
-		DECLARE @InventoryShipment AS INT = 3;
+		DECLARE @AUTO_NEGATIVE AS INT = 1
+		DECLARE @WRITE_OFF_SOLD AS INT = 2
+		DECLARE @REVALUE_SOLD AS INT = 3		
+		DECLARE @InventoryReceipt AS INT = 4
+		DECLARE @InventoryShipment AS INT = 5;
 
 		DECLARE @strTransactionId AS NVARCHAR(20)
 		DECLARE @intTransactionId AS INT
@@ -46,8 +45,8 @@ BEGIN
 			intInventoryTransactionId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-			,strRelatedInventoryTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-			,intRelatedInventoryTransactionId INT NULL 
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
 		)
 
@@ -55,8 +54,8 @@ BEGIN
 			intInventoryTransactionId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-			,strRelatedInventoryTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-			,intRelatedInventoryTransactionId INT NULL 
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
 		)
 
@@ -97,8 +96,8 @@ BEGIN
 			,dblSalesPrice
 			,intTransactionId
 			,strTransactionId
-			,intRelatedInventoryTransactionId
-			,strRelatedInventoryTransactionId
+			,intRelatedTransactionId
+			,strRelatedTransactionId
 			,intTransactionTypeId
 			,ysnIsUnposted
 			,intItemId
@@ -112,8 +111,8 @@ BEGIN
 				,dblSalesPrice = 0
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0000001'
-				,intRelatedInventoryTransactionId = NULL 
-				,strRelatedInventoryTransactionId = NULL 
+				,intRelatedTransactionId = NULL 
+				,strRelatedTransactionId = NULL 
 				,intTransactionTypeId = @InventoryReceipt
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
@@ -127,8 +126,8 @@ BEGIN
 				,dblSalesPrice = 10.00
 				,intTransactionId = 1 
 				,strTransactionId = 'InvShip-0000001'
-				,intRelatedInventoryTransactionId = NULL 
-				,strRelatedInventoryTransactionId = NULL 
+				,intRelatedTransactionId = NULL 
+				,strRelatedTransactionId = NULL 
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
@@ -142,8 +141,8 @@ BEGIN
 				,dblSalesPrice = 12.00
 				,intTransactionId = 1 
 				,strTransactionId = 'WildCard-000001'
-				,intRelatedInventoryTransactionId = NULL 
-				,strRelatedInventoryTransactionId = NULL 
+				,intRelatedTransactionId = NULL 
+				,strRelatedTransactionId = NULL 
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
@@ -169,15 +168,15 @@ BEGIN
 				intInventoryTransactionId
 				,intTransactionId
 				,strTransactionId
-				,intRelatedInventoryTransactionId
-				,strRelatedInventoryTransactionId
+				,intRelatedTransactionId
+				,strRelatedTransactionId
 				,intTransactionTypeId		
 		)
 		SELECT	intInventoryTransactionId = 2
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0000001'
-				,intRelatedInventoryTransactionId = NULL 
-				,strRelatedInventoryTransactionId = NULL 
+				,intRelatedTransactionId = NULL 
+				,strRelatedTransactionId = NULL 
 				,intTransactionTypeId = @InventoryShipment
 	END 
 	

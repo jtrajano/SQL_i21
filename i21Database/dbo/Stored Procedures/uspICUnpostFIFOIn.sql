@@ -29,15 +29,15 @@ INSERT INTO @InventoryTransactionToReverse (
 	intInventoryTransactionId
 	,intTransactionId
 	,strTransactionId
-	,intRelatedInventoryTransactionId
-	,strRelatedInventoryTransactionId
+	,intRelatedTransactionId
+	,strRelatedTransactionId
 	,intTransactionTypeId
 )
 SELECT	Changes.intInventoryTransactionId
 		,Changes.intTransactionId
 		,Changes.strTransactionId
-		,Changes.intRelatedInventoryTransactionId
-		,Changes.strRelatedInventoryTransactionId
+		,Changes.intRelatedTransactionId
+		,Changes.strRelatedTransactionId
 		,Changes.intTransactionTypeId
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
@@ -59,8 +59,8 @@ FROM	(
 					SET		ysnIsUnposted = 1
 							,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedInventoryTransactionId, Inserted.strRelatedInventoryTransactionId, Inserted.intTransactionTypeId
-		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedInventoryTransactionId, strRelatedInventoryTransactionId, intTransactionTypeId)
+				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
+		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
 WHERE	Changes.Action = 'UPDATE'
 ;
 

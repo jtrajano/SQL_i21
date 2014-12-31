@@ -18,12 +18,11 @@ BEGIN
 				,@InvalidLocation AS INT = -1
 
 		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
-		DECLARE @InventoryAdjustment AS INT = 1
-		DECLARE @InventoryReceipt AS INT = 2
-		DECLARE @InventoryShipment AS INT = 3;	
+		DECLARE @AUTO_NEGATIVE AS INT = 1
+		DECLARE @WRITE_OFF_SOLD AS INT = 2
+		DECLARE @REVALUE_SOLD AS INT = 3		
+		DECLARE @InventoryReceipt AS INT = 4
+		DECLARE @InventoryShipment AS INT = 5;
 
 		CREATE TABLE actualFIFO (
 			strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -43,8 +42,8 @@ BEGIN
 			intInventoryTransactionId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-			,strRelatedInventoryTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-			,intRelatedInventoryTransactionId INT NULL 
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
 		)
 
@@ -52,8 +51,8 @@ BEGIN
 			intInventoryTransactionId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-			,strRelatedInventoryTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-			,intRelatedInventoryTransactionId INT NULL 
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
 		)
 	END 
