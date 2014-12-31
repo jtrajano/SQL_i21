@@ -7,13 +7,13 @@ BEGIN
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
-		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
+		-- Create the variables for the internal transaction types used by costing. 	
+		DECLARE @Inventory_Auto_Negative AS INT = 1;
+		DECLARE @Inventory_Write_Off_Sold AS INT = 2;
+		DECLARE @Inventory_Revalue_Sold AS INT = 3;
 		
-		DECLARE @PurchaseType AS INT = 1
-		DECLARE @SaleType AS INT = 2
+		DECLARE @PurchaseType AS INT = 4
+		DECLARE @SaleType AS INT = 5
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -33,10 +33,9 @@ BEGIN
 		DECLARE @USD AS INT = 1;
 		
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
-		DECLARE @Inventory_AutoNegative AS NVARCHAR(50) = 'Inventory Auto Negative'  
-		DECLARE @Inventory_RevalueSold AS NVARCHAR(50) = 'Inventory Revalue Sold'  
-		DECLARE @Inventory_WriteOffSold AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
-		DECLARE @Inventory_Costing AS NVARCHAR(50) = 'Inventory Costing' 		
+		DECLARE @Inventory_AutoNegative_Name AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_RevalueSold_Name AS NVARCHAR(50) = 'Inventory Revalue Sold'  
+		DECLARE @Inventory_WriteOffSold_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
 		
 		-- Declare the account ids
 		DECLARE @Inventory_Default AS INT = 1000
@@ -79,6 +78,7 @@ BEGIN
 				,strBatchId
 				,intTransactionTypeId
 				,intLotId
+				,strTransactionForm
 				,dtmCreated
 				,intCreatedUserId
 				,intConcurrencyId
@@ -95,8 +95,9 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'SALE-00001'
 				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @REVALUE_SOLD
+				,intTransactionTypeId = @Inventory_Revalue_Sold
 				,intLotId = NULL 
+				,strTransactionForm = 'Inventory Shipment'
 				,dtmCreated = GETDATE()
 				,intCreatedUserId = 1
 				,intConcurrencyId = 1
@@ -146,7 +147,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= tblGLAccount.strDescription 
-			,strCode					= '' 
+			,strCode					= 'IRS' 
 			,strReference				= '' 
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
@@ -158,8 +159,8 @@ BEGIN
 			,intEntityId				= 1 
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= @Inventory_RevalueSold
-			,strTransactionForm			= ''
+			,strTransactionType			= @Inventory_RevalueSold_Name
+			,strTransactionForm			= 'Inventory Shipment'
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 		FROM dbo.tblGLAccount
@@ -175,7 +176,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= tblGLAccount.strDescription
-			,strCode					= ''
+			,strCode					= 'IRS'
 			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
@@ -187,8 +188,8 @@ BEGIN
 			,intEntityId				= 1
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= @Inventory_RevalueSold
-			,strTransactionForm			= ''
+			,strTransactionType			= @Inventory_RevalueSold_Name
+			,strTransactionForm			= 'Inventory Shipment'
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1		
 		FROM dbo.tblGLAccount

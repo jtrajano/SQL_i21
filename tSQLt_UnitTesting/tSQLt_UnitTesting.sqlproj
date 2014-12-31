@@ -585,6 +585,15 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add 1-add 2-unpost add 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Functions\test fnRecalculateAverageCost for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnRecalculateAverageCost for average cost from FIFO.sql" />
+    <Build Include="testi21Database\Functions\test fnRecalculateAverageCost for average cost from LIFO.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries for reversing GL entries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

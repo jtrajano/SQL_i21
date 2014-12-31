@@ -10,11 +10,12 @@ BEGIN
 		EXEC testi21Database.[Fake data for item costing];
 
 		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
-		DECLARE @PurchaseType AS INT = 1
-		DECLARE @SalesType AS INT = 2
+		DECLARE @AUTO_NEGATIVE AS INT = 1
+		DECLARE @WRITE_OFF_SOLD AS INT = 2
+		DECLARE @REVALUE_SOLD AS INT = 3
+		
+		DECLARE @PurchaseType AS INT = 4
+		DECLARE @SalesType AS INT = 5
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1

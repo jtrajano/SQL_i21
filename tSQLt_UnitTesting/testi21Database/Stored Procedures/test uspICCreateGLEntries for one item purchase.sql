@@ -7,12 +7,12 @@ BEGIN
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
-		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
+		-- Create the variables for the internal transaction types used by costing. 	
+		DECLARE @Inventory_Auto_Negative AS INT = 1;
+		DECLARE @Inventory_Write_Off_Sold AS INT = 2;
+		DECLARE @Inventory_Revalue_Sold AS INT = 3;
 		
-		DECLARE @PurchaseType AS INT = 1
+		DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -71,6 +71,7 @@ BEGIN
 				,strTransactionId
 				,strBatchId
 				,intTransactionTypeId
+				,strTransactionForm
 				,intLotId
 				,dtmCreated
 				,intCreatedUserId
@@ -88,7 +89,8 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'PURCHASE-00001'
 				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @PurchaseType
+				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE
+				,strTransactionForm = 'Inventory Receipt'
 				,intLotId = NULL 
 				,dtmCreated = GETDATE()
 				,intCreatedUserId = 1
@@ -139,7 +141,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= 'INVENTORY WHEAT-DEFAULT'
-			,strCode					= ''
+			,strCode					= 'IC'
 			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
@@ -151,8 +153,8 @@ BEGIN
 			,intEntityId				= 1
 			,strTransactionId			= 'PURCHASE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= 'Inventory Costing'
-			,strTransactionForm			= ''
+			,strTransactionType			= 'Inventory Receipt'
+			,strTransactionForm			= 'Inventory Receipt'
 			,strModuleName				= 'Inventory'
 			,intConcurrencyId			= 1
 		UNION ALL 
@@ -165,7 +167,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= 'COST OF GOODS WHEAT-DEFAULT'
-			,strCode					= ''
+			,strCode					= 'IC'
 			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
@@ -177,8 +179,8 @@ BEGIN
 			,intEntityId				= 1
 			,strTransactionId			= 'PURCHASE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= 'Inventory Costing'
-			,strTransactionForm			= ''
+			,strTransactionType			= 'Inventory Receipt'
+			,strTransactionForm			= 'Inventory Receipt'
 			,strModuleName				= 'Inventory'
 			,intConcurrencyId			= 1		
 

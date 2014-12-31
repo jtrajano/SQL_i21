@@ -14,9 +14,9 @@ BEGIN
 			ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intLocationId] ASC, [intInventoryLIFOId] DESC);	
 				
 		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
+		DECLARE @AUTO_NEGATIVE AS INT = 1
+		DECLARE @WRITE_OFF_SOLD AS INT = 2
+		DECLARE @REVALUE_SOLD AS INT = 3
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1

@@ -10,27 +10,22 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Create the variables for the internal transaction types used by costing. 
-DECLARE @WRITE_OFF_SOLD AS INT = -1;
-DECLARE @REVALUE_SOLD AS INT = -2;
-DECLARE @AUTO_NEGATIVE AS INT = -3;
-
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
 DECLARE @UseGLAccount_WriteOffSold AS NVARCHAR(30) = 'Write-Off Sold';
 DECLARE @UseGLAccount_RevalueSold AS NVARCHAR(30) = 'Revalue Sold';
 DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto Negative';
 
+-- Create the variables for the internal transaction types used by costing. 
+DECLARE @Inventory_Auto_Negative AS INT = 1;
+DECLARE @Inventory_Write_Off_Sold AS INT = 2;
+DECLARE @Inventory_Revalue_Sold AS INT = 3;
+
+-- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
-DECLARE @AUTO_NEGATIVE_TransactionType AS NVARCHAR(50) = 'Inventory Auto Negative';
-DECLARE @WRITEOFF_SOLD_TransactionType AS NVARCHAR(50) = 'Inventory Write-Off Sold';
-DECLARE @REVALUE_SOLD_TransactionType AS NVARCHAR(50) = 'Inventory Revalue Sold';
-DECLARE @ITEM_COSTING_TransactionType AS NVARCHAR(50) = 'Inventory Costing';
-
-DECLARE @GLAccounts AS dbo.ItemGLAccount; 
-
 
 -- Get the GL Account ids to use
+DECLARE @GLAccounts AS dbo.ItemGLAccount; 
 INSERT INTO @GLAccounts (
 	intItemId 
 	,intLocationId 
@@ -72,6 +67,8 @@ WITH ForGLEntries_CTE (
 	,intCurrencyId
 	,dblExchangeRate
 	,intInventoryTransactionId
+	,strInventoryTransactionTypeName
+	,strTransactionForm
 )
 AS 
 (
@@ -87,7 +84,10 @@ AS
 			,TRANS.intCurrencyId
 			,TRANS.dblExchangeRate
 			,TRANS.intInventoryTransactionId
-	FROM	dbo.tblICInventoryTransaction TRANS 
+			,strInventoryTransactionTypeName = TransType.strName
+			,TRANS.strTransactionForm
+	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	TRANS.strBatchId = @strBatchId
 )
 -------------------------------------------------------------------------------------------
@@ -102,7 +102,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= tblGLAccount.strDescription
-		,strCode					= '' 
+		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -115,8 +115,8 @@ SELECT
 		,intEntityId				= @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= @ITEM_COSTING_TransactionType
-		,strTransactionForm			= '' 
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE  
@@ -127,7 +127,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
-WHERE	intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE)
+WHERE	intTransactionTypeId NOT IN (@Inventory_Write_Off_Sold, @Inventory_Revalue_Sold, @Inventory_Auto_Negative)
 
 UNION ALL 
 SELECT	
@@ -139,7 +139,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= tblGLAccount.strDescription
-		,strCode					= '' 
+		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -152,8 +152,8 @@ SELECT
 		,intEntityId				= @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= @ITEM_COSTING_TransactionType
-		,strTransactionForm			= '' 
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
@@ -164,7 +164,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
-WHERE	intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE)
+WHERE	intTransactionTypeId NOT IN (@Inventory_Write_Off_Sold, @Inventory_Revalue_Sold, @Inventory_Auto_Negative)
 
 -----------------------------------------------------------------------------------
 -- This part is for the Write-Off Sold 
@@ -179,7 +179,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= tblGLAccount.strDescription
-		,strCode					= ''
+		,strCode					= 'IWS'
 		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -192,8 +192,8 @@ SELECT
 		,intEntityId				= @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= @WRITEOFF_SOLD_TransactionType
-		,strTransactionForm			= '' 
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm 
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
@@ -204,7 +204,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
-WHERE	intTransactionTypeId = @WRITE_OFF_SOLD
+WHERE	intTransactionTypeId = @Inventory_Write_Off_Sold
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -215,7 +215,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= tblGLAccount.strDescription
-		,strCode					= '' 
+		,strCode					= 'IWS' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -228,8 +228,8 @@ SELECT
 		,intEntityId				= @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= @WRITEOFF_SOLD_TransactionType 
-		,strTransactionForm			= '' 
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName 
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
@@ -240,7 +240,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intWriteOffSoldId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
-WHERE	intTransactionTypeId  = @WRITE_OFF_SOLD
+WHERE	intTransactionTypeId  = @Inventory_Write_Off_Sold
 
 -----------------------------------------------------------------------------------
 -- This part is for the Revalue Sold 
@@ -255,7 +255,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= tblGLAccount.strDescription
-		,strCode					= '' -- TODO
+		,strCode					= 'IRS' -- TODO
 		,strReference				= '' -- TODO
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -268,8 +268,8 @@ SELECT
 		,intEntityId				= @intUserId -- TODO
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= @REVALUE_SOLD_TransactionType
-		,strTransactionForm			= '' -- TODO
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 
@@ -281,7 +281,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
-WHERE	intTransactionTypeId = @REVALUE_SOLD
+WHERE	intTransactionTypeId = @Inventory_Revalue_Sold
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -292,7 +292,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= tblGLAccount.strDescription
-		,strCode					= '' 
+		,strCode					= 'IRS' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -305,8 +305,8 @@ SELECT
 		,intEntityId				= @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= @REVALUE_SOLD_TransactionType
-		,strTransactionForm			= '' 
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
@@ -317,7 +317,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueSoldId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
-WHERE	intTransactionTypeId  = @REVALUE_SOLD
+WHERE	intTransactionTypeId  = @Inventory_Revalue_Sold
 
 -----------------------------------------------------------------------------------
 -- This part is for the Auto-Negative 
@@ -332,7 +332,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= tblGLAccount.strDescription
-		,strCode					= '' 
+		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -345,8 +345,8 @@ SELECT
 		,intEntityId				= @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= @AUTO_NEGATIVE_TransactionType
-		,strTransactionForm			= '' 
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
@@ -357,7 +357,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
-WHERE	intTransactionTypeId = @AUTO_NEGATIVE
+WHERE	intTransactionTypeId = @Inventory_Auto_Negative
 UNION ALL 
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -368,7 +368,7 @@ SELECT
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= tblGLAccount.strDescription
-		,strCode					= '' 
+		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -381,8 +381,8 @@ SELECT
 		,intEntityId				= @intUserId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
-		,strTransactionType			= @AUTO_NEGATIVE_TransactionType
-		,strTransactionForm			= '' 
+		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
+		,strTransactionForm			= ForGLEntries_CTE.strTransactionForm
 		,strModuleName				= @ModuleName
 		,intConcurrencyId			= 1
 FROM	ForGLEntries_CTE 
@@ -393,5 +393,5 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
 		CROSS APPLY dbo.fnGetCredit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Credit
-WHERE	intTransactionTypeId  = @AUTO_NEGATIVE
+WHERE	intTransactionTypeId  = @Inventory_Auto_Negative
 ;

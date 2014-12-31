@@ -11,17 +11,27 @@ INSERT INTO dbo.[tblICInventoryTransactionType] (
 )
 SELECT 
 	[intTransactionTypeId] = 1,
-	[strName] = 'Inventory Adjustment'
+	[strName] = 'Inventory Auto Negative'
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 1)
-UNION ALL 
+UNION ALL
 SELECT 
 	[intTransactionTypeId] = 2,
-	[strName] = 'Inventory Receipt'
+	[strName] = 'Inventory Write-Off Sold'
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 2)
-UNION ALL 
+UNION ALL
 SELECT 
 	[intTransactionTypeId] = 3,
-	[strName] = 'Inventory Shipment'
+	[strName] = 'Inventory Revalue Sold'
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 3)
+UNION ALL 
+SELECT 
+	[intTransactionTypeId] = 4,
+	[strName] = 'Inventory Receipt'
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 4)
+UNION ALL 
+SELECT 
+	[intTransactionTypeId] = 5,
+	[strName] = 'Inventory Shipment'
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 5)
 
 print('/*******************  END Populate Inventory Transaction Types *******************/')

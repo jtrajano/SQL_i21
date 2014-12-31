@@ -10,11 +10,12 @@ BEGIN
 		EXEC testi21Database.[Fake data for item costing];
 
 		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
-		DECLARE @PurchaseType AS INT = 1
-		DECLARE @SalesType AS INT = 2
+		DECLARE @AUTO_NEGATIVE AS INT = 1
+		DECLARE @WRITE_OFF_SOLD AS INT = 2
+		DECLARE @REVALUE_SOLD AS INT = 3
+		
+		DECLARE @PurchaseType AS INT = 4
+		DECLARE @SalesType AS INT = 5
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -57,7 +58,6 @@ BEGIN
 		DECLARE @Inventory_AutoNegative AS NVARCHAR(50) = 'Inventory Auto Negative'  
 		DECLARE @Inventory_RevalueSold AS NVARCHAR(50) = 'Inventory Revalue Sold'  
 		DECLARE @Inventory_WriteOffSold AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
-		DECLARE @Inventory_Costing AS NVARCHAR(50) = 'Inventory Costing'  		
 
 		-- Create the expected and actual tables. 
 		DECLARE @recap AS dbo.RecapTableType		
@@ -126,7 +126,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= tblGLAccount.strDescription
-			,strCode					= ''
+			,strCode					= 'IC'
 			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
@@ -134,12 +134,12 @@ BEGIN
 			,strJournalLineDescription	= ''
 			,intJournalLineNo			= 6
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1
+			,intEntityId				= 1
 			,strTransactionId			= 'PURCHASE-000001'
 			,intTransactionId			= 1
-			,strTransactionType			= @Inventory_Costing
-			,strTransactionForm			= ''
+			,strTransactionType			= 'Inventory Receipt'
+			,strTransactionForm			= 'Inventory Receipt'
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 		FROM dbo.tblGLAccount   
@@ -155,7 +155,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= tblGLAccount.strDescription
-			,strCode					= ''
+			,strCode					= 'IC'
 			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
@@ -167,8 +167,8 @@ BEGIN
 			,intEntityId				= 1 
 			,strTransactionId			= 'PURCHASE-000001'
 			,intTransactionId			= 1
-			,strTransactionType			= @Inventory_Costing
-			,strTransactionForm			= '' 
+			,strTransactionType			= 'Inventory Receipt'
+			,strTransactionForm			= 'Inventory Receipt' 
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 		FROM dbo.tblGLAccount   

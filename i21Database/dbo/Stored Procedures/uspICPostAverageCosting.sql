@@ -53,9 +53,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @WRITE_OFF_SOLD AS INT = -1;
-DECLARE @REVALUE_SOLD AS INT = -2;
-DECLARE @AUTO_NEGATIVE AS INT = -3;
+DECLARE @Inventory_Auto_Negative AS INT = 1;
+DECLARE @Inventory_Write_Off_Sold AS INT = 2;
+DECLARE @Inventory_Revalue_Sold AS INT = 3;
 
 -- Create the variables 
 DECLARE @RemainingQty AS NUMERIC(18,6);
@@ -72,6 +72,13 @@ DECLARE @NewFifoId AS INT
 DECLARE @UpdatedFifoId AS INT 
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
+
+-- Initialize the transaction name. Use this as the transaction form name
+DECLARE @TransactionTypeName AS NVARCHAR(200) 
+SELECT	TOP 1 
+		@TransactionTypeName = strName
+FROM	dbo.tblICInventoryTransactionType
+WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
@@ -100,6 +107,7 @@ BEGIN
 			,[strTransactionId] 
 			,[strBatchId] 
 			,[intTransactionTypeId] 
+			,[strTransactionForm]
 			,[dtmCreated] 
 			,[intCreatedUserId] 
 			,[intConcurrencyId] 
@@ -117,6 +125,7 @@ BEGIN
 				,[strTransactionId] = @strTransactionId
 				,[strBatchId] = @strBatchId
 				,[intTransactionTypeId] = @intTransactionTypeId
+				,[strTransactionForm] = @TransactionTypeName
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = @intUserId
 				,[intConcurrencyId] = 1
@@ -183,6 +192,7 @@ BEGIN
 			,[strTransactionId] 
 			,[strBatchId] 
 			,[intTransactionTypeId] 
+			,[strTransactionForm]
 			,[dtmCreated] 
 			,[intCreatedUserId] 
 			,[intConcurrencyId] 
@@ -200,6 +210,7 @@ BEGIN
 				,[strTransactionId] = @strTransactionId
 				,[strBatchId] = @strBatchId
 				,[intTransactionTypeId] = @intTransactionTypeId 
+				,[strTransactionForm] = @TransactionTypeName
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = @intUserId
 				,[intConcurrencyId] = 1		
@@ -246,6 +257,7 @@ BEGIN
 				,[intTransactionTypeId] 
 				,[intRelatedInventoryTransactionId]
 				,[strRelatedInventoryTransactionId]
+				,[strTransactionForm]
 				,[dtmCreated] 
 				,[intCreatedUserId] 
 				,[intConcurrencyId] 
@@ -263,9 +275,10 @@ BEGIN
 					,[intTransactionId] = @intTransactionId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @WRITE_OFF_SOLD
+					,[intTransactionTypeId] = @Inventory_Write_Off_Sold
 					,[intRelatedInventoryTransactionId] = @intRelatedTransactionId
 					,[strRelatedInventoryTransactionId] = @strRelatedTransactionId
+					,[strTransactionForm] = @TransactionTypeName
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
@@ -284,9 +297,10 @@ BEGIN
 					,[intTransactionId] = @intTransactionId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
-					,[intTransactionTypeId] = @REVALUE_SOLD
+					,[intTransactionTypeId] = @Inventory_Revalue_Sold
 					,[intRelatedInventoryTransactionId] = @intRelatedTransactionId
 					,[strRelatedInventoryTransactionId] = @strRelatedTransactionId
+					,[strTransactionForm] = @TransactionTypeName
 					,[dtmCreated] = GETDATE()
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId] = 1
@@ -340,6 +354,7 @@ BEGIN
 				,[strTransactionId] 
 				,[strBatchId] 
 				,[intTransactionTypeId] 
+				,[strTransactionForm]
 				,[dtmCreated] 
 				,[intCreatedUserId] 
 				,[intConcurrencyId] 
@@ -358,7 +373,8 @@ BEGIN
 				,[intTransactionId] = @intTransactionId
 				,[strTransactionId] = @strTransactionId
 				,[strBatchId] = @strBatchId
-				,[intTransactionTypeId] = @AUTO_NEGATIVE
+				,[intTransactionTypeId] = @Inventory_Auto_Negative
+				,[strTransactionForm] = @TransactionTypeName
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = @intUserId
 				,[intConcurrencyId] = 1

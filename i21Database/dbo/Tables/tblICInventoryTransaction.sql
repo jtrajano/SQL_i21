@@ -33,6 +33,7 @@ CREATE TABLE [dbo].[tblICInventoryTransaction]
 	[ysnIsUnposted] BIT NULL,
 	[intRelatedInventoryTransactionId] INT NULL,
 	[strRelatedInventoryTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+	[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
     [dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
