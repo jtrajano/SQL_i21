@@ -247,13 +247,13 @@ BEGIN
 				,intRelatedTransactionId = 1
 				,strRelatedTransactionId = 'InvShip-0000001'
 				,intTransactionTypeId = @WRITE_OFF_SOLD
-		UNION ALL 
-		SELECT	intInventoryTransactionId = 5
-				,intTransactionId = 1
-				,strTransactionId = 'InvRcpt-0000001'
-				,intRelatedTransactionId = 1
-				,strRelatedTransactionId = 'InvShip-0000001'
-				,intTransactionTypeId = @AUTO_NEGATIVE				
+		--UNION ALL 
+		--SELECT	intInventoryTransactionId = 5
+		--		,intTransactionId = 1
+		--		,strTransactionId = 'InvRcpt-0000001'
+		--		,intRelatedTransactionId = 1
+		--		,strRelatedTransactionId = 'InvShip-0000001'
+		--		,intTransactionTypeId = @AUTO_NEGATIVE				
 	END 
 	
 	-- Act

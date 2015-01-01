@@ -49,7 +49,7 @@ END
 
 BEGIN 
 	-------------------------------------------------------------------------------------------
-	-- Reverse the G/L entries for the main transaction 
+	-- Reverse the G/L entries for the main and related transactions
 	-------------------------------------------------------------------------------------------
 	SELECT	
 			dtmDate						= GLEntries.dtmDate
@@ -67,7 +67,7 @@ BEGIN
 			,dtmDateEntered				= GETDATE()
 			,dtmTransactionDate			= GLEntries.dtmDate
 			,strJournalLineDescription	= GLEntries.strJournalLineDescription
-			,intJournalLineNo			= GLEntries.intJournalLineNo
+			,intJournalLineNo			= Reversal.intInventoryTransactionId
 			,ysnIsUnposted				= 1
 			,intUserId					= @intUserId 
 			,intEntityId				= @intUserId 
@@ -77,50 +77,22 @@ BEGIN
 			,strTransactionForm			= GLEntries.strTransactionForm
 			,strModuleName				= GLEntries.strModuleName
 			,intConcurrencyId			= 1
-	FROM	dbo.tblGLDetail GLEntries
-	WHERE	GLEntries.intTransactionId = @intTransactionId
-			AND GLEntries.strTransactionId = @strTransactionId
+	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
+				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
+				AND (
+						(
+							GLEntries.intTransactionId = Reversal.intTransactionId
+							AND GLEntries.strTransactionId = Reversal.strTransactionId
+						)
+						OR (
+							GLEntries.intTransactionId = Reversal.intRelatedTransactionId
+							AND GLEntries.strTransactionId = Reversal.strRelatedTransactionId					
+						)					
+				)
+	WHERE	Reversal.strBatchId = @strBatchId
 			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
-			AND strTransactionType <> @AUTO_NEGATIVE_TransactionType
-
-	-------------------------------------------------------------------------------------------
-	-- Reverse the G/L entries for the related transactions 
-	-------------------------------------------------------------------------------------------
-	UNION ALL 
-	SELECT	
-			dtmDate						= GLEntries.dtmDate
-			,strBatchId					= @strBatchId
-			,intAccountId				= GLEntries.intAccountId
-			,dblDebit					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
-			,dblCredit					= GLEntries.dblDebit	-- Reverse the Credit with Debit 
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= 0
-			,strDescription				= GLEntries.strDescription
-			,strCode					= GLEntries.strCode
-			,strReference				= GLEntries.strReference
-			,intCurrencyId				= GLEntries.intCurrencyId
-			,dblExchangeRate			= GLEntries.dblExchangeRate
-			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= GLEntries.dtmDate
-			,strJournalLineDescription	= GLEntries.strJournalLineDescription
-			,intJournalLineNo			= GLEntries.intJournalLineNo
-			,ysnIsUnposted				= 1
-			,intUserId					= @intUserId 
-			,intEntityId				= @intUserId 
-			,strTransactionId			= GLEntries.strTransactionId
-			,intTransactionId			= GLEntries.intTransactionId
-			,strTransactionType			= GLEntries.strTransactionType
-			,strTransactionForm			= GLEntries.strTransactionForm
-			,strModuleName				= GLEntries.strModuleName
-			,intConcurrencyId			= 1
-	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction ItemTransactions 
-				--ON GLEntries.intJournalLineNo = ItemTransactions.intInventoryTransactionId
-				ON GLEntries.intTransactionId = ItemTransactions.intRelatedTransactionId
-				AND GLEntries.strTransactionId = ItemTransactions.strRelatedTransactionId
-	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
-			AND GLEntries.strTransactionType NOT IN (@AUTO_NEGATIVE_TransactionType)
-
+			AND Reversal.intTransactionTypeId <> @AUTO_NEGATIVE
+			
 	-----------------------------------------------------------------------------------
 	-- Create the Auto-Negative G/L Entries
 	-----------------------------------------------------------------------------------
@@ -148,7 +120,7 @@ BEGIN
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AUTO_NEGATIVE_TransactionType
-			,strTransactionForm			= ''
+			,strTransactionForm			= ItemTransactions.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
@@ -185,7 +157,7 @@ BEGIN
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
 			,strTransactionType			= @AUTO_NEGATIVE_TransactionType
-			,strTransactionForm			= '' 
+			,strTransactionForm			= ItemTransactions.strTransactionForm 
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts

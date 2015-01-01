@@ -72,6 +72,7 @@ BEGIN
 
 		-- Call the fake data for GL Account 
 		EXEC testi21Database.[Fake data for COA used in costing];
+		EXEC testi21Database.[Fake data for the accounting period];
 	END 
 
 	-- Act

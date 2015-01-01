@@ -218,19 +218,19 @@ BEGIN
 	-- Fake data for tblICInventoryTransaction
 	BEGIN 
 		-- Sale Transaction (Negative stock)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', -100, 20.00, NULL, 0, 1, 1, 1, 'SALE-100000', 'BATCH-100000', @SalesType, NULL, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, strTransactionForm) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', -100, 20.00, NULL, 0, 1, 1, 1, 'SALE-100000', 'BATCH-100000', @SalesType, NULL, 1, NULL, NULL, 'Inventory Shipment')
 		
 		-- Purchase Transaction (To Offset the negative stock)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 100, 22.00, NULL, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-200000', @PurchaseType, NULL, 1, NULL, NULL)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, -2200.00, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-200000', @WRITE_OFF_SOLD, NULL, 1, 1, 'SALE-100000')
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, 2000.00, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-200000', @REVALUE_SOLD, NULL, 1, 1, 'SALE-100000')
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, 0, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-200000', @AUTO_NEGATIVE, NULL, 1, NULL, NULL)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, strTransactionForm) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 100, 22.00, NULL, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-200000', @PurchaseType, NULL, 1, NULL, NULL, 'Inventory Receipt')
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, strTransactionForm) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, -2200.00, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-200000', @WRITE_OFF_SOLD, NULL, 1, 1, 'SALE-100000', 'Inventory Receipt')
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, strTransactionForm) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, 2000.00, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-200000', @REVALUE_SOLD, NULL, 1, 1, 'SALE-100000', 'Inventory Receipt')
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, strTransactionForm) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, 0, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-200000', @AUTO_NEGATIVE, NULL, 1, NULL, NULL, 'Inventory Receipt')
 
 		-- Additional purhcase transactions for other items (Positive stock)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@StickyGrains, @Default_Location, 'January 1, 2014', 150, 33.00, NULL, 0, 1, 1, 2, 'PURCHASE-200000', 'BATCH-300000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@PremiumGrains, @Default_Location, 'January 1, 2014', 200, 44.00, NULL, 0, 1, 1, 3, 'PURCHASE-300000', 'BATCH-400000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@ColdGrains, @Default_Location, 'January 1, 2014', 250, 55.00, NULL, 0, 1, 1, 4, 'PURCHASE-400000', 'BATCH-500000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@HotGrains, @Default_Location, 'January 1, 2014', 300, 66.00, NULL, 0, 1, 1, 5, 'PURCHASE-500000', 'BATCH-600000', @PurchaseType, NULL, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, strTransactionForm) VALUES (@StickyGrains, @Default_Location, 'January 1, 2014', 150, 33.00, NULL, 0, 1, 1, 2, 'PURCHASE-200000', 'BATCH-300000', @PurchaseType, NULL, 1, NULL, NULL, 'Inventory Receipt')
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, strTransactionForm) VALUES (@PremiumGrains, @Default_Location, 'January 1, 2014', 200, 44.00, NULL, 0, 1, 1, 3, 'PURCHASE-300000', 'BATCH-400000', @PurchaseType, NULL, 1, NULL, NULL, 'Inventory Receipt')
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, strTransactionForm) VALUES (@ColdGrains, @Default_Location, 'January 1, 2014', 250, 55.00, NULL, 0, 1, 1, 4, 'PURCHASE-400000', 'BATCH-500000', @PurchaseType, NULL, 1, NULL, NULL, 'Inventory Receipt')
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, strTransactionForm) VALUES (@HotGrains, @Default_Location, 'January 1, 2014', 300, 66.00, NULL, 0, 1, 1, 5, 'PURCHASE-500000', 'BATCH-600000', @PurchaseType, NULL, 1, NULL, NULL, 'Inventory Receipt')
 	END 
 
 	-- Fake data for Item-Account
@@ -457,7 +457,7 @@ BEGIN
 				,dtmDateEntered = GETDATE()
 				,dtmTransactionDate = '01/01/2014'
 				,strJournalLineDescription = ''
-				,intJournalLineNo = @JournalId
+				,intJournalLineNo = @JournalId + 1
 				,ysnIsUnposted = 0
 				,intUserId = 1
 				,intEntityId = 1
@@ -485,7 +485,7 @@ BEGIN
 				,dtmDateEntered = GETDATE()
 				,dtmTransactionDate = '01/01/2014'
 				,strJournalLineDescription = ''
-				,intJournalLineNo = @JournalId
+				,intJournalLineNo = @JournalId + 1
 				,ysnIsUnposted = 0
 				,intUserId = 1
 				,intEntityId = 1
@@ -514,7 +514,7 @@ BEGIN
 				,dtmDateEntered = GETDATE()
 				,dtmTransactionDate = '01/01/2014'
 				,strJournalLineDescription = ''
-				,intJournalLineNo = @JournalId
+				,intJournalLineNo = @JournalId + 2
 				,ysnIsUnposted = 0
 				,intUserId = 1
 				,intEntityId = 1
@@ -542,7 +542,7 @@ BEGIN
 				,dtmDateEntered = GETDATE()
 				,dtmTransactionDate = '01/01/2014'
 				,strJournalLineDescription = ''
-				,intJournalLineNo = @JournalId
+				,intJournalLineNo = @JournalId + 2
 				,ysnIsUnposted = 0
 				,intUserId = 1
 				,intEntityId = 1
@@ -554,12 +554,70 @@ BEGIN
 				,intConcurrencyId = 1
 		FROM	dbo.tblGLAccount GLAccount
 		WHERE	GLAccount.intAccountId = @RevalueSold_Default
+
+		-- AUTO NEGATIVE
+		UNION ALL 
+		SELECT	dtmDate = '01/01/2014'
+				,strBatchId = 'BATCH-200000'
+				,intAccountId = @Inventory_Default
+				,dblDebit = 0
+				,dblCredit = 0
+				,dblDebitUnit = 0 
+				,dblCreditUnit = 0 
+				,strDescription = GLAccount.strDescription
+				,strCode = 'IRS'
+				,strReference = ''
+				,intCurrencyId = 1
+				,dblExchangeRate = 1
+				,dtmDateEntered = GETDATE()
+				,dtmTransactionDate = '01/01/2014'
+				,strJournalLineDescription = ''
+				,intJournalLineNo = @JournalId + 3
+				,ysnIsUnposted = 0
+				,intUserId = 1
+				,intEntityId = 1
+				,strTransactionId = 'PURCHASE-100000'
+				,intTransactionId = @TransactionId 
+				,strTransactionType = @AUTO_NEGATIVE_NAME
+				,strTransactionForm = 'Inventory Receipt'
+				,strModuleName = 'Inventory'
+				,intConcurrencyId = 1
+		FROM	dbo.tblGLAccount GLAccount
+		WHERE	GLAccount.intAccountId = @Inventory_Default
+		UNION ALL 
+		SELECT	dtmDate = '01/01/2014'
+				,strBatchId = 'BATCH-200000'
+				,intAccountId = @AutoNegative_Default
+				,dblDebit = 0
+				,dblCredit = 0
+				,dblDebitUnit = 0 
+				,dblCreditUnit = 0 
+				,strDescription = GLAccount.strDescription
+				,strCode = 'IRS'
+				,strReference = ''
+				,intCurrencyId = 1
+				,dblExchangeRate = 1
+				,dtmDateEntered = GETDATE()
+				,dtmTransactionDate = '01/01/2014'
+				,strJournalLineDescription = ''
+				,intJournalLineNo = @JournalId + 3
+				,ysnIsUnposted = 0
+				,intUserId = 1
+				,intEntityId = 1
+				,strTransactionId = 'PURCHASE-100000'
+				,intTransactionId = @TransactionId 
+				,strTransactionType = @AUTO_NEGATIVE_NAME
+				,strTransactionForm = 'Inventory Receipt'
+				,strModuleName = 'Inventory'
+				,intConcurrencyId = 1
+		FROM	dbo.tblGLAccount GLAccount
+		WHERE	GLAccount.intAccountId = @AutoNegative_Default
 	END 
 
 	-- Add fake data for PURCHASE-200000
 	BEGIN 	
 		SET @TransactionId = 2
-		SET @JournalId = 3
+		SET @JournalId = 6
 		INSERT INTO tblGLDetail (
 				dtmDate
 				,strBatchId
@@ -647,7 +705,7 @@ BEGIN
 	-- Add fake data for PURCHASE-300000
 	BEGIN 
 		SET @TransactionId = 3
-		SET @JournalId = 4
+		SET @JournalId = 7
 		INSERT INTO tblGLDetail (
 				dtmDate
 				,strBatchId
@@ -735,7 +793,7 @@ BEGIN
 	-- Add fake data for PURCHASE-400000
 	BEGIN 
 		SET @TransactionId = 4
-		SET @JournalId = 5
+		SET @JournalId = 8
 		INSERT INTO tblGLDetail (
 				dtmDate
 				,strBatchId
@@ -823,7 +881,7 @@ BEGIN
 	-- Add fake data for PURCHASE-500000
 	BEGIN 
 		SET @TransactionId = 5
-		SET @JournalId = 6
+		SET @JournalId = 9
 		INSERT INTO tblGLDetail (
 				dtmDate
 				,strBatchId

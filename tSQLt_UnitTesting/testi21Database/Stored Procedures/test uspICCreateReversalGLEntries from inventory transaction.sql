@@ -4,9 +4,9 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
-		DECLARE @AUTO_NEGATIVE_TransactionType AS NVARCHAR(50) = 'Inventory Auto Negative';
-		DECLARE @WRITEOFF_SOLD_TransactionType AS NVARCHAR(50) = 'Inventory Write-Off Sold';
-		DECLARE @REVALUE_SOLD_TransactionType AS NVARCHAR(50) = 'Inventory Revalue Sold';
+		DECLARE @AUTO_NEGATIVE_Name AS NVARCHAR(50) = 'Inventory Auto Negative';
+		DECLARE @WRITEOFF_SOLD_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold';
+		DECLARE @REVALUE_SOLD_Name AS NVARCHAR(50) = 'Inventory Revalue Sold';
 
 		DECLARE @InventoryAdjustment_TransactionType AS INT = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
@@ -61,10 +61,10 @@ BEGIN
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
 		
-		-- Add fake data that reverses the inventory transactions		
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 100, 20.00, NULL, 0, 1, 1, 1, 'SALE-100000', 'BATCH-100001', @SaleType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedInventoryTransactionId, strRelatedTransactionId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, 2200.00, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100001', @WRITE_OFF_SOLD, NULL, 1, 1, 'SALE-100000')
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedInventoryTransactionId, strRelatedTransactionId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, -2000.00, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100001', @REVALUE_SOLD, NULL, 1, 1, 'SALE-100000')	
+		-- Add fake data that reverses the inventory transactions	
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, ysnIsUnposted, intRelatedInventoryTransactionId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 100, 20.00, NULL, 0, 1, 1, 1, 'SALE-100000', 'BATCH-100001', @SaleType, NULL, 1, 1, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, intRelatedInventoryTransactionId, ysnIsUnposted) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, (100 * 20.00), 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100001', @WRITE_OFF_SOLD, NULL, 1, 1, 'SALE-100000', 3, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, intRelatedInventoryTransactionId, ysnIsUnposted) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, (-100 * 22.00), 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100001', @REVALUE_SOLD, NULL, 1, 1, 'SALE-100000', 4, 1)	
 
 		-- Create the expected and actual tables. 
 		DECLARE @recap AS dbo.RecapTableType		
@@ -102,6 +102,7 @@ BEGIN
 				,strModuleName
 				,intConcurrencyId
 		)
+		-- Reverse of Sales transaction 
 		SELECT	dtmDate = '01/01/2014'
 				,strBatchId = 'BATCH-100001'
 				,intAccountId = @Inventory_Default
@@ -116,7 +117,7 @@ BEGIN
 				,dblExchangeRate = 1
 				,dtmTransactionDate = '01/01/2014'
 				,strJournalLineDescription = ''
-				,intJournalLineNo = 1
+				,intJournalLineNo = 10
 				,ysnIsUnposted = 1
 				,intUserId = 1
 				,intEntityId = 1
@@ -143,7 +144,7 @@ BEGIN
 				,dblExchangeRate = 1
 				,dtmTransactionDate = '01/01/2014'
 				,strJournalLineDescription = ''
-				,intJournalLineNo = 1
+				,intJournalLineNo = 10
 				,ysnIsUnposted = 1
 				,intUserId = 1
 				,intEntityId = 1
@@ -155,19 +156,118 @@ BEGIN
 				,intConcurrencyId = 1
 		FROM	dbo.tblGLAccount GLAccount
 		WHERE	GLAccount.intAccountId = @CostOfGoods_Default
+		
+		-- Reverse of Purchase Write-Off and Revalue Sold
+		UNION ALL 
+		SELECT	dtmDate = '01/01/2014'
+				,strBatchId = 'BATCH-100001'
+				,intAccountId = @Inventory_Default
+				,dblDebit = 0
+				,dblCredit = (100 * 20)
+				,dblDebitUnit = 0 
+				,dblCreditUnit = 0 
+				,strDescription = GLAccount.strDescription
+				,strCode = 'IWS'
+				,strReference = ''
+				,intCurrencyId = 1
+				,dblExchangeRate = 1
+				,dtmTransactionDate = '01/01/2014'
+				,strJournalLineDescription = ''
+				,intJournalLineNo = 11
+				,ysnIsUnposted = 1
+				,intUserId = 1
+				,intEntityId = 1
+				,strTransactionId = 'PURCHASE-100000'
+				,intTransactionId = 1 
+				,strTransactionType = @WRITEOFF_SOLD_Name
+				,strTransactionForm = 'Inventory Receipt'
+				,strModuleName = 'Inventory'
+				,intConcurrencyId = 1
+		FROM	dbo.tblGLAccount GLAccount
+		WHERE	GLAccount.intAccountId = @Inventory_Default
+		UNION ALL 
+		SELECT	dtmDate = '01/01/2014'
+				,strBatchId = 'BATCH-100001'
+				,intAccountId = @WriteOffSold_Default
+				,dblDebit = (100 * 20)
+				,dblCredit = 0
+				,dblDebitUnit = 0 
+				,dblCreditUnit = 0 
+				,strDescription = GLAccount.strDescription
+				,strCode = 'IWS'
+				,strReference = ''
+				,intCurrencyId = 1
+				,dblExchangeRate = 1
+				,dtmTransactionDate = '01/01/2014'
+				,strJournalLineDescription = ''
+				,intJournalLineNo = 11
+				,ysnIsUnposted = 1
+				,intUserId = 1
+				,intEntityId = 1
+				,strTransactionId = 'PURCHASE-100000'
+				,intTransactionId = 1 
+				,strTransactionType = @WRITEOFF_SOLD_Name
+				,strTransactionForm = 'Inventory Receipt'
+				,strModuleName = 'Inventory'
+				,intConcurrencyId = 1
+		FROM	dbo.tblGLAccount GLAccount
+		WHERE	GLAccount.intAccountId = @WriteOffSold_Default
+		-- REVALUE SOLD
+		UNION ALL 
+		SELECT	dtmDate = '01/01/2014'
+				,strBatchId = 'BATCH-100001'
+				,intAccountId = @Inventory_Default
+				,dblDebit = (100 * 22)
+				,dblCredit = 0
+				,dblDebitUnit = 0 
+				,dblCreditUnit = 0 
+				,strDescription = GLAccount.strDescription
+				,strCode = 'IRS'
+				,strReference = ''
+				,intCurrencyId = 1
+				,dblExchangeRate = 1
+				,dtmTransactionDate = '01/01/2014'
+				,strJournalLineDescription = ''
+				,intJournalLineNo = 12
+				,ysnIsUnposted = 1
+				,intUserId = 1
+				,intEntityId = 1
+				,strTransactionId = 'PURCHASE-100000'
+				,intTransactionId = 1 
+				,strTransactionType = @REVALUE_SOLD_Name
+				,strTransactionForm = 'Inventory Receipt'
+				,strModuleName = 'Inventory'
+				,intConcurrencyId = 1
+		FROM	dbo.tblGLAccount GLAccount
+		WHERE	GLAccount.intAccountId = @Inventory_Default
+		UNION ALL 
+		SELECT	dtmDate = '01/01/2014'
+				,strBatchId = 'BATCH-100001'
+				,intAccountId = @WriteOffSold_Default
+				,dblDebit = 0
+				,dblCredit = (100 * 22)
+				,dblDebitUnit = 0 
+				,dblCreditUnit = 0 
+				,strDescription = GLAccount.strDescription
+				,strCode = 'IRS'
+				,strReference = ''
+				,intCurrencyId = 1
+				,dblExchangeRate = 1
+				,dtmTransactionDate = '01/01/2014'
+				,strJournalLineDescription = ''
+				,intJournalLineNo = 12
+				,ysnIsUnposted = 1
+				,intUserId = 1
+				,intEntityId = 1
+				,strTransactionId = 'PURCHASE-100000'
+				,intTransactionId = 1
+				,strTransactionType = @REVALUE_SOLD_Name
+				,strTransactionForm = 'Inventory Receipt'
+				,strModuleName = 'Inventory'
+				,intConcurrencyId = 1
+		FROM	dbo.tblGLAccount GLAccount
+		WHERE	GLAccount.intAccountId = @RevalueSold_Default		
 	END 
-
-	SELECT * FROM tblICInventoryTransaction WHERE strBatchId = 'BATCH-100001'
-	--SELECT * FROM tblGLDetail
-	
-	SELECT	'DEBUG', GLEntries.*
-	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction ItemTransactions 
-			--ON GLEntries.intJournalLineNo = ItemTransactions.intInventoryTransactionId
-			ON GLEntries.intTransactionId = ItemTransactions.intRelatedTransactionId
-			AND GLEntries.strTransactionId = ItemTransactions.strRelatedTransactionId
-	WHERE	ItemTransactions.strBatchId = 'BATCH-100001'
-			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
-			AND GLEntries.strTransactionType NOT IN (@AUTO_NEGATIVE_TransactionType)
 	
 	-- Act
 	BEGIN 
@@ -188,8 +288,6 @@ BEGIN
 		DROP COLUMN dtmDateEntered
 	END 
 	
-	SELECT 'ACTUAL', * FROM actual
-
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

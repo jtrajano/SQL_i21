@@ -598,6 +598,7 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\Fake data for unposting item costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for the accounting period.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
