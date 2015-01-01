@@ -106,7 +106,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= tblGLAccount.strDescription
-			,strCode					= '' 
+			,strCode					= 'IAN' 
 			,strReference				= '' 
 			,intCurrencyId				= ItemTransactions.intCurrencyId
 			,dblExchangeRate			= ItemTransactions.dblExchangeRate
@@ -143,7 +143,7 @@ BEGIN
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= tblGLAccount.strDescription
-			,strCode					= '' 
+			,strCode					= 'IAN' 
 			,strReference				= '' 
 			,intCurrencyId				= ItemTransactions.intCurrencyId
 			,dblExchangeRate			= ItemTransactions.dblExchangeRate

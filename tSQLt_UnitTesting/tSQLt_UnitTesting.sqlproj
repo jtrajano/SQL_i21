@@ -599,6 +599,12 @@
     </Build>
     <Build Include="testi21Database\Stored Procedures\Fake data for unposting item costing.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for the accounting period.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for posted Inventory Receipt.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

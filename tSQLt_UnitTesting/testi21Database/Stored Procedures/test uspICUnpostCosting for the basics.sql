@@ -1,12 +1,9 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateReversalGLEntries for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting for the basics]
 AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		EXEC [testi21Database].[Fake data for COA used in costing]
-
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
+		EXEC [testi21Database].[Fake data for unposting item costing];
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -21,7 +18,7 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
-
+				
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
 
@@ -41,7 +38,8 @@ BEGIN
 		DROP COLUMN dtmDateEntered
 	END 
 	
-	-- Act
+	-- Act 
+	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
 				,@intTransactionId AS INT 
@@ -49,10 +47,10 @@ BEGIN
 				,@intUserId AS INT 
 
 		INSERT INTO actual 
-		EXEC dbo.uspICCreateReversalGLEntries
-			@strBatchId
-			,@intTransactionId
+		EXEC dbo.uspICUnpostCosting
+			@intTransactionId
 			,@strTransactionId
+			,@strBatchId
 			,@intUserId
 
 		-- Remove the column dtmDateEntered. We don't need to assert it. 
@@ -61,9 +59,9 @@ BEGIN
 	END 
 
 	-- Assert
-	BEGIN 
+	BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
-	END
+	END 
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 
@@ -71,4 +69,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-END
+END 

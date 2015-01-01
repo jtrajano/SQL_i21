@@ -23,6 +23,12 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'A/P Clearing'
 
+-- Get the Inventory Receipt batch number
+DECLARE @strBatchId AS NVARCHAR(40)  
+
+-- Create the gl entries variable 
+DECLARE @GLEntries AS RecapTableType 
+
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
  
@@ -111,6 +117,9 @@ END
 BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
 
+-- Get the next batch number
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
@@ -152,13 +161,6 @@ BEGIN
   
 	-- Call the post routine 
 	BEGIN 
-		-- Get the Inventory Receipt batch number
-		DECLARE @strBatchId AS NVARCHAR(40)  
-		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
-
-		-- Create the gl entries variable 
-		DECLARE @GLEntries AS RecapTableType 
-
 		-- Call the post routine 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -200,8 +202,42 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 0   
 BEGIN   
-	-- TODO: Unpost routine  
-	PRINT 'TODO: Unpost routine';  
+	-- Call the unpost routine 
+	BEGIN 
+		-- Call the post routine 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+		)
+		EXEC	dbo.uspICUnpostCosting
+				@intTransactionId
+				,@strTransactionId
+				,@strBatchId
+				,@intUserId						
+	END 
 END   
 
 --------------------------------------------------------------------------------------------  

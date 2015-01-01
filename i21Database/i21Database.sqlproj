@@ -959,12 +959,12 @@
     <Build Include="dbo\Tables\tblICInventoryShipmentItem.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentItemLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostFIFOOut.sql">
-      <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\User Defined Types\InventoryTranactionStockToReverse.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
-      <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Functions\fnCalculateInterestToDate.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCalculateInterest.sql" />

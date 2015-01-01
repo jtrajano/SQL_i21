@@ -56,6 +56,16 @@ BEGIN
 			,intTransactionTypeId INT NOT NULL 
 		)
 
+		-- Create the temp table 
+		CREATE TABLE #tmpInventoryTranactionStockToReverse (
+			intInventoryTransactionId INT NOT NULL 
+			,intTransactionId INT NULL 
+			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
+			,intTransactionTypeId INT NOT NULL 
+		)
+
 		-- Call the fake data stored procedure
 		EXEC [testi21Database].[Fake data for simple Items]
 
@@ -195,8 +205,10 @@ BEGIN
 		DECLARE @strTransactionId AS NVARCHAR(20) = 'InvShip-0000001'
 		DECLARE @intTransactionId AS INT = 1
 		
-		INSERT INTO actualTransactionToReverse 
 		EXEC dbo.uspICUnpostFIFOOut @strTransactionId, @intTransactionId
+
+		INSERT INTO actualTransactionToReverse 
+		SELECT * FROM #tmpInventoryTranactionStockToReverse
 		
 		-- Get the actual FIFO data
 		INSERT INTO actualFIFO (

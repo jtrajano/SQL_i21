@@ -55,6 +55,16 @@ BEGIN
 			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
 		)
+
+		-- Create the temp table 
+		CREATE TABLE #tmpInventoryTranactionStockToReverse (
+			intInventoryTransactionId INT NOT NULL 
+			,intTransactionId INT NULL 
+			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+			,intRelatedTransactionId INT NULL 
+			,intTransactionTypeId INT NOT NULL 
+		)
 	END 
 	
 	-- Act
@@ -62,9 +72,11 @@ BEGIN
 		-- Call the uspICUnpostFIFOOut
 		DECLARE @strTransactionId AS NVARCHAR(20) = 'InvShip-0000001'
 		DECLARE @intTransactionId AS INT = 1
-		
-		INSERT INTO actualTransactionToReverse 
+				
 		EXEC dbo.uspICUnpostFIFOOut @strTransactionId, @intTransactionId
+
+		INSERT INTO actualTransactionToReverse 
+		SELECT * FROM #tmpInventoryTranactionStockToReverse
 	END 
 
 	-- Assert

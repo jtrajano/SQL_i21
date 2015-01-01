@@ -20,12 +20,10 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LIFO AS INT = 3
 		,@STANDARDCOST AS INT = 4 	
 
-DECLARE @InventoryTransactionToReverse AS dbo.InventoryTranactionStockToReverse
-
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
 -- Then grab the updated records and store it to the @InventoryToReverse variable
-INSERT INTO @InventoryTransactionToReverse (
+INSERT INTO #tmpInventoryTranactionStockToReverse (
 	intInventoryTransactionId
 	,intTransactionId
 	,strTransactionId
@@ -72,7 +70,7 @@ UPDATE	fifoBucket
 SET		fifoBucket.dblStockIn = ISNULL(fifoBucket.dblStockIn, 0) - fifoOutGrouped.dblQty
 FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
 			SELECT	fifoOut.intRevalueFifoId, dblQty = SUM(fifoOut.dblQty)
-			FROM	dbo.tblICInventoryFIFOOut fifoOut INNER JOIN @InventoryTransactionToReverse Reversal
+			FROM	dbo.tblICInventoryFIFOOut fifoOut INNER JOIN #tmpInventoryTranactionStockToReverse Reversal
 						ON fifoOut.intInventoryTransactionId = Reversal.intInventoryTransactionId
 			WHERE	fifoOut.intRevalueFifoId IS NOT NULL 	
 			GROUP BY fifoOut.intRevalueFifoId
@@ -106,7 +104,7 @@ SELECT	intItemId = OutTransactions.intItemId
 		,intConcurrencyId = 1
 FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICInventoryFIFOOut fifoOut
 			ON fifo.intInventoryFIFOId = fifoOut.intInventoryFIFOId
-		INNER JOIN @InventoryTransactionToReverse Reversal
+		INNER JOIN #tmpInventoryTranactionStockToReverse Reversal
 			ON Reversal.intTransactionId = fifo.intTransactionId
 			AND Reversal.strTransactionId = fifo.strTransactionId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
@@ -116,10 +114,8 @@ FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICInventoryFIFOOut fifoOut
 -- Plug the Out-qty so that it can't be used for future out-transactions. 
 UPDATE	fifoBucket
 SET		dblStockOut = dblStockIn
-FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN @InventoryTransactionToReverse Reversal
+FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN #tmpInventoryTranactionStockToReverse Reversal
 			ON fifoBucket.intTransactionId = Reversal.intTransactionId
 			AND fifoBucket.strTransactionId = Reversal.strTransactionId
 WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
 ;
--- Return the transactions to reverse back to the calling code. 
-SELECT * FROM @InventoryTransactionToReverse

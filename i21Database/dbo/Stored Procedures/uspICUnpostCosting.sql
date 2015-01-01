@@ -14,16 +14,24 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp table 
+CREATE TABLE #tmpInventoryTranactionStockToReverse (
+	intInventoryTransactionId INT NOT NULL 
+	,intTransactionId INT NULL 
+	,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+	,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+	,intRelatedTransactionId INT NULL 
+	,intTransactionTypeId INT NOT NULL 
+)
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_NEGATIVE AS INT = 1
 DECLARE @WRITE_OFF_SOLD AS INT = 2
 DECLARE @REVALUE_SOLD AS INT = 3
+DECLARE @InventoryReceipt AS INT = 4
+		,@InventoryShipment AS INT = 5
 
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
-
-DECLARE @InventoryAdjustment AS INT = 1
-		,@InventoryReceipt AS INT = 2
-		,@InventoryShipment AS INT = 3
 
 -- Get the list of items to unpost
 BEGIN 
@@ -38,6 +46,7 @@ BEGIN
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
+			AND ISNULL(ysnIsUnposted, 0) = 0
 	GROUP BY ItemTrans.intItemId, ItemTrans.intLocationId
 END 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -52,7 +61,6 @@ END
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
 	DECLARE @TransactionType AS INT 
-	DECLARE @InventoryTransactionToReverse AS dbo.InventoryTranactionStockToReverse
 
 	-- Get the transaction type 
 	SELECT TOP 1 
@@ -62,25 +70,23 @@ BEGIN
 			AND strTransactionId = @strTransactionId
 
 	-- Reverse the "IN" qty 
-	IF @TransactionType IN (@InventoryAdjustment, @InventoryReceipt)
+	IF @TransactionType IN (@InventoryReceipt)
 	BEGIN 
-		INSERT INTO @InventoryTransactionToReverse 
 		EXEC dbo.uspICUnpostFIFOIn 
 			@strTransactionId
 			,@intTransactionId
 	END
 
 	-- Reverse the "OUT" qty 
-	IF @TransactionType IN (@InventoryAdjustment, @InventoryShipment)
+	IF @TransactionType IN (@InventoryShipment)
 	BEGIN 
-		INSERT INTO @InventoryTransactionToReverse
 		EXEC dbo.uspICUnpostFIFOOut
 			@strTransactionId
 			,@intTransactionId
 	END
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM @InventoryTransactionToReverse) 
+IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTranactionStockToReverse) 
 BEGIN 
 	-------------------------------------------------
 	-- Create reversal of the inventory transactions
@@ -127,7 +133,7 @@ BEGIN
 			,[dtmCreated]			= GETDATE()
 			,[intCreatedUserId]		= @intUserId
 			,[intConcurrencyId]		= 1
-	FROM	@InventoryTransactionToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
+	FROM	#tmpInventoryTranactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 
 	--------------------------------------------------------------
@@ -175,6 +181,7 @@ BEGIN
 				,[dblExchangeRate] 
 				,[intTransactionId] 
 				,[strTransactionId] 
+				,[strTransactionForm] 
 				,[strBatchId] 
 				,[intTransactionTypeId] 
 				,[dtmCreated] 
@@ -192,6 +199,7 @@ BEGIN
 				,[dblExchangeRate] = TransactionToReverse.dblExchangeRate
 				,[intTransactionId] = TransactionToReverse.intTransactionId
 				,[strTransactionId] = TransactionToReverse.strTransactionId
+				,[strTransactionForm] = TransactionToReverse.strTransactionForm
 				,[strBatchId] = @strBatchId
 				,[intTransactionTypeId] = @AUTO_NEGATIVE
 				,[dtmCreated] = GETDATE()
@@ -207,7 +215,8 @@ BEGIN
 							,ItemTransaction.dblExchangeRate
 							,ItemTransaction.intTransactionId
 							,ItemTransaction.strTransactionId
-					FROM	@InventoryTransactionToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ItemTransaction
+							,ItemTransaction.strTransactionForm
+					FROM	#tmpInventoryTranactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ItemTransaction
 								ON ItemTransactionsToReverse.intInventoryTransactionId = ItemTransaction.intInventoryTransactionId
 					WHERE	ItemTransaction.intTransactionId = @intTransactionId
 							AND ItemTransaction.strTransactionId = @strTransactionId
@@ -225,3 +234,6 @@ EXEC dbo.uspICCreateReversalGLEntries
 	,@strTransactionId
 	,@intUserId
 ;
+
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTranactionStockToReverse')) 
+	DROP TABLE #tmpInventoryTranactionStockToReverse
