@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLCOAImportLog] (
     [intImportLogId]       INT           IDENTITY (1, 1) NOT NULL,
-    [strEvent]             NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [strEvent]             NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strIrelySuiteVersion] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [intUserId]            INT           NULL,
     [intEntityId]          INT           NULL,
