@@ -1231,3 +1231,33 @@ GO
 
 	    DELETE FROM tblSMMasterMenu  Where strMenuName = 'New Account Wizard' and intMenuID = 42 and strModuleName = 'General Ledger' and intParentMenuID = 36
 GO
+
+	/* ----------------------------------------------- */
+	/* --    Create Risk Management Module Menu     -- */
+	/* ----------------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Risk Management' AND strModuleName = 'Risk Management' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Risk Management', 'Risk Management', 0, 'Risk Management', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 2)
+	
+	DECLARE @RiskManagementModuleId INT
+	SELECT @RiskManagementModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Risk Management' AND strModuleName = 'Risk Management' AND intParentMenuID = 0
+	
+	/* --------------------------------------------- */
+	/* -- Create Risk Management Maintenance Menu -- */
+	/* --------------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementModuleId)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Maintenance', 'Risk Management', @RiskManagementModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 2)
+
+	DECLARE @RiskManagementMaintenanceId INT
+	SELECT @RiskManagementMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Futures Market' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Futures Market', 'Risk Management', @RiskManagementMaintenanceId, 'Futures Market', 'Screen', 'RiskManagement.view.FuturesMarket', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'RiskManagement.view.FuturesMarket', intSort = 0
+			WHERE strMenuName = 'Futures Market' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceId
+
+GO
