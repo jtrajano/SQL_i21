@@ -47,5 +47,9 @@ Ext.define('i21.controller.Inventory', {
 
     createNumberFormat: function (precision) {
         return "0." + Ext.String.repeat('0', precision);
+    },
+
+    roundDecimalFormat: function(number, precision) {
+        return parseFloat(Math.round(number * 100) / 100).toFixed(precision);
     }
 });
