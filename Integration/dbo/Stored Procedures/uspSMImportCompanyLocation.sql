@@ -457,13 +457,302 @@ END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
-	EXEC('CREATE PROCEDURE uspSMImportCompanyLocation
-				@Checking BIT = 0,
-				@UserId INT = 0,
-				@Total INT = 0 OUTPUT
-
-				AS
-			BEGIN
-					Return 0
-			END')
+	EXEC('CREATE PROCEDURE uspSMImportCompanyLocation  
+   @Checking BIT = 0,  
+   @UserId INT = 0,  
+   @Total INT = 0 OUTPUT  
+  
+   AS  
+  BEGIN  
+     
+   --================================================  
+   --     GET TO BE IMPORTED RECORDS  
+   -- This is checking if there are still records need to be import   
+   --================================================  
+   IF(@Checking = 1)   
+   BEGIN  
+    --Check first on ptlocmst   
+    SELECT  
+     @Total = COUNT(PT.[ptloc_loc_no])  
+    FROM  
+     ptlocmst PT  
+    LEFT OUTER JOIN  
+     tblSMCompanyLocation CL  
+      ON RTRIM(LTRIM(PT.[ptloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))            
+    WHERE  
+     CL.[strLocationNumber] IS NULL  
+        
+    RETURN @Total  
+   END   
+      
+   INSERT INTO [tblSMCompanyLocation]  
+    ([strLocationNumber]  
+    ,[strLocationName]   
+    ,[strLocationType]  
+    ,[strAddress]  
+    ,[strZipPostalCode]  
+    ,[strCity]  
+    ,[strStateProvince]  
+    ,[strCountry]  
+    ,[strPhone]  
+    ,[strFax]  
+    ,[strEmail]  
+    ,[strWebsite]  
+    ,[strInternalNotes]  
+    ,[strUseLocationAddress]  
+    ,[strSkipSalesmanDefault]  
+    ,[ysnSkipTermsDefault]  
+    ,[strOrderTypeDefault]  
+    ,[strPrintCashReceipts]  
+    ,[ysnPrintCashTendered]  
+    ,[strSalesTaxByLocation]  
+    ,[strDeliverPickupDefault]  
+    ,[strTaxState]  
+    ,[strTaxAuthorityId1]  
+    ,[strTaxAuthorityId2]  
+    ,[ysnOverridePatronage]  
+    ,[strOutOfStockWarning]  
+    ,[strLotOverdrawnWarning]  
+    ,[strDefaultCarrier]  
+    ,[ysnOrderSection2Required]  
+    ,[strPrintonPO]  
+    ,[dblMixerSize]  
+    ,[ysnOverrideMixerSize]  
+    ,[ysnEvenBatches]  
+    ,[ysnDefaultCustomBlend]  
+    ,[ysnAgroguideInterface]  
+    ,[ysnLocationActive]  
+    ,[intProfitCenter]  
+    ,[intCashAccount]  
+    ,[intDepositAccount]  
+    ,[intARAccount]  
+    ,[intAPAccount]  
+    ,[intSalesAdvAcct]  
+    ,[intPurchaseAdvAccount]  
+    ,[intFreightAPAccount]  
+    ,[intFreightExpenses]  
+    ,[intFreightIncome]  
+    ,[intServiceCharges]  
+    ,[intSalesDiscounts]  
+    ,[intCashOverShort]  
+    ,[intWriteOff]  
+    ,[intCreditCardFee]  
+    ,[intSalesAccount]  
+    ,[intCostofGoodsSold]  
+    ,[intInventory]  
+    ,[strInvoiceType]  
+    ,[strDefaultInvoicePrinter]  
+    ,[strPickTicketType]  
+    ,[strDefaultTicketPrinter]  
+    ,[strLastOrderNumber]  
+    ,[strLastInvoiceNumber]  
+    ,[strPrintonInvoice]  
+    ,[ysnPrintContractBalance]  
+    ,[strJohnDeereMerchant]  
+    ,[strInvoiceComments]  
+    ,[ysnUseOrderNumberforInvoiceNumber]  
+    ,[ysnOverrideOrderInvoiceNumber]  
+    ,[ysnPrintInvoiceMedTags]  
+    ,[ysnPrintPickTicketMedTags]  
+    ,[ysnSendtoEnergyTrac]  
+    ,[strDiscountScheduleType]  
+    ,[strLocationDiscount]  
+    ,[strLocationStorage]  
+    ,[strMarketZone]  
+    ,[strLastTicket]  
+    ,[ysnDirectShipLocation]  
+    ,[ysnScaleInstalled]  
+    ,[strDefaultScaleId]  
+    ,[ysnActive]  
+    ,[ysnUsingCashDrawer]  
+    ,[strCashDrawerDeviceId]  
+    ,[ysnPrintRegisterTape]  
+    ,[ysnUseUPConOrders]  
+    ,[ysnUseUPConPhysical]  
+    ,[ysnUseUPConPurchaseOrders]  
+    ,[strUPCSearchSequence]  
+    ,[strBarCodePrinterName]  
+    ,[strPriceLevel1]  
+    ,[strPriceLevel2]  
+    ,[strPriceLevel3]  
+    ,[strPriceLevel4]  
+    ,[strPriceLevel5]  
+    ,[ysnOverShortEntries]  
+    ,[strOverShortCustomer]  
+    ,[strOverShortAccount]  
+    ,[ysnAutomaticCashDepositEntries]  
+    ,[intConcurrencyId])  
+   SELECT  
+    PT.[ptloc_loc_no]  
+    ,(CASE WHEN EXISTS(SELECT [ptloc_loc_no], [ptloc_name] FROM ptlocmst WHERE RTRIM(LTRIM([ptloc_loc_no])) <> RTRIM(LTRIM(PT.[ptloc_loc_no])) AND RTRIM(LTRIM([ptloc_name])) = RTRIM(LTRIM(PT.[ptloc_name])))  
+     THEN   
+      RTRIM(LTRIM(PT.[ptloc_name])) + '' - '' + RTRIM(LTRIM(PT.[ptloc_loc_no]))  
+     ELSE  
+      RTRIM(LTRIM(PT.[ptloc_name]))  
+      END)        --<strLocationName, nvarchar(50),>  
+    ,''Office''       --<strLocationType, nvarchar(50),>  
+    ,RTRIM(LTRIM(ISNULL(PT.[ptloc_addr],'''')))        --<strAddress, nvarchar(max),>  
+    ,[ptloc_zip]      --<strZipPostalCode, nvarchar(50),>  
+    ,[ptloc_city]      --<strCity, nvarchar(50),>  
+    ,[ptloc_state]      --<strStateProvince, nvarchar(50),>  
+    ,''''				     --<strCountry, nvarchar(50),>  
+    ,(CASE   
+     WHEN CHARINDEX(''x'', PT.[ptloc_phone]) > 0   
+      THEN SUBSTRING(SUBSTRING(PT.[ptloc_phone],1,15), 0, CHARINDEX(''x'',PT.[ptloc_phone]))   
+     ELSE   
+      SUBSTRING(PT.[ptloc_phone],1,15)  
+      END)        --<strPhone, nvarchar(50),>  
+    ,''''         ---<strFax, nvarchar(50),>  
+    ,''''         --<strEmail, nvarchar(50),>  
+    ,''''         --<strWebsite, nvarchar(50),>  
+    ,''''         --<strInternalNotes, nvarchar(max),>  
+    ,(CASE UPPER(PT.[ptloc_use_loc_addr_yn])  
+     WHEN ''Y'' THEN ''Yes''  
+     WHEN ''N'' THEN ''No''   
+     ELSE ''''  
+      END)        --<strUseLocationAddress, nvarchar(50),>  
+    ,''Yes''        --<strSkipSalesmanDefault, nvarchar(50),>  
+    ,0            --<ysnSkipTermsDefault, bit,>  
+    ,(CASE UPPER(PT.[ptloc_dflt_tic_type_oi])  
+     WHEN ''O'' THEN ''Order''  
+     WHEN ''I'' THEN ''Invoice''      
+     ELSE ''''  
+      END)        --<strOrderTypeDefault, nvarchar(50),>  
+    ,(CASE UPPER(PT.[ptloc_cash_rcts_ynr])  
+     WHEN ''Y'' THEN ''Yes''  
+     WHEN ''N'' THEN ''No''  
+     WHEN ''R'' THEN ''Cash Receipts Printer''      
+     ELSE ''''  
+      END)        --<strPrintCashReceipts, nvarchar(50),>  
+    ,(CASE UPPER(PT.[ptloc_cash_tender_yn])  
+     WHEN ''Y'' THEN 1  
+     WHEN ''N'' THEN 0  
+     ELSE 0  
+      END)        --<ysnPrintCashTendered, bit,>  
+    ,''No''        --<strSalesTaxByLocation, nvarchar(50),>  
+    ,(CASE UPPER(PT.[ptloc_dlvry_pickup_ind])  
+     WHEN ''P'' THEN ''Pickup''  
+     WHEN ''D'' THEN ''Deliver''  
+     ELSE ''''  
+      END)        --<strDeliverPickupDefault, nvarchar(50),>  
+    ,''''    --<strTaxState, nvarchar(50),>  
+    ,''''   --<strTaxAuthorityId1, nvarchar(50),>  
+    ,''''   --<strTaxAuthorityId2, nvarchar(50),>  
+    ,0        --<ysnOverridePatronage, bit,>  
+    ,''No''        --<strOutOfStockWarning, nvarchar(50),>  
+    ,''No''        --<strLotOverdrawnWarning, nvarchar(50),>  
+    ,PT.[ptloc_default_carrier]   --<strDefaultCarrier, nvarchar(50),>  
+    ,0        --<ysnOrderSection2Required, bit,>  
+    ,''''        --<strPrintonPO, nvarchar(50),>  
+    ,0     --<dblMixerSize, numeric(18,6),>  
+    ,0        --<ysnOverrideMixerSize, bit,>  
+    ,0        --<ysnEvenBatches, bit,>  
+    ,0        --<ysnDefaultCustomBlend, bit,>  
+    ,0        --<ysnAgroguideInterface, bit,>  
+    ,1        --<ysnLocationActive, bit,>  
+    ,PT.[ptloc_gl_profit_center]  --<intProfitCenter, int,>    --TODO  
+    ,0      --<ptloc_cash, int,>  
+    ,0         --<intDepositAccount, int,>  
+    ,0         --<intARAccount, int,>  
+    ,0         --<intAPAccount, int,>  
+    ,0         --<intSalesAdvAcct, int,>  
+    ,0         --<intPurchaseAdvAccount, int,>  
+    ,0         --<intFreightAPAccount, int,>  
+    ,FE.[inti21Id]      --<intFreightExpenses, int,>  
+    ,FI.[inti21Id]      --<intFreightIncome, int,>  
+    ,0      --<intServiceCharges, int,>  
+    ,0      --<intSalesDiscounts, int,>  
+    ,0      --<intCashOverShort, int,>  
+    ,0      --<intWriteOff, int,>  
+    ,0      --<intCreditCardFee, int,>  
+    ,0         --<intSalesAccount, int,>  
+    ,0         --<intCostofGoodsSold, int,>  
+    ,0         --<intInventory, int,>  
+    ,(CASE UPPER(PT.[ptloc_ivc_type_fpl])  
+     WHEN ''F'' THEN ''Forms''  
+     WHEN ''L'' THEN ''Laser''  
+     WHEN ''P'' THEN ''Plain Paper''  
+     ELSE ''''  
+      END)        --<strInvoiceType, nvarchar(50),>  
+    ,PT.[ptloc_ivc_prtr_name]   --<strDefaultInvoicePrinter, nvarchar(50),>  
+    ,''''        --<strPickTicketType, nvarchar(50),>  
+    ,PT.[ptloc_pik_prtr_name]   --<strDefaultTicketPrinter, nvarchar(50),>  
+    ,PT.[ptloc_last_ord_no]    --<strLastOrderNumber, nvarchar(50),>  
+    ,PT.[ptloc_last_ivc_no]    --<strLastInvoiceNumber, nvarchar(50),>  
+    ,''''        --<strPrintonInvoice, nvarchar(50),>  
+    ,0        --<ysnPrintContractBalance, bit,>  
+    ,PT.[ptloc_merchant]     --<strJohnDeereMerchant, nvarchar(50),>  
+    ,''''        --<strInvoiceComments, nvarchar(50),>  
+    ,0        --<ysnUseOrderNumberforInvoiceNumber, bit,>  
+    ,0       --<ysnOverrideOrderInvoiceNumber, bit,>  
+    ,0        --<ysnPrintInvoiceMedTags, bit,>  
+    ,0        --<ysnPrintPickTicketMedTags, bit,>  
+    ,(CASE UPPER(PT.[ptloc_send_to_et_yn])  
+     WHEN ''Y'' THEN 1  
+     WHEN ''N'' THEN 0  
+     ELSE 0  
+      END)        --<ysnSendtoEnergyTrac, bit,>  
+    ,''''         --<strDiscountScheduleType, nvarchar(50),>  
+    ,''''         --<strLocationDiscount, nvarchar(50),>  
+    ,''''         --<strLocationStorage, nvarchar(50),>  
+    ,''''         --<strMarketZone, nvarchar(50),>  
+    ,''''         --<strLastTicket, nvarchar(50),>  
+    ,0         --<ysnDirectShipLocation, bit,>  
+    ,0         --<ysnScaleInstalled, bit,>  
+    ,''''         --<strDefaultScaleId, nvarchar(50),>  
+    ,0         --<ysnActive, bit,>  
+    ,(CASE UPPER(PT.[ptloc_csh_drwr_yn])  
+     WHEN ''Y'' THEN 1  
+     WHEN ''N'' THEN 0  
+     ELSE 0  
+      END)        --<ysnUsingCashDrawer, bit,>  
+    ,[ptloc_csh_drwr_dev_id]   --<strCashDrawerDeviceId, nvarchar(50),>  
+    ,(CASE UPPER(PT.[ptloc_reg_tape_yn])  
+     WHEN ''Y'' THEN 1  
+     WHEN ''N'' THEN 0  
+     ELSE 0  
+      END)        --<ysnPrintRegisterTape, bit,>  
+    ,(CASE UPPER(PT.[ptloc_upc_for_inv_yn])  
+     WHEN ''Y'' THEN 1  
+     WHEN ''N'' THEN 0  
+     ELSE 0  
+      END)        --<ysnUseUPConOrders, bit,>  
+    ,0        --<ysnUseUPConPhysical, bit,>  
+    ,0        --<ysnUseUPConPurchaseOrders, bit,>  
+    ,(CASE UPPER(PT.[ptloc_upc_search_ui])  
+     WHEN ''U'' THEN ''UPC''  
+     WHEN ''I'' THEN ''Item''  
+     ELSE ''''  
+      END)        --<strUPCSearchSequence, nvarchar(50),>  
+    ,[ptloc_bar_code_prtr]    --<strBarCodePrinterName, nvarchar(50),>  
+    ,''''     --<strPriceLevel1, nvarchar(50),>  
+    ,''''     --<strPriceLevel2, nvarchar(50),>  
+    ,''''     --<strPriceLevel3, nvarchar(50),>  
+    ,''''     --<strPriceLevel4, nvarchar(50),>  
+    ,''''     --<strPriceLevel5, nvarchar(50),>  
+    ,0        --<ysnOverShortEntries, bit,>  
+    ,''''         --<strOverShortCustomer, nvarchar(50),>  
+    ,''''         --<strOverShortAccount, nvarchar(50),>  
+    ,0        --<ysnAutomaticCashDepositEntries, bit,>  
+    ,0  
+   FROM  
+    ptlocmst PT   
+   LEFT JOIN  
+    tblGLCOACrossReference FE  
+     ON PT.[ptloc_frt_exp_acct_no] = FE.strExternalId  
+   LEFT JOIN  
+    tblGLCOACrossReference FI  
+     ON PT.[ptloc_frt_inc_acct_no] = FI.strExternalId        
+   LEFT OUTER JOIN  
+    tblSMCompanyLocation CL  
+     ON RTRIM(LTRIM(PT.[ptloc_loc_no] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(CL.[strLocationNumber] COLLATE Latin1_General_CI_AS))            
+   WHERE  
+    CL.[strLocationNumber] IS NULL  
+      
+   ORDER BY  
+    PT.[ptloc_loc_no]  
+    ,PT.[ptloc_name]  
+  
+      
+  END')
 END
