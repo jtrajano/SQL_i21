@@ -977,6 +977,7 @@
     <Build Include="dbo\Functions\fnRecalculateAverageCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntries.sql" />
     <Build Include="dbo\Tables\tblRKFutureMarket.sql" />
+    <Build Include="dbo\Views\vyuSMGetLocationPricingLevel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
