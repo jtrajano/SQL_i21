@@ -199,6 +199,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 itemId: 'txtDecimalDisplay',
                                                 fieldLabel: 'Decimal Places To Display',
                                                 labelWidth: 165,
+                                                hideTrigger: true,
                                                 allowDecimals: false,
                                                 maxValue: 6,
                                                 minValue: 0
@@ -209,6 +210,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 itemId: 'txtDecimalCalculation',
                                                 fieldLabel: 'Decimal Places for Calculation',
                                                 labelWidth: 165,
+                                                hideTrigger: true,
                                                 allowDecimals: false,
                                                 maxValue: 6,
                                                 minValue: 0
@@ -237,7 +239,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 tabIndex: -1,
                                                 itemId: 'btnDeleteConversion',
                                                 iconCls: 'small-delete',
-                                                text: 'Delete'
+                                                text: 'Remove'
                                             },
                                             {
                                                 xtype: 'tbseparator'

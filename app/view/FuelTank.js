@@ -134,7 +134,7 @@ Ext.define('Inventory.view.FuelTank', {
                                                 tabIndex: -1,
                                                 itemId: 'btnDeleteFuelTank',
                                                 iconCls: 'small-delete',
-                                                text: 'Delete'
+                                                text: 'Remove'
                                             },
                                             {
                                                 xtype: 'tbseparator'

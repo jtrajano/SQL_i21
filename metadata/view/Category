@@ -752,7 +752,7 @@
                                                         "itemId": "btnDeleteLocation",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Remove"
                                                     },
                                                     "name": "MyButton77",
                                                     "designerId": "2fb32bab-2774-4e65-92a0-93319aeda168"
@@ -781,7 +781,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter129",
+                                                    "name": "filter138",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -966,7 +966,7 @@
                                                         "itemId": "btnDeleteGlAccounts",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Remove"
                                                     },
                                                     "name": "MyButton78",
                                                     "designerId": "2813111b-aac2-4039-92ec-d40a4f8edb8b"
@@ -995,7 +995,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter130",
+                                                    "name": "filter139",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1258,7 +1258,7 @@
                                                         "itemId": "btnDeleteVendorCategoryXref",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Remove"
                                                     },
                                                     "name": "MyButton79",
                                                     "designerId": "2563eda3-59a2-4520-b60e-de2b65832b83"
@@ -1287,7 +1287,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter131",
+                                                    "name": "filter140",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1930,7 +1930,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter132",
+                                                    "name": "filter141",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2656,7 +2656,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging14",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

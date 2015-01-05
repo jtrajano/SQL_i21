@@ -406,7 +406,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteUom',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -722,7 +722,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteLocation',
                                                                                 iconCls: 'small-delete',
-                                                                                text: 'Delete'
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'
@@ -806,7 +806,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteGlAccounts',
                                                                                 iconCls: 'small-delete',
-                                                                                text: 'Delete'
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'
@@ -820,8 +820,8 @@ Ext.define('Inventory.view.Item', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'string',
                                                                         itemId: 'colGLAccountCategory',
+                                                                        dataIndex: 'string',
                                                                         text: 'Account Category',
                                                                         flex: 1,
                                                                         editor: {
@@ -1529,7 +1529,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnDeleteCategories',
                                                                                         iconCls: 'small-delete',
-                                                                                        text: 'Delete'
+                                                                                        text: 'Remove'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'tbseparator'
@@ -1609,7 +1609,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnDeleteSLA',
                                                                                         iconCls: 'small-delete',
-                                                                                        text: 'Delete'
+                                                                                        text: 'Remove'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'tbseparator'
@@ -2284,7 +2284,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteCustomerXref',
                                                                                 iconCls: 'small-delete',
-                                                                                text: 'Delete'
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'
@@ -2430,7 +2430,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteVendorXref',
                                                                                 iconCls: 'small-delete',
-                                                                                text: 'Delete'
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'
@@ -2630,7 +2630,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteContractItem',
                                                                                 iconCls: 'small-delete',
-                                                                                text: 'Delete'
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'
@@ -2828,7 +2828,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnDeleteDocumentAssociation',
                                                                                         iconCls: 'small-delete',
-                                                                                        text: 'Delete'
+                                                                                        text: 'Remove'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'tbseparator'
@@ -2910,7 +2910,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnDeleteCertification',
                                                                                         iconCls: 'small-delete',
-                                                                                        text: 'Delete'
+                                                                                        text: 'Remove'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'tbseparator'
@@ -3016,7 +3016,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeletePricing',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -3157,7 +3157,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeletePricingLevel',
                                                                                 iconCls: 'small-delete',
-                                                                                text: 'Delete'
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'
@@ -3416,7 +3416,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteSpecialPricing',
                                                                                 iconCls: 'small-delete',
-                                                                                text: 'Delete'
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'
@@ -4087,7 +4087,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteAssembly',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -4279,7 +4279,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteBundle',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -4477,7 +4477,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteKit',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -4549,7 +4549,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteKitDetail',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -4744,7 +4744,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteFactory',
                                                                                 iconCls: 'small-delete',
-                                                                                text: 'Delete'
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'
@@ -4835,7 +4835,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnDeleteManufacturingCellAssociation',
                                                                                 iconCls: 'small-delete',
-                                                                                text: 'Delete'
+                                                                                text: 'Remove'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'
@@ -5041,7 +5041,7 @@ Ext.define('Inventory.view.Item', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteNotes',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'

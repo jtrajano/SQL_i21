@@ -1206,7 +1206,7 @@
                                                         "itemId": "btnDeleteMeasurement",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Remove"
                                                     },
                                                     "name": "MyButton25",
                                                     "designerId": "2f285ec8-6e2a-4f37-8e64-5e7ef89ef51b"
@@ -1235,7 +1235,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter133",
+                                                    "name": "filter158",
                                                     "designerId": "44f4490e-5a9c-40bb-beaf-26df2f659502",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1502,7 +1502,7 @@
                                                         "itemId": "btnDeleteItemCategoryAllowed",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Remove"
                                                     },
                                                     "name": "MyButton25",
                                                     "designerId": "2782cd4d-5672-462e-8ae8-ebdd80e6de32"
@@ -1531,7 +1531,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter134",
+                                                    "name": "filter159",
                                                     "designerId": "22931607-4134-4630-a48a-1fe5916ccd67",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1712,7 +1712,7 @@
                                                         "itemId": "btnDeleteContainer",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Remove"
                                                     },
                                                     "name": "MyButton25",
                                                     "designerId": "413d8e9f-4809-4a6f-811c-f606aa9dd8f5"
@@ -1741,7 +1741,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter135",
+                                                    "name": "filter160",
                                                     "designerId": "e4e6a664-7884-4ddd-8995-16e91bcb4363",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1911,7 +1911,7 @@
                                                         "itemId": "btnDeleteSKU",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Remove"
                                                     },
                                                     "name": "MyButton25",
                                                     "designerId": "4f597048-7b6c-4726-828e-a9c9a6ab5cb8"
@@ -1940,7 +1940,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter136",
+                                                    "name": "filter161",
                                                     "designerId": "6e9571a9-d0ec-46b7-ab0d-11523cb26254",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2110,7 +2110,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging121",
                     "designerId": "007a0d4c-2515-4998-91ed-043de4f99d12",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

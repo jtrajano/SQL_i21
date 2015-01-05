@@ -752,6 +752,23 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colTaxCode',
+                                                        width: 65,
+                                                        dataIndex: 'strTaxCode',
+                                                        text: 'Tax Code'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colTaxAmount',
+                                                        width: 80,
+                                                        align: 'right',
+                                                        dataIndex: 'dblTaxAmount',
+                                                        text: 'Tax Amount',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colDockDoor',
                                                         width: 75,
                                                         dataIndex: 'strDockDoor',

@@ -145,7 +145,7 @@ Ext.define('Inventory.view.Catalog', {
                                     tabIndex: -1,
                                     itemId: 'btnDeleteCatalog',
                                     iconCls: 'small-delete',
-                                    text: 'Delete'
+                                    text: 'Remove'
                                 },
                                 {
                                     xtype: 'tbseparator'

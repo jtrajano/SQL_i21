@@ -3079,6 +3079,37 @@
                                             "designerId": "3409acd0-a5bc-45cd-9afb-0bc329f6b1de"
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "itemId": null,
+                                                "text": "Condition",
+                                                "width": 65
+                                            },
+                                            "name": "MyColumn44",
+                                            "designerId": "943bfcac-c344-4986-9d9d-b092141938ff"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Date",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "Certified",
+                                                "width": 60
+                                            },
+                                            "name": "MyDateColumn",
+                                            "designerId": "ec097491-02f5-4ef5-85db-f0edbb32d4c4"
+                                        },
+                                        {
                                             "type": "Ext.grid.plugin.CellEditing",
                                             "reference": {
                                                 "name": "plugins",

@@ -199,7 +199,7 @@
                                         "itemId": "btnDeleteFuelTank",
                                         "layout|flex": null,
                                         "tabIndex": -1,
-                                        "text": "Delete"
+                                        "text": "Remove"
                                     },
                                     "name": "MyButton163",
                                     "designerId": "8f682078-fdbd-492d-bb87-756748d92ada"
@@ -228,7 +228,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter116",
+                                    "name": "filter149",
                                     "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -391,7 +391,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar12",
+                    "name": "statusbar13",
                     "designerId": "f1d262d7-d497-4c2d-84fb-fd762dfd64d2",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

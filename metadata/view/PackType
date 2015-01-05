@@ -348,7 +348,7 @@
                                         "itemId": "btnDeletePackType",
                                         "layout|flex": null,
                                         "tabIndex": -1,
-                                        "text": "Delete"
+                                        "text": "Remove"
                                     },
                                     "name": "MyButton87",
                                     "designerId": "fc409aed-634b-4db1-b7dd-f013b3d240cc"
@@ -377,7 +377,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter149",
+                                    "name": "filter156",
                                     "designerId": "c39762ed-6d5b-4268-95f3-6514bb2f553b",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }

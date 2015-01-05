@@ -34,9 +34,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.form.Label',
+        'Ext.grid.column.Date',
         'Ext.grid.column.Check',
         'Ext.form.field.Checkbox',
-        'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
 
@@ -1325,6 +1325,17 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         width: 200,
                                                         dataIndex: 'string',
                                                         text: 'Remarks'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 65,
+                                                        dataIndex: 'string',
+                                                        text: 'Condition'
+                                                    },
+                                                    {
+                                                        xtype: 'datecolumn',
+                                                        width: 60,
+                                                        text: 'Certified'
                                                     }
                                                 ],
                                                 plugins: [

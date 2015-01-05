@@ -190,7 +190,7 @@ Ext.define('Inventory.view.PackType', {
                                     tabIndex: -1,
                                     itemId: 'btnDeletePackType',
                                     iconCls: 'small-delete',
-                                    text: 'Delete'
+                                    text: 'Remove'
                                 },
                                 {
                                     xtype: 'tbseparator'

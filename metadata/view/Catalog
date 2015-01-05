@@ -243,7 +243,7 @@
                                         "itemId": "btnDeleteCatalog",
                                         "layout|flex": null,
                                         "tabIndex": -1,
-                                        "text": "Delete"
+                                        "text": "Remove"
                                     },
                                     "name": "MyButton163",
                                     "designerId": "208925c8-5154-4e2b-8f75-6309cb2b9102"
@@ -272,7 +272,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter116",
+                                    "name": "filter137",
                                     "designerId": "568d3548-425d-4c8c-9bac-abf415d0610f",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }

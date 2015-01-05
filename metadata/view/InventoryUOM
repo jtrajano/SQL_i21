@@ -331,6 +331,7 @@
                                     "userConfig": {
                                         "allowDecimals": false,
                                         "fieldLabel": "Decimal Places To Display",
+                                        "hideTrigger": true,
                                         "itemId": "txtDecimalDisplay",
                                         "labelWidth": 165,
                                         "layout|flex": 1,
@@ -350,6 +351,7 @@
                                     "userConfig": {
                                         "allowDecimals": false,
                                         "fieldLabel": "Decimal Places for Calculation",
+                                        "hideTrigger": true,
                                         "itemId": "txtDecimalCalculation",
                                         "labelWidth": 165,
                                         "layout|flex": 1,
@@ -408,7 +410,7 @@
                                         "itemId": "btnDeleteConversion",
                                         "layout|flex": null,
                                         "tabIndex": -1,
-                                        "text": "Delete"
+                                        "text": "Remove"
                                     },
                                     "name": "MyButton159",
                                     "designerId": "5cd693f6-e070-4568-9a73-a6c0ee2c08fc"
@@ -624,7 +626,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging114",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

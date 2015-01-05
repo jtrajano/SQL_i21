@@ -249,7 +249,7 @@ Ext.define('Inventory.view.CertificationProgram', {
                                     tabIndex: -1,
                                     itemId: 'btnDeleteCertificationProgram',
                                     iconCls: 'small-delete',
-                                    text: 'Delete'
+                                    text: 'Remove'
                                 },
                                 {
                                     xtype: 'tbseparator'
