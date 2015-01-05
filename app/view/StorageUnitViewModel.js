@@ -24,10 +24,14 @@ Ext.define('Inventory.view.StorageUnitViewModel', {
         'Inventory.store.BufferedCommodity',
         'Inventory.store.BufferedRestriction',
         'Inventory.store.BufferedMeasurement',
-        'Inventory.store.BufferedReadingPoint'
+        'Inventory.store.BufferedReadingPoint',
+        'i21.store.CompanyLocationBuffered',
     ],
 
     stores: {
+        location: {
+            type: 'companylocationbuffered'
+        },
         batchSizeUOM: {
             type: 'icbuffereduom'
         },

@@ -20,7 +20,7 @@
         "minWidth": 425,
         "minimizable": null,
         "reference": null,
-        "title": "Storage Unit",
+        "title": "Storage Location",
         "width": 943
     },
     "name": "FuelTaxClass2",
@@ -407,8 +407,36 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "columns": null,
-                                                "designer|createAlias": null,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intCompanyLocationId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Location Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strLocationName',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Location Name',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strLocationType',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Location Type',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strAddress',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Address',",
+                                                    "\t\thidden: true",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strLocationName",
                                                 "fieldLabel": "Location",
                                                 "itemId": "cboLocation",
                                                 "labelWidth": 110,
@@ -416,13 +444,46 @@
                                                 "layout|margins": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "readOnly": true
+                                                "readOnly": false,
+                                                "valueField": "intCompanyLocationId"
                                             },
                                             "name": "MyComboBox26",
                                             "configAlternates": {
                                                 "columns": "array"
                                             },
                                             "designerId": "11429a2e-4738-4280-8132-7ce711a02135",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": null,
+                                                "designer|createAlias": null,
+                                                "fieldLabel": "Sub Location",
+                                                "itemId": "cboSubLocation",
+                                                "labelWidth": 110,
+                                                "layout|flex": null,
+                                                "layout|margins": null,
+                                                "margin": null,
+                                                "name": null,
+                                                "readOnly": true
+                                            },
+                                            "name": "MyComboBox21",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "602f6fa5-4e52-443c-b370-5a23713f60ee",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1174,7 +1235,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter162",
+                                                    "name": "filter133",
                                                     "designerId": "44f4490e-5a9c-40bb-beaf-26df2f659502",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1470,7 +1531,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter163",
+                                                    "name": "filter134",
                                                     "designerId": "22931607-4134-4630-a48a-1fe5916ccd67",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1680,7 +1741,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter164",
+                                                    "name": "filter135",
                                                     "designerId": "e4e6a664-7884-4ddd-8995-16e91bcb4363",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1879,7 +1940,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter165",
+                                                    "name": "filter136",
                                                     "designerId": "6e9571a9-d0ec-46b7-ab0d-11523cb26254",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2049,7 +2110,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging128",
+                    "name": "statusbarpaging15",
                     "designerId": "007a0d4c-2515-4998-91ed-043de4f99d12",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

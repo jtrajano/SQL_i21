@@ -23,6 +23,7 @@ namespace iRely.Inventory.Model
         public string strName { get; set; }
         public string strDescription { get; set; }
         public int? intStorageUnitTypeId { get; set; }
+        public int? intLocationId { get; set; }
         public int? intSubLocationId { get; set; }
         public int? intParentStorageLocationId { get; set; }
         public bool ysnAllowConsume { get; set; }

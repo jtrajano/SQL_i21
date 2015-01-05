@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets8f65e9f58da77388971fef97ddf939701f2ec1cba93b67b975413365e77ddc5e))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets07b60903e2912591abc6aebb2f32c1b5cf306f4fff02cee34c5eace8e9a531c7))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets8f65e9f58da77388971fef97ddf939701f2ec1cba93b67b975413365e77ddc5e : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets07b60903e2912591abc6aebb2f32c1b5cf306f4fff02cee34c5eace8e9a531c7 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "8f65e9f58da77388971fef97ddf939701f2ec1cba93b67b975413365e77ddc5e"; }
+            get { return "07b60903e2912591abc6aebb2f32c1b5cf306f4fff02cee34c5eace8e9a531c7"; }
         }
 
         /// <summary>
@@ -2485,13 +2485,14 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageLocation
-        [CodeFirstDatabaseSchema.tblICStorageLocation](T1.tblICStorageLocation_intStorageLocationId, T1.tblICStorageLocation_strName, T1.tblICStorageLocation_strDescription, T1.tblICStorageLocation_intStorageUnitTypeId, T1.tblICStorageLocation_intSubLocationId, T1.tblICStorageLocation_intParentStorageLocationId, T1.tblICStorageLocation_ysnAllowConsume, T1.tblICStorageLocation_ysnAllowMultipleItem, T1.tblICStorageLocation_ysnAllowMultipleLot, T1.tblICStorageLocation_ysnMergeOnMove, T1.tblICStorageLocation_ysnCycleCounted, T1.tblICStorageLocation_ysnDefaultWHStagingUnit, T1.tblICStorageLocation_intRestrictionId, T1.tblICStorageLocation_strUnitGroup, T1.tblICStorageLocation_dblMinBatchSize, T1.tblICStorageLocation_dblBatchSize, T1.tblICStorageLocation_intBatchSizeUOMId, T1.tblICStorageLocation_intSequence, T1.tblICStorageLocation_ysnActive, T1.tblICStorageLocation_intRelativeX, T1.tblICStorageLocation_intRelativeY, T1.tblICStorageLocation_intRelativeZ, T1.tblICStorageLocation_intCommodityId, T1.tblICStorageLocation_dblPackFactor, T1.tblICStorageLocation_dblUnitPerFoot, T1.tblICStorageLocation_dblResidualUnit, T1.tblICStorageLocation_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICStorageLocation](T1.tblICStorageLocation_intStorageLocationId, T1.tblICStorageLocation_strName, T1.tblICStorageLocation_strDescription, T1.tblICStorageLocation_intStorageUnitTypeId, T1.tblICStorageLocation_intLocationId, T1.tblICStorageLocation_intSubLocationId, T1.tblICStorageLocation_intParentStorageLocationId, T1.tblICStorageLocation_ysnAllowConsume, T1.tblICStorageLocation_ysnAllowMultipleItem, T1.tblICStorageLocation_ysnAllowMultipleLot, T1.tblICStorageLocation_ysnMergeOnMove, T1.tblICStorageLocation_ysnCycleCounted, T1.tblICStorageLocation_ysnDefaultWHStagingUnit, T1.tblICStorageLocation_intRestrictionId, T1.tblICStorageLocation_strUnitGroup, T1.tblICStorageLocation_dblMinBatchSize, T1.tblICStorageLocation_dblBatchSize, T1.tblICStorageLocation_intBatchSizeUOMId, T1.tblICStorageLocation_intSequence, T1.tblICStorageLocation_ysnActive, T1.tblICStorageLocation_intRelativeX, T1.tblICStorageLocation_intRelativeY, T1.tblICStorageLocation_intRelativeZ, T1.tblICStorageLocation_intCommodityId, T1.tblICStorageLocation_dblPackFactor, T1.tblICStorageLocation_dblUnitPerFoot, T1.tblICStorageLocation_dblResidualUnit, T1.tblICStorageLocation_intConcurrencyId)
     FROM (
         SELECT 
             T.intStorageLocationId AS tblICStorageLocation_intStorageLocationId, 
             T.strName AS tblICStorageLocation_strName, 
             T.strDescription AS tblICStorageLocation_strDescription, 
             T.intStorageUnitTypeId AS tblICStorageLocation_intStorageUnitTypeId, 
+            T.intLocationId AS tblICStorageLocation_intLocationId, 
             T.intSubLocationId AS tblICStorageLocation_intSubLocationId, 
             T.intParentStorageLocationId AS tblICStorageLocation_intParentStorageLocationId, 
             T.ysnAllowConsume AS tblICStorageLocation_ysnAllowConsume, 
@@ -4924,13 +4925,14 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageLocations
-        [iRely.Inventory.Model.tblICStorageLocation](T1.tblICStorageLocation_intStorageLocationId, T1.tblICStorageLocation_strName, T1.tblICStorageLocation_strDescription, T1.tblICStorageLocation_intStorageUnitTypeId, T1.tblICStorageLocation_intSubLocationId, T1.tblICStorageLocation_intParentStorageLocationId, T1.tblICStorageLocation_ysnAllowConsume, T1.tblICStorageLocation_ysnAllowMultipleItem, T1.tblICStorageLocation_ysnAllowMultipleLot, T1.tblICStorageLocation_ysnMergeOnMove, T1.tblICStorageLocation_ysnCycleCounted, T1.tblICStorageLocation_ysnDefaultWHStagingUnit, T1.tblICStorageLocation_intRestrictionId, T1.tblICStorageLocation_strUnitGroup, T1.tblICStorageLocation_dblMinBatchSize, T1.tblICStorageLocation_dblBatchSize, T1.tblICStorageLocation_intBatchSizeUOMId, T1.tblICStorageLocation_intSequence, T1.tblICStorageLocation_ysnActive, T1.tblICStorageLocation_intRelativeX, T1.tblICStorageLocation_intRelativeY, T1.tblICStorageLocation_intRelativeZ, T1.tblICStorageLocation_intCommodityId, T1.tblICStorageLocation_dblPackFactor, T1.tblICStorageLocation_dblUnitPerFoot, T1.tblICStorageLocation_dblResidualUnit, T1.tblICStorageLocation_intConcurrencyId)
+        [iRely.Inventory.Model.tblICStorageLocation](T1.tblICStorageLocation_intStorageLocationId, T1.tblICStorageLocation_strName, T1.tblICStorageLocation_strDescription, T1.tblICStorageLocation_intStorageUnitTypeId, T1.tblICStorageLocation_intLocationId, T1.tblICStorageLocation_intSubLocationId, T1.tblICStorageLocation_intParentStorageLocationId, T1.tblICStorageLocation_ysnAllowConsume, T1.tblICStorageLocation_ysnAllowMultipleItem, T1.tblICStorageLocation_ysnAllowMultipleLot, T1.tblICStorageLocation_ysnMergeOnMove, T1.tblICStorageLocation_ysnCycleCounted, T1.tblICStorageLocation_ysnDefaultWHStagingUnit, T1.tblICStorageLocation_intRestrictionId, T1.tblICStorageLocation_strUnitGroup, T1.tblICStorageLocation_dblMinBatchSize, T1.tblICStorageLocation_dblBatchSize, T1.tblICStorageLocation_intBatchSizeUOMId, T1.tblICStorageLocation_intSequence, T1.tblICStorageLocation_ysnActive, T1.tblICStorageLocation_intRelativeX, T1.tblICStorageLocation_intRelativeY, T1.tblICStorageLocation_intRelativeZ, T1.tblICStorageLocation_intCommodityId, T1.tblICStorageLocation_dblPackFactor, T1.tblICStorageLocation_dblUnitPerFoot, T1.tblICStorageLocation_dblResidualUnit, T1.tblICStorageLocation_intConcurrencyId)
     FROM (
         SELECT 
             T.intStorageLocationId AS tblICStorageLocation_intStorageLocationId, 
             T.strName AS tblICStorageLocation_strName, 
             T.strDescription AS tblICStorageLocation_strDescription, 
             T.intStorageUnitTypeId AS tblICStorageLocation_intStorageUnitTypeId, 
+            T.intLocationId AS tblICStorageLocation_intLocationId, 
             T.intSubLocationId AS tblICStorageLocation_intSubLocationId, 
             T.intParentStorageLocationId AS tblICStorageLocation_intParentStorageLocationId, 
             T.ysnAllowConsume AS tblICStorageLocation_ysnAllowConsume, 

@@ -43,7 +43,7 @@ Ext.define('Inventory.view.StorageUnit', {
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
-    title: 'Storage Unit',
+    title: 'Storage Location',
     maximizable: true,
 
     items: [
@@ -224,9 +224,44 @@ Ext.define('Inventory.view.StorageUnit', {
                                             valueField: 'intStorageUnitTypeId'
                                         },
                                         {
-                                            xtype: 'combobox',
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intCompanyLocationId',
+                                                    dataType: 'numeric',
+                                                    text: 'Location Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strLocationName',
+                                                    dataType: 'string',
+                                                    text: 'Location Name',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strLocationType',
+                                                    dataType: 'string',
+                                                    text: 'Location Type',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strAddress',
+                                                    dataType: 'string',
+                                                    text: 'Address',
+                                                    hidden: true
+                                                }
+                                            ],
                                             itemId: 'cboLocation',
                                             fieldLabel: 'Location',
+                                            labelWidth: 110,
+                                            readOnly: false,
+                                            displayField: 'strLocationName',
+                                            valueField: 'intCompanyLocationId'
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            itemId: 'cboSubLocation',
+                                            fieldLabel: 'Sub Location',
                                             labelWidth: 110,
                                             readOnly: true
                                         },

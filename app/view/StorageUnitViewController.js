@@ -37,7 +37,11 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 value: '{current.intStorageUnitTypeId}',
                 store: '{storageUnitType}'
             },
-            cboLocation: '{current.intSubLocationId}',
+            cboLocation: {
+                value: '{current.intLocationId}',
+                store: '{location}'
+            },
+            cboSubLocation: '{current.intSubLocationId}',
             cboParentUnit: '{current.intParentStorageLocationId}',
             cboRestrictionType: {
                 value: '{current.intRestrictionId}',

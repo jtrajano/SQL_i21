@@ -19,6 +19,7 @@ Ext.define('Inventory.model.StorageLocation', {
         { name: 'strName', type: 'string'},
         { name: 'strDescription', type: 'string'},
         { name: 'intStorageUnitTypeId', type: 'int', allowNull: true },
+        { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intParentStorageLocationId', type: 'int', allowNull: true },
         { name: 'ysnAllowConsume', type: 'boolean'},
@@ -44,6 +45,7 @@ Ext.define('Inventory.model.StorageLocation', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strName'}
+        {type: 'presence', field: 'strName'},
+        {type: 'presence', field: 'intLocationId'}
     ]
 });
