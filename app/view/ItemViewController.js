@@ -889,6 +889,35 @@ Ext.define('Inventory.view.ItemViewController', {
             ]
         });
 
+        var colConvertToStock = grdUOM.columns[9];
+        var colConvertFromStock = grdUOM.columns[10];
+        if (colConvertToStock) {
+            colConvertToStock.renderer = function (value, metadata, record) {
+                if (record) {
+                    if (record.get('intDecimalCalculation') > 0) {
+                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalCalculation'));
+                    }
+                    if (record.get('intDecimalDisplay') > 0) {
+                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalDisplay'));
+                    }
+                }
+            }
+        }
+        if (colConvertFromStock) {
+            colConvertFromStock.renderer = function (value, metadata, record) {
+                if (record) {
+                    if (record.get('intDecimalCalculation') > 0) {
+                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalCalculation'));
+                    }
+                    if (record.get('intDecimalDisplay') > 0) {
+                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalDisplay'));
+                    }
+                }
+            }
+        }
+
+
+
         me.subscribeLocationEvents(grdLocationStore, me);
 
 
