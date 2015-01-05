@@ -18,6 +18,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Inventory Receipt - {current.strReceiptNumber}'
+            },
             cboReceiptType: {
                 value: '{current.strReceiptType}',
                 store: '{receiptTypes}',

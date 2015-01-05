@@ -31,6 +31,9 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Storage Location - {current.strName}'
+            },
             txtName: '{current.strName}',
             txtDescription: '{current.strDescription}',
             cboUnitType: {

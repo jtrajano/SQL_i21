@@ -31,6 +31,9 @@ Ext.define('Inventory.view.PackTypeViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Pack Type - {current.strPackName}'
+            },
             txtPackTypeName: '{current.strPackName}',
             txtDescription: '{current.strDescription}',
 

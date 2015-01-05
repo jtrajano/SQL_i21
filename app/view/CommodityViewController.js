@@ -31,6 +31,9 @@ Ext.define('Inventory.view.CommodityViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Commodity - {current.strCommodityCode}'
+            },
             txtCommodityCode: '{current.strCommodityCode}',
             txtDescription: '{current.strDescription}',
             chkExchangeTraded: '{current.ysnExchangeTraded}',

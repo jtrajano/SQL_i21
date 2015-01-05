@@ -17,6 +17,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Inventory Shipment - {current.strBOLNumber}'
+            },
             txtBOLNumber: '{current.strBOLNumber}',
             dtmShipDate: '{current.dtmShipDate}',
             cboOrderType: {

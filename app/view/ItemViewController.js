@@ -38,6 +38,10 @@ Ext.define('Inventory.view.ItemViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Item - {current.strItemNo}'
+            },
+
             //-----------//
             //Details Tab//
             //-----------//

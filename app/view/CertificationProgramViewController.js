@@ -31,6 +31,9 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Certification Program - {current.strCertificationName}'
+            },
             txtCertificationProgram: '{current.strCertificationName}',
             txtIssuingOrganization: '{current.strIssuingOrganization}',
             txtCertificationID: '{current.strCertificationIdName}',

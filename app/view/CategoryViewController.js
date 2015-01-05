@@ -31,6 +31,9 @@ Ext.define('Inventory.view.CategoryViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Category - {current.strCategoryCode}'
+            },
             txtCategoryCode: '{current.strCategoryCode}',
             txtDescription: '{current.strDescription}',
             cboLineOfBusiness: {

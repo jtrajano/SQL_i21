@@ -32,6 +32,9 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Document - {current.strDocumentName}'
+            },
             txtDocumentName: '{current.strDocumentName}',
             txtDescription: '{current.strDescription}',
             cboCommodity: {

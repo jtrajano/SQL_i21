@@ -31,6 +31,9 @@ Ext.define('Inventory.view.FactoryUnitTypeViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Storage Unit Type - {current.strStorageUnitType}'
+            },
             txtName: '{current.strStorageUnitType}',
             txtDescription: '{current.strDescription}',
             cboInternalCode: {

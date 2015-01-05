@@ -32,6 +32,9 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Inventory UOM - {current.strUnitMeasure}'
+            },
             txtUnitMeasure: '{current.strUnitMeasure}',
             txtSymbol: '{current.strSymbol}',
             cboUnitType: {

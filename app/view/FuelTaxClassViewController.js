@@ -32,6 +32,9 @@ Ext.define('Inventory.view.FuelTaxClassViewController', {
             ]
         },
         binding: {
+            bind: {
+                title: 'Fuel Tax Class - {current.strTaxClassCode}'
+            },
             txtTaxClassCode: '{current.strTaxClassCode}',
             txtIrsTaxCode: '{current.strIRSTaxCode}',
             txtDescription: '{current.strDescription}',
