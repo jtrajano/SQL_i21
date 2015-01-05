@@ -4,6 +4,7 @@
     [strName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intStorageUnitTypeId] INT NULL, 
+	[intLocationId] INT NULL, 
     [intSubLocationId] INT NULL, 
     [intParentStorageLocationId] INT NULL, 
     [ysnAllowConsume] BIT NULL DEFAULT ((0)), 
@@ -32,7 +33,8 @@
     CONSTRAINT [FK_tblICStorageLocation_tblICStorageUnitType] FOREIGN KEY ([intStorageUnitTypeId]) REFERENCES [tblICStorageUnitType]([intStorageUnitTypeId]), 
     CONSTRAINT [FK_tblICStorageLocation_tblICRestriction] FOREIGN KEY ([intRestrictionId]) REFERENCES [tblICRestriction]([intRestrictionId]), 
     CONSTRAINT [FK_tblICStorageLocation_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
-    CONSTRAINT [FK_tblICStorageLocation_tblICUnitMeasure] FOREIGN KEY ([intBatchSizeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
+    CONSTRAINT [FK_tblICStorageLocation_tblICUnitMeasure] FOREIGN KEY ([intBatchSizeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+    CONSTRAINT [FK_tblICStorageLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 
 )
 
 GO
