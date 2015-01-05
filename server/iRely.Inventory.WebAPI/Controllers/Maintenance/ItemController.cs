@@ -121,6 +121,28 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
+        [HttpGet]
+        [ActionName("GetItemStockDetails")]
+        public HttpResponseMessage GetItemStockDetails(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        {
+            filter = string.IsNullOrEmpty(filter) ? "" : filter;
+
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<vyuICGetItemStock>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intKey", "ASC");
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<vyuICGetItemStock>(searchFilters, true);
+
+            var data = _ItemBRL.GetItemStockDetails(page, start, limit, sortSelector, predicate);
+
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = data
+            });
+        }
+
         [HttpPost]
         public HttpResponseMessage PostItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
         {

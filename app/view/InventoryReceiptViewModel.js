@@ -5,14 +5,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     requires: [
         'Inventory.store.BufferedEquipmentLength',
         'Inventory.store.BufferedQAProperty',
-        'Inventory.store.BufferedCompactItem',
+        'Inventory.store.BufferedItemStockView',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedPackType',
         'AccountsPayable.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CountryBuffered',
         'i21.store.CurrencyBuffered',
-        'i21.store.FreightTermsBuffered',
+        'i21.store.FreightTermsBuffered'
     ],
 
     stores: {
@@ -98,7 +98,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
         items: {
-            type: 'icbufferedcompactitem'
+            type: 'icbuffereditemstockview'
         },
         itemUOM: {
             type: 'icbuffereditemunitmeasure'

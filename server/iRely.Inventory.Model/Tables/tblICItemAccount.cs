@@ -58,5 +58,6 @@ namespace iRely.Inventory.Model
         
         public tblICItem tblICItem { get; set; }
         public tblGLAccount tblGLAccount { get; set; }
+        public vyuICGetItemStock vyuICGetItemStock { get; set; }
     }
 }

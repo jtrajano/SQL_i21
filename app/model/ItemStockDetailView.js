@@ -1,10 +1,12 @@
 /**
- * Created by LZabala on 11/25/2014.
+ * Created by LZabala on 1/5/2015.
  */
-Ext.define('Inventory.model.ItemStockView', {
+Ext.define('Inventory.model.ItemStockDetailView', {
     extend: 'Ext.data.Model',
 
     requires: [
+        'Inventory.model.ItemStockDetailAccount',
+        'Inventory.model.ItemStockDetailPricing',
         'Ext.data.Field'
     ],
 

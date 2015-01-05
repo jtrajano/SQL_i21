@@ -108,6 +108,19 @@ namespace iRely.Inventory.BRL
                     .ToList();
         }
 
+        public object GetItemStockDetails(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<vyuICGetItemStock, bool>> predicate)
+        {
+            return _db.GetQuery<vyuICGetItemStock>()
+                    .Include(p => p.tblICItemAccounts)
+                    .Include(p => p.tblICItemPricings)
+                    .Where(predicate)
+                    .OrderBySelector(sortSelector)
+                    .Skip(start)
+                    .Take(limit)
+                    .AsNoTracking()
+                    .ToList();
+        }
+
         public void AddItem(tblICItem item)
         {
             _db.AddNew<tblICItem>(item);

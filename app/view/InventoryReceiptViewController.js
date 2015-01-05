@@ -111,7 +111,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colItemNo: {
                     dataIndex: 'strItemNo',
                     editor: {
-                        store: '{items}'
+                        store: '{items}',
+                        defaultFilters: [{
+                            column: 'intLocationId',
+                            value: '{current.intLocationId}'
+                        }]
                     }
                 },
                 colDescription: 'strItemDescription',
@@ -407,6 +411,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (combo.column.itemId === 'colItemNo')
         {
+            if (win.viewModel.data.current.get('strReceiptType') === 'Direct'){
+                current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));
+                current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
+            }
+
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('strLotTracking', records[0].get('strLotTracking'));

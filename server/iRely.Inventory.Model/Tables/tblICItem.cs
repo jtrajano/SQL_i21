@@ -239,15 +239,14 @@ namespace iRely.Inventory.Model
         public string strLocationType { get; set; }
         public int? intVendorId { get; set; }
         public string strVendorId { get; set; }
-        public int? intDefaultUOMId { get; set; }
-        public string strDefaultUOM { get; set; }
+        public int? intReceiveUOMId { get; set; }
+        public int? intIssueUOMId { get; set; }
+        public string strReceiveUOM { get; set; }
+        public string strIssueUOM { get; set; }
         public int? intAllowNegativeInventory { get; set; }
         public string strAllowNegativeInventory { get; set; }
         public int? intCostingMethod { get; set; }
         public string strCostingMethod { get; set; }
-        public int? intAccountId { get; set; }
-        public string strAccountId { get; set; }
-        public string strAccountDescription { get; set; }
         public int? intUnitMeasureId { get; set; }
         public string strStockUOM { get; set; }
         public decimal? dblUnitOnHand { get; set; }
@@ -255,5 +254,8 @@ namespace iRely.Inventory.Model
         public decimal? dblMinOrder { get; set; }
         public decimal? dblOnOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
+
+        public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
+        public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
     }
 }

@@ -188,7 +188,7 @@ namespace iRely.Inventory.Model
         public vyuICGetItemStockMap()
         {
             // Primary Key
-            this.HasKey(t => t.intKey);
+            this.HasKey(p => p.intKey);
 
             // Table & Column Mappings
             this.ToTable("vyuICGetItemStock");
@@ -199,25 +199,31 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblUnitOnHand).HasColumnName("dblUnitOnHand");
             this.Property(t => t.intAllowNegativeInventory).HasColumnName("intAllowNegativeInventory");
             this.Property(t => t.intCostingMethod).HasColumnName("intCostingMethod");
-            this.Property(t => t.intDefaultUOMId).HasColumnName("intDefaultUOMId");
-            this.Property(t => t.intKey).HasColumnName("intKey");
+            this.Property(t => t.intIssueUOMId).HasColumnName("intIssueUOMId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
-            this.Property(t => t.intAccountId).HasColumnName("intAccountId");
+            this.Property(t => t.intKey).HasColumnName("intKey");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.intReceiveUOMId).HasColumnName("intReceiveUOMId");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.intVendorId).HasColumnName("intVendorId");
             this.Property(t => t.strAllowNegativeInventory).HasColumnName("strAllowNegativeInventory");
             this.Property(t => t.strCostingMethod).HasColumnName("strCostingMethod");
-            this.Property(t => t.strDefaultUOM).HasColumnName("strDefaultUOM");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strAccountId).HasColumnName("strAccountId");
-            this.Property(t => t.strAccountDescription).HasColumnName("strAccountDescription");
+            this.Property(t => t.strIssueUOM).HasColumnName("strIssueUOM");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strLocationName).HasColumnName("strLocationName");
             this.Property(t => t.strLocationType).HasColumnName("strLocationType");
+            this.Property(t => t.strReceiveUOM).HasColumnName("strReceiveUOM");
             this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
             this.Property(t => t.strType).HasColumnName("strType");
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
+
+            this.HasMany(p => p.tblICItemAccounts)
+                .WithRequired(p => p.vyuICGetItemStock)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemPricings)
+                .WithRequired(p => p.vyuICGetItemStock)
+                .HasForeignKey(p => p.intItemId);
         }
     }
 }
