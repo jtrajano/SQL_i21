@@ -200,8 +200,8 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 fieldLabel: 'Decimal Places To Display',
                                                 labelWidth: 165,
                                                 allowDecimals: false,
-                                                maxValue: 4,
-                                                minValue: 1
+                                                maxValue: 6,
+                                                minValue: 0
                                             },
                                             {
                                                 xtype: 'numberfield',
@@ -210,8 +210,8 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                 fieldLabel: 'Decimal Places for Calculation',
                                                 labelWidth: 165,
                                                 allowDecimals: false,
-                                                maxValue: 4,
-                                                minValue: 1
+                                                maxValue: 6,
+                                                minValue: 0
                                             }
                                         ]
                                     }

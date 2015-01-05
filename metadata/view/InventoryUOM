@@ -334,8 +334,8 @@
                                         "itemId": "txtDecimalDisplay",
                                         "labelWidth": 165,
                                         "layout|flex": 1,
-                                        "maxValue": 4,
-                                        "minValue": 1
+                                        "maxValue": 6,
+                                        "minValue": 0
                                     },
                                     "name": "MyNumberField20",
                                     "designerId": "4ea58e90-cf64-4bc3-8a4c-1ab39988abc4"
@@ -353,8 +353,8 @@
                                         "itemId": "txtDecimalCalculation",
                                         "labelWidth": 165,
                                         "layout|flex": 1,
-                                        "maxValue": 4,
-                                        "minValue": 1
+                                        "maxValue": 6,
+                                        "minValue": 0
                                     },
                                     "name": "MyNumberField21",
                                     "designerId": "a87ae95c-2a73-4224-8784-7828059176b9"
@@ -624,7 +624,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging111",
+                    "name": "statusbarpaging11",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
