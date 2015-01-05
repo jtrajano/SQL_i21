@@ -20,7 +20,7 @@
     [glije_user_rev_dt] INT             NULL,
     [A4GLIdentity]      NUMERIC (9)     NOT NULL, 
     [glije_postdate] DATE NULL, 
-    [glije_id] INT NULL IDENTITY, 
+    [glije_id] INT NOT NULL IDENTITY, 
     [glije_dte] DATETIME NULL, 
     [glije_error_desc] NVARCHAR(300) NULL
 );
