@@ -55,6 +55,25 @@ namespace iRely.Inventory.Model
                 _description = value;
             }
         }
+        private string _accountGroup;
+        [NotMapped]
+        public string strAccountGroup
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_accountGroup))
+                    if (tblGLAccount != null)
+                        return tblGLAccount.strAccountGroup;
+                    else
+                        return null;
+                else
+                    return _accountGroup;
+            }
+            set
+            {
+                _accountGroup = value;
+            }
+        }
         
         public tblICItem tblICItem { get; set; }
         public tblGLAccount tblGLAccount { get; set; }

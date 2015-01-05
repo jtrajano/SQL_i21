@@ -83,6 +83,9 @@ Ext.define('Inventory.view.CategoryViewModel', {
                     strDescription: 'Purchase'
                 },
                 {
+                    strDescription: 'Inventory'
+                },
+                {
                     strDescription: 'Variance'
                 },
                 {

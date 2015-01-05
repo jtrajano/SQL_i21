@@ -488,8 +488,8 @@ Ext.define('Inventory.view.Category', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colAccountCategory',
+                                                        dataIndex: 'string',
                                                         text: 'Account Category',
                                                         flex: 1,
                                                         editor: {
@@ -498,6 +498,12 @@ Ext.define('Inventory.view.Category', {
                                                             displayField: 'strDescription',
                                                             valueField: 'strDescription'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colAccountGroup',
+                                                        text: 'Account Group',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

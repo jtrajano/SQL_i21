@@ -35,10 +35,11 @@ namespace iRely.Inventory.Model
             this.HasKey(t => t.intAccountId);
 
             // Table & Column Mappings
-            this.ToTable("tblGLAccount");
+            this.ToTable("vyuGLAccountView");
             this.Property(t => t.intAccountId).HasColumnName("intAccountId");
             this.Property(t => t.strAccountId).HasColumnName("strAccountId");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
         }
     }
 

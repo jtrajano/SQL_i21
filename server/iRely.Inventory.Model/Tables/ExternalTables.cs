@@ -132,11 +132,12 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemFactory> tblICItemFactories { get; set; }
     }
 
-    public class tblGLAccount : BaseEntity
+    public class tblGLAccount
     {
         public int intAccountId { get; set; }
         public string strAccountId { get; set; }
         public string strDescription { get; set; }
+        public string strAccountGroup { get; set; }
 
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }

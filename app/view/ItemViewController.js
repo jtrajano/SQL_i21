@@ -125,6 +125,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{accountDescriptions}'
                     }
                 },
+                colAccountGroup : 'strAccountGroup',
                 colGLAccountId: {
                     dataIndex: 'strAccountId',
                     editor: {
@@ -1499,6 +1500,7 @@ Ext.define('Inventory.view.ItemViewController', {
         {
             current.set('intAccountId', records[0].get('intAccountId'));
             current.set('strDescription', records[0].get('strDescription'));
+            current.set('strAccountGroup', records[0].get('strAccountGroup'));
         }
     },
 

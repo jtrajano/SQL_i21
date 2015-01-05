@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets5adb7e1d7f0449a5834f80a2b45ef327c88144de996c1eee824ee6ac057f8b8b))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets8f65e9f58da77388971fef97ddf939701f2ec1cba93b67b975413365e77ddc5e))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets5adb7e1d7f0449a5834f80a2b45ef327c88144de996c1eee824ee6ac057f8b8b : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets8f65e9f58da77388971fef97ddf939701f2ec1cba93b67b975413365e77ddc5e : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "5adb7e1d7f0449a5834f80a2b45ef327c88144de996c1eee824ee6ac057f8b8b"; }
+            get { return "8f65e9f58da77388971fef97ddf939701f2ec1cba93b67b975413365e77ddc5e"; }
         }
 
         /// <summary>
@@ -1580,13 +1580,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblGLAccount
-        [CodeFirstDatabaseSchema.tblGLAccount](T1.tblGLAccount_intAccountId, T1.tblGLAccount_strAccountId, T1.tblGLAccount_strDescription, T1.tblGLAccount_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblGLAccount](T1.tblGLAccount_intAccountId, T1.tblGLAccount_strAccountId, T1.tblGLAccount_strDescription, T1.tblGLAccount_strAccountGroup)
     FROM (
         SELECT 
             T.intAccountId AS tblGLAccount_intAccountId, 
             T.strAccountId AS tblGLAccount_strAccountId, 
             T.strDescription AS tblGLAccount_strDescription, 
-            T.intConcurrencyId AS tblGLAccount_intConcurrencyId, 
+            T.strAccountGroup AS tblGLAccount_strAccountGroup, 
             True AS _from0
         FROM InventoryEntities.tblGLAccounts AS T
     ) AS T1");
@@ -3997,13 +3997,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblGLAccounts
-        [iRely.Inventory.Model.tblGLAccount](T1.tblGLAccount_intAccountId, T1.tblGLAccount_strAccountId, T1.tblGLAccount_strDescription, T1.tblGLAccount_intConcurrencyId)
+        [iRely.Inventory.Model.tblGLAccount](T1.tblGLAccount_intAccountId, T1.tblGLAccount_strAccountId, T1.tblGLAccount_strDescription, T1.tblGLAccount_strAccountGroup)
     FROM (
         SELECT 
             T.intAccountId AS tblGLAccount_intAccountId, 
             T.strAccountId AS tblGLAccount_strAccountId, 
             T.strDescription AS tblGLAccount_strDescription, 
-            T.intConcurrencyId AS tblGLAccount_intConcurrencyId, 
+            T.strAccountGroup AS tblGLAccount_strAccountGroup, 
             True AS _from0
         FROM CodeFirstDatabase.tblGLAccount AS T
     ) AS T1");
