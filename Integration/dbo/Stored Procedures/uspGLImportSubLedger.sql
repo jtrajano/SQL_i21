@@ -133,7 +133,7 @@ END
 		
 		EXEC  dbo.uspGLGetNewID 2, @strJournalId  OUTPUT
 		
-		INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intUserId,strJournalType,strTransactionType,ysnPosted)
+		INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted)
 		SELECT @strJournalId,@postdate, ''Imported from SubLedger'' ,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0
 		
 	 
