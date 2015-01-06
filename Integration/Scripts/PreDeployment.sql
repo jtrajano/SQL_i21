@@ -24,6 +24,7 @@
 :r "..\dbo\Stored Procedures\uspGLAccountOriginSync.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildAccount.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildOriginAccount.sql"
+:r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
 
 -- CASH MANAGEMENT
 :r ..\dbo\Views\apcbkmst.sql

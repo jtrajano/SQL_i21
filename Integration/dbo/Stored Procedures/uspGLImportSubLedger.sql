@@ -1,8 +1,9 @@
 ﻿
 
-EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLImportSubLedger'' and type = ''P'') 
-			DROP PROCEDURE [dbo].[uspGLImportSubLedger];')
-			
+IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspGLImportSubLedger' and type = 'P') 
+			DROP PROCEDURE [dbo].[uspGLImportSubLedger];
+GO
+	
 EXEC('CREATE PROCEDURE uspGLImportSubLedger
 	( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
 AS
