@@ -15,6 +15,8 @@ BEGIN
 				, 'tblTMCOBOLREADSiteLink'
 				, 'tblTMCOBOLREADSite'
 				, 'tblTMCOBOLLeaseBilling'
+				, 'tblTMCOBOLPRICE'
+				, 'tblAPaptrxmst'
 			)
 			AND COLUMN_NAME NOT IN ('strPassword')
 			AND TABLE_NAME LIKE 'tbl%'

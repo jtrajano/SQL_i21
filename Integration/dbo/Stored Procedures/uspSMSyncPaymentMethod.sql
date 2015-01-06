@@ -197,7 +197,7 @@ BEGIN
 				INSERT INTO @RecordsToAdd
 				SELECT P.[strPaymentMethodCode], P.[strPaymentMethod]
 				FROM @RecordsToProcess P
-				LEFT OUTER JOIN tblSMPaymentMethod PM ON P.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+				LEFT OUTER JOIN tblSMPaymentMethod PM ON P.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 				WHERE PM.[strPaymentMethodCode] IS NULL		
 				
 				
@@ -227,7 +227,7 @@ BEGIN
 						@RecordsToUpdate U
 					INNER JOIN
 						tblSMPaymentMethod PM
-							ON U.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON U.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					LEFT JOIN
 						tblGLCOACrossReference GL
 							ON PM.intAccountId = GL.inti21Id 				 
@@ -251,7 +251,7 @@ BEGIN
 						@RecordsToUpdate U
 					INNER JOIN
 						tblSMPaymentMethod PM
-							ON U.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON U.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					LEFT JOIN
 						tblGLCOACrossReference GL
 							ON PM.intAccountId = GL.inti21Id 				 
@@ -275,7 +275,7 @@ BEGIN
 						@RecordsToUpdate U
 					INNER JOIN
 						tblSMPaymentMethod PM
-							ON U.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON U.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					LEFT JOIN
 						tblGLCOACrossReference GL
 							ON PM.intAccountId = GL.inti21Id 				 
@@ -299,7 +299,7 @@ BEGIN
 						@RecordsToUpdate U
 					INNER JOIN
 						tblSMPaymentMethod PM
-							ON U.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON U.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					LEFT JOIN
 						tblGLCOACrossReference GL
 							ON PM.intAccountId = GL.inti21Id 				 
@@ -323,7 +323,7 @@ BEGIN
 						@RecordsToUpdate U
 					INNER JOIN
 						tblSMPaymentMethod PM
-							ON U.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON U.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					LEFT JOIN
 						tblGLCOACrossReference GL
 							ON PM.intAccountId = GL.inti21Id 				 
@@ -347,7 +347,7 @@ BEGIN
 						@RecordsToUpdate U
 					INNER JOIN
 						tblSMPaymentMethod PM
-							ON U.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON U.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					LEFT JOIN
 						tblGLCOACrossReference GL
 							ON PM.intAccountId = GL.inti21Id 				 
@@ -371,7 +371,7 @@ BEGIN
 						@RecordsToUpdate U
 					INNER JOIN
 						tblSMPaymentMethod PM
-							ON U.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON U.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					LEFT JOIN
 						tblGLCOACrossReference GL
 							ON PM.intAccountId = GL.inti21Id 				 
@@ -395,7 +395,7 @@ BEGIN
 						@RecordsToUpdate U
 					INNER JOIN
 						tblSMPaymentMethod PM
-							ON U.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON U.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					LEFT JOIN
 						tblGLCOACrossReference GL
 							ON PM.intAccountId = GL.inti21Id 				 
@@ -419,7 +419,7 @@ BEGIN
 						@RecordsToUpdate U
 					INNER JOIN
 						tblSMPaymentMethod PM
-							ON U.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON U.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					LEFT JOIN
 						tblGLCOACrossReference GL
 							ON PM.intAccountId = GL.inti21Id 				 
@@ -461,7 +461,7 @@ BEGIN
 							ON P.[strGLAccount] = GL.[strExternalId]
 					LEFT OUTER JOIN
 						tblSMPaymentMethod PM
-							ON P.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+							ON P.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					WHERE
 						PM.[strPaymentMethodCode] IS NULL
 					ORDER BY
@@ -487,7 +487,7 @@ BEGIN
 						tblGLCOACrossReference GL
 							ON P.[strGLAccount] = GL.[strExternalId]				
 					WHERE
-						 [tblSMPaymentMethod].[strPaymentMethodCode] = A.[strPaymentMethodCode]  
+						 [tblSMPaymentMethod].[strPaymentMethodCode] = A.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS  
 						 
 						 
 					SET @UpdatedCount = @@ROWCOUNT			 
@@ -560,7 +560,7 @@ BEGIN
 			INSERT INTO @RecordsToAdd
 			SELECT P.[strPaymentMethodCode]
 			FROM @RecordsToProcess P
-			LEFT OUTER JOIN tblSMPaymentMethod PM ON P.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
+			LEFT OUTER JOIN tblSMPaymentMethod PM ON P.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 			WHERE PM.[strPaymentMethodCode] IS NULL		
 	
 	
@@ -596,7 +596,7 @@ BEGIN
 					tblSMPaymentMethod P
 				INNER JOIN
 					@RecordsToAdd A
-						ON P.[strPaymentMethodCode] = A.[strPaymentMethodCode] 			
+						ON P.[strPaymentMethodCode] = A.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS 			
 				LEFT JOIN
 					tblGLCOACrossReference GL
 						ON P.[intAccountId] = GL.[inti21Id]
@@ -629,7 +629,7 @@ BEGIN
 					tblSMPaymentMethod P
 				INNER JOIN
 					@RecordsToUpdate A
-						ON P.[strPaymentMethodCode] = A.[strPaymentMethodCode]
+						ON P.[strPaymentMethodCode] = A.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS 
 				LEFT JOIN
 					tblGLCOACrossReference GL
 						ON P.[intAccountId] = GL.[inti21Id]				
@@ -671,7 +671,7 @@ BEGIN
 						ON P.[pttyp_dr_acct_no] = GL.[strExternalId]
 				LEFT OUTER JOIN
 					tblSMPaymentMethod PM
-						ON P.[pttyp_pay_type] = PM.[strPaymentMethodCode]
+						ON P.[pttyp_pay_type] COLLATE Latin1_General_CI_AS  = PM.[strPaymentMethodCode]
 				WHERE
 					PM.[strPaymentMethodCode] IS NULL
 				ORDER BY
