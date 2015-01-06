@@ -98,5 +98,6 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
+:R .\CT\2_StartingNumber.sql
 
 print 'END POST DEPLOYMENT'

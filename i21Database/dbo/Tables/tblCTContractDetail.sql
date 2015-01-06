@@ -12,7 +12,7 @@ CREATE TABLE [dbo].[tblCTContractDetail](
 	[dblQuantity] [numeric](12, 4) NOT NULL,
 	[intItemUOMId] [int] NOT NULL,
 	[intPricingType] [int] NOT NULL,
-	[dblFutures] [numeric](8, 4) NOT NULL,
+	[dblFutures] [numeric](8, 4) NULL,
 	[dblBasis] [numeric](8, 4) NULL,
 	[intFutureMarketId] [int] NULL,
 	[intFuturesMonthYearId] [int] NULL,
@@ -30,10 +30,14 @@ CREATE TABLE [dbo].[tblCTContractDetail](
 	[strFobBasis] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intGrade] [int] NOT NULL,
 	[strRemark] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
- CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED 
+ [dblOriginalQty] NUMERIC(12, 4) NULL, 
+    [dblBalance] NUMERIC(12, 4) NULL, 
+    [dblIntransitQty] NUMERIC(12, 4) NULL, 
+    [dblScheduleQty] NUMERIC(12, 4) NULL, 
+    CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED 
 (
 	[intContractDetailId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
 ) ON [PRIMARY]
 
 GO

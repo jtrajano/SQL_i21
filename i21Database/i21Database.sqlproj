@@ -1023,4 +1023,7 @@
       <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
     </ArtifactReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CT\2_StartingNumber.sql" />
+  </ItemGroup>
 </Project>
