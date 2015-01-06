@@ -234,5 +234,6 @@
     <None Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </None>
+    <Build Include="dbo\Stored Procedures\uspGLImportSubLedger.sql" />
   </ItemGroup>
 </Project>
