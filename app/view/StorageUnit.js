@@ -620,12 +620,6 @@ Ext.define('Inventory.view.StorageUnit', {
                                                         dataType: 'string',
                                                         text: 'Measurement Name',
                                                         flex: 1
-                                                    },
-                                                    {
-                                                        dataIndex: 'strDescription',
-                                                        dataType: 'string',
-                                                        text: 'Description',
-                                                        flex: 1
                                                     }
                                                 ],
                                                 itemId: 'cboMeasurement',
