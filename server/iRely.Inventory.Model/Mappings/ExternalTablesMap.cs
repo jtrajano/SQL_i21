@@ -279,4 +279,20 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuSMGetLocationPricingLevelMap : EntityTypeConfiguration<vyuSMGetLocationPricingLevel>
+    {
+        public vyuSMGetLocationPricingLevelMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intKey);
+
+            // Table & Column Mappings
+            this.ToTable("vyuSMGetLocationPricingLevel");
+            this.Property(t => t.intKey).HasColumnName("intKey");
+            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.strPriceLevel).HasColumnName("strPriceLevel");
+            
+        }
+    }
+
 }

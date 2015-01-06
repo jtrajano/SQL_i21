@@ -26,6 +26,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedInventoryTag',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedPricingLevel',
         'Inventory.store.BufferedBrand',
         'Inventory.store.BufferedFuelCategory',
         'Inventory.store.BufferedFuelTaxClass',
@@ -413,6 +414,9 @@ Ext.define('Inventory.view.ItemViewModel', {
 
         pricingLevelLocation: {
             type: 'companylocationbuffered'
+        },
+        pricingLevel: {
+            type: 'icbufferedpricinglevel'
         },
         pricingLevelUOM: {
             type: 'icbuffereditemunitmeasure'

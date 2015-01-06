@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets07b60903e2912591abc6aebb2f32c1b5cf306f4fff02cee34c5eace8e9a531c7))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsbe3252e37bdeed1b706a3e86cd37f4c6977bfdc1a08278a16643a7f280e7e09c))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets07b60903e2912591abc6aebb2f32c1b5cf306f4fff02cee34c5eace8e9a531c7 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsbe3252e37bdeed1b706a3e86cd37f4c6977bfdc1a08278a16643a7f280e7e09c : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "07b60903e2912591abc6aebb2f32c1b5cf306f4fff02cee34c5eace8e9a531c7"; }
+            get { return "be3252e37bdeed1b706a3e86cd37f4c6977bfdc1a08278a16643a7f280e7e09c"; }
         }
 
         /// <summary>
@@ -1090,6 +1090,16 @@ namespace Edm_EntityMappingGeneratedViews
             if (extentName == "InventoryEntities.tblSTSubcategoryRegProds")
             {
                 return GetView208();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuSMGetLocationPricingLevel")
+            {
+                return GetView209();
+            }
+
+            if (extentName == "InventoryEntities.vyuSMGetLocationPricingLevels")
+            {
+                return GetView210();
             }
 
             return null;
@@ -6946,6 +6956,44 @@ namespace Edm_EntityMappingGeneratedViews
             T.intConcurrencyId AS tblSTSubcategoryRegProd_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblSTSubcategoryRegProd AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuSMGetLocationPricingLevel.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView209()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuSMGetLocationPricingLevel
+        [CodeFirstDatabaseSchema.vyuSMGetLocationPricingLevel](T1.vyuSMGetLocationPricingLevel_intKey, T1.vyuSMGetLocationPricingLevel_intCompanyLocationId, T1.vyuSMGetLocationPricingLevel_strPriceLevel)
+    FROM (
+        SELECT 
+            T.intKey AS vyuSMGetLocationPricingLevel_intKey, 
+            T.intCompanyLocationId AS vyuSMGetLocationPricingLevel_intCompanyLocationId, 
+            T.strPriceLevel AS vyuSMGetLocationPricingLevel_strPriceLevel, 
+            True AS _from0
+        FROM InventoryEntities.vyuSMGetLocationPricingLevels AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuSMGetLocationPricingLevels.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView210()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuSMGetLocationPricingLevels
+        [iRely.Inventory.Model.vyuSMGetLocationPricingLevel](T1.vyuSMGetLocationPricingLevel_intKey, T1.vyuSMGetLocationPricingLevel_intCompanyLocationId, T1.vyuSMGetLocationPricingLevel_strPriceLevel)
+    FROM (
+        SELECT 
+            T.intKey AS vyuSMGetLocationPricingLevel_intKey, 
+            T.intCompanyLocationId AS vyuSMGetLocationPricingLevel_intCompanyLocationId, 
+            T.strPriceLevel AS vyuSMGetLocationPricingLevel_strPriceLevel, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuSMGetLocationPricingLevel AS T
     ) AS T1");
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -291,4 +292,11 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
     }
 
+    public class vyuSMGetLocationPricingLevel
+    {
+        [Key]
+        public int intKey { get; set; }
+        public int intCompanyLocationId { get; set; }
+        public string strPriceLevel { get; set; }
+    }
 }

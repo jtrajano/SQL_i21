@@ -412,7 +412,16 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{pricingLevelLocation}'
                     }
                 },
-                colPricingLevelPriceLevel: 'strPriceLevel',
+                colPricingLevelPriceLevel: {
+                    dataIndex: 'strPriceLevel',
+                    editor: {
+                        store: '{pricingLevel}',
+                        defaultFilters: [{
+                            column: 'intCompanyLocationId',
+                            value: '{grdPricingLevel.selection.intLocationId}'
+                        }]
+                    }
+                },
                 colPricingLevelUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
