@@ -11172,7 +11172,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "itemId": "colOwnerDefault",
-                                                                "text": "Is Default",
+                                                                "text": "Default",
                                                                 "width": 70
                                                             },
                                                             "name": "MyCheck6",

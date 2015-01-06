@@ -5010,7 +5010,7 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'checkcolumn',
                                                                         itemId: 'colOwnerDefault',
                                                                         width: 70,
-                                                                        text: 'Is Default',
+                                                                        text: 'Default',
                                                                         editor: {
                                                                             xtype: 'checkboxfield'
                                                                         }
