@@ -21,6 +21,7 @@ Ext.define('Inventory.model.Certification', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strCertificationName'}
+        {type: 'presence', field: 'strCertificationName'},
+        {type: 'presence', field: 'strIssuingOrganization'}
     ]
 });
