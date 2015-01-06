@@ -27,7 +27,6 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.form.field.Date',
         'Ext.form.field.ComboBox',
         'Ext.form.field.TextArea',
-        'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
         'Ext.form.Label',
         'Ext.selection.CheckboxModel',
@@ -300,6 +299,44 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 xtype: 'gridcombobox',
                                                                 columns: [
                                                                     {
+                                                                        dataIndex: 'intCustomerId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Customer Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strCustomerNumber',
+                                                                        dataType: 'string',
+                                                                        text: 'Customer No',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strType',
+                                                                        dataType: 'string',
+                                                                        text: 'Type',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                itemId: 'cboCustomer',
+                                                                margin: '0 5',
+                                                                fieldLabel: 'Customer',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 60,
+                                                                displayField: 'strCustomerNumber',
+                                                                valueField: 'intCustomerId'
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                flex: 1.5,
+                                                                itemId: 'txtCustomerName',
+                                                                fieldLabel: 'Customer Name',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
                                                                         dataIndex: 'intFreightTermId',
                                                                         dataType: 'numeric',
                                                                         text: 'Freight Term Id',
@@ -326,50 +363,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 ],
                                                                 flex: 1,
                                                                 itemId: 'cboFreightTerms',
-                                                                margin: '0 5',
+                                                                margin: '0 0 0 5',
                                                                 fieldLabel: 'Freight Terms',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
                                                                 displayField: 'strFreightTerm',
                                                                 valueField: 'intFreightTermId'
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intCustomerId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Customer Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strCustomerNumber',
-                                                                        dataType: 'string',
-                                                                        text: 'Customer No',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strType',
-                                                                        dataType: 'string',
-                                                                        text: 'Type',
-                                                                        flex: 1
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboCustomer',
-                                                                fieldLabel: 'Customer',
-                                                                labelAlign: 'top',
-                                                                labelWidth: 60,
-                                                                displayField: 'strCustomerNumber',
-                                                                valueField: 'intCustomerId'
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                flex: 1.5,
-                                                                itemId: 'txtCustomerName',
-                                                                margin: '0 0 0 5',
-                                                                fieldLabel: 'Customer Name',
-                                                                labelAlign: 'top',
-                                                                labelWidth: 110
                                                             }
                                                         ]
                                                     },
@@ -537,12 +536,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkDirectShipment',
-                                                                        fieldLabel: 'Direct Shipment',
-                                                                        labelWidth: 110
-                                                                    },
                                                                     {
                                                                         xtype: 'gridcombobox',
                                                                         itemId: 'cboCarrier',

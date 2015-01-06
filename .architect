@@ -878,7 +878,6 @@
                                         },
                                         {
                                             "id": "102862bc-f1f8-4a53-acf0-5e6093b33d69",
-                                            "expanded": false,
                                             "cn": [
                                                 {
                                                     "id": "246f74e4-2456-40d1-b8d9-5476871e3bbd",
@@ -899,13 +898,13 @@
                                                             "id": "3b57a957-2365-4ab2-a4ad-66b93fcdfd08"
                                                         },
                                                         {
-                                                            "id": "26547125-5650-4d7b-afee-d94e36891f01"
-                                                        },
-                                                        {
                                                             "id": "cc4e53f6-45f4-47f5-b16d-09a216055827"
                                                         },
                                                         {
                                                             "id": "e4c3846b-e661-4271-941f-3bf77da2c41b"
+                                                        },
+                                                        {
+                                                            "id": "26547125-5650-4d7b-afee-d94e36891f01"
                                                         }
                                                     ]
                                                 },
@@ -954,9 +953,6 @@
                                                         {
                                                             "id": "9d0b6e29-27ba-4cc3-8856-78a2d657181b",
                                                             "cn": [
-                                                                {
-                                                                    "id": "ad4db5a1-3068-4832-9b9f-65e3a1a01b7a"
-                                                                },
                                                                 {
                                                                     "id": "56143600-66f8-403e-abcd-868599108c6e"
                                                                 },
@@ -7991,7 +7987,7 @@
         "openTabs": []
     },
     "canvasState": {
-        "topInstance": "fce4eccc-52e6-4176-8dc8-67140c5bb31a"
+        "topInstance": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c"
     },
     "inspectorState": {
         "topInstance": null,

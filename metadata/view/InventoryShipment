@@ -586,69 +586,6 @@
                                                         "columns": [
                                                             "[",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'intFreightTermId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Freight Term Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strFreightTerm',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Freight Term',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strFobPoint',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'FOB Point',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'ysnActive',",
-                                                            "\t\tdataType: 'boolean',",
-                                                            "\t\ttext: 'Active',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strFreightTerm",
-                                                        "fieldLabel": "Freight Terms",
-                                                        "itemId": "cboFreightTerms",
-                                                        "labelAlign": "top",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "margin": "0 5",
-                                                        "name": null,
-                                                        "readOnly": null,
-                                                        "valueField": "intFreightTermId",
-                                                        "width": null
-                                                    },
-                                                    "name": "MyComboBox73",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "26547125-5650-4d7b-afee-d94e36891f01",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
                                                             "\t\tdataIndex: 'intCustomerId',",
                                                             "\t\tdataType: 'numeric',",
                                                             "\t\ttext: 'Customer Id',",
@@ -676,6 +613,7 @@
                                                         "labelWidth": 60,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
+                                                        "margin": "0 5",
                                                         "name": null,
                                                         "readOnly": null,
                                                         "valueField": "intCustomerId",
@@ -711,13 +649,76 @@
                                                         "labelWidth": 110,
                                                         "layout|flex": 1.5,
                                                         "layout|margins": null,
-                                                        "margin": "0 0 0 5",
+                                                        "margin": null,
                                                         "name": null,
                                                         "readOnly": null,
                                                         "width": null
                                                     },
                                                     "name": "MyTextField47",
                                                     "designerId": "e4c3846b-e661-4271-941f-3bf77da2c41b"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intFreightTermId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Freight Term Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strFreightTerm',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Freight Term',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strFobPoint',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'FOB Point',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'ysnActive',",
+                                                            "\t\tdataType: 'boolean',",
+                                                            "\t\ttext: 'Active',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strFreightTerm",
+                                                        "fieldLabel": "Freight Terms",
+                                                        "itemId": "cboFreightTerms",
+                                                        "labelAlign": "top",
+                                                        "labelWidth": 110,
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "margin": "0 0 0 5",
+                                                        "name": null,
+                                                        "readOnly": null,
+                                                        "valueField": "intFreightTermId",
+                                                        "width": null
+                                                    },
+                                                    "name": "MyComboBox73",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "26547125-5650-4d7b-afee-d94e36891f01",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1037,23 +1038,6 @@
                                                     "name": "MyPanel31",
                                                     "designerId": "9d0b6e29-27ba-4cc3-8856-78a2d657181b",
                                                     "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.Checkbox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "boxLabel": null,
-                                                                "fieldLabel": "Direct Shipment",
-                                                                "itemId": "chkDirectShipment",
-                                                                "labelWidth": 110,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyCheckbox28",
-                                                            "designerId": "ad4db5a1-3068-4832-9b9f-65e3a1a01b7a"
-                                                        },
                                                         {
                                                             "type": "Ext.form.field.ComboBox",
                                                             "reference": {
@@ -1534,7 +1518,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter12",
                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1930,7 +1914,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter11",
+                                                            "name": "filter13",
                                                             "designerId": "1c096b74-0e89-4d00-bbb4-573a5cbbbf72",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -2223,7 +2207,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter12",
+                                                                    "name": "filter14",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2564,7 +2548,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter13",
+                                                                    "name": "filter15",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2869,7 +2853,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter16",
                                                     "designerId": "1ae52a89-aba4-455b-a1f7-825e6b9b4bd9",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3154,7 +3138,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter17",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3331,7 +3315,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
