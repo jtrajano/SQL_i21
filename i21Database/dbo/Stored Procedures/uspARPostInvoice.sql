@@ -920,7 +920,7 @@ END
 			,intTransactionId)
 		SELECT
 			@UnpostSuccessfulMsg
-			,'Invoice'
+			,A.strTransactionType
 			,A.strInvoiceNumber
 			,@batchId
 			,A.intInvoiceId
@@ -945,7 +945,7 @@ END
 		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
 			@PostSuccessfulMsg
-			,'Invoice'
+			,A.strTransactionType
 			,A.strInvoiceNumber
 			,@batchId
 			,A.intInvoiceId
