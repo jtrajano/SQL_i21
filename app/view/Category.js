@@ -390,7 +390,7 @@ Ext.define('Inventory.view.Category', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteLocation',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -474,7 +474,7 @@ Ext.define('Inventory.view.Category', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteGlAccounts',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -602,7 +602,7 @@ Ext.define('Inventory.view.Category', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteVendorCategoryXref',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'

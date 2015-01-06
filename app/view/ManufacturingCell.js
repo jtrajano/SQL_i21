@@ -382,7 +382,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                                     tabIndex: -1,
                                                     itemId: 'btnDeletePackingType',
                                                     iconCls: 'small-delete',
-                                                    text: 'Delete'
+                                                    text: 'Remove'
                                                 },
                                                 {
                                                     xtype: 'tbseparator'

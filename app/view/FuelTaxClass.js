@@ -210,7 +210,7 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                                         tabIndex: -1,
                                                         itemId: 'btnDeleteProductCode',
                                                         iconCls: 'small-delete',
-                                                        text: 'Delete'
+                                                        text: 'Remove'
                                                     },
                                                     {
                                                         xtype: 'tbseparator'

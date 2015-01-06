@@ -588,7 +588,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     tabIndex: -1,
                                                     itemId: 'btnDeleteMeasurement',
                                                     iconCls: 'small-delete',
-                                                    text: 'Delete'
+                                                    text: 'Remove'
                                                 },
                                                 {
                                                     xtype: 'tbseparator'
@@ -709,7 +709,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     tabIndex: -1,
                                                     itemId: 'btnDeleteItemCategoryAllowed',
                                                     iconCls: 'small-delete',
-                                                    text: 'Delete'
+                                                    text: 'Remove'
                                                 },
                                                 {
                                                     xtype: 'tbseparator'
@@ -795,7 +795,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     tabIndex: -1,
                                                     itemId: 'btnDeleteContainer',
                                                     iconCls: 'small-delete',
-                                                    text: 'Delete'
+                                                    text: 'Remove'
                                                 },
                                                 {
                                                     xtype: 'tbseparator'
@@ -873,7 +873,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     tabIndex: -1,
                                                     itemId: 'btnDeleteSKU',
                                                     iconCls: 'small-delete',
-                                                    text: 'Delete'
+                                                    text: 'Remove'
                                                 },
                                                 {
                                                     xtype: 'tbseparator'

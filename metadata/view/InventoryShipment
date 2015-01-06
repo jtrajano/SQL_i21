@@ -1716,6 +1716,48 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "dataIndex": "strTaxCode",
+                                                "itemId": "colTaxCode",
+                                                "text": "Tax Code",
+                                                "width": 65
+                                            },
+                                            "name": "MyColumn",
+                                            "designerId": "763f57d0-fc6a-4281-9005-e23e4713e08c"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblTaxAmount",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colTaxAmount",
+                                                "text": "Tax Amount",
+                                                "width": 80
+                                            },
+                                            "name": "MyNumberColumn3",
+                                            "designerId": "b40ad379-c46e-4f86-ac0c-c50e16a665ed",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "dataIndex": "strDockDoor",
                                                 "itemId": "colDockDoor",
                                                 "text": "Dock Door",
@@ -1888,7 +1930,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter19",
+                                                            "name": "filter11",
                                                             "designerId": "1c096b74-0e89-4d00-bbb4-573a5cbbbf72",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -2181,7 +2223,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter11",
+                                                                    "name": "filter12",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2522,7 +2564,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter12",
+                                                                    "name": "filter13",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2827,7 +2869,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter14",
                                                     "designerId": "1ae52a89-aba4-455b-a1f7-825e6b9b4bd9",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3112,7 +3154,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter15",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

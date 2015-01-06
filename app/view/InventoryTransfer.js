@@ -27,6 +27,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
         'Ext.form.field.Checkbox',
+        'Ext.form.field.Number',
         'Ext.grid.Panel',
         'Ext.form.Label',
         'Ext.selection.CheckboxModel',
@@ -217,77 +218,156 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                             {
                                                 xtype: 'container',
                                                 layout: {
-                                                    type: 'vbox',
+                                                    type: 'hbox',
                                                     align: 'stretch'
                                                 },
                                                 items: [
                                                     {
                                                         xtype: 'container',
-                                                        margin: '0 0 5 0',
+                                                        flex: 1,
                                                         layout: {
-                                                            type: 'hbox',
+                                                            type: 'vbox',
                                                             align: 'stretch'
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'combobox',
-                                                                flex: 1,
-                                                                itemId: 'cboTransferredBy',
-                                                                fieldLabel: 'Transferred By',
-                                                                labelWidth: 90
-                                                            },
-                                                            {
-                                                                xtype: 'datefield',
-                                                                flex: 1,
-                                                                itemId: 'dtmTransferDate',
-                                                                margin: '0 5',
-                                                                fieldLabel: 'Transfer Date',
-                                                                labelWidth: 90
+                                                                xtype: 'container',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        flex: 1,
+                                                                        itemId: 'cboTransferredBy',
+                                                                        fieldLabel: 'Transferred By',
+                                                                        labelWidth: 90
+                                                                    },
+                                                                    {
+                                                                        xtype: 'container',
+                                                                        flex: 1,
+                                                                        margin: '0 0 5 0 ',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'datefield',
+                                                                                flex: 1,
+                                                                                itemId: 'dtmTransferDate',
+                                                                                fieldLabel: 'Transfer Date',
+                                                                                labelWidth: 90
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkShipmentRequired',
+                                                                                margin: '0 0 0 5',
+                                                                                fieldLabel: 'Shipment Required',
+                                                                                labelWidth: 110
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtTransferNumber',
+                                                                        fieldLabel: 'Transfer No',
+                                                                        labelWidth: 90
+                                                                    }
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
-                                                                itemId: 'txtTransferNumber',
-                                                                fieldLabel: 'Transfer No',
-                                                                labelWidth: 110
+                                                                itemId: 'txtDescription',
+                                                                fieldLabel: 'Description',
+                                                                labelWidth: 90
+                                                            },
+                                                            {
+                                                                xtype: 'container',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        flex: 1,
+                                                                        itemId: 'cboFromLocation',
+                                                                        fieldLabel: 'From Location',
+                                                                        labelWidth: 90
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        flex: 1,
+                                                                        itemId: 'cboToLocation',
+                                                                        fieldLabel: 'To Location',
+                                                                        labelWidth: 90
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     },
                                                     {
-                                                        xtype: 'textfield',
-                                                        flex: 1,
-                                                        itemId: 'txtDescription',
-                                                        fieldLabel: 'Description',
-                                                        labelWidth: 90
-                                                    },
-                                                    {
                                                         xtype: 'container',
+                                                        flex: 1,
                                                         layout: {
-                                                            type: 'hbox',
+                                                            type: 'vbox',
                                                             align: 'stretch'
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'combobox',
+                                                                xtype: 'panel',
                                                                 flex: 1,
-                                                                itemId: 'cboFromLocation',
-                                                                fieldLabel: 'From Location',
-                                                                labelWidth: 90
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
-                                                                flex: 1,
-                                                                itemId: 'cboToLocation',
-                                                                margin: '0 5',
-                                                                fieldLabel: 'To Location',
-                                                                labelWidth: 90
-                                                            },
-                                                            {
-                                                                xtype: 'checkboxfield',
-                                                                flex: 1,
-                                                                itemId: 'chkShipmentRequired',
-                                                                fieldLabel: 'Shipment Required',
-                                                                labelWidth: 110
+                                                                itemId: 'pnlFreight',
+                                                                margin: '0 0 0 5',
+                                                                bodyPadding: 5,
+                                                                title: 'Freight & Taxes',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboCarrier',
+                                                                        fieldLabel: 'Carrier',
+                                                                        labelWidth: 120
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboFreightUOM',
+                                                                        fieldLabel: 'Freight UOM',
+                                                                        labelWidth: 120
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboAccountCategory',
+                                                                        fieldLabel: 'Account Category',
+                                                                        labelWidth: 120
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboAccountID',
+                                                                        fieldLabel: 'Account ID',
+                                                                        labelWidth: 120
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtAccountDescription',
+                                                                        fieldLabel: 'Account Description',
+                                                                        labelWidth: 120
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        itemId: 'txtTaxAmount',
+                                                                        fieldLabel: 'Tax Amount',
+                                                                        labelWidth: 120,
+                                                                        hideTrigger: true
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     }
@@ -412,10 +492,101 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colUOM',
+                                                        width: 70,
+                                                        dataIndex: 'strUOM',
+                                                        text: 'UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colWeightUOM',
+                                                        width: 75,
+                                                        dataIndex: 'strWeightUOM',
+                                                        text: 'Weight UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colGross',
+                                                        width: 65,
+                                                        align: 'right',
+                                                        dataIndex: 'dblGross',
+                                                        text: 'Gross',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colTare',
+                                                        width: 65,
+                                                        align: 'right',
+                                                        dataIndex: 'dblTare',
+                                                        text: 'Tare',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colNet',
+                                                        width: 65,
+                                                        align: 'right',
+                                                        dataIndex: 'dblNet',
+                                                        text: 'Net',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colNewLotID',
                                                         width: 75,
                                                         dataIndex: 'strNewLotID',
                                                         text: 'New Lot ID'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colCost',
+                                                        width: 65,
+                                                        align: 'right',
+                                                        dataIndex: 'dblCost',
+                                                        text: 'Cost',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colTaxCode',
+                                                        width: 69,
+                                                        dataIndex: 'strTaxCode',
+                                                        text: 'Tax Code'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colTaxAmount',
+                                                        width: 85,
+                                                        align: 'right',
+                                                        dataIndex: 'dblTaxAmount',
+                                                        text: 'Tax Amount',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colFreightRate',
+                                                        width: 85,
+                                                        align: 'right',
+                                                        dataIndex: 'dblFreightRate',
+                                                        text: 'Freight Rate',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colFreightAmount',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        dataIndex: 'dblFreightAmount',
+                                                        text: 'Freight Amount',
+                                                        format: '0,000.##'
                                                     }
                                                 ],
                                                 plugins: [

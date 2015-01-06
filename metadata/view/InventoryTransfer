@@ -394,7 +394,7 @@
                                         "container|align": "stretch",
                                         "designer|displayName": "container",
                                         "height": null,
-                                        "layout": "vbox",
+                                        "layout": "hbox",
                                         "layout|flex": null
                                     },
                                     "name": "MyContainer11",
@@ -410,78 +410,165 @@
                                             "userConfig": {
                                                 "container|align": "stretch",
                                                 "designer|displayName": "container",
-                                                "layout": "hbox",
-                                                "layout|flex": null,
-                                                "layout|margins": null,
-                                                "margin": "0 0 5 0"
+                                                "layout": "vbox",
+                                                "layout|flex": 1
                                             },
-                                            "name": "MyContainer3",
-                                            "designerId": "40c4984f-3f76-4622-b458-b775f94d6cb2",
+                                            "name": "MyContainer13",
+                                            "designerId": "2dee4c8e-b245-4517-83c9-6f91c5cb2e41",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.ComboBox",
+                                                    "type": "Ext.container.Container",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "alwaysDisplayDecimals": null,
-                                                        "designer|createAlias": null,
-                                                        "fieldLabel": "Transferred By",
-                                                        "hidden": null,
-                                                        "hideTrigger": null,
-                                                        "itemId": "cboTransferredBy",
-                                                        "labelWidth": 90,
-                                                        "layout|flex": 1,
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "vbox",
+                                                        "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "name": null,
-                                                        "width": null
+                                                        "margin": null
                                                     },
-                                                    "name": "MyComboBox18",
-                                                    "configAlternates": {
-                                                        "alwaysDisplayDecimals": "boolean"
-                                                    },
-                                                    "designerId": "46eade8b-1cc6-4f7f-acaf-572ed494bc1a",
-                                                    "customConfigs": [
+                                                    "name": "MyContainer3",
+                                                    "designerId": "40c4984f-3f76-4622-b458-b775f94d6cb2",
+                                                    "cn": [
                                                         {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "alwaysDisplayDecimals",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Date",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "alwaysDisplayDecimals": null,
-                                                        "designer|createAlias": null,
-                                                        "fieldLabel": "Transfer Date",
-                                                        "hideTrigger": null,
-                                                        "itemId": "dtmTransferDate",
-                                                        "labelWidth": 90,
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "margin": "0 5",
-                                                        "name": null,
-                                                        "readOnly": null,
-                                                        "width": null
-                                                    },
-                                                    "name": "MyDateField10",
-                                                    "configAlternates": {
-                                                        "alwaysDisplayDecimals": "boolean"
-                                                    },
-                                                    "designerId": "e312af20-ad91-4bed-b078-eabc86873d47",
-                                                    "customConfigs": [
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
+                                                                "fieldLabel": "Transferred By",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboTransferredBy",
+                                                                "labelWidth": 90,
+                                                                "layout|flex": 1,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyComboBox18",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "46eade8b-1cc6-4f7f-acaf-572ed494bc1a",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
                                                         {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "alwaysDisplayDecimals",
-                                                            "type": "string"
+                                                            "type": "Ext.container.Container",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "container|align": "stretch",
+                                                                "layout": "hbox",
+                                                                "layout|flex": 1,
+                                                                "margin": "0 0 5 0 "
+                                                            },
+                                                            "name": "MyContainer18",
+                                                            "designerId": "def8d940-6498-4412-8200-4bcd61babdce",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Date",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "alwaysDisplayDecimals": null,
+                                                                        "designer|createAlias": null,
+                                                                        "fieldLabel": "Transfer Date",
+                                                                        "hideTrigger": null,
+                                                                        "itemId": "dtmTransferDate",
+                                                                        "labelWidth": 90,
+                                                                        "layout|flex": 1,
+                                                                        "layout|margins": null,
+                                                                        "margin": null,
+                                                                        "name": null,
+                                                                        "readOnly": null,
+                                                                        "width": null
+                                                                    },
+                                                                    "name": "MyDateField10",
+                                                                    "configAlternates": {
+                                                                        "alwaysDisplayDecimals": "boolean"
+                                                                    },
+                                                                    "designerId": "e312af20-ad91-4bed-b078-eabc86873d47",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "alwaysDisplayDecimals",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Shipment Required",
+                                                                        "itemId": "chkShipmentRequired",
+                                                                        "labelWidth": 110,
+                                                                        "layout|flex": null,
+                                                                        "margin": "0 0 0 5"
+                                                                    },
+                                                                    "name": "MyCheckbox4",
+                                                                    "designerId": "e2853660-7bfe-49b1-881f-5f7453f5ea3f"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
+                                                                "fieldLabel": "Transfer No",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "txtTransferNumber",
+                                                                "labelWidth": 90,
+                                                                "layout|flex": 1,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyTextField20",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "ca070701-b51b-464f-9ada-5bb6572bf51d",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },
@@ -493,48 +580,102 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "alwaysDisplayDecimals": null,
-                                                        "designer|createAlias": null,
-                                                        "fieldLabel": "Transfer No",
-                                                        "hidden": null,
-                                                        "hideTrigger": null,
-                                                        "itemId": "txtTransferNumber",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": 1,
+                                                        "fieldLabel": "Description",
+                                                        "itemId": "txtDescription",
+                                                        "labelWidth": 90,
+                                                        "layout|flex": 1
+                                                    },
+                                                    "name": "MyTextField22",
+                                                    "designerId": "41b9c35c-73f3-4c0e-a119-2f601680bc73"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "vbox",
+                                                        "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "name": null,
-                                                        "width": null
+                                                        "margin": null
                                                     },
-                                                    "name": "MyTextField20",
-                                                    "configAlternates": {
-                                                        "alwaysDisplayDecimals": "boolean"
-                                                    },
-                                                    "designerId": "ca070701-b51b-464f-9ada-5bb6572bf51d",
-                                                    "customConfigs": [
+                                                    "name": "MyContainer12",
+                                                    "designerId": "476b0bf4-335f-4c8c-8b8a-f2394b22bf78",
+                                                    "cn": [
                                                         {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "alwaysDisplayDecimals",
-                                                            "type": "string"
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
+                                                                "fieldLabel": "From Location",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboFromLocation",
+                                                                "labelWidth": 90,
+                                                                "layout|flex": 1,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyComboBox18",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "72e3ff13-6f2d-4f16-9add-dc772d76d9f7",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
+                                                                "fieldLabel": "To Location",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboToLocation",
+                                                                "labelWidth": 90,
+                                                                "layout|flex": 1,
+                                                                "layout|margins": null,
+                                                                "margin": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyComboBox20",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "74b1e33a-fd6c-4309-b85b-f992e36a7614",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 }
                                             ]
-                                        },
-                                        {
-                                            "type": "Ext.form.field.Text",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "fieldLabel": "Description",
-                                                "itemId": "txtDescription",
-                                                "labelWidth": 90,
-                                                "layout|flex": 1
-                                            },
-                                            "name": "MyTextField22",
-                                            "designerId": "41b9c35c-73f3-4c0e-a119-2f601680bc73"
                                         },
                                         {
                                             "type": "Ext.container.Container",
@@ -546,97 +687,214 @@
                                             "userConfig": {
                                                 "container|align": "stretch",
                                                 "designer|displayName": "container",
-                                                "layout": "hbox",
-                                                "layout|flex": null,
-                                                "layout|margins": null,
-                                                "margin": null
+                                                "layout": "vbox",
+                                                "layout|flex": 1
                                             },
-                                            "name": "MyContainer12",
-                                            "designerId": "476b0bf4-335f-4c8c-8b8a-f2394b22bf78",
+                                            "name": "MyContainer17",
+                                            "designerId": "5aa92c00-c448-42f6-b961-9b0cae8e06e0",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.ComboBox",
+                                                    "type": "Ext.panel.Panel",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "alwaysDisplayDecimals": null,
-                                                        "designer|createAlias": null,
-                                                        "fieldLabel": "From Location",
-                                                        "hidden": null,
-                                                        "hideTrigger": null,
-                                                        "itemId": "cboFromLocation",
-                                                        "labelWidth": 90,
+                                                        "bodyPadding": 5,
+                                                        "container|align": "stretch",
+                                                        "itemId": "pnlFreight",
+                                                        "layout": "vbox",
                                                         "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "name": null,
-                                                        "width": null
+                                                        "margin": "0 0 0 5",
+                                                        "title": "Freight & Taxes"
                                                     },
-                                                    "name": "MyComboBox18",
-                                                    "configAlternates": {
-                                                        "alwaysDisplayDecimals": "boolean"
-                                                    },
-                                                    "designerId": "72e3ff13-6f2d-4f16-9add-dc772d76d9f7",
-                                                    "customConfigs": [
+                                                    "name": "MyPanel6",
+                                                    "designerId": "c577e6d8-cc0e-48e9-b4de-17f578af3085",
+                                                    "cn": [
                                                         {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "alwaysDisplayDecimals",
-                                                            "type": "string"
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
+                                                                "fieldLabel": "Carrier",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboCarrier",
+                                                                "labelWidth": 120,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyComboBox16",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "89472246-297b-48fb-98ae-62a5004369e6",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
+                                                                "fieldLabel": "Freight UOM",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboFreightUOM",
+                                                                "labelWidth": 120,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyComboBox17",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "fc975868-87b8-4a72-aba1-d60f47cf5e0f",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
+                                                                "fieldLabel": "Account Category",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboAccountCategory",
+                                                                "labelWidth": 120,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyComboBox19",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "a99f3052-24da-4c95-bbbf-4b11bca7d6ee",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
+                                                                "fieldLabel": "Account ID",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboAccountID",
+                                                                "labelWidth": 120,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyComboBox21",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "59e1941f-73c3-49bb-8f24-5dee2ce34967",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
+                                                                "fieldLabel": "Account Description",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "txtAccountDescription",
+                                                                "labelWidth": 120,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyTextField7",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "20ea93d7-640e-4dbd-a5f6-9f6e9e4cc68a",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "fieldLabel": "Tax Amount",
+                                                                "hideTrigger": true,
+                                                                "itemId": "txtTaxAmount",
+                                                                "labelWidth": 120,
+                                                                "layout|flex": null
+                                                            },
+                                                            "name": "MyNumberField13",
+                                                            "designerId": "756f07b2-5987-4b4a-8343-8df11dc46c76"
                                                         }
                                                     ]
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "alwaysDisplayDecimals": null,
-                                                        "designer|createAlias": null,
-                                                        "fieldLabel": "To Location",
-                                                        "hidden": null,
-                                                        "hideTrigger": null,
-                                                        "itemId": "cboToLocation",
-                                                        "labelWidth": 90,
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "margin": "0 5",
-                                                        "name": null,
-                                                        "width": null
-                                                    },
-                                                    "name": "MyComboBox20",
-                                                    "configAlternates": {
-                                                        "alwaysDisplayDecimals": "boolean"
-                                                    },
-                                                    "designerId": "74b1e33a-fd6c-4309-b85b-f992e36a7614",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "alwaysDisplayDecimals",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "boxLabel": null,
-                                                        "fieldLabel": "Shipment Required",
-                                                        "itemId": "chkShipmentRequired",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": 1
-                                                    },
-                                                    "name": "MyCheckbox4",
-                                                    "designerId": "e2853660-7bfe-49b1-881f-5f7453f5ea3f"
                                                 }
                                             ]
                                         }
@@ -784,7 +1042,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter123",
+                                                    "name": "filter111",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -946,6 +1204,116 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "dataIndex": "strUOM",
+                                                "itemId": "colUOM",
+                                                "text": "UOM",
+                                                "width": 70
+                                            },
+                                            "name": "MyColumn46",
+                                            "designerId": "a040696e-e9e4-4a26-a6ee-6e15ebe90971"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strWeightUOM",
+                                                "itemId": "colWeightUOM",
+                                                "text": "Weight UOM",
+                                                "width": 75
+                                            },
+                                            "name": "MyColumn47",
+                                            "designerId": "ef2836c1-94eb-4c7a-a216-a08160f53a5e"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblGross",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colGross",
+                                                "text": "Gross",
+                                                "width": 65
+                                            },
+                                            "name": "MyNumberColumn22",
+                                            "designerId": "5036445c-2396-40cb-b430-7513ac237747",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblTare",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colTare",
+                                                "text": "Tare",
+                                                "width": 65
+                                            },
+                                            "name": "MyNumberColumn23",
+                                            "designerId": "d96b6e04-44ad-4a6d-9710-7dad0b14d477",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblNet",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colNet",
+                                                "text": "Net",
+                                                "width": 65
+                                            },
+                                            "name": "MyNumberColumn24",
+                                            "designerId": "5c4f3bed-4074-470b-958b-1e47169925ad",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "dataIndex": "strNewLotID",
                                                 "itemId": "colNewLotID",
                                                 "text": "New Lot ID",
@@ -953,6 +1321,126 @@
                                             },
                                             "name": "MyColumn9",
                                             "designerId": "26c0c9d3-7b15-41c8-a724-b4778ab6d1ec"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblCost",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colCost",
+                                                "text": "Cost",
+                                                "width": 65
+                                            },
+                                            "name": "MyNumberColumn25",
+                                            "designerId": "48dcc57b-04bd-4616-8928-5c41cf0fce18",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strTaxCode",
+                                                "itemId": "colTaxCode",
+                                                "text": "Tax Code",
+                                                "width": 69
+                                            },
+                                            "name": "MyColumn45",
+                                            "designerId": "25bb0f9c-29b8-4852-8d80-01c929d4dea5"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblTaxAmount",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colTaxAmount",
+                                                "text": "Tax Amount",
+                                                "width": 85
+                                            },
+                                            "name": "MyNumberColumn26",
+                                            "designerId": "a3212a75-b832-40ca-98fb-99adf6a2bf9e",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblFreightRate",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colFreightRate",
+                                                "text": "Freight Rate",
+                                                "width": 85
+                                            },
+                                            "name": "MyNumberColumn27",
+                                            "designerId": "2ca1d0b6-d7c4-48d2-b789-8795144e94e7",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblFreightAmount",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colFreightAmount",
+                                                "text": "Freight Amount",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn28",
+                                            "designerId": "ae5ad88e-71e9-4606-89c4-69c6ba49885c",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.plugin.CellEditing",
@@ -1103,7 +1591,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter127",
+                                                    "name": "filter112",
                                                     "designerId": "dc8288c0-74ca-4def-b42c-feb73cdf1f4d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1280,7 +1768,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging19",
+                    "name": "statusbarpaging12",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
