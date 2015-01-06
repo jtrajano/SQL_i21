@@ -63,5 +63,6 @@
 :r .\10_RPT\1_1430_to_1430.sql
 
 -- IC
+:r .\11_IC\Fix_References_to_Foreign_Keys.sql
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql

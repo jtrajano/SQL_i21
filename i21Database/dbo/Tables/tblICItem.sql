@@ -93,7 +93,18 @@
 	[intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
     CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
-    CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]) 
+    CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
+    CONSTRAINT [FK_tblICItem_tblICBrand] FOREIGN KEY ([intBrandId]) REFERENCES [tblICBrand]([intBrandId]), 
+    CONSTRAINT [FK_tblICItem_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblICItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+    CONSTRAINT [FK_tblICItem_tblICPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICPackType]([intPackTypeId]), 
+    CONSTRAINT [FK_tblICItem_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]), 
+    CONSTRAINT [FK_tblICItem_tblICFuelTaxClass] FOREIGN KEY ([intTaxClassId]) REFERENCES [tblICFuelTaxClass]([intFuelTaxClassId]), 
+    CONSTRAINT [FK_tblICItem_tblICRinFuelCategory] FOREIGN KEY ([intRINFuelTypeId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]), 
+    CONSTRAINT [FK_tblICItem_MedicationTag] FOREIGN KEY ([intMedicationTag]) REFERENCES [tblICTag]([intTagId]),
+	CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
+    CONSTRAINT [FK_tblICItem_CaseUOM] FOREIGN KEY ([intCaseUOM]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+    CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])  
 );
 GO
 

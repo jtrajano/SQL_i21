@@ -88,6 +88,7 @@
     <None Include="Scripts\Pre-Deployment\8_AP\DropAPViews.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\FixPaymentWithoutVendorId.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\DropTriggers.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\Fix_References_to_Foreign_Keys.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
