@@ -904,6 +904,7 @@
     <Build Include="dbo\Views\vyuAPGLByAccount.sql" />
     <Build Include="dbo\Views\vyuARGetItemAccount.sql" />
     <Build Include="dbo\Views\vyuARGetInventoryItem.sql" />
+    <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
