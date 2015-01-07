@@ -14,18 +14,13 @@ namespace iRely.Inventory.Model
         public int intItemStockId { get; set; }
         public int intItemId { get; set; }
         public int? intLocationId { get; set; }
-        public string strWarehouse { get; set; }
+        public int intSubLocationId { get; set; }
         public int? intUnitMeasureId { get; set; }
+        public decimal? dblAverageCost { get; set; }
         public decimal? dblUnitOnHand { get; set; }
         public decimal? dblOrderCommitted { get; set; }
         public decimal? dblOnOrder { get; set; }
-        public decimal? dblReorderPoint { get; set; }
-        public decimal? dblMinOrder { get; set; }
-        public decimal? dblSuggestedQuantity { get; set; }
-        public decimal? dblLeadTime { get; set; }
-        public string strCounted { get; set; }
-        public int? intInventoryGroupId { get; set; }
-        public bool ysnCountedDaily { get; set; }
+        public decimal? dblLastCountRetail { get; set; }
         public int intSort { get; set; }
 
         private string _location;
@@ -66,29 +61,9 @@ namespace iRely.Inventory.Model
                 _unitmeasure = value;
             }
         }
-        private string _group;
-        [NotMapped]
-        public string strCountGroup
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_group))
-                    if (tblICCountGroup != null)
-                        return tblICCountGroup.strCountGroup;
-                    else
-                        return null;
-                else
-                    return _group;
-            }
-            set
-            {
-                _group = value;
-            }
-        }
-
+        
         public tblICItem tblICItem { get; set; }
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
-        public tblICCountGroup tblICCountGroup { get; set; }
     }
 }

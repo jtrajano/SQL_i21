@@ -193,7 +193,6 @@ namespace iRely.Inventory.Model
             // Table & Column Mappings
             this.ToTable("vyuICGetItemStock");
             this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost");
-            this.Property(t => t.dblMinOrder).HasColumnName("dblMinOrder");
             this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder");
             this.Property(t => t.dblOrderCommitted).HasColumnName("dblOrderCommitted");
             this.Property(t => t.dblUnitOnHand).HasColumnName("dblUnitOnHand");

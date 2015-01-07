@@ -48,7 +48,6 @@ namespace iRely.Inventory.BRL
             return _db.GetQuery<tblICItemStock>()
                 .Include(p => p.tblICUnitMeasure)
                 .Include(p => p.tblSMCompanyLocation)
-                .Include(p => p.tblICCountGroup)
                 .Where(w => query.Where(predicate).Any(a => a.intItemStockId == w.intItemStockId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

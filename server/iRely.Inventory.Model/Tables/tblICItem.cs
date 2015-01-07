@@ -251,7 +251,6 @@ namespace iRely.Inventory.Model
         public string strStockUOM { get; set; }
         public decimal? dblUnitOnHand { get; set; }
         public decimal? dblAverageCost { get; set; }
-        public decimal? dblMinOrder { get; set; }
         public decimal? dblOnOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
 

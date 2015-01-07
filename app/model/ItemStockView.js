@@ -31,7 +31,6 @@ Ext.define('Inventory.model.ItemStockView', {
         { name: 'strStockUOM', type: 'string'},
         { name: 'dblUnitOnHand', type: 'float'},
         { name: 'dblAverageCost', type: 'float'},
-        { name: 'dblMinOrder', type: 'float'},
         { name: 'dblOnOrder', type: 'float'},
         { name: 'dblOrderCommitted', type: 'float'},
     ]

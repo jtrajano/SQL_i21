@@ -40,18 +40,13 @@ Ext.define('Inventory.model.ItemStock', {
             }
         },
         { name: 'intLocationId', type: 'int', allowNull: true },
-        { name: 'strWarehouse', type: 'string'},
+        { name: 'intSubLocationId', type: 'int'},
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblUnitOnHand', type: 'float'},
         { name: 'dblOrderCommitted', type: 'float'},
         { name: 'dblOnOrder', type: 'float'},
-        { name: 'dblReorderPoint', type: 'float'},
-        { name: 'dblMinOrder', type: 'float'},
-        { name: 'dblSuggestedQuantity', type: 'float'},
-        { name: 'dblLeadTime', type: 'float'},
-        { name: 'strCounted', type: 'string'},
-        { name: 'intInventoryGroupId', type: 'int', allowNull: true},
-        { name: 'ysnCountedDaily', type: 'boolean'},
+        { name: 'dblAverageCost', type: 'float'},
+        { name: 'dblLastCountRetail', type: 'float'},
         { name: 'intSort', type: 'int'}
     ],
 
