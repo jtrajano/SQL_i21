@@ -177,6 +177,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         record.set('intItemId', me.intItemId);
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
+        record.set('intCostingMethod', 1);
         action(record);
     }
 });
