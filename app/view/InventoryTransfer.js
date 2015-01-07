@@ -240,6 +240,13 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1,
+                                                                        itemId: 'cboTransferType',
+                                                                        fieldLabel: 'Transfer Type',
+                                                                        labelWidth: 90
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        flex: 1,
                                                                         itemId: 'cboTransferredBy',
                                                                         fieldLabel: 'Transferred By',
                                                                         labelWidth: 90
@@ -553,9 +560,37 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colCreditAccount',
+                                                        width: 90,
+                                                        dataIndex: 'strCreditAccount',
+                                                        text: 'Credit Account'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colCreditAccountDescription',
+                                                        width: 90,
+                                                        dataIndex: 'strCreditAccountDescription',
+                                                        text: 'Description'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDebitAccount',
+                                                        width: 90,
+                                                        dataIndex: 'strDebitAccount',
+                                                        text: 'Debit Account'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDebitAccountDescription',
+                                                        width: 90,
+                                                        dataIndex: 'strDebitAccountDescription',
+                                                        text: 'Description'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'strTaxCode',
                                                         itemId: 'colTaxCode',
                                                         width: 69,
-                                                        dataIndex: 'strTaxCode',
                                                         text: 'Tax Code'
                                                     },
                                                     {

@@ -444,6 +444,39 @@
                                                             "userConfig": {
                                                                 "alwaysDisplayDecimals": null,
                                                                 "designer|createAlias": null,
+                                                                "fieldLabel": "Transfer Type",
+                                                                "hidden": null,
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboTransferType",
+                                                                "labelWidth": 90,
+                                                                "layout|flex": 1,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyComboBox",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean"
+                                                            },
+                                                            "designerId": "764226c7-ebde-49c6-a124-2b069ef8007a",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "designer|createAlias": null,
                                                                 "fieldLabel": "Transferred By",
                                                                 "hidden": null,
                                                                 "hideTrigger": null,
@@ -1042,7 +1075,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter16",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1356,6 +1389,70 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "dataIndex": "strCreditAccount",
+                                                "itemId": "colCreditAccount",
+                                                "text": "Credit Account",
+                                                "width": 90
+                                            },
+                                            "name": "MyColumn3",
+                                            "designerId": "44813fae-ef3e-44e9-ad3d-9dd3978e8305"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strCreditAccountDescription",
+                                                "itemId": "colCreditAccountDescription",
+                                                "text": "Description",
+                                                "width": 90
+                                            },
+                                            "name": "MyColumn4",
+                                            "designerId": "3f349928-b246-4f7f-a096-f033e292ff39"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strDebitAccount",
+                                                "itemId": "colDebitAccount",
+                                                "text": "Debit Account",
+                                                "width": 90
+                                            },
+                                            "name": "MyColumn12",
+                                            "designerId": "aa963510-52cf-4419-995d-b814c367900d"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strDebitAccountDescription",
+                                                "itemId": "colDebitAccountDescription",
+                                                "text": "Description",
+                                                "width": 90
+                                            },
+                                            "name": "MyColumn13",
+                                            "designerId": "248a3c9d-5b93-4ace-bc60-91d4a7f01ef3"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "dataIndex": "strTaxCode",
                                                 "itemId": "colTaxCode",
                                                 "text": "Tax Code",
@@ -1591,7 +1688,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter17",
                                                     "designerId": "dc8288c0-74ca-4def-b42c-feb73cdf1f4d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1768,7 +1865,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

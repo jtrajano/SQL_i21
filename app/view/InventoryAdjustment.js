@@ -329,13 +329,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colSubLocation',
-                                                        width: 100,
-                                                        dataIndex: 'strSubLocation',
-                                                        text: 'Sub Location'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
                                                         itemId: 'colItemNumber',
                                                         width: 100,
                                                         dataIndex: 'strItemNumber',
@@ -350,31 +343,31 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colBinNumber',
+                                                        itemId: 'colSubLocation',
                                                         width: 100,
-                                                        dataIndex: 'strBinNumber',
-                                                        text: 'Bin No.'
+                                                        dataIndex: 'strSubLocation',
+                                                        text: 'Sub Location'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colStorageLocation',
+                                                        width: 100,
+                                                        dataIndex: 'strStorageLocation',
+                                                        text: 'Storage Location'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colLotID',
-                                                        width: 100,
+                                                        width: 90,
                                                         dataIndex: 'strLotID',
                                                         text: 'Lot ID'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colNewItemNumber',
-                                                        width: 110,
-                                                        dataIndex: 'strNewItemNumber',
-                                                        text: 'New Item No.'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNewItemDescription',
-                                                        width: 230,
-                                                        dataIndex: 'strNewItemDescription',
-                                                        text: 'New Item Description'
+                                                        itemId: 'colNewLotID',
+                                                        width: 90,
+                                                        dataIndex: 'strNewLotID',
+                                                        text: 'New Lot ID'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -387,34 +380,11 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         format: '0,000.##'
                                                     },
                                                     {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colNewQuantity',
-                                                        width: 90,
-                                                        align: 'right',
-                                                        dataIndex: 'dblNewQuantity',
-                                                        text: 'New Quantity',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colPhysicalCount',
-                                                        width: 110,
-                                                        align: 'right',
-                                                        dataIndex: 'dblPhysicalCount',
-                                                        text: 'Physical Count',
-                                                        format: '0,000'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colNewPhysicalCount',
-                                                        width: 119,
-                                                        align: 'right',
-                                                        dataIndex: 'dblNewPhysicalCount',
-                                                        text: 'New Physical Count',
-                                                        format: '0,000'
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colUOM',
+                                                        width: 70,
+                                                        dataIndex: 'strUOM',
+                                                        text: 'UOM'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -435,6 +405,57 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         dataIndex: 'dblUnitCost',
                                                         text: 'Unit Cost',
                                                         format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colNewQuantity',
+                                                        width: 90,
+                                                        align: 'right',
+                                                        dataIndex: 'dblNewQuantity',
+                                                        text: 'New Quantity',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNewUOM',
+                                                        width: 70,
+                                                        dataIndex: 'strNewUOM',
+                                                        text: 'New UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNewItemNumber',
+                                                        width: 90,
+                                                        dataIndex: 'strNewItemNumber',
+                                                        text: 'New Item No.'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNewItemDescription',
+                                                        width: 150,
+                                                        dataIndex: 'strNewItemDescription',
+                                                        text: 'New Item Description'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colPhysicalCount',
+                                                        width: 110,
+                                                        align: 'right',
+                                                        dataIndex: 'dblPhysicalCount',
+                                                        text: 'Physical Count',
+                                                        format: '0,000'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colNewPhysicalCount',
+                                                        width: 119,
+                                                        align: 'right',
+                                                        dataIndex: 'dblNewPhysicalCount',
+                                                        text: 'New Physical Count',
+                                                        format: '0,000'
                                                     },
                                                     {
                                                         xtype: 'datecolumn',
@@ -460,11 +481,14 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'New Status'
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colGLAccount',
-                                                        width: 75,
-                                                        dataIndex: 'strGLAccount',
-                                                        text: 'GL Account'
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colGLAmount',
+                                                        width: 95,
+                                                        align: 'right',
+                                                        dataIndex: 'dblGLAmount',
+                                                        text: 'GL Amount',
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -475,10 +499,24 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colCreditAccountDescription',
+                                                        width: 150,
+                                                        dataIndex: 'strCreditAccountDescription',
+                                                        text: 'Description'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colDebitAccount',
                                                         width: 97,
                                                         dataIndex: 'strDebitAccount',
                                                         text: 'Debit Account'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDebitAccountDescription1',
+                                                        width: 150,
+                                                        dataIndex: 'strDebitAccountDescription',
+                                                        text: 'Description'
                                                     }
                                                 ],
                                                 plugins: [
