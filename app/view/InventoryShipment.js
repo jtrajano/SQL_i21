@@ -798,7 +798,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             {
                                                 xtype: 'container',
                                                 flex: 2,
-                                                margin: '0 0 5 0',
                                                 layout: {
                                                     type: 'hbox',
                                                     align: 'stretch'
@@ -808,6 +807,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         xtype: 'advancefiltergrid',
                                                         flex: 1,
                                                         reference: 'grdItems',
+                                                        hidden: true,
                                                         itemId: 'grdItems',
                                                         margin: '-1 -1 0 -1',
                                                         dockedItems: [
@@ -908,7 +908,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 flex: 1.4,
                                                                 reference: 'grdLotTracking',
                                                                 itemId: 'grdLotTracking',
-                                                                margin: '-1 -1 0 5',
+                                                                margin: '-1 -1 0 -1',
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',
@@ -1039,7 +1039,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 flex: 1,
                                                                 reference: 'grdLotSplit',
                                                                 itemId: 'grdLotSplit',
-                                                                margin: '5 -1 0 5',
+                                                                margin: '5 -1 -1 -1',
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',

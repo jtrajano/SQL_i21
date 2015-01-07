@@ -1518,7 +1518,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter124",
                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1835,7 +1835,7 @@
                                         "designer|displayName": "container",
                                         "layout": "hbox",
                                         "layout|flex": 2,
-                                        "margin": "0 0 5 0"
+                                        "margin": null
                                     },
                                     "name": "MyContainer1",
                                     "designerId": "db5733df-e3af-43e7-9e60-ea612a37f85b",
@@ -1850,6 +1850,7 @@
                                             "userConfig": {
                                                 "autoScroll": null,
                                                 "designer|createAlias": "advancefiltergrid",
+                                                "hidden": true,
                                                 "itemId": "grdItems",
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
@@ -1914,7 +1915,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter13",
+                                                            "name": "filter125",
                                                             "designerId": "1c096b74-0e89-4d00-bbb4-573a5cbbbf72",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -2095,7 +2096,7 @@
                                                         "itemId": "grdLotTracking",
                                                         "layout|flex": 1.4,
                                                         "layout|margins": null,
-                                                        "margin": "-1 -1 0 5",
+                                                        "margin": "-1 -1 0 -1",
                                                         "reference": "grdLotTracking",
                                                         "title": null
                                                     },
@@ -2207,7 +2208,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter126",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2436,7 +2437,7 @@
                                                         "itemId": "grdLotSplit",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
-                                                        "margin": "5 -1 0 5",
+                                                        "margin": "5 -1 -1 -1",
                                                         "reference": "grdLotSplit",
                                                         "title": null
                                                     },
@@ -2548,7 +2549,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter127",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2853,7 +2854,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter128",
                                                     "designerId": "1ae52a89-aba4-455b-a1f7-825e6b9b4bd9",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3138,7 +3139,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter129",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
