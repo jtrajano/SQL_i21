@@ -29,7 +29,6 @@ SELECT
 	strStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = ItemStock.intUnitMeasureId),
 	ItemStock.dblUnitOnHand,
 	ItemStock.dblAverageCost,
-	ItemStock.dblMinOrder,
 	ItemStock.dblOnOrder,
 	ItemStock.dblOrderCommitted
 FROM tblICItem Item

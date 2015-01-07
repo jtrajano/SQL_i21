@@ -25,38 +25,26 @@ BEGIN
 		INSERT INTO tblICItemStock (
 				[intItemId]
 				,[intLocationId]
-				,[strWarehouse]
+				,[intSubLocationId]
 				,[intUnitMeasureId]
 				,[dblAverageCost]
 				,[dblUnitOnHand]
 				,[dblOrderCommitted]
 				,[dblOnOrder]
-				,[dblReorderPoint]
-				,[dblMinOrder]
-				,[dblSuggestedQuantity]
-				,[dblLeadTime]
-				,[strCounted]
-				,[intInventoryGroupId]
-				,[ysnCountedDaily]
+				,[dblLastCountRetail]
 				,[intSort]
 				,[intConcurrencyId]
 		)
 		-- Add Item Stock for Wet Grains
 		SELECT	[intItemId] = @WetGrains
 				,[intLocationId] = @Default_Location
-				,[strWarehouse] = ''
+				,[intSubLocationId] = NULL
 				,[intUnitMeasureId] = @EACH
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0 
-				,[dblReorderPoint] = 0 
-				,[dblMinOrder] = 0 
-				,[dblSuggestedQuantity] = 0 
-				,[dblLeadTime] = 0 
-				,[strCounted] = ''
-				,[intInventoryGroupId] = NULL 
-				,[ysnCountedDaily] = 0
+				,[dblLastCountRetail] = 0
 				,[intSort] = 1
 				,[intConcurrencyId] = 1
 		UNION ALL 

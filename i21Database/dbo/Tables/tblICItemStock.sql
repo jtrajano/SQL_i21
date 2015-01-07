@@ -3,26 +3,19 @@
 	[intItemStockId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 
     [intLocationId] INT NOT NULL, 
-    [strWarehouse] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intSubLocationId] INT NULL, 
     [intUnitMeasureId] INT NULL, 
 	[dblAverageCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	[dblReorderPoint] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	[dblMinOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	[dblSuggestedQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [dblLeadTime] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [strCounted] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [intInventoryGroupId] INT NULL, 
-    [ysnCountedDaily] BIT NULL DEFAULT ((0)), 
+	[dblLastCountRetail] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemStock] PRIMARY KEY ([intItemStockId]), 
     CONSTRAINT [FK_tblICItemStock_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemStock_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
-    CONSTRAINT [FK_tblICItemStock_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-    CONSTRAINT [FK_tblICItemStock_tblICCountGroup] FOREIGN KEY ([intInventoryGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId])
+    CONSTRAINT [FK_tblICItemStock_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
 GO
 
@@ -60,13 +53,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intLocationId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Warehouse',
+    @value = N'Sub Location Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblICItemStock',
     @level2type = N'COLUMN',
-    @level2name = N'strWarehouse'
+    @level2name = 'intSubLocationId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Unit of Measure Id',
@@ -104,68 +97,19 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblOnOrder'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Reorder Point',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemStock',
-    @level2type = N'COLUMN',
-    @level2name = N'dblReorderPoint'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Minimum Order',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemStock',
-    @level2type = N'COLUMN',
-    @level2name = N'dblMinOrder'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Suggested Quantity',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemStock',
-    @level2type = N'COLUMN',
-    @level2name = N'dblSuggestedQuantity'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Lead Time for Procurement',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemStock',
-    @level2type = N'COLUMN',
-    @level2name = N'dblLeadTime'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Counted',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemStock',
-    @level2type = N'COLUMN',
-    @level2name = N'strCounted'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Inventory Group Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemStock',
-    @level2type = N'COLUMN',
-    @level2name = 'intInventoryGroupId'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Counted Daily',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemStock',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnCountedDaily'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
@@ -184,3 +128,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemStock',
     @level2type = N'COLUMN',
     @level2name = 'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Last Count Retail',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblLastCountRetail'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Average Cost',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblAverageCost'
