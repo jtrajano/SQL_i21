@@ -232,7 +232,7 @@ BEGIN
 							ON P.pttyp_dr_acct_no = GL.strExternalId
 					LEFT OUTER JOIN
 						tblSMPaymentMethod PM
-							ON P.[pttyp_pay_type] = PM.[strPaymentMethodCode]
+							ON P.[pttyp_pay_type] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode]
 					WHERE
 						PM.[strPaymentMethodCode] IS NULL
 
