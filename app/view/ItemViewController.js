@@ -947,7 +947,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = this;
         var record = Ext.create('Inventory.model.Item');
         record.set('strStatus', 'Active');
-        record.set('strType', 'Inventory Item');
+        record.set('strType', 'Inventory');
         record.set('strLotTracking', 'No');
         action(record);
     },
@@ -1499,20 +1499,38 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = button.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
+
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 me.openItemLocationScreen('new', win);
             } });
         }
         else {
-            me.openItemLocationScreen('new', win);
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    me.openItemLocationScreen('new', win);
+                }
+            });
         }
     },
 
     onEditLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
-        me.openItemLocationScreen('edit', win);
+        var vm = win.getViewModel();
+
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                me.openItemLocationScreen('edit', win);
+            } });
+        }
+        else {
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    me.openItemLocationScreen('edit', win);
+                }
+            });
+        }
     },
 
     openItemLocationScreen: function (action, window) {

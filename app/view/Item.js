@@ -4838,6 +4838,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'advancefiltergrid',
                                                                 flex: 1,
+                                                                reference: 'grdManufacturingCellAssociation',
                                                                 itemId: 'grdManufacturingCellAssociation',
                                                                 margin: '-1 -1 -1 5',
                                                                 title: 'Manufacturing Cell Association',
