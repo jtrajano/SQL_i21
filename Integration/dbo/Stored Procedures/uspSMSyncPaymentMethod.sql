@@ -602,7 +602,7 @@ BEGIN
 						ON P.[intAccountId] = GL.[inti21Id]
 				LEFT OUTER JOIN
 					[pttypmst] PM
-						ON P.[strPaymentMethodCode] = PM.[pttyp_pay_type]
+						ON P.[strPaymentMethodCode] = PM.[pttyp_pay_type] COLLATE Latin1_General_CI_AS 
 				WHERE
 					PM.[pttyp_pay_type] IS NULL
 				ORDER BY
@@ -702,7 +702,7 @@ BEGIN
 					tblGLCOACrossReference GL
 						ON P.[pttyp_dr_acct_no] = GL.[strExternalId]				
 				WHERE
-					 [tblSMPaymentMethod].[strPaymentMethodCode] = A.[strPaymentMethodCode]  
+					 [tblSMPaymentMethod].[strPaymentMethodCode] = A.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS  
 			 
 			 
 				SET @UpdatedCount = @@ROWCOUNT			 
