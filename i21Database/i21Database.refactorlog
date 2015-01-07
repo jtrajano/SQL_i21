@@ -1603,4 +1603,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0bf2ec23-5cdc-4e76-9603-78ba53c0b7f5" ChangeDateTime="01/07/2015 05:32:44">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[intItemUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intUnitMeasureId" />
+  </Operation>
 </Operations>

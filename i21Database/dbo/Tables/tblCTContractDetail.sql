@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[tblCTContractDetail](
 	[intFreightTermId] [int] NOT NULL,
 	[intShipViaId] [int] NOT NULL,
 	[dblQuantity] [numeric](12, 4) NOT NULL,
-	[intItemUOMId] [int] NOT NULL,
+	[intUnitMeasureId] [int] NOT NULL,
 	[intPricingType] [int] NOT NULL,
 	[dblFutures] [numeric](8, 4) NULL,
 	[dblBasis] [numeric](8, 4) NULL,
@@ -91,11 +91,11 @@ GO
 ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblICItem_intItemId]
 GO
 
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intItemUOMId] FOREIGN KEY([intItemUOMId])
-REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId])
+ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId])
+REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
 GO
 
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intItemUOMId]
+ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intUnitMeasureId]
 GO
 
 ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY([intCompanyLocationId])
