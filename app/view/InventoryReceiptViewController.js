@@ -513,10 +513,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
-    onAfterReceive: function() {
-        var me = this;
-        var win = me.view;
-        win.context.data.load();
+    onAfterReceive: function(success, message) {
+        if (success === true) {
+            var me = this;
+            var win = me.view;
+            win.context.data.load();
+        }
+        else {
+            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
+        }
     },
 
     onCalculationBasisChange: function(obj, newValue, oldValue, eOpts) {
