@@ -101,8 +101,6 @@ namespace iRely.Inventory.Model
         public bool ysnExportEDI { get; set; }
         public bool ysnHazardMaterial { get; set; }
         public bool ysnMaterialFee { get; set; }
-        public string strUPCNo { get; set; }
-        public int? intCaseUOM { get; set; }
         public string strNACSCategory { get; set; }
         public string strWICCode { get; set; }
         public int? intAGCategory { get; set; }

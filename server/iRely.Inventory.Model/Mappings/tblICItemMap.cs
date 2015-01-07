@@ -26,7 +26,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmDateShip).HasColumnName("dtmDateShip");
             this.Property(t => t.intAGCategory).HasColumnName("intAGCategory");
             this.Property(t => t.intBrandId).HasColumnName("intBrandId");
-            this.Property(t => t.intCaseUOM).HasColumnName("intCaseUOM");
             this.Property(t => t.intClassVarietyId).HasColumnName("intClassVarietyId");
             this.Property(t => t.intCommodityHierarchyId).HasColumnName("intCommodityHierarchyId");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
@@ -77,7 +76,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strRotationType).HasColumnName("strRotationType");
             this.Property(t => t.strStatus).HasColumnName("strStatus");
             this.Property(t => t.strType).HasColumnName("strType");
-            this.Property(t => t.strUPCNo).HasColumnName("strUPCNo");
             this.Property(t => t.strVolumeRebateGroup).HasColumnName("strVolumeRebateGroup");
             this.Property(t => t.strWICCode).HasColumnName("strWICCode");
             this.Property(t => t.ysnAvailableTM).HasColumnName("ysnAvailableTM");

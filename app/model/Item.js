@@ -96,8 +96,6 @@ Ext.define('Inventory.model.Item', {
         { name: 'ysnExportEDI', type: 'boolean'},
         { name: 'ysnHazardMaterial', type: 'boolean'},
         { name: 'ysnMaterialFee', type: 'boolean'},
-        { name: 'strUPCNo', type: 'string'},
-        { name: 'intCaseUOM', type: 'int', allowNull: true},
         { name: 'strNACSCategory', type: 'string'},
         { name: 'strWICCode', type: 'string'},
         { name: 'intAGCategory', type: 'int', allowNull: true},
