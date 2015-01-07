@@ -981,6 +981,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntries.sql" />
     <Build Include="dbo\Views\vyuSMGetLocationPricingLevel.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetNewID.sql" />
+    <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
