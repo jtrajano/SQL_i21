@@ -275,25 +275,39 @@ Ext.define('Inventory.view.CategoryViewController', {
     onbtnAddLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
-        var current = win.viewModel.data.current;
+        var vm = win.getViewModel();
 
-        win.context.data.validator.validateRecord({ window: win }, function(valid) {
-            if (valid) {
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 me.openCategoryLocationScreen('new', win);
-            }
-        });
+            } });
+        }
+        else {
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    me.openCategoryLocationScreen('new', win);
+                }
+            });
+        }
     },
 
     onbtnEditLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
+        var vm = win.getViewModel();
 
-        win.context.data.validator.validateRecord({ window: win }, function(valid) {
-            if (valid) {
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 me.openCategoryLocationScreen('edit', win);
-            }
-        });
-
+            } });
+        }
+        else {
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    me.openCategoryLocationScreen('edit', win);
+                }
+            });
+        }
     },
 
     openCategoryLocationScreen: function (action, window) {
