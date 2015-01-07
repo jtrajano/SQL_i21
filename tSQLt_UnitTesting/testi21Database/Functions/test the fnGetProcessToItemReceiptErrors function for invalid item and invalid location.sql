@@ -43,11 +43,11 @@ BEGIN
 				,intLocationId = @InvalidLocation
 				,strText = FORMATMESSAGE(50027)
 				,intErrorCode = 50027
-		UNION ALL
-		SELECT	intItemId = @InvalidItem
-				,intLocationId = @InvalidLocation
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
+		--UNION ALL
+		--SELECT	intItemId = @InvalidItem
+		--		,intLocationId = @InvalidLocation
+		--		,strText = FORMATMESSAGE(50028)
+		--		,intErrorCode = 50028
 
 		-- Create the mock data 
 		EXEC testi21Database.[Fake data for simple Items];

@@ -159,7 +159,7 @@ BEGIN
 													Stock.dblAverageCost
 										END 
 				,Stock.dblUnitOnHand = Stock.dblUnitOnHand + ItemToUnpost.dblTotalQty
-				,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
+				-- ,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
 		FROM	dbo.tblICItemStock AS Stock INNER JOIN @ItemsToUnpost ItemToUnpost
 					ON Stock.intItemId = ItemToUnpost.intItemId
 					AND Stock.intLocationId = ItemToUnpost.intLocationId

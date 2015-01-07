@@ -451,9 +451,6 @@
     <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for a valid item and location.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for an invalid item location.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for an invalid item.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>

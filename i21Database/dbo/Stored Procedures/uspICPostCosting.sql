@@ -175,13 +175,63 @@ BEGIN
 	-- Adjust the average cost and units on hand. 
 	--------------------------------------------------
 	BEGIN 
-		UPDATE	Stock
-		SET		Stock.dblAverageCost = dbo.fnCalculateAverageCost((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
-				,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
-				,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
-		FROM	dbo.tblICItemStock AS Stock
-		WHERE	Stock.intItemId = @intItemId
-				AND Stock.intLocationId = @intLocationId;
+		--UPDATE	Stock
+		--SET		Stock.dblAverageCost = dbo.fnCalculateAverageCost((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
+		--		,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
+		--		,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
+		--FROM	dbo.tblICItemStock AS Stock
+		--WHERE	Stock.intItemId = @intItemId
+		--		AND Stock.intLocationId = @intLocationId;
+
+		MERGE	
+		INTO	dbo.tblICItemStock 
+		WITH	(HOLDLOCK) 
+		AS		ItemStock	
+		USING (
+				SELECT	intItemId = @intItemId
+						,intLocationId = @intLocationId
+						,Qty = ISNULL(@dblUnitQty, 0)  * ISNULL(@dblUOMQty, 0)
+						,Cost = @dblCost
+		) AS StockToUpdate
+			ON ItemStock.intItemId = StockToUpdate.intItemId
+			AND ItemStock.intLocationId = StockToUpdate.intLocationId
+
+		-- If matched, update the average cost and unit on hand qty. 
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, ItemStock.dblUnitOnHand, ItemStock.dblAverageCost)
+					,dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + StockToUpdate.Qty
+
+		-- If none found, insert a new item stock record
+		WHEN NOT MATCHED THEN 
+			INSERT (
+				intItemId
+				,intLocationId
+				,intSubLocationId
+				,intUnitMeasureId
+				,dblAverageCost
+				,dblUnitOnHand
+				,dblOrderCommitted
+				,dblOnOrder
+				,dblLastCountRetail
+				,intSort
+				,intConcurrencyId
+			)
+			VALUES (
+				StockToUpdate.intItemId
+				,StockToUpdate.intLocationId
+				,NULL 
+				,NULL 
+				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, 0, 0) -- dblAverageCost
+				,StockToUpdate.Qty -- dblUnitOnHand
+				,0
+				,0
+				,0
+				,NULL 
+				,1	
+			)		
+
+		;
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
