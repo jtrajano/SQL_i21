@@ -137,6 +137,28 @@ BEGIN
 				WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
 				AND 1 = (CASE WHEN (SELECT intWithholdAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
 
+			--Make sure it ha setup for default discount account
+			INSERT INTO #tmpPayableInvalidData
+				SELECT 
+					'There is no account setup for discount.',
+					'Payable',
+					A.strPaymentRecordNum,
+					@batchId,
+					A.intPaymentId
+				FROM	[dbo].tblAPPayment A 
+					INNER JOIN tblAPPaymentDetail B
+						ON A.intPaymentId = B.intPaymentId
+					INNER JOIN tblAPVendor C
+						ON A.intVendorId = C.intVendorId
+				WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+				AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
+				AND B.dblDiscount <> 0
+				AND 1 = (CASE WHEN (SELECT intDiscountAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
+				GROUP BY A.[strPaymentRecordNum],
+				A.intPaymentId,
+				C.strVendorId,
+				A.dtmDatePaid
+
 			--Payment without payment on detail
 			INSERT INTO #tmpPayableInvalidData
 				SELECT 
@@ -303,6 +325,37 @@ BEGIN
 			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
 				0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
+		--Do not allow to unpost if there is latest payment made
+		INSERT INTO #tmpPayableInvalidData
+			SELECT 
+				'You cannot unpost ' + A.strPaymentRecordNum + '. Unpost first ' + LatestPayment.strPaymentRecordNum + '.',
+				'Payable',
+				A.strPaymentRecordNum,
+				@batchId,
+				A.intPaymentId
+			FROM tblAPPayment A 
+			INNER JOIN (
+				SELECT * FROM (
+					SELECT 
+						A1.intPaymentId, 
+						OtherPayments.intPostPaymentId,
+						strPaymentRecordNum, 
+						dtmDatePaid,
+						ROW_NUMBER() OVER(PARTITION BY A2.intBillId ORDER BY A1.intPaymentId DESC) rowNum
+					FROM tblAPPayment A1
+						INNER JOIN tblAPPaymentDetail A2 ON A1.intPaymentId = A2.intPaymentId
+						INNER JOIN 
+						(
+							SELECT intBillId, A3.intPaymentId, #tmpPayablePostData.intPaymentId AS intPostPaymentId
+							FROM tblAPPaymentDetail A3 INNER JOIN #tmpPayablePostData ON A3.intPaymentId = #tmpPayablePostData.intPaymentId
+						) OtherPayments ON A2.intBillId = OtherPayments.intBillId
+					WHERE A1.intPaymentId NOT IN (SELECT [intPaymentId] FROM #tmpPayablePostData) --exclude the for posted on results
+					AND A1.ysnPosted = 1 --get only the posted
+					) OtherPaymentsFiltered WHERE rowNum = 1
+				) LatestPayment ON A.intPaymentId = LatestPayment.intPostPaymentId
+			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) 
+			AND A.intPaymentId < LatestPayment.intPaymentId
+
 	END
 
 	DECLARE @totalInvalid INT
@@ -387,7 +440,7 @@ BEGIN
 		OUTPUT INSERTED.dtmDate, INSERTED.intAccountId, INSERTED.dblDebit, INSERTED.dblCredit, INSERTED.dblDebitUnit, INSERTED.dblCreditUnit  INTO #tmpGLDetail
 		--CREDIT
 		SELECT
-			 [intPaymentId]
+			 A.[intPaymentId]
 			,[strPaymentRecordNum]
 			,A.intAccountId--(SELECT intAccountId FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
 			,GLAccnt.strDescription --(SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = A.intBankAccountId))
@@ -487,7 +540,9 @@ BEGIN
 				INNER JOIN tblAPVendor C
 					ON A.intVendorId = C.intVendorId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
+		AND 1 = CASE WHEN @post = 1 AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) THEN 1 
+					ELSE CASE WHEN @post = 1 THEN 0 ELSE 1 END --include the discount if unposting
+					END --fully paid
 		AND B.dblDiscount <> 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
@@ -503,12 +558,12 @@ BEGIN
 				,'Posted Payment - ' + (SELECT strBillId FROM tblAPBill WHERE intBillId = B.intBillId)
 				,D.[strVendorId]
 				,A.dtmDatePaid
-				,[dblDebit]				= CASE WHEN @post = 1 AND A.dblAmountPaid >= 0 THEN SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
+				,[dblDebit]				= CASE WHEN @post = 1 AND A.dblAmountPaid >= 0 THEN SUM(CASE WHEN (B.dblAmountDue = (B.dblPayment + B.dblDiscount)) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
 												ELSE B.dblPayment END) 
 											ELSE 0 END --Apply refund
 				,[dblCredit]			= CASE WHEN @post = 1 AND A.dblAmountPaid >= 0 THEN 0 
-											ELSE SUM(CASE WHEN (B.dblAmountDue = B.dblPayment) --add discount only if fully paid
+											ELSE SUM(CASE WHEN (B.dblAmountDue = 0) --add discount only if fully paid
 												THEN 
 													CASE WHEN A.dblAmountPaid < 0 THEN (B.dblPayment + B.dblDiscount) * -1 ELSE (B.dblPayment + B.dblDiscount) END
 												ELSE 
@@ -693,7 +748,7 @@ END
 		
 		--Unposting Process
 		UPDATE tblAPPaymentDetail
-		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + C.dblAmountDue + B.dblPayment ELSE (C.dblAmountDue + B.dblPayment) END)
+		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + C.dblAmountDue + B.dblPayment ELSE (B.dblAmountDue + B.dblPayment) END)
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
@@ -772,8 +827,9 @@ END
 				--,intConcurrencyId += 1 
 		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
-		UPDATE tblAPPaymentDetail
-			SET tblAPPaymentDetail.dblAmountDue = (B.dblAmountDue) - (B.dblPayment + B.dblDiscount)
+		UPDATE B
+			SET B.dblAmountDue = CASE WHEN (B.dblPayment + B.dblDiscount) = B.dblAmountDue THEN 0 ELSE (B.dblAmountDue) - (B.dblPayment) END,
+			B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount) = B.dblAmountDue THEN B.dblDiscount ELSE 0 END
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
