@@ -26,7 +26,7 @@ ALTER TABLE [dbo].[tblCTContractOption] CHECK CONSTRAINT [FK_tblCTContractOption
 GO
 
 ALTER TABLE [dbo].[tblCTContractOption]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractOption_tblCTContractDetail_intContractDetailId] FOREIGN KEY([intContractDetailId])
-REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId])
+REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]) ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblCTContractOption] CHECK CONSTRAINT [FK_tblCTContractOption_tblCTContractDetail_intContractDetailId]

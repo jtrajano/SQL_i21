@@ -50,7 +50,7 @@ ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail
 GO
 
 ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY([intContractHeaderId])
-REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId])
+REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]) ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId]
