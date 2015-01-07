@@ -983,6 +983,11 @@
     <Build Include="dbo\Stored Procedures\uspGLGetNewID.sql" />
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Functions\fnGeti21FiscalPeriodIdFromOriginPeriod.sql" />
+    <Build Include="dbo\Tables\tblSTSubcategory.sql" />
+    <Build Include="dbo\Tables\tblSTPromotionSalesListDetail.sql" />
+    <Build Include="dbo\Tables\tblSTPromotionItemListDetail.sql" />
+    <Build Include="dbo\Tables\tblSTPaymentOption.sql" />
+    <Build Include="dbo\Tables\tblSTRegister.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
