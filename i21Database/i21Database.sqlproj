@@ -982,6 +982,7 @@
     <Build Include="dbo\Views\vyuSMGetLocationPricingLevel.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetNewID.sql" />
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
+    <Build Include="dbo\Functions\fnGeti21FiscalPeriodIdFromOriginPeriod.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
