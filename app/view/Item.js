@@ -537,10 +537,10 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colDetailShortUPC',
                                                         minWidth: 80,
                                                         width: 75,
+                                                        dataIndex: 'string',
                                                         text: 'Short UPC'
                                                     },
                                                     {
@@ -4923,8 +4923,11 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colCellPreference',
                                                                         text: 'Preference',
+                                                                        format: '0000',
                                                                         editor: {
-                                                                            xtype: 'numberfield'
+                                                                            xtype: 'numberfield',
+                                                                            allowDecimals: false,
+                                                                            allowExponential: false
                                                                         }
                                                                     }
                                                                 ],

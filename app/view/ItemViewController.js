@@ -1939,12 +1939,15 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        var win = combo.up('window');
+        var controller = win.getController();
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepManufacturingCell');
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colCellName'){
             current.set('intManufacturingCellId', records[0].get('intManufacturingCellId'));
+            current.set('intPreference', controller.getNewPreferenceNo(grid.store));
         }
     },
 
@@ -1960,6 +1963,33 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intOwnerId', records[0].get('intCustomerId'));
         }
     },
+
+    getNewPreferenceNo: function(store) {
+        "use strict";
+
+        var max = 0;
+        if (!store || !store.isStore) {
+            return max;
+        }
+
+        var filterRecords = store.data;
+
+        // Get the max value from the filtered records.
+        if (filterRecords && filterRecords.length > 0) {
+            // loop through the filtered record to get the max value for intFieldNo.
+            filterRecords.each(function (record) {
+                //noinspection JSUnresolvedVariable
+                if (filterRecords.dummy !== true) {
+                    var intFieldNo = record.get('intPreference');
+                    if (max <= intFieldNo) {
+                        max = intFieldNo + 1;
+                    }
+                }
+            });
+        }
+        return max;
+    },
+
 
     // </editor-fold>
 
