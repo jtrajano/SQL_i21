@@ -127,3 +127,7 @@ EXEC sp_addmessage 50030,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50031) EXEC sp_dropmessage 50031, 'us_english'	
 SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.'
 EXEC sp_addmessage 50031,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50032) EXEC sp_dropmessage 50032, 'us_english'	
+SET @strmessage = 'G/L entries are expected. Cannot continue because it is missing.'
+EXEC sp_addmessage 50032,11,@strmessage,'us_english','False'

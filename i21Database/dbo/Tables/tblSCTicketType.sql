@@ -7,7 +7,7 @@
     [ysnTicketAllowed] BIT NOT NULL, 
     [intNextTicketNumber] INT NOT NULL, 
     [intDiscountSchedule] INT NULL, 
-    [strDiscountLocation] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
+    [intDiscountLocationId] INT  NULL, 
     [intDistributionMethod] INT NOT NULL, 
     [ysnSelectByPO] BIT NOT NULL, 
     [intSplitInvoiceOption] INT NOT NULL, 
@@ -19,8 +19,9 @@
     [ysnOverrideSingleTicketSeries] BIT NOT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCTicketType_intTicketTypeId] PRIMARY KEY ([intTicketTypeId]), 
-    CONSTRAINT [UK_tblSCTicketType_intTicketType] UNIQUE (intTicketType), 
-    CONSTRAINT [FK_tblSCTicketType_tblSCTicketPool_intTicketPoolId] FOREIGN KEY (intTicketPoolId) REFERENCES tblSCTicketPool(intTicketPoolId)
+    CONSTRAINT [UK_tblSCTicketType_intTicketType_strInOutIndicator] UNIQUE ([intTicketType],[intTicketPoolId],[strInOutIndicator]), 
+    CONSTRAINT [FK_tblSCTicketType_tblSCTicketPool_intTicketPoolId] FOREIGN KEY (intTicketPoolId) REFERENCES tblSCTicketPool(intTicketPoolId),
+    CONSTRAINT [FK_tblSCTicketType_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )
 
 GO
@@ -77,15 +78,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicketType',
     @level2type = N'COLUMN',
     @level2name = N'intDiscountSchedule'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Discount Location',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicketType',
-    @level2type = N'COLUMN',
-    @level2name = N'strDiscountLocation'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Distribution Method',
@@ -185,3 +177,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicketType',
     @level2type = N'COLUMN',
     @level2name = N'strInOutIndicator'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Discount Location',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicketType',
+    @level2type = N'COLUMN',
+    @level2name = N'intDiscountLocationId'
