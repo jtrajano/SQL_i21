@@ -35,23 +35,10 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
 	[ysnOptOct] [bit] NULL,
 	[ysnOptNov] [bit] NULL,
 	[ysnOptDec] [bit] NULL,
- CONSTRAINT [PK_tblRKFutureMarket_intFutureMarketId] PRIMARY KEY CLUSTERED 
-(
-	[intFutureMarketId] ASC
-)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-
-ALTER TABLE [dbo].[tblRKFutureMarket]  WITH CHECK ADD  CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId])
-REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
-GO
-
-ALTER TABLE [dbo].[tblRKFutureMarket] CHECK CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId]
-GO
-
-ALTER TABLE [dbo].[tblRKFutureMarket]  WITH CHECK ADD  CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])
-REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
+ CONSTRAINT [PK_tblRKFutureMarket_intFutureMarketId] PRIMARY KEY CLUSTERED ([intFutureMarketId] ASC),
+ CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
+ CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
+)
 GO
 
 ALTER TABLE [dbo].[tblRKFutureMarket] CHECK CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId]

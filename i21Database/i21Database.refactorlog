@@ -1638,4 +1638,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTicketSplitId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="fb4b2509-994e-41b4-8f13-a470c4be64e7" ChangeDateTime="01/08/2015 10:53:50">
+    <Property Name="ElementName" Value="[dbo].[tblCTDiscount].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTDiscount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Value" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ac99e02a-21cd-4cbf-b4d9-0130b85093ea" ChangeDateTime="01/08/2015 10:55:20">
+    <Property Name="ElementName" Value="[dbo].[PK_tblCTDiscount]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTDiscount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblCTDiscount_Value]" />
+  </Operation>
 </Operations>

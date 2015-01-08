@@ -156,3 +156,28 @@ BEGIN
 	SELECT 2,'Car',1	
 END
 GO
+
+--tblCTDiscount
+GO
+IF NOT EXISTS(SELECT * FROM tblCTDiscount WHERE Name = 'Deliver')
+BEGIN
+	INSERT INTO tblCTDiscount
+	SELECT 1,'Deliver',1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTDiscount WHERE Name = 'As-Is')
+BEGIN
+	INSERT INTO tblCTDiscount
+	SELECT 2,'As-Is',1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTDiscount WHERE Name = 'Contract')
+BEGIN
+	INSERT INTO tblCTDiscount
+	SELECT 3,'Contract',1	
+END
+GO

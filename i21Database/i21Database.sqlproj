@@ -993,6 +993,8 @@
     <Build Include="dbo\Tables\tblSCTicketPrintOption.sql" />
     <Build Include="dbo\Tables\tblSCTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCTicketSplit.sql" />
+    <Build Include="dbo\Tables\tblCTDiscount.sql" />
+    <Build Include="dbo\Views\vyuCTEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
