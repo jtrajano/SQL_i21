@@ -42,6 +42,11 @@ namespace iRely.Inventory.BRL
             return GetSearchQuery().Where(predicate).Count();
         }
 
+        public int GetManufacturingCellCount(Expression<Func<tblICItemFactoryManufacturingCell, bool>> predicate)
+        {
+            return _db.GetQuery<tblICItemFactoryManufacturingCell>().Where(predicate).Count();
+        }
+
         public IQueryable<tblICItemFactory> GetItemFactories(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICItemFactory, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
@@ -49,6 +54,17 @@ namespace iRely.Inventory.BRL
                 .Include("tblICItemFactoryManufacturingCells.tblICManufacturingCell")
                 .Include(p => p.tblSMCompanyLocation)
                 .Where(w => query.Where(predicate).Any(a => a.intItemFactoryId == w.intItemFactoryId)) //Filter the Main DataSource Based on Search Query
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .AsNoTracking();
+        }
+
+        public IQueryable<tblICItemFactoryManufacturingCell> GetItemFactoryManufacturingCells(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICItemFactoryManufacturingCell, bool>> predicate)
+        {
+            return _db.GetQuery<tblICItemFactoryManufacturingCell>()
+                .Include(p => p.tblICManufacturingCell)
+                .Where(predicate) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)
                 .Take(limit)

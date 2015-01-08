@@ -68,6 +68,30 @@ namespace iRely.Invetory.WebAPI.Controllers
         }
 
         [HttpGet]
+        [ActionName("GetItemFactoryManufacturingCells")]
+        public HttpResponseMessage GetItemFactoryManufacturingCells(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        {
+            filter = string.IsNullOrEmpty(filter) ? "" : filter;
+
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<tblICItemFactoryManufacturingCell>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemFactoryManufacturingCellId", "DESC");
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItemFactoryManufacturingCell>(searchFilters, true);
+
+            var total = _ItemFactoryBRL.GetManufacturingCellCount(predicate);
+            var data = _ItemFactoryBRL.GetItemFactoryManufacturingCells(page, start, page == 0 ? total : limit, sortSelector, predicate);
+
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = data.ToList(),
+                total = total
+            });
+        }
+
+        [HttpGet]
         [ActionName("GetItemOwners")]
         public HttpResponseMessage GetItemOwners(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
         {
