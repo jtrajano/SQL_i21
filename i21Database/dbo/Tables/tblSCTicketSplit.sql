@@ -4,7 +4,7 @@
     [intTicketId] INT NOT NULL, 
     [intCustomerId] INT NOT NULL, 
     [dblSplitPercent] DECIMAL(6, 3) NOT NULL, 
-    [strSplitOption] NVARCHAR NULL, 
+    [strSplitOption] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicketSplit_intTicketSplitId] PRIMARY KEY ([intTicketSplitId]) ,
 	CONSTRAINT [FK_tblSCTicketSplit_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId])
