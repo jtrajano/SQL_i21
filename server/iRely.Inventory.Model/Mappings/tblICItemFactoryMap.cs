@@ -23,7 +23,7 @@ namespace iRely.Inventory.Model
                 .HasForeignKey(p => p.intFactoryId);
             this.HasMany(p => p.tblICItemFactoryManufacturingCells)
                 .WithRequired(p => p.tblICItemFactory)
-                .HasForeignKey(p => p.intManufacturingCellId);
+                .HasForeignKey(p => p.intItemFactoryId);
         }
     }
 
