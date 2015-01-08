@@ -312,7 +312,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboBrand',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Brand',
-                                                                        labelWidth: 75,
+                                                                        labelWidth: 40,
                                                                         displayField: 'strBrandCode',
                                                                         valueField: 'intBrandId'
                                                                     }
@@ -374,8 +374,8 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1,
                                                                         itemId: 'cboTracking',
                                                                         margin: '0 0 0 5',
-                                                                        fieldLabel: 'Inv. Tracking',
-                                                                        labelWidth: 75,
+                                                                        fieldLabel: 'Inv. Valuation',
+                                                                        labelWidth: 85,
                                                                         displayField: 'strDescription',
                                                                         valueField: 'strDescription'
                                                                     }

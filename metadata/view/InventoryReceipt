@@ -1381,7 +1381,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter124",
+                                                    "name": "filter1",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1407,6 +1407,7 @@
                                             "userConfig": {
                                                 "dataIndex": "strItemNo",
                                                 "itemId": "colItemNo",
+                                                "locked": true,
                                                 "text": "Item No.",
                                                 "width": 100
                                             },
@@ -2079,433 +2080,10 @@
                                     "userConfig": {
                                         "designer|createAlias": "advancefiltergrid",
                                         "dock": null,
-                                        "itemId": "grdItemsLot",
-                                        "layout|flex": 1.2,
-                                        "layout|margins": null,
-                                        "margin": -1,
-                                        "reference": "grdItemsLot",
-                                        "title": null
-                                    },
-                                    "name": "MyGridPanel6",
-                                    "designerId": "08dbef59-77d3-4366-9bdc-85af2b0aa9aa",
-                                    "cn": [
-                                        {
-                                            "type": "Ext.toolbar.Toolbar",
-                                            "reference": {
-                                                "name": "dockedItems",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "container|padding": "0 0 0 1",
-                                                "dock": "top",
-                                                "itemId": "tlbToolbarGrid"
-                                            },
-                                            "name": "MyToolbar6",
-                                            "designerId": "abb547bb-0e4a-404d-bf6a-542210f22fac",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.Label",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "layout|flex": null,
-                                                        "margin": "0 7 0 5",
-                                                        "text": "Items"
-                                                    },
-                                                    "name": "MyLabel4",
-                                                    "designerId": "474eb532-ed19-4ac8-8102-52e6d587c31b"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator7",
-                                                    "designerId": "3084e04a-2b3e-4d84-b068-35187e602a94"
-                                                },
-                                                {
-                                                    "type": "linkedinstance",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "filter125",
-                                                    "designerId": "451e727f-730e-48cb-99b0-0c1f0b45d841",
-                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.selection.CheckboxModel",
-                                            "reference": {
-                                                "name": "selModel",
-                                                "type": "object"
-                                            },
-                                            "codeClass": "Ext.selection.CheckboxModel",
-                                            "name": "MyCheckboxSelectionModel2",
-                                            "designerId": "424f4292-3b9f-434b-a05d-56bd459d4cc6"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strItemNo",
-                                                "itemId": "colItemNo",
-                                                "text": "Item No.",
-                                                "width": 100
-                                            },
-                                            "name": "MyColumn6",
-                                            "designerId": "dc0bb0e8-5a54-45e8-bdb7-2d8748884d02",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intItemId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Item Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strItemNo',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Item Number',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Item Type',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strLotTracking',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Lot Tracking',",
-                                                            "\t\thidden: true",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strItemNo",
-                                                        "itemId": "cboItem",
-                                                        "valueField": "strItemNo"
-                                                    },
-                                                    "name": "MyComboBox7",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "581576fe-ed12-44a9-9b28-7b31e9216db9",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strDescription",
-                                                "flex": 1,
-                                                "itemId": "colDescription",
-                                                "text": "Description",
-                                                "width": 175
-                                            },
-                                            "name": "MyColumn",
-                                            "designerId": "4b3e537d-5edd-465f-9ace-051f566deb77"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strDescription",
-                                                "itemId": "colSubLocation",
-                                                "text": "Sub Location",
-                                                "width": 100
-                                            },
-                                            "name": "MyColumn1",
-                                            "designerId": "180e06e8-deed-402c-bd55-df6c4a6b2105"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strDescription",
-                                                "itemId": "colLotTracking",
-                                                "text": "Lot Tracking",
-                                                "width": 100
-                                            },
-                                            "name": "MyColumn7",
-                                            "designerId": "5629ad30-f135-41fe-ad7c-a933483eb39a"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblQtyOrdered",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colQtyOrdered",
-                                                "text": "Ordered",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn",
-                                            "designerId": "8ffd2882-ed4e-4c98-bc6d-683acc4c7a55",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblQtyOrdered",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colReceived",
-                                                "text": "Received",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn2",
-                                            "designerId": "9abfe9ec-01aa-4fd5-ac2f-4d562accb843",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblToReceive",
-                                                "dataType": "numeric",
-                                                "format": "0,000",
-                                                "itemId": "colToReceive",
-                                                "text": "To Receive",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn15",
-                                            "designerId": "18c3ac60-b771-481c-b07e-2e32a5e8ad17",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strDescription",
-                                                "itemId": "colUOM",
-                                                "text": "UOM",
-                                                "width": 100
-                                            },
-                                            "name": "MyColumn2",
-                                            "designerId": "f7112d38-b460-4856-ac93-82a8cab50e24",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intUnitMeasureId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Unit Of Measure ID',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit Measure',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit Type',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'ysnDefault',",
-                                                            "\t\tdataType: 'boolean',",
-                                                            "\t\ttext: 'Default',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strUnitMeasure",
-                                                        "itemId": "cboItemUOM",
-                                                        "valueField": "strUnitMeasure"
-                                                    },
-                                                    "name": "MyComboBox11",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "0c40d99e-7eed-436c-b58e-cd2c0733cc13",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblLotTotal",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colLotTotal",
-                                                "text": "Lot Total",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn18",
-                                            "designerId": "014abf33-fd31-43f2-be55-ab617ef4cbaa",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.plugin.CellEditing",
-                                            "reference": {
-                                                "name": "plugins",
-                                                "type": "array"
-                                            },
-                                            "codeClass": "Ext.grid.plugin.CellEditing",
-                                            "userConfig": {
-                                                "clicksToEdit": 1,
-                                                "designer|displayName": "cepItem",
-                                                "pluginId": "cepItem"
-                                            },
-                                            "name": "MyCellEditingPlugin",
-                                            "designerId": "ea9417d2-8800-4c6a-afbf-a27f2729a776"
-                                        },
-                                        {
-                                            "type": "Ext.grid.View",
-                                            "reference": {
-                                                "name": "viewConfig",
-                                                "type": "object"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "itemId": "grvItemsLot"
-                                            },
-                                            "name": "MyGridView2",
-                                            "designerId": "9eb467c8-9a5c-4a69-8539-be76d8e86e25"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.grid.Panel",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "designer|createAlias": "advancefiltergrid",
-                                        "dock": null,
                                         "itemId": "grdLotTracking",
                                         "layout|flex": 1,
                                         "layout|margins": null,
-                                        "margin": "5 -1 -1 -1",
+                                        "margin": -1,
                                         "reference": "grdLotTracking",
                                         "title": null
                                     },
@@ -2636,7 +2214,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter126",
+                                                    "name": "filter12",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2816,12 +2394,12 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": "colUnitUOM",
-                                                "text": "Unit UOM",
-                                                "width": 81
+                                                "itemId": "colCost",
+                                                "text": "Cost",
+                                                "width": 65
                                             },
-                                            "name": "MyNumberColumn2",
-                                            "designerId": "156d4ee5-9430-4399-91dd-5ed0492e50b5",
+                                            "name": "MyNumberColumn5",
+                                            "designerId": "81023fa4-2555-415b-ac93-0682988cef95",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -2845,6 +2423,32 @@
                                             },
                                             "name": "MyColumn22",
                                             "designerId": "883da5a4-fadd-4496-af20-1a9f8d2f7025"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "string",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colUnitUOM",
+                                                "text": "Unit UOM",
+                                                "width": 81
+                                            },
+                                            "name": "MyNumberColumn2",
+                                            "designerId": "156d4ee5-9430-4399-91dd-5ed0492e50b5",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",
@@ -3348,7 +2952,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter127",
+                                                    "name": "filter13",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4179,7 +3783,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter14",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4622,7 +4226,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging1",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

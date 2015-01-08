@@ -230,17 +230,15 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'cboCostingMethod',
                                                                 fieldLabel: 'Costing Method',
                                                                 labelWidth: 130,
-                                                                displayField: 'strDescription',
                                                                 forceSelection: true,
                                                                 valueField: 'intCostingMethodId'
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                itemId: 'cboInventoryTracking',
-                                                                fieldLabel: 'Inventory Tracking',
+                                                                itemId: 'cboInventoryValuation',
+                                                                fieldLabel: 'Inventory Valuation',
                                                                 labelWidth: 130,
-                                                                displayField: 'strDescription',
-                                                                valueField: 'strDescription'
+                                                                valueField: 'strInventoryValuation'
                                                             },
                                                             {
                                                                 xtype: 'textfield',
@@ -259,9 +257,8 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'cboMaterialFee',
                                                                 fieldLabel: 'Material Fee',
                                                                 labelWidth: 130,
-                                                                displayField: 'strDescription',
                                                                 forceSelection: true,
-                                                                valueField: 'strDescription'
+                                                                valueField: 'strMaterialFee'
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -294,8 +291,7 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'cboMaterialItem',
                                                                 fieldLabel: 'Material Item',
                                                                 labelWidth: 130,
-                                                                displayField: 'strItemNo',
-                                                                valueField: 'intItemId'
+                                                                valueField: 'intMaterialItem'
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
@@ -335,7 +331,7 @@ Ext.define('Inventory.view.Category', {
                                                                 fieldLabel: 'Freight Item',
                                                                 labelWidth: 130,
                                                                 displayField: 'strItemNo',
-                                                                valueField: 'intItemId'
+                                                                valueField: 'intFreightItem'
                                                             }
                                                         ]
                                                     },

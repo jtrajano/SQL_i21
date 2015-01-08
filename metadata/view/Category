@@ -407,7 +407,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "displayField": "strDescription",
+                                                        "displayField": null,
                                                         "fieldLabel": "Costing Method",
                                                         "forceSelection": true,
                                                         "itemId": "cboCostingMethod",
@@ -427,13 +427,13 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "displayField": "strDescription",
-                                                        "fieldLabel": "Inventory Tracking",
-                                                        "itemId": "cboInventoryTracking",
+                                                        "displayField": null,
+                                                        "fieldLabel": "Inventory Valuation",
+                                                        "itemId": "cboInventoryValuation",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "strDescription"
+                                                        "valueField": "strInventoryValuation"
                                                     },
                                                     "name": "MyComboBox47",
                                                     "designerId": "37e7f1d0-03b3-4119-bb62-22ead8e21bd3"
@@ -479,14 +479,14 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "displayField": "strDescription",
+                                                        "displayField": null,
                                                         "fieldLabel": "Material Fee",
                                                         "forceSelection": true,
                                                         "itemId": "cboMaterialFee",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "strDescription"
+                                                        "valueField": "strMaterialFee"
                                                     },
                                                     "name": "MyComboBox56",
                                                     "designerId": "95d7f6e1-a269-455e-9f5f-492111d427eb"
@@ -528,13 +528,13 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strItemNo",
+                                                        "displayField": null,
                                                         "fieldLabel": "Material Item",
                                                         "itemId": "cboMaterialItem",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "intItemId"
+                                                        "valueField": "intMaterialItem"
                                                     },
                                                     "name": "MyComboBox57",
                                                     "configAlternates": {
@@ -609,7 +609,7 @@
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "intItemId"
+                                                        "valueField": "intFreightItem"
                                                     },
                                                     "name": "MyComboBox58",
                                                     "configAlternates": {
@@ -781,7 +781,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter138",
+                                                    "name": "filter129",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -995,7 +995,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter139",
+                                                    "name": "filter130",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1287,7 +1287,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter140",
+                                                    "name": "filter131",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1930,7 +1930,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter141",
+                                                    "name": "filter132",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2656,7 +2656,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging12",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
