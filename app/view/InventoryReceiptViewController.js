@@ -365,18 +365,32 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var itemPlugin = grdInventoryReceipt.plugins[0];
             var lotPlugin = grdLotTracking.plugins[0];
             var btnReceive = win.down('#btnReceive');
+            var btnSave = win.down('#btnSave');
+            var btnDelete = win.down('#btnDelete');
+            var btnUndo = win.down('#btnUndo');
+            var btnDuplicate = win.down('#btnDuplicate');
+            var btnNotes = win.down('#btnNotes');
+
+            btnDuplicate.setHidden(true);
+            btnNotes.setHidden(true);
 
             var current = records[0];
             if (current){
                 if (current.get('ysnPosted') !== false){
                     itemPlugin.disable();
                     lotPlugin.disable();
-                    btnReceive.setText('UnRecieve');
+                    btnReceive.setText('UnReceive');
+                    btnSave.disable();
+                    btnDelete.disable();
+                    btnUndo.disable();
                 }
                 else {
                     itemPlugin.enable();
                     lotPlugin.enable();
-                    btnReceive.setText('Recieve');
+                    btnReceive.setText('Receive');
+                    btnSave.enable();
+                    btnDelete.enable();
+                    btnUndo.enable();
                 }
             }
         }
@@ -485,12 +499,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var context = win.context;
 
         var doPost = function() {
-            var strReceiptNumber = win.viewModel.data.current.get('strReceiptNumber')
+            var strReceiptNumber = win.viewModel.data.current.get('strReceiptNumber');
+            var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
                 postURL             : '../Inventory/api/Receipt/Receive',
                 strTransactionId    : strReceiptNumber,
-                isPost              : true,
+                isPost              : !posted,
                 isRecap             : false,
                 callback            : me.onAfterReceive,
                 scope               : me
