@@ -930,6 +930,25 @@ Ext.define('Inventory.view.ItemViewController', {
             }
         }
 
+        var colSpecialPricingDiscountedPrice = grdSpecialPricing.columns[9];
+        if (colSpecialPricingDiscountedPrice) {
+            colSpecialPricingDiscountedPrice.renderer = function (value, metadata, record) {
+                if (record.get('strDiscountBy') === 'Percent') {
+                    var discount = record.get('dblUnitAfterDiscount') * record.get('dblDiscount') / 100;
+                    var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                    return i21.ModuleMgr.Inventory.roundDecimalFormat(discPrice, 2);
+                }
+                else if (record.get('strDiscountBy') === 'Amount') {
+                    var discount = record.get('dblDiscount');
+                    var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                    return i21.ModuleMgr.Inventory.roundDecimalFormat(discPrice, 2);
+                }
+                else { return i21.ModuleMgr.Inventory.roundDecimalFormat(0, 2); }
+            }
+        }
+
+
+
 
 
         me.subscribeLocationEvents(grdLocationStore, me);
@@ -1750,12 +1769,21 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        var win = combo.up('window');
+        var grdPricing = win.down('#grdPricing');
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepSpecialPricing');
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colSpecialPricingLocation'){
             current.set('intLocationId', records[0].get('intCompanyLocationId'));
+
+            if (grdPricing.store){
+                var record = grdPricing.store.findRecord('intLocationId', records[0].get('intCompanyLocationId'));
+                if (record){
+                    current.set('dblUnitAfterDiscount', record.get('dblSalePrice'));
+                }
+            }
         }
         else if (combo.column.itemId === 'colSpecialPricingUnit') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));

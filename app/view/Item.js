@@ -3566,9 +3566,9 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingQty',
-                                                                        width: 58,
+                                                                        width: 65,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Quantity',
@@ -3592,12 +3592,12 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingDiscountRate',
-                                                                        width: 96,
+                                                                        width: 70,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Discount Rate',
+                                                                        text: 'Discount',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -3605,7 +3605,7 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingUnitPrice',
                                                                         width: 69,
                                                                         align: 'right',
@@ -3618,9 +3618,17 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colSpecialPricingDiscountedPrice',
+                                                                        width: 110,
+                                                                        align: 'right',
+                                                                        dataIndex: 'strFieldName',
+                                                                        text: 'Discounted Price'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingAccumQty',
-                                                                        width: 73,
+                                                                        width: 90,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Accum. Qty',
@@ -3631,7 +3639,7 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingAccumAmount',
                                                                         width: 112,
                                                                         align: 'right',
