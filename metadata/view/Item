@@ -22,7 +22,7 @@
         "minimizable": null,
         "mixins": null,
         "reference": null,
-        "title": "Item",
+        "title": "Inventory Items",
         "width": 950
     },
     "designerId": "d7ef9c4d-9fa7-40a9-ac40-8922ff13c54c",
@@ -793,8 +793,9 @@
                                                 "dataIndex": "intUnitMeasureId",
                                                 "flex": 1.3,
                                                 "itemId": "colDetailUnitMeasure",
+                                                "locked": true,
                                                 "minWidth": 100,
-                                                "text": "Unit Measure"
+                                                "text": "Unit"
                                             },
                                             "name": "MyColumn",
                                             "designerId": "9f60de7f-46f4-4ac5-9881-183c6ebb93bb",
@@ -1068,12 +1069,12 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "colAllowSale",
-                                                "minWidth": 140,
-                                                "text": "Allow Sale in Stock Unit"
+                                                "itemId": "colAllowPurchase",
+                                                "minWidth": 150,
+                                                "text": "Allow Purchase in Stock Unit"
                                             },
-                                            "name": "MyCheck4",
-                                            "designerId": "d5f4523e-50e8-4ad7-86b9-7ff0978102b8"
+                                            "name": "MyCheck9",
+                                            "designerId": "490cc0bf-aaa0-44ea-8417-a0a034daf717"
                                         },
                                         {
                                             "type": "Ext.grid.column.Check",
@@ -1083,80 +1084,12 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "itemId": "colAllowPurchase",
-                                                "minWidth": 150,
-                                                "text": "Allow Purchase in Stock Unit"
+                                                "itemId": "colAllowSale",
+                                                "minWidth": 140,
+                                                "text": "Allow Sale in Stock Unit"
                                             },
-                                            "name": "MyCheck9",
-                                            "designerId": "490cc0bf-aaa0-44ea-8417-a0a034daf717"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "number",
-                                                "format": "0",
-                                                "itemId": "colConvertToStock",
-                                                "minWidth": 150,
-                                                "text": "Convert to Stock UOM"
-                                            },
-                                            "name": "MyNumberColumn16",
-                                            "designerId": "677628ac-104c-40a1-85d6-b42a75124c5c",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldStyle": "text-align:right",
-                                                        "hideTrigger": true
-                                                    },
-                                                    "name": "MyNumberField5",
-                                                    "designerId": "0964a010-d3d9-40b3-8e62-0e0621904f85"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "number",
-                                                "format": "0",
-                                                "itemId": "colConvertFromStock",
-                                                "minWidth": 150,
-                                                "text": "Convert From Stock UOM"
-                                            },
-                                            "name": "MyNumberColumn30",
-                                            "designerId": "f5d25021-3686-49ba-a6c0-15c294eb34b1",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldStyle": "text-align:right",
-                                                        "hideTrigger": true
-                                                    },
-                                                    "name": "MyNumberField5",
-                                                    "designerId": "723f2c21-6ba8-471f-995e-5af18c4f432e"
-                                                }
-                                            ]
+                                            "name": "MyCheck4",
+                                            "designerId": "d5f4523e-50e8-4ad7-86b9-7ff0978102b8"
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",
@@ -8334,79 +8267,6 @@
                                             },
                                             "name": "MyColumn70",
                                             "designerId": "701deda7-c5dc-4efc-acac-bd5aa95b18ac"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
-                                                "itemId": "colStockUOM",
-                                                "text": "Unit",
-                                                "width": 45
-                                            },
-                                            "name": "MyColumn54",
-                                            "designerId": "f287befa-98ff-4bf9-9ea1-2b1ec51d2c50",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intUnitMeasureId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Unit Of Measure ID',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit Measure',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit Type',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'ysnDefault',",
-                                                            "\t\tdataType: 'boolean',",
-                                                            "\t\ttext: 'Default',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strUnitMeasure",
-                                                        "itemId": "cboStockUOM",
-                                                        "valueField": "strUnitMeasure"
-                                                    },
-                                                    "name": "MyComboBox23",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "2bbcd836-6d7f-4443-ba38-0f46bac979b2",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",
