@@ -7,6 +7,7 @@
 	[strTimeZone] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intTicketStatusId] [int] NULL,
 	[intTicketTypeId] [int] NULL,
+	[intBillingIncrement] [int] NOT NULL DEFAULT 0,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
  CONSTRAINT [PK_tblHDSettings] PRIMARY KEY CLUSTERED 
 (
