@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspGLBookEntries for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspGLBookEntries for empty GL entries]
 AS
 BEGIN
 	-- Arrange 
@@ -20,18 +20,17 @@ BEGIN
 		DECLARE @ysnPost AS BIT 
 	END 
 	
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50032 
+	END
+
 	-- Act
 	BEGIN 
 		EXEC dbo.uspGLBookEntries 
 			@GLEntries
 			,@ysnPost
 	END 
-
-	-- Assert
-	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expected_tblGLDetail', 'tblGLDetail';
-		EXEC tSQLt.AssertEqualsTable 'expected_tblGLSummary', 'tblGLSummary';
-	END
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('expected_tblGLDetail') IS NOT NULL 

@@ -46,5 +46,13 @@ RETURN (
 		FROM	(SELECT DISTINCT strTransactionId, dtmDate FROM @GLEntriesToValidate) GLEntries
 		WHERE	dbo.isOpenAccountingDate(dtmDate) = 0
 
+		UNION ALL 
+
+		-- G/L entries are expected. Cannot continue because it is missing.
+		SELECT	strTransactionId = NULL 
+				,strText = FORMATMESSAGE(50032)
+				,intErrorCode = 50032
+		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM @GLEntriesToValidate)
+
 	) AS Query		
 )

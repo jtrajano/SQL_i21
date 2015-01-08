@@ -41,6 +41,13 @@ BEGIN
 	GOTO _Exit
 END 
 
+-- G/L entries are expected. Cannot continue because it is missing.
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50032)
+BEGIN 
+	RAISERROR(50032, 11, 1)
+	GOTO _Exit
+END 
+
 _Exit: 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors

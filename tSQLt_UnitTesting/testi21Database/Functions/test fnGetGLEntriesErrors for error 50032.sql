@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test fnGetGLEntriesErrors for the basics]
+﻿CREATE PROCEDURE testi21Database.[test fnGetGLEntriesErrors for error 50032]
 AS 
 BEGIN
 	-- Arrange
@@ -19,10 +19,20 @@ BEGIN
 
 		-- Call the fake data for GL Account 
 		EXEC testi21Database.[Fake data for simple COA];
+
+		INSERT INTO expected (
+				strTransactionId
+				,strText
+				,intErrorCode
+		)
+		SELECT	strTransactionId = NULL 
+				,strText = 'G/L entries are expected. Cannot continue because it is missing.'
+				,intErrorCode = 50032
 	END 
 
 	-- Act
 	BEGIN
+		-- Try to validate an empty @GLEntries
 		INSERT INTO actual
 		SELECT * FROM dbo.fnGetGLEntriesErrors(@GLEntries)
 	END 
