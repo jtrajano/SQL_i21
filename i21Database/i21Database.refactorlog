@@ -1617,4 +1617,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intUnitMeasureId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="92a39264-182f-4a4b-81e2-fa5b4abbd835" ChangeDateTime="01/08/2015 07:25:15">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketDiscount].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketDiscount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketDiscountd" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4eedcda5-4e0d-4199-afcd-6265f98dcbb3" ChangeDateTime="01/08/2015 07:25:27">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketDiscount].[intTicketDiscountd]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketDiscount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketDiscountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a349945e-cd3b-4d0a-a969-a76a832c3553" ChangeDateTime="01/08/2015 07:51:12">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketSplit].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketSplit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketSplitId" />
+  </Operation>
 </Operations>
