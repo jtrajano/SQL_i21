@@ -14,6 +14,7 @@
 		,intConcurrencyId = 1
 		,intTicketProductId = (select top 1 intProductId from tblARCustomerProductVersion where intCustomerId = c.intCustomerId)
 		,intVersionId = (select top 1 intVersionId from tblARCustomerProductVersion where intCustomerId = c.intCustomerId)
+		,ysnActive = c.ysnActive
 	  from
 		tblEntityContact ec
 		inner join tblARCustomerToContact etc on etc.intContactId = ec.intContactId
