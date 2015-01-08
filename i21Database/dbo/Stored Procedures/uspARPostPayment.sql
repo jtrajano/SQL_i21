@@ -13,7 +13,8 @@
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
 	@batchIdUsed		AS NVARCHAR(20)		= NULL OUTPUT,
-	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
+	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT,
+	@transType			AS NVARCHAR(25)		= 'all'
 	--OUTPUT Parameter for GUID
 	--Provision for Date Begin and Date End Parameter
 	--Provision for Journal Begin and Journal End Parameter
