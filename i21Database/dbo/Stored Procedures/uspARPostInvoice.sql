@@ -13,7 +13,8 @@
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
 	@batchIdUsed		AS NVARCHAR(20)		= NULL OUTPUT,
-	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
+	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT,
+	@transType			AS NVARCHAR(25)		= 'all'
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -63,11 +64,14 @@ SET @recapId = '1'
 --=====================================================================================================================================
 -- 	POPULATE JOURNALS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
+IF (@transType IS NULL OR RTRIM(LTRIM(@transType)) = '')
+	SET @transType = 'all'
+
 IF (@param IS NOT NULL) 
 BEGIN
 	IF(@param = 'all')
 	BEGIN
-		INSERT INTO #tmpPostInvoiceData SELECT intInvoiceId FROM tblARInvoice WHERE ysnPosted = 0
+		INSERT INTO #tmpPostInvoiceData SELECT intInvoiceId FROM tblARInvoice WHERE ysnPosted = 0 AND (strTransactionType = @transType OR @transType = 'all')
 	END
 	ELSE
 	BEGIN
@@ -90,6 +94,7 @@ BEGIN
 	INSERT INTO #tmpPostInvoiceData
 	SELECT intInvoiceId FROM tblARInvoice
 	WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @beginDate AND @endDate AND ysnPosted = 0
+	AND (strTransactionType = @transType OR @transType = 'all')
 END
 
 IF(@beginTransaction IS NOT NULL)
@@ -97,6 +102,7 @@ BEGIN
 	INSERT INTO #tmpPostInvoiceData
 	SELECT intInvoiceId FROM tblARInvoice
 	WHERE intInvoiceId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
+	AND (strTransactionType = @transType OR @transType = 'all')
 END
 
 --Removed excluded Invoices to post/unpost
