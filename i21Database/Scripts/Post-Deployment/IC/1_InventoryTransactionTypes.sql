@@ -5,6 +5,9 @@
 
 print('/*******************  BEGIN Populate Inventory Transaction Types *******************/')
 
+TRUNCATE TABLE tblICInventoryTransactionType
+GO
+
 INSERT INTO dbo.[tblICInventoryTransactionType] (
 	[intTransactionTypeId],
 	[strName]
