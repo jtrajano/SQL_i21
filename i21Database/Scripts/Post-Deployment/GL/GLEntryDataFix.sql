@@ -48,6 +48,9 @@ UPDATE tblGLDetail SET strDescription = X.strDescription
 	FROM (SELECT strJournalType, intJournalId, strJournalId, strDescription FROM tblGLJournal) X 
 	WHERE X.intJournalId = tblGLDetail.intTransactionId
 
+UPDATE tblGLAccountStructure SET strStructureName = 'Location'
+    WHERE strStructureName = 'Profit Center' and strType = 'Segment'
+
 GO
 	PRINT N'END Normalize tblGLDetail Fields'
 GO

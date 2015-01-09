@@ -62,9 +62,9 @@
     <CloseCursorOnCommitEnabled>False</CloseCursorOnCommitEnabled>
     <DefaultCursor>LOCAL</DefaultCursor>
     <AutoClose>False</AutoClose>
-    <AutoCreateStatistics>True</AutoCreateStatistics>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
     <AutoShrink>False</AutoShrink>
-    <AutoUpdateStatistics>True</AutoUpdateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
     <TornPageDetection>False</TornPageDetection>
     <DatabaseAccess>MULTI_USER</DatabaseAccess>
     <Recovery>FULL</Recovery>
@@ -138,6 +138,8 @@
     <Folder Include="Scripts\Post-Deployment\IC" />
     <Folder Include="Scripts\Post-Deployment\Optional Run\Reports" />
     <Folder Include="Scripts\Post-Deployment\AP\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\CT" />
+    <Folder Include="Scripts\Post-Deployment\NR" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -338,8 +340,12 @@
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeBankReconciliation.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_ValidatePrintJobs.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCommitPrintCheckVerification.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateCheckNumbers.sql" />
@@ -359,8 +365,12 @@
     <Build Include="dbo\Stored Procedures\uspCMPostMiscChecks.sql" />
     <Build Include="dbo\Stored Procedures\uspSMErrorMessages.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostRecap.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMReconcileBankRecords.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspCMReverseGLEntries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspGLAccountClone.sql" />
     <Build Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
@@ -368,7 +378,9 @@
     <Build Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLBuildTempCOASegment.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportOriginCOA.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
@@ -555,7 +567,9 @@
     <Build Include="dbo\Tables\tblFRMappingDetail.sql" />
     <Build Include="dbo\Views\vyuAPBill.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRecreateCOASegmentMapping.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversal.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Functions\fnGetBankTransactionReversalErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLFixStartingNumbers.sql" />
     <Build Include="dbo\Tables\tblSMSearchFilter.sql" />
@@ -569,7 +583,9 @@
     <Build Include="dbo\Functions\fnTrim.sql" />
     <Build Include="dbo\Views\vyuHDExportHoursWork.sql" />
     <Build Include="dbo\Tables\tblARPostResult.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPostPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostPayment.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspARFixStartingNumbers.sql" />
     <Build Include="dbo\Tables\cstGLJournal.sql" />
     <Build Include="dbo\Tables\cstARCustomer.sql" />
@@ -672,7 +688,6 @@
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
     <Build Include="dbo\Tables\tblICItemLocation.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessCosting.sql" />
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
@@ -772,14 +787,14 @@
     <Build Include="dbo\Tables\tblSTSubcategoryClass.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryFamily.sql" />
     <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFO.sql" />
     <Build Include="dbo\Tables\tblGRStorageType.sql" />
     <Build Include="dbo\Functions\fnDateNotEquals.sql" />
-    <Build Include="dbo\Functions\fnDateLessThan.sql" />
-    <Build Include="dbo\Functions\fnDateGreaterThanEquals.sql" />
     <Build Include="dbo\Functions\fnDateLessThanEquals.sql" />
+    <Build Include="dbo\Functions\fnDateGreaterThanEquals.sql" />
+    <Build Include="dbo\Functions\fnDateLessThan.sql" />
     <Build Include="dbo\Functions\fnDateGreaterThan.sql" />
     <Build Include="dbo\Functions\fnDateEquals.sql" />
     <Build Include="dbo\Tables\tblARCustomerProductVersion.sql" />
@@ -789,7 +804,9 @@
     <Build Include="dbo\User Defined Types\Entity.sql" />
     <Build Include="dbo\User Defined Types\EntityContact.sql" />
     <Build Include="dbo\Stored Procedures\uspEntityCreateEntityContact.sql" />
-    <Build Include="dbo\Stored Procedures\uspARContactOriginSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspARContactOriginSync.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Tables\tblNRAdjustmentType.sql" />
     <Build Include="dbo\Tables\tblNRNote.sql" />
     <Build Include="dbo\Tables\tblNRNoteDescription.sql" />
@@ -799,13 +816,15 @@
     <Build Include="dbo\Tables\tblNRNoteTransType.sql" />
     <Build Include="dbo\Tables\tblNRScheduleTransaction.sql" />
     <Build Include="dbo\Tables\tblNRUCC.sql" />
-    <Build Include="dbo\Stored Procedures\uspARValidations.sql" />
+    <Build Include="dbo\Stored Procedures\uspARValidations.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspSMCreateImport.sql" />
     <Build Include="dbo\Stored Procedures\uspSMBuildTable.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFOOut.sql" />
     <Build Include="dbo\Tables\tblSTPromotionItemList.sql" />
     <Build Include="dbo\Tables\tblSTPromotionSalesList.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostAverageCosting.sql" />
     <Build Include="dbo\Tables\tblARTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblICStorageLocation.sql" />
     <Build Include="dbo\Tables\tblICStorageLocationMeasurement.sql" />
@@ -833,19 +852,37 @@
     <Build Include="dbo\Views\vyuARInvoiceSearch.sql" />
     <Build Include="dbo\Tables\tblCTBuySell.sql" />
     <Build Include="dbo\Tables\tblCTCashOrFuture.sql" />
-    <Build Include="dbo\Tables\tblCTContractCost.sql" />
-    <Build Include="dbo\Tables\tblCTContractDetail.sql" />
-    <Build Include="dbo\Tables\tblCTContractHeader.sql" />
-    <Build Include="dbo\Tables\tblCTContractOptDetail.sql" />
+    <Build Include="dbo\Tables\tblCTContractCost.sql">
+      <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Tables\tblCTContractDetail.sql">
+      <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Tables\tblCTContractHeader.sql">
+      <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Tables\tblCTContractOptDetail.sql">
+      <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Tables\tblCTContractOptHeader.sql" />
-    <Build Include="dbo\Tables\tblCTContractOption.sql" />
+    <Build Include="dbo\Tables\tblCTContractOption.sql">
+      <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Tables\tblCTContractText.sql" />
     <Build Include="dbo\Tables\tblCTCostMethod.sql" />
-    <Build Include="dbo\Tables\tblCTCostType.sql" />
-    <Build Include="dbo\Tables\tblCTCropYear.sql" />
+    <Build Include="dbo\Tables\tblCTCostType.sql">
+      <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Tables\tblCTCropYear.sql">
+      <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Tables\tblCTDeferredPay.sql" />
-    <Build Include="dbo\Tables\tblCTDeferredPayRate.sql" />
-    <Build Include="dbo\Tables\tblCTFreightRate.sql" />
+    <Build Include="dbo\Tables\tblCTDeferredPayRate.sql">
+      <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Tables\tblCTFreightRate.sql">
+      <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Tables\tblCTPremFee.sql" />
     <Build Include="dbo\Tables\tblCTPricingType.sql" />
     <Build Include="dbo\Tables\tblCTPutCall.sql" />
@@ -863,7 +900,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFO.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessLIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateInvoice.sql" />
     <Build Include="dbo\Functions\fnGetDueDateBasedOnTerm.sql" />
     <Build Include="dbo\Tables\tblPOOrderStatus.sql" />
@@ -876,6 +913,11 @@
     <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
     <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
+    <Build Include="dbo\Tables\tblGLImportError.sql" />
+    <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDDivider.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDStructure.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoice.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccountAsTable.sql" />
     <Build Include="dbo\Views\vyuSMContacts.sql" />
@@ -890,12 +932,74 @@
     <Build Include="dbo\Functions\fnGetDiscountBasedOnTerm.sql" />
     <Build Include="dbo\Functions\fnRemoveTimeOnDate.sql" />
     <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
+    <Build Include="dbo\Tables\tblICEquipmentLength.sql" />
+    <Build Include="dbo\Tables\tblMFQAProperty.sql" />
+    <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryReceipt.sql" />
+    <Build Include="dbo\Tables\tblICLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLBookEntries.sql" />
+    <Build Include="dbo\Functions\fnGetGLEntriesErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLValidateGLEntries.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
+    <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
+    <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
+    <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
+    <Build Include="dbo\Tables\tblSMRecurringHistory.sql" />
+    <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
+    <Build Include="dbo\Views\vyuAPBillTotals.sql" />
+    <Build Include="dbo\Views\vyuAPBillHeaderGL.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetailGL.sql" />
+    <Build Include="dbo\Views\vyuAPBillPayment.sql" />
+    <Build Include="dbo\Views\vyuAPPaymentHeaderGL.sql" />
+    <Build Include="dbo\Views\vyuAPGLByAccount.sql" />
+    <Build Include="dbo\Views\vyuARGetItemAccount.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipment.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentItem.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentItemLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOOut.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\User Defined Types\InventoryTranactionStockToReverse.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Functions\fnCalculateInterestToDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCalculateInterest.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateGLJournalEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateNoteTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRGenerateAmortization.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRGetDetailsForPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCreateImportLogDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCreateImportLogHeader.sql" />
+    <Build Include="dbo\Tables\tblSMEntityMenuFavorite.sql" />
+    <Build Include="dbo\Tables\tblRKFutureMarket.sql" />
+    <Build Include="dbo\User Defined Types\UnpostItemsTableType.sql" />
+    <Build Include="dbo\Functions\fnRecalculateAverageCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntries.sql" />
+    <Build Include="dbo\Views\vyuSMGetLocationPricingLevel.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetNewID.sql" />
+    <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
+    <Build Include="dbo\Functions\fnGeti21FiscalPeriodIdFromOriginPeriod.sql" />
+    <Build Include="dbo\Tables\tblSTSubcategory.sql" />
+    <Build Include="dbo\Tables\tblSTPromotionSalesListDetail.sql" />
+    <Build Include="dbo\Tables\tblSTPromotionItemListDetail.sql" />
+    <Build Include="dbo\Tables\tblSTPaymentOption.sql" />
+    <Build Include="dbo\Tables\tblSTRegister.sql" />
+    <Build Include="dbo\Tables\tblSCScaleSetup.sql" />
+    <Build Include="dbo\Tables\tblSCTicket.sql" />
+    <Build Include="dbo\Tables\tblSCTicketPrintOption.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDiscount.sql" />
+    <Build Include="dbo\Tables\tblSCTicketSplit.sql" />
+    <Build Include="dbo\Tables\tblCTDiscount.sql" />
+    <Build Include="dbo\Views\vyuCTEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="C:\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
@@ -914,6 +1018,8 @@
     <None Include="Scripts\Post-Deployment\AP\FixPaymentRecordStatus.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixstrBillId.sql" />
     <None Include="Scripts\Post-Deployment\IC\3_DefaultData.sql" />
+    <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
+    <None Include="Scripts\Post-Deployment\NR\1_NRStartingNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -930,5 +1036,8 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
     </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CT\2_StartingNumber.sql" />
   </ItemGroup>
 </Project>

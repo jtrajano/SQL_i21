@@ -3,8 +3,16 @@
 AS
 BEGIN
 	--CREATE DYNAMIC ACCOUNT STRUCTURE
-	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tempDASTable') DROP TABLE tempDASTable 
-	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment') DROP TABLE tblGLTempCOASegment
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tempDASTable') 
+	BEGIN 
+		EXEC ('DROP TABLE tempDASTable ');
+	END
+
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment') 
+	BEGIN 
+		EXEC ('DROP TABLE tblGLTempCOASegment');
+	END 
+
 	BEGIN
 			DECLARE @Segments NVARCHAR(MAX)
 			SELECT @Segments = ISNULL(SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']','[Primary Account]')
@@ -36,7 +44,11 @@ BEGIN
 	END
 			
 			
-	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLDetailView') DROP VIEW vyuGLDetailView
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLDetailView') 
+	BEGIN 
+		EXEC ('DROP VIEW vyuGLDetailView');
+	END 
+
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment')
 	BEGIN
 		EXEC ('CREATE VIEW [dbo].[vyuGLDetailView]
@@ -50,8 +62,29 @@ BEGIN
 						LEFT JOIN dbo.tblGLAccountUnit AS E ON E.intAccountUnitId = B.intAccountUnitId')
 	END
 
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLSummary') 
+	BEGIN 
+		EXEC ('DROP VIEW vyuGLSummary');
+	END 
+
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment')
+	BEGIN
+		EXEC ('CREATE VIEW [dbo].[vyuGLSummary]
+		AS
+		SELECT		A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit, A.strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit            
+		FROM         dbo.tblGLSummary AS A 
+						INNER JOIN dbo.tblGLAccount AS B ON B.intAccountId = A.intAccountId 
+						INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
+						LEFT JOIN dbo.tblGLTempCOASegment AS D ON D.intAccountId = B.intAccountId
+						LEFT JOIN dbo.tblGLAccountUnit AS E ON E.intAccountUnitId = B.intAccountUnitId')
+	END
+
 	
-	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLAccountView') DROP VIEW vyuGLAccountView
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLAccountView') 
+	BEGIN 
+		EXEC ('DROP VIEW vyuGLAccountView');
+	END 
+
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment')
 	BEGIN
 		EXEC ('CREATE VIEW [dbo].[vyuGLAccountView]

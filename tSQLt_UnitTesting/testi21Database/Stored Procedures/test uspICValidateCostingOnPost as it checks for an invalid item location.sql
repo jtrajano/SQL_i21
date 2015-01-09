@@ -58,8 +58,8 @@ BEGIN
 	
 	-- Test case 1: 
 	BEGIN 
-		-- Assert the error expected
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50028
+		-- Assert that there is no exception thrown 
+		EXEC tSQLt.ExpectNoException; 
 
 		-- Act 
 		EXEC dbo.uspICValidateCostingOnPost @ItemsToValidate = @Items;

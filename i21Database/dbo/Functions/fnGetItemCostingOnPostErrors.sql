@@ -25,20 +25,20 @@ RETURN (
 					WHERE	intItemId = @intItemId
 				)	
 
-		-- Check for any invalid item-location
-		UNION ALL 
-		SELECT	intItemId = @intItemId
-				,intLocationId = @intLocationId
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
-		WHERE	NOT EXISTS (
-					SELECT TOP 1 1 
-					FROM	tblICItemStock Stock INNER JOIN tblICItemLocation Location
-								ON Stock.intItemId = Location.intItemId
-								AND	Stock.intLocationId = Location.intLocationId
-					WHERE	Stock.intItemId = @intItemId 
-							AND Stock.intLocationId = @intLocationId
-				)	
+		---- Check for any invalid item-location
+		--UNION ALL 
+		--SELECT	intItemId = @intItemId
+		--		,intLocationId = @intLocationId
+		--		,strText = FORMATMESSAGE(50028)
+		--		,intErrorCode = 50028
+		--WHERE	NOT EXISTS (
+		--			SELECT TOP 1 1 
+		--			FROM	tblICItemStock Stock INNER JOIN tblICItemLocation Location
+		--						ON Stock.intItemId = Location.intItemId
+		--						AND	Stock.intLocationId = Location.intLocationId
+		--			WHERE	Stock.intItemId = @intItemId 
+		--					AND Stock.intLocationId = @intLocationId
+		--		)	
 
 		-- Check for negative stock and if negative stock is NOT allowed. 
 		UNION ALL 

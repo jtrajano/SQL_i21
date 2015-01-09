@@ -38,11 +38,11 @@ BEGIN
 				,strText
 				,intErrorCode
 		)
-		-- Valid item and invalid location
-		SELECT	intItemId = @StickyGrains
-				,intLocationId = @InvalidLocation
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
+		---- Valid item and invalid location
+		--SELECT	intItemId = @StickyGrains
+		--		,intLocationId = @InvalidLocation
+		--		,strText = FORMATMESSAGE(50028)
+		--		,intErrorCode = 50028
 
 		-- Create the mock data 
 		EXEC testi21Database.[Fake data for simple Items];

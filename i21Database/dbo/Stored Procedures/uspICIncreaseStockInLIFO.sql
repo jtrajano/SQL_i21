@@ -22,6 +22,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLIFO
 	,@QtyOffset AS NUMERIC(18,6) OUTPUT 
 	,@NewLIFOId AS INT OUTPUT 
 	,@UpdatedLIFOId AS INT OUTPUT 
+	,@strRelatedTransactionId AS NVARCHAR(40) OUTPUT
+	,@intRelatedTransactionId AS INT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -39,6 +41,8 @@ SET @CostUsed = NULL;
 SET @QtyOffset = NULL;
 SET @NewLIFOId = NULL;
 SET @UpdatedLIFOId = NULL;
+SET @strRelatedTransactionId = NULL;
+SET @intRelatedTransactionId = NULL;
 
 -- Upsert (update or insert) a record into the cost bucket.
 MERGE	TOP(1)
@@ -78,6 +82,8 @@ WHEN MATCHED THEN
 					END 
 
 		,@UpdatedLIFOId = LIFO_bucket.intInventoryLIFOId
+		,@strRelatedTransactionId = LIFO_bucket.strTransactionId
+		,@intRelatedTransactionId = LIFO_bucket.intTransactionId
 
 -- Insert a new LIFO bucket if there is no negative stock to offset. 
 WHEN NOT MATCHED AND @FullQty > 0 THEN 

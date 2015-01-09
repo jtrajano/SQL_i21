@@ -10,9 +10,9 @@ CREATE TABLE [dbo].[tblCTContractDetail](
 	[intFreightTermId] [int] NOT NULL,
 	[intShipViaId] [int] NOT NULL,
 	[dblQuantity] [numeric](12, 4) NOT NULL,
-	[intItemUOMId] [int] NOT NULL,
+	[intUnitMeasureId] [int] NOT NULL,
 	[intPricingType] [int] NOT NULL,
-	[dblFutures] [numeric](8, 4) NOT NULL,
+	[dblFutures] [numeric](8, 4) NULL,
 	[dblBasis] [numeric](8, 4) NULL,
 	[intFutureMarketId] [int] NULL,
 	[intFuturesMonthYearId] [int] NULL,
@@ -30,10 +30,14 @@ CREATE TABLE [dbo].[tblCTContractDetail](
 	[strFobBasis] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intGrade] [int] NOT NULL,
 	[strRemark] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
- CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED 
+ [dblOriginalQty] NUMERIC(12, 4) NULL, 
+    [dblBalance] NUMERIC(12, 4) NULL, 
+    [dblIntransitQty] NUMERIC(12, 4) NULL, 
+    [dblScheduleQty] NUMERIC(12, 4) NULL, 
+    CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED 
 (
 	[intContractDetailId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
 ) ON [PRIMARY]
 
 GO
@@ -46,7 +50,7 @@ ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail
 GO
 
 ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY([intContractHeaderId])
-REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId])
+REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]) ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId]
@@ -87,11 +91,11 @@ GO
 ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblICItem_intItemId]
 GO
 
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intItemUOMId] FOREIGN KEY([intItemUOMId])
-REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId])
+ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId])
+REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
 GO
 
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intItemUOMId]
+ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intUnitMeasureId]
 GO
 
 ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY([intCompanyLocationId])

@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intContractHeaderId] [int] IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intPurchaseSale] [int] NOT NULL,
-	[intCustomerId] [int] NOT NULL,
+	[intEntityId] [int] NOT NULL,
 	[intCommodityId] [int] NOT NULL,
 	[dblQuantity] [numeric](8, 4) NOT NULL,
 	[intCommodityUnitMeasureId] [int] NOT NULL,
@@ -23,16 +23,17 @@ CREATE TABLE [dbo].[tblCTContractHeader](
  CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED 
 (
 	[intContractHeaderId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
+    CONSTRAINT [UQ_tblCTContractHeader_intPurchaseSale_intContractNumber] UNIQUE ([intPurchaseSale], [intContractNumber])
 ) ON [PRIMARY]
 
 GO
 
-ALTER TABLE [dbo].[tblCTContractHeader]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractHeader_tblARCustomer_intCustomerId] FOREIGN KEY([intCustomerId])
-REFERENCES [dbo].[tblARCustomer] ([intCustomerId])
+ALTER TABLE [dbo].[tblCTContractHeader]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractHeader_tblEntity_intEntityId] FOREIGN KEY([intEntityId])
+REFERENCES [dbo].[tblEntity] ([intEntityId])
 GO
 
-ALTER TABLE [dbo].[tblCTContractHeader] CHECK CONSTRAINT [FK_tblCTContractHeader_tblARCustomer_intCustomerId]
+ALTER TABLE [dbo].[tblCTContractHeader] CHECK CONSTRAINT [FK_tblCTContractHeader_tblEntity_intEntityId]
 GO
 
 ALTER TABLE [dbo].[tblCTContractHeader]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractHeader_tblARSalesperson_intSalespersonId] FOREIGN KEY([intSalespersonId])

@@ -121,6 +121,8 @@ BEGIN
 				,@QtyOffset AS NUMERIC(18,6)
 				,@NewFifoId AS INT 
 				,@UpdatedFifoId AS INT 
+				,@strRelatedTransactionId AS NVARCHAR(40)
+				,@intRelatedTransactionId AS INT 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -219,6 +221,8 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@NewFifoId OUTPUT 
 				,@UpdatedFifoId OUTPUT 
+				,@strRelatedTransactionId OUTPUT 
+				,@intRelatedTransactionId OUTPUT 
 
 			-- Assert on first pass
 			-- the cost to offset is $13

@@ -11,7 +11,7 @@
 */
 
 CREATE PROCEDURE [dbo].[uspICValidateCostingOnUnpost]
-	@ItemsToValidate ItemCostingTableType READONLY
+	@ItemsToValidate UnpostItemsTableType READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -34,8 +34,7 @@ SELECT	Errors.intItemId
 		,Errors.intLocationId
 		,Errors.strText
 		,Errors.intErrorCode
-FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnUnpostErrors(Item.intItemId, Item.intLocationId, Item.dblUnitQty * Item.dblUOMQty) Errors
-
+FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnUnpostErrors(Item.intItemId, Item.intLocationId, Item.dblTotalQty) Errors
 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 -- Check for negative stock qty 

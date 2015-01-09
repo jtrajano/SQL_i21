@@ -44,12 +44,12 @@ BEGIN
 	GOTO _Exit
 END 
 
--- Check for invalid location in the item-location setup. 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50028)
-BEGIN 
-	RAISERROR(50028, 11, 1)
-	GOTO _Exit
-END 
+---- Check for invalid location in the item-location setup. 
+--IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50028)
+--BEGIN 
+--	RAISERROR(50028, 11, 1)
+--	GOTO _Exit
+--END 
 
 _Exit: 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 

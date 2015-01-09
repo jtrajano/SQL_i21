@@ -5,8 +5,8 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[intCostTypeId] [int] NOT NULL,
 	[intVendorId] [int] NULL,
 	[intCostMethod] [int] NOT NULL,
-	[dblRate] [numeric](5, 4) NOT NULL,
-	[intItemUOMId] [int] NULL,
+	[dblRate] [numeric](10, 4) NOT NULL,
+	[intUnitMeasureId] [int] NULL,
 	[intCurrencyId] [int] NOT NULL,
 	[ysnAccrue] [bit] NOT NULL CONSTRAINT [DF_tblCTContractCost_ysnAccrue]  DEFAULT ((1)),
 	[ysnMTM] [bit] NULL,
@@ -27,7 +27,7 @@ ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tbl
 GO
 
 ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY([intContractDetailId])
-REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId])
+REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]) ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId]
@@ -47,11 +47,11 @@ GO
 ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblCTCostType_intCostTypeId]
 GO
 
-ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblICItemUOM_intItemUOMId] FOREIGN KEY([intItemUOMId])
-REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId])
+ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId])
+REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
 GO
 
-ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblICItemUOM_intItemUOMId]
+ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblICUnitMeasure_intUnitMeasureId]
 GO
 
 ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])

@@ -2,7 +2,8 @@
 (
 	[intId] INT NOT NULL IDENTITY, 
     [intInventoryFIFOId] INT NULL, 
-    [intInventoryTransactionId] INT NOT NULL, 
+    [intInventoryTransactionId] INT NOT NULL,
+	[intRevalueFifoId] INT NULL,
     [dblQty] NUMERIC(18, 6) NOT NULL,
 	CONSTRAINT [PK_tblICInventoryFIFOOut] PRIMARY KEY CLUSTERED ([intId])    
 )

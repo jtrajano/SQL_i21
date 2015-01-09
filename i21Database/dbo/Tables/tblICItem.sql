@@ -63,8 +63,6 @@
     [ysnExportEDI] BIT NULL DEFAULT ((0)), 
     [ysnHazardMaterial] BIT NULL DEFAULT ((0)), 
     [ysnMaterialFee] BIT NULL DEFAULT ((0)), 
-	[strUPCNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intCaseUOM] INT NULL, 
     [strNACSCategory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strWICCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intAGCategory] INT NULL, 
@@ -93,7 +91,17 @@
 	[intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
     CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
-    CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]) 
+    CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
+    CONSTRAINT [FK_tblICItem_tblICBrand] FOREIGN KEY ([intBrandId]) REFERENCES [tblICBrand]([intBrandId]), 
+    CONSTRAINT [FK_tblICItem_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblICItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+    CONSTRAINT [FK_tblICItem_tblICPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICPackType]([intPackTypeId]), 
+    CONSTRAINT [FK_tblICItem_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]), 
+    CONSTRAINT [FK_tblICItem_tblICFuelTaxClass] FOREIGN KEY ([intTaxClassId]) REFERENCES [tblICFuelTaxClass]([intFuelTaxClassId]), 
+    CONSTRAINT [FK_tblICItem_tblICRinFuelCategory] FOREIGN KEY ([intRINFuelTypeId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]), 
+    CONSTRAINT [FK_tblICItem_MedicationTag] FOREIGN KEY ([intMedicationTag]) REFERENCES [tblICTag]([intTagId]),
+	CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
+    CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])  
 );
 GO
 
@@ -629,23 +637,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'strLotTracking'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'UPC No',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItem',
-    @level2type = N'COLUMN',
-    @level2name = N'strUPCNo'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Case Unit of Measure',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItem',
-    @level2type = N'COLUMN',
-    @level2name = N'intCaseUOM'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'NACS Category',

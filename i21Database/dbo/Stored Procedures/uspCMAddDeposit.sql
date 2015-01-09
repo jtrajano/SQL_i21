@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE uspCMAddDeposit
+﻿CREATE PROCEDURE uspCMAddDeposit
 	@intBankAccountId INT
 	,@dtmDate DATETIME 
 	,@intGLAccountId INT	
@@ -15,7 +14,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN TRANSACTION 
+DECLARE @TransactionName AS VARCHAR(500) = 'CM Add Deposit' + CAST(NEWID() AS NVARCHAR(100));
+
+BEGIN TRAN @TransactionName
+SAVE TRAN @TransactionName
 
 DECLARE @BANK_DEPOSIT INT = 1
 		,@BANK_WITHDRAWAL INT = 2
@@ -42,6 +44,13 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@strTransactionId NVARCHAR(40)
 		,@intTransactionId INT 
 		,@msg_id INT
+		
+-- Check for invalid bank account id. 
+IF NOT EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankAccount] WHERE intBankAccountId = @intBankAccountId AND ysnActive =  1)
+BEGIN
+	RAISERROR(50010, 11, 1, @strTransactionId)
+	GOTO uspCMAddDeposit_Rollback
+END
 
 -- Initialize the transaction id. 
 SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20))
@@ -155,36 +164,31 @@ SELECT	intTransactionId		= @intTransactionId
 		,intLastModifiedUserId	= @intUserId
 		,dtmLastModified		= GETDATE()
 		,intConcurrencyId		= 1
-FROM	tblGLAccount 
+FROM	dbo.tblGLAccount 
 WHERE	intAccountId = @intGLAccountId
 IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback
 
 -- Post the transaction 
-BEGIN TRY
-	EXEC dbo.uspCMPostBankTransaction
-			@ysnPost = 1
-			,@ysnRecap = 0
-			,@strTransactionId = @strTransactionId
-			,@isSuccessful = @isAddSuccessful OUTPUT
-			,@message_id = @msg_id OUTPUT
+EXEC dbo.uspCMPostBankTransaction
+		@ysnPost = 1
+		,@ysnRecap = 0
+		,@strTransactionId = @strTransactionId
+		,@isSuccessful = @isAddSuccessful OUTPUT
+		,@message_id = @msg_id OUTPUT
 
-	IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback	
-	GOTO uspCMAddDeposit_Commit
-END TRY
-BEGIN CATCH
-	GOTO uspCMAddDeposit_Exit
-END CATCH
+IF @@ERROR <> 0	GOTO uspCMAddDeposit_Rollback	
+GOTO uspCMAddDeposit_Commit
 
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
 ---------------------------------------------------------------------------------------------------------------------------------------
 uspCMAddDeposit_Commit:
-	SET @isAddSuccessful = 1
-	COMMIT TRANSACTION
+	SET @isAddSuccessful = 1	
 	GOTO uspCMAddDeposit_Exit
 	
 uspCMAddDeposit_Rollback:
 	SET @isAddSuccessful = 0
-	ROLLBACK TRANSACTION 
+	ROLLBACK TRAN @TransactionName
 	
 uspCMAddDeposit_Exit:
+COMMIT TRAN @TransactionName

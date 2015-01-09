@@ -94,6 +94,5 @@ RETURN (
 							)	
 			) AS RecreatedAccount INNER JOIN tblGLAccount 
 				-- To be sure, cross reference the re-created account id with the tblGLAccount table
-				ON RecreatedAccount.strAccountId = tblGLAccount.strAccountId
-	
+				ON RecreatedAccount.strAccountId = tblGLAccount.strAccountId COLLATE Latin1_General_CI_AS
 )

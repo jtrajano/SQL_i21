@@ -18,6 +18,11 @@
     [glije_cbk_no]      CHAR (2)        NULL,
     [glije_user_id]     CHAR (16)       NULL,
     [glije_user_rev_dt] INT             NULL,
-    [A4GLIdentity]      NUMERIC (9)     NOT NULL
+    [A4GLIdentity]      NUMERIC (9)     NOT NULL, 
+	[glije_uid] [uniqueidentifier] NULL,
+    [glije_postdate] DATE NULL, 
+    [glije_id] INT NOT NULL IDENTITY, 
+    [glije_dte] DATETIME NULL, 
+    [glije_error_desc] NVARCHAR(300) NULL,
 );
 

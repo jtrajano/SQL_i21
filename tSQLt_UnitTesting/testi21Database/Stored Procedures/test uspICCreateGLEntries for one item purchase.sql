@@ -7,12 +7,12 @@ BEGIN
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
-		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
+		-- Create the variables for the internal transaction types used by costing. 	
+		DECLARE @Inventory_Auto_Negative AS INT = 1;
+		DECLARE @Inventory_Write_Off_Sold AS INT = 2;
+		DECLARE @Inventory_Revalue_Sold AS INT = 3;
 		
-		DECLARE @PurchaseType AS INT = 1
+		DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -71,6 +71,7 @@ BEGIN
 				,strTransactionId
 				,strBatchId
 				,intTransactionTypeId
+				,strTransactionForm
 				,intLotId
 				,dtmCreated
 				,intCreatedUserId
@@ -88,7 +89,8 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'PURCHASE-00001'
 				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @PurchaseType
+				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE
+				,strTransactionForm = 'Inventory Receipt'
 				,intLotId = NULL 
 				,dtmCreated = GETDATE()
 				,intCreatedUserId = 1
@@ -138,22 +140,22 @@ BEGIN
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= 'INVENTORY WHEAT-DEFAULT'
+			,strCode					= 'IC'
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'January 12, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1
+			,intEntityId				= 1
 			,strTransactionId			= 'PURCHASE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
+			,strTransactionType			= 'Inventory Receipt'
+			,strTransactionForm			= 'Inventory Receipt'
+			,strModuleName				= 'Inventory'
 			,intConcurrencyId			= 1
 		UNION ALL 
 		SELECT	
@@ -164,22 +166,22 @@ BEGIN
 			,dblCredit					= 12.00
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= 'COST OF GOODS WHEAT-DEFAULT'
+			,strCode					= 'IC'
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'January 12, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1
+			,intEntityId				= 1
 			,strTransactionId			= 'PURCHASE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
+			,strTransactionType			= 'Inventory Receipt'
+			,strTransactionForm			= 'Inventory Receipt'
+			,strModuleName				= 'Inventory'
 			,intConcurrencyId			= 1		
 
 	END 

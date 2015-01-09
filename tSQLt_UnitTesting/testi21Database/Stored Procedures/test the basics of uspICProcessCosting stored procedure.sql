@@ -59,10 +59,9 @@ BEGIN
 		EXEC tSQLt.AssertEquals 0, @isCalledUspICValidateCostingOnUnpost;
 		
 		-- Check if the Unpost Costing is NOT called 
-		SELECT	@isCalledUspICUnpostCosting = 1 
+		SELECT	TOP 1 
+				@isCalledUspICUnpostCosting = 1 
 		FROM	uspICUnpostCosting_SpyProcedureLog 
-		WHERE	_id_ = 1
-				AND strBatchId = 'BATCH-XXXX'
 		
 		EXEC tSQLt.AssertEquals 0, @isCalledUspICUnpostCosting;
 	END 	
@@ -114,10 +113,9 @@ BEGIN
 		EXEC tSQLt.AssertEquals 1, @isCalledUspICValidateCostingOnUnpost;
 		
 		-- Check if the Unpost Costing is CALLED 
-		SELECT	@isCalledUspICUnpostCosting = 1 
+		SELECT	TOP 1 
+				@isCalledUspICUnpostCosting = 1 
 		FROM	uspICUnpostCosting_SpyProcedureLog 
-		WHERE	_id_ = 1
-				AND strBatchId = 'BATCH-YYYY'
 		
 		EXEC tSQLt.AssertEquals 1, @isCalledUspICUnpostCosting;
 	END 

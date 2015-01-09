@@ -14,12 +14,17 @@
 
 -- SYSTEM MANAGER
 :r "..\dbo\Stored Procedures\uspSMMigrateCurrency.sql"
+:r "..\dbo\Stored Procedures\uspSMImportCompanyLocation.sql"
+:r "..\dbo\Stored Procedures\uspSMImportPaymentMethod.sql"
+:r "..\dbo\Stored Procedures\uspSMSyncCompanyLocation.sql"
+:r "..\dbo\Stored Procedures\uspSMSyncPaymentMethod.sql"
 
 -- GENERAL LEDGER
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
 :r "..\dbo\Stored Procedures\uspGLAccountOriginSync.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildAccount.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildOriginAccount.sql"
+:r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
 
 -- CASH MANAGEMENT
 :r ..\dbo\Views\apcbkmst.sql
@@ -122,3 +127,5 @@
 :r "..\dbo\Stored Procedures\uspARImportInvoice.sql"
 :r "..\dbo\Stored Procedures\uspARImportTaxAuthority.sql"
 :r "..\dbo\Stored Procedures\uspARImportTerm.sql"
+:r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
+:r "..\dbo\Stored Procedures\uspARImportPayments.sql"

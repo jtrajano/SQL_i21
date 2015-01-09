@@ -24,6 +24,8 @@
     <IncludeCompositeObjects>True</IncludeCompositeObjects>
     <TargetDatabaseSet>True</TargetDatabaseSet>
     <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -127,6 +129,10 @@
     <None Include="Scripts\AP\TransferImportedTermsData.sql" />
     <None Include="Scripts\AP\TransferImportedVendorData.sql" />
     <None Include="Scripts\AP\UpdateBillPONumber.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportPaymentMethod.sql" />
+    <None Include="dbo\Stored Procedures\uspSMSyncPaymentMethod.sql" />
+    <None Include="dbo\Stored Procedures\uspARSyncTerms.sql" />
+    <None Include="dbo\Stored Procedures\uspARImportPayments.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -224,5 +230,10 @@
     <None Include="dbo\Stored Procedures\uspARImportTaxAuthority.sql" />
     <None Include="dbo\Stored Procedures\uspARImportTerm.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportCompanyLocation.sql" />
+    <None Include="dbo\Views\vyuAPOriginBillsWithoutPayment.sql" />
+    <None Include="dbo\Stored Procedures\uspSMSyncCompanyLocation.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </None>
+    <None Include="dbo\Stored Procedures\uspGLImportSubLedger.sql" />
   </ItemGroup>
 </Project>

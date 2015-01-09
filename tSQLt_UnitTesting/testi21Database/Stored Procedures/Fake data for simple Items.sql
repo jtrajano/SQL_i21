@@ -6,6 +6,12 @@ BEGIN
 	DECLARE @AllowNegativeStockWithWriteOff AS INT = 2
 	DECLARE @DoNotAllowNegativeStock AS INT = 3
 
+	-- Create the CONSTANT variables for the costing methods
+	DECLARE @AVERAGECOST AS INT = 1
+			,@FIFO AS INT = 2
+			,@LIFO AS INT = 3
+			,@STANDARDCOST AS INT = 4
+
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
 			,@StickyGrains AS INT = 2
@@ -34,9 +40,12 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICItemAccount', @Identity = 1;
-
 	EXEC tSQLt.FakeTable 'dbo.tblICCategory';
 	EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;
+
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
 	INSERT INTO tblSMCompanyLocation (intCompanyLocationId, strLocationName) VALUES (1, '')
 	INSERT INTO tblSMCompanyLocation (intCompanyLocationId, strLocationName) VALUES (2, 'NEW HAVEN')
@@ -78,25 +87,25 @@ BEGIN
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@HotGrains, 'HOT GRAINS')
 
 	-- Add items for location 1 ('')
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@WetGrains, @Default_Location, @AllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@StickyGrains, @Default_Location, @AllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@PremiumGrains, @Default_Location, @AllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@ColdGrains, @Default_Location, @AllowNegativeStock, @ColdItems)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@HotGrains, @Default_Location, @AllowNegativeStock, @HotItems)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @Default_Location, @AllowNegativeStock, @AVERAGECOST)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @Default_Location, @AllowNegativeStock, @AVERAGECOST)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @Default_Location, @AllowNegativeStock, @AVERAGECOST)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod, intCategoryId) VALUES (@ColdGrains, @Default_Location, @AllowNegativeStock, @AVERAGECOST, @ColdItems)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod, intCategoryId) VALUES (@HotGrains, @Default_Location, @AllowNegativeStock, @AVERAGECOST, @HotItems)
 
 	-- Add items for location 2 ('NEW HAVEN')
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@WetGrains, @NewHaven, @AllowNegativeStockWithWriteOff)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@StickyGrains, @NewHaven, @AllowNegativeStockWithWriteOff)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@PremiumGrains, @NewHaven, @AllowNegativeStockWithWriteOff)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@ColdGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @ColdItems)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@HotGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @HotItems)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId, intCostingMethod) VALUES (@ColdGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @ColdItems, @FIFO)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId, intCostingMethod) VALUES (@HotGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @HotItems, @FIFO)
 
 	-- Add items for location 3 ('BETTER HAVEN')
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@WetGrains, @BetterHaven, @DoNotAllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@StickyGrains, @BetterHaven, @DoNotAllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory) VALUES (@PremiumGrains, @BetterHaven, @DoNotAllowNegativeStock)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@ColdGrains, @BetterHaven, @DoNotAllowNegativeStock, @ColdItems)
-	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@HotGrains, @BetterHaven, @DoNotAllowNegativeStock, @HotItems)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId, intCostingMethod) VALUES (@ColdGrains, @BetterHaven, @DoNotAllowNegativeStock, @ColdItems, @LIFO)
+	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId, intCostingMethod) VALUES (@HotGrains, @BetterHaven, @DoNotAllowNegativeStock, @HotItems, @LIFO)
 		
 	-- Add stock information for items under location 1 ('')
 	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@WetGrains, @Default_Location,	100)

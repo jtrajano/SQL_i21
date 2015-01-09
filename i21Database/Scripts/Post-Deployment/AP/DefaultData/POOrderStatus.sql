@@ -6,7 +6,8 @@ USING (VALUES
   (3, N'Closed'),
   (4, N'Cancelled'),
   (5, N'Washed Out'),
-  (6, N'Short Closed')
+  (6, N'Short Closed'),
+  (7, N'Pending')
 )
 AS Source (intOrderStatusId, strStatus)
 ON Target.intOrderStatusId = Source.intOrderStatusId AND Target.strStatus = Source.strStatus

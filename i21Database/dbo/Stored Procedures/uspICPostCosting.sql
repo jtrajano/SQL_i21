@@ -58,10 +58,21 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LIFO AS INT = 3
 		,@STANDARDCOST AS INT = 4 	
 
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Do the Validation
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	EXEC [dbo].[uspICValidateCostingOnPost] 
+		@ItemsToValidate = @ItemsToPost
+END
+
+-----------------------------------------------------------------------------------------------------------------------------
 -- Create the cursor
 -- Make sure the following options are used: 
 -- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
 -- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
+-----------------------------------------------------------------------------------------------------------------------------
 DECLARE loopItems CURSOR LOCAL FAST_FORWARD
 FOR 
 SELECT  intId
@@ -85,7 +96,9 @@ OPEN loopItems;
 -- Initial fetch attempt
 FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 
+-----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
+-----------------------------------------------------------------------------------------------------------------------------
 WHILE @@FETCH_STATUS = 0
 BEGIN 
 	-- Initialize the costing method and negative inventory option. 
@@ -101,7 +114,7 @@ BEGIN
 	-- Moving Average Cost
 	IF (@CostingMethod = @AVERAGECOST)
 	BEGIN 
-		EXEC dbo.uspICProcessAverageCosting
+		EXEC dbo.uspICPostAverageCosting
 			@intItemId
 			,@intLocationId
 			,@dtmDate
@@ -121,7 +134,7 @@ BEGIN
 	-- FIFO 
 	IF (@CostingMethod = @FIFO)
 	BEGIN 
-		EXEC dbo.uspICProcessFIFO
+		EXEC dbo.uspICPostFIFO
 			@intItemId
 			,@intLocationId
 			,@dtmDate
@@ -138,25 +151,95 @@ BEGIN
 			,@intUserId;
 	END
 
-	-- LIFO -- TODO
+	-- LIFO 
+	IF (@CostingMethod = @LIFO)
+	BEGIN 
+		EXEC dbo.uspICPostLIFO
+			@intItemId
+			,@intLocationId
+			,@dtmDate
+			,@dblUnitQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intUserId;
+	END
 
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
 	--------------------------------------------------
 	BEGIN 
-		UPDATE	Stock
-		SET		Stock.dblAverageCost = dbo.fnCalculateAverageCost((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
-				,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
-				,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
-		FROM	dbo.tblICItemStock AS Stock
-		WHERE	Stock.intItemId = @intItemId
-				AND Stock.intLocationId = @intLocationId;
+		--UPDATE	Stock
+		--SET		Stock.dblAverageCost = dbo.fnCalculateAverageCost((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
+		--		,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
+		--		,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
+		--FROM	dbo.tblICItemStock AS Stock
+		--WHERE	Stock.intItemId = @intItemId
+		--		AND Stock.intLocationId = @intLocationId;
+
+		MERGE	
+		INTO	dbo.tblICItemStock 
+		WITH	(HOLDLOCK) 
+		AS		ItemStock	
+		USING (
+				SELECT	intItemId = @intItemId
+						,intLocationId = @intLocationId
+						,Qty = ISNULL(@dblUnitQty, 0)  * ISNULL(@dblUOMQty, 0)
+						,Cost = @dblCost
+		) AS StockToUpdate
+			ON ItemStock.intItemId = StockToUpdate.intItemId
+			AND ItemStock.intLocationId = StockToUpdate.intLocationId
+
+		-- If matched, update the average cost and unit on hand qty. 
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, ItemStock.dblUnitOnHand, ItemStock.dblAverageCost)
+					,dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + StockToUpdate.Qty
+
+		-- If none found, insert a new item stock record
+		WHEN NOT MATCHED THEN 
+			INSERT (
+				intItemId
+				,intLocationId
+				,intSubLocationId
+				,intUnitMeasureId
+				,dblAverageCost
+				,dblUnitOnHand
+				,dblOrderCommitted
+				,dblOnOrder
+				,dblLastCountRetail
+				,intSort
+				,intConcurrencyId
+			)
+			VALUES (
+				StockToUpdate.intItemId
+				,StockToUpdate.intLocationId
+				,NULL 
+				,NULL 
+				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, 0, 0) -- dblAverageCost
+				,StockToUpdate.Qty -- dblUnitOnHand
+				,0
+				,0
+				,0
+				,NULL 
+				,1	
+			)		
+
+		;
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId
 END;
+-----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
+-----------------------------------------------------------------------------------------------------------------------------
 
 CLOSE loopItems;
 DEALLOCATE loopItems;

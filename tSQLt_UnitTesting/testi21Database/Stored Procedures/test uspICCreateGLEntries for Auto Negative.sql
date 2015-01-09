@@ -7,10 +7,10 @@ BEGIN
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
-		-- Create the variables for the internal transaction types used by costing. 
-		DECLARE @WRITE_OFF_SOLD AS INT = -1
-		DECLARE @REVALUE_SOLD AS INT = -2
-		DECLARE @AUTO_NEGATIVE AS INT = -3
+		-- Create the variables for the internal transaction types used by costing. 	
+		DECLARE @Inventory_Auto_Negative AS INT = 1;
+		DECLARE @Inventory_Write_Off_Sold AS INT = 2;
+		DECLARE @Inventory_Revalue_Sold AS INT = 3;
 		
 		DECLARE @PurchaseType AS INT = 1
 		DECLARE @SaleType AS INT = 2
@@ -55,7 +55,12 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 		
 		-- Declare the variables for the Unit of Measure
-		DECLARE @EACH AS INT = 1;		
+		DECLARE @EACH AS INT = 1;
+		
+		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
+		DECLARE @Inventory_Auto_Negative_Name AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @Inventory_Revalue_Sold_Name AS NVARCHAR(50) = 'Inventory Revalue Sold'  
+		DECLARE @Inventory_WriteOff_Sold_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
 
 		-- Insert a fake data in the Inventory transaction table 
 		INSERT INTO tblICInventoryTransaction (
@@ -73,6 +78,7 @@ BEGIN
 				,strBatchId
 				,intTransactionTypeId
 				,intLotId
+				,strTransactionForm
 				,dtmCreated
 				,intCreatedUserId
 				,intConcurrencyId
@@ -89,8 +95,9 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'SALE-00001'
 				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @AUTO_NEGATIVE
+				,intTransactionTypeId = @Inventory_Auto_Negative
 				,intLotId = NULL 
+				,strTransactionForm = 'Inventory Shipment'
 				,dtmCreated = GETDATE()
 				,intCreatedUserId = 1
 				,intConcurrencyId = 1
@@ -139,23 +146,26 @@ BEGIN
 			,dblCredit					= 16.50
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= tblGLAccount.strDescription
+			,strCode					= 'IAN'
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'January 17, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1
+			,intEntityId				= 1
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
+			,strTransactionType			= @Inventory_Auto_Negative_Name
+			,strTransactionForm			= 'Inventory Shipment'
+			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
+		FROM dbo.tblGLAccount
+		WHERE intAccountId = @Inventory_Default
+		
 		UNION ALL 
 		SELECT	
 			dtmDate						= 'January 17, 2014'
@@ -165,23 +175,26 @@ BEGIN
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= '' -- TODO 
-			,strCode					= '' -- TODO
-			,strReference				= '' -- TODO
+			,strDescription				= tblGLAccount.strDescription 
+			,strCode					= 'IAN'
+			,strReference				= ''
 			,intCurrencyId				= @USD
 			,dblExchangeRate			= 1
 			,dtmTransactionDate			= 'January 17, 2014'
-			,strJournalLineDescription	= '' -- TODO
-			,intJournalLineNo			= NULL -- TODO
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= 1
 			,ysnIsUnposted				= 0
-			,intUserId					= 1 -- TODO
-			,intEntityId				= 1 -- TODO
+			,intUserId					= 1 
+			,intEntityId				= 1 
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= '' -- TODO 
-			,strTransactionForm			= '' -- TODO
-			,strModuleName				= '' -- TODO
-			,intConcurrencyId			= 1		
+			,strTransactionType			= @Inventory_Auto_Negative_Name
+			,strTransactionForm			= 'Inventory Shipment'
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1	
+		FROM dbo.tblGLAccount
+		WHERE intAccountId = @AutoNegative_Default
+				
 	END 
 	
 	-- Act

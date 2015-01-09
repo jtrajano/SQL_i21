@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblNRScheduleTransaction]
 (
-	[intScheduleTransId] INT NOT NULL IDENTITY, 
-    [intScheduleId] INT NULL, 
+		[intScheduleTransId] INT NOT NULL IDENTITY, 
+    [intNoteId] INT NULL, 
     [intPaymentNo] INT NULL, 
     [dtmExpectedPayDate] DATETIME NULL, 
     [dblExpectedPayAmt] NUMERIC(18, 6) NULL, 
@@ -17,5 +17,6 @@
     [dblLateFeePayAmt] NUMERIC(18, 6) NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblNRScheduleTransaction_intScheduleTransId] PRIMARY KEY ([intScheduleTransId]), 
-    CONSTRAINT [FK_tblNRScheduleTransaction_tblNRNoteSchedule_intScheduleId] FOREIGN KEY ([intScheduleId]) REFERENCES [tblNRNoteSchedule]([intScheduleId]) 
+    CONSTRAINT [FK_tblNRScheduleTransaction_tblNRNote_intNoteId] FOREIGN KEY ([intNoteId]) REFERENCES [tblNRNote]([intNoteId]) 
+
 )

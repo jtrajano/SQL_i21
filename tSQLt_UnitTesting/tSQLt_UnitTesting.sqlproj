@@ -25,6 +25,8 @@
     <TargetDatabaseSet>True</TargetDatabaseSet>
     <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -213,21 +215,6 @@
     <Build Include="testi21Database\Stored Procedures\Fake data for multiple segments COA.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for simple Items.sql" />
     <Build Include="testi21Database\Functions\test the fnGetNegativeInventoryOption function.sql" />
-    <Build Include="testi21Database\Stored Procedures\test the basics of uspICProcessCosting stored procedure.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICValidateCostingOnPost.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICPostCosting.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICValidateCostingOnUnpost.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for errors thrown by uspICUnpostCosting.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost as it checks for an invalid item.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
@@ -311,58 +298,58 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to negative.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to zero.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to positive _with partial in_.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO for the basics.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO for the basics.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, Jan 1. Purchase 20 stocks @ 20 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Jan 1. Purchase 20 stocks @ 20 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, Feb 10. Purchase 20 stocks at 21 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Feb 10. Purchase 20 stocks at 21 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, Feb 15. Purchase 20 stocks at 21.75 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Feb 15. Purchase 20 stocks at 21.75 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, Mar 1. Sold 40 stocks.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Mar 1. Sold 40 stocks.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, Mar 15. Sold 50 stocks.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Mar 15. Sold 50 stocks.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, Apr 12. Purchase 75 stocks at 19 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Apr 12. Purchase 75 stocks at 19 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, Apr 7. Sold 60 stocks.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Apr 7. Sold 60 stocks.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessFIFO, May 15. Purchase 15 stocks at 27 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, May 15. Purchase 15 stocks at 27 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting for the basics.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting for the basics.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting, Apr 12. Purchase 75 stocks at 19 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Apr 12. Purchase 75 stocks at 19 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting, Apr 7. Sold 60 stocks.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Apr 7. Sold 60 stocks.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting, Feb 10. Purchase 20 stocks at 21 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Feb 10. Purchase 20 stocks at 21 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting, Feb 15. Purchase 20 stocks at 21.75 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Feb 15. Purchase 20 stocks at 21.75 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting, Jan 1. Purchase 20 stocks @ 20 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Jan 1. Purchase 20 stocks @ 20 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting, Mar 1. Sold 40 stocks.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Mar 1. Sold 40 stocks.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting, Mar 15. Sold 50 stocks.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Mar 15. Sold 50 stocks.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessAverageCosting, May 15. Purchase 15 stocks at 27 dollars each.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, May 15. Purchase 15 stocks at 27 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Functions\test fnCalculateAverageCost for the basics.sql" />
@@ -451,7 +438,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and fifo is correct.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and coming stock and GL entries are correct.sql">
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and GL entries are correct.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and the inventory-transaction is correct.sql">
@@ -460,17 +447,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and the item stock is correct.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for one incoming stock.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessCosting for one outgoing stock.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="testi21Database\Functions\test fnCalculateAverageCost, use new cost when increasing stock but stock was from negative or zero.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for a valid item and location.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for an invalid item location.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for an invalid item.sql">
@@ -506,6 +484,124 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToItemReceipt for errors thrown by uspSMGetStartingNumber.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToItemReceipt for errors thrown by a null transaction id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToItemReceipt on converting a PO into Inventory Receipt.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsForItemReceipt for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsForItemReceipt for getting the items from PO.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Jan 1. Purchase 20 stocks @ 20 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Feb 10. Purchase 20 stocks at 21 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Feb 15. Purchase 20 stocks at 21.75 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Mar 1. Sold 40 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Mar 15. Sold 50 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Apr 7. Sold 60 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Apr 12. Purchase 75 stocks at 19 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, May 15. Purchase 15 stocks at 27 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from zero to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from negative to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to zero stock.sql" />
+    <Build Include="testi21Database\Functions\test fnRemoveTimeOnDate for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnRemoveTimeOnDate on a date with time.sql" />
+    <Build Include="testi21Database\Functions\test fnRemoveTimeOnDate on a date without time.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for the Costing Method.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method at item level.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method at category level.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable when costing method was not specified.sql" />
+    <Build Include="testi21Database\Scripts\test the standard collation Latin1_General_CI_AS on all i21 columns.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for the basics.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for open periods.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for closed periods.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for empty periods.sql" />
+    <Build Include="testi21Database\Functions\test isOpenAccountingDate for multiple periods.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50032.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50001.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50001 _non-null and invalid account id_.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50003.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLEntriesErrors for error 50005.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for empty GL entries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for the valid GL Entries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for invalid GL Entries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one item and non-recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="tSQLt\Stored Procedures\Private_PrepareTableForFaking.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one item and recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple items and recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple items and non-recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for add-sell-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add 1-add 2-unpost add 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Functions\test fnRecalculateAverageCost for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnRecalculateAverageCost for average cost from FIFO.sql" />
+    <Build Include="testi21Database\Functions\test fnRecalculateAverageCost for average cost from LIFO.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries for reversing GL entries.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries from inventory transaction.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake data for unposting item costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for the accounting period.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for posted Inventory Receipt.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

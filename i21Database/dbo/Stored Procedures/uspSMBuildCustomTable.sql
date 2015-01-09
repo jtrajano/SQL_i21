@@ -55,8 +55,8 @@ BEGIN
 	FROM #tmpCustomFieldDetail
 	
 	SELECT @existingCount = COUNT(*) FROM sys.columns 
-	WHERE OBJECT_ID = ( SELECT OBJECT_ID FROM sys.tables 
-						WHERE NAME = @tableName) AND NAME = @fieldName
+	WHERE object_id = ( SELECT object_id FROM sys.tables 
+						WHERE name = @tableName) AND name = @fieldName
 	
 	IF (@existingCount = 0)
 		BEGIN

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test the fnGetItemCostingOnPostErrorss function for the basics]
+﻿CREATE PROCEDURE testi21Database.[test the fnGetItemCostingOnPostErrors function]
 AS 
 BEGIN
 	-- Arrange
@@ -43,18 +43,18 @@ BEGIN
 				,intLocationId = @Default_Location
 				,strText = FORMATMESSAGE(50027)
 				,intErrorCode = 50027
-		UNION ALL
-		SELECT	intItemId = @InvalidItem
-				,intLocationId = @Default_Location
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
+		--UNION ALL
+		--SELECT	intItemId = @InvalidItem
+		--		,intLocationId = @Default_Location
+		--		,strText = FORMATMESSAGE(50028)
+		--		,intErrorCode = 50028
 
 		-- 3: Valid item and invalid location
-		UNION ALL
-		SELECT	intItemId = @StickyGrains
-				,intLocationId = @InvalidLocation
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
+		--UNION ALL
+		--SELECT	intItemId = @StickyGrains
+		--		,intLocationId = @InvalidLocation
+		--		,strText = FORMATMESSAGE(50028)
+		--		,intErrorCode = 50028
 
 		-- 4: Invalid item and invalid location
 		UNION ALL		
@@ -62,11 +62,11 @@ BEGIN
 				,intLocationId = @InvalidLocation
 				,strText = FORMATMESSAGE(50027)
 				,intErrorCode = 50027
-		UNION ALL
-		SELECT	intItemId = @InvalidItem
-				,intLocationId = @InvalidLocation
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
+		--UNION ALL
+		--SELECT	intItemId = @InvalidItem
+		--		,intLocationId = @InvalidLocation
+		--		,strText = FORMATMESSAGE(50028)
+		--		,intErrorCode = 50028
 
 		-- 6: Negative stock is not allowed 
 		UNION ALL

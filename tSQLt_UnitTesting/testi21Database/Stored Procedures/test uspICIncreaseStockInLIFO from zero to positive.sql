@@ -60,6 +60,8 @@ BEGIN
 				,@QtyOffset AS NUMERIC(18,6)
 				,@NewLIFOId AS INT 
 				,@UpdatedLIFOId AS INT 
+				,@strRelatedTransactionId AS NVARCHAR(40)
+				,@intRelatedTransactionId AS INT 
 
 		-- Setup the expected values 
 		INSERT INTO expected (
@@ -117,6 +119,8 @@ BEGIN
 				,@QtyOffset OUTPUT 
 				,@NewLIFOId OUTPUT 
 				,@UpdatedLIFOId OUTPUT 
+				,@strRelatedTransactionId OUTPUT 
+				,@intRelatedTransactionId OUTPUT 
 
 			SET @dblQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)

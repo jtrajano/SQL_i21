@@ -2,10 +2,13 @@
 (
 	[intInventoryReceiptItemLotId] INT NOT NULL IDENTITY, 
     [intInventoryReceiptItemId] INT NOT NULL, 
-    [strParentLotId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intParentLotId] INT NULL, 
+    [intLotId] INT NULL, 
+	[strParentLotId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strLotId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strContainerNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
+	[intUnitMeasureId] INT NOT NULL, 
     [intUnits] INT NOT NULL DEFAULT ((0)), 
     [intUnitUOMId] INT NULL, 
     [intUnitPallet] INT NOT NULL DEFAULT ((0)), 
@@ -25,7 +28,9 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryReceiptItemLot] PRIMARY KEY ([intInventoryReceiptItemLotId]), 
-    CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
+    CONSTRAINT [FK_tblICInventoryReceiptItemLot_ParentLot] FOREIGN KEY ([intParentLotId]) REFERENCES [tblICLot]([intLotId])
 )
 
 GO
@@ -54,7 +59,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICInventoryReceiptItemLot',
     @level2type = N'COLUMN',
-    @level2name = N'strParentLotId'
+    @level2name = N'intParentLotId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Lot Id',
@@ -63,7 +68,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICInventoryReceiptItemLot',
     @level2type = N'COLUMN',
-    @level2name = N'strLotId'
+    @level2name = N'intLotId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Container Number',

@@ -24,6 +24,8 @@
     <IncludeCompositeObjects>True</IncludeCompositeObjects>
     <TargetDatabaseSet>True</TargetDatabaseSet>
     <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+    <AutoCreateStatistics>False</AutoCreateStatistics>
+    <AutoUpdateStatistics>False</AutoUpdateStatistics>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -86,6 +88,7 @@
     <None Include="Scripts\Pre-Deployment\8_AP\DropAPViews.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\FixPaymentWithoutVendorId.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\DropTriggers.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\Fix_References_to_Foreign_Keys.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -145,5 +148,8 @@
     <None Include="Scripts\Pre-Deployment\1_TM\5_1430_to_1440.sql">
       <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\Drop_References_to_RecapTableType.sql" />
   </ItemGroup>
 </Project>
