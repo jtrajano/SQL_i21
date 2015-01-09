@@ -62,6 +62,23 @@ BEGIN
 						LEFT JOIN dbo.tblGLAccountUnit AS E ON E.intAccountUnitId = B.intAccountUnitId')
 	END
 
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLSummary') 
+	BEGIN 
+		EXEC ('DROP VIEW vyuGLSummary');
+	END 
+
+	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'tblGLTempCOASegment')
+	BEGIN
+		EXEC ('CREATE VIEW [dbo].[vyuGLSummary]
+		AS
+		SELECT		A.dtmDate, A.dblDebit, A.dblCredit, A.dblDebitUnit, A.dblCreditUnit, A.strCode, B.strDescription, C.strAccountGroup, C.strAccountType, D.*, E.strUOMCode, E.dblLbsPerUnit            
+		FROM         dbo.tblGLSummary AS A 
+						INNER JOIN dbo.tblGLAccount AS B ON B.intAccountId = A.intAccountId 
+						INNER JOIN dbo.tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
+						LEFT JOIN dbo.tblGLTempCOASegment AS D ON D.intAccountId = B.intAccountId
+						LEFT JOIN dbo.tblGLAccountUnit AS E ON E.intAccountUnitId = B.intAccountUnitId')
+	END
+
 	
 	IF EXISTS (SELECT top 1 1  FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vyuGLAccountView') 
 	BEGIN 
