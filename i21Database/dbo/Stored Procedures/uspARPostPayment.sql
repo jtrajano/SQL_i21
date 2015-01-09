@@ -227,7 +227,7 @@ IF (ISNULL(@recap, 0) = 0)
 					#tmpARReceivablePostData P
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
-					(A.dblAmountPaid) <> (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
+					ROUND(A.dblAmountPaid,2) <> ROUND((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId),2)
 
 				--ALREADY POSTED
 				INSERT INTO
@@ -783,7 +783,7 @@ BEGIN
 					tblARInvoice.ysnPaid = 0,
 					tblARInvoice.dtmPostDate = NULL,	
 					tblARInvoice.dblDiscount = 0,
-					tblARInvoice.dblPayment = 0
+					tblARInvoice.dblPayment = ISNULL(C.dblPayment,0) - (B.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END) ) 
 					
 			FROM tblARPayment A
 						INNER JOIN tblARPaymentDetail B 
@@ -900,7 +900,7 @@ BEGIN
 														intInvoiceId = B.intInvoiceId
 														AND intPaymentId = A.intPaymentId																											
 												)
-					,dblPayment = (A.dblAmountPaid * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END) ) + ISNULL(C.dblPayment,0) 
+					,dblPayment = (B.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END) ) + ISNULL(C.dblPayment,0) 
 			FROM tblARPayment A
 						INNER JOIN tblARPaymentDetail B 
 								ON A.intPaymentId = B.intPaymentId
