@@ -372,7 +372,7 @@
                                         "labelWidth": 110,
                                         "layout|flex": 1,
                                         "tabIndex": 1,
-                                        "valueField": "intUnitMeasureId"
+                                        "valueField": "intItemUOMId"
                                     },
                                     "name": "MyComboBox23",
                                     "configAlternates": {

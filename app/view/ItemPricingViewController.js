@@ -101,13 +101,12 @@ Ext.define('Inventory.view.ItemPricingViewController', {
 
     createRecord: function(config, action) {
         var me = this;
-        var today = new Date();
         var record = Ext.create('Inventory.model.ItemPricing');
         record.set('intItemId', me.intItemId);
         record.set('ysnActive', true);
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
-        record.set('dtmBeginDate', today);
+        record.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
         action(record);
     },
 

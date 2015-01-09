@@ -239,7 +239,7 @@ Ext.define('Inventory.view.ItemPricing', {
                                     fieldLabel: 'UOM',
                                     labelWidth: 110,
                                     displayField: 'strUnitMeasure',
-                                    valueField: 'intUnitMeasureId'
+                                    valueField: 'intItemUOMId'
                                 },
                                 {
                                     xtype: 'textfield',

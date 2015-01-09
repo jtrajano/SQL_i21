@@ -51,5 +51,18 @@ Ext.define('i21.controller.Inventory', {
 
     roundDecimalFormat: function(number, precision) {
         return parseFloat(Math.round(number * 100) / 100).toFixed(precision);
+    },
+
+    getTodayDate: function() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth()+1; //January is 0!
+        var yyyy = today.getFullYear();
+
+        mm = mm - 1;
+
+        today = new Date(yyyy, mm, dd, 1, 0, 0, 0);
+
+        return today;
     }
 });

@@ -937,7 +937,7 @@ Ext.define('Inventory.view.ItemViewController', {
             }
         }
 
-        var colSpecialPricingDiscountedPrice = grdSpecialPricing.columns[9];
+        var colSpecialPricingDiscountedPrice = grdSpecialPricing.columns[8];
         if (colSpecialPricingDiscountedPrice) {
             colSpecialPricingDiscountedPrice.renderer = function (value, metadata, record) {
                 if (record.get('strDiscountBy') === 'Percent') {
@@ -1766,11 +1766,10 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intLocationId', records[0].get('intCompanyLocationId'));
-            var today = new Date();
-            current.set('dtmBeginDate', today);
+            current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
-            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('intUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
         }
     },
@@ -1794,12 +1793,10 @@ Ext.define('Inventory.view.ItemViewController', {
                     current.set('dblUnitAfterDiscount', record.get('dblSalePrice'));
                 }
             }
-
-            var today = new Date();
-            current.set('dtmBeginDate', today);
+            current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
         }
         else if (combo.column.itemId === 'colSpecialPricingUnit') {
-            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('intUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
         }
     },
