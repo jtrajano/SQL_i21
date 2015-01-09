@@ -14,7 +14,8 @@
     [strPaymentInfo]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strNotes]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPosted]          BIT             CONSTRAINT [DF_tblARPayment_ysnPosted] DEFAULT ((0)) NOT NULL,
-    [intConcurrencyId]   INT             CONSTRAINT [DF_tblARPayment_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+	[intEntityId]		 INT			 NULL DEFAULT ((0)),
+    [intConcurrencyId]   INT             CONSTRAINT [DF_tblARPayment_intConcurrencyId] DEFAULT ((0)) NOT NULL,    
     CONSTRAINT [PK_tblARPayment] PRIMARY KEY CLUSTERED ([intPaymentId] ASC),
     CONSTRAINT [FK_tblARPayment_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intCustomerId])
 );

@@ -3,7 +3,7 @@
     [intCustomerId]            INT          NULL,
     [intContactId]             INT          NULL,
     [intEntityLocationId]      INT          NULL,
-    [strUserType]              NVARCHAR (5) NULL,
+    [strUserType]              NVARCHAR (5) COLLATE Latin1_General_CI_AS NULL,
     [ysnPortalAccess]          BIT          NOT NULL,
     [intConcurrencyId]         INT          CONSTRAINT [DF__tblEntity__intCo__578A682E] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblEntity2Contact] PRIMARY KEY CLUSTERED ([intARCustomerToContactId] ASC),

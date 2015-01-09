@@ -125,5 +125,11 @@ SELECT
 	,[strBankTransactionTypeName]	= 'Bank Stmt Import'
 	,[intConcurrencyId]				= 1			
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 17)
+UNION ALL 
+SELECT 
+	[intBankTransactionTypeId]		= 18
+	,[strBankTransactionTypeName]	= 'AR Payment'
+	,[intConcurrencyId]				= 1			
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 18)
 
 print('/*******************  END Populate Bank Transaction Types *******************/')

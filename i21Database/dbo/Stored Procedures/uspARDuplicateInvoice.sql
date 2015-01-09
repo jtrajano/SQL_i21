@@ -65,9 +65,9 @@ BEGIN
 		,dblShipping
 		,dblTax
 		,dblInvoiceTotal
-		,dblDiscount
-		,dblAmountDue
-		,dblPayment
+		,0
+		,dblInvoiceTotal
+		,0
 		,strTransactionType
 		,intPaymentMethodId
 		,strComments
@@ -108,6 +108,9 @@ BEGIN
 		,dblPrice
 		,dblTotal
 		,intAccountId
+		,intCOGSAccountId
+		,intSalesAccountId
+		,intInventoryAccountId
 		,intConcurrencyId)
 	SELECT
 		@NewId
@@ -120,6 +123,9 @@ BEGIN
 		,dblPrice
 		,dblTotal
 		,intAccountId
+		,intCOGSAccountId
+		,intSalesAccountId
+		,intInventoryAccountId
 		,0
 	FROM
 		tblARInvoiceDetail
