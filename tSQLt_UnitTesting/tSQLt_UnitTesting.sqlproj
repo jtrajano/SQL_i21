@@ -605,6 +605,9 @@
     <Build Include="testi21Database\Functions\test fnGetGLAccountFromCompanyLocation for the basics.sql" />
     <Build Include="testi21Database\Functions\Fake data company location.sql" />
     <Build Include="testi21Database\Functions\test fnGetGLAccountFromCompanyLocation for retrieving the gl accounts.sql" />
+    <Build Include="testi21Database\Stored Procedures\test insert on tblICItemStock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

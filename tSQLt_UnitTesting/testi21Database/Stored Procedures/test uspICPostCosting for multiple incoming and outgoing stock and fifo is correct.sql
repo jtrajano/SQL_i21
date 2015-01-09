@@ -265,9 +265,6 @@ BEGIN
 		WHERE	intItemId = @WetGrains
 				AND intLocationId = @Default_Location
 	END 
-
-	select * from expected
-	select * from actual 
 	
 	-- Assert
 	BEGIN 

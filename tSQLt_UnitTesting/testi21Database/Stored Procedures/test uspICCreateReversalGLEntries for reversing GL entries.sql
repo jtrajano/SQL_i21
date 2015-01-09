@@ -284,8 +284,6 @@ BEGIN
 		DROP COLUMN dtmDateEntered
 	END 
 	
-	SELECT * FROM actual
-
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
