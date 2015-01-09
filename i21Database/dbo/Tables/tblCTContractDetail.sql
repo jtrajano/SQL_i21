@@ -28,7 +28,7 @@ CREATE TABLE [dbo].[tblCTContractDetail](
 	[intBillTo] [int] NULL,
 	[intFreightRateId] [int] NULL,
 	[strFobBasis] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[intGrade] [int] NOT NULL,
+	[intGrade] [int] NULL,
 	[strRemark] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
  [dblOriginalQty] NUMERIC(12, 4) NULL, 
     [dblBalance] NUMERIC(12, 4) NULL, 
