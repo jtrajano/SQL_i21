@@ -423,7 +423,6 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colDetailUnitMeasure',
                                                         minWidth: 100,
                                                         dataIndex: 'intUnitMeasureId',
-                                                        locked: true,
                                                         text: 'Unit',
                                                         flex: 1.3,
                                                         editor: {
