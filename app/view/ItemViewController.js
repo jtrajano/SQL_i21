@@ -392,17 +392,21 @@ Ext.define('Inventory.view.ItemViewController', {
             //-----------//
             grdPricing: {
                 colPricingLocation: 'strLocationName',
+                colPricingUOM: 'strUnitMeasure',
+                colPricingUPC: 'strUPC',
+                colPricingLastCost: 'dblLastCost',
+                colPricingStandardCost: 'dblStandardCost',
+                colPricingAverageCost: 'dblMovingAverageCost',
+                colPricingEOMCost: 'dblEndMonthCost',
+                colPricingMethod: 'strPricingMethod',
+                colPricingAmount: 'dblAmountPercent',
                 colPricingSalePrice: 'dblSalePrice',
                 colPricingRetailPrice: 'dblRetailPrice',
                 colPricingWholesalePrice: 'dblWholesalePrice',
                 colPricingLargeVolumePrice: 'dblLargeVolumePrice',
                 colPricingMSRP: 'dblMSRPPrice',
-                colPricingMethod: 'strPricingMethod',
-                colPricingLastCost: 'dblLastCost',
-                colPricingStandardCost: 'dblStandardCost',
-                colPricingAverageCost: 'dblMovingAverageCost',
-                colPricingEOMCost: 'dblEndMonthCost',
-                colPricingActive: 'ysnActive'
+                colPricingBeginDate: 'dtmBeginDate',
+                colPricingEndDate: 'dtmEndDate'
             },
 
             grdPricingLevel: {
@@ -432,6 +436,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
+                colPricingLevelUPC: 'strUPC',
                 colPricingLevelUnits: 'dblUnit',
                 colPricingLevelMin: 'dblMin',
                 colPricingLevelMax: 'dblMax',
@@ -450,7 +455,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPricingLevelCommissionRate: 'dblCommissionRate',
                 colPricingLevelAmount: '',
                 colPricingLevelUnitPrice: 'dblUnitPrice',
-                colPricingLevelActive: 'ysnActive'
+                colPricingLevelBeginDate: 'dtmBeginDate',
+                colPricingLevelEndDate: 'dtmEndDate'
             },
 
             grdSpecialPricing: {
@@ -466,8 +472,6 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{promotionTypes}'
                     }
                 },
-                colSpecialPricingBeginDate: 'dtmBeginDate',
-                colSpecialPricingEndDate: 'dtmEndDate',
                 colSpecialPricingUnit: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
@@ -478,6 +482,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
+                colSpecialPricingUPC: 'strUPC',
                 colSpecialPricingQty: 'dblUnit',
                 colSpecialPricingDiscountBy: {
                     dataIndex: 'strDiscountBy',
@@ -487,6 +492,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colSpecialPricingDiscountRate: 'dblDiscount',
                 colSpecialPricingUnitPrice: 'dblUnitAfterDiscount',
+                colSpecialPricingBeginDate: 'dtmBeginDate',
+                colSpecialPricingEndDate: 'dtmEndDate',
                 colSpecialPricingAccumQty: 'dblAccumulatedQty',
                 colSpecialPricingAccumAmount: 'dblAccumulatedAmount'
             },
@@ -1759,9 +1766,12 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intLocationId', records[0].get('intCompanyLocationId'));
+            var today = new Date();
+            current.set('dtmBeginDate', today);
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('strUPC', records[0].get('strUpcCode'));
         }
     },
 
@@ -1784,9 +1794,13 @@ Ext.define('Inventory.view.ItemViewController', {
                     current.set('dblUnitAfterDiscount', record.get('dblSalePrice'));
                 }
             }
+
+            var today = new Date();
+            current.set('dtmBeginDate', today);
         }
         else if (combo.column.itemId === 'colSpecialPricingUnit') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('strUPC', records[0].get('strUpcCode'));
         }
     },
 

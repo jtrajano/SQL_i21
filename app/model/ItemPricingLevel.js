@@ -49,14 +49,22 @@ Ext.define('Inventory.model.ItemPricingLevel', {
         { name: 'strCommissionOn', type: 'string'},
         { name: 'dblCommissionRate', type: 'float'},
         { name: 'dblUnitPrice', type: 'float'},
-        { name: 'ysnActive', type: 'boolean'},
+        { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
+        { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intSort', type: 'int'},
 
         { name: 'strLocationName', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strUPC', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'strLocationName'}
+        {type: 'presence', field: 'strLocationName'},
+        {type: 'presence', field: 'strPriceLevel'},
+        {type: 'presence', field: 'strUnitMeasure'},
+        {type: 'presence', field: 'dblUnit'},
+        {type: 'presence', field: 'strPricingMethod'},
+        {type: 'presence', field: 'dblUnitPrice'},
+        {type: 'presence', field: 'dtmBeginDate'}
     ]
 });

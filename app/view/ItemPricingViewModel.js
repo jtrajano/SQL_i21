@@ -18,6 +18,7 @@ Ext.define('Inventory.view.ItemPricingViewModel', {
     alias: 'viewmodel.icitempricing',
 
     requires: [
+        'Inventory.store.BufferedItemUnitMeasure',
         'i21.store.CompanyLocationBuffered'
     ],
 
@@ -45,6 +46,9 @@ Ext.define('Inventory.view.ItemPricingViewModel', {
         },
         Location: {
             type: 'companylocationbuffered'
+        },
+        itemUOM: {
+            type: 'icbuffereditemunitmeasure'
         }
     },
 

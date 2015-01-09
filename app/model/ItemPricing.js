@@ -40,6 +40,7 @@ Ext.define('Inventory.model.ItemPricing', {
             }
         },
         { name: 'intLocationId', type: 'int', allowNull: true },
+        { name: 'intItemUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblRetailPrice', type: 'float'},
         { name: 'dblWholesalePrice', type: 'float'},
         { name: 'dblLargeVolumePrice', type: 'float'},
@@ -51,13 +52,21 @@ Ext.define('Inventory.model.ItemPricing', {
         { name: 'dblStandardCost', type: 'float'},
         { name: 'dblMovingAverageCost', type: 'float'},
         { name: 'dblEndMonthCost', type: 'float'},
-        { name: 'ysnActive', type: 'boolean'},
+        { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
+        { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intSort', type: 'int'},
 
-        { name: 'strLocationName', type: 'string'}
+        { name: 'strLocationName', type: 'string'},
+        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strUPC', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'intLocationId'}
+        {type: 'presence', field: 'intLocationId'},
+        {type: 'presence', field: 'intItemUnitMeasureId'},
+        {type: 'presence', field: 'dblStandardCost'},
+        {type: 'presence', field: 'strPricingMethod'},
+        {type: 'presence', field: 'dblRetailPrice'},
+        {type: 'presence', field: 'dtmBeginDate'}
     ]
 });

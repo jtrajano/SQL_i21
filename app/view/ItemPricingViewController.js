@@ -23,6 +23,15 @@ Ext.define('Inventory.view.ItemPricingViewController', {
                 value: '{current.intLocationId}',
                 store: '{Location}'
             },
+            cboUnitMeasure: {
+                value: '{current.intItemUnitMeasureId}',
+                store: '{itemUOM}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}'
+                }]
+            },
+            txtUPC: '{current.strUPC}',
             txtSalePrice: '{current.dblSalePrice}',
             txtRetailPrice: '{current.dblRetailPrice}',
             txtWholesalePrice: '{current.dblWholesalePrice}',
@@ -41,7 +50,8 @@ Ext.define('Inventory.view.ItemPricingViewController', {
             txtStandardCost: '{current.dblStandardCost}',
             txtAverageCost: '{current.dblMovingAverageCost}',
             txtEndofMonthCost: '{current.dblEndMonthCost}',
-            chkActive: '{current.ysnActive}'
+            dtpBeginDate: '{current.dtmBeginDate}',
+            dtpEndDate: '{current.dtmEndDate}'
         }
     },
 
@@ -91,11 +101,30 @@ Ext.define('Inventory.view.ItemPricingViewController', {
 
     createRecord: function(config, action) {
         var me = this;
+        var today = new Date();
         var record = Ext.create('Inventory.model.ItemPricing');
         record.set('intItemId', me.intItemId);
         record.set('ysnActive', true);
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
+        record.set('dtmBeginDate', today);
         action(record);
+    },
+
+    onUOMSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        current.set('strUPC', records[0].get('strUpcCode'));
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboUnitMeasure": {
+                select: this.onUOMSelect
+            }
+        })
     }
 });

@@ -41,22 +41,29 @@ Ext.define('Inventory.model.ItemSpecialPricing', {
         },
         { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'strPromotionType', type: 'string'},
-        { name: 'dtmBeginDate', type: 'date'},
-        { name: 'dtmEndDate', type: 'date'},
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblUnit', type: 'float'},
         { name: 'strDiscountBy', type: 'string'},
         { name: 'dblDiscount', type: 'float'},
         { name: 'dblUnitAfterDiscount', type: 'float'},
+        { name: 'dtmBeginDate', type: 'date'},
+        { name: 'dtmEndDate', type: 'date'},
         { name: 'dblAccumulatedQty', type: 'float'},
         { name: 'dblAccumulatedAmount', type: 'float'},
         { name: 'intSort', type: 'int'},
 
         { name: 'strLocationName', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strUPC', type: 'string'}
     ],
 
     validators: [
-        {type: 'presence', field: 'strLocationName'}
+        {type: 'presence', field: 'strLocationName'},
+        {type: 'presence', field: 'strPromotionType'},
+        {type: 'presence', field: 'strUnitMeasure'},
+        {type: 'presence', field: 'dblUnit'},
+        {type: 'presence', field: 'dblDiscount'},
+        {type: 'presence', field: 'dblUnitAfterDiscount'},
+        {type: 'presence', field: 'dtmBeginDate'}
     ]
 });

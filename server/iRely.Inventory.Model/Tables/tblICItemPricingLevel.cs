@@ -23,7 +23,8 @@ namespace iRely.Inventory.Model
         public string strCommissionOn { get; set; }
         public decimal? dblCommissionRate { get; set; }
         public decimal? dblUnitPrice { get; set; }
-        public bool ysnActive { get; set; }
+        public DateTime? dtmBeginDate { get; set; }
+        public DateTime? dtmEndDate { get; set; }
         public int intSort { get; set; }
 
         private string _location;
@@ -52,8 +53,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_unitmeasure))
-                    if (tblICUnitMeasure != null)
-                        return tblICUnitMeasure.strUnitMeasure;
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUnitMeasure;
                     else
                         return null;
                 else
@@ -64,9 +65,28 @@ namespace iRely.Inventory.Model
                 _unitmeasure = value;
             }
         }
+        private string _upc;
+        [NotMapped]
+        public string strUPC
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_upc))
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUpcCode;
+                    else
+                        return null;
+                else
+                    return _upc;
+            }
+            set
+            {
+                _upc = value;
+            }
+        }
 
         public tblICItem tblICItem { get; set; }
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
-        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICItemUOM tblICItemUOM { get; set; }
     }
 }

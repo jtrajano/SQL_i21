@@ -10,19 +10,19 @@
         "defaultFocus": null,
         "designer|userAlias": "icitempricing",
         "designer|userClassName": "ItemPricing",
-        "height": 466,
+        "height": 386,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maxHeight": null,
         "maximizable": true,
-        "minHeight": 315,
-        "minWidth": null,
+        "minHeight": 386,
+        "minWidth": 594,
         "minimizable": null,
         "reference": null,
         "title": "Item Pricing",
-        "width": 437
+        "width": 594
     },
     "designerId": "54062c27-ee12-42e6-8f66-e9a370fe94ab",
     "viewControllerInstanceId": "653f4b76-74f7-4a94-9435-07ec95e1dd59",
@@ -282,6 +282,7 @@
                                 "store": [
                                     "{Location}"
                                 ],
+                                "tabIndex": 0,
                                 "valueField": "intCompanyLocationId"
                             },
                             "name": "MyComboBox64",
@@ -299,80 +300,236 @@
                             ]
                         },
                         {
-                            "type": "Ext.form.field.Number",
+                            "type": "Ext.container.Container",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "designer|createAlias": "moneynumber",
-                                "fieldLabel": "Standard Cost",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtStandardCost",
-                                "labelWidth": 110,
-                                "layout|flex": null
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "margin": "0 0 5 0"
                             },
-                            "name": "MyNumberField49",
-                            "designerId": "da85e908-4dbe-460a-9736-911b711029b3"
+                            "name": "MyContainer27",
+                            "designerId": "835d8387-6322-45d2-88a8-7477fa963714",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.ComboBox",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "columns": [
+                                            "[",
+                                            "    {",
+                                            "        dataIndex: 'intUnitMeasureId',",
+                                            "        dataType: 'numeric',",
+                                            "        text: 'Unit Of Measure ID',",
+                                            "        hidden: true",
+                                            "    },",
+                                            "    {",
+                                            "        dataIndex: 'strUnitMeasure',",
+                                            "        dataType: 'string',",
+                                            "        text: 'Unit Measure',",
+                                            "        flex: 1",
+                                            "    },",
+                                            "    {",
+                                            "        dataIndex: 'strUnitType',",
+                                            "        dataType: 'string',",
+                                            "        text: 'Unit Type',",
+                                            "        flex: 1",
+                                            "    },",
+                                            "    {",
+                                            "        dataIndex: 'ysnDefault',",
+                                            "        dataType: 'boolean',",
+                                            "        text: 'Default',",
+                                            "        flex: 1",
+                                            "    },",
+                                            "    {",
+                                            "        dataIndex: 'intDecimalCalculation',",
+                                            "        dataType: 'numeric',",
+                                            "        text: 'Decimal Places for Calculation',",
+                                            "        hidden: true",
+                                            "    },",
+                                            "    {",
+                                            "        dataIndex: 'intDecimalDisplay',",
+                                            "        dataType: 'numeric',",
+                                            "        text: 'Decimal Places for Display',",
+                                            "        hidden: true",
+                                            "    }",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strUnitMeasure",
+                                        "fieldLabel": "UOM",
+                                        "itemId": "cboUnitMeasure",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "tabIndex": 1,
+                                        "valueField": "intUnitMeasureId"
+                                    },
+                                    "name": "MyComboBox23",
+                                    "configAlternates": {
+                                        "columns": "array"
+                                    },
+                                    "designerId": "e2572cad-9dc2-4846-ba16-eb0ac83bb52e",
+                                    "customConfigs": [
+                                        {
+                                            "group": "(Custom Properties)",
+                                            "name": "columns",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.form.field.Text",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "UPC",
+                                        "itemId": "txtUPC",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "margin": "0 0 0 5",
+                                        "readOnly": true,
+                                        "tabIndex": 2
+                                    },
+                                    "name": "MyTextField8",
+                                    "designerId": "dd642abe-8c51-414e-a914-4b87ed7e6dde"
+                                }
+                            ]
                         },
                         {
-                            "type": "Ext.form.field.Number",
+                            "type": "Ext.container.Container",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "designer|createAlias": "moneynumber",
-                                "fieldLabel": "Average Cost",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtAverageCost",
-                                "labelWidth": 110,
-                                "layout|flex": null
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "margin": "0 0 5 0"
                             },
-                            "name": "MyNumberField50",
-                            "designerId": "9c7aa544-87b2-4f8e-950a-b9c7f291d7f5"
+                            "name": "MyContainer10",
+                            "designerId": "f044f529-3448-4d20-8523-c0a8b82812f4",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "moneynumber",
+                                        "fieldLabel": "Last Cost",
+                                        "fieldStyle": "text-align:right",
+                                        "hideTrigger": true,
+                                        "itemId": "txtLastCost",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "tabIndex": 3
+                                    },
+                                    "name": "MyNumberField48",
+                                    "designerId": "968f3f82-abdf-4bc9-9d5b-24627a7c1c8e"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "moneynumber",
+                                        "fieldLabel": "Standard Cost",
+                                        "fieldStyle": "text-align:right",
+                                        "hideTrigger": true,
+                                        "itemId": "txtStandardCost",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "margin": "0 0 0 5",
+                                        "tabIndex": 4
+                                    },
+                                    "name": "MyNumberField49",
+                                    "designerId": "da85e908-4dbe-460a-9736-911b711029b3"
+                                }
+                            ]
                         },
                         {
-                            "type": "Ext.form.field.Number",
+                            "type": "Ext.container.Container",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "designer|createAlias": "moneynumber",
-                                "fieldLabel": "Last Cost",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtLastCost",
-                                "labelWidth": 110,
-                                "layout|flex": null
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "margin": "0 0 5 0"
                             },
-                            "name": "MyNumberField48",
-                            "designerId": "968f3f82-abdf-4bc9-9d5b-24627a7c1c8e"
-                        },
-                        {
-                            "type": "Ext.form.field.Number",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|createAlias": "moneynumber",
-                                "fieldLabel": "End of Month Cost",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtEndofMonthCost",
-                                "labelWidth": 110,
-                                "layout|flex": null
-                            },
-                            "name": "MyNumberField51",
-                            "designerId": "65129da8-fe40-45a9-b634-58915ede5a85"
+                            "name": "MyContainer11",
+                            "designerId": "3c75afd9-45a5-4956-9e5a-cf26799beecf",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "moneynumber",
+                                        "fieldLabel": "Moving Avg Cost",
+                                        "fieldStyle": "text-align:right",
+                                        "hideTrigger": true,
+                                        "itemId": "txtAverageCost",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "margin": "",
+                                        "tabIndex": 5
+                                    },
+                                    "name": "MyNumberField50",
+                                    "designerId": "9c7aa544-87b2-4f8e-950a-b9c7f291d7f5"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "moneynumber",
+                                        "fieldLabel": "End of Month Cost",
+                                        "fieldStyle": "text-align:right",
+                                        "hideTrigger": true,
+                                        "itemId": "txtEndofMonthCost",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "margin": "0 0 0 5",
+                                        "tabIndex": 6
+                                    },
+                                    "name": "MyNumberField51",
+                                    "designerId": "65129da8-fe40-45a9-b634-58915ede5a85"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.container.Container",
@@ -408,6 +565,7 @@
                                         "store": [
                                             "{PricingMethods}"
                                         ],
+                                        "tabIndex": 7,
                                         "valueField": "strDescription"
                                     },
                                     "name": "MyComboBox65",
@@ -430,9 +588,10 @@
                                         "fieldStyle": null,
                                         "hideTrigger": true,
                                         "itemId": "txtAmountPercent",
-                                        "labelWidth": 50,
-                                        "layout|flex": null,
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
                                         "margin": "0 0 0 5",
+                                        "tabIndex": 8,
                                         "width": 115
                                     },
                                     "name": "MyNumberField13",
@@ -441,116 +600,234 @@
                             ]
                         },
                         {
-                            "type": "Ext.form.field.Number",
+                            "type": "Ext.container.Container",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "designer|createAlias": "moneynumber",
-                                "fieldLabel": "Sale Price",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtSalePrice",
-                                "labelWidth": 110,
-                                "layout|flex": null
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "margin": "0 0 5 0"
                             },
-                            "name": "MyNumberField43",
-                            "designerId": "887aa2b4-9b87-46bf-9231-4f1bcfaec4ab"
+                            "name": "MyContainer30",
+                            "designerId": "04dc5f68-d6c4-4032-8e9c-d9168a003216",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "moneynumber",
+                                        "fieldLabel": "Sale Price",
+                                        "fieldStyle": "text-align:right",
+                                        "hideTrigger": true,
+                                        "itemId": "txtSalePrice",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "tabIndex": 9
+                                    },
+                                    "name": "MyNumberField43",
+                                    "designerId": "887aa2b4-9b87-46bf-9231-4f1bcfaec4ab"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "moneynumber",
+                                        "fieldLabel": "Retail Price",
+                                        "fieldStyle": "text-align:right",
+                                        "hideTrigger": true,
+                                        "itemId": "txtRetailPrice",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "margin": "0 0 0 5",
+                                        "tabIndex": 10
+                                    },
+                                    "name": "MyNumberField44",
+                                    "designerId": "bf066783-a6e9-4703-aab2-50678d949c4c"
+                                }
+                            ]
                         },
                         {
-                            "type": "Ext.form.field.Number",
+                            "type": "Ext.container.Container",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "designer|createAlias": "moneynumber",
-                                "fieldLabel": "Retail Price",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtRetailPrice",
-                                "labelWidth": 110,
-                                "layout|flex": null
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "margin": "0 0 5 0"
                             },
-                            "name": "MyNumberField44",
-                            "designerId": "bf066783-a6e9-4703-aab2-50678d949c4c"
+                            "name": "MyContainer31",
+                            "designerId": "43f04396-58f0-412e-84c3-b96b4db3af41",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "moneynumber",
+                                        "fieldLabel": "Wholesale Price",
+                                        "fieldStyle": "text-align:right",
+                                        "hideTrigger": true,
+                                        "itemId": "txtWholesalePrice",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "tabIndex": 11
+                                    },
+                                    "name": "MyNumberField45",
+                                    "designerId": "76f0714f-fcbc-442f-a075-7cc3adb0a9ac"
+                                },
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "moneynumber",
+                                        "fieldLabel": "Large Volume Price",
+                                        "fieldStyle": "text-align:right",
+                                        "hideTrigger": true,
+                                        "itemId": "txtLargeVolumePrice",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "margin": "0 0 0 5",
+                                        "tabIndex": 12
+                                    },
+                                    "name": "MyNumberField46",
+                                    "designerId": "35aa5c9e-32e0-4966-993a-4ed186303e8b"
+                                }
+                            ]
                         },
                         {
-                            "type": "Ext.form.field.Number",
+                            "type": "Ext.container.Container",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "designer|createAlias": "moneynumber",
-                                "fieldLabel": "Wholesale Price",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtWholesalePrice",
-                                "labelWidth": 110,
-                                "layout|flex": null
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "margin": "0 0 5 0"
                             },
-                            "name": "MyNumberField45",
-                            "designerId": "76f0714f-fcbc-442f-a075-7cc3adb0a9ac"
+                            "name": "MyContainer32",
+                            "designerId": "94d88199-e52c-497c-b277-f7d7d199780a",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Number",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "moneynumber",
+                                        "fieldLabel": "MSRP",
+                                        "fieldStyle": "text-align:right",
+                                        "hideTrigger": true,
+                                        "itemId": "txtMsrp",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "tabIndex": 13
+                                    },
+                                    "name": "MyNumberField47",
+                                    "designerId": "a662b97c-8638-443d-b1e8-3b7ffd88cf0c"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "layout|flex": 1,
+                                        "margin": "0 0 0 5"
+                                    },
+                                    "name": "MyContainer34",
+                                    "designerId": "81d89f01-d6b8-4684-b019-b6318d94cfc2"
+                                }
+                            ]
                         },
                         {
-                            "type": "Ext.form.field.Number",
+                            "type": "Ext.container.Container",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "designer|createAlias": "moneynumber",
-                                "fieldLabel": "Large Volume Price",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtLargeVolumePrice",
-                                "labelWidth": 110,
-                                "layout|flex": null
+                                "container|align": "stretch",
+                                "designer|displayName": "container",
+                                "layout": "hbox",
+                                "layout|flex": null,
+                                "layout|margins": null,
+                                "margin": "0 0 5 0"
                             },
-                            "name": "MyNumberField46",
-                            "designerId": "35aa5c9e-32e0-4966-993a-4ed186303e8b"
-                        },
-                        {
-                            "type": "Ext.form.field.Number",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|createAlias": "moneynumber",
-                                "fieldLabel": "MSRP",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtMsrp",
-                                "labelWidth": 110,
-                                "layout|flex": null
-                            },
-                            "name": "MyNumberField47",
-                            "designerId": "a662b97c-8638-443d-b1e8-3b7ffd88cf0c"
-                        },
-                        {
-                            "type": "Ext.form.field.Checkbox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "boxLabel": null,
-                                "fieldLabel": "Active",
-                                "itemId": "chkActive",
-                                "labelWidth": 110,
-                                "layout|flex": 1
-                            },
-                            "name": "MyCheckbox43",
-                            "designerId": "9ddb9802-6c5b-42f7-82cf-6994b6331357"
+                            "name": "MyContainer33",
+                            "designerId": "2191571b-22bd-4892-bee8-d9265fbfc46e",
+                            "cn": [
+                                {
+                                    "type": "Ext.form.field.Date",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "Begin Date",
+                                        "itemId": "dtpBeginDate",
+                                        "labelWidth": 110,
+                                        "layout|flex": 1,
+                                        "tabIndex": 14
+                                    },
+                                    "name": "MyDateField3",
+                                    "designerId": "02579e82-dde7-4732-90e2-db3a3113a3ab"
+                                },
+                                {
+                                    "type": "Ext.form.field.Date",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "fieldLabel": "End Date",
+                                        "itemId": "dtpEndDate",
+                                        "layout|flex": 1,
+                                        "margin": "0 0 0 5",
+                                        "tabIndex": 15
+                                    },
+                                    "name": "MyDateField4",
+                                    "designerId": "117415d4-7b3c-4eb5-a790-433ebc83c739"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -570,7 +847,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging116",
+                    "name": "statusbarpaging15",
                     "designerId": "ee98d62c-330d-4829-b90b-22407d93d85f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

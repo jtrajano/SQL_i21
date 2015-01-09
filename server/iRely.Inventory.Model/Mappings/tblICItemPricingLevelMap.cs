@@ -17,6 +17,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblMin).HasColumnName("dblMin");
             this.Property(t => t.dblUnit).HasColumnName("dblUnit");
             this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice");
+            this.Property(t => t.dtmBeginDate).HasColumnName("dtmBeginDate");
+            this.Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemPricingLevelId).HasColumnName("intItemPricingLevelId");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
@@ -25,12 +27,11 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCommissionOn).HasColumnName("strCommissionOn");
             this.Property(t => t.strPriceLevel).HasColumnName("strPriceLevel");
             this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
-            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
 
             this.HasOptional(p => p.tblSMCompanyLocation)
                 .WithMany(p => p.tblICItemPricingLevels)
                 .HasForeignKey(p => p.intLocationId);
-            this.HasOptional(p => p.tblICUnitMeasure)
+            this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICItemPricingLevels)
                 .HasForeignKey(p => p.intUnitMeasureId);
         }

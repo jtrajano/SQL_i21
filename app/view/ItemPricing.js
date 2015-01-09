@@ -24,14 +24,15 @@ Ext.define('Inventory.view.ItemPricing', {
         'Ext.toolbar.Separator',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Number',
-        'Ext.form.field.Checkbox',
+        'Ext.form.field.Date',
         'Ext.toolbar.Paging'
     ],
 
-    height: 466,
+    height: 386,
     hidden: false,
-    minHeight: 315,
-    width: 437,
+    minHeight: 386,
+    minWidth: 594,
+    width: 594,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -174,6 +175,7 @@ Ext.define('Inventory.view.ItemPricing', {
                                     flex: 1
                                 }
                             ],
+                            tabIndex: 0,
                             itemId: 'cboLocation',
                             fieldLabel: 'Location',
                             labelWidth: 110,
@@ -184,36 +186,135 @@ Ext.define('Inventory.view.ItemPricing', {
                             }
                         },
                         {
-                            xtype: 'moneynumber',
-                            itemId: 'txtStandardCost',
-                            fieldLabel: 'Standard Cost',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
+                            xtype: 'container',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'gridcombobox',
+                                    flex: 1,
+                                    columns: [
+                                        {
+                                            dataIndex: 'intUnitMeasureId',
+                                            dataType: 'numeric',
+                                            text: 'Unit Of Measure ID',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strUnitMeasure',
+                                            dataType: 'string',
+                                            text: 'Unit Measure',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strUnitType',
+                                            dataType: 'string',
+                                            text: 'Unit Type',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'ysnDefault',
+                                            dataType: 'boolean',
+                                            text: 'Default',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'intDecimalCalculation',
+                                            dataType: 'numeric',
+                                            text: 'Decimal Places for Calculation',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'intDecimalDisplay',
+                                            dataType: 'numeric',
+                                            text: 'Decimal Places for Display',
+                                            hidden: true
+                                        }
+                                    ],
+                                    tabIndex: 1,
+                                    itemId: 'cboUnitMeasure',
+                                    fieldLabel: 'UOM',
+                                    labelWidth: 110,
+                                    displayField: 'strUnitMeasure',
+                                    valueField: 'intUnitMeasureId'
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    flex: 1,
+                                    tabIndex: 2,
+                                    itemId: 'txtUPC',
+                                    margin: '0 0 0 5',
+                                    fieldLabel: 'UPC',
+                                    labelWidth: 110,
+                                    readOnly: true
+                                }
+                            ]
                         },
                         {
-                            xtype: 'moneynumber',
-                            itemId: 'txtAverageCost',
-                            fieldLabel: 'Average Cost',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
+                            xtype: 'container',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 3,
+                                    itemId: 'txtLastCost',
+                                    fieldLabel: 'Last Cost',
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
+                                },
+                                {
+                                    xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 4,
+                                    itemId: 'txtStandardCost',
+                                    margin: '0 0 0 5',
+                                    fieldLabel: 'Standard Cost',
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
+                                }
+                            ]
                         },
                         {
-                            xtype: 'moneynumber',
-                            itemId: 'txtLastCost',
-                            fieldLabel: 'Last Cost',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'moneynumber',
-                            itemId: 'txtEndofMonthCost',
-                            fieldLabel: 'End of Month Cost',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
+                            xtype: 'container',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 5,
+                                    itemId: 'txtAverageCost',
+                                    margin: '',
+                                    fieldLabel: 'Moving Avg Cost',
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
+                                },
+                                {
+                                    xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 6,
+                                    itemId: 'txtEndofMonthCost',
+                                    margin: '0 0 0 5',
+                                    fieldLabel: 'End of Month Cost',
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
+                                }
+                            ]
                         },
                         {
                             xtype: 'container',
@@ -226,6 +327,7 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'combobox',
                                     flex: 1,
+                                    tabIndex: 7,
                                     itemId: 'cboPricingMethod',
                                     fieldLabel: 'Pricing Method',
                                     labelWidth: 110,
@@ -237,61 +339,129 @@ Ext.define('Inventory.view.ItemPricing', {
                                 },
                                 {
                                     xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 8,
                                     itemId: 'txtAmountPercent',
                                     margin: '0 0 0 5',
                                     width: 115,
                                     fieldLabel: 'Amount',
-                                    labelWidth: 50,
+                                    labelWidth: 110,
                                     hideTrigger: true
                                 }
                             ]
                         },
                         {
-                            xtype: 'moneynumber',
-                            itemId: 'txtSalePrice',
-                            fieldLabel: 'Sale Price',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
+                            xtype: 'container',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 9,
+                                    itemId: 'txtSalePrice',
+                                    fieldLabel: 'Sale Price',
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
+                                },
+                                {
+                                    xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 10,
+                                    itemId: 'txtRetailPrice',
+                                    margin: '0 0 0 5',
+                                    fieldLabel: 'Retail Price',
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
+                                }
+                            ]
                         },
                         {
-                            xtype: 'moneynumber',
-                            itemId: 'txtRetailPrice',
-                            fieldLabel: 'Retail Price',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
+                            xtype: 'container',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 11,
+                                    itemId: 'txtWholesalePrice',
+                                    fieldLabel: 'Wholesale Price',
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
+                                },
+                                {
+                                    xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 12,
+                                    itemId: 'txtLargeVolumePrice',
+                                    margin: '0 0 0 5',
+                                    fieldLabel: 'Large Volume Price',
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
+                                }
+                            ]
                         },
                         {
-                            xtype: 'moneynumber',
-                            itemId: 'txtWholesalePrice',
-                            fieldLabel: 'Wholesale Price',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
+                            xtype: 'container',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'moneynumber',
+                                    flex: 1,
+                                    tabIndex: 13,
+                                    itemId: 'txtMsrp',
+                                    fieldLabel: 'MSRP',
+                                    labelWidth: 110,
+                                    fieldStyle: 'text-align:right',
+                                    hideTrigger: true
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 1,
+                                    margin: '0 0 0 5'
+                                }
+                            ]
                         },
                         {
-                            xtype: 'moneynumber',
-                            itemId: 'txtLargeVolumePrice',
-                            fieldLabel: 'Large Volume Price',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'moneynumber',
-                            itemId: 'txtMsrp',
-                            fieldLabel: 'MSRP',
-                            labelWidth: 110,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            flex: 1,
-                            itemId: 'chkActive',
-                            fieldLabel: 'Active',
-                            labelWidth: 110
+                            xtype: 'container',
+                            margin: '0 0 5 0',
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'datefield',
+                                    flex: 1,
+                                    tabIndex: 14,
+                                    itemId: 'dtpBeginDate',
+                                    fieldLabel: 'Begin Date',
+                                    labelWidth: 110
+                                },
+                                {
+                                    xtype: 'datefield',
+                                    flex: 1,
+                                    tabIndex: 15,
+                                    itemId: 'dtpEndDate',
+                                    margin: '0 0 0 5',
+                                    fieldLabel: 'End Date'
+                                }
+                            ]
                         }
                     ]
                 }

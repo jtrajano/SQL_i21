@@ -84,5 +84,8 @@ namespace iRely.Inventory.Model
 
         public tblICItem tblICItem { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
+        public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
+        public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
     }
 }

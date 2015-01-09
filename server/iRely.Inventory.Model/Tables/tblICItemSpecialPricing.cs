@@ -52,8 +52,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_unitmeasure))
-                    if (tblICUnitMeasure != null)
-                        return tblICUnitMeasure.strUnitMeasure;
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUnitMeasure;
                     else
                         return null;
                 else
@@ -64,9 +64,28 @@ namespace iRely.Inventory.Model
                 _unitmeasure = value;
             }
         }
+        private string _upc;
+        [NotMapped]
+        public string strUPC
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_upc))
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUpcCode;
+                    else
+                        return null;
+                else
+                    return _upc;
+            }
+            set
+            {
+                _upc = value;
+            }
+        }
 
         public tblICItem tblICItem { get; set; }
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
-        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICItemUOM tblICItemUOM { get; set; }
     }
 }

@@ -3017,11 +3017,72 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Location'
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colPricingUOM',
+                                                        width: 116,
+                                                        dataIndex: 'string',
+                                                        text: 'UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colPricingUPC',
+                                                        width: 116,
+                                                        dataIndex: 'string',
+                                                        text: 'UPC'
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
-                                                        itemId: 'colPricingSalePrice',
+                                                        itemId: 'colPricingLastCost',
                                                         width: 80,
                                                         align: 'right',
                                                         dataIndex: 'string',
+                                                        text: 'Last Cost'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colPricingStandardCost',
+                                                        width: 95,
+                                                        align: 'right',
+                                                        dataIndex: 'string',
+                                                        text: 'Standard Cost'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colPricingAverageCost',
+                                                        width: 90,
+                                                        align: 'right',
+                                                        dataIndex: 'string',
+                                                        text: 'Avarage Cost'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colPricingEOMCost',
+                                                        width: 85,
+                                                        align: 'right',
+                                                        dataIndex: 'string',
+                                                        text: 'EOM Cost'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colPricingMethod',
+                                                        width: 85,
+                                                        dataIndex: 'string',
+                                                        text: 'Pricing Method'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colPricingAmount',
+                                                        width: 80,
+                                                        align: 'right',
+                                                        dataIndex: 'string',
+                                                        text: 'Amount'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataIndex: 'string',
+                                                        itemId: 'colPricingSalePrice',
+                                                        width: 80,
+                                                        align: 'right',
                                                         text: 'Sale Price'
                                                     },
                                                     {
@@ -3035,7 +3096,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colPricingWholesalePrice',
-                                                        width: 90,
+                                                        width: 100,
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Wholesale Price'
@@ -3043,7 +3104,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colPricingLargeVolumePrice',
-                                                        width: 110,
+                                                        width: 115,
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Large Volume Price'
@@ -3057,49 +3118,18 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'MSRP'
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colPricingMethod',
-                                                        width: 85,
-                                                        dataIndex: 'string',
-                                                        text: 'Pricing Method'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colPricingLastCost',
+                                                        xtype: 'datecolumn',
+                                                        itemId: 'colPricingBeginDate',
                                                         width: 80,
-                                                        align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'Last Cost'
+                                                        text: 'Begin Date'
                                                     },
                                                     {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colPricingStandardCost',
-                                                        width: 85,
-                                                        align: 'right',
+                                                        xtype: 'datecolumn',
+                                                        itemId: 'colPricingEndDate',
+                                                        width: 80,
                                                         dataIndex: 'string',
-                                                        text: 'Standard Cost'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colPricingAverageCost',
-                                                        width: 85,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Avarage Cost'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colPricingEOMCost',
-                                                        width: 85,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'End of Month Cost'
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'colPricingActive',
-                                                        width: 52,
-                                                        text: 'Active'
+                                                        text: 'End Date'
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -3156,7 +3186,6 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'colPricingLevelLocation',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Location',
-                                                                        flex: 1,
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -3189,7 +3218,6 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'colPricingLevelPriceLevel',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Price Level',
-                                                                        flex: 1,
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -3264,11 +3292,18 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        dataIndex: 'strFieldName',
+                                                                        itemId: 'colPricingLevelUPC',
+                                                                        width: 50,
+                                                                        text: 'UPC'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colPricingLevelUnits',
                                                                         width: 50,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Units',
+                                                                        text: 'Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -3347,7 +3382,6 @@ Ext.define('Inventory.view.Item', {
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Amount',
-                                                                        flex: 1,
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -3360,7 +3394,6 @@ Ext.define('Inventory.view.Item', {
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Unit Price',
-                                                                        flex: 1,
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -3368,12 +3401,25 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'checkcolumn',
-                                                                        itemId: 'colPricingLevelActive',
-                                                                        width: 52,
-                                                                        text: 'Active',
+                                                                        xtype: 'datecolumn',
+                                                                        dataIndex: 'strFieldName',
+                                                                        itemId: 'colPricingLevelBeginDate',
+                                                                        text: 'Begin Date',
                                                                         editor: {
-                                                                            xtype: 'checkboxfield'
+                                                                            xtype: 'datefield',
+                                                                            fieldStyle: 'text-align:right',
+                                                                            hideTrigger: true
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'datecolumn',
+                                                                        itemId: 'colPricingLevelEndDate',
+                                                                        dataIndex: 'strFieldName',
+                                                                        text: 'End Date',
+                                                                        editor: {
+                                                                            xtype: 'datefield',
+                                                                            fieldStyle: 'text-align:right',
+                                                                            hideTrigger: true
                                                                         }
                                                                     }
                                                                 ],
@@ -3476,29 +3522,11 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'datecolumn',
-                                                                        itemId: 'colSpecialPricingBeginDate',
-                                                                        width: 80,
-                                                                        text: 'Begin Date',
-                                                                        editor: {
-                                                                            xtype: 'datefield'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'datecolumn',
-                                                                        itemId: 'colSpecialPricingEndDate',
-                                                                        width: 80,
-                                                                        text: 'End Date',
-                                                                        editor: {
-                                                                            xtype: 'datefield'
-                                                                        }
-                                                                    },
-                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colSpecialPricingUnit',
-                                                                        width: 53,
+                                                                        width: 80,
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Unit',
+                                                                        text: 'UOM',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -3537,6 +3565,13 @@ Ext.define('Inventory.view.Item', {
                                                                             displayField: 'strUnitMeasure',
                                                                             valueField: 'strUnitMeasure'
                                                                         }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'strFieldName',
+                                                                        itemId: 'colSpecialPricingUPC',
+                                                                        width: 80,
+                                                                        text: 'UPC'
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
@@ -3597,6 +3632,24 @@ Ext.define('Inventory.view.Item', {
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Discounted Price'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'datecolumn',
+                                                                        itemId: 'colSpecialPricingBeginDate',
+                                                                        width: 80,
+                                                                        text: 'Begin Date',
+                                                                        editor: {
+                                                                            xtype: 'datefield'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'datecolumn',
+                                                                        itemId: 'colSpecialPricingEndDate',
+                                                                        width: 80,
+                                                                        text: 'End Date',
+                                                                        editor: {
+                                                                            xtype: 'datefield'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',

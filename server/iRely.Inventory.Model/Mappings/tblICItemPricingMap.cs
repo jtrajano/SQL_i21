@@ -12,6 +12,7 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemPricing");
+            this.Property(t => t.dblAmountPercent).HasColumnName("dblAmountPercent");
             this.Property(t => t.dblEndMonthCost).HasColumnName("dblEndMonthCost");
             this.Property(t => t.dblLargeVolumePrice).HasColumnName("dblLargeVolumePrice");
             this.Property(t => t.dblLastCost).HasColumnName("dblLastCost");
@@ -19,19 +20,23 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblMSRPPrice).HasColumnName("dblMSRPPrice");
             this.Property(t => t.dblRetailPrice).HasColumnName("dblRetailPrice");
             this.Property(t => t.dblSalePrice).HasColumnName("dblSalePrice");
-            this.Property(t => t.dblAmountPercent).HasColumnName("dblAmountPercent");
             this.Property(t => t.dblStandardCost).HasColumnName("dblStandardCost");
             this.Property(t => t.dblWholesalePrice).HasColumnName("dblWholesalePrice");
+            this.Property(t => t.dtmBeginDate).HasColumnName("dtmBeginDate");
+            this.Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemPricingId).HasColumnName("intItemPricingId");
+            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
-            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
 
             this.HasOptional(p => p.tblSMCompanyLocation)
                 .WithMany(p => p.tblICItemPricings)
                 .HasForeignKey(p => p.intLocationId);
+            this.HasOptional(p => p.tblICItemUOM)
+                .WithMany(p => p.tblICItemPricings)
+                .HasForeignKey(p => p.intItemUnitMeasureId);
         }
     }
 }
