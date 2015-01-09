@@ -61,11 +61,7 @@ RETURN (
 																			ON CategoryLevel.intAccountId = CategoryLevel.intAccountId
 																		FULL JOIN (
 																			-- Get the base account at the Company Location level
-																			SELECT	TOP 1
-																					intAccountId
-																			FROM	tblSMCompanyLocationAccount
-																			WHERE	intCompanyLocationId = @intLocationId
-																					AND tblSMCompanyLocationAccount.strAccountDescription = @strAccountDescription 			
+																			SELECT	intAccountId = dbo.fnGetGLAccountFromCompanyLocation (@intLocationId, @strAccountDescription)
 																		) AS CompanyLocationLevel
 																			ON CompanyLocationLevel.intAccountId = CompanyLocationLevel.intAccountId
 

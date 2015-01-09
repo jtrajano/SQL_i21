@@ -48,19 +48,40 @@ BEGIN
 	INSERT INTO tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@BetterHaven, 'BETTER HAVEN', 100)
 
 	-- G/L Accounts for DEFAULT LOCATION
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, 'Inventory', 1000);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, 'Cost of Goods', 2000);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, 'Purchase Account', 3000);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, 'Inventory', 1000);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, 'Cost of Goods', 2000);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, 'AP Account', 3000);
+
+	UPDATE	tblSMCompanyLocation 
+	SET		intInventory = 1000
+			,intCostofGoodsSold = 2000
+			,intAPAccount = 3000
+	FROM	tblSMCompanyLocation 
+	WHERE	intCompanyLocationId = @Default_Location
 
 	-- G/L Accounts for NEW HAVEN
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, 'Inventory', 1001);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, 'Cost of Goods', 2001);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, 'Purchase Account', 3001);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, 'Inventory', 1001);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, 'Cost of Goods', 2001);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, 'AP Account', 3001);
+
+	UPDATE	tblSMCompanyLocation 
+	SET		intInventory = 1001
+			,intCostofGoodsSold = 2001
+			,intAPAccount = 3001
+	FROM	tblSMCompanyLocation 
+	WHERE	intCompanyLocationId = @NewHaven
 
 	-- G/L Accounts for BETTER HAVEN
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, 'Inventory', 1002);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, 'Cost of Goods', 2002);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, 'Purchase Account', 3002);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, 'Inventory', 1002);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, 'Cost of Goods', 2002);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, 'AP Account', 3002);
+
+	UPDATE	tblSMCompanyLocation 
+	SET		intInventory = 1002
+			,intCostofGoodsSold = 2002
+			,intAPAccount = 3002
+	FROM	tblSMCompanyLocation 
+	WHERE	intCompanyLocationId = @BetterHaven
 
 	-- Category
 	INSERT INTO tblICCategory (intCategoryId, strDescription, intCostingMethod) VALUES (@HotItems, 'Hot Items', @FIFO);
@@ -70,7 +91,7 @@ BEGIN
 	-- Add G/L setup for Hot items
 	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 1001, 'Inventory')
 	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 2001, 'Cost of Goods')
-	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 3001, 'Purchase Account')
+	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 3001, 'AP Account')
 
 	-- Add G/L setup for Cold items
 	-- No category-level g/l account overrides for Cold items. Use default g/l account from Location. 
@@ -127,17 +148,17 @@ BEGIN
 	-- Add the G/L accounts for WET GRAINS
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, 'Inventory', 1000);
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, 'Cost of Goods', 2000);
-	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, 'Purchase Account', 3000);
+	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, 'AP Account', 3000);
 
 	-- Add the G/L accounts for STICKY GRAINS
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, 'Inventory', 1001);
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, 'Cost of Goods', 2001);
-	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, 'Purchase Account', 3001);
+	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, 'AP Account', 3001);
 
 	-- Add the G/L accounts for PREMIUM GRAINS 
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, 'Inventory', 1002);
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, 'Cost of Goods', 2002);
-	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, 'Purchase Account', 3002);
+	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, 'AP Account', 3002);
 
 	-- Add the G/L accounts for COLD GRAINS 
 	-- No item level g/l account overrides for cold grains. Use g/l from category

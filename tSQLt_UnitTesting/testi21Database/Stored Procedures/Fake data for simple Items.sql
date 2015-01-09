@@ -52,19 +52,40 @@ BEGIN
 	INSERT INTO tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (3, 'BETTER HAVEN', 100)
 
 	-- G/L Accounts for Company Location 1 ('')
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (1, 'Inventory', 1000);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (1, 'Cost of Goods', 2000);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (1, 'Purchase Account', 3000);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (1, 'Inventory', 1000);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (1, 'Cost of Goods', 2000);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (1, 'AP Account', 3000);
+
+	UPDATE	tblSMCompanyLocation 
+	SET		intInventory = 1000
+			,intCostofGoodsSold = 2000
+			,intAPAccount = 3000
+	FROM	tblSMCompanyLocation 
+	WHERE	intCompanyLocationId = 1
 
 	-- G/L Accounts for Company Location 2 ('NEW HAVEN')
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (2, 'Inventory', 1001);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (2, 'Cost of Goods', 2001);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (2, 'Purchase Account', 3001);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (2, 'Inventory', 1001);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (2, 'Cost of Goods', 2001);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (2, 'AP Account', 3001);
+
+	UPDATE	tblSMCompanyLocation 
+	SET		intInventory = 1001
+			,intCostofGoodsSold = 2001
+			,intAPAccount = 3001
+	FROM	tblSMCompanyLocation 
+	WHERE	intCompanyLocationId = 2
 
 	-- G/L Accounts for Company Location 3 ('BETTER HAVEN')
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Inventory', 1002);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Cost of Goods', 2002);
-	INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Purchase Account', 3002);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Inventory', 1002);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'Cost of Goods', 2002);
+	--INSERT INTO tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (3, 'AP Account', 3002);
+
+	UPDATE	tblSMCompanyLocation 
+	SET		intInventory = 1002
+			,intCostofGoodsSold = 2002
+			,intAPAccount = 3002
+	FROM	tblSMCompanyLocation 
+	WHERE	intCompanyLocationId = 3
 
 	-- Category
 	INSERT INTO tblICCategory (intCategoryId, strDescription) VALUES (@HotItems, 'Hot Items');
@@ -74,7 +95,7 @@ BEGIN
 	-- Add G/L setup for Hot items
 	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 1001, 'Inventory')
 	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 2001, 'Cost of Goods')
-	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 3001, 'Purchase Account')
+	INSERT INTO tblICCategoryAccount (intCategoryId, intAccountId, strAccountDescription) VALUES (@HotItems, 3001, 'AP Account')
 
 	-- Add G/L setup for Cold items
 	-- No category-level g/l account overrides for Cold items. Use default g/l account from Location. 
@@ -131,17 +152,17 @@ BEGIN
 	-- Add the G/L accounts for WET GRAINS
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, 'Inventory', 1000);
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, 'Cost of Goods', 2000);
-	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, 'Purchase Account', 3000);
+	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, 'AP Account', 3000);
 
 	-- Add the G/L accounts for STICKY GRAINS
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, 'Inventory', 1001);
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, 'Cost of Goods', 2001);
-	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, 'Purchase Account', 3001);
+	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, 'AP Account', 3001);
 
 	-- Add the G/L accounts for PREMIUM GRAINS 
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, 'Inventory', 1002);
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, 'Cost of Goods', 2002);
-	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, 'Purchase Account', 3002);
+	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, 'AP Account', 3002);
 
 	-- Add the G/L accounts for COLD GRAINS 
 	-- No item level g/l account overrides for cold grains. Use g/l from category

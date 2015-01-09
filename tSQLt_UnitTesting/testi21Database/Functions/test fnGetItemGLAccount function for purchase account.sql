@@ -47,7 +47,7 @@ BEGIN
 			,[AutoNegative]
 		)
 		SELECT	[Inventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'Inventory')
-				,[ContraInventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'Purchase Account')
+				,[ContraInventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'AP Account')
 				,[RevalueSold] = NULL 
 				,[WriteOffSold] = NULL 
 				,[AutoNegative] = NULL 	

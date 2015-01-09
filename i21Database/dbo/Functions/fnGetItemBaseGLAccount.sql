@@ -35,16 +35,12 @@ BEGIN
 						AND ItemLocation.intLocationId = @intLocationId
 						AND CategoryAccounts.strAccountDescription = @strAccountDescription 			
 			) AS CategoryLevel
-				ON CategoryLevel.intAccountId = CategoryLevel.intAccountId
+				ON 1 = 1
 			FULL JOIN (
 				-- Get the base account at the Company Location level
-				SELECT	TOP 1
-						intAccountId
-				FROM	tblSMCompanyLocationAccount
-				WHERE	intCompanyLocationId = @intLocationId
-						AND tblSMCompanyLocationAccount.strAccountDescription = @strAccountDescription 			
+				SELECT	intAccountId = dbo.fnGetGLAccountFromCompanyLocation (@intLocationId, @strAccountDescription)
 			) AS CompanyLocationLevel
-				ON CompanyLocationLevel.intAccountId = CompanyLocationLevel.intAccountId
+				ON 1 = 1
 	
 	RETURN @intGLAccountId
 END

@@ -94,28 +94,58 @@ BEGIN
 	-- Fake data for Company-Location-Account
 	BEGIN 
 		-- G/L Accounts for Company Location 1 ('Default')
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_Inventory, @Inventory_Default);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_CostOfGoods, @CostOfGoods_Default);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_APClearing, @APClearing_Default);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_WriteOffSold, @WriteOffSold_Default);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_RevalueSold, @RevalueSold_Default);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_AutoNegative, @AutoNegative_Default);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_Inventory, @Inventory_Default);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_CostOfGoods, @CostOfGoods_Default);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_APClearing, @APClearing_Default);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_WriteOffSold, @WriteOffSold_Default);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_RevalueSold, @RevalueSold_Default);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_AutoNegative, @AutoNegative_Default);
+
+		UPDATE	tblSMCompanyLocation 
+		SET		intInventory = @Inventory_Default
+				,intCostofGoodsSold = @CostOfGoods_Default
+				,intAPClearing = @APClearing_Default
+				,intWriteOffSold = @WriteOffSold_Default
+				,intRevalueSold = @RevalueSold_Default
+				,intAutoNegativeSold = @AutoNegative_Default
+		FROM	tblSMCompanyLocation 
+		WHERE	intCompanyLocationId = @Default_Location
 
 		-- G/L Accounts for Company Location 2 ('NEW HAVEN')
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_Inventory, @Inventory_NewHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_CostOfGoods, @CostOfGoods_NewHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_APClearing, @APClearing_NewHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_WriteOffSold, @WriteOffSold_NewHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_RevalueSold, @RevalueSold_NewHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_AutoNegative, @AutoNegative_NewHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_Inventory, @Inventory_NewHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_CostOfGoods, @CostOfGoods_NewHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_APClearing, @APClearing_NewHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_WriteOffSold, @WriteOffSold_NewHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_RevalueSold, @RevalueSold_NewHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_AutoNegative, @AutoNegative_NewHaven);
+
+		UPDATE	tblSMCompanyLocation 
+		SET		intInventory = @Inventory_NewHaven
+				,intCostofGoodsSold = @CostOfGoods_NewHaven
+				,intAPClearing = @APClearing_NewHaven
+				,intWriteOffSold = @WriteOffSold_NewHaven
+				,intRevalueSold = @RevalueSold_NewHaven
+				,intAutoNegativeSold = @AutoNegative_NewHaven
+		FROM	tblSMCompanyLocation 
+		WHERE	intCompanyLocationId = @NewHaven
 
 		-- G/L Accounts for Company Location 3 ('BETTER HAVEN')
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_Inventory, @Inventory_BetterHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_CostOfGoods, @CostOfGoods_BetterHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_APClearing, @APClearing_BetterHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_WriteOffSold, @WriteOffSold_BetterHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_RevalueSold, @RevalueSold_BetterHaven);
-		INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_AutoNegative, @AutoNegative_BetterHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_Inventory, @Inventory_BetterHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_CostOfGoods, @CostOfGoods_BetterHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_APClearing, @APClearing_BetterHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_WriteOffSold, @WriteOffSold_BetterHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_RevalueSold, @RevalueSold_BetterHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_AutoNegative, @AutoNegative_BetterHaven);
+
+		UPDATE	tblSMCompanyLocation 
+		SET		intInventory = @Inventory_BetterHaven
+				,intCostofGoodsSold = @CostOfGoods_BetterHaven
+				,intAPClearing = @APClearing_BetterHaven
+				,intWriteOffSold = @WriteOffSold_BetterHaven
+				,intRevalueSold = @RevalueSold_BetterHaven
+				,intAutoNegativeSold = @AutoNegative_BetterHaven
+		FROM	tblSMCompanyLocation 
+		WHERE	intCompanyLocationId = @BetterHaven
 	END
 
 	-- Fake data for Category

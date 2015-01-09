@@ -9,7 +9,7 @@ BEGIN
 		-- GL Account types used in inventory costing
 		DECLARE @InventoryDescription AS NVARCHAR(50) = 'Inventory';
 		DECLARE @CostOfGoodsDescription AS NVARCHAR(50) = 'Cost of Goods';
-		DECLARE @PurchasesDescription AS NVARCHAR(50) = 'Purchase Account';
+		DECLARE @PurchasesDescription AS NVARCHAR(50) = 'AP Account';
 				
 		-- Generate the fake data. 
 		EXEC testi21Database.[Fake data for simple Items]

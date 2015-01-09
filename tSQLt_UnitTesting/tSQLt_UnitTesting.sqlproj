@@ -602,6 +602,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for posted Inventory Receipt.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnGetGLAccountFromCompanyLocation for the basics.sql" />
+    <Build Include="testi21Database\Functions\Fake data company location.sql" />
+    <Build Include="testi21Database\Functions\test fnGetGLAccountFromCompanyLocation for retrieving the gl accounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

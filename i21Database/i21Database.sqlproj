@@ -995,6 +995,7 @@
     <Build Include="dbo\Tables\tblSCTicketSplit.sql" />
     <Build Include="dbo\Tables\tblCTDiscount.sql" />
     <Build Include="dbo\Views\vyuCTEntity.sql" />
+    <Build Include="dbo\Functions\fnGetGLAccountFromCompanyLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
