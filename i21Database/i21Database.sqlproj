@@ -996,6 +996,7 @@
     <Build Include="dbo\Tables\tblCTDiscount.sql" />
     <Build Include="dbo\Views\vyuCTEntity.sql" />
     <Build Include="dbo\Functions\fnGetGLAccountFromCompanyLocation.sql" />
+    <Build Include="dbo\Tables\tblCTContractType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

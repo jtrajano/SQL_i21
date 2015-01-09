@@ -181,3 +181,28 @@ BEGIN
 	SELECT 3,'Contract',1	
 END
 GO
+
+--tblCTDiscount
+GO
+IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'Purchase')
+BEGIN
+	INSERT INTO tblCTContractType
+	SELECT 1,'Purchase',1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'Sell')
+BEGIN
+	INSERT INTO tblCTContractType
+	SELECT 2,'Sell',1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'DP')
+BEGIN
+	INSERT INTO tblCTContractType
+	SELECT 3,'DP',1	
+END
+GO
