@@ -534,7 +534,7 @@ BEGIN
       ,[agloc_addr] =   
        (CASE WHEN LEN(RTRIM(LTRIM(CL.[strAddress]))) > 30  
         THEN SUBSTRING(RTRIM(LTRIM(CL.[strAddress])), 0, 29)  
-        ELSE LEN(RTRIM(LTRIM(CL.[strAddress])))  
+        ELSE RTRIM(LTRIM(CL.[strAddress]))  
        END)      
       ,[agloc_addr2] =   
        (CASE WHEN LEN(RTRIM(LTRIM(CL.[strAddress]))) > 30  
