@@ -1221,7 +1221,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(false);
-                pgeUPC.tab.setHidden(false);
+//                pgeUPC.tab.setHidden(false);
                 pgeContract.tab.setHidden(true);
                 break;
             case 'Bundle':
@@ -1240,7 +1240,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(true);
-                pgeUPC.tab.setHidden(false);
+//                pgeUPC.tab.setHidden(false);
                 pgeContract.tab.setHidden(true);
                 break;
             case 'Inventory Item':
@@ -1267,7 +1267,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(true);
-                pgeUPC.tab.setHidden(false);
+//                pgeUPC.tab.setHidden(false);
                 pgeContract.tab.setHidden(true);
                 break;
             case 'Kit':
@@ -1286,7 +1286,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(true);
-                pgeUPC.tab.setHidden(false);
+//                pgeUPC.tab.setHidden(false);
                 pgeContract.tab.setHidden(true);
                 break;
             case 'Manufacturing Item':
@@ -1313,7 +1313,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(false);
-                pgeUPC.tab.setHidden(true);
+//                pgeUPC.tab.setHidden(true);
                 pgeContract.tab.setHidden(true);
                 break;
 
@@ -1333,7 +1333,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
-                pgeUPC.tab.setHidden(true);
+//                pgeUPC.tab.setHidden(true);
                 pgeContract.tab.setHidden(true);
                 break;
             case 'Other Charge':
@@ -1352,7 +1352,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
-                pgeUPC.tab.setHidden(true);
+//                pgeUPC.tab.setHidden(true);
                 pgeContract.tab.setHidden(true);
                 break;
             case 'Service':
@@ -1371,7 +1371,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
-                pgeUPC.tab.setHidden(true);
+//                pgeUPC.tab.setHidden(true);
                 pgeContract.tab.setHidden(true);
                 break;
             case 'Commodity':
@@ -1397,7 +1397,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
-                pgeUPC.tab.setHidden(true);
+//                pgeUPC.tab.setHidden(true);
                 pgeContract.tab.setHidden(true);
                 break;
 
@@ -1424,7 +1424,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(false);
-                pgeUPC.tab.setHidden(true);
+//                pgeUPC.tab.setHidden(true);
                 pgeContract.tab.setHidden(true);
                 break;
 
