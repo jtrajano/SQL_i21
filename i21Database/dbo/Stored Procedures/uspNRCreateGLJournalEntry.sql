@@ -1,8 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspNRCreateGLJournalEntry]
-@NoteId Int,
+@intNoteId Int,
 @TransactionTypeId Int,
 @NoteTransId Int,
-@EntityId Int
+@EntityId Int,
+@PayExtra Bit = 0,
+@ExtraPayment numeric(18,6) = 0,
+@LateCharge numeric(18,6) = 0,
+@UseAdjustmentAcc nvarchar(50) = ''
 AS
 BEGIN
 	
@@ -20,6 +24,7 @@ BEGIN
 			,@strNoteNumber nvarchar(50)	
 			,@dblFee numeric(18,6)	
 			,@dblTransAmt numeric(18,6)
+			,@strReference nvarchar(max)
 			--,@strJournalType nvarchar(50)
 			--,@EntityId Int
 	
@@ -41,7 +46,7 @@ BEGIN
 			, @strNoteNumber = N.strNoteNumber	
 	FROM dbo.tblNRNote N
 	JOIN dbo.tblNRNoteDescription D ON D.intDescriptionId = N.intDescriptionId 
-	WHERE N.intNoteId = @NoteId  
+	WHERE N.intNoteId = @intNoteId  
 	
 	-- Get Note Transaction user Id, trans amount
 	SELECT @intUserId = intLastModifiedUserId, @dblTransAmt = dblTransAmount FROM dbo.tblNRNoteTransaction WHERE intNoteTransId = @NoteTransId                
@@ -70,7 +75,7 @@ BEGIN
            ,GETDATE() ------------dtmDateEntered
            ,@intUserId --------------intUserId
            ,@EntityId ------------intEntityId
-           ,@NoteId --------------strSourceId
+           ,@intNoteId --------------strSourceId
            ,'Notes Receivable' ---strJournalType
            ,NULL  ----------------strRecurringStatus
            ,'NR' -----------------strSourceType
@@ -80,135 +85,311 @@ BEGIN
 	
 	--Insert into detail table
 	
-	IF @TransactionTypeId = 2
-	BEGIN
-		IF @strNoteType = 'Scheduled Invoice'
-		BEGIN
-			
-			--Credit entry
+	IF @strNoteType = 'Scheduled Invoice'
+	BEGIN		
+-- Scheduled Invoice Credit entry	
+		IF @TransactionTypeId = 2
+		BEGIN		
 			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-			
-			INSERT INTO [dbo].[tblGLJournalDetail]
-				   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
-			 VALUES
-				   (1 ---------------------------------------intLineNo
-				   ,@intJournalId ---------------------------intJournalId
-				   ,GETDATE() -------------------------------dtmDate
-				   ,@intCreditAccountId ---------------------intAccountId
-				   ,0 ---------------------------------------dblDebit
-				   ,0 ---------------------------------------dblDebitRate
-				   ,@dblTransAmt ----------------------------dblCredit
-				   ,0 ---------------------------------------dblCreditRate
-				   ,0 ---------------------------------------dblDebitUnit
-				   ,0 ---------------------------------------dblCreditUnit
-				   ,@strDetailDesc --------------------------strDescription
-				   ,1 ---------------------------------------intConcurrencyId
-				   ,0 ---------------------------------------dblUnitsInLBS
-				   ,@strNoteNumber --------------------------strDocument
-				   ,'' --------------------------------------strComments
-				   ,'Scheduled Invoice' ---------------------strReference
-				   ,0 ---------------------------------------dblDebitUnitsInLBS
-				   ,NULL ------------------------------------strCorrecting
-				   ,NULL ------------------------------------strSourcePgm
-				   ,NULL ------------------------------------strCheckBookNo
-				   ,NULL ------------------------------------strWorkArea
-				   )
-		           
-			-- Debit Entry		           
-			SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
-			
-			INSERT INTO [dbo].[tblGLJournalDetail]
-				   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
-			 VALUES
-				   (2 ---------------------------------------intLineNo
-				   ,@intJournalId ---------------------------intJournalId
-				   ,GETDATE() -------------------------------dtmDate
-				   ,@intDebitAccountId ----------------------intAccountId
-				   ,@dblTransAmt ----------------------------dblDebit
-				   ,0 ---------------------------------------dblDebitRate
-				   ,0 ---------------------------------------dblCredit
-				   ,0 ---------------------------------------dblCreditRate
-				   ,0 ---------------------------------------dblDebitUnit
-				   ,0 ---------------------------------------dblCreditUnit
-				   ,@strDetailDesc --------------------------strDescription
-				   ,1 ---------------------------------------intConcurrencyId
-				   ,0 ---------------------------------------dblUnitsInLBS
-				   ,@strNoteNumber --------------------------strDocument
-				   ,'' --------------------------------------strComments
-				   ,'Scheduled Invoice' ---------------------strReference
-				   ,0 ---------------------------------------dblDebitUnitsInLBS
-				   ,NULL ------------------------------------strCorrecting
-				   ,NULL ------------------------------------strSourcePgm
-				   ,NULL ------------------------------------strCheckBookNo
-				   ,NULL ------------------------------------strWorkArea
-				   )
-				   
-		End
-		
-		IF @dblFee > 0
-		BEGIN
-		--Credit Entry
-			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
-			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-			
-			INSERT INTO [dbo].[tblGLJournalDetail]
-				   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
-			 VALUES
-				   (1 ---------------------------------------intLineNo
-				   ,@intJournalId ---------------------------intJournalId
-				   ,GETDATE() -------------------------------dtmDate
-				   ,@intCreditAccountId ---------------------intAccountId
-				   ,0 ---------------------------------------dblDebit
-				   ,0 ---------------------------------------dblDebitRate
-				   ,@dblTransAmt ----------------------------dblCredit
-				   ,0 ---------------------------------------dblCreditRate
-				   ,0 ---------------------------------------dblDebitUnit
-				   ,0 ---------------------------------------dblCreditUnit
-				   ,@strDetailDesc --------------------------strDescription
-				   ,1 ---------------------------------------intConcurrencyId
-				   ,0 ---------------------------------------dblUnitsInLBS
-				   ,@strNoteNumber --------------------------strDocument
-				   ,'' --------------------------------------strComments
-				   ,'Fee for NR' ----------------------------strReference
-				   ,0 ---------------------------------------dblDebitUnitsInLBS
-				   ,NULL ------------------------------------strCorrecting
-				   ,NULL ------------------------------------strSourcePgm
-				   ,NULL ------------------------------------strCheckBookNo
-				   ,NULL ------------------------------------strWorkArea
-				   )
-		 -- Debit Entry         
-			SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
-			
-			INSERT INTO [dbo].[tblGLJournalDetail]
-				   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
-			 VALUES
-				   (2 ---------------------------------------intLineNo
-				   ,@intJournalId ---------------------------intJournalId
-				   ,GETDATE() -------------------------------dtmDate
-				   ,@intDebitAccountId ----------------------intAccountId
-				   ,@dblTransAmt ----------------------------dblDebit
-				   ,0 ---------------------------------------dblDebitRate
-				   ,0 ---------------------------------------dblCredit
-				   ,0 ---------------------------------------dblCreditRate
-				   ,0 ---------------------------------------dblDebitUnit
-				   ,0 ---------------------------------------dblCreditUnit
-				   ,@strDetailDesc --------------------------strDescription
-				   ,1 ---------------------------------------intConcurrencyId
-				   ,0 ---------------------------------------dblUnitsInLBS
-				   ,@strNoteNumber --------------------------strDocument
-				   ,'' --------------------------------------strComments
-				   ,'Fee for NR' ----------------------------strReference
-				   ,0 ---------------------------------------dblDebitUnitsInLBS
-				   ,NULL ------------------------------------strCorrecting
-				   ,NULL ------------------------------------strSourcePgm
-				   ,NULL ------------------------------------strCheckBookNo
-				   ,NULL ------------------------------------strWorkArea
-				   )
-				   
+			SET @strReference = 'Scheduled Invoice'
 		END
+		IF @TransactionTypeId = 4
+		BEGIN
+			IF @PayExtra = 0
+			BEGIN
+				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+				SET @strReference = 'NR Schd Payment'
+			END
+			ELSE
+			BEGIN
+				IF @ExtraPayment = 0
+				BEGIN
+					SELECT TOP 1 @dblTransAmt = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId
+					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+					SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+					SET @strReference = 'NR Schd Payment'
+				END
+				ELSE
+				BEGIN
+					SET @dblTransAmt = @ExtraPayment
+					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+					SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+					SET @strReference = 'NR Schd Payment'
+				END				
+			END	
+			IF @LateCharge > 0
+			BEGIN
+				SET @dblTransAmt = @LateCharge
+				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+				SET @strReference = 'ScheduledLateFee'
+			END		
+		END
+		IF @TransactionTypeId = 7
+		BEGIN	
+			If @PayExtra = 1
+			BEGIN
+				SET @dblTransAmt = @dblTransAmt * (-1)
+				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+			END	
+			ELSE
+			BEGIN
+				If @UseAdjustmentAcc = 'Notes Write-off'			
+					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRNoteWriteOffAccount'
+				Else If @UseAdjustmentAcc = 'Interest Income'
+					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+				Else If @UseAdjustmentAcc = 'Clearing Account'
+					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
+			END				
+			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+			SET @strReference = 'NR Adjustment Schd'
+		END
+		
+	
+		INSERT INTO [dbo].[tblGLJournalDetail]
+			   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
+		 VALUES
+			   (1 ---------------------------------------intLineNo
+			   ,@intJournalId ---------------------------intJournalId
+			   ,GETDATE() -------------------------------dtmDate
+			   ,@intCreditAccountId ---------------------intAccountId
+			   ,0 ---------------------------------------dblDebit
+			   ,0 ---------------------------------------dblDebitRate
+			   ,@dblTransAmt ----------------------------dblCredit
+			   ,0 ---------------------------------------dblCreditRate
+			   ,0 ---------------------------------------dblDebitUnit
+			   ,0 ---------------------------------------dblCreditUnit
+			   ,@strDetailDesc --------------------------strDescription
+			   ,1 ---------------------------------------intConcurrencyId
+			   ,0 ---------------------------------------dblUnitsInLBS
+			   ,@strNoteNumber --------------------------strDocument
+			   ,'' --------------------------------------strComments
+			   ,@strReference ---------------------------strReference
+			   ,0 ---------------------------------------dblDebitUnitsInLBS
+			   ,NULL ------------------------------------strCorrecting
+			   ,NULL ------------------------------------strSourcePgm
+			   ,NULL ------------------------------------strCheckBookNo
+			   ,NULL ------------------------------------strWorkArea
+			   )
+		           
+-- Scheduled Invoice Debit Entry		
+		IF @TransactionTypeId = 2
+		BEGIN
+			SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+			SET @strReference = 'Scheduled Invoice'
+		END
+		If @TransactionTypeId = 4
+		BEGIN
+			IF @PayExtra = 0
+			BEGIN
+				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+				SET @strReference = 'NR Schd Payment'
+			END
+			ELSE
+			BEGIN
+				IF @ExtraPayment = 0
+				BEGIN
+					SELECT TOP 1 @dblTransAmt = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+					SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+					SET @strReference = 'NR Schd Payment'
+				END
+				ELSE
+				BEGIN
+					SET @dblTransAmt = @ExtraPayment
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+					SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+					SET @strReference = 'NR Schd Payment'
+				END		
+			END	
+			IF @LateCharge > 0
+			BEGIN
+				SET @dblTransAmt = @LateCharge
+				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+				SET @strReference = 'ScheduledLateFee'
+			END			
+		END
+		IF @TransactionTypeId = 7
+		BEGIN	
+			If @PayExtra = 1
+			BEGIN
+				SET @dblTransAmt = @dblTransAmt * (-1)
+				If @UseAdjustmentAcc = 'Notes Write-off'			
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRNoteWriteOffAccount'
+				Else If @UseAdjustmentAcc = 'Interest Income'
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+				Else If @UseAdjustmentAcc = 'Clearing Account'
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
+			END	
+			ELSE
+			BEGIN
+				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+			END				
+			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+			SET @strReference = 'NR Adjustment Schd'
+		END
+		
+			
+		INSERT INTO [dbo].[tblGLJournalDetail]
+			   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
+		 VALUES
+			   (2 ---------------------------------------intLineNo
+			   ,@intJournalId ---------------------------intJournalId
+			   ,GETDATE() -------------------------------dtmDate
+			   ,@intDebitAccountId ----------------------intAccountId
+			   ,@dblTransAmt ----------------------------dblDebit
+			   ,0 ---------------------------------------dblDebitRate
+			   ,0 ---------------------------------------dblCredit
+			   ,0 ---------------------------------------dblCreditRate
+			   ,0 ---------------------------------------dblDebitUnit
+			   ,0 ---------------------------------------dblCreditUnit
+			   ,@strDetailDesc --------------------------strDescription
+			   ,1 ---------------------------------------intConcurrencyId
+			   ,0 ---------------------------------------dblUnitsInLBS
+			   ,@strNoteNumber --------------------------strDocument
+			   ,'' --------------------------------------strComments
+			   ,@strReference ---------------------------strReference
+			   ,0 ---------------------------------------dblDebitUnitsInLBS
+			   ,NULL ------------------------------------strCorrecting
+			   ,NULL ------------------------------------strSourcePgm
+			   ,NULL ------------------------------------strCheckBookNo
+			   ,NULL ------------------------------------strWorkArea
+		   )
+		   				   
+	END	
+	ELSE
+	BEGIN
+-- Non Schedule Credit Entry	
+		IF @TransactionTypeId = 2	
+		BEGIN		
+			IF @dblFee > 0
+			BEGIN 		
+				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+				SET @strReference = 'Fee for NR'
+			END
+		END	
+		If @TransactionTypeId = 4
+		BEGIN
+			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+			SET @strReference = 'NR Payment'
+		END
+		IF @TransactionTypeId = 7
+		BEGIN	
+			If @PayExtra = 1
+			BEGIN
+				SET @dblTransAmt = @dblTransAmt * (-1)
+				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+			END	
+			ELSE
+			BEGIN
+				If @UseAdjustmentAcc = 'Notes Write-off'			
+					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRNoteWriteOffAccount'
+				Else If @UseAdjustmentAcc = 'Interest Income'
+					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+				Else If @UseAdjustmentAcc = 'Clearing Account'
+					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
+			END				
+			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+			SET @strReference = 'NR Adjustment'
+		END
+		
+		
+			INSERT INTO [dbo].[tblGLJournalDetail]
+				   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
+			 VALUES
+				   (1 ---------------------------------------intLineNo
+				   ,@intJournalId ---------------------------intJournalId
+				   ,GETDATE() -------------------------------dtmDate
+				   ,@intCreditAccountId ---------------------intAccountId
+				   ,0 ---------------------------------------dblDebit
+				   ,0 ---------------------------------------dblDebitRate
+				   ,@dblTransAmt ----------------------------dblCredit
+				   ,0 ---------------------------------------dblCreditRate
+				   ,0 ---------------------------------------dblDebitUnit
+				   ,0 ---------------------------------------dblCreditUnit
+				   ,@strDetailDesc --------------------------strDescription
+				   ,1 ---------------------------------------intConcurrencyId
+				   ,0 ---------------------------------------dblUnitsInLBS
+				   ,@strNoteNumber --------------------------strDocument
+				   ,'' --------------------------------------strComments
+				   ,@strReference ---------------------------strReference
+				   ,0 ---------------------------------------dblDebitUnitsInLBS
+				   ,NULL ------------------------------------strCorrecting
+				   ,NULL ------------------------------------strSourcePgm
+				   ,NULL ------------------------------------strCheckBookNo
+				   ,NULL ------------------------------------strWorkArea
+				   )
+				   
+				   
+-- Non Schedule Debit Entry         
+		IF @TransactionTypeId = 2	
+		BEGIN		
+			IF @dblFee > 0
+			BEGIN 		
+				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+				SET @strReference = 'Fee for NR'
+			END
+		END	
+		If @TransactionTypeId = 4
+		BEGIN
+			SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+			SET @strReference = 'NR Payment'
+		END	
+		IF @TransactionTypeId = 7
+		BEGIN	
+			If @PayExtra = 1
+			BEGIN
+				SET @dblTransAmt = @dblTransAmt * (-1)
+				If @UseAdjustmentAcc = 'Notes Write-off'			
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRNoteWriteOffAccount'
+				Else If @UseAdjustmentAcc = 'Interest Income'
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+				Else If @UseAdjustmentAcc = 'Clearing Account'
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
+			END	
+			ELSE
+			BEGIN
+				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+			END				
+			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+			SET @strReference = 'NR Adjustment'
+		END		
+			
+			INSERT INTO [dbo].[tblGLJournalDetail]
+				   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
+			 VALUES
+				   (2 ---------------------------------------intLineNo
+				   ,@intJournalId ---------------------------intJournalId
+				   ,GETDATE() -------------------------------dtmDate
+				   ,@intDebitAccountId ----------------------intAccountId
+				   ,@dblTransAmt ----------------------------dblDebit
+				   ,0 ---------------------------------------dblDebitRate
+				   ,0 ---------------------------------------dblCredit
+				   ,0 ---------------------------------------dblCreditRate
+				   ,0 ---------------------------------------dblDebitUnit
+				   ,0 ---------------------------------------dblCreditUnit
+				   ,@strDetailDesc --------------------------strDescription
+				   ,1 ---------------------------------------intConcurrencyId
+				   ,0 ---------------------------------------dblUnitsInLBS
+				   ,@strNoteNumber --------------------------strDocument
+				   ,'' --------------------------------------strComments
+				   ,@strReference ---------------------------strReference
+				   ,0 ---------------------------------------dblDebitUnitsInLBS
+				   ,NULL ------------------------------------strCorrecting
+				   ,NULL ------------------------------------strSourcePgm
+				   ,NULL ------------------------------------strCheckBookNo
+				   ,NULL ------------------------------------strWorkArea
+				   )				   
+		
 	END
 
 	Declare @strBatchId nvarchar(50), @ParamVal nvarchar(MAX)

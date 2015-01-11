@@ -972,6 +972,7 @@
     <Build Include="dbo\Stored Procedures\uspNRCreateNoteTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGenerateAmortization.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForPayment.sql" />
+<<<<<<< HEAD
     <Build Include="dbo\Stored Procedures\uspGLCreateImportLogDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateImportLogHeader.sql" />
     <Build Include="dbo\Tables\tblSMEntityMenuFavorite.sql" />
@@ -997,6 +998,12 @@
     <Build Include="dbo\Views\vyuCTEntity.sql" />
     <Build Include="dbo\Functions\fnGetGLAccountFromCompanyLocation.sql" />
     <Build Include="dbo\Tables\tblCTContractType.sql" />
+=======
+    <Build Include="dbo\Stored Procedures\uspNRCreateManualScheduledPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRGetDetailsForInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRGetDetailsForReversePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRScheduleHistoryReversePayment.sql" />
+>>>>>>> NR Development
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

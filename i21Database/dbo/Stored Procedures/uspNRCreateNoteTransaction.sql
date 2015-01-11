@@ -5,8 +5,9 @@ BEGIN TRY
 	DECLARE 
 	 @idoc int
 	,@ErrMsg nvarchar(max)
-	,@NoteID Int
+	,@intNoteId Int
 	,@isWriteOff bit
+	, @intNoteTransId Int
 	,@NoteTransID Int
 	,@TransDate DateTime
 	,@TransTypeID Int
@@ -38,20 +39,17 @@ BEGIN TRY
 	,@UnPaidInterest Decimal(18,2)
 	,@ConcurrencyId int
 	
-	--,@XML varchar(max)
-	
-	--return @XML
-	
-	--Set @XML='<root><NoteID>43</NoteID><WriteOff>False</WriteOff><NoteTrans><NoteHistoryDetail><NoteTransID>0</NoteTransID><TransDate>11/29/2012 5:33:42 PM</TransDate><TransTypeID>7</TransTypeID><Amount>3000</Amount><PayOffBalance>0</PayOffBalance><InvoiceNumber>0</InvoiceNumber><InvoiceDate>11/29/2012 5:33:42 PM</InvoiceDate><Location></Location><BatchNumber></BatchNumber><Days>0</Days><AmountAppliedToPrincipal>0</AmountAppliedToPrincipal><AmountAppliesToInterest>0</AmountAppliesToInterest><AsOf>11/29/2012</AsOf><Principal>0</Principal><CheckNumber></CheckNumber><UserId>NBYRD</UserId><LastUpdateDate>11/29/2012</LastUpdateDate><Comments></Comments><OnPrincipalOrInterest>Principal</OnPrincipalOrInterest><AccountAffected>Clearing Account</AccountAffected><AdjustmentType>INVOICES</AdjustmentType></NoteTransDetail></NoteTrans></root>'
 	BEGIN TRANSACTION
 	
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
-	SELECT @NoteID = NoteID,@isWriteOff= WriteOff
+	SELECT @intNoteId = NoteID,@isWriteOff= WriteOff
 	 From OPENXML(@idoc, 'root',2) WITH( NoteID int
 	 ,WriteOff bit)
 			
-	SELECT @isWriteOff = ysnWriteOff, @NoteType = strNoteType FROM dbo.tblNRNote WHERE intNoteId = @NoteID
+	SELECT @isWriteOff = ysnWriteOff, @NoteType = strNoteType FROM dbo.tblNRNote WHERE intNoteId = @intNoteId
+	--SELECT @NoteType = strNoteType FROM dbo.tblNRNote Where intNoteId = @intNoteId
+	
 	
 	DECLARE CurTrans CURSOR FOR
 	SELECT 
@@ -148,16 +146,13 @@ BEGIN TRY
 				,@LastTransTypeID Int
 				,@PrevUnPaidInterest Decimal(18,2)
 				
-		If Exists (Select * from dbo.tblNRNoteTransaction Where intNoteId = @NoteID)
+		If Exists (Select * from dbo.tblNRNoteTransaction Where intNoteId = @intNoteId)
 		BEGIN
 			SELECT top 1 @PrevAsOfDate = dtmAsOfDate, @PrevPrincipal = dblPrincipal, @PrevInterest = dblInterestToDate
 			, @PrevPayOffBal = dblPayOffBalance, @LastTransTypeID = intNoteTransTypeId, @PrevUnPaidInterest = dblUnpaidInterest
-			FROM dbo.tblNRNoteTransaction WHERE intNoteId = @NoteID Order By intNoteTransId DESC
+			FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId Order By intNoteTransId DESC
 		END
 		
-				
-		SELECT @NoteType = strNoteType FROM dbo.tblNRNote
-	
 		IF @TransTypeID = 2 OR @TransTypeID = 1 OR (@TransTypeID = 7 and @OnPrincipalOrInterest = 'Principal')
 		BEGIN
 			SET @AmountAppliedToPrincipal = (@Amount * (1)) 
@@ -209,60 +204,61 @@ BEGIN TRY
 			SET @AmountAppliesToInterest = 0
 			SET @AmountAppliedToPrincipal = 0 
 		END
-		
-			
+					
 		
 		SET @InterestToDate =0
 			
 		if @PrevAsOfDate = @AsOf
 		BEGIN
-			Select Top 1 @Days = intTransDays From dbo.tblNRNoteTransaction WHERE intNoteId =  @NoteID Order By intNoteTransId DESC
+			Select Top 1 @Days = intTransDays From dbo.tblNRNoteTransaction WHERE intNoteId =  @intNoteId Order By intNoteTransId DESC
 		END
 		ELSE IF @TransTypeID = 6
 		BEGIN
 			DECLARE @PayNoteTransID Int
 		
-			SELECT @NoteTransID = intNoteTransId FROM dbo.tblNRNoteTransaction WHERE intNoteId = @NoteID AND intNoteTransTypeId = 4 AND strCheckNumber = @CheckNumber
+			SELECT @NoteTransID = intNoteTransId FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId AND intNoteTransTypeId = 4 AND strCheckNumber = @CheckNumber
 		
-			SELECT TOP 1 @PrevAsOfDate = dtmAsOfDate FROM dbo.tblNRNoteTransaction WHERE intNoteId = @NoteID AND intNoteTransTypeId > (@NoteTransID) --<= @PrvAsOfDate AND TransTypeID = 4 and 	
-		
+			SELECT TOP 1 @PrevAsOfDate = dtmAsOfDate FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId AND intNoteTransTypeId > (@NoteTransID) --<= @PrvAsOfDate AND TransTypeID = 4 and 	
 			SET @Days = DATEDIFF(day,@PrevAsOfDate,@AsOf)
-			
+		END
+		ELSE IF @LastTransTypeID = 6 
+		BEGIN			
+			SELECT TOP 1 @PrevAsOfDate = dtmAsOfDate From dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId AND intNoteTransTypeId <> 6 ORDER By intNoteTransId DESC
+			SET @Days = DATEDIFF(day,@PrevAsOfDate,@AsOf)
 		END
 		ELSE
 		BEGIN
-			IF @LastTransTypeID = 6 
-			SELECT TOP 1 @PrevAsOfDate = dtmAsOfDate From dbo.tblNRNoteTransaction WHERE intNoteId = @NoteID AND intNoteTransTypeId <> 6 ORDER By intNoteTransId DESC
 			SET @Days = DATEDIFF(day,@PrevAsOfDate,@AsOf)
 		END
+				
 			
 		IF (@PrevPrincipal + @Amount)<=0
 			SET @Principal = 0
 		ELSE
-			SET @Principal = @PrevPrincipal + @Amount
+			SET @Principal = ISNULL(@PrevPrincipal,0) + ISNULL(@Amount,0)
 			
 		SET @UnPaidInterest = ISNULL(@PrevUnPaidInterest,0) + ISNULL(@AmountAppliesToInterest,0)	
 		
 				
 		INSERT INTO dbo.tblNRNoteTransaction
 		SELECT 
-		 @NoteID 
+		 @intNoteId 
 		,@TransDate 
 		,@TransTypeID 
-		,@Days 
-		,@Amount 
-		,@Principal 
-		,@InterestToDate
-		,@UnPaidInterest
-		,@PayOffBalance 
+		,ISNULL(@Days,0) 
+		,ISNULL(@Amount,0) 
+		,ISNULL(@Principal,0) 
+		,ISNULL(@InterestToDate,0)
+		,ISNULL(@UnPaidInterest,0)
+		,ISNULL(@PayOffBalance,0) 
 		,@InvoiceNumber 
 		,@InvoiceDate 
 		,@InvoiceLocation
 		,@Location 
 		,@ReferenceNumber
 		,@BatchNumber 
-		,@AmountAppliedToPrincipal 
-		,@AmountAppliesToInterest 
+		,ISNULL(@AmountAppliedToPrincipal,0) 
+		,ISNULL(@AmountAppliesToInterest,0) 
 		,@PaymentType
 		,@AsOf 
 		,@CheckNumber 
@@ -274,6 +270,57 @@ BEGIN TRY
 		,@ConcurrencyId
 		--,@PrevAsOfDate 
 		--,@ReferenceNumber
+		
+		SET @intNoteTransId = @@IDENTITY
+		
+		IF(@TransTypeID = 4)
+		BEGIN
+			IF(@NoteType = 'Scheduled Invoice')
+			BEGIN
+				DECLARE @ExpectedPayAmount numeric(18,6), @LateFee numeric(18,6)
+				SELECT TOP 1 @ExpectedPayAmount = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId
+				SELECT TOP 1 @LateFee = dblLateFeePayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId AND dblLateFeePayAmt > 0 
+				AND CAST(CONVERT(nvarchar(10),dtmLateFeePaidOn,101)AS DateTime)  = CAST(CONVERT(nvarchar(10),GETDATE(),101)AS DateTime)
+				ORDER BY intScheduleTransId DESC
+				
+				IF(ISNULL(@Amount,0) > @ExpectedPayAmount)
+				BEGIN
+					DECLARE @ExtraAmount numeric(18,6)
+					SET @ExtraAmount = (@Amount - @ExpectedPayAmount)
+					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, @ExtraAmount, 0, ''
+					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, @ExpectedPayAmount, 0, ''
+				END
+				ELSE
+				BEGIN
+					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
+				END
+				
+				IF(ISNULL(@LateFee,0) <> 0)
+				BEGIN
+					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, @LateFee, ''
+				END
+				
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
+			END
+		END
+		IF(@TransTypeID = 6)
+		BEGIN
+			EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, @TransTypeID, @intNoteTransId, @UserId, 0, 0, 0, ''
+		END
+		IF(@TransTypeID = 7)
+		BEGIN
+			IF ISNULL(@Amount,0) < 0 
+			BEGIN
+				EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, @TransTypeID, @intNoteTransId, @UserId, 1, 0, 0, @AccountAffected
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, @TransTypeID, @intNoteTransId, @UserId, 0, 0, 0, @AccountAffected
+			END	
+		END
 		
 		--Declare @TransId
 	
@@ -310,14 +357,14 @@ BEGIN TRY
 	Deallocate CurTrans
 
 		
-		SET @InterestToDate = [dbo].[fnCalculateInterestToDate] (@NoteID, @AsOfForInterestCal,@TransTypeID, @CheckNumber)
+		SET @InterestToDate = [dbo].[fnCalculateInterestToDate] (@intNoteId, @AsOfForInterestCal,@TransTypeID, @CheckNumber)
 		
 		--IF @TransTypeID = 6 SET @InterestToDate = @InterestToDate * @Amount
 			
 		DECLARE @LastTransID Int,@AMTAPP_INT DECIMAL(18,2), @InterestCalcDate DateTime,@LastInterest Decimal(18,2)
 		, @IntSinceCreation Decimal(18,2),@PrvPayoff Decimal(18,2), @LastUnpaidInt Decimal(18,2)
 
-		 SELECT top 1 @LastTransID = intNoteTransId, @LastTransTypeID = intNoteTransTypeId	FROM dbo.tblNRNoteTransaction WHERE intNoteId = @NoteID Order By intNoteTransId DESC
+		 SELECT top 1 @LastTransID = intNoteTransId, @LastTransTypeID = intNoteTransTypeId	FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId Order By intNoteTransId DESC
 		
 			
 		-- added the following condition if current asof date and previous asof dates are same then Interest to date setting as zero
@@ -325,9 +372,9 @@ BEGIN TRY
 		IF (@LastTransTypeID=1) 
 		BEGIN
 			UPDATE dbo.tblNRNoteTransaction SET dblInterestToDate = 0
-			WHERE intNoteId = @NoteID AND intNoteTransId <> @LastTransID AND dtmAsOfDate = @AsOfForInterestCal AND intNoteTransTypeId = @LastTransTypeID --and Convert(nvarchar(10),AsOf,101) = CONVERT(nvarchar(10), @AsOfForInterestCal,101)
+			WHERE intNoteId = @intNoteId AND intNoteTransId <> @LastTransID AND dtmAsOfDate = @AsOfForInterestCal AND intNoteTransTypeId = @LastTransTypeID --and Convert(nvarchar(10),AsOf,101) = CONVERT(nvarchar(10), @AsOfForInterestCal,101)
 
-			IF @AsOf = (select TOP 1 dtmAsOfDate FROM dbo.tblNRNoteTransaction WHERE intNoteId=@NoteID AND intNoteTransTypeId <> @LastTransTypeID ORDER BY dtmAsOfDate DESC,dtmNoteTranDate DESC ,intNoteTransId DESC)
+			IF @AsOf = (select TOP 1 dtmAsOfDate FROM dbo.tblNRNoteTransaction WHERE intNoteId=@intNoteId AND intNoteTransTypeId <> @LastTransTypeID ORDER BY dtmAsOfDate DESC,dtmNoteTranDate DESC ,intNoteTransId DESC)
 			 SET @InterestToDate =0
 		END
 		ELSE
@@ -339,13 +386,14 @@ BEGIN TRY
 		END
 
 		
-		UPDATE dbo.tblNRNoteTransaction	SET dblUnpaidInterest = @UnPaidInterest + @InterestToDate WHERE intNoteTransId = @LastTransID
-		UPDATE dbo.tblNRNoteTransaction SET dblPayOffBalance = dblPrincipal + dblUnpaidInterest WHERE intNoteTransId = @LastTransID
+		UPDATE dbo.tblNRNoteTransaction	SET dblUnpaidInterest = ISNULL(@UnPaidInterest,0) + ISNULL(@InterestToDate,0) WHERE intNoteTransId = @LastTransID
+		UPDATE dbo.tblNRNoteTransaction SET dblPayOffBalance = ISNULL(dblPrincipal,0) + ISNULL(dblUnpaidInterest,0) WHERE intNoteTransId = @LastTransID
 		
-		UPDATE dbo.tblNRNote SET dblNotePrincipal = (SELECT dblPrincipal FROM dbo.tblNRNoteTransaction WHERE intNoteTransId = @LastTransID) WHERE intNoteId = @NoteID
+		UPDATE dbo.tblNRNote SET dblNotePrincipal = (SELECT ISNULL(dblPrincipal,0) FROM dbo.tblNRNoteTransaction WHERE intNoteTransId = @LastTransID) WHERE intNoteId = @intNoteId
 		
-	--EXEC [dbo].[Note_Future_Trans_Update] @NoteID=@NoteID
+	--EXEC [dbo].[Note_Future_Trans_Update] @intNoteId=@intNoteId
 		
+	
 
 	  	COMMIT TRANSACTION	
 	  	
@@ -358,3 +406,4 @@ BEGIN CATCH
  IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 END CATCH
+

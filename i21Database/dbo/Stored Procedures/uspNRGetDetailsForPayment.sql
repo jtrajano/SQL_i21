@@ -165,4 +165,3 @@ WHERE intNoteId = @intNoteId  and dtmExpectedPayDate <= GETDATE()
 	
 
 End
-
