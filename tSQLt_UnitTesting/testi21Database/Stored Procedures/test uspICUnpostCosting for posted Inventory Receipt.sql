@@ -1,5 +1,10 @@
 ﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting for posted Inventory Receipt]
 AS
+	-- Arrange 
+	BEGIN 
+		EXEC [testi21Database].[Fake posted transactions - Add Stock];
+	END 
+
 --BEGIN
 --	-- Arrange 
 --	BEGIN 

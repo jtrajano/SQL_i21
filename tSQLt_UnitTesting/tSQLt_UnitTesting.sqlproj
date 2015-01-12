@@ -608,6 +608,8 @@
     <Build Include="testi21Database\Stored Procedures\test insert on tblICItemStock.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake posted transactions - Add Stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake items for posted transactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
