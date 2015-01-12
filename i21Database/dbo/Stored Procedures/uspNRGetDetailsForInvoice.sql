@@ -40,5 +40,9 @@ BEGIN
 	END	
 
 	SELECT @strRefNo [strRefNo] 
-
+	
+	Select dtmCreated from dbo.tblNRNote Where intNoteId = @intNoteId
+	
+	SELECT TOP 1 dtmNoteTranDate FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId AND intNoteTransTypeId = 3 ORDER BY intNoteTransId DESC
+	
 END
