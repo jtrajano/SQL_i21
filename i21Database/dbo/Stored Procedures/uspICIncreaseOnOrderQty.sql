@@ -49,7 +49,6 @@ WHEN NOT MATCHED THEN
 		intItemId
 		,intLocationId
 		,intSubLocationId
-		,intUnitMeasureId
 		,dblAverageCost
 		,dblUnitOnHand
 		,dblOrderCommitted
@@ -61,7 +60,6 @@ WHEN NOT MATCHED THEN
 	VALUES (
 		Source_Query.intItemId
 		,Source_Query.intLocationId
-		,NULL 
 		,NULL 
 		,0
 		,0

@@ -25,8 +25,6 @@ SELECT
 	strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
 							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
 							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END),
-	ItemStock.intUnitMeasureId,
-	strStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = ItemStock.intUnitMeasureId),
 	ItemStock.dblUnitOnHand,
 	ItemStock.dblAverageCost,
 	ItemStock.dblOnOrder,

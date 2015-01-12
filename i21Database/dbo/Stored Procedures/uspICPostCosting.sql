@@ -208,7 +208,6 @@ BEGIN
 				intItemId
 				,intLocationId
 				,intSubLocationId
-				,intUnitMeasureId
 				,dblAverageCost
 				,dblUnitOnHand
 				,dblOrderCommitted
@@ -220,7 +219,6 @@ BEGIN
 			VALUES (
 				StockToUpdate.intItemId
 				,StockToUpdate.intLocationId
-				,NULL 
 				,NULL 
 				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, 0, 0) -- dblAverageCost
 				,StockToUpdate.Qty -- dblUnitOnHand

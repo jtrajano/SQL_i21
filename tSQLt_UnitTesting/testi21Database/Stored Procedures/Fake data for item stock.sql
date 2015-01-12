@@ -26,7 +26,6 @@ BEGIN
 				[intItemId]
 				,[intLocationId]
 				,[intSubLocationId]
-				,[intUnitMeasureId]
 				,[dblAverageCost]
 				,[dblUnitOnHand]
 				,[dblOrderCommitted]
@@ -39,7 +38,6 @@ BEGIN
 		SELECT	[intItemId] = @WetGrains
 				,[intLocationId] = @Default_Location
 				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
