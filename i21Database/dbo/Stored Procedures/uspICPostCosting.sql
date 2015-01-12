@@ -17,7 +17,7 @@
 	@strAccountDescription - The contra g/l account id to use when posting an item. By default, it is set to "Cost of Goods". 
 				The calling code needs to specify it because each module may use a different contra g/l account against the 
 				Inventory account. For example, a Sales transaction will contra Inventory account with "Cost of Goods" while 
-				Receive stocks from AP module may use "A/P Clearing".
+				Receive stocks from AP module may use "AP Clearing".
 
 	@intUserId - The user who is initiating the post. 
 */

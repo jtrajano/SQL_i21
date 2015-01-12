@@ -58,7 +58,7 @@ BEGIN
 	-- Declare Account descriptions
 	DECLARE @Account_Inventory AS NVARCHAR(100) = 'Inventory'
 	DECLARE @Account_CostOfGoods AS NVARCHAR(100) = 'Cost of Goods'
-	DECLARE @Account_APClearing AS NVARCHAR(100) = 'A/P Clearing'
+	DECLARE @Account_APClearing AS NVARCHAR(100) = 'AP Clearing'
 	DECLARE @Account_WriteOffSold AS NVARCHAR(100) = 'Write-Off Sold'
 	DECLARE @Account_RevalueSold AS NVARCHAR(100) = 'Revalue Sold'
 	DECLARE @Account_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
