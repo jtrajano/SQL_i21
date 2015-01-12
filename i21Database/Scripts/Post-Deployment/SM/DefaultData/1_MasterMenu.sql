@@ -1285,3 +1285,76 @@ GO
 			WHERE strMenuName = 'Futures Market' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceId
 
 GO
+
+	/* ----------------------------------------------- */
+	/* --   Update Financial Reports Module Menu    -- */
+	/* ----------------------------------------------- */
+
+	DECLARE @GeneralLedgerModuleId INT
+	SELECT @GeneralLedgerModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'General Ledger' AND strModuleName = 'General Ledger' AND intParentMenuID = 0
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Financial Reports' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerModuleId)
+	UPDATE tblSMMasterMenu
+	SET strModuleName = 'Financial Reports', intParentMenuID = 0
+	WHERE strMenuName = 'Financial Reports' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerModuleId
+
+	DECLARE @FinancialReportsModuleId INT
+	SELECT @FinancialReportsModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Financial Reports' AND strModuleName = 'Financial Reports' AND intParentMenuID = 0
+
+		/* ---------------------------------------------- */
+		/* -- Create Financial Reports Activities Menu -- */
+		/* ---------------------------------------------- */
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Financial Reports' AND intParentMenuID = @FinancialReportsModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Activities', 'Financial Reports', @FinancialReportsModuleId, 'Activities', 'Folder', '', 'small-folder', 1, 0, 0, 0, 1, 1)
+	
+		DECLARE @FinancialReportsActivitiesId INT
+		SELECT @FinancialReportsActivitiesId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Financial Reports' AND intParentMenuID = @FinancialReportsModuleId
+	
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Financial Report Viewer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsModuleId)
+		UPDATE tblSMMasterMenu
+		SET strModuleName = 'Financial Reports', intParentMenuID = @FinancialReportsActivitiesId
+		WHERE strMenuName = 'Financial Report Viewer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsModuleId
+	
+		/* -------------------------------------------- */
+		/* -- Update Financial Report Designer Menu  -- */
+		/* -------------------------------------------- */
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Financial Report Designer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsModuleId)
+		UPDATE tblSMMasterMenu
+		SET strModuleName = 'Financial Reports', strMenuName = 'Maintenance', strDescription = 'Maintenance', intSort = 2
+		WHERE strMenuName = 'Financial Report Designer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsModuleId
+	
+		DECLARE @FinancialReportsMaintenanceId INT
+		SELECT @FinancialReportsMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Financial Reports' AND intParentMenuID = @FinancialReportsModuleId
+	
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Row Designer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId)
+		UPDATE tblSMMasterMenu
+		SET strModuleName = 'Financial Reports'
+		WHERE strMenuName = 'Row Designer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId
+	
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Column Designer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId)
+		UPDATE tblSMMasterMenu
+		SET strModuleName = 'Financial Reports'
+		WHERE strMenuName = 'Column Designer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId
+	
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Header and Footer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId)
+		UPDATE tblSMMasterMenu
+		SET strModuleName = 'Financial Reports'
+		WHERE strMenuName = 'Report Header and Footer' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId
+	
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Financial Report Builder' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId)
+		UPDATE tblSMMasterMenu
+		SET strModuleName = 'Financial Reports'
+		WHERE strMenuName = 'Financial Report Builder' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId
+	
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Templates' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId)
+		UPDATE tblSMMasterMenu
+		SET strModuleName = 'Financial Reports'
+		WHERE strMenuName = 'Report Templates' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId
+
+	/* ----------------------------------------------- */
+	/* --   End of Financial Reports Module Menu    -- */
+	/* ----------------------------------------------- */
+
+GO
