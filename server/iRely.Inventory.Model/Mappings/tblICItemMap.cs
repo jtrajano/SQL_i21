@@ -201,7 +201,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intKey).HasColumnName("intKey");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intReceiveUOMId).HasColumnName("intReceiveUOMId");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.intVendorId).HasColumnName("intVendorId");
             this.Property(t => t.strAllowNegativeInventory).HasColumnName("strAllowNegativeInventory");
             this.Property(t => t.strCostingMethod).HasColumnName("strCostingMethod");
@@ -211,7 +210,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLocationName).HasColumnName("strLocationName");
             this.Property(t => t.strLocationType).HasColumnName("strLocationType");
             this.Property(t => t.strReceiveUOM).HasColumnName("strReceiveUOM");
-            this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
             this.Property(t => t.strType).HasColumnName("strType");
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
 

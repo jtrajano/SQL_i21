@@ -29,8 +29,6 @@ Ext.define('Inventory.model.ItemStockDetailView', {
         { name: 'strAllowNegativeInventory', type: 'string'},
         { name: 'intCostingMethod', type: 'int'},
         { name: 'strCostingMethod', type: 'string'},
-        { name: 'intUnitMeasureId', type: 'int'},
-        { name: 'strStockUOM', type: 'string'},
         { name: 'dblUnitOnHand', type: 'float'},
         { name: 'dblAverageCost', type: 'float'},
         { name: 'dblOnOrder', type: 'float'},

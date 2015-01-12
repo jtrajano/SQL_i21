@@ -20,7 +20,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemStockId).HasColumnName("intItemStockId");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost");
             this.Property(t => t.dblLastCountRetail).HasColumnName("dblLastCountRetail");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
@@ -28,9 +27,6 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblSMCompanyLocation)
                 .WithMany(p => p.tblICItemStocks)
                 .HasForeignKey(p => p.intLocationId);
-            this.HasOptional(p => p.tblICUnitMeasure)
-                .WithMany(p => p.tblICItemStocks)
-                .HasForeignKey(p => p.intUnitMeasureId);
         }
     }
 }

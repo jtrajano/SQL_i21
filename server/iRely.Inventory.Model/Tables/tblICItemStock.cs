@@ -15,7 +15,6 @@ namespace iRely.Inventory.Model
         public int intItemId { get; set; }
         public int? intLocationId { get; set; }
         public int intSubLocationId { get; set; }
-        public int? intUnitMeasureId { get; set; }
         public decimal? dblAverageCost { get; set; }
         public decimal? dblUnitOnHand { get; set; }
         public decimal? dblOrderCommitted { get; set; }
@@ -42,28 +41,8 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
-        private string _unitmeasure;
-        [NotMapped]
-        public string strUnitMeasure
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_unitmeasure))
-                    if (tblICUnitMeasure != null)
-                        return tblICUnitMeasure.strUnitMeasure;
-                    else
-                        return null;
-                else
-                    return _unitmeasure;
-            }
-            set
-            {
-                _unitmeasure = value;
-            }
-        }
         
         public tblICItem tblICItem { get; set; }
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
-        public tblICUnitMeasure tblICUnitMeasure { get; set; }
     }
 }
