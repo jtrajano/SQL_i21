@@ -3,6 +3,7 @@
 	[intItemPricingId] INT NOT NULL IDENTITY, 
     [intItemId] INT NOT NULL, 
     [intLocationId] INT NOT NULL, 
+	[intItemUnitMeasureId] INT NULL, 
     [dblRetailPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblWholesalePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblLargeVolumePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -13,13 +14,15 @@
 	[dblLastCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblStandardCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblMovingAverageCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	[dblEndMonthCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [ysnActive] BIT NULL DEFAULT ((0)), 
+	[dblEndMonthCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dtmBeginDate] DATETIME NULL DEFAULT getdate(),
+	[dtmEndDate] DATETIME NULL,
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemPricing] PRIMARY KEY ([intItemPricingId]), 
     CONSTRAINT [FK_tblICItemPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblICItemPricing_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
+    CONSTRAINT [FK_tblICItemPricing_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+    CONSTRAINT [FK_tblICItemPricing_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 )
 
 GO
@@ -143,15 +146,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblEndMonthCost'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Active',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemPricing',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnActive'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -177,3 +171,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemPricing',
     @level2type = N'COLUMN',
     @level2name = N'dblAmountPercent'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item Unit Measure Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemPricing',
+    @level2type = N'COLUMN',
+    @level2name = N'intItemUnitMeasureId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Begin Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemPricing',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmBeginDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'End Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemPricing',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmEndDate'

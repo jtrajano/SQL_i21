@@ -12,13 +12,14 @@
     [strCommissionOn] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblCommissionRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblUnitPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [ysnActive] BIT NULL DEFAULT ((0)), 
+	[dtmBeginDate] DATETIME NULL DEFAULT getdate(), 
+	[dtmEndDate] DATETIME NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemPricingLevel] PRIMARY KEY ([intItemPricingLevelId]), 
     CONSTRAINT [FK_tblICItemPricingLevel_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICItemPricingLevel_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
-    CONSTRAINT [FK_tblICItemPricingLevel_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+    CONSTRAINT [FK_tblICItemPricingLevel_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 )
 
 GO
@@ -132,14 +133,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblUnitPrice'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Active',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemPricingLevel',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnActive'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
@@ -158,3 +152,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemPricingLevel',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Begin Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemPricingLevel',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmBeginDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'End Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemPricingLevel',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmEndDate'

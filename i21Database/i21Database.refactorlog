@@ -1652,4 +1652,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[PK_tblCTDiscount_Value]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="95a56dfa-4178-42cd-bf3c-a30afeb243c8" ChangeDateTime="01/09/2015 01:31:32">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPricing].[dblEndMonthCost]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPricing]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmBeginDate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e55a0838-e3b0-4af0-b1c2-4073487662b9" ChangeDateTime="01/09/2015 01:33:33">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPricing].[intUnitMeasureId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPricing]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemUnitMeasureId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f5ca93b2-1f49-4bd9-8186-33ec55d34609" ChangeDateTime="01/09/2015 02:28:35">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPricingLevel].[dblUnitPrice]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPricingLevel]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmBeginDate" />
+  </Operation>
 </Operations>
