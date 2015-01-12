@@ -2,6 +2,7 @@
     [intPaymentDetailId] INT             IDENTITY (1, 1) NOT NULL,
     [intPaymentId]       INT             NOT NULL,
     [intInvoiceId]       INT             NOT NULL,
+	[intTermId]			 INT             NULL,
     [intAccountId]       INT             NOT NULL,
     [dblInvoiceTotal]    NUMERIC (18, 6) NULL,
     [dblDiscount]        NUMERIC (18, 6) NULL,
