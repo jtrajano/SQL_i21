@@ -297,13 +297,41 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         readOnly: true
                                                     },
                                                     {
-                                                        xtype: 'combobox',
+                                                        xtype: 'gridcombobox',
                                                         flex: 1,
+                                                        columns: [
+                                                            {
+                                                                dataIndex: 'intCompanyLocationId',
+                                                                dataType: 'numeric',
+                                                                text: 'Location Id',
+                                                                hidden: true
+                                                            },
+                                                            {
+                                                                dataIndex: 'strLocationName',
+                                                                dataType: 'string',
+                                                                text: 'Location Name',
+                                                                flex: 1
+                                                            },
+                                                            {
+                                                                dataIndex: 'strLocationType',
+                                                                dataType: 'string',
+                                                                text: 'Location Type',
+                                                                flex: 1
+                                                            },
+                                                            {
+                                                                dataIndex: 'strAddress',
+                                                                dataType: 'string',
+                                                                text: 'Address',
+                                                                hidden: true
+                                                            }
+                                                        ],
                                                         itemId: 'cboTransferor',
                                                         margin: '0 5',
                                                         fieldLabel: 'Transferor',
                                                         labelAlign: 'top',
-                                                        labelWidth: 80
+                                                        labelWidth: 80,
+                                                        displayField: 'strLocationName',
+                                                        valueField: 'intCompanyLocationId'
                                                     },
                                                     {
                                                         xtype: 'combobox',
@@ -630,7 +658,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         itemId: 'colItemNo',
                                                         width: 100,
                                                         dataIndex: 'strItemNo',
-                                                        locked: true,
                                                         text: 'Item No.',
                                                         editor: {
                                                             xtype: 'gridcombobox',

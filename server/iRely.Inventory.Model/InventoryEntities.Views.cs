@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets88e88f2ad820383e31e1a5456ae39ded5f63675434e10f3da5d3bb72a2eab556))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets9bba3ee2232895b164856614ab1b5bb5de69054aef9c85d53299c44a0dc1bde2))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets88e88f2ad820383e31e1a5456ae39ded5f63675434e10f3da5d3bb72a2eab556 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets9bba3ee2232895b164856614ab1b5bb5de69054aef9c85d53299c44a0dc1bde2 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "88e88f2ad820383e31e1a5456ae39ded5f63675434e10f3da5d3bb72a2eab556"; }
+            get { return "9bba3ee2232895b164856614ab1b5bb5de69054aef9c85d53299c44a0dc1bde2"; }
         }
 
         /// <summary>
@@ -2133,7 +2133,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceipt
-        [CodeFirstDatabaseSchema.tblICInventoryReceipt](T1.tblICInventoryReceipt_intInventoryReceiptId, T1.tblICInventoryReceipt_strReceiptNumber, T1.tblICInventoryReceipt_dtmReceiptDate, T1.tblICInventoryReceipt_intVendorId, T1.tblICInventoryReceipt_strReceiptType, T1.tblICInventoryReceipt_intSourceId, T1.tblICInventoryReceipt_intBlanketRelease, T1.tblICInventoryReceipt_intLocationId, T1.tblICInventoryReceipt_strVendorRefNo, T1.tblICInventoryReceipt_strBillOfLading, T1.tblICInventoryReceipt_intShipViaId, T1.tblICInventoryReceipt_intProductOrigin, T1.tblICInventoryReceipt_intReceiverId, T1.tblICInventoryReceipt_intCurrencyId, T1.tblICInventoryReceipt_strVessel, T1.tblICInventoryReceipt_intFreightTermId, T1.tblICInventoryReceipt_strDeliveryPoint, T1.tblICInventoryReceipt_strAllocateFreight, T1.tblICInventoryReceipt_strFreightBilledBy, T1.tblICInventoryReceipt_intShiftNumber, T1.tblICInventoryReceipt_strNotes, T1.tblICInventoryReceipt_strCalculationBasis, T1.tblICInventoryReceipt_dblUnitWeightMile, T1.tblICInventoryReceipt_dblFreightRate, T1.tblICInventoryReceipt_dblFuelSurcharge, T1.tblICInventoryReceipt_dblInvoiceAmount, T1.tblICInventoryReceipt_ysnPrepaid, T1.tblICInventoryReceipt_ysnInvoicePaid, T1.tblICInventoryReceipt_intCheckNo, T1.tblICInventoryReceipt_dteCheckDate, T1.tblICInventoryReceipt_intTrailerTypeId, T1.tblICInventoryReceipt_dteTrailerArrivalDate, T1.tblICInventoryReceipt_dteTrailerArrivalTime, T1.tblICInventoryReceipt_strSealNo, T1.tblICInventoryReceipt_strSealStatus, T1.tblICInventoryReceipt_dteReceiveTime, T1.tblICInventoryReceipt_dblActualTempReading, T1.tblICInventoryReceipt_ysnPosted, T1.tblICInventoryReceipt_intCreatedUserId, T1.tblICInventoryReceipt_intEntityId, T1.tblICInventoryReceipt_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryReceipt](T1.tblICInventoryReceipt_intInventoryReceiptId, T1.tblICInventoryReceipt_strReceiptNumber, T1.tblICInventoryReceipt_dtmReceiptDate, T1.tblICInventoryReceipt_intVendorId, T1.tblICInventoryReceipt_strReceiptType, T1.tblICInventoryReceipt_intSourceId, T1.tblICInventoryReceipt_intBlanketRelease, T1.tblICInventoryReceipt_intTransferorId, T1.tblICInventoryReceipt_intLocationId, T1.tblICInventoryReceipt_strVendorRefNo, T1.tblICInventoryReceipt_strBillOfLading, T1.tblICInventoryReceipt_intShipViaId, T1.tblICInventoryReceipt_intProductOrigin, T1.tblICInventoryReceipt_intReceiverId, T1.tblICInventoryReceipt_intCurrencyId, T1.tblICInventoryReceipt_strVessel, T1.tblICInventoryReceipt_intFreightTermId, T1.tblICInventoryReceipt_strDeliveryPoint, T1.tblICInventoryReceipt_strAllocateFreight, T1.tblICInventoryReceipt_strFreightBilledBy, T1.tblICInventoryReceipt_intShiftNumber, T1.tblICInventoryReceipt_strNotes, T1.tblICInventoryReceipt_strCalculationBasis, T1.tblICInventoryReceipt_dblUnitWeightMile, T1.tblICInventoryReceipt_dblFreightRate, T1.tblICInventoryReceipt_dblFuelSurcharge, T1.tblICInventoryReceipt_dblInvoiceAmount, T1.tblICInventoryReceipt_ysnPrepaid, T1.tblICInventoryReceipt_ysnInvoicePaid, T1.tblICInventoryReceipt_intCheckNo, T1.tblICInventoryReceipt_dteCheckDate, T1.tblICInventoryReceipt_intTrailerTypeId, T1.tblICInventoryReceipt_dteTrailerArrivalDate, T1.tblICInventoryReceipt_dteTrailerArrivalTime, T1.tblICInventoryReceipt_strSealNo, T1.tblICInventoryReceipt_strSealStatus, T1.tblICInventoryReceipt_dteReceiveTime, T1.tblICInventoryReceipt_dblActualTempReading, T1.tblICInventoryReceipt_ysnPosted, T1.tblICInventoryReceipt_intCreatedUserId, T1.tblICInventoryReceipt_intEntityId, T1.tblICInventoryReceipt_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptId AS tblICInventoryReceipt_intInventoryReceiptId, 
@@ -2143,6 +2143,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strReceiptType AS tblICInventoryReceipt_strReceiptType, 
             T.intSourceId AS tblICInventoryReceipt_intSourceId, 
             T.intBlanketRelease AS tblICInventoryReceipt_intBlanketRelease, 
+            T.intTransferorId AS tblICInventoryReceipt_intTransferorId, 
             T.intLocationId AS tblICInventoryReceipt_intLocationId, 
             T.strVendorRefNo AS tblICInventoryReceipt_strVendorRefNo, 
             T.strBillOfLading AS tblICInventoryReceipt_strBillOfLading, 
@@ -4568,7 +4569,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceipts
-        [iRely.Inventory.Model.tblICInventoryReceipt](T1.tblICInventoryReceipt_intInventoryReceiptId, T1.tblICInventoryReceipt_strReceiptNumber, T1.tblICInventoryReceipt_dtmReceiptDate, T1.tblICInventoryReceipt_intVendorId, T1.tblICInventoryReceipt_strReceiptType, T1.tblICInventoryReceipt_intSourceId, T1.tblICInventoryReceipt_intBlanketRelease, T1.tblICInventoryReceipt_intLocationId, T1.tblICInventoryReceipt_strVendorRefNo, T1.tblICInventoryReceipt_strBillOfLading, T1.tblICInventoryReceipt_intShipViaId, T1.tblICInventoryReceipt_intProductOrigin, T1.tblICInventoryReceipt_intReceiverId, T1.tblICInventoryReceipt_intCurrencyId, T1.tblICInventoryReceipt_strVessel, T1.tblICInventoryReceipt_intFreightTermId, T1.tblICInventoryReceipt_strDeliveryPoint, T1.tblICInventoryReceipt_strAllocateFreight, T1.tblICInventoryReceipt_strFreightBilledBy, T1.tblICInventoryReceipt_intShiftNumber, T1.tblICInventoryReceipt_strNotes, T1.tblICInventoryReceipt_strCalculationBasis, T1.tblICInventoryReceipt_dblUnitWeightMile, T1.tblICInventoryReceipt_dblFreightRate, T1.tblICInventoryReceipt_dblFuelSurcharge, T1.tblICInventoryReceipt_dblInvoiceAmount, T1.tblICInventoryReceipt_ysnPrepaid, T1.tblICInventoryReceipt_ysnInvoicePaid, T1.tblICInventoryReceipt_intCheckNo, T1.tblICInventoryReceipt_dteCheckDate, T1.tblICInventoryReceipt_intTrailerTypeId, T1.tblICInventoryReceipt_dteTrailerArrivalDate, T1.tblICInventoryReceipt_dteTrailerArrivalTime, T1.tblICInventoryReceipt_strSealNo, T1.tblICInventoryReceipt_strSealStatus, T1.tblICInventoryReceipt_dteReceiveTime, T1.tblICInventoryReceipt_dblActualTempReading, T1.tblICInventoryReceipt_ysnPosted, T1.tblICInventoryReceipt_intCreatedUserId, T1.tblICInventoryReceipt_intEntityId, T1.tblICInventoryReceipt_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryReceipt](T1.tblICInventoryReceipt_intInventoryReceiptId, T1.tblICInventoryReceipt_strReceiptNumber, T1.tblICInventoryReceipt_dtmReceiptDate, T1.tblICInventoryReceipt_intVendorId, T1.tblICInventoryReceipt_strReceiptType, T1.tblICInventoryReceipt_intSourceId, T1.tblICInventoryReceipt_intBlanketRelease, T1.tblICInventoryReceipt_intTransferorId, T1.tblICInventoryReceipt_intLocationId, T1.tblICInventoryReceipt_strVendorRefNo, T1.tblICInventoryReceipt_strBillOfLading, T1.tblICInventoryReceipt_intShipViaId, T1.tblICInventoryReceipt_intProductOrigin, T1.tblICInventoryReceipt_intReceiverId, T1.tblICInventoryReceipt_intCurrencyId, T1.tblICInventoryReceipt_strVessel, T1.tblICInventoryReceipt_intFreightTermId, T1.tblICInventoryReceipt_strDeliveryPoint, T1.tblICInventoryReceipt_strAllocateFreight, T1.tblICInventoryReceipt_strFreightBilledBy, T1.tblICInventoryReceipt_intShiftNumber, T1.tblICInventoryReceipt_strNotes, T1.tblICInventoryReceipt_strCalculationBasis, T1.tblICInventoryReceipt_dblUnitWeightMile, T1.tblICInventoryReceipt_dblFreightRate, T1.tblICInventoryReceipt_dblFuelSurcharge, T1.tblICInventoryReceipt_dblInvoiceAmount, T1.tblICInventoryReceipt_ysnPrepaid, T1.tblICInventoryReceipt_ysnInvoicePaid, T1.tblICInventoryReceipt_intCheckNo, T1.tblICInventoryReceipt_dteCheckDate, T1.tblICInventoryReceipt_intTrailerTypeId, T1.tblICInventoryReceipt_dteTrailerArrivalDate, T1.tblICInventoryReceipt_dteTrailerArrivalTime, T1.tblICInventoryReceipt_strSealNo, T1.tblICInventoryReceipt_strSealStatus, T1.tblICInventoryReceipt_dteReceiveTime, T1.tblICInventoryReceipt_dblActualTempReading, T1.tblICInventoryReceipt_ysnPosted, T1.tblICInventoryReceipt_intCreatedUserId, T1.tblICInventoryReceipt_intEntityId, T1.tblICInventoryReceipt_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptId AS tblICInventoryReceipt_intInventoryReceiptId, 
@@ -4578,6 +4579,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strReceiptType AS tblICInventoryReceipt_strReceiptType, 
             T.intSourceId AS tblICInventoryReceipt_intSourceId, 
             T.intBlanketRelease AS tblICInventoryReceipt_intBlanketRelease, 
+            T.intTransferorId AS tblICInventoryReceipt_intTransferorId, 
             T.intLocationId AS tblICInventoryReceipt_intLocationId, 
             T.strVendorRefNo AS tblICInventoryReceipt_strVendorRefNo, 
             T.strBillOfLading AS tblICInventoryReceipt_strBillOfLading, 

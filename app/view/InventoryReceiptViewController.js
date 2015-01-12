@@ -33,15 +33,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboVendor: {
                 value: '{current.intVendorId}',
                 store: '{vendor}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{current.ysnPosted}',
+                hidden: '{checkHiddenInTransferReceipt}'
             },
             txtVendorName: {
-                value: '{current.strVendorName}'
+                value: '{current.strVendorName}',
+                hidden: '{checkHiddenInTransferReceipt}'
             },
             cboLocation: {
                 value: '{current.intLocationId}',
                 store: '{location}',
                 readOnly: '{current.ysnPosted}'
+            },
+            cboTransferor: {
+                value: '{current.intTransferorId}',
+                store: '{transferor}',
+                hidden: '{checkHiddenIfNotTransferReceipt}'
             },
             dtmReceiptDate: {
                 value: '{current.dtmReceiptDate}',
@@ -187,7 +194,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.dblFuelSurcharge}',
                 readOnly: '{current.ysnPosted}'
             },
-            txtCalculatedFreight: '{getCalculatedFreight}',
+//            txtCalculatedFreight: '{getCalculatedFreight}',
 
 //            txtCalculatedAmount: '{current.strMessage}',
             txtInvoiceAmount: {
@@ -205,11 +212,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             txtCheckNo: {
                 value: '{current.intCheckNo}',
-                readOnly: '{getInvoicePaidEnabled}'
+                readOnly: '{checkHiddenInInvoicePaid}'
             },
             txtCheckDate: {
                 value: '{current.dteCheckDate}',
-                readOnly: '{getInvoicePaidEnabled}'
+                readOnly: '{checkHiddenInInvoicePaid}'
             },
 //            txtInvoiceMargin: '{current.strMessage}',
 

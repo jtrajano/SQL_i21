@@ -1,7 +1,7 @@
 /**
  * Created by LZabala on 9/15/2014.
  */
-Ext.define('i21.controller.Inventory', {
+Ext.define('Inventory.controller.Inventory', {
     extend: 'i21.controller.Module',
     alias: 'controller.inventory',
 

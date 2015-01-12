@@ -28,6 +28,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intFreightTermId).HasColumnName("intFreightTermId");
             this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.intTransferorId).HasColumnName("intTransferorId");
             this.Property(t => t.intProductOrigin).HasColumnName("intProductOrigin");
             this.Property(t => t.intShiftNumber).HasColumnName("intShiftNumber");
             this.Property(t => t.intShipViaId).HasColumnName("intShipViaId");

@@ -24,7 +24,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 },{
                     strDescription: 'Purchase Order'
                 },{
-                    strDescription: 'Transfer Order'
+                    strDescription: 'Transfer Receipt'
+                },{
+                    strDescription: 'Direct Transfer'
                 },{
                     strDescription: 'Direct'
                 }
@@ -112,6 +114,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         location: {
             type: 'companylocationbuffered'
         },
+        transferor: {
+            type: 'companylocationbuffered'
+        },
         currency: {
             type: 'currencybuffered'
         },
@@ -130,27 +135,29 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     },
 
     formulas: {
-        getInvoicePaidEnabled: function(get){
-            if (get('ysnPosted') !== false){
-                return true;
+        checkHiddenInInvoicePaid: function (get) {
+            var isEnabled = false;
+            if (get('ysnPosted')){
+                isEnabled = true;
             }
             else {
-                if ((get('ysnInvoicePaid') !== false)){
-                    return true;
+                if (get('ysnInvoicePaid')){
+                    isEnabled = true;
                 }
-                else{
-                    return false;
+                else {
+                    isEnabled = false;
                 }
+            }
 
-            }
+            return isEnabled;
         },
-        getReceiveButtonText: function(get){
-            if (get('ysnPosted') !== false){
-                return 'Receive';
-            }
-            else {
-                return 'UnReceive';
-            }
+        checkHiddenInTransferReceipt: function (get) {
+            var isTransferReceipt = (get('current.strReceiptType') === 'Transfer Receipt')
+            return isTransferReceipt;
+        },
+        checkHiddenIfNotTransferReceipt: function (get) {
+            var isTransferReceipt = (get('current.strReceiptType') !== 'Transfer Receipt')
+            return isTransferReceipt;
         }
     }
 

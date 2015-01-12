@@ -24,6 +24,7 @@ namespace iRely.Inventory.Model
         public string strReceiptType { get; set; }
         public int? intSourceId { get; set; }
         public int? intBlanketRelease { get; set; }
+        public int? intTransferorId { get; set; }
         public int? intLocationId { get; set; }
         public string strVendorRefNo { get; set; }
         public string strBillOfLading { get; set; }

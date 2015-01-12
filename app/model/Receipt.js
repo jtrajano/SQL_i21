@@ -20,6 +20,7 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'strReceiptType', type: 'string'},
         { name: 'intSourceId', type: 'int', allowNull: true },
         { name: 'intBlanketRelease', type: 'int', allowNull: true },
+        { name: 'intTransferorId', type: 'int', allowNull: true },
         { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'strVendorRefNo', type: 'string'},
         { name: 'strBillOfLading', type: 'string'},
