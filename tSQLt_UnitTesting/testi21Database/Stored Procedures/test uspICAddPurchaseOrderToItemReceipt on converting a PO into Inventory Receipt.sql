@@ -25,7 +25,7 @@ BEGIN
 		-- Create the fake table and data for the unit of measure
 		EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasureConversion', @Identity = 1;
-
+		
 		DECLARE @UOMBushel AS INT = 1
 		DECLARE @UOMPound AS INT = 2
 
@@ -33,6 +33,17 @@ BEGIN
 		INSERT INTO dbo.tblICUnitMeasure (strUnitMeasure) VALUES ('Pound')
 		INSERT INTO dbo.tblICUnitMeasureConversion (intUnitMeasureId, dblConversionToStock, dblConversionFromStock) VALUES (@UOMBushel, 1, 1)
 		INSERT INTO dbo.tblICUnitMeasureConversion (intUnitMeasureId, dblConversionToStock, dblConversionFromStock) VALUES (@UOMPound, 0.016667, 60)
+
+		-- Creata fake data for security user
+		EXEC tSQLt.FakeTable 'dbo.tblSMUserSecurity';
+		DECLARE @intUserId AS INT = 39989
+		DECLARE @intEntityId AS INT = 19945
+
+		INSERT INTO tblSMUserSecurity (
+			intUserSecurityID
+			,intEntityId 
+		)
+		VALUES (@intUserId, @intEntityId);
 
 		DROP VIEW vyuAPPurchase		
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchase';
@@ -81,6 +92,8 @@ BEGIN
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId
+				,intCreatedUserId
+				,intEntityId
 		INTO	expected_tblICInventoryReceipt
 		FROM	dbo.tblICInventoryReceipt
 		WHERE	1 = 0 
@@ -98,7 +111,7 @@ BEGIN
 				,dblUnitCost
 				,dblLineTotal
 				,intSort
-				,intConcurrencyId
+				,intConcurrencyId			
 		INTO	expected_tblICInventoryReceiptItem
 		FROM	dbo.tblICInventoryReceiptItem
 		WHERE	1 = 0
@@ -123,6 +136,8 @@ BEGIN
 				,dblInvoiceAmount = 2000.00
 				,ysnInvoicePaid = 0
 				,intConcurrencyId = 1
+				,intCreatedUserId = @intUserId
+				,intEntityId = @intEntityId
 				
 		INSERT INTO expected_tblICInventoryReceiptItem 
 		SELECT	intInventoryReceiptId = 1
@@ -192,7 +207,7 @@ BEGIN
 
 		EXEC dbo.uspICAddPurchaseOrderToItemReceipt
 			@PurchaseOrderId = 1
-			,@intUserId = 1
+			,@intUserId = @intUserId
 			,@InventoryReceiptId = @InventoryReceiptIdResult OUTPUT
 			
 		SELECT	strReceiptNumber
@@ -213,6 +228,8 @@ BEGIN
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId
+				,intCreatedUserId
+				,intEntityId				
 		INTO	actual_tblICInventoryReceipt
 		FROM	dbo.tblICInventoryReceipt
 		
