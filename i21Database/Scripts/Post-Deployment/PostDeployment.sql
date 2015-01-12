@@ -55,6 +55,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- General Ledger
 :r .\GL\DefaultData\AccountStructure.sql
 :r .\GL\DefaultData\AccountGroup.sql
+:r .\GL\DefaultData\AccountCategory.sql
 :r .\GL\DefaultData\AccountTemplate.sql
 :r .\GL\DefaultData\AccountSegmentTemplate.sql
 :r .\GL\GLEntryDataFix.sql
