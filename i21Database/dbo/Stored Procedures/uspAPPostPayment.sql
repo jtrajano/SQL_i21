@@ -210,7 +210,10 @@ BEGIN
 					A.intPaymentId
 				FROM tblAPPayment A 
 				WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData) AND 
-					(A.dblAmountPaid + A.dblWithheld) <> (SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)
+					(A.dblAmountPaid + A.dblWithheld 
+					+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
+					<> ((SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId) 
+							+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId))
 					--include over payment
 
 			--ALREADY POSTED
