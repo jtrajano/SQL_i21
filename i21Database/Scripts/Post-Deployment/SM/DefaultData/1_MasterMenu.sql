@@ -1127,8 +1127,12 @@ GO
 	/* --  Create Notes Receivable Maintenance Menu   -- */
 	/* ------------------------------------------------- */
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId)
-	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('Maintenance', 'Notes Receivable', @NotesReceivableModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Maintenance', 'Notes Receivable', @NotesReceivableModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 2, 1)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET intSort = 2
+		WHERE strMenuName = 'Maintenance' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
 
 	DECLARE @NotesReceivableMaintenanceId INT
 	SELECT @NotesReceivableMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
@@ -1153,8 +1157,12 @@ GO
 		/* --  Create Notes Receivable Activities Menu   -- */
 		/* ------------------------------------------------ */
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId)
-		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Activities', 'Notes Receivable', @NotesReceivableModuleId, 'Activities', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Activities', 'Notes Receivable', @NotesReceivableModuleId, 'Activities', 'Folder', '', 'small-folder', 1, 0, 0, 0, 1, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET intSort = 1
+			WHERE strMenuName = 'Activities' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
 
 		DECLARE @NotesReceivableActivityId INT
 		SELECT @NotesReceivableActivityId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
@@ -1179,8 +1187,12 @@ GO
 		/* --   Create Notes Receivable Reports Menu     -- */
 		/* ------------------------------------------------ */
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId)
-		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Reports', 'Notes Receivable', @NotesReceivableModuleId, 'Reports', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Reports', 'Notes Receivable', @NotesReceivableModuleId, 'Reports', 'Folder', '', 'small-folder', 1, 0, 0, 0, 3, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET intSort = 3
+			WHERE strMenuName = 'Reports' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
 		
 		DECLARE @NotesReceivableReportsId INT
 		SELECT @NotesReceivableReportsId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
