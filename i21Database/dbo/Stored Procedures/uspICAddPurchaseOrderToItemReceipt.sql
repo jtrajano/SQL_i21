@@ -148,11 +148,11 @@ SELECT	intInventoryReceiptId = @InventoryReceiptId
 		,intPackTypeId			= 0 -- None found from Purchase Order
 		,dblExpPackageWeight	= 0 -- None found from Purchase Order
 		,dblUnitCost			= PODetail.dblCost
-		,dblLineTotal			= ISNULL(PODetail.dblQtyOrdered, 0) * ISNULL(PODetail.dblCost, 0) * ISNULL(UOMConversion.dblConversionToStock, 0)
+		,dblLineTotal			= 0
 		,intSort				= PODetail.intLineNo
 		,intConcurrencyId		= 1
 FROM	dbo.tblPOPurchaseDetail PODetail LEFT JOIN dbo.tblICUnitMeasure UOM
 			ON PODetail.intUnitOfMeasureId = UOM.intUnitMeasureId
-		INNER JOIN dbo.tblICUnitMeasureConversion UOMConversion
-			ON UOM.intUnitMeasureId = UOMConversion.intUnitMeasureId
+		INNER JOIN dbo.tblICItemUOM ItemUOM
+			ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 WHERE	PODetail.intPurchaseId = @PurchaseOrderId
