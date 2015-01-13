@@ -63,7 +63,23 @@ Ext.define('Inventory.view.ItemPricingViewModel', {
         },
         getAmountPercentReadOnly: function(get) {
             if (iRely.Functions.isEmpty(get('current.strPricingMethod')) || get('current.strPricingMethod') === 'None'){
+                this.data.current.set('dblSalePrice', get('current.dblStandardCost'));
+                this.data.current.set('dblAmountPercent', 0.00);
                 return true;
+            }
+            else if (iRely.Functions.isEmpty(get('current.strPricingMethod')) || get('current.strPricingMethod') === 'Fixed Dollar Amount'){
+                this.data.current.set('dblSalePrice', (get('current.dblStandardCost') + get('current.dblAmountPercent')));
+                return false;
+            }
+            else if (iRely.Functions.isEmpty(get('current.strPricingMethod')) || get('current.strPricingMethod') === 'Markup Standard Cost'){
+                var markup = (get('current.dblStandardCost') * (get('current.dblAmountPercent') / 100));
+                this.data.current.set('dblSalePrice', (get('current.dblStandardCost') + markup));
+                return false;
+            }
+            else if (iRely.Functions.isEmpty(get('current.strPricingMethod')) || get('current.strPricingMethod') === 'Percent of Margin'){
+                var markup = (get('current.dblStandardCost') / (1 - (get('current.dblAmountPercent') / 100)));
+                this.data.current.set('dblSalePrice', markup);
+                return false;
             }
             else{
                 return false;
