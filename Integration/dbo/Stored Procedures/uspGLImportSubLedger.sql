@@ -121,9 +121,9 @@ END
     
     DECLARE @postdate DATE,@intJournalId INT,@strJournalId VARCHAR(10),
 			@glije_date VARCHAR(20),@intAccountId INT,@intAccountId1 INT, @strDescription VARCHAR(50),@strDescription1 VARCHAR(50),@dtmDate DATE,
-			@glije_amt DECIMAL ,@glije_units DECIMAL,@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL,@credit DECIMAL,@creditUnit DECIMAL,
-			@debitUnit DECIMAL,@debitUnitInLBS DECIMAL,@creditUnitInLBS DECIMAL,@totalDebit DECIMAL,@totalCredit DECIMAL,@glije_error_desc VARCHAR(100),
-			@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT
+			@glije_amt DECIMAL(10,2) ,@glije_units DECIMAL(10,2),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(10,2),@credit DECIMAL(10,2),
+			@creditUnit DECIMAL(10,2),@debitUnit DECIMAL(10,2),@debitUnitInLBS DECIMAL(10,2),@creditUnitInLBS DECIMAL(10,2),@totalDebit DECIMAL(10,2),@totalCredit DECIMAL(10,2),
+			@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT
 	
 	-- INSERTS INTO THE tblGLJournal GROUPED BY glije_postdate COLUMN in tblGLIjemst
     DECLARE cursor_postdate CURSOR FOR  SELECT glije_postdate FROM tblGLIjemst WHERE glije_uid =@uid GROUP BY glije_postdate
