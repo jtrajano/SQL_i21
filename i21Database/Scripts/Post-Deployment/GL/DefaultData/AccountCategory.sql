@@ -1,7 +1,7 @@
 ﻿
 
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory ='AP Account')
-	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intAccountGroupId], [intConcurrencyId]) VALUES ( N'AP Account', (SELECT  [intAccountGroupId] FROM [i1440DevTest].[dbo].[tblGLAccountGroup] where strAccountGroup = 'Payables'), 1)
+	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intAccountGroupId], [intConcurrencyId]) VALUES ( N'AP Account', (SELECT  [intAccountGroupId] FROM [dbo].[tblGLAccountGroup] where strAccountGroup = 'Payables'), 1)
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'AR Account')
 	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intAccountGroupId], [intConcurrencyId]) VALUES (N'AR Account', (SELECT  [intAccountGroupId]  FROM [dbo].[tblGLAccountGroup] where strAccountGroup = 'Receivables'), 1)
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Begin Inventory')
