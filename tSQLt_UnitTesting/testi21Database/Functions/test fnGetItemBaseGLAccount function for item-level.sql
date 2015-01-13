@@ -58,7 +58,7 @@ BEGIN
 
 	END
 
-	-- Must return account id 12040-1001 (INVENTORY WHEAT-NEW HAVEN GRAIN)
+	-- Must return account id 12040-1001 (INVENTORY WHEAT-NEW HAVEN)
 	BEGIN 
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @InventoryDescription);
 
@@ -68,7 +68,7 @@ BEGIN
 
 	END
 
-	-- Must return account id 40100-1001 (COST OF GOODS WHEAT-NEW HAVEN GRAIN)
+	-- Must return account id 40100-1001 (COST OF GOODS WHEAT-NEW HAVEN)
 	BEGIN 
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @CostOfGoodsDescription);
 
@@ -78,7 +78,7 @@ BEGIN
 
 	END
 
-	-- Must return account id 50110-1001 (PURCHASES WHEAT-NEW HAVEN GRAIN)
+	-- Must return account id 50110-1001 (PURCHASES WHEAT-NEW HAVEN)
 	BEGIN 
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @PurchasesDescription);
 
@@ -88,7 +88,7 @@ BEGIN
 
 	END
 
-	-- Must return account id 12040-1002 (INVENTORY WHEAT-NEW HAVEN GRAIN)
+	-- Must return account id 12040-1002 (INVENTORY WHEAT-NEW HAVEN)
 	BEGIN 
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @InventoryDescription);
 
@@ -98,7 +98,7 @@ BEGIN
 
 	END
 
-	-- Must return account id 40100-1002 (COST OF GOODS WHEAT-NEW HAVEN GRAIN)
+	-- Must return account id 40100-1002 (COST OF GOODS WHEAT-NEW HAVEN)
 	BEGIN 
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @CostOfGoodsDescription);
 
@@ -108,7 +108,7 @@ BEGIN
 
 	END
 
-	-- Must return account id 50110-1002 (PURCHASES WHEAT-NEW HAVEN GRAIN)
+	-- Must return account id 50110-1002 (PURCHASES WHEAT-NEW HAVEN)
 	BEGIN 
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @PurchasesDescription);
 

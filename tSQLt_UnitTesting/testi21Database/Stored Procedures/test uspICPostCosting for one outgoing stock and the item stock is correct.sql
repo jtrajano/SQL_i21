@@ -3,11 +3,8 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		-- Fake the inventory transaction table 
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
-
 		-- Create the fake data
-		EXEC testi21Database.[Fake data for item costing];
+		EXEC testi21Database.[Fake transactions for item costing]
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @WRITE_OFF_SOLD AS INT = -1

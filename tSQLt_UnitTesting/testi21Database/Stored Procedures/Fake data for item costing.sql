@@ -15,9 +15,6 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICItemAccount', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICCategory';
 	EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;		
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -55,6 +52,10 @@ BEGIN
 	DECLARE @RevalueSold_BetterHaven AS INT = 5002
 	DECLARE @AutoNegative_BetterHaven AS INT = 6002
 
+	DECLARE @SegmentId_DEFAULT_LOCATION AS INT = 100
+	DECLARE @SegmentId_NEW_HAVEN_LOCATION AS INT = 101
+	DECLARE @SegmentId_BETTER_HAVEN_LOCATION AS INT = 102
+
 	-- Declare Account descriptions
 	DECLARE @Account_Inventory AS NVARCHAR(100) = 'Inventory'
 	DECLARE @Account_CostOfGoods AS NVARCHAR(100) = 'Cost of Goods'
@@ -72,23 +73,11 @@ BEGIN
 	DECLARE @FIFO AS INT = 2
 	DECLARE @LIFO AS INT = 3
 
-	-- Declare the profit centers
-	DECLARE @ProfitCenter_Default AS INT = 100
-	DECLARE @ProfitCenter_NewHaven AS INT = 101
-	DECLARE @ProfitCenter_BetterHaven AS INT = 102
-
-	-- Declare the variables for the Unit of Measure
-	DECLARE @EACH AS INT = 1;
-
-	-- Declare the variables for the transaction types
-	DECLARE @PurchaseType AS INT = 4
-	DECLARE @SalesType AS INT = 5
-
 	-- Fake company locations 
 	BEGIN 
-		INSERT INTO dbo.tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@Default_Location, 'DEFAULT', @ProfitCenter_Default)
-		INSERT INTO dbo.tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@NewHaven, 'NEW HAVEN', @ProfitCenter_NewHaven)
-		INSERT INTO dbo.tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@BetterHaven, 'BETTER HAVEN', @ProfitCenter_BetterHaven)
+		INSERT INTO dbo.tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@Default_Location, 'DEFAULT', @SegmentId_DEFAULT_LOCATION)
+		INSERT INTO dbo.tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@NewHaven, 'NEW HAVEN', @SegmentId_NEW_HAVEN_LOCATION)
+		INSERT INTO dbo.tblSMCompanyLocation (intCompanyLocationId, strLocationName, intProfitCenter) VALUES (@BetterHaven, 'BETTER HAVEN', @SegmentId_BETTER_HAVEN_LOCATION)
 	END
 
 	-- Fake data for Company-Location-Account
@@ -101,6 +90,7 @@ BEGIN
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_RevalueSold, @RevalueSold_Default);
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_AutoNegative, @AutoNegative_Default);
 
+		-- Use tblSMCompanyLocation to store the GL Accounts. This will change in 15.2 where GL accounts will be retrieved in tblSMCompanyLocationAccount
 		UPDATE	tblSMCompanyLocation 
 		SET		intInventory = @Inventory_Default
 				,intCostofGoodsSold = @CostOfGoods_Default
@@ -119,6 +109,7 @@ BEGIN
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_RevalueSold, @RevalueSold_NewHaven);
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_AutoNegative, @AutoNegative_NewHaven);
 
+		-- Use tblSMCompanyLocation to store the GL Accounts. This will change in 15.2 where GL accounts will be retrieved in tblSMCompanyLocationAccount
 		UPDATE	tblSMCompanyLocation 
 		SET		intInventory = @Inventory_NewHaven
 				,intCostofGoodsSold = @CostOfGoods_NewHaven
@@ -137,6 +128,7 @@ BEGIN
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_RevalueSold, @RevalueSold_BetterHaven);
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_AutoNegative, @AutoNegative_BetterHaven);
 
+		-- Use tblSMCompanyLocation to store the GL Accounts. This will change in 15.2 where GL accounts will be retrieved in tblSMCompanyLocationAccount
 		UPDATE	tblSMCompanyLocation 
 		SET		intInventory = @Inventory_BetterHaven
 				,intCostofGoodsSold = @CostOfGoods_BetterHaven
@@ -171,8 +163,8 @@ BEGIN
 		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@WetGrains, 'WET GRAINS')
 		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@StickyGrains, 'STICKY GRAINS')
 		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
-		--INSERT INTO dbo.tblICItem (intItemId, strDescription, intTrackingId) VALUES (@ColdGrains, 'COLD GRAINS', @ColdItems)
-		--INSERT INTO dbo.tblICItem (intItemId, strDescription, intTrackingId) VALUES (@HotGrains, 'HOT GRAINS', @HotItems)
+		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@ColdGrains, 'COLD GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@HotGrains, 'HOT GRAINS')
 	END
 
 	-- Fake data for Item-Location
@@ -222,24 +214,6 @@ BEGIN
 		INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, dblAverageCost) VALUES (@ColdGrains, @BetterHaven, 0, 0)
 		INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, dblAverageCost) VALUES (@HotGrains, @BetterHaven, 0, 0)
 	END
-
-	-- Fake data for tblICInventoryFIFO
-	BEGIN
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 100, 0, 22.00, 1)
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@StickyGrains, @Default_Location, 'January 1, 2014', 150, 0, 33.00, 1)
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@PremiumGrains, @Default_Location, 'January 1, 2014', 200, 0, 44.00, 1)
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@ColdGrains, @Default_Location, 'January 1, 2014', 250, 0, 55.00, 1)
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@HotGrains, @Default_Location, 'January 1, 2014', 300, 0, 66.00, 1)
-	END 
-
-	-- Fake data for tblICInventoryTransaction
-	BEGIN 
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 100, 22.00, NULL, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@StickyGrains, @Default_Location, 'January 1, 2014', 150, 33.00, NULL, 0, 1, 1, 2, 'PURCHASE-200000', 'BATCH-200000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@PremiumGrains, @Default_Location, 'January 1, 2014', 200, 44.00, NULL, 0, 1, 1, 3, 'PURCHASE-300000', 'BATCH-300000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@ColdGrains, @Default_Location, 'January 1, 2014', 250, 55.00, NULL, 0, 1, 1, 4, 'PURCHASE-400000', 'BATCH-400000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@HotGrains, @Default_Location, 'January 1, 2014', 300, 66.00, NULL, 0, 1, 1, 5, 'PURCHASE-500000', 'BATCH-500000', @PurchaseType, NULL, 1)
-	END 
 
 	-- Fake data for Item-Account
 	BEGIN 

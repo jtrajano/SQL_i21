@@ -28,7 +28,7 @@ BEGIN
 	END
 	
 	-- Get the base account in the category level 
-	-- Must return account id 12040-1001 (INVENTORY WHEAT-NEW HAVEN GRAIN)
+	-- Must return account id 12040-1001 (INVENTORY WHEAT-NEW HAVEN)
 	BEGIN                                                                                                                                                                                                                                                                                
 		SELECT @actual =[dbo].[fnGetItemBaseGLAccount](@HotGrains, @Default_Location, @InventoryDescription);
 
@@ -38,7 +38,7 @@ BEGIN
 
 	END
 
-	-- Must return account id 40100-1001 (COST OF GOODS WHEAT-NEW HAVEN GRAIN)
+	-- Must return account id 40100-1001 (COST OF GOODS WHEAT-NEW HAVEN)
 	BEGIN                                                                                                                                                                                                                                                                               
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@HotGrains, @Default_Location, @CostOfGoodsDescription);
 

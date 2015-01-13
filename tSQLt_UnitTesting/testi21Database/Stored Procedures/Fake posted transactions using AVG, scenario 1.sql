@@ -1,5 +1,9 @@
-﻿CREATE PROCEDURE [testi21Database].[Fake posted transactions - Add Stock]
+﻿---------------------------------------------------------------------------------------------------
+-- Scenario 1: Add stock 
+---------------------------------------------------------------------------------------------------
+CREATE PROCEDURE [testi21Database].[Fake posted transactions using AVG, scenario 1]
 AS
+
 BEGIN
 	-- Use the 'fake data for simple COA' for the simple items
 	EXEC testi21Database.[Fake items for posted transactions]
@@ -56,8 +60,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;
-	
+	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 		
 	----------------------------------------------------------------
 	-- Fake data for inventory receipt transaction 

@@ -15,8 +15,8 @@ BEGIN
 
 	-- Test case 1:
 	--		1. Base g/l account id is 12040-1000 ('INVENTORY WHEAT-')
-	--		2. Profit center segment id is 101 ('NEW HAVEN GRAIN')
-	--		3. Expected g/l account id is 12040-1001 ('INVENTORY WHEAT-NEW HAVEN GRAIN')
+	--		2. Profit center segment id is 101 ('NEW HAVEN')
+	--		3. Expected g/l account id is 12040-1001 ('INVENTORY WHEAT-NEW HAVEN')
 	BEGIN 
 		-- Act 
 		SELECT @actual = [dbo].[fnGetGLAccountIdFromProfitCenter](1000, 101);

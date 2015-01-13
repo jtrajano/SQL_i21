@@ -73,19 +73,19 @@ BEGIN
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId, intAccountGroupId) VALUES (4, '10000', 'BANK OF AMERICA', 90, @Group_CashAccounts)
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId, intAccountGroupId) VALUES (5, '50000', 'MISCELLANEOUS EXPENESE', 90, @Group_Expenses)
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (100, '1000', '', 92)
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (101, '1001', 'NEW HAVEN GRAIN', 92)
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (102, '1002', 'BETTER HAVEN GRAIN', 92)
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (101, '1001', 'NEW HAVEN', 92)
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (102, '1002', 'BETTER HAVEN', 92)
 
 		-- Add fake data for GL Account
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_InventoryWheat_Default, 'INVENTORY WHEAT-', '12040-1000', @Group_Inventory);
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_CostOfGoods_Default, 'COST OF GOODS WHEAT-', '40100-1000', @Group_CostOfGoodsSold);
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_Purchase_Default, 'PURCHASES WHEAT-', '50110-1000', @Group_Expenses);
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_InventoryWheat_NewHaven, 'INVENTORY WHEAT-NEW HAVEN GRAIN', '12040-1001', @Group_Inventory);
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_CostOfGoods_NewHaven, 'COST OF GOODS WHEAT-NEW HAVEN GRAIN', '40100-1001', @Group_CostOfGoodsSold);
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_Purchase_NewHaven, 'PURCHASES WHEAT-NEW HAVEN GRAIN', '50110-1001', @Group_Expenses);
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_InventoryWheat_BetterHaven, 'INVENTORY WHEAT-BETTER HAVEN GRAIN', '12040-1002', @Group_Inventory);
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_CostOfGoods_BetterHaven, 'COST OF GOODS WHEAT-BETTER HAVEN GRAIN', '40100-1002', @Group_CostOfGoodsSold);
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_Purchase_BetterHaven, 'PURCHASES WHEAT-BETTER HAVEN GRAIN', '50110-1002', @Group_Expenses);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_InventoryWheat_NewHaven, 'INVENTORY WHEAT-NEW HAVEN', '12040-1001', @Group_Inventory);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_CostOfGoods_NewHaven, 'COST OF GOODS WHEAT-NEW HAVEN', '40100-1001', @Group_CostOfGoodsSold);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_Purchase_NewHaven, 'PURCHASES WHEAT-NEW HAVEN', '50110-1001', @Group_Expenses);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_InventoryWheat_BetterHaven, 'INVENTORY WHEAT-BETTER HAVEN', '12040-1002', @Group_Inventory);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_CostOfGoods_BetterHaven, 'COST OF GOODS WHEAT-BETTER HAVEN', '40100-1002', @Group_CostOfGoodsSold);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_Purchase_BetterHaven, 'PURCHASES WHEAT-BETTER HAVEN', '50110-1002', @Group_Expenses);
 		
 		-- Fake Cash Accounts
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@AccountId_BankAccount_Default, 'BANK OF AMERICA MAIN BRANCH', '10000-1000', @Group_CashAccounts);
@@ -108,23 +108,23 @@ BEGIN
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_Purchase_Default, 3);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_Purchase_Default, 100);
 
-		-- INVENTORY WHEAT-NEW HAVEN GRAIN
+		-- INVENTORY WHEAT-NEW HAVEN
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_InventoryWheat_NewHaven, 1);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_InventoryWheat_NewHaven, 101);
-		-- COST OF GOODS WHEAT-NEW HAVEN GRAIN
+		-- COST OF GOODS WHEAT-NEW HAVEN
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_CostOfGoods_NewHaven, 2);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_CostOfGoods_NewHaven, 101);
-		-- PURCHASES WHEAT-NEW HAVEN GRAIN
+		-- PURCHASES WHEAT-NEW HAVEN
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_Purchase_NewHaven, 3);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_Purchase_NewHaven, 101);	
 
-		-- INVENTORY WHEAT-BETTER HAVEN GRAIN
+		-- INVENTORY WHEAT-BETTER HAVEN
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_InventoryWheat_BetterHaven, 1);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_InventoryWheat_BetterHaven, 102);
-		-- COST OF GOODS WHEAT-BETTER HAVEN GRAIN
+		-- COST OF GOODS WHEAT-BETTER HAVEN
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_CostOfGoods_BetterHaven, 2);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_CostOfGoods_BetterHaven, 102);
-		-- PURCHASES WHEAT-BETTER HAVEN GRAIN
+		-- PURCHASES WHEAT-BETTER HAVEN
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_Purchase_BetterHaven, 3);
 		INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountId_Purchase_BetterHaven, 102);	
 
