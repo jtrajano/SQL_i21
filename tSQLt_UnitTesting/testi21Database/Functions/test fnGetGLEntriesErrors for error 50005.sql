@@ -107,7 +107,7 @@ BEGIN
 		INSERT INTO expected (strTransactionId, strText, intErrorCode) VALUES ('DUMMY-00003', 'Unable to find an open fiscal year period to match the transaction date.', 50005)
 
 		-- Call the fake data for GL Account 
-		EXEC testi21Database.[Fake data for COA used in costing];
+		EXEC testi21Database.[Fake COA used for fake inventory items];
 
 		-- Create fake data for the fiscal year periods
 		EXEC tSQLt.FakeTable 'dbo.tblGLFiscalYearPeriod', @Identity = 1;

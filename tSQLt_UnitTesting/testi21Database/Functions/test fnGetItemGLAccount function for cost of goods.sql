@@ -28,7 +28,7 @@ BEGIN
 		)
 
 		-- Create the Fake data 
-		EXEC [testi21Database].[Fake data for simple Items]
+		EXEC testi21Database.[Fake inventory items]
 	END 
 	
 	-- Test case: Get the contra account for "Cost of Goods"
@@ -61,8 +61,8 @@ BEGIN
 			,[AutoNegative]
 		)
 		SELECT				
-			[Inventory] = 1000	-- 12040-1000
-			,[ContraInventory] = 2000		-- 40100-1000
+			[Inventory] = 1001	-- 12040-1001
+			,[ContraInventory] = 2001	-- 40100-1001
 			,[RevalueSold] = NULL
 			,[WriteOffSold] = NULL
 			,[AutoNegative] = NULL

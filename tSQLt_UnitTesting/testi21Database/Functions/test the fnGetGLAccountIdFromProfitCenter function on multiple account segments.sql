@@ -9,7 +9,7 @@ BEGIN
 		DECLARE @expected AS INT
 		DECLARE @actual AS INT
 		
-		EXEC [testi21Database].[Fake data for multiple segments COA]
+		EXEC [testi21Database].[Fake COA with multiple account segments]
 	END	
 
 	-- Test case 1: GL Account id and Profit Center ID are both invalid (or NULL)

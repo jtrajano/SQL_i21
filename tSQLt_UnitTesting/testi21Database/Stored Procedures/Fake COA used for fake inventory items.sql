@@ -1,20 +1,12 @@
-﻿CREATE PROCEDURE [testi21Database].[Fake data for COA used in costing]
+﻿CREATE PROCEDURE [testi21Database].[Fake COA used for fake inventory items]
 AS
 BEGIN
-		-- Drop these views. It has dependencies with tblGLAccount table. Can't do fake table if these exists. 
-		-- note: when tSQLt do the rollback, the views are rolled back as well. 
-		DROP VIEW vyuAPBill
-		DROP VIEW vyuAPBillBatch
-		DROP VIEW vyuAPPayablesAgingSummary
-		DROP VIEW vyuAPPaymentDetail
-		DROP VIEW vyuAPVendor
-		DROP VIEW vyuAPRecapTransaction
-
 		-- Create the fake table		
+		EXEC tSQLt.FakeTable 'dbo.tblGLAccountGroup';
 		EXEC tSQLt.FakeTable 'dbo.tblGLAccountStructure';
 		EXEC tSQLt.FakeTable 'dbo.tblGLAccountSegment';
 		EXEC tSQLt.FakeTable 'dbo.tblGLAccount';
-		EXEC tSQLt.FakeTable 'dbo.tblGLAccountSegmentMapping', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLAccountSegmentMapping', @Identity = 1;	
 
 		-- Declare the account ids
 		DECLARE @Inventory_Default AS INT = 1000
@@ -41,6 +33,33 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 		DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
 
+		-- Constant Variables
+		DECLARE @Group_Asset AS INT = 1
+		DECLARE @Group_Liability AS INT = 2
+		DECLARE @Group_Equity AS INT = 3
+		DECLARE @Group_Revenue AS INT = 4
+		DECLARE @Group_Expenses AS INT = 5
+		DECLARE @Group_Sales AS INT = 6
+		DECLARE @Group_CostOfGoodsSold AS INT = 7
+		DECLARE @Group_CashAccounts AS INT = 8
+		DECLARE @Group_Receivables AS INT = 9
+		DECLARE @Group_Inventory AS INT = 10
+		DECLARE @Group_MiscExpenses AS INT = 11
+
+		-- Add fake data fro the Account Group
+		INSERT INTO tblGLAccountGroup (intAccountGroupId, strAccountGroup, strAccountType, intParentGroupId,intGroup,intSort)
+		SELECT				@Group_Asset, 'Asset', 'Asset', 0, 1, 10000
+		UNION ALL SELECT	@Group_Liability, 'Liability', 'Liability', 0, 1, 20000
+		UNION ALL SELECT	@Group_Equity, 'Equity', 'Equity', 0, 1, 30000
+		UNION ALL SELECT	@Group_Revenue, 'Revenue', 'Revenue', 0, 1, 40000
+		UNION ALL SELECT	@Group_Expenses, 'Expenses', 'Expenses', 0, 1, 50000
+		UNION ALL SELECT	@Group_Sales, 'Sales', 'Sales', 0, 1, 60000
+		UNION ALL SELECT	@Group_CostOfGoodsSold, 'Cost of Goods Sold', 'Cost of Goods Sold', 0, 1, 70000
+		UNION ALL SELECT	@Group_CashAccounts, 'Cash Accounts', 'Asset', 1, NULL, 10001
+		UNION ALL SELECT	@Group_Receivables, 'Receivables', 'Asset', 1, NULL, 10002
+		UNION ALL SELECT	@Group_Inventory, 'Inventory', 'Asset', 1, NULL, 10003
+		UNION ALL SELECT	@Group_MiscExpenses, 'Miscellaneous Expenses', 'Expenses', 5, NULL, 50001
+
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 		-- Add fake data for Account Structure
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,7 +84,7 @@ BEGIN
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_COST_OF_GOODS_WHEAT, '20100', 'COST OF GOODS WHEAT', @AccountStructureId_Primary)
 
 		DECLARE @SegmentId_AP_Clearing_WHEAT AS INT = 3
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_AP_Clearing_WHEAT, '30110', 'AP Clearing WHEAT', @AccountStructureId_Primary)
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_AP_Clearing_WHEAT, '30110', 'AP CLEARING WHEAT', @AccountStructureId_Primary)
 
 		DECLARE @SegmentId_WRITE_OFF_SOLD_WHEAT AS INT = 4
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_WRITE_OFF_SOLD_WHEAT, '40110', 'WRITE-OFF SOLD WHEAT', @AccountStructureId_Primary)
@@ -93,7 +112,7 @@ BEGIN
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@Inventory_Default, 'INVENTORY WHEAT-DEFAULT', '12040-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostOfGoods_Default, 'COST OF GOODS WHEAT-DEFAULT', '20100-1000');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@APClearing_Default, 'AP Clearing WHEAT-DEFAULT', '30110-1000');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@APClearing_Default, 'AP CLEARING WHEAT-DEFAULT', '30110-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@WriteOffSold_Default, 'WRITE-OFF SOLD WHEAT-DEFAULT', '40110-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@RevalueSold_Default, 'REVALUE SOLD WHEAT-DEFAULT', '50110-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_Default, 'AUTO NEGATIVE WHEAT-DEFAULT', '60110-1000');
@@ -101,7 +120,7 @@ BEGIN
 
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@Inventory_NewHaven, 'INVENTORY WHEAT-NEW HAVEN', '12040-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostOfGoods_NewHaven, 'COST OF GOODS WHEAT-NEW HAVEN', '20100-1001');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@APClearing_NewHaven, 'AP Clearing WHEAT-NEW HAVEN', '30110-1001');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@APClearing_NewHaven, 'AP CLEARING WHEAT-NEW HAVEN', '30110-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@WriteOffSold_NewHaven, 'WRITE-OFF SOLD WHEAT-NEW HAVEN', '40110-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@RevalueSold_NewHaven, 'REVALUE SOLD WHEAT-NEW HAVEN', '50110-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_NewHaven, 'AUTO NEGATIVE WHEAT-NEW HAVEN', '60110-1001');
@@ -109,7 +128,7 @@ BEGIN
 
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@Inventory_BetterHaven, 'INVENTORY WHEAT-BETTER HAVEN', '12040-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostOfGoods_BetterHaven, 'COST OF GOODS WHEAT-BETTER HAVEN', '20100-1002');
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@APClearing_BetterHaven, 'AP Clearing WHEAT-BETTER HAVEN', '30110-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@APClearing_BetterHaven, 'AP CLEARING WHEAT-BETTER HAVEN', '30110-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@WriteOffSold_BetterHaven, 'WRITE-OFF SOLD WHEAT-BETTER HAVEN', '40110-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@RevalueSold_BetterHaven, 'REVALUE SOLD WHEAT-BETTER HAVEN', '50110-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_BetterHaven, 'AUTO NEGATIVE WHEAT-BETTER HAVEN', '60110-1002');
@@ -127,7 +146,7 @@ BEGIN
 			-- COST OF GOODS WHEAT
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_Default, @SegmentId_COST_OF_GOODS_WHEAT);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_Default, @SegmentId_DEFAULT_LOCATION);
-			-- AP Clearing WHEAT
+			-- AP CLEARING WHEAT
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_Default, @SegmentId_AP_Clearing_WHEAT);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_Default, @SegmentId_DEFAULT_LOCATION);
 
@@ -158,7 +177,7 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_NewHaven, @SegmentId_COST_OF_GOODS_WHEAT);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);
 
-			-- AP Clearing WHEAT
+			-- AP CLEARING WHEAT
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_NewHaven, @SegmentId_AP_Clearing_WHEAT);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);	
 
@@ -189,7 +208,7 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_BetterHaven, @SegmentId_COST_OF_GOODS_WHEAT);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);
 
-			-- AP Clearing WHEAT
+			-- AP CLEARING WHEAT
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_BetterHaven, @SegmentId_AP_Clearing_WHEAT);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);	
 

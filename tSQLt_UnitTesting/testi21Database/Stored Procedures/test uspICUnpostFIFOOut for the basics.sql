@@ -65,6 +65,10 @@ BEGIN
 			,intRelatedTransactionId INT NULL 
 			,intTransactionTypeId INT NOT NULL 
 		)
+
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 	END 
 	
 	-- Act

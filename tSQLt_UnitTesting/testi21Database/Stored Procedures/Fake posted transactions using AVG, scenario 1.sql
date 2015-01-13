@@ -5,7 +5,6 @@ CREATE PROCEDURE [testi21Database].[Fake posted transactions using AVG, scenario
 AS
 
 BEGIN
-	-- Use the 'fake data for simple COA' for the simple items
 	EXEC testi21Database.[Fake items for posted transactions]
 
 	-- Declare the variables for grains (item)

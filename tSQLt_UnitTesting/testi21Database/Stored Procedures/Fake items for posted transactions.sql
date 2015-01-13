@@ -1,8 +1,7 @@
 ﻿CREATE PROCEDURE [testi21Database].[Fake items for posted transactions]
 AS
 BEGIN
-	-- Use the 'fake data for simple COA' for the simple items
-	EXEC testi21Database.[Fake data for COA used in costing]
+	EXEC testi21Database.[Fake COA used for fake inventory items]
 
 	-- Create the fake table and data for the items
 	EXEC tSQLt.FakeTable 'dbo.tblSMCompanyLocation';
@@ -173,7 +172,7 @@ BEGIN
 		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains, @BetterHaven, 3, @LIFO)
 	END 
 
-	-- Fake data for Item Stock
+	-- Fake data for item stock table
 	BEGIN 
 		-- Add stock information for items under location 1 ('Default')
 		INSERT INTO dbo.tblICItemStock (intItemId, intLocationId, dblUnitOnHand, dblAverageCost) VALUES (@WetGrains, @Default_Location, 100, 22)

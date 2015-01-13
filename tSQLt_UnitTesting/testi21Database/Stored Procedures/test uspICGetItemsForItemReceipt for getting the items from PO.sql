@@ -55,7 +55,7 @@ BEGIN
 		DECLARE @intDirectType AS INT = 3
 
 		-- Create the fake data
-		EXEC testi21Database.[Fake data for simple Items]
+		EXEC testi21Database.[Fake inventory items]
 
 		-- Create the fake table and data for the unit of measure
 		EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure', @Identity = 1;

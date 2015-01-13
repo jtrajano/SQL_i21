@@ -80,7 +80,7 @@ BEGIN
 				,intLotId = NULL 
 
 		-- Use the simple item mock data
-		EXEC testi21Database.[Fake data for simple Items]; 
+		EXEC testi21Database.[Fake transactions for item costing]
 	END 
 	
 	-- Test case 1: 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[Fake data for items in a transaction to unpost]
+﻿CREATE PROCEDURE [testi21Database].[Fake data for inventory transaction table]
 AS
 BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction';

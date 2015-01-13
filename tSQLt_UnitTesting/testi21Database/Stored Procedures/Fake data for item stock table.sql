@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[Fake data for item stock]
+﻿CREATE PROCEDURE [testi21Database].[Fake data for item stock table]
 AS
 BEGIN
 		DROP VIEW vyuAPRptPurchase

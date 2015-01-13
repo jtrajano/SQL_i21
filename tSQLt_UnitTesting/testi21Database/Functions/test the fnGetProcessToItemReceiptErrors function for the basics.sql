@@ -32,7 +32,7 @@ BEGIN
 				,@InvalidLocation AS INT = -1
 
 		-- Create the mock data 
-		EXEC testi21Database.[Fake data for simple Items];
+		EXEC testi21Database.[Fake inventory items];
 	END
 
 	-- Act

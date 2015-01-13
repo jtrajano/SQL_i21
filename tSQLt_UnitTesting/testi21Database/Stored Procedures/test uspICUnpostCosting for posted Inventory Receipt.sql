@@ -8,7 +8,7 @@ AS
 --BEGIN
 --	-- Arrange 
 --	BEGIN 
---		EXEC [testi21Database].[Fake data for unposting item costing];
+--		EXEC [testi21Database].[Fake posted transactions for testing the unposting];
 
 --		-- Declare the variables for grains (item)
 --		DECLARE @WetGrains AS INT = 1

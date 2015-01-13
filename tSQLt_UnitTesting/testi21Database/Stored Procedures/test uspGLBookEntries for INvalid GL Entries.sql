@@ -38,7 +38,7 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblGLSummary';
 
 		-- Add fake data
-		EXEC testi21Database.[Fake data for COA used in costing];
+		EXEC testi21Database.[Fake COA used for fake inventory items];
 
 		-- Add the expected tables 
 		SELECT *
