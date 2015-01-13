@@ -49,7 +49,6 @@ BEGIN
 		SELECT	[intItemId] = @WetGrains
 				,[intLocationId] = @NewHaven
 				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -60,8 +59,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
 				,[intLocationId] = @BetterHaven
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -74,8 +72,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @StickyGrains
 				,[intLocationId] = @Default_Location
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -86,8 +83,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @StickyGrains
 				,[intLocationId] = @NewHaven
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -98,8 +94,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @StickyGrains
 				,[intLocationId] = @BetterHaven
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -112,8 +107,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intLocationId] = @Default_Location
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -124,8 +118,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intLocationId] = @NewHaven
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -136,8 +129,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intLocationId] = @BetterHaven
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -150,8 +142,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @ColdGrains
 				,[intLocationId] = @Default_Location
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -162,8 +153,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @ColdGrains
 				,[intLocationId] = @NewHaven
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -174,8 +164,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @ColdGrains
 				,[intLocationId] = @BetterHaven
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -188,8 +177,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @HotGrains
 				,[intLocationId] = @Default_Location
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -200,8 +188,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @HotGrains
 				,[intLocationId] = @NewHaven
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
@@ -212,8 +199,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @HotGrains
 				,[intLocationId] = @BetterHaven
-				,[intSubLocationId] = NULL
-				,[intUnitMeasureId] = @EACH
+				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
