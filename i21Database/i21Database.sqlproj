@@ -1005,6 +1005,8 @@
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForAdjustment.sql" />
     <Build Include="dbo\Tables\tblGLAccountCategory.sql" />
+    <Build Include="dbo\Tables\tblHDTicketHistory.sql" />
+    <Build Include="dbo\Views\vyuHDTicketHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
