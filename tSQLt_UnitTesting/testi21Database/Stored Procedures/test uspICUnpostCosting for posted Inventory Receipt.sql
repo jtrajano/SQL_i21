@@ -2,7 +2,7 @@
 AS
 	-- Arrange 
 	BEGIN 
-		EXEC [testi21Database].[Fake posted transactions - Add Stock];
+		EXEC [testi21Database].[Fake posted transactions using AVG, scenario 1];
 	END 
 
 --BEGIN
