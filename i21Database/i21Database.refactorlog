@@ -1673,4 +1673,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmBeginDate" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="954fc025-9f9a-4150-ba1c-219b3a2577c8" ChangeDateTime="01/13/2015 07:19:34">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocationSubLocationCategory].[intSubLocationCategoryId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocationSubLocationCategory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCategoryId" />
+  </Operation>
 </Operations>

@@ -1007,6 +1007,8 @@
     <Build Include="dbo\Tables\tblGLAccountCategory.sql" />
     <Build Include="dbo\Tables\tblHDTicketHistory.sql" />
     <Build Include="dbo\Views\vyuHDTicketHistory.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocationSubLocation.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocationSubLocationCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
