@@ -620,10 +620,14 @@ Ext.define('Inventory.view.ItemViewModel', {
 
     formulas: {
         formatUOMDisplayDecimal: function (get) {
-            return i21.ModuleMgr.Inventory.createNumberFormat(get('intDecimalDisplay'));
+            return i21.ModuleMgr.Inventory.createNumberFormat(get('current.intDecimalDisplay'));
         },
         formatUOMCalculationDecimal: function (get) {
-            return i21.ModuleMgr.Inventory.createNumberFormat(get('intDecimalCalculation'));
+            return i21.ModuleMgr.Inventory.createNumberFormat(get('current.intDecimalCalculation'));
+        },
+        checkLotTrackingVisibility: function(get) {
+            var isNotItemLevel = (get('current.strInventoryTracking') !== 'Item Level');
+            return isNotItemLevel;
         }
     }
 

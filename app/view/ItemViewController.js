@@ -66,7 +66,8 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboLotTracking: {
                 value: '{current.strLotTracking}',
-                store: '{lotTrackings}'
+                store: '{lotTrackings}',
+                readOnly: '{checkLotTrackingVisibility}'
             },
             cboTracking: {
                 value: '{current.strInventoryTracking}',

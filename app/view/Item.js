@@ -342,15 +342,6 @@ Ext.define('Inventory.view.Item', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'combobox',
-                                                                        flex: 1,
-                                                                        itemId: 'cboLotTracking',
-                                                                        fieldLabel: 'Lot Tracking',
-                                                                        labelWidth: 80,
-                                                                        displayField: 'strLotTracking',
-                                                                        valueField: 'strLotTracking'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
                                                                         columns: [
                                                                             {
                                                                                 dataIndex: 'intCategoryId',
@@ -373,11 +364,20 @@ Ext.define('Inventory.view.Item', {
                                                                         ],
                                                                         flex: 1,
                                                                         itemId: 'cboTracking',
-                                                                        margin: '0 0 0 5',
                                                                         fieldLabel: 'Inv. Valuation',
-                                                                        labelWidth: 85,
+                                                                        labelWidth: 80,
                                                                         displayField: 'strDescription',
                                                                         valueField: 'strDescription'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        flex: 1,
+                                                                        itemId: 'cboLotTracking',
+                                                                        margin: '0 0 0 5',
+                                                                        fieldLabel: 'Lot Tracking',
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strLotTracking',
+                                                                        valueField: 'strLotTracking'
                                                                     }
                                                                 ]
                                                             }
@@ -3078,10 +3078,10 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colPricingSalePrice',
                                                         width: 80,
                                                         align: 'right',
+                                                        dataIndex: 'string',
                                                         text: 'Sale Price'
                                                     },
                                                     {
@@ -3291,9 +3291,9 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'strFieldName',
                                                                         itemId: 'colPricingLevelUPC',
                                                                         width: 50,
+                                                                        dataIndex: 'strFieldName',
                                                                         text: 'UPC'
                                                                     },
                                                                     {
@@ -3401,8 +3401,8 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'datecolumn',
-                                                                        dataIndex: 'strFieldName',
                                                                         itemId: 'colPricingLevelBeginDate',
+                                                                        dataIndex: 'strFieldName',
                                                                         text: 'Begin Date',
                                                                         editor: {
                                                                             xtype: 'datefield',
@@ -3567,9 +3567,9 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'strFieldName',
                                                                         itemId: 'colSpecialPricingUPC',
                                                                         width: 80,
+                                                                        dataIndex: 'strFieldName',
                                                                         text: 'UPC'
                                                                     },
                                                                     {
