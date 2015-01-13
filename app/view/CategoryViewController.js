@@ -45,7 +45,7 @@ Ext.define('Inventory.view.CategoryViewController', {
                 value: '{current.intCostingMethod}',
                 store: '{costingMethods}'
             },
-            cboInventoryTracking: {
+            cboInventoryValuation: {
                 value: '{current.strInventoryTracking}',
                 store: '{inventoryTrackings}'
             },
@@ -318,7 +318,7 @@ Ext.define('Inventory.view.CategoryViewController', {
         Ext.require([
                 screenName,
                 screenName + 'ViewModel',
-                screenName + 'ViewController',
+                screenName + 'ViewController'
         ], function() {
             var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
             var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel : { type: screen.toLowerCase() } });
@@ -364,8 +364,6 @@ Ext.define('Inventory.view.CategoryViewController', {
             "#cboVendorOrderClass": {
                 select: this.onVendorXRefSelect
             }
-
-
         });
     }
 });

@@ -407,7 +407,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "displayField": null,
+                                                        "displayField": "strDescription",
                                                         "fieldLabel": "Costing Method",
                                                         "forceSelection": true,
                                                         "itemId": "cboCostingMethod",
@@ -427,13 +427,13 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "displayField": null,
+                                                        "displayField": "strDescription",
                                                         "fieldLabel": "Inventory Valuation",
                                                         "itemId": "cboInventoryValuation",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "strInventoryValuation"
+                                                        "valueField": "strDescription"
                                                     },
                                                     "name": "MyComboBox47",
                                                     "designerId": "37e7f1d0-03b3-4119-bb62-22ead8e21bd3"
@@ -479,14 +479,14 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "displayField": null,
+                                                        "displayField": "strDescription",
                                                         "fieldLabel": "Material Fee",
                                                         "forceSelection": true,
                                                         "itemId": "cboMaterialFee",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "strMaterialFee"
+                                                        "valueField": "strDescription"
                                                     },
                                                     "name": "MyComboBox56",
                                                     "designerId": "95d7f6e1-a269-455e-9f5f-492111d427eb"
@@ -528,13 +528,13 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": null,
+                                                        "displayField": "strItemNo",
                                                         "fieldLabel": "Material Item",
                                                         "itemId": "cboMaterialItem",
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "intMaterialItem"
+                                                        "valueField": "intItemId"
                                                     },
                                                     "name": "MyComboBox57",
                                                     "configAlternates": {
@@ -609,7 +609,7 @@
                                                         "labelWidth": 130,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "valueField": "intFreightItem"
+                                                        "valueField": "intItemId"
                                                     },
                                                     "name": "MyComboBox58",
                                                     "configAlternates": {

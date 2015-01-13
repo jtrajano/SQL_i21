@@ -109,6 +109,9 @@ Ext.define('Inventory.view.CategoryViewModel', {
                 },
                 {
                     strDescription: 'Category Level'
+                },
+                {
+                    strDescription: 'Lot Level'
                 }
             ],
             fields: [

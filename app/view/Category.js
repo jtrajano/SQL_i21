@@ -230,6 +230,7 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'cboCostingMethod',
                                                                 fieldLabel: 'Costing Method',
                                                                 labelWidth: 130,
+                                                                displayField: 'strDescription',
                                                                 forceSelection: true,
                                                                 valueField: 'intCostingMethodId'
                                                             },
@@ -238,7 +239,8 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'cboInventoryValuation',
                                                                 fieldLabel: 'Inventory Valuation',
                                                                 labelWidth: 130,
-                                                                valueField: 'strInventoryValuation'
+                                                                displayField: 'strDescription',
+                                                                valueField: 'strDescription'
                                                             },
                                                             {
                                                                 xtype: 'textfield',
@@ -257,8 +259,9 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'cboMaterialFee',
                                                                 fieldLabel: 'Material Fee',
                                                                 labelWidth: 130,
+                                                                displayField: 'strDescription',
                                                                 forceSelection: true,
-                                                                valueField: 'strMaterialFee'
+                                                                valueField: 'strDescription'
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -291,7 +294,8 @@ Ext.define('Inventory.view.Category', {
                                                                 itemId: 'cboMaterialItem',
                                                                 fieldLabel: 'Material Item',
                                                                 labelWidth: 130,
-                                                                valueField: 'intMaterialItem'
+                                                                displayField: 'strItemNo',
+                                                                valueField: 'intItemId'
                                                             },
                                                             {
                                                                 xtype: 'checkboxfield',
@@ -331,7 +335,7 @@ Ext.define('Inventory.view.Category', {
                                                                 fieldLabel: 'Freight Item',
                                                                 labelWidth: 130,
                                                                 displayField: 'strItemNo',
-                                                                valueField: 'intFreightItem'
+                                                                valueField: 'intItemId'
                                                             }
                                                         ]
                                                     },
