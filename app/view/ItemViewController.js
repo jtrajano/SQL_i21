@@ -1522,6 +1522,30 @@ Ext.define('Inventory.view.ItemViewController', {
         if (colLocationCostingMethod) colLocationCostingMethod.renderer = me.CostingMethodRenderer;
     },
 
+    onLocationDoubleClick: function(view, record, item, index, e, eOpts){
+        var win = view.up('window');
+        var me = win.controller;
+        var vm = win.getViewModel();
+
+        if (!record){
+            iRely.Funtions.showErrorDialog('Please select a location to edit.');
+            return;
+        }
+
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                me.openItemLocationScreen('edit', win, record);
+            } });
+        }
+        else {
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    me.openItemLocationScreen('edit', win, record);
+                }
+            });
+        }
+    },
+
     onAddLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
@@ -1545,22 +1569,29 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = button.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
+        var grd = button.up('grid');
+        var selection = grd.getSelectionModel().getSelection();
+
+        if (selection.length <= 0){
+            iRely.Funtions.showErrorDialog('Please select a location to edit.');
+            return;
+        }
 
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemLocationScreen('edit', win);
+                me.openItemLocationScreen('edit', win, selection[0]);
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    me.openItemLocationScreen('edit', win);
+                    me.openItemLocationScreen('edit', win, selection[0]);
                 }
             });
         }
     },
 
-    openItemLocationScreen: function (action, window) {
+    openItemLocationScreen: function (action, window, record) {
         var win = window;
         var me = win.controller;
         var screenName = 'Inventory.view.ItemLocation';
@@ -1576,7 +1607,12 @@ Ext.define('Inventory.view.ItemViewController', {
 
             var controller = view.getController();
             var current = win.getViewModel().data.current;
-            controller.show({ id: current.get('intItemId'), action: action });
+            if (action === 'edit'){
+                controller.show({ itemId: current.get('intItemId'), locationId: record.get('intItemPricingId'), action: action });
+            }
+            else if (action === 'new') {
+                controller.show({ itemId: current.get('intItemId'), action: action });
+            }
         });
     },
 
@@ -2246,6 +2282,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#grdPricing": {
                 itemdblclick: this.onPricingDoubleClick
+            },
+            "#grdLocationStore": {
+                itemdblclick: this.onLocationDoubleClick
             }
         });
     }

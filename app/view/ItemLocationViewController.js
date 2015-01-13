@@ -155,15 +155,21 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         if (config) {
             win.show();
 
-            var context = me.setupContext( { window : win, itemId: config.id } );
-            me.intItemId = config.id;
+            var context = me.setupContext( { window : win } );
+            me.intItemId = config.itemId;
             if (config.action === 'new') {
                 context.data.addRecord();
             } else {
                 var filter = [{
                     column: 'intItemId',
-                    value: config.id
-                }];
+                    value: config.itemId,
+                    conjunction: 'and'
+                },{
+                    column: 'intItemLocationId',
+                    value: config.locationId,
+                    conjunction: 'and'
+                }
+                ];
                 context.data.load({
                     filters: filter
                 });
