@@ -781,7 +781,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter129",
+                                                    "name": "filter1",
                                                     "designerId": "9be921ca-705f-47f3-98b7-abf79fa0ae14",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -995,7 +995,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter130",
+                                                    "name": "filter11",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1033,21 +1033,6 @@
                                                     "designerId": "da1af9af-f3be-4b4b-a90b-56c4b7591e5b"
                                                 }
                                             ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "flex": 1,
-                                                "itemId": "colAccountGroup",
-                                                "text": "Account Group"
-                                            },
-                                            "name": "MyColumn56",
-                                            "designerId": "e46ad431-7f08-4175-b8e7-3aa82f0a9529"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -1146,6 +1131,21 @@
                                             },
                                             "name": "MyColumn24",
                                             "designerId": "879a5e0a-8c0a-4065-a570-64cf007122ce"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "flex": 1,
+                                                "itemId": "colAccountGroup",
+                                                "text": "Account Group"
+                                            },
+                                            "name": "MyColumn56",
+                                            "designerId": "e46ad431-7f08-4175-b8e7-3aa82f0a9529"
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -1287,7 +1287,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter131",
+                                                    "name": "filter12",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1930,7 +1930,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter132",
+                                                    "name": "filter13",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2656,7 +2656,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging1",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

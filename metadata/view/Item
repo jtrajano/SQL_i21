@@ -1740,21 +1740,6 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "flex": 1,
-                                                                "itemId": "colAccountGroup",
-                                                                "text": "Account Group"
-                                                            },
-                                                            "name": "MyColumn35",
-                                                            "designerId": "a339e8ae-ad10-4a33-9f77-98ca1add576e"
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
                                                                 "dataIndex": "string",
                                                                 "flex": 1,
                                                                 "itemId": "colGLAccountId",
@@ -1845,6 +1830,21 @@
                                                             },
                                                             "name": "MyColumn22",
                                                             "designerId": "176d0221-f56c-400a-be7a-3e56b44997bc"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "flex": 1,
+                                                                "itemId": "colAccountGroup",
+                                                                "text": "Account Group"
+                                                            },
+                                                            "name": "MyColumn35",
+                                                            "designerId": "a339e8ae-ad10-4a33-9f77-98ca1add576e"
                                                         },
                                                         {
                                                             "type": "Ext.grid.View",
