@@ -3064,17 +3064,17 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colPricingMethod',
-                                                        width: 85,
+                                                        width: 120,
                                                         dataIndex: 'string',
                                                         text: 'Pricing Method'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colPricingAmount',
-                                                        width: 80,
+                                                        width: 110,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'Amount'
+                                                        text: 'Amount/Percent'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -3601,10 +3601,10 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingDiscountRate',
-                                                                        width: 70,
+                                                                        width: 150,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Discount',
+                                                                        text: 'Discount Amount/Percent',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
