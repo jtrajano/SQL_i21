@@ -1802,19 +1802,78 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onPricingDoubleClick: function(view, record, item, index, e, eOpts){
+        var win = view.up('window');
+        var me = win.controller;
+        var vm = win.getViewModel();
+
+        if (!record){
+            iRely.Funtions.showErrorDialog('Please select a price to edit.');
+            return;
+        }
+
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                me.openItemPricingScreen('edit', win, record);
+            } });
+        }
+        else {
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    me.openItemPricingScreen('edit', win, record);
+                }
+            });
+        }
+    },
+
     onAddPricingClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
-        me.openItemPricingScreen('new', win);
+        var vm = win.getViewModel();
+
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                var record = win.viewModel.data.current.tblICItemUOMs().data.items[0];
+                me.openItemPricingScreen('new', win, record);
+            } });
+        }
+        else {
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    var record = win.viewModel.data.current.tblICItemUOMs().data.items[0];
+                    me.openItemPricingScreen('new', win, record);
+                }
+            });
+        }
     },
 
     onEditPricingClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
-        me.openItemPricingScreen('edit', win);
+        var vm = win.getViewModel();
+        var grd = button.up('grid');
+        var selection = grd.getSelectionModel().getSelection();
+
+        if (selection.length <= 0){
+            iRely.Funtions.showErrorDialog('Please select a price to edit.');
+            return;
+        }
+
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                me.openItemPricingScreen('edit', win, selection[0]);
+            } });
+        }
+        else {
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    me.openItemPricingScreen('edit', win, selection[0]);
+                }
+            });
+        }
     },
 
-    openItemPricingScreen: function (action, window) {
+    openItemPricingScreen: function (action, window, record) {
         var win = window;
         var me = win.controller;
         var screenName = 'Inventory.view.ItemPricing';
@@ -1830,7 +1889,17 @@ Ext.define('Inventory.view.ItemViewController', {
 
             var controller = view.getController();
             var current = win.getViewModel().data.current;
-            controller.show({ id: current.get('intItemId'), action: action });
+            if (action === 'edit'){
+                controller.show({ itemId: current.get('intItemId'), priceId: record.get('intItemPricingId'), action: action });
+            }
+            else if (action === 'new') {
+                if (record){
+                    controller.show({ itemId: current.get('intItemId'), uomId: record.get('intItemUOMId'), action: action });
+                }
+                else {
+                    controller.show({ itemId: current.get('intItemId'), action: action });
+                }
+            }
         });
     },
 
@@ -2174,6 +2243,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#colAllowPurchase": {
                 beforecheckchange: this.onUOMBeforeCheckChange
+            },
+            "#grdPricing": {
+                itemdblclick: this.onPricingDoubleClick
             }
         });
     }

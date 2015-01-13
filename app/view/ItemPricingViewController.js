@@ -84,14 +84,21 @@ Ext.define('Inventory.view.ItemPricingViewController', {
             win.show();
 
             var context = me.setupContext( { window : win } );
-            me.intItemId = config.id;
+            me.intItemId = config.itemId;
             if (config.action === 'new') {
+                me.uomId = config.uomId;
                 context.data.addRecord();
             } else {
                 var filter = [{
-                    column: 'intItemId',
-                    value: config.id
-                }];
+                        column: 'intItemId',
+                        value: config.itemId,
+                        conjunction: 'and'
+                    },{
+                        column: 'intItemPricingId',
+                        value: config.priceId,
+                        conjunction: 'and'
+                    }
+                ];
                 context.data.load({
                     filters: filter
                 });
@@ -106,6 +113,8 @@ Ext.define('Inventory.view.ItemPricingViewController', {
         record.set('ysnActive', true);
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
+        if (me.uomId)
+            record.set('intItemUnitMeasureId', me.uomId);
         record.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
         action(record);
     },
