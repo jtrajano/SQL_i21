@@ -10,43 +10,63 @@ BEGIN
 
 	EXEC('CREATE PROCEDURE uspSMSyncCompanyLocation  
 	@ToOrigin   bit    = 0  
-	,@LocationNumbers nvarchar(MAX) = ''all''  
+	,@LocationIds nvarchar(MAX) = ''all''  
 	,@AddedCount  int    = 0 OUTPUT  
 	,@UpdatedCount  int    = 0 OUTPUT  
 AS  
 BEGIN  
   
    IF (@ToOrigin = 1)  
-    BEGIN  
-     SELECT intCompanyLocationId   
-     INTO #Temp  
-     FROM dbo.[tblSMCompanyLocation]   
-     WHERE strLocationNumber IS NULL OR RTRIM(LTRIM(strLocationNumber)) = ''''
-     ORDER BY intCompanyLocationId  
+	BEGIN 
+		DECLARE @Temp AS table(intCompanyLocationId int)  
+		IF(LOWER(@LocationIds) = ''all'')     
+			BEGIN
+				INSERT INTO @Temp  
+				SELECT CL.intCompanyLocationId   
+				FROM [tblSMCompanyLocation] CL
+				WHERE CL.strLocationNumber IS NULL OR RTRIM(LTRIM(CL.strLocationNumber)) = ''''
+				ORDER BY CL.intCompanyLocationId 		
+			END
+		ELSE
+			BEGIN
+				INSERT INTO @Temp  
+				SELECT CL.intCompanyLocationId   
+				FROM [tblSMCompanyLocation] CL
+				INNER JOIN fnGetRowsFromDelimitedValues(@LocationIds) T
+					ON CL.intCompanyLocationId = T.intID 
+				WHERE CL.strLocationNumber IS NULL OR RTRIM(LTRIM(CL.strLocationNumber)) = ''''
+				ORDER BY CL.intCompanyLocationId 
+			END
+      
        
-     WHILE(EXISTS(SELECT TOP 1 1 FROM #Temp))  
-      BEGIN  
-       DECLARE @MaxNumber int  
-       DECLARE @TopLocId int  
-       SELECT @TopLocId = intCompanyLocationId FROM #Temp ORDER BY intCompanyLocationId  
-       SELECT @MaxNumber = MAX([agloc_loc_no]) FROM aglocmst  
-         
-       --IF(EXISTS(SELECT NULL FROM aglocmst WHERE ISNUMERIC([agloc_loc_no]) = 0) OR @MaxNumber > 998)  
-       -- BEGIN  
-  
-       -- END  
-       --ELSE  
-       -- BEGIN  
-  
-         --UPDATE tblSMCompanyLocation -- Uncomment Once strLocationNumberhas been adde to strLocationNumber  
-         --SET strLocationNumber = @MaxNumber + 1  
-         --WHERE intCompanyLocationId = @TopLocId  
-        --END  
-          
-       DELETE FROM #Temp WHERE intCompanyLocationId = @TopLocId  
-      END   
-        
-     DROP TABLE #Temp         
+		DECLARE @TempTable AS table(strLocationNumber nvarchar(3), intRowNumber int)
+		INSERT INTO @TempTable 
+		SELECT [agloc_loc_no], ROW_NUMBER() OVER (ORDER BY [agloc_loc_no]) 
+		FROM	[aglocmst]   
+	          
+		WHILE(EXISTS(SELECT TOP 1 1 FROM @Temp))  
+			BEGIN  
+			DECLARE @NextRowNumber int  
+			DECLARE @NextNumber nvarchar(3)  
+			DECLARE @TopLocId int  
+			SELECT TOP 1 @TopLocId = intCompanyLocationId FROM @Temp ORDER BY intCompanyLocationId  
+
+			SELECT TOP 1 @NextRowNumber = intRowNumber FROM @TempTable WHERE  CAST(strLocationNumber as int) <> intRowNumber  
+			SET @NextNumber = REPLICATE(''0'',3 - LEN(CAST(@NextRowNumber as nvarchar(3)))) + CAST(@NextRowNumber as nvarchar(3))
+			
+			UPDATE @TempTable
+		    SET intRowNumber = CAST(strLocationNumber as int)
+			WHERE intRowNumber = @NextRowNumber
+			
+			INSERT INTO @TempTable
+			SELECT @NextNumber, @NextRowNumber
+			
+			UPDATE tblSMCompanyLocation 
+			SET strLocationNumber = @NextNumber  
+			WHERE intCompanyLocationId = @TopLocId  
+
+			DELETE FROM @Temp WHERE intCompanyLocationId = @TopLocId 
+			END                  
     END  
       
    DECLARE @RecordsToProcess table(strNumber varchar(3), strName varchar(30))  
@@ -59,7 +79,7 @@ BEGIN
   
   
   
-   IF(LOWER(@LocationNumbers) = ''all'')  
+   IF(LOWER(@LocationIds) = ''all'')  
     BEGIN  
      IF (@ToOrigin = 1)  
       INSERT INTO @RecordsToProcess(strName, strNumber)
@@ -75,12 +95,12 @@ BEGIN
      IF (@ToOrigin = 1)     
       INSERT INTO @RecordsToProcess(strName, strNumber)
       SELECT CL.[strLocationName], CL.[strLocationNumber]  
-      FROM fnGetRowsFromDelimitedValues(@LocationNumbers) T  
+      FROM fnGetRowsFromDelimitedValues(@LocationIds) T  
       INNER JOIN tblSMCompanyLocation CL ON T.[intID] = CL.[intCompanyLocationId]  
      ELSE  
       INSERT INTO @RecordsToProcess(strName, strNumber)   
       SELECT AG.[agloc_name], AG.[agloc_loc_no]  
-      FROM fnGetRowsFromDelimitedValues(@LocationNumbers) T  
+      FROM fnGetRowsFromDelimitedValues(@LocationIds) T  
       INNER JOIN aglocmst AG ON T.[intID] = AG.[agloc_loc_no]          
     END    
       
@@ -223,7 +243,7 @@ BEGIN
       ,CL.[strLocationName]   --[agloc_name]  
       ,(CASE WHEN LEN(RTRIM(LTRIM(CL.[strAddress]))) > 30  
         THEN SUBSTRING(RTRIM(LTRIM(CL.[strAddress])), 0, 29)  
-        ELSE LEN(RTRIM(LTRIM(CL.[strAddress])))  
+        ELSE RTRIM(LTRIM(CL.[strAddress])) 
        END)      --[agloc_addr]  
       ,(CASE WHEN LEN(RTRIM(LTRIM(CL.[strAddress]))) > 30  
         THEN SUBSTRING(RTRIM(LTRIM(CL.[strAddress])), 29, LEN(RTRIM(LTRIM(CL.[strAddress]))) - 31)  
