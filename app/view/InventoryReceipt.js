@@ -515,10 +515,32 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         labelWidth: 75
                                                                     },
                                                                     {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtReceiver',
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intUserSecurityID',
+                                                                                dataType: 'numeric',
+                                                                                text: 'User Security Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strUserName',
+                                                                                dataType: 'string',
+                                                                                text: 'User Name',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strFullName',
+                                                                                dataType: 'string',
+                                                                                text: 'Full Name',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboReceiver',
                                                                         fieldLabel: 'Receiver',
-                                                                        labelWidth: 75
+                                                                        labelWidth: 75,
+                                                                        displayField: 'strUserName',
+                                                                        valueField: 'intUserSecurityID'
                                                                     }
                                                                 ]
                                                             },

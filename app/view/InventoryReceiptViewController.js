@@ -84,8 +84,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 store: '{country}',
                 readOnly: '{current.ysnPosted}'
             },
-            txtReceiver: {
+            cboReceiver: {
                 value: '{current.intReceiverId}',
+                store: '{users}',
                 readOnly: '{current.ysnPosted}'
             },
             txtVessel: {
@@ -364,6 +365,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var record = Ext.create('Inventory.model.Receipt');
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
+        if (app.UserId > 0)
+            record.set('intReceiverId', app.UserId);
         record.set('dtmReceiptDate', today);
         record.set('ysnPosted', false);
         action(record);

@@ -26,7 +26,7 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'strBillOfLading', type: 'string'},
         { name: 'intShipViaId', type: 'int', allowNull: true },
         { name: 'intProductOrigin', type: 'int', allowNull: true },
-        { name: 'intReceiverId', type: 'string'},
+        { name: 'intReceiverId', type: 'int', allowNull: true },
         { name: 'intCurrencyId', type: 'int', allowNull: true },
         { name: 'strVessel', type: 'string'},
         { name: 'intFreightTermId', type: 'int', allowNull: true },

@@ -1029,24 +1029,59 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.Text",
+                                                            "type": "Ext.form.field.ComboBox",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intUserSecurityID',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'User Security Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strUserName',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'User Name',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strFullName',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Full Name',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strUserName",
                                                                 "fieldLabel": "Receiver",
-                                                                "itemId": "txtReceiver",
+                                                                "itemId": "cboReceiver",
                                                                 "labelWidth": 75,
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
                                                                 "name": null,
                                                                 "readOnly": null,
+                                                                "valueField": "intUserSecurityID",
                                                                 "width": null
                                                             },
-                                                            "name": "MyTextField6",
-                                                            "designerId": "d9440ce3-8e07-4197-a08b-74d2b9cccca9"
+                                                            "name": "MyComboBox27",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "d9440ce3-8e07-4197-a08b-74d2b9cccca9",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },

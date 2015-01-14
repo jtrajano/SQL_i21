@@ -13,7 +13,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'i21.store.CountryBuffered',
         'i21.store.CurrencyBuffered',
         'i21.store.FreightTermsBuffered',
-        'i21.store.ShipViaBuffered'
+        'i21.store.ShipViaBuffered',
+        'i21.store.UserListBuffered'
     ],
 
     stores: {
@@ -117,6 +118,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         transferor: {
             type: 'companylocationbuffered'
+        },
+        users: {
+            type: 'userlistbuffered'
         },
         currency: {
             type: 'currencybuffered'
