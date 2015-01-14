@@ -5,7 +5,8 @@ CREATE PROCEDURE [testi21Database].[Fake posted transactions using AVG, scenario
 AS
 
 BEGIN
-	EXEC testi21Database.[Fake items for posted transactions]
+	EXEC testi21Database.[Fake inventory items]
+	EXEC testi21Database.[Fake open fiscal year and accounting periods]
 
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -18,6 +19,10 @@ BEGIN
 	DECLARE @Default_Location AS INT = 1
 			,@NewHaven AS INT = 2
 			,@BetterHaven AS INT = 3
+
+	-- Declare the variables for the currencies
+	DECLARE @USD AS INT = 1;	
+	DECLARE @USD_ExchangeRate AS NUMERIC(18,6) = 1;
 				
 	-- Declare the variable for unit of measure
 	DECLARE @Each AS INT = 1
@@ -43,6 +48,9 @@ BEGIN
 	DECLARE @WriteOffSold_BetterHaven AS INT = 4002
 	DECLARE @RevalueSold_BetterHaven AS INT = 5002
 	DECLARE @AutoNegative_BetterHaven AS INT = 6002
+
+	-- Batch Id
+	DECLARE @strBatchId AS NVARCHAR(40) = 'BATCH-0000001'
 
 	-- Define the additional tables to fake
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipment', @Identity = 1;
@@ -274,6 +282,7 @@ BEGIN
 				,strTransactionId
 				,ysnIsUnposted
 				,intJournalLineNo
+				,dblExchangeRate
 		)
 		-- @WetGrains
 		SELECT	dtmDate = '01/01/2014'
@@ -284,6 +293,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @Inventory_Default
@@ -293,6 +303,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 		-- @StickyGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -303,6 +314,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @APClearing_Default
@@ -312,6 +324,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 		-- @PremiumGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -322,6 +335,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @APClearing_Default
@@ -331,6 +345,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 		-- @ColdGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -341,6 +356,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @APClearing_Default
@@ -350,6 +366,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 		-- @HotGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -360,6 +377,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @APClearing_Default
@@ -369,6 +387,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
 				,intJournalLineNo = NULL 
+				,dblExchangeRate = 1
 
 		INSERT INTO dbo.tblGLSummary(
 				dtmDate

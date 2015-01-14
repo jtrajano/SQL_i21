@@ -14,13 +14,11 @@ BEGIN
 			,@PremiumGrains AS INT = 3
 			,@ColdGrains AS INT = 4
 			,@HotGrains AS INT = 5
-			,@InvalidItem AS INT = -1
 
 	-- Declare the variables for location
 	DECLARE @Default_Location AS INT = 1
 			,@NewHaven AS INT = 2
 			,@BetterHaven AS INT = 3
-			,@InvalidLocation AS INT = -1
 				
 	-- Declare the variables for the currencies
 	DECLARE @USD AS INT = 1;	
