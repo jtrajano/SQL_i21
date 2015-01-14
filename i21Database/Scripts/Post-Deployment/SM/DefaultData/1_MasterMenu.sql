@@ -1390,3 +1390,18 @@ GO
 	/* ------------------------------------------------- */
 
 GO
+
+	/* ------------------------------------------------- */
+	/* --- Update Help Desk Menu Commands for MVVM ----- */
+	/* ------------------------------------------------- */
+
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketJobCode' WHERE strCommand = 'HelpDesk.controller.TicketJobCode'
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketPriority' WHERE strCommand = 'HelpDesk.controller.TicketPriority'
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketStatus' WHERE strCommand = 'HelpDesk.controller.TicketStatus'
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketType' WHERE strCommand = 'HelpDesk.controller.TicketType'
+
+	/* ------------------------------------------------- */
+	/* -- End Update Help Desk Menu Commands for MVVM -- */
+	/* ------------------------------------------------- */
+
+GO
