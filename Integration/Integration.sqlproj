@@ -235,5 +235,6 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </None>
     <None Include="dbo\Stored Procedures\uspGLImportSubLedger.sql" />
+    <None Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
   </ItemGroup>
 </Project>

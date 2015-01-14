@@ -962,7 +962,6 @@
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\User Defined Types\InventoryTranactionStockToReverse.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
