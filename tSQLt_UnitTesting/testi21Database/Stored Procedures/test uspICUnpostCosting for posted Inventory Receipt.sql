@@ -4,6 +4,18 @@ AS
 BEGIN 
 	EXEC [testi21Database].[Fake posted transactions using AVG, scenario 1];
 
+	-- Declare the variables for grains (item)
+	DECLARE @WetGrains AS INT = 1
+			,@StickyGrains AS INT = 2
+			,@PremiumGrains AS INT = 3
+			,@ColdGrains AS INT = 4
+			,@HotGrains AS INT = 5
+
+	-- Declare the variables for location
+	DECLARE @Default_Location AS INT = 1
+			,@NewHaven AS INT = 2
+			,@BetterHaven AS INT = 3
+
 	DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-0000002'
 	DECLARE @intTransactionId AS INT = 1
 	DECLARE @strTransactionId AS NVARCHAR(40) = 'InvRcpt-0001'
@@ -81,6 +93,20 @@ BEGIN
 		,intRelatedTransactionId INT
 		,strRelatedTransactionId NVARCHAR(40)
 		,strTransactionForm NVARCHAR(255)	
+	)
+
+	CREATE TABLE expectedItemStock (
+		intItemId INT
+		,intLocationId INT
+		,dblAverageCost NUMERIC(18,6)
+		,dblUnitOnHand NUMERIC(18,6)
+	)
+
+	CREATE TABLE actualItemStock (
+		intItemId INT
+		,intLocationId INT
+		,dblAverageCost NUMERIC(18,6)
+		,dblUnitOnHand NUMERIC(18,6)
 	)
 END 
 
@@ -186,8 +212,41 @@ BEGIN
 			,strTransactionForm 
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	intTransactionId = @intTransactionId
-			AND strTransactionId = @strTransactionId		
-	
+			AND strTransactionId = @strTransactionId
+
+	-- Setup the expected Item Stock
+	-- Expect the stock goes back to zero. The average cost should remain the same. 
+	INSERT INTO expectedItemStock (
+			intItemId
+			,intLocationId
+			,dblAverageCost
+			,dblUnitOnHand
+	)
+	SELECT	intItemId = @WetGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand = 0 
+	UNION ALL
+	SELECT	intItemId = @StickyGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand = 0
+	UNION ALL
+	SELECT	intItemId = @PremiumGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand = 0
+	UNION ALL
+	SELECT	intItemId = @ColdGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand = 0
+	UNION ALL
+	SELECT	intItemId = @HotGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand = 0
+							
 	-- Do the act
 	INSERT INTO @GLDetail (
 		[dtmDate] 
@@ -298,9 +357,23 @@ BEGIN
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
-				
+
+	-- Actual item stock data
+	INSERT INTO actualItemStock (
+			intItemId
+			,intLocationId
+			,dblAverageCost
+			,dblUnitOnHand
+	)
+	SELECT	intItemId 
+			,intLocationId 
+			,dblAverageCost 
+			,dblUnitOnHand 
+	FROM dbo.tblICItemStock	
+			
 	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
 	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
+	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
 END 
 
 -- Clean-up: remove the tables used in the unit test
@@ -315,3 +388,9 @@ IF OBJECT_ID('expectedInventoryTransaction') IS NOT NULL
 
 IF OBJECT_ID('actualInventoryTransaction') IS NOT NULL 
 	DROP TABLE dbo.actualInventoryTransaction
+
+IF OBJECT_ID('expectedItemStock') IS NOT NULL 
+	DROP TABLE expectedItemStock
+
+IF OBJECT_ID('actualItemStock') IS NOT NULL 
+	DROP TABLE dbo.actualItemStock

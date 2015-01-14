@@ -126,7 +126,41 @@ BEGIN
 			,dblUnitCost = 2.00
 			,intUnitMeasureId = @Each
 			,intInventoryReceiptId = 1				
-					
+
+	----------------------------------------------------------------
+	-- Fake data for tblICItemStock
+	----------------------------------------------------------------
+	INSERT INTO dbo.tblICItemStock(
+			intItemId
+			,intLocationId
+			,dblAverageCost
+			,dblUnitOnHand	
+	)
+	SELECT 	intItemId = @WetGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= 100
+	UNION ALL 
+	SELECT 	intItemId = @StickyGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= 100	
+	UNION ALL 
+	SELECT 	intItemId = @PremiumGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= 100		
+	UNION ALL 
+	SELECT 	intItemId = @ColdGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= 100	
+	UNION ALL 
+	SELECT 	intItemId = @HotGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= 100
+
 	----------------------------------------------------------------
 	-- Fake data for tblICInventoryFIFO
 	----------------------------------------------------------------

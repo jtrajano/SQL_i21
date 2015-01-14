@@ -610,6 +610,9 @@
     <Build Include="testi21Database\Stored Procedures\Fake posted transactions using AVG, scenario 2.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake transactions for item costing.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake COA used in Cash Management.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for posted Inventory Shipment.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
