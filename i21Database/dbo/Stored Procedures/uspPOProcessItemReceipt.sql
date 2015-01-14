@@ -13,15 +13,17 @@ SET ANSI_WARNINGS OFF
  
 DECLARE @itemReceiptId INT, @itemReceiptNumber NVARCHAR(50);
 -- Implement your code that validates the transaction you need to process.
- 
+
 -- Add code to lock-out editing of the purchase order after it has been processed.
   
 -- Call inventory stored procedure to process your transaction into "Item Receipt"
 
+DECLARE @icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @userId);
+
 EXEC dbo.uspICProcessToItemReceipt
 	@intSourceTransactionId = @poId
 	,@strSourceType = 'Purchase Order'
-	,@intUserId = @userId
+	,@intUserId = @icUserId
 	,@InventoryReceiptId = @itemReceiptId OUTPUT
 
 SELECT @itemReceiptNumber = strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @itemReceiptId

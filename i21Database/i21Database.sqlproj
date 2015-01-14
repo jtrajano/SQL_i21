@@ -962,6 +962,7 @@
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\User Defined Types\InventoryTranactionStockToReverse.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
@@ -1000,6 +1001,7 @@
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForReversePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspNRScheduleHistoryReversePayment.sql" />
+    <Build Include="dbo\Views\vyuAPReceivedItems.sql" />
     <Build Include="dbo\Views\vyuARGetInventoryItem.sql" />
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForAdjustment.sql" />
