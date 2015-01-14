@@ -1,224 +1,317 @@
 ﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting for posted Inventory Receipt]
 AS
-	-- Arrange 
-	BEGIN 
-		EXEC [testi21Database].[Fake posted transactions using AVG, scenario 1];
-	END 
+-- Arrange 
+BEGIN 
+	EXEC [testi21Database].[Fake posted transactions using AVG, scenario 1];
 
---BEGIN
---	-- Arrange 
---	BEGIN 
---		EXEC [testi21Database].[Fake posted transactions for testing the unposting];
+	DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-0000002'
+	DECLARE @intTransactionId AS INT = 1
+	DECLARE @strTransactionId AS NVARCHAR(40) = 'InvRcpt-0001'
+	DECLARE @intUserId AS INT = 1
+	DECLARE @GLDetail AS dbo.RecapTableType 
 
---		-- Declare the variables for grains (item)
---		DECLARE @WetGrains AS INT = 1
---				,@StickyGrains AS INT = 2
---				,@PremiumGrains AS INT = 3
---				,@ColdGrains AS INT = 4
---				,@HotGrains AS INT = 5
---				,@InvalidItem AS INT = -1
+	-- Create the tables used for assertion
+	CREATE TABLE expectedGLDetail (
+		dtmDate DATETIME
+		,strBatchId NVARCHAR(20)
+		,intAccountId INT
+		,dblDebit NUMERIC(18,6)
+		,dblCredit NUMERIC(18,6)
+		,dblDebitUnit NUMERIC(18,6)
+		,dblCreditUnit NUMERIC(18,6)
+		,strDescription NVARCHAR(255)
+		,strCode NVARCHAR(40)
+		,intJournalLineNo INT
+		,ysnIsUnposted BIT
+		,strTransactionId NVARCHAR(40)
+		,intTransactionId INT
+		,strModuleName NVARCHAR(255)
+	)
 
---		-- Declare the variables for location
---		DECLARE @Default_Location AS INT = 1
---				,@NewHaven AS INT = 2
---				,@BetterHaven AS INT = 3
---				,@InvalidLocation AS INT = -1
+	CREATE TABLE actualGLDetail (
+		dtmDate DATETIME
+		,strBatchId NVARCHAR(20)
+		,intAccountId INT
+		,dblDebit NUMERIC(18,6)
+		,dblCredit NUMERIC(18,6)
+		,dblDebitUnit NUMERIC(18,6)
+		,dblCreditUnit NUMERIC(18,6)
+		,strDescription NVARCHAR(255)
+		,strCode NVARCHAR(40)
+		,intJournalLineNo INT
+		,ysnIsUnposted BIT
+		,strTransactionId NVARCHAR(40)
+		,intTransactionId INT
+		,strModuleName NVARCHAR(255)
+	)
+
+	CREATE TABLE expectedInventoryTransaction (
+		intItemId INT
+		,intLocationId INT
+		,dtmDate DATETIME
+		,dblUnitQty NUMERIC(18,6)
+		,dblCost NUMERIC(18,6)
+		,dblValue NUMERIC(18,6)
+		,dblSalesPrice NUMERIC(18,6)
+		,intTransactionId INT
+		,strTransactionId NVARCHAR(40)
+		,strBatchId NVARCHAR(20)
+		,intTransactionTypeId INT
+		,ysnIsUnposted BIT
+		,intRelatedInventoryTransactionId INT
+		,intRelatedTransactionId INT
+		,strRelatedTransactionId NVARCHAR(40)
+		,strTransactionForm NVARCHAR(255)	
+	)
+
+	CREATE TABLE actualInventoryTransaction (
+		intItemId INT
+		,intLocationId INT
+		,dtmDate DATETIME
+		,dblUnitQty NUMERIC(18,6)
+		,dblCost NUMERIC(18,6)
+		,dblValue NUMERIC(18,6)
+		,dblSalesPrice NUMERIC(18,6)
+		,intTransactionId INT
+		,strTransactionId NVARCHAR(40)
+		,strBatchId NVARCHAR(20)
+		,intTransactionTypeId INT
+		,ysnIsUnposted BIT
+		,intRelatedInventoryTransactionId INT
+		,intRelatedTransactionId INT
+		,strRelatedTransactionId NVARCHAR(40)
+		,strTransactionForm NVARCHAR(255)	
+	)
+END 
+
+-- Act
+BEGIN
+	-- Setup the expected data. 
+	-- Reverse the posted GL entries
+	INSERT INTO dbo.expectedGLDetail (
+		dtmDate
+		,strBatchId
+		,intAccountId
+		,dblDebit
+		,dblCredit
+		,dblDebitUnit
+		,dblCreditUnit
+		,strDescription
+		,strCode
+		,intJournalLineNo
+		,ysnIsUnposted
+		,strTransactionId
+		,intTransactionId 
+		,strModuleName 
+	)
+	SELECT	dtmDate
+			,strBatchId = @strBatchId
+			,intAccountId
+			-----------------------------------------------
+			-- Reverse the debit and credit amounts
+			-- { 
+				,dblDebit = dblCredit 
+				,dblCredit = dblDebit 
+			-- }
+			,ISNULL(dblDebitUnit, 0)
+			,ISNULL(dblCreditUnit, 0)
+			,strDescription
+			,strCode
+			,intJournalLineNo = intJournalLineNo + 5
+			,ysnIsUnposted = 1
+			,strTransactionId
+			,intTransactionId 
+			,strModuleName 
+	FROM	dbo.tblGLDetail
+	WHERE	tblGLDetail.intTransactionId = @intTransactionId
+			AND tblGLDetail.strTransactionId = @strTransactionId
 				
---		-- Declare the variables for the currencies
---		DECLARE @USD AS INT = 1;
-
---		-- Create the expected and actual tables. 
---		CREATE TABLE expectedGLDetail (
---			[dtmDate]                    DATETIME         NOT NULL
---			,[strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL
---			,[intAccountId]              INT              NULL
---			,[dblDebit]                  NUMERIC (18, 6)  NULL
---			,[dblCredit]                 NUMERIC (18, 6)  NULL
---			,[dblDebitUnit]              NUMERIC (18, 6)  NULL
---			,[dblCreditUnit]             NUMERIC (18, 6)  NULL
---			,[strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL    
---			,[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[intCurrencyId]             INT              NULL
---			,[dblExchangeRate]           NUMERIC (38, 20) NOT NULL
---			,[dtmTransactionDate]        DATETIME         NULL
---			,[strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL
---			,[intJournalLineNo]			 INT              NULL
---			,[ysnIsUnposted]             BIT              NOT NULL    
---			,[intUserId]                 INT              NULL
---			,[intEntityId]				 INT              NULL
---			,[strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL
---			,[intTransactionId]          INT              NULL
---			,[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[intConcurrencyId]          INT              DEFAULT 1 NOT NULL		
---		)
-
---		CREATE TABLE actualGLDetail (
---			[dtmDate]                    DATETIME         NOT NULL
---			,[strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL
---			,[intAccountId]              INT              NULL
---			,[dblDebit]                  NUMERIC (18, 6)  NULL
---			,[dblCredit]                 NUMERIC (18, 6)  NULL
---			,[dblDebitUnit]              NUMERIC (18, 6)  NULL
---			,[dblCreditUnit]             NUMERIC (18, 6)  NULL
---			,[strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL    
---			,[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[intCurrencyId]             INT              NULL
---			,[dblExchangeRate]           NUMERIC (38, 20) NOT NULL
---			,[dtmTransactionDate]        DATETIME         NULL
---			,[strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL
---			,[intJournalLineNo]			 INT              NULL
---			,[ysnIsUnposted]             BIT              NOT NULL    
---			,[intUserId]                 INT              NULL
---			,[intEntityId]				 INT              NULL
---			,[strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL
---			,[intTransactionId]          INT              NULL
---			,[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL
---			,[intConcurrencyId]          INT              DEFAULT 1 NOT NULL		
---		)
-
---		CREATE TABLE expectedInventoryTransaction (
---			[intItemId]								INT NOT NULL
---			,[intLocationId]						INT NOT NULL
---			,[dtmDate]								DATETIME NOT NULL
---			,[dblUnitQty]							NUMERIC(18, 6) NOT NULL DEFAULT 0 
---			,[dblCost]								NUMERIC(18, 6) NOT NULL DEFAULT 0 
---			,[dblValue]								NUMERIC(18, 6) NULL 
---			,[dblSalesPrice]						NUMERIC(18, 6) NOT NULL DEFAULT 0 
---			,[intCurrencyId]						INT NULL
---			,[dblExchangeRate]						DECIMAL (38, 20) DEFAULT 1 NOT NULL
---			,[intTransactionId]						INT NOT NULL 
---			,[strTransactionId]						NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL 
---			,[strBatchId]							NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL 
---			,[intTransactionTypeId]					INT NOT NULL 
---			,[intLotId]								INT NULL 
---			,[ysnIsUnposted]						BIT NULL
---			,[intRelatedInventoryTransactionId]		INT NULL
---			,[intRelatedTransactionId]				INT NULL
---			,[strRelatedTransactionId]				NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
---			,[strTransactionForm]					NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL
---			,[dtmCreated]							DATETIME NULL 
---			,[intCreatedUserId]						INT NULL 
---			,[intConcurrencyId]						INT NOT NULL DEFAULT 1 		
---		)
-
---		CREATE TABLE actualInventoryTransaction (
---			[intItemId]								INT NOT NULL
---			,[intLocationId]						INT NOT NULL
---			,[dtmDate]								DATETIME NOT NULL
---			,[dblUnitQty]							NUMERIC(18, 6) NOT NULL DEFAULT 0 
---			,[dblCost]								NUMERIC(18, 6) NOT NULL DEFAULT 0 
---			,[dblValue]								NUMERIC(18, 6) NULL 
---			,[dblSalesPrice]						NUMERIC(18, 6) NOT NULL DEFAULT 0 
---			,[intCurrencyId]						INT NULL
---			,[dblExchangeRate]						DECIMAL (38, 20) DEFAULT 1 NOT NULL
---			,[intTransactionId]						INT NOT NULL 
---			,[strTransactionId]						NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL 
---			,[strBatchId]							NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL 
---			,[intTransactionTypeId]					INT NOT NULL 
---			,[intLotId]								INT NULL 
---			,[ysnIsUnposted]						BIT NULL
---			,[intRelatedInventoryTransactionId]		INT NULL
---			,[intRelatedTransactionId]				INT NULL
---			,[strRelatedTransactionId]				NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
---			,[strTransactionForm]					NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL
---			,[dtmCreated]							DATETIME NULL 
---			,[intCreatedUserId]						INT NULL 
---			,[intConcurrencyId]						INT NOT NULL DEFAULT 1 	
---		)
---	END 
+	-- Reverse of the inventory transactions
+	INSERT INTO expectedInventoryTransaction (
+			intItemId 
+			,intLocationId 
+			,dtmDate 
+			,dblUnitQty 
+			,dblCost 
+			,dblValue
+			,dblSalesPrice 
+			,intTransactionId 
+			,strTransactionId 
+			,strBatchId 
+			,intTransactionTypeId 
+			,ysnIsUnposted 
+			,intRelatedInventoryTransactionId 
+			,intRelatedTransactionId 
+			,strRelatedTransactionId 
+			,strTransactionForm 
+	)
+	SELECT	intItemId 
+			,intLocationId 
+			,dtmDate 
+			,dblUnitQty 
+			,dblCost 
+			,dblValue
+			,dblSalesPrice 
+			,intTransactionId 
+			,strTransactionId 
+			,strBatchId 
+			,intTransactionTypeId 
+			,ysnIsUnposted = 1
+			,intRelatedInventoryTransactionId 
+			,intRelatedTransactionId 
+			,strRelatedTransactionId 
+			,strTransactionForm 
+	FROM	dbo.tblICInventoryTransaction
+	WHERE	intTransactionId = @intTransactionId
+			AND strTransactionId = @strTransactionId
+	UNION ALL 
+	SELECT	intItemId 
+			,intLocationId 
+			,dtmDate 
+			-- Reverse the unit qty
+			--{
+				,dblUnitQty = dblUnitQty * -1
+			--}
+			,dblCost 
+			,dblValue
+			,dblSalesPrice 
+			,intTransactionId 
+			,strTransactionId 
+			,strBatchId = @strBatchId
+			,intTransactionTypeId 
+			,ysnIsUnposted = 1
+			,intRelatedInventoryTransactionId = intInventoryTransactionId
+			,intRelatedTransactionId 
+			,strRelatedTransactionId 
+			,strTransactionForm 
+	FROM	dbo.tblICInventoryTransaction
+	WHERE	intTransactionId = @intTransactionId
+			AND strTransactionId = @strTransactionId		
 	
---	-- Act 
---	BEGIN 
---		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-200001'
---				,@intTransactionId AS INT = 1
---				,@strTransactionId AS NVARCHAR(40) = 'PURCHASE-100000'
---				,@intUserId AS INT = 1
+	-- Do the act
+	INSERT INTO @GLDetail (
+		[dtmDate] 
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[strCode]
+		,[strReference]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[dtmTransactionDate]
+		,[strJournalLineDescription]
+		,[intJournalLineNo]
+		,[ysnIsUnposted]
+		,[intUserId]
+		,[intEntityId]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]		
+	)
+	EXEC dbo.uspICUnpostCosting
+		@intTransactionId
+		,@strTransactionId
+		,@strBatchId
+		,@intUserId
+END 
 
---		DECLARE @GLDetail AS dbo.RecapTableType
-
---		INSERT INTO @GLDetail
---		EXEC dbo.uspICUnpostCosting
---			@intTransactionId
---			,@strTransactionId
---			,@strBatchId
---			,@intUserId
-			
---		INSERT INTO actualGLDetail (
---				[dtmDate]                    
---				,[strBatchId]                
---				,[intAccountId]              
---				,[dblDebit]                  
---				,[dblCredit]                 
---				,[dblDebitUnit]              
---				,[dblCreditUnit]             
---				,[strDescription]            
---				,[strCode]                   
---				,[strReference]              
---				,[intCurrencyId]             
---				,[dblExchangeRate]           
---				,[dtmTransactionDate]        
---				,[strJournalLineDescription] 
---				,[intJournalLineNo]			 
---				,[ysnIsUnposted]             
---				,[intUserId]                 
---				,[intEntityId]				 
---				,[strTransactionId]          
---				,[intTransactionId]          
---				,[strTransactionType]        
---				,[strTransactionForm]        
---				,[strModuleName]             
---				,[intConcurrencyId]          	
---		)
---		SELECT	[dtmDate]                    
---				,[strBatchId]                
---				,[intAccountId]              
---				,[dblDebit]                  
---				,[dblCredit]                 
---				,[dblDebitUnit]              
---				,[dblCreditUnit]             
---				,[strDescription]            
---				,[strCode]                   
---				,[strReference]              
---				,[intCurrencyId]             
---				,[dblExchangeRate]           
---				,[dtmTransactionDate]        
---				,[strJournalLineDescription] 
---				,[intJournalLineNo]			 
---				,[ysnIsUnposted]             
---				,[intUserId]                 
---				,[intEntityId]				 
---				,[strTransactionId]          
---				,[intTransactionId]          
---				,[strTransactionType]        
---				,[strTransactionForm]        
---				,[strModuleName]             
---				,[intConcurrencyId]          	
---		FROM @GLDetail
+-- Assert
+BEGIN
+	-- Get the data for assertion 
+	-- Actual data from @GLDetail
+	INSERT INTO dbo.actualGLDetail (
+		dtmDate
+		,strBatchId
+		,intAccountId
+		,dblDebit
+		,dblCredit
+		,dblDebitUnit
+		,dblCreditUnit
+		,strDescription
+		,strCode
+		,intJournalLineNo
+		,ysnIsUnposted
+		,strTransactionId
+		,intTransactionId 
+		,strModuleName 
+	)
+	SELECT	dtmDate
+			,strBatchId
+			,intAccountId
+			,dblDebit
+			,dblCredit
+			,dblDebitUnit
+			,dblCreditUnit
+			,strDescription
+			,strCode
+			,intJournalLineNo
+			,ysnIsUnposted 
+			,strTransactionId
+			,intTransactionId 
+			,strModuleName 
+	FROM	@GLDetail
 		
---	END 
-	
---	-- Assert
---	BEGIN
---		EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
---		EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
---	END 
+	-- Actual data from tblICInventoryTransaction
+	-- Reverse of the inventory transactions
+	INSERT INTO actualInventoryTransaction (
+			intItemId 
+			,intLocationId 
+			,dtmDate 
+			,dblUnitQty 
+			,dblCost 
+			,dblValue
+			,dblSalesPrice 
+			,intTransactionId 
+			,strTransactionId 
+			,strBatchId 
+			,intTransactionTypeId 
+			,ysnIsUnposted 
+			,intRelatedInventoryTransactionId 
+			,intRelatedTransactionId 
+			,strRelatedTransactionId 
+			,strTransactionForm 
+	)
+	SELECT	intItemId 
+			,intLocationId 
+			,dtmDate 
+			,dblUnitQty 
+			,dblCost 
+			,dblValue
+			,dblSalesPrice 
+			,intTransactionId 
+			,strTransactionId 
+			,strBatchId 
+			,intTransactionTypeId 
+			,ysnIsUnposted = 1
+			,intRelatedInventoryTransactionId 
+			,intRelatedTransactionId 
+			,strRelatedTransactionId 
+			,strTransactionForm 
+	FROM	dbo.tblICInventoryTransaction
+	WHERE	intTransactionId = @intTransactionId
+			AND strTransactionId = @strTransactionId
+				
+	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
+	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
+END 
 
---	-- Clean-up: remove the tables used in the unit test
---	IF OBJECT_ID('expectedGLDetail') IS NOT NULL 
---		DROP TABLE expectedGLDetail
+-- Clean-up: remove the tables used in the unit test
+IF OBJECT_ID('expectedGLDetail') IS NOT NULL 
+	DROP TABLE expectedGLDetail
 
---	IF OBJECT_ID('actualGLDetail') IS NOT NULL 
---		DROP TABLE dbo.actualGLDetail
+IF OBJECT_ID('actualGLDetail') IS NOT NULL 
+	DROP TABLE dbo.actualGLDetail
 
---	IF OBJECT_ID('expectedInventoryTransaction') IS NOT NULL 
---		DROP TABLE expectedInventoryTransaction
+IF OBJECT_ID('expectedInventoryTransaction') IS NOT NULL 
+	DROP TABLE expectedInventoryTransaction
 
---	IF OBJECT_ID('actualInventoryTransaction') IS NOT NULL 
---		DROP TABLE dbo.actualInventoryTransaction
---END 
+IF OBJECT_ID('actualInventoryTransaction') IS NOT NULL 
+	DROP TABLE dbo.actualInventoryTransaction

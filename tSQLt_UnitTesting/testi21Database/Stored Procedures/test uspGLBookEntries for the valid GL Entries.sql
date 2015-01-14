@@ -39,7 +39,7 @@ BEGIN
 
 		-- Add fake data
 		EXEC testi21Database.[Fake COA used for fake inventory items];
-		EXEC testi21Database.[Fake data for the accounting period];
+		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 
 		-- Add the expected tables 
 		SELECT *

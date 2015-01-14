@@ -25,7 +25,7 @@ BEGIN
 		DECLARE @dtmDate AS DATETIME = GETDATE()
 
 		EXEC [testi21Database].[Fake inventory items];
-		EXEC testi21Database.[Fake data for the accounting period];
+		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;

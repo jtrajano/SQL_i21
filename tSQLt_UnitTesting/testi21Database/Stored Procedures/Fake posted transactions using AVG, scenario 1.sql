@@ -5,7 +5,8 @@ CREATE PROCEDURE [testi21Database].[Fake posted transactions using AVG, scenario
 AS
 
 BEGIN
-	EXEC testi21Database.[Fake items for posted transactions]
+	EXEC testi21Database.[Fake inventory items]
+	EXEC testi21Database.[Fake open fiscal year and accounting periods]
 
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -23,6 +24,7 @@ BEGIN
 				
 	-- Declare the variables for the currencies
 	DECLARE @USD AS INT = 1;	
+	DECLARE @USD_ExchangeRate AS NUMERIC(18,6) = 1;
 
 	-- Declare the variable for unit of measure
 	DECLARE @Each AS INT = 1
@@ -48,6 +50,9 @@ BEGIN
 	DECLARE @WriteOffSold_BetterHaven AS INT = 4002
 	DECLARE @RevalueSold_BetterHaven AS INT = 5002
 	DECLARE @AutoNegative_BetterHaven AS INT = 6002
+
+	-- Batch Id
+	DECLARE @strBatchId AS NVARCHAR(40) = 'BATCH-0000001'
 
 	-- Define the additional tables to fake
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
@@ -206,6 +211,9 @@ BEGIN
 			,ysnIsUnposted
 			,intItemId
 			,intLocationId
+			,strBatchId
+			,dblExchangeRate
+			,intCurrencyId
 		)
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = 100
@@ -219,6 +227,9 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = 100
@@ -232,6 +243,9 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @StickyGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = 100
@@ -245,6 +259,9 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @PremiumGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = 100
@@ -258,6 +275,9 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @ColdGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = 100
@@ -271,6 +291,9 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @HotGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 	END 
 
 	----------------------------------------------------------------
@@ -287,6 +310,9 @@ BEGIN
 				,strTransactionId
 				,ysnIsUnposted
 				,intJournalLineNo
+				,strBatchId
+				,dblExchangeRate
+				,intCurrencyId
 		)
 		-- @WetGrains
 		SELECT	dtmDate = '01/01/2014'
@@ -296,7 +322,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 1 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @APClearing_Default
@@ -305,7 +334,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 1 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		-- @StickyGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -315,7 +347,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 2 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @APClearing_Default
@@ -324,7 +359,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 2 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		-- @PremiumGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -334,7 +372,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 3 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @APClearing_Default
@@ -343,7 +384,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 3 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		-- @ColdGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -353,7 +397,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 4 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @APClearing_Default
@@ -362,7 +409,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 4 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		-- @HotGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -372,7 +422,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 5 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,intAccountId = @APClearing_Default
@@ -381,7 +434,10 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 5 
+				,strBatchId = @strBatchId
+				,dblExchangeRate = @USD_ExchangeRate
+				,intCurrencyId = @USD
 
 		INSERT INTO dbo.tblGLSummary(
 				dtmDate
