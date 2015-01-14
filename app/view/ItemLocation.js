@@ -297,15 +297,6 @@ Ext.define('Inventory.view.ItemLocation', {
                                     },
                                     items: [
                                         {
-                                            xtype: 'combobox',
-                                            flex: 1,
-                                            itemId: 'cboCostingMethod',
-                                            fieldLabel: 'Costing Method',
-                                            labelWidth: 95,
-                                            displayField: 'strDescription',
-                                            valueField: 'intCostingMethodId'
-                                        },
-                                        {
                                             xtype: 'gridcombobox',
                                             columns: [
                                                 {
@@ -329,11 +320,20 @@ Ext.define('Inventory.view.ItemLocation', {
                                             ],
                                             flex: 1,
                                             itemId: 'cboCategory',
-                                            margin: '0 0 0 5',
                                             fieldLabel: 'Category',
-                                            labelWidth: 55,
+                                            labelWidth: 80,
                                             displayField: 'strCategoryCode',
                                             valueField: 'intCategoryId'
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            flex: 1,
+                                            itemId: 'cboCostingMethod',
+                                            margin: '0 0 0 5',
+                                            fieldLabel: 'Costing Method',
+                                            labelWidth: 95,
+                                            displayField: 'strDescription',
+                                            valueField: 'intCostingMethodId'
                                         }
                                     ]
                                 },
@@ -350,7 +350,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                             flex: 1,
                                             itemId: 'txtRow',
                                             fieldLabel: 'Row',
-                                            labelWidth: 95
+                                            labelWidth: 80
                                         },
                                         {
                                             xtype: 'textfield',
@@ -358,7 +358,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                             itemId: 'txtBin',
                                             margin: '0 0 0 5',
                                             fieldLabel: 'Bin',
-                                            labelWidth: 55
+                                            labelWidth: 95
                                         }
                                     ]
                                 },
@@ -392,7 +392,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                     ],
                                     itemId: 'cboReceiveUom',
                                     fieldLabel: 'Receive UOM',
-                                    labelWidth: 95,
+                                    labelWidth: 80,
                                     displayField: 'strUnitMeasure',
                                     valueField: 'intUnitMeasureId'
                                 }

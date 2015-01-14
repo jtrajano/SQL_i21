@@ -27,13 +27,13 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 value: '{current.intVendorId}',
                 store: '{vendor}'
             },
-            cboCostingMethod: {
-                value: '{current.intCostingMethod}',
-                store: '{costingMethods}'
-            },
             cboCategory: {
                 value: '{current.intCategoryId}',
                 store: '{category}'
+            },
+            cboCostingMethod: {
+                value: '{current.intCostingMethod}',
+                store: '{costingMethods}'
             },
             txtDescription: '{current.strDescription}',
             txtRow: '{current.strRow}',
@@ -185,5 +185,22 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             record.set('intLocationId', app.DefaultLocation);
         record.set('intCostingMethod', 1);
         action(record);
+    },
+
+    onCategorySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        current.set('intCostingMethod', records[0].get('intCostingMethod'));
+    },
+
+    init: function(application) {
+        this.control({
+            "#cboCategory": {
+                select: this.onCategorySelect
+            }
+        })
     }
 });

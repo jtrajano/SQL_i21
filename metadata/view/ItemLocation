@@ -508,26 +508,6 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "displayField": "strDescription",
-                                                "fieldLabel": "Costing Method",
-                                                "itemId": "cboCostingMethod",
-                                                "labelAlign": null,
-                                                "labelWidth": 95,
-                                                "layout|flex": 1,
-                                                "margin": null,
-                                                "valueField": "intCostingMethodId"
-                                            },
-                                            "name": "MyComboBox20",
-                                            "designerId": "9e6c9559-01c7-4ada-a282-00b519aa1336"
-                                        },
-                                        {
-                                            "type": "Ext.form.field.ComboBox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
                                                 "columns": [
                                                     "[",
                                                     "\t{",
@@ -555,9 +535,8 @@
                                                 "fieldLabel": "Category",
                                                 "itemId": "cboCategory",
                                                 "labelAlign": null,
-                                                "labelWidth": 55,
+                                                "labelWidth": 80,
                                                 "layout|flex": 1,
-                                                "margin": "0 0 0 5",
                                                 "valueField": "intCategoryId"
                                             },
                                             "name": "MyComboBox2",
@@ -572,6 +551,26 @@
                                                     "type": "string"
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "displayField": "strDescription",
+                                                "fieldLabel": "Costing Method",
+                                                "itemId": "cboCostingMethod",
+                                                "labelAlign": null,
+                                                "labelWidth": 95,
+                                                "layout|flex": 1,
+                                                "margin": "0 0 0 5",
+                                                "valueField": "intCostingMethodId"
+                                            },
+                                            "name": "MyComboBox20",
+                                            "designerId": "9e6c9559-01c7-4ada-a282-00b519aa1336"
                                         }
                                     ]
                                 },
@@ -602,7 +601,7 @@
                                             "userConfig": {
                                                 "fieldLabel": "Row",
                                                 "itemId": "txtRow",
-                                                "labelWidth": 95,
+                                                "labelWidth": 80,
                                                 "layout|flex": 1
                                             },
                                             "name": "MyTextField32",
@@ -618,7 +617,7 @@
                                             "userConfig": {
                                                 "fieldLabel": "Bin",
                                                 "itemId": "txtBin",
-                                                "labelWidth": 55,
+                                                "labelWidth": 95,
                                                 "layout|flex": 1,
                                                 "margin": "0 0 0 5"
                                             },
@@ -667,7 +666,7 @@
                                         "displayField": "strUnitMeasure",
                                         "fieldLabel": "Receive UOM",
                                         "itemId": "cboReceiveUom",
-                                        "labelWidth": 95,
+                                        "labelWidth": 80,
                                         "layout|flex": null,
                                         "valueField": "intUnitMeasureId"
                                     },
@@ -1901,7 +1900,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging13",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
