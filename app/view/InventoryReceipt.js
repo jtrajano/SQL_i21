@@ -298,7 +298,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'gridcombobox',
-                                                        flex: 1,
                                                         columns: [
                                                             {
                                                                 dataIndex: 'intCompanyLocationId',
@@ -325,6 +324,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 hidden: true
                                                             }
                                                         ],
+                                                        flex: 1,
                                                         itemId: 'cboTransferor',
                                                         margin: '0 5',
                                                         fieldLabel: 'Transferor',
@@ -480,10 +480,32 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intShipViaID',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Ship Via Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strShipVia',
+                                                                                dataType: 'string',
+                                                                                text: 'Ship Via',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strShippingService',
+                                                                                dataType: 'string',
+                                                                                text: 'Shipping Service',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
                                                                         itemId: 'cboShipVia',
                                                                         width: 200,
                                                                         fieldLabel: 'Ship Via',
-                                                                        labelWidth: 75
+                                                                        labelWidth: 75,
+                                                                        displayField: 'strShipVia',
+                                                                        valueField: 'intShipViaID'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',

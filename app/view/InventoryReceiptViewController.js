@@ -59,6 +59,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 store: '{currency}',
                 readOnly: '{current.ysnPosted}'
             },
+            cboShipVia: {
+                value: '{current.intShipViaId}',
+                store: '{shipvia}',
+                readOnly: '{current.ysnPosted}'
+            },
             txtReceiptNumber: {
                 value: '{current.strReceiptNumber}'
             },
