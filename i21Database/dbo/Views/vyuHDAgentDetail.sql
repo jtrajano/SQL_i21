@@ -5,7 +5,8 @@
 		intId = us.intUserSecurityID,
 		strFullName = en.strName,
 		strEmail = en.strEmail,
-		intEntityId = us.intEntityId
+		intEntityId = us.intEntityId,
+		ysnDisabled = us.ysnDisabled
 	from
 		tblSMUserSecurity us, tblEntity en, tblEntityCredential ec
 	where
