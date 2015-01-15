@@ -1370,3 +1370,26 @@ GO
 	/* ----------------------------------------------- */
 
 GO
+
+	/* -------------------------------------------- */
+	/* --   Update General Ledger Module Menu    -- */
+	/* -------------------------------------------- */
+
+	DECLARE @GeneralLedgerModuleId INT
+	SELECT @GeneralLedgerModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'General Ledger' AND strModuleName = 'General Ledger' AND intParentMenuID = 0
+
+	DECLARE @GeneralLedgerMaintenanceId INT
+	SELECT @GeneralLedgerMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerModuleId
+
+		/* ------------------------------ */
+		/* -- Update Maintenance Menu  -- */
+		/* ------------------------------ */
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Account Category' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES (N'Account Category', N'General Ledger', @GeneralLedgerMaintenanceId, N'Account Category', N'Screen', N'GeneralLedger.view.AccountCategory', N'small-screen', 0, 0, 0, 1, NULL, 1)
+
+	/* ---------------------------------------- */
+	/* --   End General Ledger Module Menu   -- */
+	/* ---------------------------------------- */
+
+GO
