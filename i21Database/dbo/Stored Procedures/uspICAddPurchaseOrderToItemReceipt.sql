@@ -80,7 +80,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,strBillOfLading		= NULL
 		,intShipViaId			= PO.intShipViaId
 		,intProductOrigin		= NULL 
-		,intReceiverId			= NULL 
+		,intReceiverId			= @intUserId 
 		,intCurrencyId			= PO.intCurrencyId
 		,strVessel				= NULL
 		,intFreightTermId		= PO.intFreightId
@@ -151,8 +151,9 @@ SELECT	intInventoryReceiptId = @InventoryReceiptId
 		,dblLineTotal			= 0
 		,intSort				= PODetail.intLineNo
 		,intConcurrencyId		= 1
-FROM	dbo.tblPOPurchaseDetail PODetail LEFT JOIN dbo.tblICUnitMeasure UOM
-			ON PODetail.intUnitOfMeasureId = UOM.intUnitMeasureId
-		INNER JOIN dbo.tblICItemUOM ItemUOM
-			ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
+			ON ItemUOM.intItemId = PODetail.intItemId
+			AND ItemUOM.intUnitMeasureId = PODetail.intUnitOfMeasureId
+		INNER JOIN dbo.tblICUnitMeasure UOM
+			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 WHERE	PODetail.intPurchaseId = @PurchaseOrderId

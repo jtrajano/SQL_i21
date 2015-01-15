@@ -15,24 +15,15 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 				
+		DECLARE @UOMBushel AS INT = 1
+		DECLARE @UOMPound AS INT = 2				
+				
 		DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 		DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 		DECLARE @ReceiptType_Direct AS NVARCHAR(100) = 'Direct'				
 
 		-- Create the fake data
-		EXEC testi21Database.[Fake data for simple Items]
-
-		-- Create the fake table and data for the unit of measure
-		EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasureConversion', @Identity = 1;
-		
-		DECLARE @UOMBushel AS INT = 1
-		DECLARE @UOMPound AS INT = 2
-
-		INSERT INTO dbo.tblICUnitMeasure (strUnitMeasure) VALUES ('Bushel')
-		INSERT INTO dbo.tblICUnitMeasure (strUnitMeasure) VALUES ('Pound')
-		INSERT INTO dbo.tblICUnitMeasureConversion (intUnitMeasureId, dblConversionToStock, dblConversionFromStock) VALUES (@UOMBushel, 1, 1)
-		INSERT INTO dbo.tblICUnitMeasureConversion (intUnitMeasureId, dblConversionToStock, dblConversionFromStock) VALUES (@UOMPound, 0.016667, 60)
+		EXEC testi21Database.[Fake inventory items]
 
 		-- Creata fake data for security user
 		EXEC tSQLt.FakeTable 'dbo.tblSMUserSecurity';
@@ -45,7 +36,6 @@ BEGIN
 		)
 		VALUES (@intUserId, @intEntityId);
 
-		DROP VIEW vyuAPPurchase		
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchase';
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchaseDetail', @Identity = 1;
 
@@ -117,6 +107,7 @@ BEGIN
 		WHERE	1 = 0
 		
 		-- Setup the expected data
+		-- Header
 		INSERT INTO expected_tblICInventoryReceipt 
 		SELECT strReceiptNumber = 'INVRCT-1000'
 				,dtmReceiptDate = dbo.fnRemoveTimeOnDate(GETDATE())
@@ -138,7 +129,7 @@ BEGIN
 				,intConcurrencyId = 1
 				,intCreatedUserId = @intUserId
 				,intEntityId = @intEntityId
-				
+		-- Detail 
 		INSERT INTO expected_tblICInventoryReceiptItem 
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 1
@@ -151,7 +142,7 @@ BEGIN
 				,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 50.00
-				,dblLineTotal = 500.00
+				,dblLineTotal = 0
 				,intSort = 1
 				,intConcurrencyId = 1
 		UNION ALL 
@@ -166,7 +157,7 @@ BEGIN
 				,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 100.00
-				,dblLineTotal = 500.00
+				,dblLineTotal = 0
 				,intSort = 2
 				,intConcurrencyId = 1
 		UNION ALL 
@@ -181,7 +172,7 @@ BEGIN
 				,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 200.00
-				,dblLineTotal = 400.00
+				,dblLineTotal = 0
 				,intSort = 3
 				,intConcurrencyId = 1
 		UNION ALL 
@@ -196,7 +187,7 @@ BEGIN
 				,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 125.00
-				,dblLineTotal = 500.00
+				,dblLineTotal = 0
 				,intSort = 4
 				,intConcurrencyId = 1					
 	END

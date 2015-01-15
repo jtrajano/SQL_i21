@@ -211,9 +211,7 @@
     <Build Include="testi21Database\Scripts\test the constraints of tblAPVendor.sql" />
     <Build Include="testi21Database\Functions\test the fnGetGLAccountIdFromProfitCenter function on 8x8 account structure.sql" />
     <Build Include="testi21Database\Functions\test the fnGetGLAccountIdFromProfitCenter function on multiple account segments.sql" />
-    <Build Include="testi21Database\Stored Procedures\Fake data for simple COA.sql" />
-    <Build Include="testi21Database\Stored Procedures\Fake data for multiple segments COA.sql" />
-    <Build Include="testi21Database\Stored Procedures\Fake data for simple Items.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake COA with multiple account segments.sql" />
     <Build Include="testi21Database\Functions\test the fnGetNegativeInventoryOption function.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost as it checks for an invalid item.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
@@ -238,7 +236,7 @@
       </SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Functions\test the fnGetItemCostingOnPostErrors function.sql" />
-    <Build Include="testi21Database\Stored Procedures\Fake data for items in a transaction to unpost.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for inventory transaction table.sql" />
     <Build Include="testi21Database\Functions\test the fnGetItemsToUnpost function.sql" />
     <Build Include="testi21Database\Functions\test the fnGetItemCostingOnUnpostErrors function.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemGLAccount function for bad inputs.sql" />
@@ -248,7 +246,7 @@
     <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for category level.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for location level.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemBaseGLAccount function for another location.sql" />
-    <Build Include="testi21Database\Stored Procedures\Fake data for item stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for item stock table.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from zero to negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from positive stock to zero stock.sql" />
@@ -367,11 +365,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for the basics.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\Fake data for the accounting period.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake open fiscal year and accounting periods.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for one item purchase.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\Fake data for item costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake inventory items.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for one item sold.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
@@ -594,8 +592,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries from inventory transaction.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\Fake data for unposting item costing.sql" />
-    <Build Include="testi21Database\Stored Procedures\Fake data for COA used in costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake posted transactions for testing the unposting.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake COA used for fake inventory items.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for the basics.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
@@ -609,9 +607,12 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\Fake posted transactions using AVG, scenario 1.sql" />
-    <Build Include="testi21Database\Stored Procedures\Fake items for posted transactions.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake posted transactions using AVG, scenario 2.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake transactions for item costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake COA used in Cash Management.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for posted Inventory Shipment.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

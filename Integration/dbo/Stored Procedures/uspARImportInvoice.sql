@@ -5,13 +5,21 @@ GO
 CREATE PROCEDURE uspARImportInvoice
 	@Checking BIT = 0,
 	@UserId INT = 0,
-	@Total INT = 0 OUTPUT
+	@Total INT = 0 OUTPUT,
+	@StartDate DATETIME = NULL,
+	@EndDate DATETIME = NULL
 
 	AS
 BEGIN
 	--================================================
 	--     ONE TIME INVOICE SYNCHRONIZATION	
 	--================================================
+	
+	IF (@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0)
+		BEGIN
+			SET @StartDate = NULL
+			SET @EndDate = NULL
+		END			
 	
 	DECLARE @EntityId int
 	SET @EntityId = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @UserId),@UserId)
@@ -116,6 +124,11 @@ BEGIN
 			LEFT JOIN tblSMCurrency Cur ON Cur.strCurrency COLLATE Latin1_General_CI_AS = agivc_currency COLLATE Latin1_General_CI_AS
 			LEFT JOIN tblSMTerm Term ON Term.strTermCode COLLATE Latin1_General_CI_AS = CONVERT(NVARCHAR(10),CONVERT(INT,agivc_terms_code)) COLLATE Latin1_General_CI_AS
 			WHERE Inv.strInvoiceNumber IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
+			AND (
+					((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+					OR
+					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+			    )
 			   
 			
 			
@@ -158,6 +171,11 @@ BEGIN
 			FROM agivcmst
 		LEFT JOIN tblARInvoice ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = tblARInvoice.strInvoiceOriginId COLLATE Latin1_General_CI_AS
 		WHERE tblARInvoice.strInvoiceOriginId IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
+		AND (
+				((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+				OR
+				((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+			)
 		
 	END
 		

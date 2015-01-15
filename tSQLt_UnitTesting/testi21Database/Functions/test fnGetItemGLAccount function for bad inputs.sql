@@ -28,7 +28,7 @@ BEGIN
 		)
 
 		-- Create the Fake data 
-		EXEC [testi21Database].[Fake data for simple Items]
+		EXEC testi21Database.[Fake inventory items]
 	END 
 
 	-- Test case

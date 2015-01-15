@@ -26,10 +26,16 @@ CREATE TABLE #tmpInventoryTranactionStockToReverse (
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_NEGATIVE AS INT = 1
-DECLARE @WRITE_OFF_SOLD AS INT = 2
-DECLARE @REVALUE_SOLD AS INT = 3
-DECLARE @InventoryReceipt AS INT = 4
+		,@WRITE_OFF_SOLD AS INT = 2
+		,@REVALUE_SOLD AS INT = 3
+		,@InventoryReceipt AS INT = 4
 		,@InventoryShipment AS INT = 5
+
+-- Create the CONSTANT variables for the costing methods
+DECLARE @AVERAGECOST AS INT = 1
+		,@FIFO AS INT = 2
+		,@LIFO AS INT = 3
+		,@STANDARDCOST AS INT = 4
 
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
@@ -49,6 +55,7 @@ BEGIN
 			AND ISNULL(ysnIsUnposted, 0) = 0
 	GROUP BY ItemTrans.intItemId, ItemTrans.intLocationId
 END 
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
@@ -165,9 +172,9 @@ BEGIN
 					AND Stock.intLocationId = ItemToUnpost.intLocationId
 	END
 
-	-----------------------------
-	-- Create the AUTO-Negative
-	-----------------------------
+	---------------------------------------------------------------------------------------
+	-- Create the AUTO-Negative if costing method is average costing
+	---------------------------------------------------------------------------------------
 	BEGIN 
 		INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
@@ -208,6 +215,7 @@ BEGIN
 		FROM	dbo.tblICItemStock AS Stock INNER JOIN @ItemsToUnpost ItemToUnpost
 						ON Stock.intItemId = ItemToUnpost.intItemId
 						AND Stock.intLocationId = ItemToUnpost.intLocationId
+						AND dbo.fnGetCostingMethod(ItemToUnpost.intItemId, ItemToUnpost.intLocationId) = @AVERAGECOST
 				,(
 					SELECT TOP 1
 							ItemTransaction.dtmDate

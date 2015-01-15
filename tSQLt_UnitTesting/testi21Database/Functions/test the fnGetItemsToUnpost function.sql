@@ -48,7 +48,7 @@ BEGIN
 				,@InvalidLocation AS INT = -1
 
 		-- Create the mock data 
-		EXEC testi21Database.[Fake data for items in a transaction to unpost];
+		EXEC testi21Database.[Fake data for inventory transaction table];
 
 		-- Create the expected data
 		INSERT INTO expected (

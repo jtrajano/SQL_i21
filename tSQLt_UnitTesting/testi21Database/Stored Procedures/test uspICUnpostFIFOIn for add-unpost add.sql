@@ -72,7 +72,10 @@ BEGIN
 		)
 
 		-- Call the fake data stored procedure
-		EXEC [testi21Database].[Fake data for simple Items]
+		EXEC testi21Database.[Fake inventory items]
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 
 		-- Add fake data for tblICInventoryFIFO
 		INSERT INTO dbo.tblICInventoryFIFO (

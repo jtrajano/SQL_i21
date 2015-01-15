@@ -3,25 +3,16 @@ AS
 BEGIN
 	-- ARRANGE 
 	BEGIN 
-		-- Constant variables
-		DECLARE @AccountId_InventoryWheat_Default AS INT = 1000
-		DECLARE @AccountId_CostOfGoods_Default AS INT = 2000
-		DECLARE @AccountId_Purchase_Default AS INT = 3000
-		DECLARE @AccountId_InventoryWheat_NewHaven AS INT = 1001
-		DECLARE @AccountId_CostOfGoods_NewHaven AS INT = 2001
-		DECLARE @AccountId_Purchase_NewHaven AS INT = 3001
-		DECLARE @AccountId_InventoryWheat_BetterHaven AS INT = 1002
-		DECLARE @AccountId_CostOfGoods_BetterHaven AS INT = 2002
-		DECLARE @AccountId_Purchase_BetterHaven AS INT = 3003
-		DECLARE @AccountId_BankAccount_Default AS INT = 4000
-		DECLARE @AccountId_BankAccount_NewHaven AS INT = 4001
-		DECLARE @AccountId_BankAccount_BetterHaven AS INT = 4002
-		DECLARE @AccountId_MiscExpenses_Default AS INT = 5000
-		DECLARE @AccountId_MiscExpenses_NewHaven AS INT = 5001
-		DECLARE @AccountId_MiscExpenses_BetterHaven AS INT = 5002	
+		-- Constant GL account variables
+		DECLARE @BankOfAmerica_Default AS INT = 1000
+		DECLARE @MiscExpenses_Default AS INT = 4000
+		DECLARE @BankOfAmerica_NewHaven AS INT = 1001
+		DECLARE @MiscExpenses_NewHaven AS INT = 4001
+		DECLARE @BankOfAmerica_BetterHaven AS INT = 1002
+		DECLARE @MiscExpenses_BetterHaven AS INT = 4002	
 	
 		-- Add fake data
-		EXEC [testi21Database].[Fake data for simple COA]
+		EXEC [testi21Database].[Fake COA used in Cash Management]
 
 		-- Arrange the fake table 
 		EXEC tSQLt.FakeTable 'dbo.tblCMBankTransaction', @Identity = 1;
@@ -36,12 +27,12 @@ BEGIN
 				,intGLAccountId
 		)
 		SELECT	1
-				,@AccountId_BankAccount_Default
+				,@BankOfAmerica_Default
 
 		-- Variables used in calling the stored procedure 
 		DECLARE @intBankAccountId AS INT = 1
 				,@dtmDate AS DATETIME = '02/28/2012'
-				,@intGLAccountId AS INT = @AccountId_MiscExpenses_Default
+				,@intGLAccountId AS INT = @MiscExpenses_Default
 				,@dblAmount AS NUMERIC(18,6) = 496.88
 				,@strDescription AS NVARCHAR(255) = 'this is the description'
 				,@intUserId AS INT = 4546

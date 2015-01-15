@@ -1,12 +1,12 @@
 ﻿---------------------------------------------------------------------------------------------------
--- Scenario 1: Add stock 
+-- Scenario 2: Sell Stock 
 ---------------------------------------------------------------------------------------------------
 CREATE PROCEDURE [testi21Database].[Fake posted transactions using AVG, scenario 2]
 AS
 
 BEGIN
-	-- Use the 'fake data for simple COA' for the simple items
-	EXEC testi21Database.[Fake items for posted transactions]
+	EXEC testi21Database.[Fake inventory items]
+	EXEC testi21Database.[Fake open fiscal year and accounting periods]
 
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -19,6 +19,10 @@ BEGIN
 	DECLARE @Default_Location AS INT = 1
 			,@NewHaven AS INT = 2
 			,@BetterHaven AS INT = 3
+
+	-- Declare the variables for the currencies
+	DECLARE @USD AS INT = 1;	
+	DECLARE @USD_ExchangeRate AS NUMERIC(18,6) = 1;
 				
 	-- Declare the variable for unit of measure
 	DECLARE @Each AS INT = 1
@@ -30,6 +34,7 @@ BEGIN
 	DECLARE @WriteOffSold_Default AS INT = 4000
 	DECLARE @RevalueSold_Default AS INT = 5000 
 	DECLARE @AutoNegative_Default AS INT = 6000
+	DECLARE @InventoryInTransit_Default AS INT = 7000
 
 	DECLARE @Inventory_NewHaven AS INT = 1001
 	DECLARE @CostOfGoods_NewHaven AS INT = 2001
@@ -37,6 +42,7 @@ BEGIN
 	DECLARE @WriteOffSold_NewHaven AS INT = 4001
 	DECLARE @RevalueSold_NewHaven AS INT = 5001
 	DECLARE @AutoNegative_NewHaven AS INT = 6001
+	DECLARE @InventoryInTransit_NewHaven AS INT = 7001
 
 	DECLARE @Inventory_BetterHaven AS INT = 1002
 	DECLARE @CostOfGoods_BetterHaven AS INT = 2002
@@ -44,6 +50,10 @@ BEGIN
 	DECLARE @WriteOffSold_BetterHaven AS INT = 4002
 	DECLARE @RevalueSold_BetterHaven AS INT = 5002
 	DECLARE @AutoNegative_BetterHaven AS INT = 6002
+	DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
+
+	-- Batch Id
+	DECLARE @strBatchId AS NVARCHAR(40) = 'BATCH-0000001'
 
 	-- Define the additional tables to fake
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipment', @Identity = 1;
@@ -104,7 +114,41 @@ BEGIN
 	SELECT 	intInventoryShipmentId = 1
 			,intItemId = @HotGrains
 			,dblQuantity = 100
-			,dblUnitPrice = 55.23	
+			,dblUnitPrice = 55.23
+
+	----------------------------------------------------------------
+	-- Fake data for tblICItemStock
+	----------------------------------------------------------------
+	INSERT INTO dbo.tblICItemStock(
+			intItemId
+			,intLocationId
+			,dblAverageCost
+			,dblUnitOnHand	
+	)
+	SELECT 	intItemId = @WetGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= -100
+	UNION ALL 
+	SELECT 	intItemId = @StickyGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= -100	
+	UNION ALL 
+	SELECT 	intItemId = @PremiumGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= -100		
+	UNION ALL 
+	SELECT 	intItemId = @ColdGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= -100
+	UNION ALL 
+	SELECT 	intItemId = @HotGrains
+			,intLocationId = @Default_Location
+			,dblAverageCost = 2.00
+			,dblUnitOnHand	= -100
 
 	----------------------------------------------------------------
 	-- Fake data for tblICInventoryFIFO
@@ -189,6 +233,7 @@ BEGIN
 			,ysnIsUnposted
 			,intItemId
 			,intLocationId
+			,strBatchId
 		)
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = -100
@@ -203,6 +248,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = -100
@@ -217,6 +263,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @StickyGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = -100
@@ -231,6 +278,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @PremiumGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = -100
@@ -245,6 +293,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @ColdGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblUnitQty = -100
@@ -259,13 +308,13 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @HotGrains
 				,intLocationId = @Default_Location
+				,strBatchId = @strBatchId				
 	END 
 
 	----------------------------------------------------------------
 	-- Fake data for tblGLDetail & GL Summary 
 	----------------------------------------------------------------
-	BEGIN 
-
+	BEGIN
 		INSERT INTO dbo.tblGLDetail(
 				dtmDate
 				,intAccountId
@@ -275,6 +324,7 @@ BEGIN
 				,strTransactionId
 				,ysnIsUnposted
 				,intJournalLineNo
+				,dblExchangeRate
 		)
 		-- @WetGrains
 		SELECT	dtmDate = '01/01/2014'
@@ -284,16 +334,18 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 1 
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,intAccountId = @Inventory_Default
+				,intAccountId = @InventoryInTransit_Default
 				,dblDebit = 200.00
 				,dblCredit = 0
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 1 
+				,dblExchangeRate = 1
 		-- @StickyGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -303,16 +355,18 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 2 
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,intAccountId = @APClearing_Default
+				,intAccountId = @InventoryInTransit_Default
 				,dblDebit = 0
 				,dblCredit = 200.00
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 2
+				,dblExchangeRate = 1
 		-- @PremiumGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -322,16 +376,18 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 3
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,intAccountId = @APClearing_Default
+				,intAccountId = @InventoryInTransit_Default
 				,dblDebit = 0
 				,dblCredit = 200.00
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 3 
+				,dblExchangeRate = 1
 		-- @ColdGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -341,16 +397,18 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 4 
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,intAccountId = @APClearing_Default
+				,intAccountId = @InventoryInTransit_Default
 				,dblDebit = 0
 				,dblCredit = 200.00
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 4
+				,dblExchangeRate = 1
 		-- @HotGrains
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
@@ -360,16 +418,18 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 5 
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,intAccountId = @APClearing_Default
+				,intAccountId = @InventoryInTransit_Default
 				,dblDebit = 0
 				,dblCredit = 200.00
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0001'
 				,ysnIsUnposted = 0 
-				,intJournalLineNo = NULL 
+				,intJournalLineNo = 5 
+				,dblExchangeRate = 1
 
 		INSERT INTO dbo.tblGLSummary(
 				dtmDate
@@ -378,14 +438,14 @@ BEGIN
 				,intAccountId
 		)
 		SELECT	dtmDate = '01/01/2014'
-				,dblDebit = (200.00 * 5)
-				,dblCredit = 0
+				,dblDebit = 0
+				,dblCredit = (200.00 * 5)
 				,intAccountId = @Inventory_Default
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,dblDebit = 0
-				,dblCredit = (200.00 * 5)
-				,intAccountId = @APClearing_Default
+				,dblDebit = (200.00 * 5)
+				,dblCredit = 0
+				,intAccountId = @InventoryInTransit_Default
 
 	END 
 END

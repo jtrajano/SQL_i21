@@ -25,7 +25,7 @@ BEGIN
 			,intLocationId = PO.intShipToId -- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
 			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 			,dblUnitQty = PODetail.dblQtyOrdered 
-			,dblUOMQty = UOMConversion.dblConversionToStock 
+			,dblUOMQty = ItemUOM.dblUnitQty
 			,dblCost = PODetail.dblCost
 			,dblSalesPrice = 0
 			,intCurrencyId = PO.intCurrencyId
@@ -36,9 +36,10 @@ BEGIN
 			,intLotId = null 
 	FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 				ON PO.intPurchaseId = PODetail.intPurchaseId
-			LEFT JOIN dbo.tblICUnitMeasure UOM
-				ON PODetail.intUnitOfMeasureId = UOM.intUnitMeasureId
-			INNER JOIN dbo.tblICUnitMeasureConversion UOMConversion
-				ON UOM.intUnitMeasureId = UOMConversion.intUnitMeasureId
+			INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON PODetail.intItemId = ItemUOM.intItemId
+				AND PODetail.intUnitOfMeasureId = ItemUOM.intUnitMeasureId
+			INNER JOIN dbo.tblICUnitMeasure UOM
+				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	WHERE	PODetail.intPurchaseId = @intSourceTransactionId
 END

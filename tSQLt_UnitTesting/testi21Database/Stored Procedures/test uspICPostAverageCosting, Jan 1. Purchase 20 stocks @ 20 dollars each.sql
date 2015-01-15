@@ -4,7 +4,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		-- Generate the fake data for the item stock table
-		EXEC [testi21Database].[Fake data for item stock]
+		EXEC [testi21Database].[Fake data for item stock table]
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;

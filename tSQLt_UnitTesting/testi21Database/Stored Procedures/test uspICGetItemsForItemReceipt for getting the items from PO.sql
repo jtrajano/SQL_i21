@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [testi21Database].[test uspICGetItemsForItemReceipt for getting the items from PO]
+﻿CREATE PROCEDURE [testi21Database].[test uspICGetItemsForItemReceipt for getting the items from PO]
 AS
 BEGIN
 	-- Arrange 
@@ -46,6 +45,9 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 				
+		DECLARE @UOMBushel AS INT = 1
+		DECLARE @UOMPound AS INT = 2			
+				
 		DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 		DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 		DECLARE @ReceiptType_Direct AS NVARCHAR(100) = 'Direct'
@@ -55,21 +57,9 @@ BEGIN
 		DECLARE @intDirectType AS INT = 3
 
 		-- Create the fake data
-		EXEC testi21Database.[Fake data for simple Items]
+		EXEC testi21Database.[Fake inventory items]
 
-		-- Create the fake table and data for the unit of measure
-		EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasureConversion', @Identity = 1;
-
-		DECLARE @UOMBushel AS INT = 1
-		DECLARE @UOMPound AS INT = 2
-
-		INSERT INTO dbo.tblICUnitMeasure (strUnitMeasure) VALUES ('Bushel')
-		INSERT INTO dbo.tblICUnitMeasure (strUnitMeasure) VALUES ('Pound')
-		INSERT INTO dbo.tblICUnitMeasureConversion (intUnitMeasureId, dblConversionToStock, dblConversionFromStock) VALUES (@UOMBushel, 1, 1)
-		INSERT INTO dbo.tblICUnitMeasureConversion (intUnitMeasureId, dblConversionToStock, dblConversionFromStock) VALUES (@UOMPound, 0.016667, 60)
-
-		DROP VIEW vyuAPPurchase		
+		-- Create the fake PO tables 
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchase';
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchaseDetail', @Identity = 1;
 

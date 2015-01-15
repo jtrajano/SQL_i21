@@ -45,8 +45,8 @@ BEGIN
 		VALUES ('DUMMY-00001', 'Invalid G/L account id found.', 50001)
 
 		-- Call the fake data for GL Account 
-		EXEC testi21Database.[Fake data for COA used in costing];
-		EXEC testi21Database.[Fake data for the accounting period];
+		EXEC testi21Database.[Fake COA used for fake inventory items];
+		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 	END 
 
 	-- Act

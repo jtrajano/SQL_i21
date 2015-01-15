@@ -28,7 +28,7 @@ BEGIN
 		)
 
 		-- Create the Fake data 
-		EXEC [testi21Database].[Fake data for simple Items]
+		EXEC testi21Database.[Fake inventory items]
 	END 
 
 	-- Test case: Get the contra account for "Purchase Account"
@@ -47,7 +47,7 @@ BEGIN
 			,[AutoNegative]
 		)
 		SELECT	[Inventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'Inventory')
-				,[ContraInventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'AP Account')
+				,[ContraInventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'AP Clearing')
 				,[RevalueSold] = NULL 
 				,[WriteOffSold] = NULL 
 				,[AutoNegative] = NULL 	
@@ -61,8 +61,8 @@ BEGIN
 			,[AutoNegative]
 		)
 		SELECT				
-			[Inventory] = 1000	-- 12040-1000
-			,[ContraInventory] = 3000	-- 50110-1000
+			[Inventory] = 1001	-- 12040-1001
+			,[ContraInventory] = 3001	-- 50110-1001
 			,[RevalueSold] = NULL
 			,[WriteOffSold] = NULL
 			,[AutoNegative] = NULL

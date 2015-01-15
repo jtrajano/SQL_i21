@@ -3,6 +3,31 @@ AS
 BEGIN
 	-- Arrange
 	BEGIN 
+		-- Declare the account ids
+		DECLARE @Inventory_Default AS INT = 1000
+		DECLARE @CostOfGoods_Default AS INT = 2000
+		DECLARE @APClearing_Default AS INT = 3000
+		DECLARE @WriteOffSold_Default AS INT = 4000
+		DECLARE @RevalueSold_Default AS INT = 5000 
+		DECLARE @AutoNegative_Default AS INT = 6000
+		DECLARE @InventoryInTransit_Default AS INT = 7000
+
+		DECLARE @Inventory_NewHaven AS INT = 1001
+		DECLARE @CostOfGoods_NewHaven AS INT = 2001
+		DECLARE @APClearing_NewHaven AS INT = 3001
+		DECLARE @WriteOffSold_NewHaven AS INT = 4001
+		DECLARE @RevalueSold_NewHaven AS INT = 5001
+		DECLARE @AutoNegative_NewHaven AS INT = 6001
+		DECLARE @InventoryInTransit_NewHaven AS INT = 7001
+
+		DECLARE @Inventory_BetterHaven AS INT = 1002
+		DECLARE @CostOfGoods_BetterHaven AS INT = 2002
+		DECLARE @APClearing_BetterHaven AS INT = 3002
+		DECLARE @WriteOffSold_BetterHaven AS INT = 4002
+		DECLARE @RevalueSold_BetterHaven AS INT = 5002
+		DECLARE @AutoNegative_BetterHaven AS INT = 6002
+		DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
+
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
 				,@StickyGrains AS INT = 2
@@ -21,10 +46,10 @@ BEGIN
 		-- GL Account types used in inventory costing
 		DECLARE @InventoryDescription AS NVARCHAR(50) = 'Inventory';
 		DECLARE @CostOfGoodsDescription AS NVARCHAR(50) = 'Cost of Goods';
-		DECLARE @PurchasesDescription AS NVARCHAR(50) = 'AP Account';
+		DECLARE @PurchasesDescription AS NVARCHAR(50) = 'AP Clearing';
 				
 		-- Generate the fake data. 
-		EXEC testi21Database.[Fake data for simple Items]
+		EXEC testi21Database.[Fake inventory items]
 	END
 
 	-- Get the base account from the item level 
@@ -33,7 +58,7 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@WetGrains, NULL, @InventoryDescription);
 
 		-- Assert
-		SET @expected = 1000;
+		SET @expected = @Inventory_Default;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END 
@@ -43,17 +68,17 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@WetGrains, NULL, @CostOfGoodsDescription);
 
 		-- Assert
-		SET @expected = 2000;
+		SET @expected = @CostOfGoods_Default;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END 	
 	
-	-- Must return account id 50110-1001 (PURCHASES WHEAT-)
+	-- Must return account id 50110-1001 (AP CLEARING WHEAT-)
 	BEGIN 
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@WetGrains, NULL, @PurchasesDescription);
 
 		-- Assert
-		SET @expected = 3000;
+		SET @expected = @APClearing_Default;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END
@@ -63,7 +88,7 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @InventoryDescription);
 
 		-- Assert
-		SET @expected = 1001;
+		SET @expected = @Inventory_NewHaven;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END
@@ -73,17 +98,17 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @CostOfGoodsDescription);
 
 		-- Assert
-		SET @expected = 2001;
+		SET @expected = @CostOfGoods_NewHaven;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END
 
-	-- Must return account id 50110-1001 (PURCHASES WHEAT-NEW HAVEN)
+	-- Must return account id 50110-1001 (AP CLEARING WHEAT-NEW HAVEN)
 	BEGIN 
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@StickyGrains, NULL, @PurchasesDescription);
 
 		-- Assert
-		SET @expected = 3001;
+		SET @expected = @APClearing_NewHaven;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END
@@ -93,7 +118,7 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @InventoryDescription);
 
 		-- Assert
-		SET @expected = 1002;
+		SET @expected = @Inventory_BetterHaven;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END
@@ -103,17 +128,17 @@ BEGIN
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @CostOfGoodsDescription);
 
 		-- Assert
-		SET @expected = 2002;
+		SET @expected = @CostOfGoods_BetterHaven;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END
 
-	-- Must return account id 50110-1002 (PURCHASES WHEAT-NEW HAVEN)
+	-- Must return account id 50110-1002 (AP CLEARING WHEAT-NEW HAVEN)
 	BEGIN 
 		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@PremiumGrains, NULL, @PurchasesDescription);
 
 		-- Assert
-		SET @expected = 3002;
+		SET @expected = @APClearing_BetterHaven;
 		EXEC tSQLt.AssertEquals @expected, @actual; 
 
 	END

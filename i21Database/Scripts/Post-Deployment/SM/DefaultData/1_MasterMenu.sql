@@ -1371,25 +1371,38 @@ GO
 
 GO
 
-	/* -------------------------------------------- */
-	/* --   Update General Ledger Module Menu    -- */
-	/* -------------------------------------------- */
+	/* ------------------------------------------------- */
+	/* - Update Cash Management Menu Commands for MVVM - */
+	/* ------------------------------------------------- */
 
-	DECLARE @GeneralLedgerModuleId INT
-	SELECT @GeneralLedgerModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'General Ledger' AND strModuleName = 'General Ledger' AND intParentMenuID = 0
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankDeposit' WHERE strCommand = 'CashManagement.controller.BankDeposit'
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankTransactions' WHERE strCommand = 'CashManagement.controller.BankTransactions'
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankTransfer' WHERE strCommand = 'CashManagement.controller.BankTransfer'
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.MiscellaneousChecks' WHERE strCommand = 'CashManagement.controller.MiscellaneousChecks'
+	--UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankAccountRegister' WHERE strCommand = 'CashManagement.controller.BankAccountRegister'
+	--UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankReconciliation' WHERE strCommand = 'CashManagement.controller.BankReconciliation'
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.Banks' WHERE strCommand = 'CashManagement.controller.Banks'
+	--UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankAccounts' WHERE strCommand = 'CashManagement.controller.BankAccounts'
+	--UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankFileFormat' WHERE strCommand = 'CashManagement.controller.BankFileFormat'
 
-	DECLARE @GeneralLedgerMaintenanceId INT
-	SELECT @GeneralLedgerMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerModuleId
+	/* ------------------------------------------------- */
+	/* End Update Cash Management Menu Commands for MVVM */
+	/* ------------------------------------------------- */
 
-		/* ------------------------------ */
-		/* -- Update Maintenance Menu  -- */
-		/* ------------------------------ */
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Account Category' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerMaintenanceId)
-		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES (N'Account Category', N'General Ledger', @GeneralLedgerMaintenanceId, N'Account Category', N'Screen', N'GeneralLedger.view.AccountCategory', N'small-screen', 0, 0, 0, 1, NULL, 1)
+GO
 
-	/* ---------------------------------------- */
-	/* --   End General Ledger Module Menu   -- */
-	/* ---------------------------------------- */
+	/* ------------------------------------------------- */
+	/* --- Update Help Desk Menu Commands for MVVM ----- */
+	/* ------------------------------------------------- */
+
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketJobCode' WHERE strCommand = 'HelpDesk.controller.TicketJobCode'
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketPriority' WHERE strCommand = 'HelpDesk.controller.TicketPriority'
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketStatus' WHERE strCommand = 'HelpDesk.controller.TicketStatus'
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketType' WHERE strCommand = 'HelpDesk.controller.TicketType'
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.HelpDeskSettings' WHERE strCommand = 'HelpDesk.controller.HelpDeskSettings'
+
+	/* ------------------------------------------------- */
+	/* -- End Update Help Desk Menu Commands for MVVM -- */
+	/* ------------------------------------------------- */
 
 GO

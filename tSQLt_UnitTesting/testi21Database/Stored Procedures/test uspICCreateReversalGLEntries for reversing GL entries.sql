@@ -9,7 +9,7 @@ BEGIN
 		DECLARE @REVALUE_SOLD_Name AS NVARCHAR(50) = 'Inventory Revalue Sold';
 		
 		-- Fake data
-		EXEC [testi21Database].[Fake data for unposting item costing]
+		EXEC [testi21Database].[Fake posted transactions for testing the unposting]
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @AUTO_NEGATIVE AS INT = 1

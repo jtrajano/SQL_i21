@@ -24,7 +24,7 @@ BEGIN
 		DECLARE @intEntityId AS INT = 1
 		DECLARE @dtmDate AS DATETIME = GETDATE()
 
-		EXEC [testi21Database].[Fake data for item costing];
+		EXEC [testi21Database].[Fake inventory items];
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;

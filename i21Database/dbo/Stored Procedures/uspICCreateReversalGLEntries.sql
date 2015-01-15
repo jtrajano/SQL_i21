@@ -16,15 +16,20 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 DECLARE @WRITE_OFF_SOLD AS INT = 2
 DECLARE @REVALUE_SOLD AS INT = 3
 
+--1	Inventory Auto Negative
+--2	Inventory Write-Off Sold
+--3	Inventory Revalue Sold
+--4	Inventory Receipt
+--5	Inventory Shipment
+
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 DECLARE @AUTO_NEGATIVE_TransactionType AS NVARCHAR(50) = 'Inventory Auto Negative';
 DECLARE @WRITEOFF_SOLD_TransactionType AS NVARCHAR(50) = 'Inventory Write-Off Sold';
 DECLARE @REVALUE_SOLD_TransactionType AS NVARCHAR(50) = 'Inventory Revalue Sold';
-DECLARE @ITEM_COSTING_TransactionType AS NVARCHAR(50) = 'Inventory Costing';
 
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
 DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
-DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto Negative';
+DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto-Negative';
 
 -- Get the GL Account ids to use
 BEGIN 

@@ -56,8 +56,7 @@ DECLARE @CostingMethod AS INT
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4 	
-
+		,@STANDARDCOST AS INT = 4
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
