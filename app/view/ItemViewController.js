@@ -592,7 +592,11 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{bundleItem}',
                         defaultFilters: [{
                             column: 'strType',
-                            value: 'Inventory Item'
+                            value: 'Inventory Item',
+                            conjunction: 'or'
+                        },{
+                            column: 'strType',
+                            value: 'Inventory'
                         }]
                     }
                 },
