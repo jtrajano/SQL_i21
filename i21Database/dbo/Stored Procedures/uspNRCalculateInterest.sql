@@ -45,13 +45,11 @@ BEGIN
 		 select @AmtAppInt=SUM(dblAmtAppToInterest) FROM dbo.tblNRNoteTransaction 
 		 WHERE intNoteId = @intNoteId   AND intNoteTransTypeId = 4  
 		    
-		 select top 1 @dblInterestAcc = (ISNULL(@IntSum,0) + ISNULL(@InterestAdjustment,0)---ISNULL (@AmtAppInt,0)  
+		 select @dblInterestAcc = (ISNULL(@IntSum,0) + ISNULL(@InterestAdjustment,0)---ISNULL (@AmtAppInt,0)  
 		 ) , @dblUnpaidInterest = dblUnpaidInterest, @dblPrincipal = dblPrincipal  
 		 from dbo.tblNRNoteTransaction where intNoteId= @intNoteId Order By intNoteTransId DESC      
 		 
 		DECLARE @FUTUREINTEREST numeric(18,6),@HISTORYINTEREST numeric(18,6)
-		Select top 1 @intTransTypeID = intNoteTransTypeId From dbo.tblNRNoteTransaction Where intNoteId = @intNoteId ORDER By intNoteTransId DESC
-		
 		SELECT @dblCurrentInterest = dbo.fnCalculateInterestToDate(@intNoteId, @dtmCurrentDate, @intTransTypeID, @strCheckNumber)
 		
 		Select @dblTotalInterest = ISNULL(SUM(dblTransAmount),0) --as 'Total Interest' 
@@ -105,7 +103,7 @@ BEGIN
 			END
 		END
 		
-		SET @dblPayOffBalance = ISNULL(@dblPrincipal,0) + ISNULL(@dblUnpaidInterest,0) + @dblInterestToDate
+		SET @dblPayOffBalance = ISNULL(@dblPrincipal,0) + ISNULL(@dblUnpaidInterest,0)
 		
 				
 		SELECT ISNULL(@intNoteId,0) [intNoteId]

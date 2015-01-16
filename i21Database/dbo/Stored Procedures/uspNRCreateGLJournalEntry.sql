@@ -299,13 +299,6 @@ BEGIN
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 			SET @strReference = 'NR Adjustment'
 		END
-		If @TransactionTypeId = 3
-		BEGIN
-			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
-			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-			SET @strReference = 'NR Interest'
-		END
-		
 		
 		
 			INSERT INTO [dbo].[tblGLJournalDetail]
@@ -369,12 +362,6 @@ BEGIN
 			END				
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 			SET @strReference = 'NR Adjustment'
-		END
-		If @TransactionTypeId = 3
-		BEGIN
-			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-			SET @strReference = 'NR Interest'
 		END		
 			
 			INSERT INTO [dbo].[tblGLJournalDetail]
