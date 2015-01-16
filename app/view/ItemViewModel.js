@@ -143,7 +143,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                 {
                     intTracking: '2',
                     strDescription: 'Category Level'
+                },
+                {
+                    intTracking: '3',
+                    strDescription: 'Lot Level'
                 }
+
             ],
             fields: [
                 {
@@ -627,6 +632,9 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         checkLotTrackingVisibility: function(get) {
             var isNotItemLevel = (get('current.strInventoryTracking') !== 'Item Level');
+            if (isNotItemLevel) {
+                this.data.current.set('strLotTracking', 'No');
+            }
             return isNotItemLevel;
         }
     }

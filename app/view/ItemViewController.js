@@ -980,6 +980,7 @@ Ext.define('Inventory.view.ItemViewController', {
         record.set('strStatus', 'Active');
         record.set('strType', 'Inventory');
         record.set('strLotTracking', 'No');
+        record.set('strInventoryTracking', 'Item Level');
         action(record);
     },
 
