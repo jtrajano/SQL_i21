@@ -160,7 +160,7 @@ END
 				@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
 				SET @isValid = 0	
 			END
-			SELECT @intAccountId = NULL,@strDescription = ''
+			SELECT @intAccountId = NULL
 			SELECT @intAccountId= b.intAccountId, @strDescription=b.strDescription FROM tblGLCOACrossReference a 
 			JOIN tblGLAccount b ON a.inti21Id = b.intAccountId WHERE a.strExternalId = @glije_acct_no
 			IF @intAccountId IS NULL
