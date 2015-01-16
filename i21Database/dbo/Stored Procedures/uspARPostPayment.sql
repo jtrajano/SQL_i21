@@ -151,6 +151,27 @@ IF (ISNULL(@recap, 0) = 0)
 						ON A.intPaymentId = P.intPaymentId						
 				WHERE
 					B.intPaymentId IS NULL
+					
+				--Return Payment not allowed
+				INSERT INTO
+					#tmpARReceivableInvalidData
+				SELECT
+					'Return Payment is not allowed.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN 
+					tblARPaymentDetail B
+						ON A.intPaymentId = B.intPaymentId 
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId				
+				WHERE
+					(A.dblAmountPaid) < 0
+					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId AND B.dblPayment > 0 AND strTransactionType <> 'Credit Memo')
 
 				--Fiscal Year
 				INSERT INTO 
