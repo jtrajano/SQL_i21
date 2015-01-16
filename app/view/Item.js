@@ -815,7 +815,7 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colGLAccountId',
                                                                         dataIndex: 'string',
-                                                                        text: 'Account ID',
+                                                                        text: 'Account Id',
                                                                         flex: 1,
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
@@ -3254,15 +3254,9 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intItemId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Item Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
                                                                                     dataIndex: 'intUnitMeasureId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Unit Of Measure Id',
+                                                                                    text: 'Unit Of Measure ID',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -3278,10 +3272,16 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'ysnDefault',
-                                                                                    dataType: 'boolean',
-                                                                                    text: 'Default',
-                                                                                    flex: 1
+                                                                                    dataIndex: 'intDecimalCalculation',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Decimal Places for Calculation',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intDecimalDisplay',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Decimal Places for Display',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboPricingLevelUOM',
@@ -3530,12 +3530,6 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intItemId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Item Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
                                                                                     dataIndex: 'intUnitMeasureId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Unit Of Measure ID',
@@ -3554,10 +3548,16 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'ysnDefault',
-                                                                                    dataType: 'boolean',
-                                                                                    text: 'Default',
-                                                                                    flex: 1
+                                                                                    dataIndex: 'intDecimalCalculation',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Decimal Places for Calculation',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intDecimalDisplay',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Decimal Places for Display',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboSpecialPricingUOM',
@@ -4331,7 +4331,7 @@ Ext.define('Inventory.view.Item', {
                                                                 {
                                                                     dataIndex: 'strItemNo',
                                                                     dataType: 'string',
-                                                                    text: 'Item Number',
+                                                                    text: 'Item No',
                                                                     flex: 1
                                                                 },
                                                                 {

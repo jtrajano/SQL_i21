@@ -330,7 +330,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "allowDecimals": false,
-                                        "fieldLabel": "Decimal Places To Display",
+                                        "fieldLabel": "Decimal Places to Display",
                                         "hideTrigger": true,
                                         "itemId": "txtDecimalDisplay",
                                         "labelWidth": 165,
@@ -626,7 +626,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging114",
+                    "name": "statusbarpaging16",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
