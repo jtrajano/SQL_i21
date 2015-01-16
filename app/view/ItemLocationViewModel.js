@@ -20,6 +20,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
     requires: [
         'i21.store.CompanyLocationBuffered',
         'i21.store.FreightTermsBuffered',
+        'i21.store.ShipViaBuffered',
         'AccountsPayable.store.VendorBuffered',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedCategory',
@@ -89,8 +90,8 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         freightTerm: {
             type: 'FreightTermsBuffered'
         },
-        freightVendor: {
-            type: 'vendorbuffered'
+        shipVia: {
+            type: 'shipviabuffered'
         },
         negativeInventory: {
             data: [

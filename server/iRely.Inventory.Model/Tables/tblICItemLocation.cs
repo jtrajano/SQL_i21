@@ -60,7 +60,7 @@ namespace iRely.Inventory.Model
         public bool ysnAutoCalculateFreight { get; set; }
         public int? intFreightMethodId { get; set; }
         public decimal? dblFreightRate { get; set; }
-        public int? intFreightVendorId { get; set; }
+        public int? intShipViaId { get; set; }
         public int? intNegativeInventory { get; set; }
         public decimal? dblReorderPoint { get; set; }
         public decimal? dblMinOrder { get; set; }

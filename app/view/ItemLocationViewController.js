@@ -97,9 +97,9 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 store: '{freightTerm}'
             },
             txtFreightRate: '{current.dblFreightRate}',
-            cboFreightVendor: {
-                value: '{current.intFreightVendorId}',
-                store: '{freightVendor}'
+            cboShipVia: {
+                value: '{current.intShipViaId}',
+                store: '{shipVia}'
             },
             cboNegativeInventory: {
                 value: '{current.intNegativeInventory}',

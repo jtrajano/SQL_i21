@@ -820,27 +820,29 @@ Ext.define('Inventory.view.ItemLocation', {
                                                     xtype: 'gridcombobox',
                                                     columns: [
                                                         {
-                                                            dataIndex: 'intVendorId',
+                                                            dataIndex: 'intShipViaID',
                                                             dataType: 'numeric',
-                                                            text: 'Vendor Id',
+                                                            text: 'Ship Via Id',
                                                             hidden: true
                                                         },
                                                         {
-                                                            dataIndex: 'strVendorId',
+                                                            dataIndex: 'strShipVia',
                                                             dataType: 'string',
-                                                            text: 'Vendor No',
+                                                            text: 'Ship Via',
                                                             flex: 1
                                                         },
                                                         {
-                                                            dataIndex: 'strVendorName',
+                                                            dataIndex: 'strShippingService',
                                                             dataType: 'string',
-                                                            text: 'Vendor Name',
+                                                            text: 'Shipping Service',
                                                             flex: 1
                                                         }
                                                     ],
-                                                    itemId: 'cboFreightVendor',
-                                                    fieldLabel: 'Freight Vendor',
-                                                    labelWidth: 140
+                                                    itemId: 'cboShipVia',
+                                                    fieldLabel: 'Ship Via',
+                                                    labelWidth: 140,
+                                                    displayField: 'strShipVia',
+                                                    valueField: 'intShipViaID'
                                                 }
                                             ]
                                         }

@@ -85,7 +85,7 @@ Ext.define('Inventory.model.ItemLocation', {
         { name: 'ysnAutoCalculateFreight', type: 'boolean'},
         { name: 'intFreightMethodId', type: 'int', allowNull: true},
         { name: 'dblFreightRate', type: 'float'},
-        { name: 'intFreightVendorId', type: 'int', allowNull: true},
+        { name: 'intShipViaId', type: 'int', allowNull: true},
         { name: 'intNegativeInventory', type: 'int', allowNull: true},
         { name: 'dblReorderPoint', type: 'float'},
         { name: 'dblMinOrder', type: 'float'},
