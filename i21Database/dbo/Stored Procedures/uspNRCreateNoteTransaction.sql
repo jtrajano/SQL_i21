@@ -406,4 +406,3 @@ BEGIN CATCH
  IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 END CATCH
-
