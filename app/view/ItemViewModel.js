@@ -431,6 +431,15 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 {
                     strDescription: 'Percent of Margin'
+                },
+                {
+                    strDescription: 'Discount Sales Price'
+                },
+                {
+                    strDescription: 'MSRP Discount'
+                },
+                {
+                    strDescription: 'Percent of Margin (MSRP)'
                 }
             ],
             fields: [

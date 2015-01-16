@@ -3338,7 +3338,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colPricingLevelMethod',
-                                                                        width: 85,
+                                                                        minWidth: 150,
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Pricing Method',
                                                                         editor: {

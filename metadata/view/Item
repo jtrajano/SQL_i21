@@ -7343,8 +7343,8 @@
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colPricingLevelMethod",
-                                                                "text": "Pricing Method",
-                                                                "width": 85
+                                                                "minWidth": 150,
+                                                                "text": "Pricing Method"
                                                             },
                                                             "name": "MyColumn39",
                                                             "designerId": "8ac55ddf-d77a-4739-91c6-6f3810bf2afd",
