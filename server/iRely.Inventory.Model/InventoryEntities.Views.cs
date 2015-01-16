@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetse6bddcb66c8ea18e9d476f2cc656ccb377e42d0299ef79e03f0d587781cb6083))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets15eb009411d0702dd3d5431f7a52e45fba5c3fe62cd0bac0aada9aa2a19bef25))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetse6bddcb66c8ea18e9d476f2cc656ccb377e42d0299ef79e03f0d587781cb6083 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets15eb009411d0702dd3d5431f7a52e45fba5c3fe62cd0bac0aada9aa2a19bef25 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "e6bddcb66c8ea18e9d476f2cc656ccb377e42d0299ef79e03f0d587781cb6083"; }
+            get { return "15eb009411d0702dd3d5431f7a52e45fba5c3fe62cd0bac0aada9aa2a19bef25"; }
         }
 
         /// <summary>
