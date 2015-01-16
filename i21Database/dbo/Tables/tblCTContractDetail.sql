@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[tblCTContractDetail](
 	[dblBasis] [numeric](8, 4) NULL,
 	[intFutureMarketId] [int] NULL,
 	[intFuturesMonthYearId] [int] NULL,
-	[dblCashPrice] [numeric](5, 2) NULL,
+	[dblCashPrice] [numeric](9, 4) NULL,
 	[intCurrencyId] [int] NOT NULL,
 	[dblRate] [numeric](8, 4) NOT NULL,
 	[strCurrencyReference] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,

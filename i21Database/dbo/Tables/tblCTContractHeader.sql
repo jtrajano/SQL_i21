@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intPurchaseSale] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
 	[intCommodityId] [int] NOT NULL,
-	[dblQuantity] [numeric](8, 4) NOT NULL,
+	[dblQuantity] [numeric](24, 4) NOT NULL,
 	[intCommodityUnitMeasureId] [int] NOT NULL,
 	[intContractNumber] [int] NOT NULL,
 	[dtmContractDate] [datetime] NOT NULL,

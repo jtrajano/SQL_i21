@@ -1009,6 +1009,8 @@
     <Build Include="dbo\Tables\tblHDTicketHistory.sql" />
     <Build Include="dbo\Views\vyuHDTicketHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCalculateMonthlyInterest.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreatePriceContract.sql" />
+    <Build Include="dbo\Views\vyuCTPriceContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
