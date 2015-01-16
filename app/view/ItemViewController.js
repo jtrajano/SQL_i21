@@ -1608,7 +1608,7 @@ Ext.define('Inventory.view.ItemViewController', {
             var controller = view.getController();
             var current = win.getViewModel().data.current;
             if (action === 'edit'){
-                controller.show({ itemId: current.get('intItemId'), locationId: record.get('intItemPricingId'), action: action });
+                controller.show({ itemId: current.get('intItemId'), locationId: record.get('intItemLocationId'), action: action });
             }
             else if (action === 'new') {
                 controller.show({ itemId: current.get('intItemId'), action: action });
