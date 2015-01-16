@@ -1008,6 +1008,7 @@
     <Build Include="dbo\Tables\tblGLAccountCategory.sql" />
     <Build Include="dbo\Tables\tblHDTicketHistory.sql" />
     <Build Include="dbo\Views\vyuHDTicketHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCalculateMonthlyInterest.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
