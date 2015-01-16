@@ -1850,13 +1850,13 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemPricingScreen('edit', win, record);
+                me.openItemPricingScreen('edit', win, record, win.viewModel.data.current.tblICItemPricings().data);
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    me.openItemPricingScreen('edit', win, record);
+                    me.openItemPricingScreen('edit', win, record, win.viewModel.data.current.tblICItemPricings().data);
                 }
             });
         }
@@ -1870,14 +1870,14 @@ Ext.define('Inventory.view.ItemViewController', {
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 var record = win.viewModel.data.current.tblICItemUOMs().data.items[0];
-                me.openItemPricingScreen('new', win, record);
+                me.openItemPricingScreen('new', win, record, win.viewModel.data.current.tblICItemPricings().data);
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
                     var record = win.viewModel.data.current.tblICItemUOMs().data.items[0];
-                    me.openItemPricingScreen('new', win, record);
+                    me.openItemPricingScreen('new', win, record, win.viewModel.data.current.tblICItemPricings().data);
                 }
             });
         }
@@ -1897,19 +1897,19 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemPricingScreen('edit', win, selection[0]);
+                me.openItemPricingScreen('edit', win, selection[0], win.viewModel.data.current.tblICItemPricings().data);
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    me.openItemPricingScreen('edit', win, selection[0]);
+                    me.openItemPricingScreen('edit', win, selection[0], win.viewModel.data.current.tblICItemPricings().data);
                 }
             });
         }
     },
 
-    openItemPricingScreen: function (action, window, record) {
+    openItemPricingScreen: function (action, window, record, table) {
         var win = window;
         var me = win.controller;
         var screenName = 'Inventory.view.ItemPricing';
@@ -1926,14 +1926,14 @@ Ext.define('Inventory.view.ItemViewController', {
             var controller = view.getController();
             var current = win.getViewModel().data.current;
             if (action === 'edit'){
-                controller.show({ itemId: current.get('intItemId'), priceId: record.get('intItemPricingId'), action: action });
+                controller.show({ itemId: current.get('intItemId'), priceId: record.get('intItemPricingId'), table: table, action: action });
             }
             else if (action === 'new') {
                 if (record){
-                    controller.show({ itemId: current.get('intItemId'), uomId: record.get('intItemUOMId'), action: action });
+                    controller.show({ itemId: current.get('intItemId'), uomId: record.get('intItemUOMId'), table: table, action: action });
                 }
                 else {
-                    controller.show({ itemId: current.get('intItemId'), action: action });
+                    controller.show({ itemId: current.get('intItemId'), table: table, action: action });
                 }
             }
         });
