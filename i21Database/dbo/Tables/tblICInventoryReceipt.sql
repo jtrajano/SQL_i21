@@ -50,7 +50,7 @@
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
     CONSTRAINT [FK_tblICInventoryReceipt_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
-    CONSTRAINT [FK_tblICInventoryReceipt_tblEntity] FOREIGN KEY ([intReceiverId]) REFERENCES [tblEntity]([intEntityId])
+    CONSTRAINT [FK_tblICInventoryReceipt_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId])
 )
 
 GO
