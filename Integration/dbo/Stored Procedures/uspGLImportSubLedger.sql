@@ -68,7 +68,7 @@ END
     --DEFAULTS THE POST DATE TO glije_date
     UPDATE tblGLIjemst SET glije_postdate = glije_dte WHERE glije_uid=@uid
     
-    DECLARE @id INT, @dte DATETIME, @glije_period INT,@intFiscalYearId INT,@glije_acct_no DECIMAL
+    DECLARE @id INT, @dte DATETIME, @glije_period INT,@intFiscalYearId INT,@glije_acct_no DECIMAL(16,8)
     
     
     DECLARE @year NVARCHAR(4) ,@period NVARCHAR(4),@intFiscalPeriodId INT,@dateStart DATETIME, @dateEnd DATETIME ,@ysnStatus BIT
@@ -160,7 +160,7 @@ END
 				@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
 				SET @isValid = 0	
 			END
-			
+			SELECT @intAccountId = NULL,@strDescription = ''
 			SELECT @intAccountId= b.intAccountId, @strDescription=b.strDescription FROM tblGLCOACrossReference a 
 			JOIN tblGLAccount b ON a.inti21Id = b.intAccountId WHERE a.strExternalId = @glije_acct_no
 			IF @intAccountId IS NULL
