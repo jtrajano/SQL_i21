@@ -1813,6 +1813,7 @@ Ext.define('Inventory.view.ItemViewController', {
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
+            current.set('dblUnit', records[0].get('dblUnitQty'));
         }
     },
 
@@ -1840,6 +1841,7 @@ Ext.define('Inventory.view.ItemViewController', {
         else if (combo.column.itemId === 'colSpecialPricingUnit') {
             current.set('intUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
+            current.set('dblUnit', records[0].get('dblUnitQty'));
         }
     },
 

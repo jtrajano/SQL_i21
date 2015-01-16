@@ -7146,8 +7146,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strFieldName",
                                                                 "itemId": "colPricingLevelUOM",
-                                                                "text": "UOM",
-                                                                "width": 50
+                                                                "text": "UOM"
                                                             },
                                                             "name": "MyColumn33",
                                                             "designerId": "f197876e-abfc-49c3-ab13-2db34c9e342a",
@@ -7920,7 +7919,7 @@
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colSpecialPricingQty",
-                                                                "text": "Quantity",
+                                                                "text": "Qty",
                                                                 "width": 65
                                                             },
                                                             "name": "MyNumberColumn34",

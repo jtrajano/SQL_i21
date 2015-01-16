@@ -3247,7 +3247,6 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colPricingLevelUOM',
-                                                                        width: 50,
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'UOM',
                                                                         editor: {
@@ -3578,7 +3577,7 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 65,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Quantity',
+                                                                        text: 'Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
