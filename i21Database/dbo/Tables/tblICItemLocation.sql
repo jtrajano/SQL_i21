@@ -50,7 +50,7 @@
     [ysnAutoCalculateFreight] BIT NULL, 
     [intFreightMethodId] INT NULL, 
     [dblFreightRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [intFreightVendorId] INT NULL, 
+	[intShipViaId] INT NULL, 
     [intNegativeInventory] INT NULL DEFAULT ((3)), 
     [dblReorderPoint] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblMinOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -69,8 +69,8 @@
     CONSTRAINT [PK_tblICItemLocation] PRIMARY KEY ([intItemLocationId]), 
     CONSTRAINT [FK_tblICItemLocation_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
     CONSTRAINT [FK_tblICItemLocation_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
-	CONSTRAINT [FK_tblICItemLocation_tblAPVendorFreight] FOREIGN KEY ([intFreightVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
-    CONSTRAINT [FK_tblICItemLocation_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId])
+    CONSTRAINT [FK_tblICItemLocation_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId]), 
+    CONSTRAINT [FK_tblICItemLocation_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID])
 )
 GO
 
@@ -523,14 +523,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblFreightRate'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Freight Vendor Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemLocation',
-    @level2type = N'COLUMN',
-    @level2name = N'intFreightVendorId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Field',
@@ -630,3 +623,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemLocation',
     @level2type = N'COLUMN',
     @level2name = N'ysnCountedDaily'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Ship Via Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intShipViaId'
