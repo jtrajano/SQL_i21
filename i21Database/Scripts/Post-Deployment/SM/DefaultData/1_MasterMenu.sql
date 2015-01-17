@@ -1379,10 +1379,10 @@ GO
 	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankTransactions' WHERE strCommand = 'CashManagement.controller.BankTransactions'
 	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankTransfer' WHERE strCommand = 'CashManagement.controller.BankTransfer'
 	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.MiscellaneousChecks' WHERE strCommand = 'CashManagement.controller.MiscellaneousChecks'
-	--UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankAccountRegister' WHERE strCommand = 'CashManagement.controller.BankAccountRegister'
-	--UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankReconciliation' WHERE strCommand = 'CashManagement.controller.BankReconciliation'
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankAccountRegister' WHERE strCommand = 'CashManagement.controller.BankAccountRegister'
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankReconciliation' WHERE strCommand = 'CashManagement.controller.BankReconciliation'
 	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.Banks' WHERE strCommand = 'CashManagement.controller.Banks'
-	--UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankAccounts' WHERE strCommand = 'CashManagement.controller.BankAccounts'
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankAccounts' WHERE strCommand = 'CashManagement.controller.BankAccounts'
 	--UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankFileFormat' WHERE strCommand = 'CashManagement.controller.BankFileFormat'
 
 	/* ------------------------------------------------- */
