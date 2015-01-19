@@ -276,10 +276,16 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                     flex: 1
                                                 },
                                                 {
-                                                    dataIndex: 'ysnDefault',
-                                                    dataType: 'boolean',
-                                                    text: 'Default',
-                                                    flex: 1
+                                                    dataIndex: 'intDecimalCalculation',
+                                                    dataType: 'numeric',
+                                                    text: 'Decimal Places for Calculation',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'intDecimalDisplay',
+                                                    dataType: 'numeric',
+                                                    text: 'Decimal Places for Display',
+                                                    hidden: true
                                                 }
                                             ],
                                             itemId: 'cboStockUom',

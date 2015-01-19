@@ -132,9 +132,9 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             case 'Length':
                 cboUOM.defaultFilters =
                     [
-                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq' },
-                        { dataIndex: 'strUnitType', value: 'Area', condition: 'eq', conjunction: 'and'},
-                        { dataIndex: 'strUnitType', value: 'Length', condition: 'eq', conjunction: 'or'}
+                        { dataIndex: 'strUnitType', value: 'Area', condition: 'eq'},
+                        { dataIndex: 'strUnitType', value: 'Length', condition: 'eq', conjunction: 'or'},
+                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq', conjunction: 'and' }
                     ];
                 break;
             case 'Quantity':
@@ -142,16 +142,16 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             case 'Weight':
                 cboUOM.defaultFilters =
                     [
-                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq' },
-                        { dataIndex: 'strUnitType', value: 'Quantity', condition: 'eq', conjunction: 'and'},
+                        { dataIndex: 'strUnitType', value: 'Quantity', condition: 'eq'},
                         { dataIndex: 'strUnitType', value: 'Volume', condition: 'eq', conjunction: 'or'},
-                        { dataIndex: 'strUnitType', value: 'Weight', condition: 'eq', conjunction: 'or'}
+                        { dataIndex: 'strUnitType', value: 'Weight', condition: 'eq', conjunction: 'or'},
+                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq', conjunction: 'and' }
                     ];
                 break;
             case 'Time':
                 cboUOM.defaultFilters =
                     [
-                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq' },
+                        { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq'},
                         { dataIndex: 'strUnitType', value: 'Time', condition: 'eq', conjunction: 'and'}
                     ];
                 break;
