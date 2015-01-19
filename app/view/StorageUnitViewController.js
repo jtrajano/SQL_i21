@@ -136,6 +136,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             window : win,
             store  : store,
             binding: me.config.binding,
+            createRecord : me.createRecord,
             details: [
                 {
                     key: 'tblICStorageLocationCategories',
@@ -198,6 +199,14 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 });
             }
         }
+    },
+
+    createRecord: function(config, action) {
+        var me = this;
+        var record = Ext.create('Inventory.model.StorageLocation');
+        if (app.DefaultLocation > 0)
+            record.set('intLocationId', app.DefaultLocation);
+        action(record);
     },
 
     onCategorySelect: function(combo, records, eOpts) {
