@@ -378,37 +378,43 @@ GO
 		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
 		VALUES ('Invoice','Accounts Receivable',@activitiesId,'Invoice','Screen','AccountsReceivable.view.Invoice','small-screen',1,0,0,1,1,1)
 	END
+
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Import Invoices from Origin' AND intParentMenuID = @activitiesId)
+	BEGIN
+		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
+		VALUES ('Import Invoices from Origin','Accounts Receivable',@activitiesId,'Import Invoices from Origin','Screen','AccountsReceivable.view.ImportInvoices','small-screen',1,0,0,1,2,1)
+	END
 	
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Credit Memo' AND intParentMenuID = @activitiesId)
 	BEGIN
 		INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-		VALUES ('Credit Memo','Accounts Receivable',@activitiesId,'Credit Memo','Screen','AccountsReceivable.view.CreditMemo','small-screen',1,0,0,1,2,1)
+		VALUES ('Credit Memo','Accounts Receivable',@activitiesId,'Credit Memo','Screen','AccountsReceivable.view.CreditMemo','small-screen',1,0,0,1,3,1)
 	END	
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payments' AND intParentMenuID = @activitiesId)
 		BEGIN
 			INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-			VALUES ('Receive Payments','Accounts Receivable',@activitiesId,'Receive Payments','Screen','AccountsReceivable.view.ReceivePayments','small-screen',1,0,0,1,3,1)
+			VALUES ('Receive Payments','Accounts Receivable',@activitiesId,'Receive Payments','Screen','AccountsReceivable.view.ReceivePayments','small-screen',1,0,0,1,4,1)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblSMMasterMenu SET intSort = 3 WHERE strMenuName = 'Receive Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
+			UPDATE tblSMMasterMenu SET intSort = 4 WHERE strMenuName = 'Receive Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
 		END
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payment Detail' AND intParentMenuID = @activitiesId)
 		BEGIN
 			INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-			VALUES ('Receive Payment Detail','Accounts Receivable',@activitiesId,'Receive Payment Detail','Screen','AccountsReceivable.view.ReceivePaymentsDetail','small-screen',1,0,0,1,4,1)
+			VALUES ('Receive Payment Detail','Accounts Receivable',@activitiesId,'Receive Payment Detail','Screen','AccountsReceivable.view.ReceivePaymentsDetail','small-screen',1,0,0,1,5,1)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblSMMasterMenu SET intSort = 4 WHERE strMenuName = 'Receive Payment Detail' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
+			UPDATE tblSMMasterMenu SET intSort = 5 WHERE strMenuName = 'Receive Payment Detail' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
 		END
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Batch Posting' AND intParentMenuID = @activitiesId)
 		BEGIN
 			INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-			VALUES ('Batch Posting','Accounts Receivable',@activitiesId,'Batch Posting','Screen','AccountsReceivable.controller.BatchPosting','small-screen',1,0,0,1,5,1)
+			VALUES ('Batch Posting','Accounts Receivable',@activitiesId,'Batch Posting','Screen','AccountsReceivable.controller.BatchPosting','small-screen',1,0,0,1,6,1)
 		END
 	ELSE
 		BEGIN
