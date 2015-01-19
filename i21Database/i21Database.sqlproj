@@ -1011,6 +1011,8 @@
     <Build Include="dbo\Stored Procedures\uspNRCalculateMonthlyInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreatePriceContract.sql" />
     <Build Include="dbo\Views\vyuCTPriceContract.sql" />
+    <Build Include="dbo\Tables\tblGRDiscountId.sql" />
+    <Build Include="dbo\Tables\tblGRDiscountLocationUse.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
