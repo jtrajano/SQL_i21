@@ -14,7 +14,7 @@ namespace iRely.Inventory.Model
         public int intCompanyLocationId { get; set; }
         public string strLocationName { get; set; }
         public string strLocationType { get; set; }
-        public int intProfitCenter { get; set; }
+        public int? intProfitCenter { get; set; }
 
         public string strAddress { get; set; }
         public string strZipPostalCode { get; set; }
