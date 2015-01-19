@@ -552,13 +552,13 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowPurchase',
                                                         minWidth: 150,
-                                                        text: 'Allow Purchase in Stock Unit'
+                                                        text: 'Purchase in Stock Unit'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowSale',
                                                         minWidth: 140,
-                                                        text: 'Allow Sale in Stock Unit'
+                                                        text: 'Sale in Stock Unit'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',

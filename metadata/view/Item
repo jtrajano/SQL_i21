@@ -1070,7 +1070,7 @@
                                             "userConfig": {
                                                 "itemId": "colAllowPurchase",
                                                 "minWidth": 150,
-                                                "text": "Allow Purchase in Stock Unit"
+                                                "text": "Purchase in Stock Unit"
                                             },
                                             "name": "MyCheck9",
                                             "designerId": "490cc0bf-aaa0-44ea-8417-a0a034daf717"
@@ -1085,7 +1085,7 @@
                                             "userConfig": {
                                                 "itemId": "colAllowSale",
                                                 "minWidth": 140,
-                                                "text": "Allow Sale in Stock Unit"
+                                                "text": "Sale in Stock Unit"
                                             },
                                             "name": "MyCheck4",
                                             "designerId": "d5f4523e-50e8-4ad7-86b9-7ff0978102b8"
