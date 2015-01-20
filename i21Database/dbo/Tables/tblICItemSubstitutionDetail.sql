@@ -10,7 +10,8 @@
     [ysnYearValidationRequired] BIT NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICItemSubstitutionDetail] PRIMARY KEY ([intItemSubstitutionDetailId]) 
+    CONSTRAINT [PK_tblICItemSubstitutionDetail] PRIMARY KEY ([intItemSubstitutionDetailId]), 
+    CONSTRAINT [FK_tblICItemSubstitutionDetail_tblICItem] FOREIGN KEY ([intSubstituteItemId]) REFERENCES [tblICItem]([intItemId]) 
 )
 
 GO

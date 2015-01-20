@@ -1,13 +1,17 @@
 ﻿CREATE TABLE [dbo].[tblICItemSubstitution]
 (
 	[intItemSubstitutionId] INT NOT NULL IDENTITY, 
+	[intLocationId] INT NOT NULL, 
     [intItemId] INT NOT NULL, 
     [strModification] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[ysnContracted] BIT NULL DEFAULT ((0)),
     [strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemSubstitution] PRIMARY KEY ([intItemSubstitutionId]), 
-    CONSTRAINT [AK_tblICItemSubstitution_intItemId] UNIQUE ([intItemId])
+    CONSTRAINT [AK_tblICItemSubstitution_intItemId] UNIQUE ([intLocationId], [intItemId]), 
+    CONSTRAINT [FK_tblICItemSubstitution_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [FK_tblICItemSubstitution_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )
 
 GO

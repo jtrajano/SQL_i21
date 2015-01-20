@@ -1673,4 +1673,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmBeginDate" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f358122f-97e4-491d-b8c9-8dd183773204" ChangeDateTime="01/20/2015 04:00:45">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransfer].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransfer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryTransferId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="33b63fca-be78-44f0-aeb2-0ab4e458a2fb" ChangeDateTime="01/20/2015 04:02:29">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransfer].[strTransferTyp]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransfer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strTransferType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c42f9804-72fa-4d7d-af8e-1af59280e598" ChangeDateTime="01/20/2015 05:56:44">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransferDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransferDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryTransferDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="69c96976-dd03-4b2e-8868-0b16ad19f02f" ChangeDateTime="01/20/2015 05:58:02">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransferDetail].[intSubLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransferDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFromSubLocationId" />
+  </Operation>
 </Operations>

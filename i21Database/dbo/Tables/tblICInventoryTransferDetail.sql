@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[tblICInventoryTransferDetail]
+(
+	[intInventoryTransferDetailId] INT NOT NULL IDENTITY, 
+    [intInventoryTransferId] INT NOT NULL, 
+    [intItemId] INT NOT NULL, 
+    [intLotId] INT NULL, 
+    [intFromSubLocationId] INT NULL, 
+    [intFromStorageId] INT NULL, 
+    [intToSubLocationId] INT NULL, 
+    [intToStorageId] INT NULL, 
+    [dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[intUnitMeasureId] INT NULL, 
+    [intWeightUOMId] INT NULL, 
+    [dblGrossWeight] NUMERIC(18, 6) NULL DEFAULT ((0)),  
+    [dblTareWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblNetWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [strNewLotId] NVARCHAR(50) NULL, 
+    [dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [intCreditAccountId] INT NULL, 
+    [intDebitAccountId] INT NULL, 
+    [intTaxCodeId] INT NULL, 
+    [dblTaxAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblFreightRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblFreightAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [intSort] INT NULL, 
+    [intConcurrencyId] INT NULL DEFAULT ((0)), 
+    CONSTRAINT [PK_tblICInventoryTransferDetail] PRIMARY KEY ([intInventoryTransferDetailId]) 
+)
