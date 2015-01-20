@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARCustomerFarm] (
     [intFarmFieldId]      INT            IDENTITY (1, 1) NOT NULL,
-    [intEntityId]         INT            NOT NULL,
+    [intCustomerId]         INT            NOT NULL,
     [strFarmNumber]           NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
     [strFarmDescription]  NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
     [strFieldNumber]          NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
