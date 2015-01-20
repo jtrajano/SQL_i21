@@ -239,7 +239,7 @@ BEGIN
 			AND strTransactionId = @strTransactionId
 			
 	-- Setup the expected Item Stock
-	-- Expect the stock goes back to zero. The average cost should remain the same. 
+	-- Expect the stock goes back to 100. The average cost should remain the same. 
 	INSERT INTO expectedItemStock (
 			intItemId
 			,intLocationId
@@ -249,27 +249,27 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = -75
+			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @StickyGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = -75
+			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @PremiumGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = -75
+			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @ColdGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = -75
+			,dblUnitOnHand = 100
 	UNION ALL
 	SELECT	intItemId = @HotGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = -75
+			,dblUnitOnHand = 100
 			
 	-- Setup the expected FIFO data
 	INSERT INTO dbo.expectedFIFO (
@@ -484,9 +484,9 @@ BEGIN
 			AND intLocationId IN (@Default_Location)
 				
 	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
-	--EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
-	--EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
-	--EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';
+	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
+	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
+	EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';
 END 
 
 -- Clean-up: remove the tables used in the unit test

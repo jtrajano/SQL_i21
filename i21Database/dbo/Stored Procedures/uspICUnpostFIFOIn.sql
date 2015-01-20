@@ -109,6 +109,7 @@ FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICInventoryFIFOOut fifoOut
 			AND OutTransactions.dblUnitQty < 0 
 WHERE	fifo.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTranactionStockToReverse)
 		AND fifo.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTranactionStockToReverse)
+		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
 ;
 -- Plug the Out-qty so that it can't be used for future out-transactions. 
 -- Mark the record as unposted too. 
