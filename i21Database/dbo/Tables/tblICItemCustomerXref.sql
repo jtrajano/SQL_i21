@@ -11,7 +11,7 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICItemCustomerXref] PRIMARY KEY ([intItemCustomerXrefId]), 
     CONSTRAINT [FK_tblICItemCustomerXref_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblICItemCustomerXref_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+    CONSTRAINT [FK_tblICItemCustomerXref_tblICItemLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
     CONSTRAINT [FK_tblICItemCustomerXref_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intCustomerId])
 )
 
