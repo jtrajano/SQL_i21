@@ -20,6 +20,7 @@ SELECT
 	,D.strPurchaseOrderNumber
 	,F.strShipVia
 	,G.strTerm
+	,intAccountId = dbo.fnGetItemGLAccount(B.intItemId, A.intLocationId, 'Inventory')
 FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId

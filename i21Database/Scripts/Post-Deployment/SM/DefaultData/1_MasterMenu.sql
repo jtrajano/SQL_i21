@@ -1412,8 +1412,17 @@ GO
 	/* -- End Update Help Desk Menu Commands for MVVM -- */
 	/* ------------------------------------------------- */
 
-GO
+	/* ------------------------------------------------- */
+	/* --- Update AP Menu Commands for MVVM ----- */
+	/* ------------------------------------------------- */
 
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Bill' WHERE strCommand = 'AccountsPayable.controller.Bill'
+
+	/* ------------------------------------------------- */
+	/* -- End Update AP Menu Commands for MVVM -- */
+	/* ------------------------------------------------- */
+
+GO
 	/* -------------------------------------------- */
 	/* --   Update General Ledger Module Menu    -- */
 	/* -------------------------------------------- */
