@@ -613,6 +613,13 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for posted Inventory Shipment.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake posted transactions using AVG, scenario 3.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for scenario 3, unpost add stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for scenario 3, unpost sell stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

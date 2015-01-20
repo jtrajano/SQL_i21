@@ -57,7 +57,6 @@ FROM	(
 				WHEN MATCHED THEN 
 					UPDATE 
 					SET		ysnIsUnposted = 1
-							,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 
 				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
 		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
@@ -77,6 +76,7 @@ FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
 		) AS fifoOutGrouped
 			ON fifoOutGrouped.intRevalueFifoId = fifoBucket.intInventoryFIFOId
 ;
+
 -- If there are out records, create a negative stock cost bucket 
 INSERT INTO dbo.tblICInventoryFIFO (
 		intItemId
@@ -104,12 +104,11 @@ SELECT	intItemId = OutTransactions.intItemId
 		,intConcurrencyId = 1
 FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICInventoryFIFOOut fifoOut
 			ON fifo.intInventoryFIFOId = fifoOut.intInventoryFIFOId
-		INNER JOIN #tmpInventoryTranactionStockToReverse Reversal
-			ON Reversal.intTransactionId = fifo.intTransactionId
-			AND Reversal.strTransactionId = fifo.strTransactionId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
 			ON OutTransactions.intInventoryTransactionId = fifoOut.intInventoryTransactionId
 			AND OutTransactions.dblUnitQty < 0 
+WHERE	fifo.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTranactionStockToReverse)
+		AND fifo.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTranactionStockToReverse)
 ;
 -- Plug the Out-qty so that it can't be used for future out-transactions. 
 UPDATE	fifoBucket
