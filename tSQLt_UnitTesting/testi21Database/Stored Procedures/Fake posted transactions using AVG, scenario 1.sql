@@ -1,5 +1,32 @@
 ﻿---------------------------------------------------------------------------------------------------
--- Scenario 1: Add stock 
+/*
+	Scenario 1: Add stock 	
+
+	tblICInventoryFIFO
+	-----------------------------------------------------------------
+	Fifo Id	Date		In		Out		Cost	Inbound Transaction
+	-------	---------	------	-----	------	---------------------
+	1		1/1/2014	100		0		$2.00	InvRcpt-00001
+
+	tblICInventoryFIFOOut
+	-----------------------------------------------------------------
+	Id		Fifo Id		Inventory Transaction Id	Revalue Id	Qty
+	-----	---------	-------------------------	----------	-----
+	None
+
+	tblICInventoryTransaction
+	-------------------------------------------------------------------------------------------------------------------
+	Id	Date		Qty		Cost	Value Adj	Transaction Id	Related Transaction Id	Type				Is Unposted
+	---	---------	------	------	----------	--------------	----------------------	-----------------	-----------
+	1	1/1/2014	100		$2.000	NULL		InvRcpt-00001	NULL					Inventory Receipt	
+	
+	G/L Entries
+	------------------------------------------------------------------------------------
+	Date		Account				Debit		Credit		Journal Id		Is Unposted
+	----------	------------------	-----------	----------	-------------	------------
+	1/1/2014	Inventory			$200.000								
+				A/P Clearing					$200.000
+*/
 ---------------------------------------------------------------------------------------------------
 CREATE PROCEDURE [testi21Database].[Fake posted transactions using AVG, scenario 1]
 AS

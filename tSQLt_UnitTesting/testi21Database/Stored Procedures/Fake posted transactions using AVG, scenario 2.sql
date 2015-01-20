@@ -1,5 +1,32 @@
 ﻿---------------------------------------------------------------------------------------------------
--- Scenario 2: Sell Stock 
+/*
+	Scenario 2: Sell stock 	
+
+	tblICInventoryFIFO
+	-----------------------------------------------------------------
+	Fifo Id	Date		In		Out		Cost	Inbound Transaction
+	-------	---------	------	-----	------	---------------------
+	1		1/1/2014	0		50		$2.00	InvShip-00001
+
+	tblICInventoryFIFOOut
+	-----------------------------------------------------------------
+	Id		Fifo Id		Inventory Transaction Id	Revalue Id	Qty
+	-----	---------	-------------------------	----------	-----
+	None
+
+	tblICInventoryTransaction
+	-------------------------------------------------------------------------------------------------------------------
+	Id	Date		Qty		Cost	Value Adj	Transaction Id	Related Transaction Id	Type				Is Unposted
+	---	---------	------	------	----------	--------------	----------------------	-------------------	-----------
+	1	1/1/2014	-50		$2.000	NULL		InvShip-00001	NULL					Inventory Shipment	
+	
+	G/L Entries
+	----------------------------------------------------------------------------------------
+	Date		Account					Debit		Credit		Journal Id		Is Unposted
+	----------	----------------------	-----------	----------	-------------	------------
+	1/1/2014	Inventory In-Transit	$100.00
+				Inventory							$100.00
+*/
 ---------------------------------------------------------------------------------------------------
 CREATE PROCEDURE [testi21Database].[Fake posted transactions using AVG, scenario 2]
 AS
