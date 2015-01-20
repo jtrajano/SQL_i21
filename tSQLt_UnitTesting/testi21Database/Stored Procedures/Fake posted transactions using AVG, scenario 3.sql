@@ -649,7 +649,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,intRelatedTransactionId = NULL 
 				,strRelatedTransactionId = NULL 
-				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
+				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
 				,intLocationId = @Default_Location
@@ -664,7 +664,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,intRelatedTransactionId = NULL 
 				,strRelatedTransactionId = NULL 
-				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
+				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @StickyGrains
 				,intLocationId = @Default_Location
@@ -679,7 +679,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,intRelatedTransactionId = NULL 
 				,strRelatedTransactionId = NULL 
-				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
+				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @PremiumGrains
 				,intLocationId = @Default_Location
@@ -694,7 +694,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,intRelatedTransactionId = NULL 
 				,strRelatedTransactionId = NULL 
-				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
+				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @ColdGrains
 				,intLocationId = @Default_Location
@@ -709,7 +709,7 @@ BEGIN
 				,strTransactionId = 'InvShip-0001'
 				,intRelatedTransactionId = NULL 
 				,strRelatedTransactionId = NULL 
-				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
+				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @HotGrains
 				,intLocationId = @Default_Location
