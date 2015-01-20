@@ -434,6 +434,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "allowExponential": false,
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "Last Cost",
                                         "fieldStyle": "text-align:right",
@@ -454,6 +456,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "allowExponential": false,
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "Standard Cost",
                                         "fieldStyle": "text-align:right",
@@ -495,6 +499,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "allowExponential": false,
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "Moving Avg Cost",
                                         "fieldStyle": "text-align:right",
@@ -516,6 +522,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "allowExponential": false,
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "End of Month Cost",
                                         "fieldStyle": "text-align:right",
@@ -625,6 +633,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "allowExponential": false,
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "Sale Price",
                                         "fieldStyle": "text-align:right",
@@ -645,6 +655,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "allowExponential": false,
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "Retail Price",
                                         "fieldStyle": "text-align:right",
@@ -686,6 +698,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "allowExponential": false,
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "Wholesale Price",
                                         "fieldStyle": "text-align:right",
@@ -706,6 +720,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "allowExponential": false,
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "Large Volume Price",
                                         "fieldStyle": "text-align:right",
@@ -747,6 +763,8 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "allowExponential": false,
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "MSRP",
                                         "fieldStyle": "text-align:right",
@@ -847,7 +865,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging11",
                     "designerId": "ee98d62c-330d-4829-b90b-22407d93d85f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

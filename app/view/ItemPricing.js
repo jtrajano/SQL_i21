@@ -195,7 +195,6 @@ Ext.define('Inventory.view.ItemPricing', {
                             items: [
                                 {
                                     xtype: 'gridcombobox',
-                                    flex: 1,
                                     columns: [
                                         {
                                             dataIndex: 'intUnitMeasureId',
@@ -234,6 +233,7 @@ Ext.define('Inventory.view.ItemPricing', {
                                             hidden: true
                                         }
                                     ],
+                                    flex: 1,
                                     tabIndex: 1,
                                     itemId: 'cboUnitMeasure',
                                     fieldLabel: 'UOM',
@@ -268,8 +268,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                     itemId: 'txtLastCost',
                                     fieldLabel: 'Last Cost',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    allowExponential: false
                                 },
                                 {
                                     xtype: 'moneynumber',
@@ -279,8 +281,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Standard Cost',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    allowExponential: false
                                 }
                             ]
                         },
@@ -300,8 +304,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                     margin: '',
                                     fieldLabel: 'Moving Avg Cost',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    allowExponential: false
                                 },
                                 {
                                     xtype: 'moneynumber',
@@ -311,8 +317,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                     margin: '0 0 0 5',
                                     fieldLabel: 'End of Month Cost',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    allowExponential: false
                                 }
                             ]
                         },
@@ -365,8 +373,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                     itemId: 'txtSalePrice',
                                     fieldLabel: 'Sale Price',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    allowExponential: false
                                 },
                                 {
                                     xtype: 'moneynumber',
@@ -376,8 +386,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Retail Price',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    allowExponential: false
                                 }
                             ]
                         },
@@ -396,8 +408,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                     itemId: 'txtWholesalePrice',
                                     fieldLabel: 'Wholesale Price',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    allowExponential: false
                                 },
                                 {
                                     xtype: 'moneynumber',
@@ -407,8 +421,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Large Volume Price',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    allowExponential: false
                                 }
                             ]
                         },
@@ -427,8 +443,10 @@ Ext.define('Inventory.view.ItemPricing', {
                                     itemId: 'txtMsrp',
                                     fieldLabel: 'MSRP',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    allowExponential: false
                                 },
                                 {
                                     xtype: 'container',
