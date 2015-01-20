@@ -47,7 +47,7 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemContract>()
                 .Include("tblICItemContractDocuments.tblICDocument")
-                .Include(p => p.tblSMCompanyLocation)
+                .Include("tblICItemLocation.tblSMCompanyLocation")
                 .Include(p => p.tblSMCountry)
                 .Where(w => query.Where(predicate).Any(a => a.intItemContractId == w.intItemContractId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)

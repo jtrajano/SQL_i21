@@ -24,7 +24,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblLastCountRetail).HasColumnName("dblLastCountRetail");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
 
-            this.HasOptional(p => p.tblSMCompanyLocation)
+            this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemStocks)
                 .HasForeignKey(p => p.intLocationId);
         }

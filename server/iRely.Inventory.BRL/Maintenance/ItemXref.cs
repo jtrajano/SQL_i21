@@ -48,7 +48,7 @@ namespace iRely.Inventory.BRL
             return _db.GetQuery<tblICItemVendorXref>()
                 .Include(p => p.vyuAPVendor)
                 .Include(p => p.tblICUnitMeasure)
-                .Include(p => p.tblSMCompanyLocation)
+                .Include("tblICItemLocation.tblSMCompanyLocation")
                 .Where(w => query.Where(predicate).Any(a => a.intItemVendorXrefId == w.intItemVendorXrefId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)
@@ -97,7 +97,7 @@ namespace iRely.Inventory.BRL
             var query = GetCustomerXrefSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemCustomerXref>()
                 .Include(p => p.tblARCustomer)
-                .Include(p => p.tblSMCompanyLocation)
+                .Include("tblICItemLocation.tblSMCompanyLocation")
                 .Where(w => query.Where(predicate).Any(a => a.intItemCustomerXrefId == w.intItemCustomerXrefId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

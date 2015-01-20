@@ -31,7 +31,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
 
-            this.HasOptional(p => p.tblSMCompanyLocation)
+            this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemPricings)
                 .HasForeignKey(p => p.intLocationId);
             this.HasOptional(p => p.tblICItemUOM)

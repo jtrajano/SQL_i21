@@ -25,6 +25,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedPatronageCategory',
         'Inventory.store.BufferedInventoryTag',
         'Inventory.store.BufferedItemUnitMeasure',
+        'Inventory.store.BufferedItemLocation',
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedPricingLevel',
         'Inventory.store.BufferedBrand',
@@ -378,13 +379,13 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         custXrefLocation: {
-            type: 'companylocationbuffered'
+            type: 'icbuffereditemlocation'
         },
         custXrefCustomer: {
             type: 'customerbuffered'
         },
         vendorXrefLocation: {
-            type: 'companylocationbuffered'
+            type: 'icbuffereditemlocation'
         },
         vendorXrefVendor: {
             type: 'vendorbuffered'
@@ -395,7 +396,7 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         contractLocation: {
-            type: 'companylocationbuffered'
+            type: 'icbuffereditemlocation'
         },
         origin: {
             type: 'countrybuffered'
@@ -409,7 +410,7 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         pricingLevelLocation: {
-            type: 'companylocationbuffered'
+            type: 'icbuffereditemlocation'
         },
         pricingLevel: {
             type: 'icbufferedpricinglevel'
@@ -468,7 +469,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         specialPricingLocation: {
-            type: 'companylocationbuffered'
+            type: 'icbuffereditemlocation'
         },
         promotionTypes:{
             autoLoad: true,
@@ -510,7 +511,7 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         stockLocation: {
-            type: 'companylocationbuffered'
+            type: 'icbuffereditemlocation'
         },
         stockUOM: {
             type: 'icbuffereduom'
@@ -610,7 +611,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
 
         noteLocation: {
-            type: 'companylocationbuffered'
+            type: 'icbuffereditemlocation'
         },
         commentTypes: {
             autoLoad: true,

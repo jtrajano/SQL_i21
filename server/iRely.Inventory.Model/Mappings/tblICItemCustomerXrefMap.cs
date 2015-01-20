@@ -21,7 +21,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strPickTicketNotes).HasColumnName("strPickTicketNotes");
             this.Property(t => t.strProductDescription).HasColumnName("strProductDescription");
 
-            this.HasOptional(p => p.tblSMCompanyLocation)
+            this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemCustomerXrefs)
                 .HasForeignKey(p => p.intLocationId);
             this.HasOptional(p => p.tblARCustomer)

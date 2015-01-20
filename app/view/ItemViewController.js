@@ -422,7 +422,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     editor: {
                         store: '{pricingLevel}',
                         defaultFilters: [{
-                            column: 'intCompanyLocationId',
+                            column: 'intItemLocationId',
                             value: '{grdPricingLevel.selection.intLocationId}'
                         }]
                     }
@@ -1722,7 +1722,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colCustomerXrefLocation')
         {
-            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+            current.set('intLocationId', records[0].get('intItemLocationId'));
         }
         else if (combo.column.itemId === 'colCustomerXrefCustomer') {
             current.set('intCustomerId', records[0].get('intCustomerId'));
@@ -1738,7 +1738,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colVendorXrefLocation'){
-            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+            current.set('intLocationId', records[0].get('intItemLocationId'));
         }
         else if (combo.column.itemId === 'colVendorXrefVendor') {
             current.set('intVendorId', records[0].get('intVendorId'));
@@ -1761,7 +1761,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colContractLocation'){
-            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+            current.set('intLocationId', records[0].get('intItemLocationId'));
         }
         else if (combo.column.itemId === 'colContractOrigin') {
             current.set('intCountryId', records[0].get('intCountryID'));
@@ -1807,7 +1807,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colPricingLevelLocation'){
-            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+            current.set('intLocationId', records[0].get('intItemLocationId'));
             current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
@@ -1828,10 +1828,10 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colSpecialPricingLocation'){
-            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+            current.set('intLocationId', records[0].get('intItemLocationId'));
 
             if (grdPricing.store){
-                var record = grdPricing.store.findRecord('intLocationId', records[0].get('intCompanyLocationId'));
+                var record = grdPricing.store.findRecord('intLocationId', records[0].get('intItemLocationId'));
                 if (record){
                     current.set('dblUnitAfterDiscount', record.get('dblSalePrice'));
                 }
@@ -1973,7 +1973,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colStockLocation'){
-            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+            current.set('intLocationId', records[0].get('intItemLocationId'));
         }
         else if (combo.column.itemId === 'colStockUOM') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
@@ -2156,7 +2156,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colNoteLocation'){
-            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+            current.set('intLocationId', records[0].get('intItemLocationId'));
         }
     },
 

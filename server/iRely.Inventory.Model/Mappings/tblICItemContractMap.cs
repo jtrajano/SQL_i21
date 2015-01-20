@@ -25,7 +25,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.strGradeType).HasColumnName("strGradeType");
 
-            this.HasOptional(p => p.tblSMCompanyLocation)
+            this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemContracts)
                 .HasForeignKey(p => p.intLocationId);
             this.HasOptional(p => p.tblSMCountry)

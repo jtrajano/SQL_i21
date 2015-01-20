@@ -27,7 +27,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDiscountBy).HasColumnName("strDiscountBy");
             this.Property(t => t.strPromotionType).HasColumnName("strPromotionType");
 
-            this.HasOptional(p => p.tblSMCompanyLocation)
+            this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemSpecialPricings)
                 .HasForeignKey(p => p.intLocationId);
             this.HasOptional(p => p.tblICItemUOM)

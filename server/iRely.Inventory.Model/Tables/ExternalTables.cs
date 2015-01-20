@@ -116,20 +116,11 @@ namespace iRely.Inventory.Model
         //public string strOverShortAccount { get; set; }
         //public bool ysnAutomaticCashDepositEntries { get; set; }
 
-        public ICollection<tblICItemNote> tblICItemNotes { get; set; }
-        public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
-        public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
-        public ICollection<tblICItemContract> tblICItemContracts { get; set; }
-        public ICollection<tblICItemStock> tblICItemStocks { get; set; }
-        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
-        public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
-        public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
-        public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
-
         public ICollection<tblICManufacturingCell> tblICManufacturingCells { get; set; }
         public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
 
+        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICItemFactory> tblICItemFactories { get; set; }
     }
 

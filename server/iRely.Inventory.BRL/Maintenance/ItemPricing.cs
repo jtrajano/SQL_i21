@@ -46,7 +46,7 @@ namespace iRely.Inventory.BRL
         {
             var query = GetPricingSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemPricing>()
-                .Include(p => p.tblSMCompanyLocation)
+                .Include("tblICItemLocation.tblSMCompanyLocation")
                 .Include("tblICItemUOM.tblICUnitMeasure")
                 .Where(w => query.Where(predicate).Any(a => a.intItemPricingId == w.intItemPricingId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
@@ -96,7 +96,7 @@ namespace iRely.Inventory.BRL
             var query = GetPricingLevelSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemPricingLevel>()
                 .Include("tblICItemUOM.tblICUnitMeasure")
-                .Include(p => p.tblSMCompanyLocation)
+                .Include("tblICItemLocation.tblSMCompanyLocation")
                 .Where(w => query.Where(predicate).Any(a => a.intItemPricingLevelId == w.intItemPricingLevelId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)
@@ -145,7 +145,7 @@ namespace iRely.Inventory.BRL
             var query = GetSpecialPricingSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemSpecialPricing>()
                 .Include("tblICItemUOM.tblICUnitMeasure")
-                .Include(p => p.tblSMCompanyLocation)
+                .Include("tblICItemLocation.tblSMCompanyLocation")
                 .Where(w => query.Where(predicate).Any(a => a.intItemSpecialPricingId == w.intItemSpecialPricingId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

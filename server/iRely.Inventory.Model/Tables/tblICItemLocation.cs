@@ -90,6 +90,44 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
+        private string _type;
+        [NotMapped]
+        public string strLocationType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_type))
+                    if (tblSMCompanyLocation != null)
+                        return tblSMCompanyLocation.strLocationType;
+                    else
+                        return null;
+                else
+                    return _type;
+            }
+            set
+            {
+                _type = value;
+            }
+        }
+        private string _address;
+        [NotMapped]
+        public string strAddress
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_address))
+                    if (tblSMCompanyLocation != null)
+                        return tblSMCompanyLocation.strAddress;
+                    else
+                        return null;
+                else
+                    return _address;
+            }
+            set
+            {
+                _address = value;
+            }
+        }
         private string _vendor;
         [NotMapped]
         public string strVendorId
@@ -154,6 +192,15 @@ namespace iRely.Inventory.Model
         public tblICCategory tblICCategory { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public tblICCountGroup tblICCountGroup { get; set; }
+
+        public ICollection<tblICItemNote> tblICItemNotes { get; set; }
+        public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
+        public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
+        public ICollection<tblICItemContract> tblICItemContracts { get; set; }
+        public ICollection<tblICItemStock> tblICItemStocks { get; set; }
+        public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
+        public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
+        public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
         
     }
 }

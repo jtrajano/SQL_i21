@@ -34,8 +34,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_location))
-                    if (tblSMCompanyLocation != null)
-                        return tblSMCompanyLocation.strLocationName;
+                    if (tblICItemLocation != null)
+                        return tblICItemLocation.strLocationName;
                     else
                         return null;
                 else
@@ -86,7 +86,7 @@ namespace iRely.Inventory.Model
         }
 
         public tblICItem tblICItem { get; set; }
-        public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
+        public tblICItemLocation tblICItemLocation { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
     }
 }
