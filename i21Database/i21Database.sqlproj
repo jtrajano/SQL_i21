@@ -1001,20 +1001,14 @@
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForReversePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspNRScheduleHistoryReversePayment.sql" />
-    <Build Include="dbo\Views\vyuAPReceivedItems.sql" />
     <Build Include="dbo\Views\vyuARGetInventoryItem.sql" />
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForAdjustment.sql" />
     <Build Include="dbo\Tables\tblGLAccountCategory.sql" />
     <Build Include="dbo\Tables\tblHDTicketHistory.sql" />
     <Build Include="dbo\Views\vyuHDTicketHistory.sql" />
-    <Build Include="dbo\Stored Procedures\uspNRCalculateMonthlyInterest.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTCreatePriceContract.sql" />
-    <Build Include="dbo\Views\vyuCTPriceContract.sql" />
-    <Build Include="dbo\Tables\tblGRDiscountId.sql" />
-    <Build Include="dbo\Tables\tblGRDiscountLocationUse.sql" />
-    <Build Include="dbo\Tables\tblICInventoryTransfer.sql" />
-    <Build Include="dbo\Tables\tblICInventoryTransferDetail.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocationSubLocation.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocationSubLocationCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
