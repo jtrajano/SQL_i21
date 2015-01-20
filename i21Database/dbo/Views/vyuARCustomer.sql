@@ -15,11 +15,13 @@ SELECT
 ,Cus.intCurrencyId
 ,Loc.intTermsId
 ,Loc.intShipViaId
+,ShipToLoc.strLocationName as strShipToLocationName
 ,ShipToLoc.strAddress as strShipToAddress
 ,ShipToLoc.strCity as strShipToCity
 ,ShipToLoc.strState as strShipToState
 ,ShipToLoc.strZipCode as strShipToZipCode
 ,ShipToLoc.strCountry as strShipToCountry
+,BillToLoc.strLocationName as strBillToLocationName
 ,BillToLoc.strAddress as strBillToAddress
 ,BillToLoc.strCity as strBillToCity
 ,BillToLoc.strState as strBillToState
