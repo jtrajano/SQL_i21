@@ -543,6 +543,41 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
+    onRecapClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doPost = function() {
+            var strReceiptNumber = win.viewModel.data.current.get('strReceiptNumber');
+            var posted = win.viewModel.data.current.get('ysnPosted');
+
+            var options = {
+                postURL             : '../Inventory/api/Receipt/Receive',
+                strTransactionId    : strReceiptNumber,
+                isPost              : !posted,
+                isRecap             : true,
+                callback            : me.onAfterReceive,
+                scope               : me
+            };
+
+            CashManagement.common.BusinessRules.callPostRequest(options);
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doPost();
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doPost();
+            }
+        });
+    },
+
     onAfterReceive: function(success, message) {
         if (success === true) {
             var me = this;
@@ -644,6 +679,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnReceive": {
                 click: this.onReceiveClick
+            },
+            "#btnRecap": {
+                click: this.onRecapClick
             }
         })
     }

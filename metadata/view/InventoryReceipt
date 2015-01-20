@@ -266,6 +266,28 @@
                                 "height": 57,
                                 "icon": null,
                                 "iconAlign": "top",
+                                "iconCls": "large-recap",
+                                "itemId": "btnRecap",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Recap"
+                            },
+                            "name": "MyButton30",
+                            "designerId": "524e1b30-151d-48a2-95f4-207977f57675"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
                                 "iconCls": "large-duplicate",
                                 "itemId": "btnDuplicate",
                                 "layout|flex": null,

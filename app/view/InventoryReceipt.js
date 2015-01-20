@@ -160,6 +160,16 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         xtype: 'button',
                                         tabIndex: -1,
                                         height: 57,
+                                        itemId: 'btnRecap',
+                                        iconAlign: 'top',
+                                        iconCls: 'large-recap',
+                                        scale: 'large',
+                                        text: 'Recap'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
                                         itemId: 'btnDuplicate',
                                         width: 59,
                                         iconAlign: 'top',
