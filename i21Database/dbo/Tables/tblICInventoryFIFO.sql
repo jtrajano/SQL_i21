@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[tblICInventoryFIFO]
 	[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intTransactionId] INT NOT NULL,
     [dtmCreated] DATETIME NULL, 
+	[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
     [intCreatedUserId] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblICInventoryFIFO] PRIMARY KEY NONCLUSTERED ([intInventoryFIFOId]) 

@@ -67,7 +67,6 @@ FROM	(
 				WHEN MATCHED THEN 
 					UPDATE 
 					SET		ysnIsUnposted = 1
-							,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 
 				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
 		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
@@ -77,6 +76,7 @@ WHERE	Changes.Action = 'UPDATE'
 -- If fifo_bucket was from a negative stock, let dblStockIn equal to dblStockOut. 
 UPDATE	fifoBucket
 SET		dblStockIn = dblStockOut
+		,ysnIsUnposted = 1
 FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN #tmpInventoryTranactionStockToReverse InventoryToReverse
 			ON fifoBucket.intTransactionId = InventoryToReverse.intTransactionId
 			AND fifoBucket.strTransactionId = InventoryToReverse.strTransactionId
@@ -93,4 +93,5 @@ FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
 			GROUP BY fifoOut.intInventoryFIFOId
 		) AS fifoOutGrouped
 			ON fifoOutGrouped.intInventoryFIFOId = fifoBucket.intInventoryFIFOId
+WHERE	ISNULL(fifoBucket.ysnIsUnposted, 0) = 0
 ;

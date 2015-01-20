@@ -22,7 +22,7 @@ DECLARE @AVERAGECOST AS INT = 1
 
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
--- Then grab the updated records and store it to the @InventoryToReverse variable
+-- Then grab the updated records and store it into the @InventoryToReverse variable
 INSERT INTO #tmpInventoryTranactionStockToReverse (
 	intInventoryTransactionId
 	,intTransactionId
@@ -111,8 +111,10 @@ WHERE	fifo.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTranac
 		AND fifo.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTranactionStockToReverse)
 ;
 -- Plug the Out-qty so that it can't be used for future out-transactions. 
+-- Mark the record as unposted too. 
 UPDATE	fifoBucket
 SET		dblStockOut = dblStockIn
+		,ysnIsUnposted = 1
 FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN #tmpInventoryTranactionStockToReverse Reversal
 			ON fifoBucket.intTransactionId = Reversal.intTransactionId
 			AND fifoBucket.strTransactionId = Reversal.strTransactionId
