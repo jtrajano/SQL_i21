@@ -1389,7 +1389,7 @@ GO
 	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankReconciliation' WHERE strCommand = 'CashManagement.controller.BankReconciliation'
 	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.Banks' WHERE strCommand = 'CashManagement.controller.Banks'
 	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankAccounts' WHERE strCommand = 'CashManagement.controller.BankAccounts'
-	--UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankFileFormat' WHERE strCommand = 'CashManagement.controller.BankFileFormat'
+	UPDATE tblSMMasterMenu SET strCommand = 'CashManagement.view.BankFileFormat' WHERE strCommand = 'CashManagement.controller.BankFileFormat'
 
 	/* ------------------------------------------------- */
 	/* End Update Cash Management Menu Commands for MVVM */
