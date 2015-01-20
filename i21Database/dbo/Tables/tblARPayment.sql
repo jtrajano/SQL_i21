@@ -10,7 +10,7 @@
     [dblUnappliedAmount] NUMERIC (18, 6) NULL,
     [dblOverpayment]     NUMERIC (18, 6) NULL,
     [dblBalance]         NUMERIC (18, 6) NULL,
-    [strRecordNumber]    NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
+    [strRecordNumber]    NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [strPaymentInfo]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strNotes]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPosted]          BIT             CONSTRAINT [DF_tblARPayment_ysnPosted] DEFAULT ((0)) NOT NULL,
