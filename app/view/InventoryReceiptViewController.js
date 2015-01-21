@@ -150,14 +150,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }]
                     }
                 },
+                colUnitCost: 'dblUnitCost',
+                colUnitRetail: 'dblUnitRetail',
+//                colTax: 'dblUnitCost',
+                colLineTotal: 'dblLineTotal',
+                colGrossMargin: 'dblGrossMargin',
                 colPackages: 'intNoPackages',
                 colPackageType: {
                     dataIndex: 'strPackName',
                     editor: {
                         store: '{itemPackType}'
                     }
-                },
-                colUnitCost: 'dblUnitCost'
+                }
+//                colExpPackageWt: 'dblUnitCost'
             },
 
             grdLotTracking: {
@@ -308,6 +313,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
 
         win.context.data.store.on('load', me.onStoreLoad);
+
+        var cepItem = grdInventoryReceipt.getPlugin('cepItem');
+        if (cepItem){
+            cepItem.on({
+                validateedit: me.onEditItem,
+                scope: me
+            });
+        }
 
         var colTaxDetails = grdInventoryReceipt.columns[11];
         var btnViewTaxDetail = colTaxDetails.items[0];
@@ -642,6 +655,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             txtCalculatedAmount.setValue(calculatedTotal);
             var difference = calculatedTotal - (txtInvoiceAmount.getValue());
             txtDifference.setValue(difference);
+        }
+    },
+
+    onEditItem: function (editor, context, eOpts) {
+        if (context.field === 'dblReceived' || context.field === 'dblUnitCost')
+        {
+            if (context.record) {
+                var value = 0;
+                var record = context.record;
+                if (context.field === 'dblReceived'){
+                    value = context.value * (record.get('dblUnitCost'));
+                }
+                else if (context.field === 'dblUnitCost'){
+                    value = context.value * (record.get('dblReceived'));
+                    record.set('dblUnitRetail', context.value);
+                }
+                record.set('dblLineTotal', value);
+            }
         }
     },
 
