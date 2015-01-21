@@ -134,6 +134,7 @@
     <None Include="dbo\Stored Procedures\uspARSyncTerms.sql" />
     <None Include="dbo\Stored Procedures\uspARImportPayments.sql" />
     <None Include="dbo\Stored Procedures\uspARImportServiceCharge.sql" />
+    <None Include="dbo\Stored Procedures\uspSMImportShipVia.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />

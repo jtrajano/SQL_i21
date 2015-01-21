@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSMShipVia] (
     [intShipViaID]       INT            IDENTITY (1, 1) NOT NULL,
+	[strShipViaOriginKey]      NVARCHAR (10) COLLATE Latin1_General_CI_AS  NULL,
     [strShipVia]         NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strShippingService] NVARCHAR (250) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strName]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
