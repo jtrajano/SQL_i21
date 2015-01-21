@@ -88,6 +88,7 @@ Ext.define('Inventory.view.ItemPricingViewController', {
             me.intItemId = config.itemId;
             me.priceId = config.priceId;
             me.pricingTable = config.table;
+            me.defaultLocation = config.defaultLocation;
 
             if (config.action === 'new') {
                 me.uomId = config.uomId;
@@ -115,8 +116,8 @@ Ext.define('Inventory.view.ItemPricingViewController', {
         var record = Ext.create('Inventory.model.ItemPricing');
         record.set('intItemId', me.intItemId);
         record.set('ysnActive', true);
-        if (app.DefaultLocation > 0)
-            record.set('intLocationId', app.DefaultLocation);
+        if (me.defaultLocation > 0)
+            record.set('intLocationId', me.defaultLocation);
         if (me.uomId)
             record.set('intItemUnitMeasureId', me.uomId);
         record.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());

@@ -1850,6 +1850,17 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = win.controller;
         var vm = win.getViewModel();
 
+        var defaultLocation = 0;
+        if (app.DefaultLocation > 0){
+            var record = Ext.Array.findBy(win.viewModel.data.current.tblICItemLocations().data.items, function(record) {
+                if (record.get('intLocationId') === app.DefaultLocation){
+                    return true;
+                }
+                else { return false; }
+            });
+            defaultLocation = record.get('intItemLocationId');
+        }
+
         if (!record){
             iRely.Funtions.showErrorDialog('Please select a price to edit.');
             return;
@@ -1857,13 +1868,13 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemPricingScreen('edit', win, record, win.viewModel.data.current.tblICItemPricings().data);
+                me.openItemPricingScreen('edit', win, record, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    me.openItemPricingScreen('edit', win, record, win.viewModel.data.current.tblICItemPricings().data);
+                    me.openItemPricingScreen('edit', win, record, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
                 }
             });
         }
@@ -1874,17 +1885,28 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = win.controller;
         var vm = win.getViewModel();
 
+        var defaultLocation = 0;
+        if (app.DefaultLocation > 0){
+            var record = Ext.Array.findBy(win.viewModel.data.current.tblICItemLocations().data.items, function(record) {
+                if (record.get('intLocationId') === app.DefaultLocation){
+                    return true;
+                }
+                else { return false; }
+            });
+            defaultLocation = record.get('intItemLocationId');
+        }
+
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 var record = win.viewModel.data.current.tblICItemUOMs().data.items[0];
-                me.openItemPricingScreen('new', win, record, win.viewModel.data.current.tblICItemPricings().data);
+                me.openItemPricingScreen('new', win, record, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
                     var record = win.viewModel.data.current.tblICItemUOMs().data.items[0];
-                    me.openItemPricingScreen('new', win, record, win.viewModel.data.current.tblICItemPricings().data);
+                    me.openItemPricingScreen('new', win, record, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
                 }
             });
         }
@@ -1902,21 +1924,32 @@ Ext.define('Inventory.view.ItemViewController', {
             return;
         }
 
+        var defaultLocation = 0;
+        if (app.DefaultLocation > 0){
+            var record = Ext.Array.findBy(win.viewModel.data.current.tblICItemLocations().data.items, function(record) {
+                if (record.get('intLocationId') === app.DefaultLocation){
+                    return true;
+                }
+                else { return false; }
+            });
+            defaultLocation = record.get('intItemLocationId');
+        }
+
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemPricingScreen('edit', win, selection[0], win.viewModel.data.current.tblICItemPricings().data);
+                me.openItemPricingScreen('edit', win, selection[0], win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    me.openItemPricingScreen('edit', win, selection[0], win.viewModel.data.current.tblICItemPricings().data);
+                    me.openItemPricingScreen('edit', win, selection[0], win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
                 }
             });
         }
     },
 
-    openItemPricingScreen: function (action, window, record, table) {
+    openItemPricingScreen: function (action, window, record, table, defaultLocation) {
         var win = window;
         var me = win.controller;
         var screenName = 'Inventory.view.ItemPricing';
@@ -1933,14 +1966,14 @@ Ext.define('Inventory.view.ItemViewController', {
             var controller = view.getController();
             var current = win.getViewModel().data.current;
             if (action === 'edit'){
-                controller.show({ itemId: current.get('intItemId'), priceId: record.get('intItemPricingId'), table: table, action: action });
+                controller.show({ itemId: current.get('intItemId'), priceId: record.get('intItemPricingId'), table: table, defaultLocation: defaultLocation, action: action });
             }
             else if (action === 'new') {
                 if (record){
-                    controller.show({ itemId: current.get('intItemId'), uomId: record.get('intItemUOMId'), table: table, action: action });
+                    controller.show({ itemId: current.get('intItemId'), uomId: record.get('intItemUOMId'), table: table, defaultLocation: defaultLocation, action: action });
                 }
                 else {
-                    controller.show({ itemId: current.get('intItemId'), table: table, action: action });
+                    controller.show({ itemId: current.get('intItemId'), table: table, defaultLocation: defaultLocation, action: action });
                 }
             }
         });

@@ -283,7 +283,7 @@
                                     "{Location}"
                                 ],
                                 "tabIndex": 0,
-                                "valueField": "intCompanyLocationId"
+                                "valueField": "intLocationId"
                             },
                             "name": "MyComboBox64",
                             "configAlternates": {
