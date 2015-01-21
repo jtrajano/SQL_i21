@@ -26,10 +26,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 store: '{receiptTypes}',
                 readOnly: '{current.ysnPosted}'
             },
-            cboReferenceNumber: {
-                value: '{current.intSourceId}',
-                readOnly: '{current.ysnPosted}'
-            },
             cboVendor: {
                 value: '{current.intVendorId}',
                 store: '{vendor}',
@@ -40,15 +36,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.strVendorName}',
                 hidden: '{checkHiddenInTransferReceipt}'
             },
-            cboLocation: {
-                value: '{current.intLocationId}',
-                store: '{location}',
-                readOnly: '{current.ysnPosted}'
-            },
             cboTransferor: {
                 value: '{current.intTransferorId}',
                 store: '{transferor}',
                 hidden: '{checkHiddenIfNotTransferReceipt}'
+            },
+            cboSource: {
+                value: '{current.intSourceId}',
+                readOnly: '{current.ysnPosted}'
+            },
+            cboLocation: {
+                value: '{current.intLocationId}',
+                store: '{location}',
+                readOnly: '{current.ysnPosted}'
             },
             dtmReceiptDate: {
                 value: '{current.dtmReceiptDate}',
@@ -57,11 +57,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboCurrency: {
                 value: '{current.intCurrencyId}',
                 store: '{currency}',
-                readOnly: '{current.ysnPosted}'
-            },
-            cboShipVia: {
-                value: '{current.intShipViaId}',
-                store: '{shipvia}',
                 readOnly: '{current.ysnPosted}'
             },
             txtReceiptNumber: {
@@ -79,9 +74,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.strBillOfLading}',
                 readOnly: '{current.ysnPosted}'
             },
-            cboProductOrigin: {
-                value: '{current.intProductOrigin}',
-                store: '{country}',
+            cboShipVia: {
+                value: '{current.intShipViaId}',
+                store: '{shipvia}',
+                readOnly: '{current.ysnPosted}'
+            },
+            cboShipFrom: {
+//                value: '{current.intShipViaId}',
+//                store: '{shipvia}',
                 readOnly: '{current.ysnPosted}'
             },
             cboReceiver: {
@@ -99,18 +99,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             txtFobPoint: '{current.strFobPoint}',
-            txtDeliveryPoint: {
-                value: '{current.strDeliveryPoint}',
+            cboShipTo: {
+                value: '{current.strNotes}',
+                store: '{shipTo}',
                 readOnly: '{current.ysnPosted}'
             },
             cboAllocateFreight: {
                 value: '{current.strAllocateFreight}',
                 store: '{allocateFreights}',
-                readOnly: '{current.ysnPosted}'
-            },
-            cboFreightBilledBy: {
-                value: '{current.strFreightBilledBy}',
-                store: '{freightBilledBys}',
                 readOnly: '{current.ysnPosted}'
             },
             txtShiftNumber: {
@@ -121,6 +117,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.strNotes}',
                 readOnly: '{current.ysnPosted}'
             },
+
 
 
             grdInventoryReceipt: {

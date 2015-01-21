@@ -10,7 +10,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedPackType',
         'AccountsPayable.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
-        'i21.store.CountryBuffered',
         'i21.store.CurrencyBuffered',
         'i21.store.FreightTermsBuffered',
         'i21.store.ShipViaBuffered',
@@ -44,21 +43,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     strDescription: 'Weight'
                 },{
                     strDescription: 'Cost'
-                },{
-                    strDescription: 'No'
-                }
-            ],
-            fields: {
-                name: 'strDescription'
-            }
-        },
-        freightBilledBys: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Vendor'
-                },{
-                    strDescription: 'Outside Carrier'
                 },{
                     strDescription: 'No'
                 }
@@ -101,6 +85,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 name: 'strDescription'
             }
         },
+
         items: {
             type: 'icbuffereditemstockview'
         },
@@ -116,6 +101,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         location: {
             type: 'companylocationbuffered'
         },
+        shipTo: {
+            type: 'companylocationbuffered'
+        },
         transferor: {
             type: 'companylocationbuffered'
         },
@@ -127,9 +115,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         shipvia: {
             type: 'shipviabuffered'
-        },
-        country: {
-            type: 'countrybuffered'
         },
         freightTerm: {
             type: 'FreightTermsBuffered'
