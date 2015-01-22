@@ -75,7 +75,6 @@ BEGIN
 				,intCurrencyId
 				,intFreightTermId
 				,strAllocateFreight
-				,strFreightBilledBy
 				,dblUnitWeightMile
 				,dblFreightRate
 				,dblFuelSurcharge
@@ -212,7 +211,6 @@ BEGIN
 				,intCurrencyId
 				,intFreightTermId
 				,strAllocateFreight
-				,strFreightBilledBy
 				,dblUnitWeightMile
 				,dblFreightRate
 				,dblFuelSurcharge
