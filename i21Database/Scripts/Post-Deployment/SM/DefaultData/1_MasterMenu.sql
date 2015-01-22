@@ -1419,6 +1419,7 @@ GO
 	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Bill' WHERE strCommand = 'AccountsPayable.controller.Bill'
 	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PayBillsDetail' WHERE strCommand = 'AccountsPayable.controller.PayBillsDetail'
 	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.BillBatch' WHERE strCommand = 'AccountsPayable.controller.BillBatch'
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.PayBills' WHERE strCommand = 'AccountsPayable.controller.PayBill'
 
 	/* ------------------------------------------------- */
 	/* -- End Update AP Menu Commands for MVVM -- */
