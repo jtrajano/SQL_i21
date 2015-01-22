@@ -265,6 +265,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                             flex: 1
                                         },
                                         {
+                                            xtype: 'checkcolumn',
                                             dataIndex: 'ysnStockUnit',
                                             dataType: 'boolean',
                                             text: 'Stock Unit',
@@ -405,6 +406,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                             flex: 1
                                         },
                                         {
+                                            xtype: 'checkcolumn',
                                             dataIndex: 'ysnStockUnit',
                                             dataType: 'boolean',
                                             text: 'Stock Unit',

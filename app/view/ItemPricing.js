@@ -215,6 +215,7 @@ Ext.define('Inventory.view.ItemPricing', {
                                             flex: 1
                                         },
                                         {
+                                            xtype: 'checkcolumn',
                                             dataIndex: 'ysnStockUnit',
                                             dataType: 'boolean',
                                             text: 'Stock Unit',

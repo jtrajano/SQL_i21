@@ -447,12 +447,6 @@ Ext.define('Inventory.view.Item', {
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'ysnDefault',
-                                                                    dataType: 'boolean',
-                                                                    text: 'Default',
-                                                                    flex: 1
-                                                                },
-                                                                {
                                                                     dataIndex: 'intDecimalCalculation',
                                                                     dataType: 'numeric',
                                                                     text: 'Decimal Places for Calculation',
@@ -551,13 +545,11 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowPurchase',
-                                                        minWidth: 150,
                                                         text: 'Purchase in Stock Unit'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowSale',
-                                                        minWidth: 140,
                                                         text: 'Sale in Stock Unit'
                                                     },
                                                     {
@@ -3271,6 +3263,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    xtype: 'checkcolumn',
                                                                                     dataIndex: 'ysnStockUnit',
                                                                                     dataType: 'boolean',
                                                                                     text: 'Stock Unit',
@@ -3553,6 +3546,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    xtype: 'checkcolumn',
                                                                                     dataIndex: 'ysnStockUnit',
                                                                                     dataType: 'boolean',
                                                                                     text: 'Stock Unit',

@@ -49,6 +49,25 @@ namespace iRely.Inventory.Model
                 _unitmeasure = value;
             }
         }
+        private string _unitType;
+        [NotMapped]
+        public string strUnitType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_unitType))
+                    if (tblICUnitMeasure != null)
+                        return tblICUnitMeasure.strUnitType;
+                    else
+                        return null;
+                else
+                    return _unitType;
+            }
+            set
+            {
+                _unitType = value;
+            }
+        }
         private int _calculation;
         [NotMapped]
         public int intDecimalCalculation
