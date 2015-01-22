@@ -180,7 +180,7 @@ Ext.define('Inventory.view.ItemPricing', {
                             fieldLabel: 'Location',
                             labelWidth: 110,
                             displayField: 'strLocationName',
-                            valueField: 'intLocationId',
+                            valueField: 'intItemLocationId',
                             bind: {
                                 store: '{Location}'
                             }
