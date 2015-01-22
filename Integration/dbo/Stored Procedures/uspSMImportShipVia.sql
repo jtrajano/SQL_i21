@@ -2,6 +2,10 @@
 	DROP PROCEDURE uspSMImportShipVia
 GO
 
+IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE (strPrefix = 'AG' or strPrefix = 'PT') and strDBName = db_name()) = 1
+BEGIN
+
+	EXEC('
 CREATE PROCEDURE uspSMImportShipVia
 	@Checking	bit = 0,
 	@UserId		int = 0,
@@ -10,8 +14,7 @@ AS
 BEGIN
 
 	IF(@Checking = 1) 
-	BEGIN
-		--Check first on aglocmst	
+	BEGIN	
 		SELECT
 			@Total = COUNT(AG.[sscar_key])
 		FROM
@@ -55,7 +58,7 @@ BEGIN
 		,[sscar_trans_lic_no]	AS [strTransporterLicense]
 		,[sscar_ifta_no]		AS [strMotorCarrierIFTA]
 		,[sscar_trans_mode]		AS [strTransportationMode]
-		,(CASE WHEN [sscar_co_owned_yn] = 'Y' 
+		,(CASE WHEN [sscar_co_owned_yn] = ''Y'' 
 			THEN 1
 			ELSE 0
 		 END)					AS [ysnCompanyOwnedCarrier]
@@ -72,6 +75,5 @@ BEGIN
 		SV.[strShipViaOriginKey] IS NULL		
 
 END
-
-
-
+')
+END
