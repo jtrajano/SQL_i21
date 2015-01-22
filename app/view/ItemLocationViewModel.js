@@ -28,7 +28,8 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         'Inventory.store.Class',
         'Inventory.store.Family',
         'Inventory.store.PromotionSalesList',
-        'Inventory.store.BufferedCountGroup'
+        'Inventory.store.BufferedCountGroup',
+        'Inventory.store.BufferedStorageLocation'
     ],
 
     stores: {
@@ -63,6 +64,9 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+        storageLocation: {
+            type: 'icbufferedstoragelocation'
         },
         category: {
             type: 'icbufferedcategory'

@@ -331,7 +331,6 @@ Ext.define('Inventory.view.ItemLocation', {
                                             itemId: 'cboCostingMethod',
                                             margin: '0 0 0 5',
                                             fieldLabel: 'Costing Method',
-                                            labelWidth: 95,
                                             displayField: 'strDescription',
                                             valueField: 'intCostingMethodId'
                                         }
@@ -346,19 +345,41 @@ Ext.define('Inventory.view.ItemLocation', {
                                     },
                                     items: [
                                         {
-                                            xtype: 'textfield',
+                                            xtype: 'combobox',
                                             flex: 1,
-                                            itemId: 'txtRow',
-                                            fieldLabel: 'Row',
+                                            disabled: true,
+                                            itemId: 'cboSubLocation',
+                                            fieldLabel: 'Sub Location',
                                             labelWidth: 80
                                         },
                                         {
-                                            xtype: 'textfield',
+                                            xtype: 'gridcombobox',
                                             flex: 1,
-                                            itemId: 'txtBin',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intStorageLocationId',
+                                                    dataType: 'numeric',
+                                                    text: 'Storage Location Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strName',
+                                                    dataType: 'string',
+                                                    text: 'Storage Location',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboStorageLocation',
                                             margin: '0 0 0 5',
-                                            fieldLabel: 'Bin',
-                                            labelWidth: 95
+                                            fieldLabel: 'Storage Location',
+                                            displayField: 'strName',
+                                            valueField: 'intStorageLocationId'
                                         }
                                     ]
                                 },

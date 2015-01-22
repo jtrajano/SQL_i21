@@ -564,7 +564,6 @@
                                                 "fieldLabel": "Costing Method",
                                                 "itemId": "cboCostingMethod",
                                                 "labelAlign": null,
-                                                "labelWidth": 95,
                                                 "layout|flex": 1,
                                                 "margin": "0 0 0 5",
                                                 "valueField": "intCostingMethodId"
@@ -592,37 +591,72 @@
                                     "designerId": "a74fbf1f-a15d-4604-a995-5ed938961310",
                                     "cn": [
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.ComboBox",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "fieldLabel": "Row",
-                                                "itemId": "txtRow",
+                                                "disabled": true,
+                                                "fieldLabel": "Sub Location",
+                                                "itemId": "cboSubLocation",
                                                 "labelWidth": 80,
                                                 "layout|flex": 1
                                             },
-                                            "name": "MyTextField32",
+                                            "name": "MyComboBox18",
                                             "designerId": "0c45d94d-c5f5-4e10-b8ca-07b5bf30fdb7"
                                         },
                                         {
-                                            "type": "Ext.form.field.Text",
+                                            "type": "Ext.form.field.ComboBox",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "fieldLabel": "Bin",
-                                                "itemId": "txtBin",
-                                                "labelWidth": 95,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intStorageLocationId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Storage Location Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strName',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Storage Location',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strDescription',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Description',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strName",
+                                                "fieldLabel": "Storage Location",
+                                                "itemId": "cboStorageLocation",
                                                 "layout|flex": 1,
-                                                "margin": "0 0 0 5"
+                                                "margin": "0 0 0 5",
+                                                "valueField": "intStorageLocationId"
                                             },
-                                            "name": "MyTextField33",
-                                            "designerId": "a006055a-da78-4de9-9e22-a0b206626357"
+                                            "name": "MyComboBox17",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "a006055a-da78-4de9-9e22-a0b206626357",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         }
                                     ]
                                 },
@@ -1903,7 +1937,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging13",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

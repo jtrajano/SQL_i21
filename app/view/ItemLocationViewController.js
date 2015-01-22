@@ -36,8 +36,19 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 store: '{costingMethods}'
             },
             txtDescription: '{current.strDescription}',
-            txtRow: '{current.strRow}',
-            txtBin: '{current.strBin}',
+            cboSubLocation: {
+                value: '{current.intSubLocationId}'
+//                ,
+//                store: '{costingMethods}'
+            },
+            cboStorageLocation: {
+                value: '{current.intStorageLocationId}',
+                store: '{storageLocation}',
+                defaultFilters: [{
+                    column: 'intLocationId',
+                    value: '{current.intLocationId}'
+                }]
+            },
             cboIssueUom: {
                 value: '{current.intIssueUOMId}',
                 store: '{issueUOM}'
