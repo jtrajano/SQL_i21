@@ -1443,6 +1443,10 @@ GO
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
 		VALUES (N'Account Category', N'General Ledger', @GeneralLedgerMaintenanceId, N'Account Category', N'Screen', N'GeneralLedger.view.AccountCategory', N'small-screen', 0, 0, 0, 1, NULL, 1)
 
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'General Journal' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.GeneralJournal'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Account Structure' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountStructure'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Clone Account' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountClone'
+
 	/* ---------------------------------------- */
 	/* --   End General Ledger Module Menu   -- */
 	/* ---------------------------------------- */
