@@ -1687,4 +1687,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intAuditBin" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f7d48d94-4c96-4606-8447-a1f0a32d9a25" ChangeDateTime="01/22/2015 02:27:24">
+    <Property Name="ElementName" Value="[dbo].[tblICItemLocation].[intCategoryId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSubLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="66113eb5-e784-4052-8622-594bb742b6aa" ChangeDateTime="01/22/2015 02:27:33">
+    <Property Name="ElementName" Value="[dbo].[tblICItemLocation].[intCategoryId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageLocationId" />
+  </Operation>
 </Operations>

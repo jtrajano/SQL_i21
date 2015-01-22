@@ -8,8 +8,8 @@
     [intCostingMethod] INT NULL, 
 	[intAllowNegativeInventory] INT DEFAULT 3,
     [intCategoryId] INT NULL, 
-    [strRow] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strBin] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intSubLocationId] INT NULL, 
+	[intStorageLocationId] INT NULL, 
     [intDefaultUOMId] INT NULL, 
     [intIssueUOMId] INT NULL, 
     [intReceiveUOMId] INT NULL, 
@@ -70,7 +70,8 @@
     CONSTRAINT [FK_tblICItemLocation_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
     CONSTRAINT [FK_tblICItemLocation_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
     CONSTRAINT [FK_tblICItemLocation_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId]), 
-    CONSTRAINT [FK_tblICItemLocation_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID])
+    CONSTRAINT [FK_tblICItemLocation_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
+    CONSTRAINT [FK_tblICItemLocation_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
 )
 GO
 
@@ -145,23 +146,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intCategoryId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Row',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemLocation',
-    @level2type = N'COLUMN',
-    @level2name = N'strRow'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Bin',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemLocation',
-    @level2type = N'COLUMN',
-    @level2name = N'strBin'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Default Unit of Measure Id',
@@ -632,3 +619,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICItemLocation',
     @level2type = N'COLUMN',
     @level2name = N'intShipViaId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sub Location Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intSubLocationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Storage Location Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intStorageLocationId'
