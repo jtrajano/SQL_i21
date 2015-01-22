@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting for scenario 3, unpost sell stock]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting for scenario 4, unpost add stock]
 AS
 -- Arrange 
 BEGIN 
-	EXEC [testi21Database].[Fake posted transactions using AVG, scenario 3];
+	EXEC [testi21Database].[Fake posted transactions using AVG, scenario 4];
 	
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -18,9 +18,14 @@ BEGIN
 
 	DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-0000003'
 	DECLARE @intTransactionId AS INT = 1
-	DECLARE @strTransactionId AS NVARCHAR(40) = 'InvShip-0001'
+	DECLARE @strTransactionId AS NVARCHAR(40) = 'InvRcpt-00001'
 	DECLARE @intUserId AS INT = 1
-	DECLARE @GLDetail AS dbo.RecapTableType 
+	DECLARE @GLDetail AS dbo.RecapTableType
+		
+	DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
+	DECLARE @UseGLAccount_AutoNegative AS NVARCHAR(30) = 'Auto-Negative';
+	
+	DECLARE @AUTO_NEGATIVE AS INT = 1
 
 	-- Create the tables used for assertion
 	CREATE TABLE expectedGLDetail (
@@ -137,7 +142,9 @@ END
 -- Act
 BEGIN
 	-- Setup the expected data. 
-	-- Reverse the posted GL entries
+	
+	
+	-- BEGIN Reverse the posted GL entries
 	INSERT INTO dbo.expectedGLDetail (
 		dtmDate
 		,strBatchId
@@ -154,6 +161,8 @@ BEGIN
 		,intTransactionId 
 		,strModuleName 
 	)
+	-------------------------------------------------------------
+	-- Expect the g/l entries from the receipt to be reversed
 	SELECT	dtmDate
 			,strBatchId = @strBatchId
 			,intAccountId
@@ -161,13 +170,29 @@ BEGIN
 			-- Reverse the debit and credit amounts
 			-- { 
 				,dblDebit = dblCredit 
-				,dblCredit = dblDebit 
+				,dblCredit = dblDebit 				
+				,dblDebitUnit = ISNULL(dblCreditUnit, 0)				
+				,dblCreditUnit = ISNULL(dblDebitUnit, 0)
 			-- }
-			,ISNULL(dblDebitUnit, 0)
-			,ISNULL(dblCreditUnit, 0)
 			,strDescription
 			,strCode
-			,intJournalLineNo = intJournalLineNo + 5
+			,intJournalLineNo = 
+				CASE	WHEN intJournalLineNo = 6 THEN 21
+						WHEN intJournalLineNo = 7 THEN 22
+						WHEN intJournalLineNo = 8 THEN 23						
+						WHEN intJournalLineNo = 9 THEN 24
+						WHEN intJournalLineNo = 10 THEN 25
+						WHEN intJournalLineNo = 11 THEN 26						
+						WHEN intJournalLineNo = 12 THEN 27
+						WHEN intJournalLineNo = 13 THEN 28
+						WHEN intJournalLineNo = 14 THEN 29
+						WHEN intJournalLineNo = 15 THEN 30
+						WHEN intJournalLineNo = 16 THEN 31
+						WHEN intJournalLineNo = 17 THEN 32
+						WHEN intJournalLineNo = 18 THEN 33
+						WHEN intJournalLineNo = 19 THEN 34
+						WHEN intJournalLineNo = 20 THEN 35
+				END 
 			,ysnIsUnposted = 1
 			,strTransactionId
 			,intTransactionId 
@@ -175,8 +200,72 @@ BEGIN
 	FROM	dbo.tblGLDetail
 	WHERE	tblGLDetail.intTransactionId = @intTransactionId
 			AND tblGLDetail.strTransactionId = @strTransactionId
+	-------------------------------------------------------------
+	-- Expect AUTO NEGATIVE G/L entries
+	UNION ALL 
+	SELECT	dtmDate = '01/16/2014'
+			,strBatchId = @strBatchId
+			,intAccountId = GLAccount.intAccountId
+			,dblDebit = 0
+			,dblCredit = ABS((-75 * 2.15) - (-75 * 2.00))
+			,dblDebitUnit = 0
+			,dblCreditUnit = 0
+			,strDescription = GLAccount.strDescription
+			,strCode = 'IAN'
+			,intJournalLineNo = 
+				CASE	WHEN  InventoryAccountSetup.intItemId = @WetGrains THEN 36
+						WHEN  InventoryAccountSetup.intItemId = @StickyGrains THEN 37
+						WHEN  InventoryAccountSetup.intItemId = @PremiumGrains THEN 38
+						WHEN  InventoryAccountSetup.intItemId = @ColdGrains THEN 39
+						WHEN  InventoryAccountSetup.intItemId = @HotGrains THEN 40
+				END 
+			,ysnIsUnposted = 0
+			,strTransactionId = 'InvRcpt-00001'
+			,intTransactionId = 1
+			,strModuleName = 'Inventory'
+	FROM	(
+				SELECT Stock.intItemId, Stock.intLocationId, Inventory.intAccountId FROM dbo.tblICItemStock Stock
+				OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intLocationId, @UseGLAccount_Inventory) Inventory
+			) InventoryAccountSetup
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON InventoryAccountSetup.intAccountId = GLAccount.intAccountId
 				
-	-- Reverse of the inventory transactions
+	WHERE	InventoryAccountSetup.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+			AND InventoryAccountSetup.intLocationId = @Default_Location
+	UNION ALL 
+	SELECT	dtmDate = '01/16/2014'
+			,strBatchId = @strBatchId
+			,intAccountId = GLAccount.intAccountId
+			,dblDebit = ABS((-75 * 2.15) - (-75 * 2.00))
+			,dblCredit = 0
+			,dblDebitUnit = 0
+			,dblCreditUnit = 0
+			,strDescription = GLAccount.strDescription
+			,strCode = 'IAN'
+			,intJournalLineNo = 
+				CASE	WHEN  InventoryAccountSetup.intItemId = @WetGrains THEN 36
+						WHEN  InventoryAccountSetup.intItemId = @StickyGrains THEN 37
+						WHEN  InventoryAccountSetup.intItemId = @PremiumGrains THEN 38
+						WHEN  InventoryAccountSetup.intItemId = @ColdGrains THEN 39
+						WHEN  InventoryAccountSetup.intItemId = @HotGrains THEN 40
+				END 
+			,ysnIsUnposted = 0
+			,strTransactionId = 'InvRcpt-00001'
+			,intTransactionId = 1
+			,strModuleName = 'Inventory'
+	FROM	(
+				SELECT	Stock.intItemId, Stock.intLocationId, AutoNegative.intAccountId 
+				FROM	dbo.tblICItemStock Stock
+						OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intLocationId, @UseGLAccount_AutoNegative) AutoNegative
+			) InventoryAccountSetup
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON InventoryAccountSetup.intAccountId = GLAccount.intAccountId
+	WHERE	InventoryAccountSetup.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+			AND InventoryAccountSetup.intLocationId = @Default_Location					
+	-- END Reverse the posted GL entries
+	
+	
+	-- BEGIN Reverse of the inventory transactions
 	INSERT INTO expectedInventoryTransaction (
 			intItemId 
 			,intLocationId 
@@ -195,6 +284,8 @@ BEGIN
 			,strRelatedTransactionId 
 			,strTransactionForm 
 	)
+	---------------------------------------------------------------------------------
+	-- Expect the original receipt to be marked as unposted
 	SELECT	intItemId 
 			,intLocationId 
 			,dtmDate 
@@ -214,6 +305,8 @@ BEGIN
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
+	---------------------------------------------------------------------------------
+	-- Expect new inventory transactions are created to reverse the original receipt
 	UNION ALL 
 	SELECT	intItemId 
 			,intLocationId 
@@ -223,23 +316,57 @@ BEGIN
 				,dblUnitQty = dblUnitQty * -1
 			--}
 			,dblCost 
-			,dblValue
+			-- Reverse the value
+			-- {
+				,dblValue = dblValue * -1
+			-- {
 			,dblSalesPrice 
 			,intTransactionId 
 			,strTransactionId 
 			,strBatchId = @strBatchId
-			,intTransactionTypeId 
+			,Trans.intTransactionTypeId 
 			,ysnIsUnposted = 1
 			,intRelatedInventoryTransactionId = intInventoryTransactionId
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
 			,strTransactionForm 
-	FROM	dbo.tblICInventoryTransaction
-	WHERE	intTransactionId = @intTransactionId
-			AND strTransactionId = @strTransactionId
-			
-	-- Setup the expected Item Stock
-	-- Expect the stock goes back to 100. The average cost should remain the same. 
+	FROM	dbo.tblICInventoryTransaction Trans INNER JOIN dbo.tblICInventoryTransactionType IType
+				ON Trans.intTransactionTypeId = IType.intTransactionTypeId
+	WHERE	Trans.intTransactionId = @intTransactionId
+			AND Trans.strTransactionId = @strTransactionId
+			AND IType.strName <> 'Inventory Auto Negative'	
+	-----------------------------------------------------------------------------------
+	-- Expect the auto negative transactions
+	UNION ALL 
+	SELECT	intItemId 
+			,intLocationId 
+			,dtmDate = '01/16/2014'
+			,dblUnitQty = 0
+			,dblCost = 0
+			,dblValue = (-75 * 2.15) - (-75 * 2.00)
+			,dblSalesPrice = 0
+			,intTransactionId = @intTransactionId
+			,strTransactionId = @strTransactionId
+			,strBatchId = @strBatchId
+			,intTransactionTypeId = @AUTO_NEGATIVE
+			,ysnIsUnposted = 0
+			,intRelatedInventoryTransactionId = NULL
+			,intRelatedTransactionId = NULL
+			,strRelatedTransactionId = NULL
+			,strTransactionForm = NULL
+	FROM	(
+				SELECT	Stock.intItemId, Stock.intLocationId, AutoNegative.intAccountId 
+				FROM	dbo.tblICItemStock Stock
+						OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intLocationId, @UseGLAccount_AutoNegative) AutoNegative
+			) InventoryAccountSetup
+			INNER JOIN dbo.tblGLAccount GLAccount
+				ON InventoryAccountSetup.intAccountId = GLAccount.intAccountId
+	WHERE	InventoryAccountSetup.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+			AND InventoryAccountSetup.intLocationId = @Default_Location	
+	-- END Reverse of the inventory transactions
+
+	-- BEGIN Setup the expected Item Stock
+	-- Expect the stock to go down to negative. 
 	INSERT INTO expectedItemStock (
 			intItemId
 			,intLocationId
@@ -249,29 +376,30 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = 100
+			,dblUnitOnHand = -75
 	UNION ALL
 	SELECT	intItemId = @StickyGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = 100
+			,dblUnitOnHand = -75
 	UNION ALL
 	SELECT	intItemId = @PremiumGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = 100
+			,dblUnitOnHand = -75
 	UNION ALL
 	SELECT	intItemId = @ColdGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = 100
+			,dblUnitOnHand = -75
 	UNION ALL
 	SELECT	intItemId = @HotGrains
 			,intLocationId = @Default_Location
 			,dblAverageCost = 2.15
-			,dblUnitOnHand = 100
-			
-	-- Setup the expected FIFO data
+			,dblUnitOnHand = -75
+	-- END Setup the expected Item Stock
+
+	-- BEGIN Setup the expected FIFO data
 	INSERT INTO dbo.expectedFIFO (
 			intInventoryFIFOId
 			,intItemId
@@ -282,58 +410,112 @@ BEGIN
 			,dblCost
 			,strTransactionId
 			,intTransactionId
-	)
-	-- Plug the out-qty 
+	)	
+	-------------------------------------------------
+	-- Return the stock to the negative cost bucket
 	SELECT	intInventoryFIFOId = 1
 			,intItemId = @WetGrains
 			,intLocationId = @Default_Location
 			,dtmDate = '01/01/2014'
-			,dblStockIn = 100
-			,dblStockOut = 0
-			,dblCost = 2.15
-			,strTransactionId = 'InvRcpt-0001'
+			,dblStockIn = 0
+			,dblStockOut = 75
+			,dblCost = 2.00
+			,strTransactionId = 'InvShip-00001'
 			,intTransactionId = 1
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 2
 			,intItemId = @StickyGrains
 			,intLocationId = @Default_Location
 			,dtmDate = '01/01/2014'
-			,dblStockIn = 100
-			,dblStockOut = 0
-			,dblCost = 2.15
-			,strTransactionId = 'InvRcpt-0001'
+			,dblStockIn = 0
+			,dblStockOut = 75
+			,dblCost = 2.00
+			,strTransactionId = 'InvShip-00001'
 			,intTransactionId = 1
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 3
 			,intItemId = @PremiumGrains
 			,intLocationId = @Default_Location
 			,dtmDate = '01/01/2014'
-			,dblStockIn = 100
-			,dblStockOut = 0
-			,dblCost = 2.15
-			,strTransactionId = 'InvRcpt-0001'
+			,dblStockIn = 0
+			,dblStockOut = 75
+			,dblCost = 2.00
+			,strTransactionId = 'InvShip-00001'
 			,intTransactionId = 1
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 4
 			,intItemId = @ColdGrains
 			,intLocationId = @Default_Location
 			,dtmDate = '01/01/2014'
-			,dblStockIn = 100
-			,dblStockOut = 0
-			,dblCost = 2.15
-			,strTransactionId = 'InvRcpt-0001'
-			,intTransactionId = 1							
+			,dblStockIn = 0
+			,dblStockOut = 75
+			,dblCost = 2.00
+			,strTransactionId = 'InvShip-00001'
+			,intTransactionId = 1						
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 5
 			,intItemId = @HotGrains
 			,intLocationId = @Default_Location
 			,dtmDate = '01/01/2014'
+			,dblStockIn = 0
+			,dblStockOut = 75
+			,dblCost = 2.00
+			,strTransactionId = 'InvShip-00001'
+			,intTransactionId = 1
+	--------------------------------------------------------
+	-- Plug the following cost bucket because of the unpost
+	UNION ALL 
+	SELECT	intInventoryFIFOId = 6
+			,intItemId = @WetGrains
+			,intLocationId = @Default_Location
+			,dtmDate = '01/16/2014'
 			,dblStockIn = 100
-			,dblStockOut = 0
+			,dblStockOut = 100
 			,dblCost = 2.15
-			,strTransactionId = 'InvRcpt-0001'
-			,intTransactionId = 1			
-	
+			,strTransactionId = 'InvRcpt-00001'
+			,intTransactionId = 1
+	UNION ALL 
+	SELECT	intInventoryFIFOId = 7
+			,intItemId = @StickyGrains
+			,intLocationId = @Default_Location
+			,dtmDate = '01/16/2014'
+			,dblStockIn = 100
+			,dblStockOut = 100
+			,dblCost = 2.15
+			,strTransactionId = 'InvRcpt-00001'
+			,intTransactionId = 1
+	UNION ALL 
+	SELECT	intInventoryFIFOId = 8
+			,intItemId = @PremiumGrains
+			,intLocationId = @Default_Location
+			,dtmDate = '01/16/2014'
+			,dblStockIn = 100
+			,dblStockOut = 100
+			,dblCost = 2.15
+			,strTransactionId = 'InvRcpt-00001'
+			,intTransactionId = 1
+	UNION ALL 
+	SELECT	intInventoryFIFOId = 9
+			,intItemId = @ColdGrains
+			,intLocationId = @Default_Location
+			,dtmDate = '01/16/2014'
+			,dblStockIn = 100
+			,dblStockOut = 100
+			,dblCost = 2.15
+			,strTransactionId = 'InvRcpt-00001'
+			,intTransactionId = 1						
+	UNION ALL 
+	SELECT	intInventoryFIFOId = 10
+			,intItemId = @HotGrains
+			,intLocationId = @Default_Location
+			,dtmDate = '01/16/2014'
+			,dblStockIn = 100
+			,dblStockOut = 100
+			,dblCost = 2.15
+			,strTransactionId = 'InvRcpt-00001'
+			,intTransactionId = 1		
+	-- END Setup the expected FIFO data
+
 	-- Do the act
 	INSERT INTO @GLDetail (
 		[dtmDate] 
@@ -435,15 +617,18 @@ BEGIN
 			,intTransactionId 
 			,strTransactionId 
 			,strBatchId 
-			,intTransactionTypeId 
-			,ysnIsUnposted
+			,Trans.intTransactionTypeId 
+			,ysnIsUnposted 
 			,intRelatedInventoryTransactionId 
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
 			,strTransactionForm 
-	FROM	dbo.tblICInventoryTransaction
-	WHERE	intTransactionId = @intTransactionId
-			AND strTransactionId = @strTransactionId
+	FROM	dbo.tblICInventoryTransaction Trans INNER JOIN dbo.tblICInventoryTransactionType ICType
+				ON Trans.intTransactionTypeId = ICType.intTransactionTypeId
+	WHERE	(
+				intTransactionId = @intTransactionId
+				AND strTransactionId = @strTransactionId
+			)
 	
 	-- Actual item stock data
 	INSERT INTO actualItemStock (
