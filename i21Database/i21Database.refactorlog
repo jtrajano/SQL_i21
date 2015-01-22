@@ -1729,4 +1729,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmReceiveTime" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8c7d5c6f-3deb-4891-8147-9387f855fe13" ChangeDateTime="01/22/2015 10:20:00">
+    <Property Name="ElementName" Value="[dbo].[tblSCTruckDriverReference].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTruckDriverReference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="int" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8e1f6090-f225-4b1c-8241-1e4a0463e149" ChangeDateTime="01/22/2015 10:20:12">
+    <Property Name="ElementName" Value="[dbo].[tblSCTruckDriverReference].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTruckDriverReference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTruckDriverReferenceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b0e35a85-adff-4e9d-bca9-bb93d60a6952" ChangeDateTime="01/22/2015 10:35:28">
+    <Property Name="ElementName" Value="[dbo].[tblGRDiscountScheduleCode].[intPurchaseAccountGroupId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRDiscountScheduleCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPurchaseAccountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="93e1ecce-9b07-4876-9e34-fae5585d095a" ChangeDateTime="01/22/2015 10:35:32">
+    <Property Name="ElementName" Value="[dbo].[tblGRDiscountScheduleCode].[intSalesAccountGroupId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRDiscountScheduleCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSalesAccountId" />
+  </Operation>
 </Operations>
