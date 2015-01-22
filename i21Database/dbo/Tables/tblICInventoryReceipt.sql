@@ -12,48 +12,46 @@ Type the overview for the table here.
 */
 	CREATE TABLE [dbo].[tblICInventoryReceipt]
 	(
-		[intInventoryReceiptId] INT NOT NULL IDENTITY, 
-		[strReceiptNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-		[dtmReceiptDate] DATETIME NOT NULL, 
-		[intTransferorId] INT NULL, 
-		[intVendorId] INT NULL, 
-		[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-		[intSourceId] INT NULL, 
-		[intBlanketRelease] INT NULL DEFAULT ((0)), 
-		[intLocationId] INT NULL, 
-		[strVendorRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strBillOfLading] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-		[intShipViaId] INT NULL, 
-		[intProductOrigin] INT NULL, 
-		[intReceiverId] INT NULL, 
-		[intCurrencyId] INT NULL, 
-		[strVessel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[intFreightTermId] INT NULL, 
-		[strDeliveryPoint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strAllocateFreight] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('No'), 
-		[strFreightBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('No'), 
-		[intShiftNumber] INT NULL, 
-		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-		[strCalculationBasis] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[dblUnitWeightMile] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblFreightRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblFuelSurcharge] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblInvoiceAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[ysnPrepaid] BIT NULL DEFAULT ((0)), 
-		[ysnInvoicePaid] BIT NULL DEFAULT ((0)), 
-		[intCheckNo] INT NULL, 
-		[dteCheckDate] DATETIME NULL, 
-		[intTrailerTypeId] INT NULL, 
-		[dteTrailerArrivalDate] DATETIME NULL, 
-		[dteTrailerArrivalTime] DATETIME NULL, 
-		[strSealNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-		[strSealStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[dteReceiveTime] DATETIME NULL, 
-		[dblActualTempReading] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[ysnPosted] BIT DEFAULT ((0)),
-		[intCreatedUserId] INT NULL,
-		[intEntityId] INT NULL,
-		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+		[intInventoryReceiptId] [int] IDENTITY NOT NULL,
+		[strReceiptType] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
+		[intVendorId] [int] NULL,
+		[intTransferorId] [int] NULL,
+		[intSourceId] [int] NULL,
+		[intLocationId] [int] NULL,
+		[strReceiptNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
+		[dtmReceiptDate] [datetime] NOT NULL,
+		[intCurrencyId] [int] NULL,
+		[intBlanketRelease] [int] NULL,
+		[strVendorRefNo] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[strBillOfLading] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[intShipViaId] [int] NULL,
+		[intShipFromId] [int] NULL,
+		[intReceiverId] [int] NULL,
+		[strVessel] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[intFreightTermId] [int] NULL,
+		[intShipToId] [int] NULL,
+		[strAllocateFreight] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[intShiftNumber] [int] NULL,
+		[strCalculationBasis] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[dblUnitWeightMile] [numeric](18, 6) NULL,
+		[dblFreightRate] [numeric](18, 6) NULL,
+		[dblFuelSurcharge] [numeric](18, 6) NULL,
+		[dblInvoiceAmount] [numeric](18, 6) NULL,
+		[ysnPrepaid] [bit] NULL,
+		[ysnInvoicePaid] [bit] NULL,
+		[intCheckNo] [int] NULL,
+		[dtmCheckDate] [datetime] NULL,
+		[intTrailerTypeId] [int] NULL,
+		[dtmTrailerArrivalDate] [datetime] NULL,
+		[dtmTrailerArrivalTime] [datetime] NULL,
+		[strSealNo] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+		[strSealStatus] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+		[dtmReceiveTime] [datetime] NULL,
+		[dblActualTempReading] [numeric](18, 6) NULL,
+		[ysnPosted] [bit] NULL,
+		[intCreatedUserId] [int] NULL,
+		[intEntityId] [int] NULL,
+		[intConcurrencyId] [int] NULL,
 		CONSTRAINT [PK_tblICInventoryReceipt] PRIMARY KEY ([intInventoryReceiptId]), 
 		CONSTRAINT [AK_tblICInventoryReceipt_strReceiptNumber] UNIQUE ([strReceiptNumber]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
@@ -167,21 +165,6 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intShipViaId'
 	GO
-
-	GO
-
-	GO
-
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Product Origin',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
-		@level2name = N'intProductOrigin'
-	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Receiver',
 		@level0type = N'SCHEMA',
@@ -231,25 +214,7 @@ Type the overview for the table here.
 		@level1type = N'TABLE',
 		@level1name = N'tblICInventoryReceipt',
 		@level2type = N'COLUMN',
-		@level2name = N'strDeliveryPoint'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Delivery Point',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
 		@level2name = N'strAllocateFreight'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Freight Billed By',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
-		@level2name = N'strFreightBilledBy'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Shift Number',
@@ -259,15 +224,6 @@ Type the overview for the table here.
 		@level1name = N'tblICInventoryReceipt',
 		@level2type = N'COLUMN',
 		@level2name = N'intShiftNumber'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Notes',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
-		@level2name = N'strNotes'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Concurrency Field',
@@ -348,7 +304,7 @@ Type the overview for the table here.
 		@level1type = N'TABLE',
 		@level1name = N'tblICInventoryReceipt',
 		@level2type = N'COLUMN',
-		@level2name = N'dteCheckDate'
+		@level2name = N'dtmCheckDate'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Trailer Type Id',
@@ -366,7 +322,7 @@ Type the overview for the table here.
 		@level1type = N'TABLE',
 		@level1name = N'tblICInventoryReceipt',
 		@level2type = N'COLUMN',
-		@level2name = N'dteTrailerArrivalDate'
+		@level2name = N'dtmTrailerArrivalDate'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Trailer Arrival Time',
@@ -375,7 +331,7 @@ Type the overview for the table here.
 		@level1type = N'TABLE',
 		@level1name = N'tblICInventoryReceipt',
 		@level2type = N'COLUMN',
-		@level2name = N'dteTrailerArrivalTime'
+		@level2name = N'dtmTrailerArrivalTime'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Seal No',
@@ -402,7 +358,7 @@ Type the overview for the table here.
 		@level1type = N'TABLE',
 		@level1name = N'tblICInventoryReceipt',
 		@level2type = N'COLUMN',
-		@level2name = N'dteReceiveTime'
+		@level2name = N'dtmReceiveTime'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Actual Temp Reading (Fahrenheit)',
