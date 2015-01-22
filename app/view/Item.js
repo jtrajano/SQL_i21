@@ -3271,6 +3271,12 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'ysnStockUnit',
+                                                                                    dataType: 'boolean',
+                                                                                    text: 'Stock Unit',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'intDecimalCalculation',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Decimal Places for Calculation',
@@ -3544,6 +3550,12 @@ Ext.define('Inventory.view.Item', {
                                                                                     dataIndex: 'strUnitType',
                                                                                     dataType: 'string',
                                                                                     text: 'Unit Type',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnStockUnit',
+                                                                                    dataType: 'boolean',
+                                                                                    text: 'Stock Unit',
                                                                                     flex: 1
                                                                                 },
                                                                                 {

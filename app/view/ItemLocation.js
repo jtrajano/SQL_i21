@@ -265,9 +265,9 @@ Ext.define('Inventory.view.ItemLocation', {
                                             flex: 1
                                         },
                                         {
-                                            dataIndex: 'ysnDefault',
+                                            dataIndex: 'ysnStockUnit',
                                             dataType: 'boolean',
-                                            text: 'Default',
+                                            text: 'Stock Unit',
                                             flex: 1
                                         }
                                     ],
@@ -276,7 +276,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                     fieldLabel: 'Issue UOM',
                                     labelWidth: 105,
                                     displayField: 'strUnitMeasure',
-                                    valueField: 'intUnitMeasureId'
+                                    valueField: 'intItemUOMId'
                                 }
                             ]
                         },
@@ -405,9 +405,9 @@ Ext.define('Inventory.view.ItemLocation', {
                                             flex: 1
                                         },
                                         {
-                                            dataIndex: 'ysnDefault',
+                                            dataIndex: 'ysnStockUnit',
                                             dataType: 'boolean',
-                                            text: 'Default',
+                                            text: 'Stock Unit',
                                             flex: 1
                                         }
                                     ],
@@ -415,7 +415,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                     fieldLabel: 'Receive UOM',
                                     labelWidth: 80,
                                     displayField: 'strUnitMeasure',
-                                    valueField: 'intUnitMeasureId'
+                                    valueField: 'intItemUOMId'
                                 }
                             ]
                         }

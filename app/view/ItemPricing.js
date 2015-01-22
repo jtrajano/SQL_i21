@@ -215,9 +215,9 @@ Ext.define('Inventory.view.ItemPricing', {
                                             flex: 1
                                         },
                                         {
-                                            dataIndex: 'ysnDefault',
+                                            dataIndex: 'ysnStockUnit',
                                             dataType: 'boolean',
-                                            text: 'Default',
+                                            text: 'Stock Unit',
                                             flex: 1
                                         },
                                         {

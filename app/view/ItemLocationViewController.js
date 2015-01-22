@@ -51,11 +51,19 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             },
             cboIssueUom: {
                 value: '{current.intIssueUOMId}',
-                store: '{issueUOM}'
+                store: '{issueUOM}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}'
+                }]
             },
             cboReceiveUom: {
                 value: '{current.intReceiveUOMId}',
-                store: '{receiveUOM}'
+                store: '{receiveUOM}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}'
+                }]
             },
             cboFamily: {
                 value: '{current.intFamilyId}',

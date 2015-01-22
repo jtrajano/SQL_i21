@@ -437,9 +437,9 @@
                                             "\t\tflex: 1",
                                             "\t},",
                                             "\t{",
-                                            "\t\tdataIndex: 'ysnDefault',",
+                                            "\t\tdataIndex: 'ysnStockUnit',",
                                             "\t\tdataType: 'boolean',",
-                                            "\t\ttext: 'Default',",
+                                            "\t\ttext: 'Stock Unit',",
                                             "\t\tflex: 1",
                                             "\t}",
                                             "]"
@@ -451,7 +451,7 @@
                                         "labelWidth": 105,
                                         "layout|flex": null,
                                         "margin": "0 5 5 0",
-                                        "valueField": "intUnitMeasureId"
+                                        "valueField": "intItemUOMId"
                                     },
                                     "name": "MyComboBox23",
                                     "configAlternates": {
@@ -689,9 +689,9 @@
                                             "\t\tflex: 1",
                                             "\t},",
                                             "\t{",
-                                            "\t\tdataIndex: 'ysnDefault',",
+                                            "\t\tdataIndex: 'ysnStockUnit',",
                                             "\t\tdataType: 'boolean',",
-                                            "\t\ttext: 'Default',",
+                                            "\t\ttext: 'Stock Unit',",
                                             "\t\tflex: 1",
                                             "\t}",
                                             "]"
@@ -702,7 +702,7 @@
                                         "itemId": "cboReceiveUom",
                                         "labelWidth": 80,
                                         "layout|flex": null,
-                                        "valueField": "intUnitMeasureId"
+                                        "valueField": "intItemUOMId"
                                     },
                                     "name": "MyComboBox26",
                                     "configAlternates": {
