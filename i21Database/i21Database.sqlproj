@@ -1013,6 +1013,7 @@
     <Build Include="dbo\Tables\tblSMTaxComponent.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroup.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupComponent.sql" />
+    <Build Include="dbo\Views\vyuAPReceivedItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
