@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets88280cb3e9d847a8a865b248d46271ae43b42f1a95018047d281935c258de07d))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsaa9d2c9db00d587128f812937298e0b128a680edd9e0b4da3cc59a4858670df3))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets88280cb3e9d847a8a865b248d46271ae43b42f1a95018047d281935c258de07d : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsaa9d2c9db00d587128f812937298e0b128a680edd9e0b4da3cc59a4858670df3 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "88280cb3e9d847a8a865b248d46271ae43b42f1a95018047d281935c258de07d"; }
+            get { return "aa9d2c9db00d587128f812937298e0b128a680edd9e0b4da3cc59a4858670df3"; }
         }
 
         /// <summary>
@@ -1867,7 +1867,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStock
-        [CodeFirstDatabaseSchema.vyuICGetItemStock](T1.vyuICGetItemStock_intKey, T1.vyuICGetItemStock_intItemId, T1.vyuICGetItemStock_strItemNo, T1.vyuICGetItemStock_strType, T1.vyuICGetItemStock_strDescription, T1.vyuICGetItemStock_intLocationId, T1.vyuICGetItemStock_strLocationName, T1.vyuICGetItemStock_strLocationType, T1.vyuICGetItemStock_intVendorId, T1.vyuICGetItemStock_strVendorId, T1.vyuICGetItemStock_intReceiveUOMId, T1.vyuICGetItemStock_intIssueUOMId, T1.vyuICGetItemStock_strReceiveUOM, T1.vyuICGetItemStock_strIssueUOM, T1.vyuICGetItemStock_intAllowNegativeInventory, T1.vyuICGetItemStock_strAllowNegativeInventory, T1.vyuICGetItemStock_intCostingMethod, T1.vyuICGetItemStock_strCostingMethod, T1.vyuICGetItemStock_dblUnitOnHand, T1.vyuICGetItemStock_dblAverageCost, T1.vyuICGetItemStock_dblOnOrder, T1.vyuICGetItemStock_dblOrderCommitted)
+        [CodeFirstDatabaseSchema.vyuICGetItemStock](T1.vyuICGetItemStock_intKey, T1.vyuICGetItemStock_intItemId, T1.vyuICGetItemStock_strItemNo, T1.vyuICGetItemStock_strType, T1.vyuICGetItemStock_strDescription, T1.vyuICGetItemStock_intLocationId, T1.vyuICGetItemStock_strLocationName, T1.vyuICGetItemStock_strLocationType, T1.vyuICGetItemStock_intVendorId, T1.vyuICGetItemStock_strVendorId, T1.vyuICGetItemStock_intReceiveUOMId, T1.vyuICGetItemStock_intIssueUOMId, T1.vyuICGetItemStock_strReceiveUOM, T1.vyuICGetItemStock_strIssueUOM, T1.vyuICGetItemStock_intSubLocationId, T1.vyuICGetItemStock_intStorageLocationId, T1.vyuICGetItemStock_dblMinOrder, T1.vyuICGetItemStock_dblReorderPoint, T1.vyuICGetItemStock_intAllowNegativeInventory, T1.vyuICGetItemStock_strAllowNegativeInventory, T1.vyuICGetItemStock_intCostingMethod, T1.vyuICGetItemStock_strCostingMethod, T1.vyuICGetItemStock_dblUnitOnHand, T1.vyuICGetItemStock_dblAverageCost, T1.vyuICGetItemStock_dblOnOrder, T1.vyuICGetItemStock_dblOrderCommitted)
     FROM (
         SELECT 
             T.intKey AS vyuICGetItemStock_intKey, 
@@ -1884,6 +1884,10 @@ namespace Edm_EntityMappingGeneratedViews
             T.intIssueUOMId AS vyuICGetItemStock_intIssueUOMId, 
             T.strReceiveUOM AS vyuICGetItemStock_strReceiveUOM, 
             T.strIssueUOM AS vyuICGetItemStock_strIssueUOM, 
+            T.intSubLocationId AS vyuICGetItemStock_intSubLocationId, 
+            T.intStorageLocationId AS vyuICGetItemStock_intStorageLocationId, 
+            T.dblMinOrder AS vyuICGetItemStock_dblMinOrder, 
+            T.dblReorderPoint AS vyuICGetItemStock_dblReorderPoint, 
             T.intAllowNegativeInventory AS vyuICGetItemStock_intAllowNegativeInventory, 
             T.strAllowNegativeInventory AS vyuICGetItemStock_strAllowNegativeInventory, 
             T.intCostingMethod AS vyuICGetItemStock_intCostingMethod, 
@@ -4300,7 +4304,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStocks
-        [iRely.Inventory.Model.vyuICGetItemStock](T1.vyuICGetItemStock_intKey, T1.vyuICGetItemStock_intItemId, T1.vyuICGetItemStock_strItemNo, T1.vyuICGetItemStock_strType, T1.vyuICGetItemStock_strDescription, T1.vyuICGetItemStock_intLocationId, T1.vyuICGetItemStock_strLocationName, T1.vyuICGetItemStock_strLocationType, T1.vyuICGetItemStock_intVendorId, T1.vyuICGetItemStock_strVendorId, T1.vyuICGetItemStock_intReceiveUOMId, T1.vyuICGetItemStock_intIssueUOMId, T1.vyuICGetItemStock_strReceiveUOM, T1.vyuICGetItemStock_strIssueUOM, T1.vyuICGetItemStock_intAllowNegativeInventory, T1.vyuICGetItemStock_strAllowNegativeInventory, T1.vyuICGetItemStock_intCostingMethod, T1.vyuICGetItemStock_strCostingMethod, T1.vyuICGetItemStock_dblUnitOnHand, T1.vyuICGetItemStock_dblAverageCost, T1.vyuICGetItemStock_dblOnOrder, T1.vyuICGetItemStock_dblOrderCommitted)
+        [iRely.Inventory.Model.vyuICGetItemStock](T1.vyuICGetItemStock_intKey, T1.vyuICGetItemStock_intItemId, T1.vyuICGetItemStock_strItemNo, T1.vyuICGetItemStock_strType, T1.vyuICGetItemStock_strDescription, T1.vyuICGetItemStock_intLocationId, T1.vyuICGetItemStock_strLocationName, T1.vyuICGetItemStock_strLocationType, T1.vyuICGetItemStock_intVendorId, T1.vyuICGetItemStock_strVendorId, T1.vyuICGetItemStock_intReceiveUOMId, T1.vyuICGetItemStock_intIssueUOMId, T1.vyuICGetItemStock_strReceiveUOM, T1.vyuICGetItemStock_strIssueUOM, T1.vyuICGetItemStock_intSubLocationId, T1.vyuICGetItemStock_intStorageLocationId, T1.vyuICGetItemStock_dblMinOrder, T1.vyuICGetItemStock_dblReorderPoint, T1.vyuICGetItemStock_intAllowNegativeInventory, T1.vyuICGetItemStock_strAllowNegativeInventory, T1.vyuICGetItemStock_intCostingMethod, T1.vyuICGetItemStock_strCostingMethod, T1.vyuICGetItemStock_dblUnitOnHand, T1.vyuICGetItemStock_dblAverageCost, T1.vyuICGetItemStock_dblOnOrder, T1.vyuICGetItemStock_dblOrderCommitted)
     FROM (
         SELECT 
             T.intKey AS vyuICGetItemStock_intKey, 
@@ -4317,6 +4321,10 @@ namespace Edm_EntityMappingGeneratedViews
             T.intIssueUOMId AS vyuICGetItemStock_intIssueUOMId, 
             T.strReceiveUOM AS vyuICGetItemStock_strReceiveUOM, 
             T.strIssueUOM AS vyuICGetItemStock_strIssueUOM, 
+            T.intSubLocationId AS vyuICGetItemStock_intSubLocationId, 
+            T.intStorageLocationId AS vyuICGetItemStock_intStorageLocationId, 
+            T.dblMinOrder AS vyuICGetItemStock_dblMinOrder, 
+            T.dblReorderPoint AS vyuICGetItemStock_dblReorderPoint, 
             T.intAllowNegativeInventory AS vyuICGetItemStock_intAllowNegativeInventory, 
             T.strAllowNegativeInventory AS vyuICGetItemStock_strAllowNegativeInventory, 
             T.intCostingMethod AS vyuICGetItemStock_intCostingMethod, 

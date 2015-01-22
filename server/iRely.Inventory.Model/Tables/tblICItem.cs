@@ -241,6 +241,10 @@ namespace iRely.Inventory.Model
         public int? intIssueUOMId { get; set; }
         public string strReceiveUOM { get; set; }
         public string strIssueUOM { get; set; }
+        public int? intSubLocationId { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public decimal? dblMinOrder { get; set; }
+        public decimal? dblReorderPoint { get; set; }
         public int? intAllowNegativeInventory { get; set; }
         public string strAllowNegativeInventory { get; set; }
         public int? intCostingMethod { get; set; }
