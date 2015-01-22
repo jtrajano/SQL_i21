@@ -8,6 +8,7 @@
 	[intBinLocationId] INT NULL,
 	[intLocationId] INT NOT NULL,
     [dblQtyOrdered] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+	[dblQtyContract] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblQtyReceived] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblVolume] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblWeight] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
