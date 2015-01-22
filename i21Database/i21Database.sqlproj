@@ -1009,6 +1009,7 @@
     <Build Include="dbo\Views\vyuHDTicketHistory.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationSubLocation.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationSubLocationCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportSubLedger.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
