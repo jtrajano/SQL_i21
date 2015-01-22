@@ -18,27 +18,25 @@ namespace iRely.Inventory.Model
         }
 
         public int intInventoryReceiptId { get; set; }
+        public string strReceiptType { get; set; }
+        public int? intVendorId { get; set; }
+        public int? intTransferorId { get; set; }
+        public int? intSourceId { get; set; }
+        public int? intLocationId { get; set; }
         public string strReceiptNumber { get; set; }
         public DateTime? dtmReceiptDate { get; set; }
-        public int? intVendorId { get; set; }
-        public string strReceiptType { get; set; }
-        public int? intSourceId { get; set; }
+        public int? intCurrencyId { get; set; }
         public int? intBlanketRelease { get; set; }
-        public int? intTransferorId { get; set; }
-        public int? intLocationId { get; set; }
         public string strVendorRefNo { get; set; }
         public string strBillOfLading { get; set; }
         public int? intShipViaId { get; set; }
-        public int? intProductOrigin { get; set; }
+        public int? intShipFromId { get; set; }
         public int? intReceiverId { get; set; }
-        public int? intCurrencyId { get; set; }
         public string strVessel { get; set; }
         public int? intFreightTermId { get; set; }
-        public string strDeliveryPoint { get; set; }
+        public int? intShipToId { get; set; }
         public string strAllocateFreight { get; set; }
-        public string strFreightBilledBy { get; set; }
         public int? intShiftNumber { get; set; }
-        public string strNotes { get; set; }
         public string strCalculationBasis { get; set; }
         public decimal? dblUnitWeightMile { get; set; }
         public decimal? dblFreightRate { get; set; }
@@ -46,14 +44,14 @@ namespace iRely.Inventory.Model
         public decimal? dblInvoiceAmount { get; set; }
         public bool ysnPrepaid { get; set; }
         public bool ysnInvoicePaid { get; set; }
-        public int? intCheckNo { get; set; }
-        public DateTime? dteCheckDate { get; set; }
+        public int intCheckNo { get; set; }
+        public DateTime? dtmCheckDate { get; set; }
         public int? intTrailerTypeId { get; set; }
-        public DateTime? dteTrailerArrivalDate { get; set; }
-        public DateTime? dteTrailerArrivalTime { get; set; }
+        public DateTime? dtmTrailerArrivalDate { get; set; }
+        public DateTime? dtmTrailerArrivalTime { get; set; }
         public string strSealNo { get; set; }
         public string strSealStatus { get; set; }
-        public DateTime? dteReceiveTime { get; set; }
+        public DateTime? dtmReceiveTime { get; set; }
         public decimal? dblActualTempReading { get; set; }
         public bool ysnPosted { get; set; }
         public int? intCreatedUserId { get; set; }
@@ -76,6 +74,22 @@ namespace iRely.Inventory.Model
             set
             {
                 _vendorName = value;
+            }
+        }
+        private int _vendorEntity;
+        [NotMapped]
+        public int intVendorEntityId
+        {
+            get
+            {
+                if (vyuAPVendor != null)
+                    return vyuAPVendor.intEntityId;
+                else
+                    return -1;
+            }
+            set
+            {
+                _vendorEntity = value;
             }
         }
         private string _fobPoint;

@@ -640,8 +640,30 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": null,
-                                                "displayField": null,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intPurchaseId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Purchase Order Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strPurchaseOrderNumber',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'PO Number',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strVendorOrderNumber',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Vendor Order Number',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strPurchaseOrderNumber",
                                                 "fieldLabel": "Source",
                                                 "itemId": "cboSource",
                                                 "labelAlign": "top",
@@ -650,11 +672,21 @@
                                                 "layout|margins": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "valueField": null,
+                                                "valueField": "intPurchaseId",
                                                 "width": null
                                             },
                                             "name": "MyComboBox",
-                                            "designerId": "525cb4c3-0957-41a8-946d-816afdfd0160"
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "525cb4c3-0957-41a8-946d-816afdfd0160",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.form.field.ComboBox",
@@ -1018,9 +1050,30 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "alwaysDisplayDecimals": null,
-                                                                "columns": null,
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intEntityLocationId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Location Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strLocationName',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Location Name',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strAddress',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Address',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
                                                                 "designer|createAlias": "gridcombobox",
-                                                                "displayField": null,
+                                                                "displayField": "strLocationName",
                                                                 "fieldLabel": "Ship From",
                                                                 "hideTrigger": null,
                                                                 "itemId": "cboShipFrom",
@@ -1028,7 +1081,7 @@
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
                                                                 "name": null,
-                                                                "valueField": null,
+                                                                "valueField": "intEntityLocationId",
                                                                 "width": 200
                                                             },
                                                             "name": "MyComboBox6",

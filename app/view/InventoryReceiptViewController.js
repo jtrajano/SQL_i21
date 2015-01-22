@@ -43,6 +43,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             cboSource: {
                 value: '{current.intSourceId}',
+                store: '{poSource}',
+                defaultFilters: [{
+                    column: 'intOrderStatusId',
+                    value: '1',
+                    conjunction: 'and'
+                },{
+                    column: 'intVendorId',
+                    value: '{current.intVendorId}',
+                    conjunction: 'and'
+                }],
                 readOnly: '{current.ysnPosted}'
             },
             cboLocation: {
@@ -80,8 +90,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             cboShipFrom: {
-//                value: '{current.intShipViaId}',
-//                store: '{shipvia}',
+                value: '{current.intShipFromId}',
+                store: '{shipFrom}',
+                defaultFilters: [{
+                    column: 'intEntityId',
+                    value: '{current.intVendorEntityId}'
+                }],
                 readOnly: '{current.ysnPosted}'
             },
             cboReceiver: {
@@ -100,7 +114,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             txtFobPoint: '{current.strFobPoint}',
             cboShipTo: {
-                value: '{current.strNotes}',
+                value: '{current.intShipToId}',
                 store: '{shipTo}',
                 readOnly: '{current.ysnPosted}'
             },
@@ -223,7 +237,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{checkHiddenInInvoicePaid}'
             },
             txtCheckDate: {
-                value: '{current.dteCheckDate}',
+                value: '{current.dtmCheckDate}',
                 readOnly: '{checkHiddenInInvoicePaid}'
             },
 //            txtInvoiceMargin: '{current.strMessage}',
@@ -235,11 +249,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             txtTrailerArrivalDate: {
-                value: '{current.dteTrailerArrivalDate}',
+                value: '{current.dtmTrailerArrivalDate}',
                 readOnly: '{current.ysnPosted}'
             },
             txtTrailerArrivalTime: {
-                value: '{current.dteTrailerArrivalTime}',
+                value: '{current.dtmTrailerArrivalTime}',
                 readOnly: '{current.ysnPosted}'
             },
             txtSealNo: {
@@ -252,7 +266,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             txtReceiveTime: {
-                value: '{current.dteReceiveTime}',
+                value: '{current.dtmReceiveTime}',
                 readOnly: '{current.ysnPosted}'
             },
             txtActualTempReading: {
@@ -428,7 +442,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
-        if (current) current.set('strVendorName', records[0].get('strName'));
+        if (current) {
+            current.set('strVendorName', records[0].get('strName'));
+            current.set('intVendorEntityId', records[0].get('strName'));
+        }
     },
 
     onFreightTermSelect: function(combo, records, eOpts) {

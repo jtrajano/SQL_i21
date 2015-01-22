@@ -9,6 +9,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedPackType',
         'AccountsPayable.store.VendorBuffered',
+        'AccountsPayable.store.PurchaseOrder',
+        'AccountsPayable.store.VendorLocation',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CurrencyBuffered',
         'i21.store.FreightTermsBuffered',
@@ -100,6 +102,15 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         location: {
             type: 'companylocationbuffered'
+        },
+        shipTo: {
+            type: 'companylocationbuffered'
+        },
+        poSource: {
+            type: 'purchaseorder'
+        },
+        shipFrom: {
+            type: 'apentitylocation'
         },
         shipTo: {
             type: 'companylocationbuffered'
