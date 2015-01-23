@@ -633,6 +633,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for scenario 4, unpost add stock.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for scenario 4, unpost sell stock, unpost add stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for scenario 4, unpost add stock, unpost sell stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
