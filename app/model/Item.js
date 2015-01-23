@@ -125,9 +125,25 @@ Ext.define('Inventory.model.Item', {
 
     validators: [
         {type: 'presence', field: 'strItemNo'},
-        {type: 'presence', field: 'strType'},
         {type: 'presence', field: 'strStatus'},
         {type: 'presence', field: 'strInventoryTracking'},
-        {type: 'presence', field: 'strLotTracking'}
+        {type: 'presence', field: 'strLotTracking'},
+
+        { type: 'inclusion',
+            field: 'strType',
+            list: [
+                'Inventory',
+                'Non-Inventory',
+                'Assembly/Formula/Blend',
+                'Bundle',
+                'Kit',
+                'Manufacturing',
+                'Raw Material',
+                'Other Charge',
+                'Service',
+                'Commodity'
+            ],
+            message: 'Invalid Type! Please select an Item Type from the list.'
+        }
     ]
 });

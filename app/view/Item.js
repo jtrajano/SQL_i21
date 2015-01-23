@@ -222,6 +222,7 @@ Ext.define('Inventory.view.Item', {
                                                                         flex: 1,
                                                                         itemId: 'cboType',
                                                                         margin: '0 1 0 5',
+                                                                        modelValidation: true,
                                                                         width: 170,
                                                                         fieldLabel: 'Type',
                                                                         labelWidth: 40,
