@@ -905,6 +905,7 @@ END
 		SET
 			ysnPosted = 0
 			,ysnPaid = 0
+			,dblAmountDue = dblInvoiceTotal 
 		FROM
 			tblARInvoice 
 		WHERE 
@@ -944,6 +945,7 @@ END
 			tblARInvoice
 		SET
 			ysnPosted = 1
+			,dblAmountDue = dblInvoiceTotal 
 		WHERE
 			tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
 

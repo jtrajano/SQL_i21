@@ -252,7 +252,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				ptsls_city = SUBSTRING(S.strCity,1,20),
 				ptsls_state = SUBSTRING(S.strState,1,2),
 				--ptsls_country = (CASE WHEN LEN(S.strCountry) = 3 THEN S.strCountry ELSE '''' END),
-				ptsls_phone = SUBSTRING(S.strPhone,1,15),
+				ptsls_phone = SUBSTRING(S.strPhone,1,12),
 				ptsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				ptsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
@@ -287,7 +287,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				SUBSTRING(S.strCity,1,20),
 				SUBSTRING(S.strState,1,2),
 				--S.strCountry,
-				SUBSTRING(S.strPhone,1,15),
+				SUBSTRING(S.strPhone,1,12),
 				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E

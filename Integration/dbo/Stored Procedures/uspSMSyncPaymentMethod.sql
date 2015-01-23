@@ -17,7 +17,7 @@ BEGIN
 			BEGIN
 
 			DECLARE @RecordsToProcess table(strPaymentMethod nvarchar(12), strGLAccount decimal(16,8), strPrintOption nvarchar(50), strPaymentMethodCode nvarchar(3))
-			DECLARE @RecordsToAdd table(strPaymentMethodCode varchar(3), strPaymentMethod varchar(30))
+			DECLARE @RecordsToAdd table(strPaymentMethodCode varchar(3), strPaymentMethod varchar(30), intPaymentCodeId int)
 			DECLARE @RecordsToUpdate table(strPaymentMethodCode varchar(3), strPaymentMethod varchar(30))
 
 			DELETE FROM @RecordsToProcess
@@ -36,7 +36,7 @@ BEGIN
 				BEGIN
 					INSERT INTO @RecordsToProcess
 					SELECT
-						[agct2_pay_desc_1]			AS [strPaymentMethod]
+						RTRIM(LTRIM([agct2_pay_desc_1]))			AS [strPaymentMethod]
 						,[agct2_pay_gl_acct_1]		AS [strGLAccount]
 						,(CASE UPPER([agct2_pay_ind_1])
 							WHEN ''Y'' THEN @PrintOptionY
@@ -51,7 +51,7 @@ BEGIN
 					UNION
 
 					SELECT
-						[agct2_pay_desc_2]			AS [strPaymentMethod]
+						RTRIM(LTRIM([agct2_pay_desc_2]))			AS [strPaymentMethod]
 						,[agct2_pay_gl_acct_2]		AS [strGLAccount]
 						,(CASE UPPER([agct2_pay_ind_2])
 							WHEN ''Y'' THEN @PrintOptionY
@@ -67,7 +67,7 @@ BEGIN
 					UNION
 
 					SELECT
-						[agct2_pay_desc_3]			AS [strPaymentMethod]
+						RTRIM(LTRIM([agct2_pay_desc_3]))			AS [strPaymentMethod]
 						,[agct2_pay_gl_acct_3]		AS [strGLAccount]
 						,(CASE UPPER([agct2_pay_ind_3])
 							WHEN ''Y'' THEN @PrintOptionY
@@ -82,7 +82,7 @@ BEGIN
 					UNION
 
 					SELECT
-						[agct2_pay_desc_4]			AS [strPaymentMethod]
+						RTRIM(LTRIM([agct2_pay_desc_4]))			AS [strPaymentMethod]
 						,[agct2_pay_gl_acct_4]		AS [strGLAccount]
 						,(CASE UPPER([agct2_pay_ind_4])
 							WHEN ''Y'' THEN @PrintOptionY
@@ -97,7 +97,7 @@ BEGIN
 					UNION
 
 					SELECT
-						[agct2_pay_desc_5]			AS [strPaymentMethod]
+						RTRIM(LTRIM([agct2_pay_desc_5]))			AS [strPaymentMethod]
 						,[agct2_pay_gl_acct_5]		AS [strGLAccount]
 						,(CASE UPPER([agct2_pay_ind_5])
 							WHEN ''Y'' THEN @PrintOptionY
@@ -112,7 +112,7 @@ BEGIN
 					UNION
 
 					SELECT
-						[agct2_pay_desc_6]			AS [strPaymentMethod]
+						RTRIM(LTRIM([agct2_pay_desc_6]))			AS [strPaymentMethod]
 						,[agct2_pay_gl_acct_6]		AS [strGLAccount]
 						,(CASE UPPER([agct2_pay_ind_6])
 							WHEN ''Y'' THEN @PrintOptionY
@@ -127,7 +127,7 @@ BEGIN
 					UNION
 
 					SELECT
-						[agct2_pay_desc_7]			AS [strPaymentMethod]
+						RTRIM(LTRIM([agct2_pay_desc_7]))			AS [strPaymentMethod]
 						,[agct2_pay_gl_acct_7]		AS [strGLAccount]
 						,(CASE UPPER([agct2_pay_ind_7])
 							WHEN ''Y'' THEN @PrintOptionY
@@ -142,7 +142,7 @@ BEGIN
 					UNION
 
 					SELECT
-						[agct2_pay_desc_8]			AS [strPaymentMethod]
+						RTRIM(LTRIM([agct2_pay_desc_8]))			AS [strPaymentMethod]
 						,[agct2_pay_gl_acct_8]		AS [strGLAccount]
 						,(CASE UPPER([agct2_pay_ind_8])
 							WHEN ''Y'' THEN @PrintOptionY
@@ -157,7 +157,7 @@ BEGIN
 					UNION
 
 					SELECT
-						[agct2_pay_desc_9]			AS [strPaymentMethod]
+						RTRIM(LTRIM([agct2_pay_desc_9]))			AS [strPaymentMethod]
 						,[agct2_pay_gl_acct_9]		AS [strGLAccount]
 						,(CASE UPPER([agct2_pay_ind_9])
 							WHEN ''Y'' THEN @PrintOptionY
@@ -192,10 +192,14 @@ BEGIN
 				END		
 				
 			IF (@ToOrigin = 1)
-				SET @AddedCount = 0
+				--SET @AddedCount = 0
+				INSERT INTO @RecordsToAdd
+				SELECT [strPaymentMethodCode], [strPaymentMethod], [intPaymentMethodID] 
+				FROM tblSMPaymentMethod
+				WHERE [strPaymentMethodCode] IS NULL OR RTRIM(LTRIM([strPaymentMethodCode])) = '''' OR [strPaymentMethodCode] = ''000''
 			ELSE
 				INSERT INTO @RecordsToAdd
-				SELECT P.[strPaymentMethodCode], P.[strPaymentMethod]
+				SELECT P.[strPaymentMethodCode], P.[strPaymentMethod], 0
 				FROM @RecordsToProcess P
 				LEFT OUTER JOIN tblSMPaymentMethod PM ON P.[strPaymentMethodCode] = PM.[strPaymentMethodCode]
 				WHERE PM.[strPaymentMethodCode] IS NULL		
@@ -211,7 +215,261 @@ BEGIN
 				
 
 			IF(@ToOrigin = 1)
-				BEGIN	
+				BEGIN
+					--INSERT
+					IF (SELECT COUNT(1) FROM @RecordsToAdd) > 0
+					BEGIN
+					WHILE((SELECT COUNT(1) FROM tblSMPaymentMethod WHERE strPaymentMethodCode IN (''001'',''002'',''003'',''004'',''005'',''006'',''007'',''008'',''009'')) < 9)
+						BEGIN
+							DECLARE @TempTable AS table(strPaymentMethodCode nvarchar(3), intRowNumber int)
+							INSERT INTO @TempTable
+							SELECT [strPaymentMethodCode], ROW_NUMBER() OVER (ORDER BY strPaymentMethodCode)							
+							FROM tblSMPaymentMethod
+							WHERE strPaymentMethodCode IN (''001'',''002'',''003'',''004'',''005'',''006'',''007'',''008'',''009'') ORDER BY strPaymentMethodCode
+							
+							DECLARE @AvailablePayTypeSlot int, @PaymentMethodIdToAdd int
+							SELECT TOP 1 @AvailablePayTypeSlot = intRowNumber FROM @TempTable WHERE CAST(strPaymentMethodCode  AS int) <> intRowNumber ORDER BY intRowNumber
+							SELECT TOP 1 @PaymentMethodIdToAdd = intPaymentCodeId FROM @RecordsToAdd
+							
+							IF @AvailablePayTypeSlot = 1
+								BEGIN								
+									UPDATE agctlmst
+									SET
+										[agct2_pay_desc_1] = SUBSTRING(RTRIM(LTRIM(PM.[strPaymentMethod])),0,29)
+										,[agct2_pay_ind_1] = 
+											(CASE PM.[strPrintOption]
+												WHEN @PrintOptionY THEN	''Y'' 
+												WHEN @PrintOptionN THEN ''N''
+												WHEN @PrintOptionC THEN ''C''
+											END)
+										,[agct2_pay_gl_acct_1] = ISNULL(GL.strExternalId,0.00000000)
+									FROM
+										tblSMPaymentMethod PM
+									LEFT JOIN
+										tblGLCOACrossReference GL
+											ON PM.intAccountId = GL.inti21Id 				 
+									WHERE
+										agctl_key = 2
+										AND PM.intPaymentMethodID = @PaymentMethodIdToAdd 
+									
+									UPDATE tblSMPaymentMethod
+									SET strPaymentMethodCode = ''001''
+									WHERE intPaymentMethodID = @PaymentMethodIdToAdd
+								END								
+							ELSE IF @AvailablePayTypeSlot = 2
+								BEGIN
+								
+									UPDATE agctlmst
+									SET
+										[agct2_pay_desc_2] = SUBSTRING(RTRIM(LTRIM(PM.[strPaymentMethod])),0,29)
+										,[agct2_pay_ind_2] = 
+											(CASE PM.[strPrintOption]
+												WHEN @PrintOptionY THEN	''Y'' 
+												WHEN @PrintOptionN THEN ''N''
+												WHEN @PrintOptionC THEN ''C''
+											END)
+										,[agct2_pay_gl_acct_2] = ISNULL(GL.strExternalId,0.00000000)
+									FROM
+										tblSMPaymentMethod PM
+									LEFT JOIN
+										tblGLCOACrossReference GL
+											ON PM.intAccountId = GL.inti21Id 				 
+									WHERE
+										agctl_key = 2
+										AND PM.intPaymentMethodID = @PaymentMethodIdToAdd 
+										
+									UPDATE tblSMPaymentMethod
+									SET strPaymentMethodCode = ''002''
+									WHERE intPaymentMethodID = @PaymentMethodIdToAdd										
+								END	
+							ELSE IF @AvailablePayTypeSlot = 3
+								BEGIN
+								
+									UPDATE agctlmst
+									SET
+										[agct2_pay_desc_3] = SUBSTRING(RTRIM(LTRIM(PM.[strPaymentMethod])),0,29)
+										,[agct2_pay_ind_3] = 
+											(CASE PM.[strPrintOption]
+												WHEN @PrintOptionY THEN	''Y'' 
+												WHEN @PrintOptionN THEN ''N''
+												WHEN @PrintOptionC THEN ''C''
+											END)
+										,[agct2_pay_gl_acct_3] = ISNULL(GL.strExternalId,0.00000000)
+									FROM
+										tblSMPaymentMethod PM
+									LEFT JOIN
+										tblGLCOACrossReference GL
+											ON PM.intAccountId = GL.inti21Id 				 
+									WHERE
+										agctl_key = 2
+										AND PM.intPaymentMethodID = @PaymentMethodIdToAdd 
+										
+									UPDATE tblSMPaymentMethod
+									SET strPaymentMethodCode = ''003''
+									WHERE intPaymentMethodID = @PaymentMethodIdToAdd										
+								END			
+							ELSE IF @AvailablePayTypeSlot = 4
+								BEGIN
+								
+									UPDATE agctlmst
+									SET
+										[agct2_pay_desc_4] = SUBSTRING(RTRIM(LTRIM(PM.[strPaymentMethod])),0,29)
+										,[agct2_pay_ind_4] = 
+											(CASE PM.[strPrintOption]
+												WHEN @PrintOptionY THEN	''Y'' 
+												WHEN @PrintOptionN THEN ''N''
+												WHEN @PrintOptionC THEN ''C''
+											END)
+										,[agct2_pay_gl_acct_4] = ISNULL(GL.strExternalId,0.00000000)
+									FROM
+										tblSMPaymentMethod PM
+									LEFT JOIN
+										tblGLCOACrossReference GL
+											ON PM.intAccountId = GL.inti21Id 				 
+									WHERE
+										agctl_key = 2
+										AND PM.intPaymentMethodID = @PaymentMethodIdToAdd 
+										
+									UPDATE tblSMPaymentMethod
+									SET strPaymentMethodCode = ''004''
+									WHERE intPaymentMethodID = @PaymentMethodIdToAdd										
+								END	
+							ELSE IF @AvailablePayTypeSlot = 5
+								BEGIN
+								
+									UPDATE agctlmst
+									SET
+										[agct2_pay_desc_5] = SUBSTRING(RTRIM(LTRIM(PM.[strPaymentMethod])),0,29)
+										,[agct2_pay_ind_5] = 
+											(CASE PM.[strPrintOption]
+												WHEN @PrintOptionY THEN	''Y'' 
+												WHEN @PrintOptionN THEN ''N''
+												WHEN @PrintOptionC THEN ''C''
+											END)
+										,[agct2_pay_gl_acct_5] = ISNULL(GL.strExternalId,0.00000000)
+									FROM
+										tblSMPaymentMethod PM
+									LEFT JOIN
+										tblGLCOACrossReference GL
+											ON PM.intAccountId = GL.inti21Id 				 
+									WHERE
+										agctl_key = 2
+										AND PM.intPaymentMethodID = @PaymentMethodIdToAdd 
+										
+									UPDATE tblSMPaymentMethod
+									SET strPaymentMethodCode = ''005''
+									WHERE intPaymentMethodID = @PaymentMethodIdToAdd										
+								END		
+							ELSE IF @AvailablePayTypeSlot = 6
+								BEGIN
+								
+									UPDATE agctlmst
+									SET
+										[agct2_pay_desc_6] = SUBSTRING(RTRIM(LTRIM(PM.[strPaymentMethod])),0,29)
+										,[agct2_pay_ind_6] = 
+											(CASE PM.[strPrintOption]
+												WHEN @PrintOptionY THEN	''Y'' 
+												WHEN @PrintOptionN THEN ''N''
+												WHEN @PrintOptionC THEN ''C''
+											END)
+										,[agct2_pay_gl_acct_6] = ISNULL(GL.strExternalId,0.00000000)
+									FROM
+										tblSMPaymentMethod PM
+									LEFT JOIN
+										tblGLCOACrossReference GL
+											ON PM.intAccountId = GL.inti21Id 				 
+									WHERE
+										agctl_key = 2
+										AND PM.intPaymentMethodID = @PaymentMethodIdToAdd 
+										
+									UPDATE tblSMPaymentMethod
+									SET strPaymentMethodCode = ''006''
+									WHERE intPaymentMethodID = @PaymentMethodIdToAdd										
+								END		
+							ELSE IF @AvailablePayTypeSlot = 7
+								BEGIN
+								
+									UPDATE agctlmst
+									SET
+										[agct2_pay_desc_7] = SUBSTRING(RTRIM(LTRIM(PM.[strPaymentMethod])),0,29)
+										,[agct2_pay_ind_7] = 
+											(CASE PM.[strPrintOption]
+												WHEN @PrintOptionY THEN	''Y'' 
+												WHEN @PrintOptionN THEN ''N''
+												WHEN @PrintOptionC THEN ''C''
+											END)
+										,[agct2_pay_gl_acct_7] = ISNULL(GL.strExternalId,0.00000000)
+									FROM
+										tblSMPaymentMethod PM
+									LEFT JOIN
+										tblGLCOACrossReference GL
+											ON PM.intAccountId = GL.inti21Id 				 
+									WHERE
+										agctl_key = 2
+										AND PM.intPaymentMethodID = @PaymentMethodIdToAdd 
+										
+									UPDATE tblSMPaymentMethod
+									SET strPaymentMethodCode = ''007''
+									WHERE intPaymentMethodID = @PaymentMethodIdToAdd										
+								END		
+							ELSE IF @AvailablePayTypeSlot = 8
+								BEGIN
+								
+									UPDATE agctlmst
+									SET
+										[agct2_pay_desc_8] = SUBSTRING(RTRIM(LTRIM(PM.[strPaymentMethod])),0,29)
+										,[agct2_pay_ind_8] = 
+											(CASE PM.[strPrintOption]
+												WHEN @PrintOptionY THEN	''Y'' 
+												WHEN @PrintOptionN THEN ''N''
+												WHEN @PrintOptionC THEN ''C''
+											END)
+										,[agct2_pay_gl_acct_8] = ISNULL(GL.strExternalId,0.00000000)
+									FROM
+										tblSMPaymentMethod PM
+									LEFT JOIN
+										tblGLCOACrossReference GL
+											ON PM.intAccountId = GL.inti21Id 				 
+									WHERE
+										agctl_key = 2
+										AND PM.intPaymentMethodID = @PaymentMethodIdToAdd 
+										
+									UPDATE tblSMPaymentMethod
+									SET strPaymentMethodCode = ''008''
+									WHERE intPaymentMethodID = @PaymentMethodIdToAdd										
+								END		
+							ELSE IF @AvailablePayTypeSlot = 9
+								BEGIN
+								
+									UPDATE agctlmst
+									SET
+										[agct2_pay_desc_9] = SUBSTRING(RTRIM(LTRIM(PM.[strPaymentMethod])),0,29)
+										,[agct2_pay_ind_9] = 
+											(CASE PM.[strPrintOption]
+												WHEN @PrintOptionY THEN	''Y'' 
+												WHEN @PrintOptionN THEN ''N''
+												WHEN @PrintOptionC THEN ''C''
+											END)
+										,[agct2_pay_gl_acct_9] = ISNULL(GL.strExternalId,0.00000000)
+									FROM
+										tblSMPaymentMethod PM
+									LEFT JOIN
+										tblGLCOACrossReference GL
+											ON PM.intAccountId = GL.inti21Id 				 
+									WHERE
+										agctl_key = 2
+										AND PM.intPaymentMethodID = @PaymentMethodIdToAdd 
+										
+									UPDATE tblSMPaymentMethod
+									SET strPaymentMethodCode = ''009''
+									WHERE intPaymentMethodID = @PaymentMethodIdToAdd										
+								END
+								
+							DELETE FROM @RecordsToAdd WHERE intPaymentCodeId = @PaymentMethodIdToAdd																																																										
+								
+						END
+					END					
+					--UPDATE	
 					DECLARE @UpdateCountTemp int
 					UPDATE agctlmst
 					SET
@@ -222,7 +480,7 @@ BEGIN
 								WHEN @PrintOptionN THEN ''N''
 								WHEN @PrintOptionC THEN ''C''
 							END)
-						,[agct2_pay_gl_acct_1] = GL.strExternalId
+						,[agct2_pay_gl_acct_1] = ISNULL(GL.strExternalId,0.00000000)
 					FROM
 						@RecordsToUpdate U
 					INNER JOIN
@@ -246,7 +504,7 @@ BEGIN
 								WHEN @PrintOptionN THEN ''N''
 								WHEN @PrintOptionC THEN ''C''
 							END)
-						,[agct2_pay_gl_acct_2] = GL.strExternalId
+						,[agct2_pay_gl_acct_2] = ISNULL(GL.strExternalId,0.00000000)
 					FROM
 						@RecordsToUpdate U
 					INNER JOIN
@@ -270,7 +528,7 @@ BEGIN
 								WHEN @PrintOptionN THEN ''N''
 								WHEN @PrintOptionC THEN ''C''
 							END)
-						,[agct2_pay_gl_acct_3] = GL.strExternalId
+						,[agct2_pay_gl_acct_3] = ISNULL(GL.strExternalId,0.00000000)
 					FROM
 						@RecordsToUpdate U
 					INNER JOIN
@@ -294,7 +552,7 @@ BEGIN
 								WHEN @PrintOptionN THEN ''N''
 								WHEN @PrintOptionC THEN ''C''
 							END)
-						,[agct2_pay_gl_acct_4] = GL.strExternalId
+						,[agct2_pay_gl_acct_4] = ISNULL(GL.strExternalId,0.00000000)
 					FROM
 						@RecordsToUpdate U
 					INNER JOIN
@@ -318,7 +576,7 @@ BEGIN
 								WHEN @PrintOptionN THEN ''N''
 								WHEN @PrintOptionC THEN ''C''
 							END)
-						,[agct2_pay_gl_acct_5] = GL.strExternalId
+						,[agct2_pay_gl_acct_5] = ISNULL(GL.strExternalId,0.00000000)
 					FROM
 						@RecordsToUpdate U
 					INNER JOIN
@@ -342,7 +600,7 @@ BEGIN
 								WHEN @PrintOptionN THEN ''N''
 								WHEN @PrintOptionC THEN ''C''
 							END)
-						,[agct2_pay_gl_acct_6] = GL.strExternalId
+						,[agct2_pay_gl_acct_6] = ISNULL(GL.strExternalId,0.00000000)
 					FROM
 						@RecordsToUpdate U
 					INNER JOIN
@@ -366,7 +624,7 @@ BEGIN
 								WHEN @PrintOptionN THEN ''N''
 								WHEN @PrintOptionC THEN ''C''
 							END)
-						,[agct2_pay_gl_acct_7] = GL.strExternalId
+						,[agct2_pay_gl_acct_7] = ISNULL(GL.strExternalId,0.00000000)
 					FROM
 						@RecordsToUpdate U
 					INNER JOIN
@@ -390,7 +648,7 @@ BEGIN
 								WHEN @PrintOptionN THEN ''N''
 								WHEN @PrintOptionC THEN ''C''
 							END)
-						,[agct2_pay_gl_acct_8] = GL.strExternalId
+						,[agct2_pay_gl_acct_8] = ISNULL(GL.strExternalId,0.00000000)
 					FROM
 						@RecordsToUpdate U
 					INNER JOIN
@@ -414,7 +672,7 @@ BEGIN
 								WHEN @PrintOptionN THEN ''N''
 								WHEN @PrintOptionC THEN ''C''
 							END)
-						,[agct2_pay_gl_acct_9] = GL.strExternalId
+						,[agct2_pay_gl_acct_9] = ISNULL(GL.strExternalId,0.00000000)
 					FROM
 						@RecordsToUpdate U
 					INNER JOIN
@@ -428,7 +686,9 @@ BEGIN
 						AND U.[strPaymentMethodCode] = ''009'' 	
 						
 					SET @UpdateCountTemp = @UpdateCountTemp + @@ROWCOUNT
-					SET @UpdatedCount = @UpdateCountTemp			
+					SET @UpdatedCount = @UpdateCountTemp
+					
+								
 						
 						
 				END
