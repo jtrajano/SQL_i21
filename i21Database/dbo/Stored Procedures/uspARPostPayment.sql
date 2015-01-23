@@ -1128,6 +1128,7 @@ ELSE
 				ON A.intPaymentId = P.intPaymentId					
 		WHERE
 			B.dblDiscount <> 0
+			AND B.dblPayment <> 0
 		GROUP BY
 			 strRecordNumber
 			,A.intPaymentId
@@ -1236,6 +1237,7 @@ ELSE
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
 			B.dblDiscount <> 0
+			AND B.dblPayment <> 0
 		GROUP BY
 			A.strRecordNumber
 			,A.intPaymentId
