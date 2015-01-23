@@ -105,8 +105,11 @@ BEGIN
 		FROM	dbo.tblICInventoryReceiptItem
 		WHERE	1 = 0
 		
+			
 		-- Setup the expected data
+		---------------------------------------------------------
 		-- Header
+		---------------------------------------------------------
 		INSERT INTO expected_tblICInventoryReceipt 
 		SELECT strReceiptNumber = 'INVRCT-1000'
 				,dtmReceiptDate = dbo.fnRemoveTimeOnDate(GETDATE())
@@ -119,7 +122,6 @@ BEGIN
 				,intCurrencyId = @Currency_USD
 				,intFreightTermId = @FreightTerm
 				,strAllocateFreight = N'No'
-				,strFreightBilledBy = N'No'
 				,dblUnitWeightMile = 0
 				,dblFreightRate = 100.00
 				,dblFuelSurcharge = 0 
@@ -128,7 +130,10 @@ BEGIN
 				,intConcurrencyId = 1
 				,intCreatedUserId = @intUserId
 				,intEntityId = @intEntityId
+		
+		---------------------------------------------------------
 		-- Detail 
+		---------------------------------------------------------
 		INSERT INTO expected_tblICInventoryReceiptItem 
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 1
