@@ -915,33 +915,6 @@ Ext.define('Inventory.view.ItemViewController', {
             ]
         });
 
-        var colConvertToStock = grdUOM.columns[9];
-        var colConvertFromStock = grdUOM.columns[10];
-        if (colConvertToStock) {
-            colConvertToStock.renderer = function (value, metadata, record) {
-                if (record) {
-                    if (record.get('intDecimalCalculation') > 0) {
-                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalCalculation'));
-                    }
-                    if (record.get('intDecimalDisplay') > 0) {
-                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalDisplay'));
-                    }
-                }
-            }
-        }
-        if (colConvertFromStock) {
-            colConvertFromStock.renderer = function (value, metadata, record) {
-                if (record) {
-                    if (record.get('intDecimalCalculation') > 0) {
-                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalCalculation'));
-                    }
-                    if (record.get('intDecimalDisplay') > 0) {
-                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalDisplay'));
-                    }
-                }
-            }
-        }
-
         var colSpecialPricingDiscountedPrice = grdSpecialPricing.columns[8];
         if (colSpecialPricingDiscountedPrice) {
             colSpecialPricingDiscountedPrice.renderer = function (value, metadata, record) {
@@ -959,12 +932,7 @@ Ext.define('Inventory.view.ItemViewController', {
             }
         }
 
-
-
-
-
         me.subscribeLocationEvents(grdLocationStore, me);
-
 
         var btnAddPricing = grdPricing.down('#btnAddPricing');
         btnAddPricing.on('click', me.onAddPricingClick);

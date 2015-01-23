@@ -421,7 +421,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailUnitMeasure',
-                                                        minWidth: 100,
+                                                        minWidth: 95,
                                                         dataIndex: 'intUnitMeasureId',
                                                         text: 'Unit',
                                                         flex: 1.3,
@@ -510,7 +510,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailDescription',
-                                                        minWidth: 150,
+                                                        minWidth: 120,
                                                         dataIndex: 'string',
                                                         text: 'Package Description',
                                                         flex: 2,
@@ -521,7 +521,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailUpcCode',
-                                                        minWidth: 100,
+                                                        minWidth: 80,
                                                         dataIndex: 'string',
                                                         text: 'UPC Code',
                                                         flex: 2,
@@ -532,24 +532,26 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colDetailShortUPC',
-                                                        minWidth: 80,
-                                                        width: 75,
+                                                        width: 70,
                                                         dataIndex: 'string',
                                                         text: 'Short UPC'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colStockUnit',
+                                                        width: 80,
                                                         text: 'Stock Unit'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowPurchase',
+                                                        width: 130,
                                                         text: 'Purchase in Stock Unit'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowSale',
+                                                        width: 100,
                                                         text: 'Sale in Stock Unit'
                                                     },
                                                     {
@@ -3521,7 +3523,6 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colSpecialPricingUnit',
-                                                                        width: 80,
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'UOM',
                                                                         editor: {
