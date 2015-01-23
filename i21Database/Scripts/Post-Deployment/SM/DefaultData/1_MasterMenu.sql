@@ -1451,4 +1451,14 @@ GO
 	/* --   End General Ledger Module Menu   -- */
 	/* ---------------------------------------- */
 
+	/* ------------------------------------------------- */
+	/* --- Update GCE Menu Commands for MVVM ----- */
+	/* ------------------------------------------------- */
+
+	UPDATE tblSMMasterMenu SET strCommand = 'GlobalComponentEngine.view.CustomField' WHERE strCommand = 'GlobalComponentEngine.controller.CustomField'
+
+	/* ------------------------------------------------- */
+	/* -- End Update GCE Menu Commands for MVVM -- */
+	/* ------------------------------------------------- */
+
 GO
