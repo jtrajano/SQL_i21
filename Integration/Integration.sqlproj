@@ -236,5 +236,6 @@
     </None>
     <None Include="dbo\Stored Procedures\uspGLImportSubLedger.sql" />
     <None Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
+    <None Include="dbo\Views\vyuTMOriginAccountStatus.sql" />
   </ItemGroup>
 </Project>
