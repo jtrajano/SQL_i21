@@ -1445,3 +1445,106 @@ GO
 	/* ---------------------------------------- */
 
 GO
+
+	/* ------------------------------------------------- */
+	/* --- START Update TM Menu Commands for MVVM ----- */
+	/* ------------------------------------------------- */
+
+	DECLARE @tmModuleId int
+	DECLARE @tmActivitiesId int
+	DECLARE @tmMaintenanceId int
+	DECLARE @tmMenuName NVARCHAR(150)
+	DECLARE @tmCommand NVARCHAR(150)
+	
+	
+	SET @tmModuleId = (SELECT TOP 1 intMenuID FROM [tblSMMasterMenu] WHERE strMenuName = 'Tank Management' AND strModuleName = 'Tank Management' AND intParentMenuID = 0)
+	SET @tmActivitiesId = (SELECT TOP 1 intMenuID FROM [tblSMMasterMenu] WHERE strMenuName = 'Activities' AND strModuleName = 'Tank Management' AND intParentMenuID = @tmModuleId)
+	SET @tmMaintenanceId = (SELECT TOP 1 intMenuID FROM [tblSMMasterMenu] WHERE strMenuName = 'Maintenance' AND strModuleName = 'Tank Management' AND intParentMenuID = @tmModuleId)
+
+	/*---------------------------------  */
+	/*-- START Update TM Maintenance Menu */
+	/*---------------------------------  */
+		SET @tmMenuName = 'Degree Day Clock'
+		SET @tmCommand ='TankManagement.view.DegreeDayClock'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId
+		END
+	
+		SET @tmMenuName = 'Devices'
+		SET @tmCommand ='TankManagement.view.Device'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId
+		END
+	
+		SET @tmMenuName = 'Event Type'
+		SET @tmCommand ='TankManagement.view.EventType'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId
+		END
+	
+		SET @tmMenuName = 'Device Type'
+		SET @tmCommand ='TankManagement.view.DeviceType'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId
+		END
+	
+		SET @tmMenuName = 'Lease Code'
+		SET @tmCommand ='TankManagement.view.LeaseCode'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId
+		END
+	
+		SET @tmMenuName = 'Event Automation Setup'
+		SET @tmCommand ='TankManagement.view.EventAutomation'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId
+		END
+	
+		SET @tmMenuName = 'Meter Type'
+		SET @tmCommand ='TankManagement.view.MeterType'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId
+		END
+	
+	/*---------------------------------*/
+	/*-- END Update TM Maintenance Menu */
+	/*---------------------------------*/
+	
+	/*---------------------------------  */
+	/*-- START Update TM Activities Menu */
+	/*---------------------------------  */
+		SET @tmMenuName = 'Customer Inquiry'
+		SET @tmCommand ='TankManagement.view.CustomerInquiry'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
+		END
+	
+		SET @tmMenuName = 'Consumption Sites'
+		SET @tmCommand ='TankManagement.view.ConsumptionSite'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
+		END
+	
+		SET @tmMenuName = 'Clock Reading'
+		SET @tmCommand ='TankManagement.view.ClockReading'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
+		END
+	/*---------------------------------*/
+	/*-- END Update TM Activities Menu */
+	/*---------------------------------*/
+
+	/* ------------------------------------------------- */
+	/* -- End Update TM Menu Commands for MVVM -- */
+	/* ------------------------------------------------- */
+GO
