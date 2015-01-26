@@ -273,6 +273,10 @@ BEGIN TRY
 		
 		SET @intNoteTransId = @@IDENTITY
 		
+		IF(@TransTypeID = 1)
+		BEGIN
+			EXEC dbo.uspNRCreateAREntry @intNoteTransId
+		END
 		IF(@TransTypeID = 4)
 		BEGIN
 			IF(@NoteType = 'Scheduled Invoice')

@@ -1022,6 +1022,9 @@
     <Build Include="dbo\Tables\tblGRDiscountScheduleCode.sql" />
     <Build Include="dbo\Tables\tblGRDiscountScheduleLine.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationPricingLevel.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCalculateMonthlyInterest.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateAREntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRReportNotesStatement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
