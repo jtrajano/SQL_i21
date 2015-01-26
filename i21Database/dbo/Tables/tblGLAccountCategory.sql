@@ -5,5 +5,5 @@
 	[intAccountGroupId] [int] NULL, 
 	[intConcurrencyId] [int] NOT NULL
     CONSTRAINT [PK_tblGLAccountCategory] PRIMARY KEY ([intAccountCategoryId]), 
-    [strAccountGroupFilter] NCHAR(50) NULL,
+    [strAccountGroupFilter] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 )
