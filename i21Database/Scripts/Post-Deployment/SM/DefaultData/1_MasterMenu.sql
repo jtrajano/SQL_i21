@@ -1527,12 +1527,12 @@ GO
 			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
 		END
 	
-		SET @tmMenuName = 'Consumption Sites'
-		SET @tmCommand ='TankManagement.view.ConsumptionSite'
-		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId)
-		BEGIN 
-			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
-		END
+		--SET @tmMenuName = 'Consumption Sites'
+		--SET @tmCommand ='TankManagement.view.ConsumptionSite'
+		--IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId)
+		--BEGIN 
+		--	UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
+		--END
 	
 		SET @tmMenuName = 'Clock Reading'
 		SET @tmCommand ='TankManagement.view.ClockReading'
