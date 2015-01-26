@@ -14,6 +14,24 @@ BEGIN
 	END 
 
 	BEGIN
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = N'Segment' and (strStructureName = N'Location' OR strStructureName LIKE N'Profit Center%')) AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
+	BEGIN
+		--TODO: Push on 15.1 (GL-1285)
+		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Location', N'Segment', 4, N'0', 2, 1, 1, 5, NULL, NULL)
+		PRINT 'Inserted Location Segment'
+	END
+	ELSE
+	BEGIN
+		UPDATE tblGLAccountStructure SET strStructureName = 'Location'
+	    WHERE strStructureName LIKE 'Profit Center%' and strType = 'Segment'
+		PRINT 'Updated Profit Center to Location'
+		
+	END
+				
+
+
+
 			DECLARE @Segments NVARCHAR(MAX)
 			SELECT @Segments = ISNULL(SUBSTRING((SELECT '],[' + strStructureName FROM tblGLAccountStructure WHERE strType <> 'Divider' FOR XML PATH('')),3,200000) + ']','[Primary Account]')
 			DECLARE @Query NVARCHAR(MAX)

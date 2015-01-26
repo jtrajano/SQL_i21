@@ -152,4 +152,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\Drop_References_to_RecapTableType.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\6_GL\3_1440_to_1510.sql" />
+  </ItemGroup>
 </Project>
