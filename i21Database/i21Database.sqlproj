@@ -1021,6 +1021,7 @@
     <Build Include="dbo\Tables\tblGRDiscountSchedule.sql" />
     <Build Include="dbo\Tables\tblGRDiscountScheduleCode.sql" />
     <Build Include="dbo\Tables\tblGRDiscountScheduleLine.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocationPricingLevel.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

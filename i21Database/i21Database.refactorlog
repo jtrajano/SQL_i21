@@ -1757,4 +1757,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intSalesAccountId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e2de4795-f00e-4a32-9787-412cf0e50b2e" ChangeDateTime="01/23/2015 03:48:56">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanyLocationPricingLevel].[intConcurrencyid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanyLocationPricingLevel]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
 </Operations>
