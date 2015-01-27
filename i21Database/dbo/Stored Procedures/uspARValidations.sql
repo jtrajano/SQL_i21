@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARValidations]
 	@Sucess BIT = 0 OUTPUT,
-	@Message NVARCHAR(100) = '' OUTPUT
+	@Message NVARCHAR(100) = '' OUTPUT,
+	@StartDate DATETIME = NULL,
+	@EndDate DATETIME = NULL
 
 	AS
 
@@ -9,17 +11,34 @@
 	--==========================
 	DECLARE @customerCount INT
 	DECLARE @originCustomerCount INT
+	
+	IF (@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0)
+	BEGIN
+		SET @StartDate = NULL
+		SET @EndDate = NULL
+	END	
 
 	SELECT
 	@originCustomerCount = COUNT(DISTINCT agivc_bill_to_cus)
 	FROM
 	agivcmst
+	WHERE
+	(
+		((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+		OR
+		((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+	)
 	
 	SELECT
 	@customerCount = COUNT(DISTINCT strCustomerNumber)
 	FROM agivcmst
 		INNER JOIN tblARCustomer ON agivcmst.agivc_bill_to_cus COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
-
+	WHERE
+	(
+		((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+		OR
+		((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+	)
 			
 	--SELECT
 	--@customerCount = COUNT(DISTINCT agivc_bill_to_cus)
@@ -59,11 +78,23 @@
 	@originSalespersonCount = COUNT(DISTINCT agivc_slsmn_no) 
 	FROM agivcmst 
 	WHERE agivc_slsmn_no IS NOT NULL
+	AND 
+	(
+		((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+		OR
+		((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+	)
 	
 	SELECT
 	@salespersonCount = COUNT(DISTINCT strSalespersonId)
 	FROM agivcmst
 		INNER JOIN tblARSalesperson ON agivcmst.agivc_slsmn_no COLLATE Latin1_General_CI_AS = tblARSalesperson.strSalespersonId COLLATE Latin1_General_CI_AS
+	WHERE 
+	(
+		((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+		OR
+		((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+	)
 	
 	IF(@originSalespersonCount = @salespersonCount)
 	BEGIN
@@ -86,6 +117,12 @@
 	@originTermCount = COUNT(DISTINCT agivc_terms_code) 
 	FROM agivcmst 
 	WHERE agivc_terms_code IS NOT NULL
+	AND 
+	(
+		((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+		OR
+		((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+	)
  
 	SELECT
 	@termCount = COUNT(DISTINCT strTerm)
@@ -93,7 +130,13 @@
 	WHERE strTermCode COLLATE Latin1_General_CI_AS in (SELECT 
 			DISTINCT (CASE WHEN SUBSTRING(agivc_terms_code,1, 1) = 0 THEN SUBSTRING(agivc_terms_code,2,1) ELSE agivc_terms_code END) COLLATE Latin1_General_CI_AS
 			FROM agivcmst 
-			WHERE agivc_terms_code IS NOT NULL)
+			WHERE agivc_terms_code IS NOT NULL
+			AND 
+				(
+					((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+					OR
+					((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+				))
 
 	IF(@originTermCount = @termCount)
 	BEGIN
