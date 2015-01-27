@@ -156,7 +156,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colSubLocation: '',
                 colLotTracking: 'strLotTracking',
                 colQtyOrdered: 'dblOrderQty',
-                colOpenReceive: 'dblOpenReceive',
+                colQtyToReceive: 'dblOpenReceive',
                 colReceived: 'dblReceived',
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
@@ -680,16 +680,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onEditItem: function (editor, context, eOpts) {
-        if (context.field === 'dblReceived' || context.field === 'dblUnitCost')
+        if (context.field === 'dblOpenReceive' || context.field === 'dblUnitCost')
         {
             if (context.record) {
                 var value = 0;
                 var record = context.record;
-                if (context.field === 'dblReceived'){
+                if (context.field === 'dblOpenReceive'){
                     value = context.value * (record.get('dblUnitCost'));
                 }
                 else if (context.field === 'dblUnitCost'){
-                    value = context.value * (record.get('dblReceived'));
+                    value = context.value * (record.get('dblOpenReceive'));
                     record.set('dblUnitRetail', context.value);
                 }
                 record.set('dblLineTotal', value);

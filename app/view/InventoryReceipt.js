@@ -842,28 +842,22 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
+                                                        dataIndex: 'dblQtyOrdered',
                                                         itemId: 'colQtyOrdered',
                                                         width: 75,
                                                         align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
                                                         text: 'Ordered',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
+                                                        dataIndex: 'dblQtyOrdered',
                                                         itemId: 'colReceived',
                                                         width: 75,
                                                         align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
                                                         text: 'Received',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -875,7 +869,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         text: 'Qty to Receive',
                                                         format: '0,000.##',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            itemId: 'txtQtyToReceive'
                                                         }
                                                     },
                                                     {
@@ -906,10 +901,23 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'ysnDefault',
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnStockUnit',
                                                                     dataType: 'boolean',
-                                                                    text: 'Default',
+                                                                    text: 'Stock Unit',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboItemUOM',
@@ -933,7 +941,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         itemId: 'colUnitRetail',
                                                         width: 85,
                                                         dataIndex: 'dblUnitRetail',
-                                                        text: 'Unit Retail'
+                                                        text: 'Unit Retail',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            itemId: 'txtUnitRetail'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
