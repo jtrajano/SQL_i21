@@ -1596,6 +1596,14 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
 		WHERE strMenuName = 'Payment Methods' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.PaymentMethod'
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerModuleId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+		WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.FreightTerms'
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerModuleId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+		WHERE strMenuName = 'Terms' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.Term'
+
 	/*-------------------------------  */
 	/*-- End Update System Manager Menu */
 	/*-------------------------------  */
