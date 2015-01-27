@@ -1594,8 +1594,9 @@ GO
 	/* --- Update Dashboard Menu Commands for MVVM ----- */
 	/* ------------------------------------------------- */
 
-	UPDATE tblSMMasterMenu SET strCommand = 'DAshboard.view.TabSetup' WHERE strCommand = 'Dashboard.controller.TabSetup'
-	UPDATE tblSMMasterMenu SET strCommand = 'DAshboard.view.PanelSettings' WHERE strCommand = 'DAshboard.controller.PanelSettings'
+	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.TabSetup' WHERE strCommand = 'Dashboard.controller.TabSetup'
+	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.PanelSettings' WHERE strCommand = 'Dashboard.controller.PanelSettings'
+	UPDATE tblSMMasterMenu SET strCommand = 'Reports.view.Connection' WHERE strCommand = 'Reports.controller.Connection'
 
 	/* ------------------------------------------------- */
 	/* -- End Update Dashboard Menu Commands for MVVM -- */
