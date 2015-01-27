@@ -1,6 +1,10 @@
-﻿IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGLGetImportOriginHistoricalJournalError')
-	DROP PROCEDURE uspGLGetImportOriginHistoricalJournalError
-GO
+﻿GO
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glhstmst]') AND type IN (N'U'))
+BEGIN 
+EXEC('
+IF EXISTS(select top 1 1 from sys.procedures where name = ''uspGLGetImportOriginHistoricalJournalError'')
+	DROP PROCEDURE uspGLGetImportOriginHistoricalJournalError')
+
 
 EXEC ('CREATE PROCEDURE [dbo].[uspGLGetImportOriginHistoricalJournalError](@uid UNIQUEIDENTIFIER,@category VARCHAR(50) OUT, @result INT = 0 OUT)
 AS
@@ -61,3 +65,4 @@ BEGIN
 	
 END
 ')
+END

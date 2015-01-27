@@ -655,7 +655,7 @@ BEGIN
 			,strTransactionId 
 			,strBatchId 
 			,intTransactionTypeId 
-			,ysnIsUnposted = 1
+			,ysnIsUnposted
 			,intRelatedInventoryTransactionId 
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 

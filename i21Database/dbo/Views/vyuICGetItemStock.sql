@@ -17,6 +17,10 @@ SELECT
 	ItemLocation.intIssueUOMId,
 	strReceiveUOM = (SELECT TOP 1 strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = ItemLocation.intReceiveUOMId),
 	strIssueUOM = (SELECT TOP 1 strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = ItemLocation.intIssueUOMId),
+	ItemLocation.intSubLocationId,
+	ItemLocation.intStorageLocationId,
+	ItemLocation.dblMinOrder,
+	ItemLocation.dblReorderPoint,
 	ItemLocation.intAllowNegativeInventory,
 	strAllowNegativeInventory = (CASE WHEN ItemLocation.intAllowNegativeInventory = 1 THEN 'Yes'
 							 WHEN ItemLocation.intAllowNegativeInventory = 2 THEN 'Yes with Auto Write-Off'
@@ -29,6 +33,7 @@ SELECT
 	ItemStock.dblAverageCost,
 	ItemStock.dblOnOrder,
 	ItemStock.dblOrderCommitted
+	
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId

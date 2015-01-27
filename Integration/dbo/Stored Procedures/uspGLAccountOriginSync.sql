@@ -1,4 +1,5 @@
-﻿IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
+﻿GO
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
 BEGIN 
 	EXEC('
 		IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLAccountOriginSync'' and type = ''P'') 

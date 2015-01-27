@@ -40,16 +40,14 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,strVendorRefNo
 		,strBillOfLading
 		,intShipViaId
-		,intProductOrigin
+		,intShipFromId
+		,intShipToId
 		,intReceiverId
 		,intCurrencyId
 		,strVessel
 		,intFreightTermId
-		,strDeliveryPoint
 		,strAllocateFreight
-		,strFreightBilledBy
 		,intShiftNumber
-		,strNotes
 		,strCalculationBasis
 		,dblUnitWeightMile
 		,dblFreightRate
@@ -57,13 +55,13 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,dblInvoiceAmount
 		,ysnInvoicePaid
 		,intCheckNo
-		,dteCheckDate
+		,dtmCheckDate
 		,intTrailerTypeId
-		,dteTrailerArrivalDate
-		,dteTrailerArrivalTime
+		,dtmTrailerArrivalDate
+		,dtmTrailerArrivalTime
 		,strSealNo
 		,strSealStatus
-		,dteReceiveTime
+		,dtmReceiveTime
 		,dblActualTempReading
 		,intConcurrencyId
 		,intEntityId
@@ -79,16 +77,14 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,strVendorRefNo			= PO.strReference
 		,strBillOfLading		= NULL
 		,intShipViaId			= PO.intShipViaId
-		,intProductOrigin		= NULL 
+		,intShipFromId			= PO.intShipFromId 
+		,intShipToId			= PO.intShipToId
 		,intReceiverId			= @intUserId 
 		,intCurrencyId			= PO.intCurrencyId
 		,strVessel				= NULL
-		,intFreightTermId		= PO.intFreightId
-		,strDeliveryPoint		= NULL 
+		,intFreightTermId		= PO.intFreightTermId
 		,strAllocateFreight		= 'No' -- Default is No
-		,strFreightBilledBy		= 'No' -- Default is No
 		,intShiftNumber			= NULL 
-		,strNotes				= NULL 
 		,strCalculationBasis	= NULL 
 		,dblUnitWeightMile		= 0 -- TODO Not sure where to get this from PO
 		,dblFreightRate			= PO.dblShipping -- TODO I assume dblShipping is the Freight Rate. 

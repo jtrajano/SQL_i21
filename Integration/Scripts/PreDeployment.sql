@@ -18,12 +18,15 @@
 :r "..\dbo\Stored Procedures\uspSMImportPaymentMethod.sql"
 :r "..\dbo\Stored Procedures\uspSMSyncCompanyLocation.sql"
 :r "..\dbo\Stored Procedures\uspSMSyncPaymentMethod.sql"
+:r "..\dbo\Stored Procedures\uspSMImportShipVia.sql"
+:r "..\dbo\Stored Procedures\uspSMSyncShipVia.sql"
 
 -- GENERAL LEDGER
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
 :r "..\dbo\Stored Procedures\uspGLAccountOriginSync.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildAccount.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildOriginAccount.sql"
+:r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
 :r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
 
 -- CASH MANAGEMENT

@@ -283,6 +283,7 @@ BEGIN
 				,intItemId
 				,intLocationId
 				,strBatchId
+				,dblExchangeRate
 		)
 		SELECT	dtmDate = @dtmDate
 				,dblUnitQty = -75
@@ -297,7 +298,8 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
 				,intLocationId = @Default_Location
-				,strBatchId = @strBatchId			
+				,strBatchId = @strBatchId
+				,dblExchangeRate = 1		
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblUnitQty = -75
@@ -313,6 +315,7 @@ BEGIN
 				,intItemId = @StickyGrains
 				,intLocationId = @Default_Location
 				,strBatchId = @strBatchId
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblUnitQty = -75
@@ -328,6 +331,7 @@ BEGIN
 				,intItemId = @PremiumGrains
 				,intLocationId = @Default_Location
 				,strBatchId = @strBatchId
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblUnitQty = -75
@@ -343,6 +347,7 @@ BEGIN
 				,intItemId = @ColdGrains
 				,intLocationId = @Default_Location
 				,strBatchId = @strBatchId			
+				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblUnitQty = -75
@@ -358,6 +363,7 @@ BEGIN
 				,intItemId = @HotGrains
 				,intLocationId = @Default_Location
 				,strBatchId = @strBatchId
+				,dblExchangeRate = 1
 
 		----------------------------------------------------------------
 		-- Fake data for tblGLDetail & GL Summary 

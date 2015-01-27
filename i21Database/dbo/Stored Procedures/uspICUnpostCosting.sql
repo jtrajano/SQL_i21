@@ -193,7 +193,8 @@ BEGIN
 				,[intTransactionTypeId] 
 				,[dtmCreated] 
 				,[intCreatedUserId] 
-				,[intConcurrencyId] 
+				,[intConcurrencyId]
+				,[ysnIsUnposted]
 		)
 		SELECT	[intItemId] = ItemToUnpost.intItemId
 				,[intLocationId] = ItemToUnpost.intLocationId
@@ -212,6 +213,7 @@ BEGIN
 				,[dtmCreated] = GETDATE()
 				,[intCreatedUserId] = @intUserId
 				,[intConcurrencyId] = 1
+				,[ysnIsUnposted] = 0
 		FROM	dbo.tblICItemStock AS Stock INNER JOIN @ItemsToUnpost ItemToUnpost
 						ON Stock.intItemId = ItemToUnpost.intItemId
 						AND Stock.intLocationId = ItemToUnpost.intLocationId

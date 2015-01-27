@@ -1009,6 +1009,22 @@
     <Build Include="dbo\Views\vyuHDTicketHistory.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationSubLocation.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationSubLocationCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportSubLedger.sql" />
+    <Build Include="dbo\Tables\tblSMTaxComponent.sql" />
+    <Build Include="dbo\Tables\tblSMTaxGroup.sql" />
+    <Build Include="dbo\Tables\tblSMTaxGroupComponent.sql" />
+    <Build Include="dbo\Views\vyuAPReceivedItems.sql" />
+    <Build Include="dbo\Tables\tblSCTruckDriverReference.sql" />
+    <Build Include="dbo\Tables\tblGRDiscountCrossReference.sql" />
+    <Build Include="dbo\Tables\tblGRDiscountId.sql" />
+    <Build Include="dbo\Tables\tblGRDiscountLocationUse.sql" />
+    <Build Include="dbo\Tables\tblGRDiscountSchedule.sql" />
+    <Build Include="dbo\Tables\tblGRDiscountScheduleCode.sql" />
+    <Build Include="dbo\Tables\tblGRDiscountScheduleLine.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyLocationPricingLevel.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCalculateMonthlyInterest.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateAREntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRReportNotesStatement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

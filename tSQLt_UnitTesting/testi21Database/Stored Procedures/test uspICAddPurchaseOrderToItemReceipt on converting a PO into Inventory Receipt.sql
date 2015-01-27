@@ -48,7 +48,7 @@ BEGIN
 		DECLARE @Vendor_CoolAmish AS INT = 1
 
 		-- Fake PO Header data
-		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightId, dblShipping, dblTotal, intVendorId) VALUES (1, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish)
+		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightTermId, dblShipping, dblTotal, intVendorId) VALUES (1, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish)
 
 		-- Fake PO Detail data
 		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 1, @WetGrains, 10, 0, @UOMBushel, 50.00)
@@ -75,7 +75,6 @@ BEGIN
 				,intCurrencyId
 				,intFreightTermId
 				,strAllocateFreight
-				,strFreightBilledBy
 				,dblUnitWeightMile
 				,dblFreightRate
 				,dblFuelSurcharge
@@ -106,8 +105,11 @@ BEGIN
 		FROM	dbo.tblICInventoryReceiptItem
 		WHERE	1 = 0
 		
+			
 		-- Setup the expected data
+		---------------------------------------------------------
 		-- Header
+		---------------------------------------------------------
 		INSERT INTO expected_tblICInventoryReceipt 
 		SELECT strReceiptNumber = 'INVRCT-1000'
 				,dtmReceiptDate = dbo.fnRemoveTimeOnDate(GETDATE())
@@ -120,7 +122,6 @@ BEGIN
 				,intCurrencyId = @Currency_USD
 				,intFreightTermId = @FreightTerm
 				,strAllocateFreight = N'No'
-				,strFreightBilledBy = N'No'
 				,dblUnitWeightMile = 0
 				,dblFreightRate = 100.00
 				,dblFuelSurcharge = 0 
@@ -129,7 +130,10 @@ BEGIN
 				,intConcurrencyId = 1
 				,intCreatedUserId = @intUserId
 				,intEntityId = @intEntityId
+		
+		---------------------------------------------------------
 		-- Detail 
+		---------------------------------------------------------
 		INSERT INTO expected_tblICInventoryReceiptItem 
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 1
@@ -212,7 +216,6 @@ BEGIN
 				,intCurrencyId
 				,intFreightTermId
 				,strAllocateFreight
-				,strFreightBilledBy
 				,dblUnitWeightMile
 				,dblFreightRate
 				,dblFuelSurcharge

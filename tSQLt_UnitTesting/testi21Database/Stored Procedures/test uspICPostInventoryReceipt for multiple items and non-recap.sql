@@ -27,6 +27,10 @@ BEGIN
 		EXEC [testi21Database].[Fake inventory items];
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
