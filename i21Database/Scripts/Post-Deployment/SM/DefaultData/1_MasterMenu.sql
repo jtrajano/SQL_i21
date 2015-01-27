@@ -1584,6 +1584,10 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
 		WHERE strMenuName = 'Country' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.Country'
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerModuleId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+		WHERE strMenuName = 'Currency' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.Currency'
+
 	/*-------------------------------  */
 	/*-- End Update System Manager Menu */
 	/*-------------------------------  */
