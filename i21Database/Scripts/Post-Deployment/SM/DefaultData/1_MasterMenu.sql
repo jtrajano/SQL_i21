@@ -1585,7 +1585,20 @@ GO
 		WHERE strMenuName = 'Country' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.Country'
 
 	/*-------------------------------  */
-	/*-- End Update TM Activities Menu */
+	/*-- End Update System Manager Menu */
 	/*-------------------------------  */
+	
+GO
 
+	/* ------------------------------------------------- */
+	/* --- Update Dashboard Menu Commands for MVVM ----- */
+	/* ------------------------------------------------- */
+
+	UPDATE tblSMMasterMenu SET strCommand = 'DAshboard.view.TabSetup' WHERE strCommand = 'Dashboard.controller.TabSetup'
+	UPDATE tblSMMasterMenu SET strCommand = 'DAshboard.view.PanelSettings' WHERE strCommand = 'DAshboard.controller.PanelSettings'
+
+	/* ------------------------------------------------- */
+	/* -- End Update Dashboard Menu Commands for MVVM -- */
+	/* ------------------------------------------------- */
+	
 GO
