@@ -53,7 +53,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     value: '{current.intVendorId}',
                     conjunction: 'and'
                 }],
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{checkReadOnlyIfDirect}'
             },
             cboLocation: {
                 value: '{current.intLocationId}',

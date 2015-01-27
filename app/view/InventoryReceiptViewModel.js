@@ -162,6 +162,15 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         checkHiddenIfNotTransferReceipt: function (get) {
             var isTransferReceipt = (get('current.strReceiptType') !== 'Transfer Receipt')
             return isTransferReceipt;
+        },
+        checkReadOnlyIfDirect: function (get) {
+            if (get('current.ysnPosted') === true){
+                return true
+            }
+            else {
+                var isDirect = (get('current.strReceiptType') === 'Direct')
+                return isDirect;
+            }
         }
     }
 
