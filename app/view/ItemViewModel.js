@@ -60,7 +60,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strType: 'Non-Inventory'
                 },
                 {
-                    strType: 'Assembly/Formula/Blend'
+                    strType: 'Assembly/Blend'
                 },
                 {
                     strType: 'Bundle'
@@ -185,6 +185,21 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 {
                     strDescription: 'Expenses'
+                },
+                {
+                    strDescription: 'Write Off Sold'
+                },
+                {
+                    strDescription: 'Revalue Sold'
+                },
+                {
+                    strDescription: 'Auto Negative'
+                },
+                {
+                    strDescription: 'A/P Clearing'
+                },
+                {
+                    strDescription: 'Inventory In-Transit'
                 }
             ],
             fields: [

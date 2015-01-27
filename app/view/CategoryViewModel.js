@@ -93,6 +93,21 @@ Ext.define('Inventory.view.CategoryViewModel', {
                 },
                 {
                     strDescription: 'Expenses'
+                },
+                {
+                    strDescription: 'Write Off Sold'
+                },
+                {
+                    strDescription: 'Revalue Sold'
+                },
+                {
+                    strDescription: 'Auto Negative'
+                },
+                {
+                    strDescription: 'A/P Clearing'
+                },
+                {
+                    strDescription: 'Inventory In-Transit'
                 }
             ],
             fields: [
