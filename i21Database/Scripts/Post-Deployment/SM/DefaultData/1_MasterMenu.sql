@@ -1569,6 +1569,27 @@ GO
 	/* -- End Update TM Menu Commands for MVVM -- */
 	/* ------------------------------------------------- */
 
+GO
+	/*----------------------------------  */
+	/*-- Start Update System Manager Menu */
+	/*----------------------------------  */
+
+	DECLARE @SystemManagerModuleId INT
+	SELECT @SystemManagerModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Common Info' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+		
+		/* ------------------------------ */
+		/* -- Update Common Info Menu  -- */
+		/* ------------------------------ */
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Country' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerModuleId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+		WHERE strMenuName = 'Country' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.Country'
+
+	/*-------------------------------  */
+	/*-- End Update System Manager Menu */
+	/*-------------------------------  */
+	
+GO
+
 	/* ------------------------------------------------- */
 	/* --- Update Dashboard Menu Commands for MVVM ----- */
 	/* ------------------------------------------------- */
@@ -1580,5 +1601,5 @@ GO
 	/* ------------------------------------------------- */
 	/* -- End Update Dashboard Menu Commands for MVVM -- */
 	/* ------------------------------------------------- */
-
+	
 GO
