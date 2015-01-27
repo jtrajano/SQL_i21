@@ -1025,6 +1025,8 @@
     <Build Include="dbo\Stored Procedures\uspNRCalculateMonthlyInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCreateAREntry.sql" />
     <Build Include="dbo\Stored Procedures\uspNRReportNotesStatement.sql" />
+    <Build Include="dbo\Views\vyuICGetItemAccount.sql" />
+    <Build Include="dbo\Views\vyuICGetItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
