@@ -77,6 +77,8 @@
     <Compile Include="Common\ContainerType.cs" />
     <Compile Include="Common\EquipmentLength.cs" />
     <Compile Include="Activities\Receipts\ReceiptItemTax.cs" />
+    <Compile Include="Maintenance\CategoryAccount.cs" />
+    <Compile Include="Maintenance\CategoryVendor.cs" />
     <Compile Include="Maintenance\ItemContract.cs" />
     <Compile Include="Maintenance\ItemCertification.cs" />
     <Compile Include="Maintenance\ItemXref.cs" />

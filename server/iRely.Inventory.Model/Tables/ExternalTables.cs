@@ -118,8 +118,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICManufacturingCell> tblICManufacturingCells { get; set; }
         public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
-        public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
-
+        
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICItemFactory> tblICItemFactories { get; set; }
     }

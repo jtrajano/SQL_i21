@@ -150,6 +150,8 @@
     <Compile Include="Controllers\Common\ContainerTypeController.cs" />
     <Compile Include="Controllers\Common\EquipmentLengthController.cs" />
     <Compile Include="Controllers\Activities\Receipts\ReceiptItemTaxController.cs" />
+    <Compile Include="Controllers\Maintenance\CategoryAccountController.cs" />
+    <Compile Include="Controllers\Maintenance\CategoryVendorController.cs" />
     <Compile Include="Controllers\Maintenance\ItemStockController.cs" />
     <Compile Include="Controllers\Maintenance\ItemCertificationController.cs" />
     <Compile Include="Controllers\Maintenance\ItemContractController.cs" />

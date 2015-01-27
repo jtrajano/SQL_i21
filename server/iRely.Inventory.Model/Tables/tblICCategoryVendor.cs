@@ -32,8 +32,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_location))
-                    if (tblSMCompanyLocation != null)
-                        return tblSMCompanyLocation.strLocationName;
+                    if (tblICCategoryLocation != null)
+                        return tblICCategoryLocation.strLocationName;
                     else
                         return null;
                 else
@@ -126,7 +126,7 @@ namespace iRely.Inventory.Model
         public tblSTSubcategoryFamily Family { get; set; }
         public tblSTSubcategoryClass SellClass { get; set; }
         public tblSTSubcategoryClass OrderClass { get; set; }
-        public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
+        public tblICCategoryLocation tblICCategoryLocation { get; set; }
 
     }
 }

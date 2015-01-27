@@ -252,7 +252,7 @@ Ext.define('Inventory.view.CategoryViewController', {
 
         if (combo.column.itemId === 'colVendorLocation')
         {
-            current.set('intLocationId', records[0].get('intCompanyLocationId'));
+            current.set('intLocationId', records[0].get('intCategoryLocationId'));
         }
         else if (combo.column.itemId === 'colVendorId')
         {

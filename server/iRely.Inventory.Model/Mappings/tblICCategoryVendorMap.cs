@@ -26,7 +26,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnUpdateExistingRecords).HasColumnName("ysnUpdateExistingRecords");
             this.Property(t => t.ysnUpdatePrice).HasColumnName("ysnUpdatePrice");
 
-            this.HasRequired(p => p.tblSMCompanyLocation)
+            this.HasRequired(p => p.tblICCategoryLocation)
                 .WithMany(p => p.tblICCategoryVendors)
                 .HasForeignKey(p => p.intLocationId);
             this.HasOptional(p => p.Family)
