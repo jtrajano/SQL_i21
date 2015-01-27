@@ -400,6 +400,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (app.UserId > 0)
             record.set('intReceiverId', app.UserId);
         record.set('dtmReceiptDate', today);
+        record.set('intBlanketRelease', 0);
         record.set('ysnPosted', false);
         action(record);
     },
