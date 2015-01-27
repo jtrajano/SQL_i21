@@ -1027,6 +1027,8 @@
     <Build Include="dbo\Stored Procedures\uspNRReportNotesStatement.sql" />
     <Build Include="dbo\Views\vyuICGetItemAccount.sql" />
     <Build Include="dbo\Views\vyuICGetItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTFuturesMonthList.sql" />
+    <Build Include="dbo\Tables\tblCTAssociation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

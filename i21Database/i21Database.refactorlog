@@ -1764,4 +1764,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intConcurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="eca5c8c2-453f-4a34-9fcf-f2f0cb97aef8" ChangeDateTime="01/27/2015 12:12:31">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[intFuturesMonthYearId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMonth" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="757c5b9f-7a7c-400c-a01f-f1d7c40ebeb0" ChangeDateTime="01/27/2015 12:12:50">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[strMonth]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFuturesMonth" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9637ea74-6fa6-4e4f-abf5-0dc4d6cf5c03" ChangeDateTime="01/27/2015 12:15:38">
+    <Property Name="ElementName" Value="[dbo].[tblCTAssociation].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTAssociation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAssociationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f4dd9802-45de-4500-bc52-ce9413ae9ebd" ChangeDateTime="01/27/2015 12:16:19">
+    <Property Name="ElementName" Value="[dbo].[tblCTAssociation].[strName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTAssociation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strComment" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="193171e2-e61d-48ad-b4ce-2657348fddb7" ChangeDateTime="01/27/2015 12:17:35">
+    <Property Name="ElementName" Value="[dbo].[tblCTAssociation].[strComment]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTAssociation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strName" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d9a92943-6d47-4d35-84f8-b1e69ada2b69" ChangeDateTime="01/27/2015 12:18:01">
+    <Property Name="ElementName" Value="[dbo].[tblCTAssociation].[ysnActive]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTAssociation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strComment" />
+  </Operation>
 </Operations>
