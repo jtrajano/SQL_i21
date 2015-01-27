@@ -110,9 +110,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboFreightTerms: {
                 value: '{current.intFreightTermId}',
                 store: '{freightTerm}',
+                defaultFilters: [{
+                    column: 'ysnActive',
+                    value: 'true'
+                }],
                 readOnly: '{current.ysnPosted}'
             },
-            txtFobPoint: '{current.strFobPoint}',
+            txtFobPoint: {
+                value: '{current.strFobPoint}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboShipTo: {
                 value: '{current.intShipToId}',
                 store: '{shipTo}',

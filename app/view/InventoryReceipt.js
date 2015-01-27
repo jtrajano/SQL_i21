@@ -345,7 +345,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'gridcombobox',
-                                                        flex: 1,
                                                         columns: [
                                                             {
                                                                 dataIndex: 'intPurchaseId',
@@ -366,6 +365,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 flex: 1
                                                             }
                                                         ],
+                                                        flex: 1,
                                                         itemId: 'cboSource',
                                                         fieldLabel: 'Source',
                                                         labelAlign: 'top',
@@ -625,19 +625,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 dataIndex: 'strFreightTerm',
                                                                                 dataType: 'string',
-                                                                                text: 'Freight Term',
+                                                                                text: 'Freight Terms',
                                                                                 flex: 1
                                                                             },
                                                                             {
                                                                                 dataIndex: 'strFobPoint',
                                                                                 dataType: 'string',
                                                                                 text: 'FOB Point',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'ysnActive',
-                                                                                dataType: 'boolean',
-                                                                                text: 'Active',
                                                                                 flex: 1
                                                                             }
                                                                         ],
@@ -649,10 +643,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
-                                                                        itemId: 'txtFOB',
-                                                                        fieldLabel: 'FOB',
+                                                                        itemId: 'txtFobPoint',
+                                                                        fieldLabel: 'FOB Point',
                                                                         labelWidth: 85,
-                                                                        readOnly: true
+                                                                        readOnly: false
                                                                     }
                                                                 ]
                                                             }
