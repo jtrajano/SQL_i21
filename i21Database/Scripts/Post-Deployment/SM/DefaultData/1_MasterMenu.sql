@@ -1407,6 +1407,7 @@ GO
 	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketType' WHERE strCommand = 'HelpDesk.controller.TicketType'
 	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.HelpDeskSettings' WHERE strCommand = 'HelpDesk.controller.HelpDeskSettings'
 	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.HelpDeskEmailSetup' WHERE strCommand = 'HelpDesk.controller.EmailSetup'
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketGroup' WHERE strCommand = 'HelpDesk.controller.TicketGroup'
 
 	/* ------------------------------------------------- */
 	/* -- End Update Help Desk Menu Commands for MVVM -- */
