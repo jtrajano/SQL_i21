@@ -254,7 +254,56 @@ namespace iRely.Inventory.Model
         public decimal? dblOnOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
 
-        public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
-        public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
+        public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
+        public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }
     }
+
+    public class vyuICGetItemPricing
+    {
+        public int intPricingKey { get; set; }
+        public int intKey { get; set; }
+        public int intItemPricingId { get; set; }
+        public int? intItemId { get; set; }
+        public int? intLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public string strLocationType { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUnitType { get; set; }
+        public bool ysnStockUnit { get; set; }
+        public decimal? dblRetailPrice { get; set; }
+        public decimal? dblWholesalePrice { get; set; }
+        public decimal? dblLargeVolumePrice { get; set; }
+        public decimal? dblAmountPercent { get; set; }
+        public decimal? dblSalePrice { get; set; }
+        public decimal? dblMSRPPrice { get; set; }
+        public string strPricingMethod { get; set; }
+        public decimal? dblLastCost { get; set; }
+        public decimal? dblStandardCost { get; set; }
+        public decimal? dblMovingAverageCost { get; set; }
+        public decimal? dblEndMonthCost { get; set; }
+        public DateTime? dtmBeginDate { get; set; }
+        public DateTime? dtmEndDate { get; set; }
+        public int? intSort { get; set; }
+
+        public vyuICGetItemStock vyuICGetItemStock { get; set; }
+    }
+
+    public class vyuICGetItemAccount
+    {
+        public int intAccountKey { get; set; }
+        public int intKey { get; set; }
+        public int intItemAccountId { get; set; }
+        public int? intItemId { get; set; }
+        public int? intAccountId { get; set; }
+        public string strAccountId { get; set; }
+        public int? intAccountGroupId { get; set; }
+        public string strAccountGroup { get; set; }
+        public string strAccountType { get; set; }
+        public string strAccountCategory { get; set; }
+        public int? intSort { get; set; }
+
+        public vyuICGetItemStock vyuICGetItemStock { get; set; }
+    }
+
 }

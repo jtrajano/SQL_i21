@@ -219,10 +219,70 @@ namespace iRely.Inventory.Model
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)
-                .HasForeignKey(p => p.intItemId);
+                .HasForeignKey(p => p.intKey);
             this.HasMany(p => p.tblICItemPricings)
                 .WithRequired(p => p.vyuICGetItemStock)
-                .HasForeignKey(p => p.intItemId);
+                .HasForeignKey(p => p.intKey);
+        }
+    }
+
+    public class vyuICGetItemPricingMap : EntityTypeConfiguration<vyuICGetItemPricing>
+    {
+        public vyuICGetItemPricingMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intPricingKey);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemPricing");
+            this.Property(t => t.dblAmountPercent).HasColumnName("dblAmountPercent");
+            this.Property(t => t.dblEndMonthCost).HasColumnName("dblEndMonthCost");
+            this.Property(t => t.dblLargeVolumePrice).HasColumnName("dblLargeVolumePrice");
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost");
+            this.Property(t => t.dblMovingAverageCost).HasColumnName("dblMovingAverageCost");
+            this.Property(t => t.dblMSRPPrice).HasColumnName("dblMSRPPrice");
+            this.Property(t => t.dblRetailPrice).HasColumnName("dblRetailPrice");
+            this.Property(t => t.dblSalePrice).HasColumnName("dblSalePrice");
+            this.Property(t => t.dblStandardCost).HasColumnName("dblStandardCost");
+            this.Property(t => t.dblWholesalePrice).HasColumnName("dblWholesalePrice");
+            this.Property(t => t.dtmBeginDate).HasColumnName("dtmBeginDate");
+            this.Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemPricingId).HasColumnName("intItemPricingId");
+            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
+            this.Property(t => t.intPricingKey).HasColumnName("intPricingKey");
+            this.Property(t => t.intKey).HasColumnName("intKey");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.strLocationType).HasColumnName("strLocationType");
+            this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.strUnitType).HasColumnName("strUnitType");
+            this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+        }
+    }
+
+    public class vyuICGetItemAccountMap : EntityTypeConfiguration<vyuICGetItemAccount>
+    {
+        public vyuICGetItemAccountMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intAccountKey);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemAccount");
+            this.Property(t => t.intAccountGroupId).HasColumnName("intAccountGroupId");
+            this.Property(t => t.intAccountId).HasColumnName("intAccountId");
+            this.Property(t => t.intItemAccountId).HasColumnName("intItemAccountId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(p => p.intAccountKey).HasColumnName("intAccountKey");
+            this.Property(t => t.intKey).HasColumnName("intKey");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.strAccountCategory).HasColumnName("strAccountCategory");
+            this.Property(t => t.strAccountGroup).HasColumnName("strAccountGroup");
+            this.Property(t => t.strAccountId).HasColumnName("strAccountId");
+            this.Property(t => t.strAccountType).HasColumnName("strAccountType");
         }
     }
 }

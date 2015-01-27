@@ -91,6 +91,5 @@ namespace iRely.Inventory.Model
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
-        public vyuICGetItemStock vyuICGetItemStock { get; set; }
     }
 }
