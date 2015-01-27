@@ -362,12 +362,6 @@ Ext.define('Inventory.view.CertificationProgram', {
                                         dataType: 'string',
                                         text: 'Unit Type',
                                         flex: 1
-                                    },
-                                    {
-                                        dataIndex: 'ysnDefault',
-                                        dataType: 'boolean',
-                                        text: 'Default',
-                                        flex: 1
                                     }
                                 ],
                                 itemId: 'cboPerUnitMeasure',

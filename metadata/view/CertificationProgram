@@ -509,7 +509,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter142",
+                                    "name": "filter136",
                                     "designerId": "264fa430-47fb-419b-9c59-83d13bd35b5f",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -717,12 +717,6 @@
                                             "\t\tdataIndex: 'strUnitType',",
                                             "\t\tdataType: 'string',",
                                             "\t\ttext: 'Unit Type',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'ysnDefault',",
-                                            "\t\tdataType: 'boolean',",
-                                            "\t\ttext: 'Default',",
                                             "\t\tflex: 1",
                                             "\t}",
                                             "]"
