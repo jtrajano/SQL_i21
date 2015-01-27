@@ -1639,6 +1639,14 @@ GO
 		BEGIN 
 			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
 		END
+
+		SET @ARMenuName = 'Account Status Codes'
+		SET @ARCommand ='AccountsReceivable.view.AccountStatusCodes'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
+		END
+
 	/*---------------------------------  */
 	/*-- END Update AR Maintenance Menu */
 	/*---------------------------------  */	
