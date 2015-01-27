@@ -136,19 +136,18 @@ Ext.define('Inventory.view.ItemPricingViewController', {
 
                if (priceId){
                    Ext.Array.each(pricingTable.items, function(row) {
-                       var dtmBeginDate = row.get('dtmBeginDate');
-                       var dtmEndDate = row.get('dtmEndDate');
+                       if (row.get('intItemPricingId') === priceId){
+                           row.set('intLocationId', current.get('intLocationId'));
+                           row.set('intItemUnitMeasureId', current.get('intItemUnitMeasureId'));
+                           row.set('dtmBeginDate', current.get('dtmBeginDate'));
+                           row.set('dtmEndDate', current.get('dtmEndDate'));
+                       }
                        var exists = Ext.Array.findBy(locationUOM, function(record) {
-                           if ((record.intLocationId === row.get('intLocationId')) && (record.intItemUOMId === row.get('intItemUOMId'))){
+                           if ((record.intLocationId === row.get('intLocationId')) && (record.intItemUnitMeasureId === row.get('intItemUnitMeasureId'))){
                                return true;
                            }
                            else { return false; }
                        });
-
-                       if (row.get('intItemPricingId') === priceId){
-                           row.set('dtmBeginDate', current.get('dtmBeginDate'));
-                           row.set('dtmEndDate', current.get('dtmEndDate'));
-                       }
 
                        if (exists){
                            exists.children.push(row);
@@ -157,7 +156,7 @@ Ext.define('Inventory.view.ItemPricingViewController', {
                        {
                            var loc = {
                                intLocationId: row.get('intLocationId'),
-                               intItemUOMId: row.get('intItemUOMId'),
+                               intItemUnitMeasureId: row.get('intItemUnitMeasureId'),
                                children: []
                            };
                            loc.children.push(row);
@@ -168,10 +167,8 @@ Ext.define('Inventory.view.ItemPricingViewController', {
                }
                else {
                    Ext.Array.each(pricingTable.items, function(row) {
-                       var dtmBeginDate = row.get('dtmBeginDate');
-                       var dtmEndDate = row.get('dtmEndDate');
                        var exists = Ext.Array.findBy(locationUOM, function(record) {
-                           if ((record.intLocationId === row.get('intLocationId')) && (record.intItemUOMId === row.get('intItemUOMId'))){
+                           if ((record.intLocationId === row.get('intLocationId')) && (record.intItemUnitMeasureId === row.get('intItemUnitMeasureId'))){
                                return true;
                            }
                            else { return false; }
@@ -183,7 +180,7 @@ Ext.define('Inventory.view.ItemPricingViewController', {
                        {
                            var loc = {
                                intLocationId: row.get('intLocationId'),
-                               intItemUOMId: row.get('intItemUOMId'),
+                               intItemUnitMeasureId: row.get('intItemUnitMeasureId'),
                                children: []
                            };
                            loc.children.push(row);
@@ -191,7 +188,7 @@ Ext.define('Inventory.view.ItemPricingViewController', {
                        }
                    });
                    var exists = Ext.Array.findBy(locationUOM, function(record) {
-                       if ((record.intLocationId === current.get('intLocationId')) && (record.intItemUOMId === current.get('intItemUOMId'))){
+                       if ((record.intLocationId === current.get('intLocationId')) && (record.intItemUnitMeasureId === current.get('intItemUnitMeasureId'))){
                            return true;
                        }
                        else { return false; }
@@ -203,7 +200,7 @@ Ext.define('Inventory.view.ItemPricingViewController', {
                    {
                        var loc = {
                            intLocationId: current.get('intLocationId'),
-                           intItemUOMId: current.get('intItemUOMId'),
+                           intItemUnitMeasureId: current.get('intItemUnitMeasureId'),
                            children: []
                        };
                        loc.children.push(current);
