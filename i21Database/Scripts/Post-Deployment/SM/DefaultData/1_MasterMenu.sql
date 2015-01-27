@@ -1569,4 +1569,15 @@ GO
 	/* -- End Update TM Menu Commands for MVVM -- */
 	/* ------------------------------------------------- */
 
+	/* ------------------------------------------------- */
+	/* --- Update Dashboard Menu Commands for MVVM ----- */
+	/* ------------------------------------------------- */
+
+	UPDATE tblSMMasterMenu SET strCommand = 'DAshboard.view.TabSetup' WHERE strCommand = 'Dashboard.controller.TabSetup'
+	UPDATE tblSMMasterMenu SET strCommand = 'DAshboard.view.PanelSettings' WHERE strCommand = 'DAshboard.controller.PanelSettings'
+
+	/* ------------------------------------------------- */
+	/* -- End Update Dashboard Menu Commands for MVVM -- */
+	/* ------------------------------------------------- */
+
 GO
