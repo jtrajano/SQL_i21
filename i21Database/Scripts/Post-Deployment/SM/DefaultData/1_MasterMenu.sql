@@ -1614,5 +1614,37 @@ GO
 	/* ------------------------------------------------- */
 	/* ---- End Update FRD Menu Commands for MVVM ------ */
 	/* ------------------------------------------------- */
+
+	/* ------------------------------------------------- */
+	/* --- START Update AR Menu Commands for MVVM ----- */
+	/* ------------------------------------------------- */
+
+	DECLARE @ARModuleId int
+	DECLARE @ARActivitiesId int
+	DECLARE @ARMaintenanceId int
+	DECLARE @ARMenuName NVARCHAR(150)
+	DECLARE @ARCommand NVARCHAR(150)
+	
+	
+	SET @ARModuleId = (SELECT TOP 1 intMenuID FROM [tblSMMasterMenu] WHERE strMenuName = 'Accounts Receivable' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = 0)
+	SET @ARActivitiesId = (SELECT TOP 1 intMenuID FROM [tblSMMasterMenu] WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARModuleId)
+	SET @ARMaintenanceId = (SELECT TOP 1 intMenuID FROM [tblSMMasterMenu] WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARModuleId)
+
+	/*---------------------------------  */
+	/*-- START Update AR Maintenance Menu */
+	/*---------------------------------  */
+		SET @ARMenuName = 'Market Zone'
+		SET @ARCommand ='AccountsReceivable.view.MarketZone'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
+		END
+	/*---------------------------------  */
+	/*-- END Update AR Maintenance Menu */
+	/*---------------------------------  */	
+		
+	/* ------------------------------------------------- */
+	/* -- End Update AR Menu Commands for MVVM -- */
+	/* ------------------------------------------------- */
 	
 GO
