@@ -1651,6 +1651,13 @@ GO
 			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
 		END
 
+		SET @ARMenuName = 'Service Charge'
+		SET @ARCommand ='AccountsReceivable.view.ServiceCharge'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
+		END
+
 	/*---------------------------------  */
 	/*-- END Update AR Maintenance Menu */
 	/*---------------------------------  */	
