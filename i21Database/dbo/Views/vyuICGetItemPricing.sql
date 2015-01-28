@@ -28,6 +28,6 @@ ItemPricing.dtmBeginDate,
 ItemPricing.dtmEndDate,
 ItemPricing.intSort
 FROM vyuICGetItemStock Item
-INNER JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Item.intItemId and ItemPricing.intLocationId = Item.intLocationId
+INNER JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Item.intItemId and ItemPricing.intLocationId = Item.intItemLocationId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ItemPricing.intItemUnitMeasureId
 LEFT JOIN tblICUnitMeasure UOM ON UOM .intUnitMeasureId= ItemUOM.intUnitMeasureId

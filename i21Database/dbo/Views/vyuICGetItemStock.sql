@@ -12,6 +12,7 @@ SELECT
 	Item.strInventoryTracking,
 	Item.strStatus,
 	ItemLocation.intLocationId,
+	ItemLocation.intItemLocationId,
 	Location.strLocationName,
 	Location.strLocationType,
 	ItemLocation.intVendorId,
