@@ -5,7 +5,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     requires: [
         'Inventory.store.BufferedEquipmentLength',
         'Inventory.store.BufferedQAProperty',
-        'Inventory.store.BufferedItemStockView',
+        'Inventory.store.BufferedItemStockDetailView',
+        'Inventory.store.BufferedItemPricingView',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedPackType',
         'AccountsPayable.store.VendorBuffered',
@@ -89,10 +90,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
 
         items: {
-            type: 'icbuffereditemstockview'
+            type: 'icbuffereditemstockdetailview'
         },
         itemUOM: {
-            type: 'icbuffereditemunitmeasure'
+            type: 'icbuffereditempricingview'
         },
         itemPackType: {
             type: 'icbufferedpacktype'

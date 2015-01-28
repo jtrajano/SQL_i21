@@ -160,6 +160,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{grdInventoryReceipt.selection.intItemId}'
+                        },{
+                            column: 'intLocationId',
+                            value: '{current.intItemLocationId}'
                         }]
                     }
                 },
@@ -479,10 +482,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
             }
 
+            current.set('tblICItemPricings', records[0].tblICItemPricings());
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('strLotTracking', records[0].get('strLotTracking'));
             current.set('dblOpenReceive', 0);
+
 
             switch (records[0].get('strLotTracking')){
                 case 'Yes - Serial Number':

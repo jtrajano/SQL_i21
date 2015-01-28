@@ -41,9 +41,9 @@ namespace iRely.Inventory.Model
         public decimal? dblFreightRate { get; set; }
         public decimal? dblFuelSurcharge { get; set; }
         public decimal? dblInvoiceAmount { get; set; }
-        public bool ysnPrepaid { get; set; }
-        public bool ysnInvoicePaid { get; set; }
-        public int intCheckNo { get; set; }
+        public bool? ysnPrepaid { get; set; }
+        public bool? ysnInvoicePaid { get; set; }
+        public int? intCheckNo { get; set; }
         public DateTime? dtmCheckDate { get; set; }
         public int? intTrailerTypeId { get; set; }
         public DateTime? dtmTrailerArrivalDate { get; set; }
@@ -52,7 +52,7 @@ namespace iRely.Inventory.Model
         public string strSealStatus { get; set; }
         public DateTime? dtmReceiveTime { get; set; }
         public decimal? dblActualTempReading { get; set; }
-        public bool ysnPosted { get; set; }
+        public bool? ysnPosted { get; set; }
         public int? intCreatedUserId { get; set; }
         public int? intEntityId { get; set; }
 
