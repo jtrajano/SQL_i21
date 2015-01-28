@@ -21,7 +21,6 @@ namespace iRely.Inventory.Model
         public int? intCategoryId { get; set; }
         public int? intSubLocationId { get; set; }
         public int? intStorageLocationId { get; set; }
-        public int? intDefaultUOMId { get; set; }
         public int? intIssueUOMId { get; set; }
         public int? intReceiveUOMId { get; set; }
         public int? intFamilyId { get; set; }
@@ -166,31 +165,12 @@ namespace iRely.Inventory.Model
                 _category = value;
             }
         }
-        private string _unitmeasure;
-        [NotMapped]
-        public string strUnitMeasure
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_unitmeasure))
-                    if (tblICUnitMeasure != null)
-                        return tblICUnitMeasure.strUnitMeasure;
-                    else
-                        return null;
-                else
-                    return _unitmeasure;
-            }
-            set
-            {
-                _unitmeasure = value;
-            }
-        }
-
+        
         public tblICItem tblICItem { get; set; }
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public vyuAPVendor vyuAPVendor { get; set; }
         public tblICCategory tblICCategory { get; set; }
-        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        
         public tblICCountGroup tblICCountGroup { get; set; }
 
         public ICollection<tblICItemNote> tblICItemNotes { get; set; }

@@ -355,7 +355,6 @@ Ext.define('Inventory.view.ItemLocation', {
                                         },
                                         {
                                             xtype: 'gridcombobox',
-                                            flex: 1,
                                             columns: [
                                                 {
                                                     dataIndex: 'intStorageLocationId',
@@ -376,6 +375,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                     flex: 1
                                                 }
                                             ],
+                                            flex: 1,
                                             itemId: 'cboStorageLocation',
                                             margin: '0 0 0 5',
                                             fieldLabel: 'Storage Location',

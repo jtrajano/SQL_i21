@@ -23,7 +23,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intClassId).HasColumnName("intClassId");
             this.Property(t => t.intCostingMethod).HasColumnName("intCostingMethod");
             this.Property(t => t.intCountGroupId).HasColumnName("intCountGroupId");
-            this.Property(t => t.intDefaultUOMId).HasColumnName("intDefaultUOMId");
             this.Property(t => t.intFamilyId).HasColumnName("intFamilyId");
             this.Property(t => t.intFreightMethodId).HasColumnName("intFreightMethodId");
             this.Property(t => t.intShipViaId).HasColumnName("intShipViaId");
@@ -81,9 +80,6 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICCategory)
                 .WithMany(p => p.tblICItemLocations)
                 .HasForeignKey(p => p.intCategoryId);
-            this.HasOptional(p => p.tblICUnitMeasure)
-                .WithMany(p => p.tblICItemLocations)
-                .HasForeignKey(p => p.intDefaultUOMId);
             this.HasOptional(p => p.tblICCountGroup)
                 .WithMany(p => p.tblICItemLocations)
                 .HasForeignKey(p => p.intCountGroupId);
