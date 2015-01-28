@@ -4,6 +4,7 @@
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
+	@isBatch			AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
 	@userId				AS INT,
 	@beginDate			AS DATE				= NULL,
@@ -280,7 +281,7 @@ BEGIN
 
 	COMMIT TRANSACTION --COMMIT inserted invalid transaction
 
-	IF(@totalRecords = 0)  
+	IF(@totalRecords = 0 OR (@isBatch = 0 AND @totalInvalid > 0))  
 	BEGIN
 		SET @success = 0
 		GOTO Post_Exit

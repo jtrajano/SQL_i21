@@ -12,6 +12,7 @@ BEGIN
 			@transactionType	AS NVARCHAR(30)		= NULL,
 			@post				AS BIT				= 0,
 			@recap				AS BIT				= 0,
+			@isBatch			AS BIT				= 0,
 			@param				AS NVARCHAR(MAX)	= NULL,
 			@userId				AS INT				= 1,
 			@beginDate			AS DATE				= NULL,
@@ -38,6 +39,7 @@ BEGIN
 				INSERT INTO #tmpPayments
 				EXEC uspAPPostPayment @post=@post,
 					@recap=@recap,
+					@isBatch=@isBatch,
 					@param=@param,
 					@transactionType=@transactionType,
 					@beginDate=@beginDate,

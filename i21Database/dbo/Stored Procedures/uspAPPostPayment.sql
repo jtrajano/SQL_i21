@@ -3,6 +3,7 @@
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
+	@isBatch			AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
 	@userId				AS INT,
 	@beginDate			AS DATE				= NULL,

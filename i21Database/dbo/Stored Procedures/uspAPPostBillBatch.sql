@@ -3,6 +3,7 @@
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
+	@isBatch			AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
 	@userId				AS INT				= 1,
 	@beginDate			AS DATE				= NULL,
@@ -54,7 +55,7 @@ INSERT INTO #tmpPostBillBatchData SELECT [intID] FROM [dbo].fnGetRowsFromDelimit
 
 SELECT TOP 1 @BillBatchId = intBillBatchId FROM #tmpPostBillBatchData
 
-EXEC uspAPPostBill  @batchId = @batchId, @billBatchId = @BillBatchId, @post = @post, @recap = @recap, @userId = @userId, @exclude = @exclude, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT, @invalidCount = @invalidCount OUTPUT
+EXEC uspAPPostBill  @batchId = @batchId, @isBatch = @isBatch, @billBatchId = @BillBatchId, @post = @post, @recap = @recap, @userId = @userId, @exclude = @exclude, @success = @success OUTPUT, @successfulCount = @successfulCount OUTPUT, @invalidCount = @invalidCount OUTPUT
 		
 SET @batchIdUsed = @batchId
 
