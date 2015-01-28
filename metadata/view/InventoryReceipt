@@ -991,68 +991,6 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'intShipViaID',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Ship Via Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strShipVia',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Ship Via',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strShippingService',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Shipping Service',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strShipVia",
-                                                                "fieldLabel": "Ship Via",
-                                                                "hideTrigger": null,
-                                                                "itemId": "cboShipVia",
-                                                                "labelWidth": 75,
-                                                                "layout|flex": null,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "valueField": "intShipViaID",
-                                                                "width": 200
-                                                            },
-                                                            "name": "MyComboBox10",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "2eb4d9e4-2817-43d6-bf36-e1571d8b6a1e",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
                                                                     "\t\tdataIndex: 'intEntityLocationId',",
                                                                     "\t\tdataType: 'numeric',",
                                                                     "\t\ttext: 'Location Id',",
@@ -1090,6 +1028,68 @@
                                                                 "columns": "array"
                                                             },
                                                             "designerId": "5213581d-f8f3-4c04-a933-56bc58404677",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "alwaysDisplayDecimals": null,
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intShipViaID',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Ship Via Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strShipVia',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Ship Via',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strShippingService',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Shipping Service',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strShipVia",
+                                                                "fieldLabel": "Ship Via",
+                                                                "hideTrigger": null,
+                                                                "itemId": "cboShipVia",
+                                                                "labelWidth": 75,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "valueField": "intShipViaID",
+                                                                "width": 200
+                                                            },
+                                                            "name": "MyComboBox10",
+                                                            "configAlternates": {
+                                                                "alwaysDisplayDecimals": "boolean",
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "2eb4d9e4-2817-43d6-bf36-e1571d8b6a1e",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",

@@ -452,7 +452,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (current) {
             current.set('strVendorName', records[0].get('strName'));
-            current.set('intVendorEntityId', records[0].get('strName'));
+            current.set('intVendorEntityId', records[0].get('intEntityId'));
+            current.set('intCurrencyId', records[0].get('intCurrencyId'));
+
+            current.set('intShipFromId', null);
+            current.set('intShipViaId', null);
         }
     },
 
@@ -713,6 +717,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onShipFromSelect: function(combo, records) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) current.set('intShipViaId', records[0].get('intShipViaId'));
+    },
+
     init: function(application) {
         this.control({
             "#cboVendor": {
@@ -752,7 +766,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 click: this.onRecapClick
             },
             "#cboShipFrom": {
-                beforequery: this.onShipFromBeforeQuery
+                beforequery: this.onShipFromBeforeQuery,
+                select: this.onShipFromSelect
             }
         })
     }
