@@ -662,40 +662,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
-                                                                    {
-                                                                        dataIndex: 'intCompanyLocationId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Location Id',
-                                                                        hidden: true
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strLocationName',
-                                                                        dataType: 'string',
-                                                                        text: 'Location Name',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strLocationType',
-                                                                        dataType: 'string',
-                                                                        text: 'Location Type',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strAddress',
-                                                                        dataType: 'string',
-                                                                        text: 'Address',
-                                                                        hidden: true
-                                                                    }
-                                                                ],
-                                                                itemId: 'cboShipTo',
-                                                                fieldLabel: 'Ship To',
-                                                                labelWidth: 95,
-                                                                displayField: 'strLocationName',
-                                                                valueField: 'intCompanyLocationId'
-                                                            },
-                                                            {
                                                                 xtype: 'combobox',
                                                                 itemId: 'cboAllocateFreight',
                                                                 fieldLabel: 'Allocate Freight',

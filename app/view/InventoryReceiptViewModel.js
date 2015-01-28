@@ -103,17 +103,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         location: {
             type: 'companylocationbuffered'
         },
-        shipTo: {
-            type: 'companylocationbuffered'
-        },
         poSource: {
             type: 'purchaseorder'
         },
         shipFrom: {
             type: 'apentitylocation'
-        },
-        shipTo: {
-            type: 'companylocationbuffered'
         },
         transferor: {
             type: 'companylocationbuffered'
