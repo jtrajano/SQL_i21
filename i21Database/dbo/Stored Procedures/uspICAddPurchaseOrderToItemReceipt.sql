@@ -65,6 +65,7 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intConcurrencyId
 		,intEntityId
 		,intCreatedUserId
+		,ysnPosted
 )
 SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
@@ -101,6 +102,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intConcurrencyId		= 1
 		,intEntityId			= (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
 		,intCreatedUserId		= @intUserId
+		,ysnPosted				= 0
 FROM	dbo.tblPOPurchase PO
 WHERE	PO.intPurchaseId = @PurchaseOrderId
 
