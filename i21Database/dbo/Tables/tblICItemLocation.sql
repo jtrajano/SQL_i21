@@ -22,7 +22,6 @@ Type the overview for the table here.
 		[intCategoryId] INT NULL, 
 		[intSubLocationId] INT NULL, 
 		[intStorageLocationId] INT NULL, 
-		[intDefaultUOMId] INT NULL, 
 		[intIssueUOMId] INT NULL, 
 		[intReceiveUOMId] INT NULL, 
 		[intFamilyId] INT NULL, 
@@ -75,9 +74,8 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [FK_tblICItemLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Default] FOREIGN KEY ([intDefaultUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Issue] FOREIGN KEY ([intIssueUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Receive] FOREIGN KEY ([intDefaultUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Issue] FOREIGN KEY ([intIssueUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Receive] FOREIGN KEY ([intReceiveUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [PK_tblICItemLocation] PRIMARY KEY ([intItemLocationId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
@@ -176,14 +174,7 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intStorageLocationId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Default Unit of Measure Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemLocation',
-		@level2type = N'COLUMN',
-		@level2name = N'intDefaultUOMId'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Issue Unit of Measure Id',
