@@ -41,7 +41,6 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,strBillOfLading
 		,intShipViaId
 		,intShipFromId
-		,intShipToId
 		,intReceiverId
 		,intCurrencyId
 		,strVessel
@@ -78,7 +77,6 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,strBillOfLading		= NULL
 		,intShipViaId			= PO.intShipViaId
 		,intShipFromId			= PO.intShipFromId 
-		,intShipToId			= PO.intShipToId
 		,intReceiverId			= @intUserId 
 		,intCurrencyId			= PO.intCurrencyId
 		,strVessel				= NULL

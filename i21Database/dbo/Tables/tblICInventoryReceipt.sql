@@ -29,7 +29,6 @@ Type the overview for the table here.
 		[intReceiverId] [int] NULL,
 		[strVessel] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 		[intFreightTermId] [int] NULL,
-		[intShipToId] [int] NULL,
 		[strAllocateFreight] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 		[intShiftNumber] [int] NULL,
 		[strCalculationBasis] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
