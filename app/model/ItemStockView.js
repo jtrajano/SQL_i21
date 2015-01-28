@@ -18,6 +18,7 @@ Ext.define('Inventory.model.ItemStockView', {
         { name: 'strInventoryTracking', type: 'string'},
         { name: 'strStatus', type: 'string'},
         { name: 'intLocationId', type: 'int', allowNull: true },
+        { name: 'intItemLocationId', type: 'int', allowNull: true },
         { name: 'strLocationName', type: 'string'},
         { name: 'strLocationType', type: 'string'},
         { name: 'intVendorId', type: 'int', allowNull: true },
