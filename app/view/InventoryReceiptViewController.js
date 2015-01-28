@@ -360,7 +360,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             txtUnitCost.on('change', me.onCalculateTotalAmount);
         }
 
-
         return win.context;
     },
 
@@ -704,6 +703,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onShipFromBeforeQuery: function(obj) {
+        if (obj.combo) {
+            var store = obj.combo.store;
+            if (store) {
+                store.remoteFilter = true;
+                store.remoteSort = true;
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboVendor": {
@@ -741,6 +750,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnRecap": {
                 click: this.onRecapClick
+            },
+            "#cboShipFrom": {
+                beforequery: this.onShipFromBeforeQuery
             }
         })
     }
