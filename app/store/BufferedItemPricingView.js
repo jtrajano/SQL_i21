@@ -1,20 +1,20 @@
 /**
- * Created by LZabala on 11/12/2014.
+ * Created by LZabala on 1/28/2015.
  */
-Ext.define('Inventory.store.BufferedBrand', {
+Ext.define('Inventory.store.BufferedItemPricingView', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.icbufferedbrand',
+    alias: 'store.icbuffereditempricingview',
 
     requires: [
-        'Inventory.model.Brand'
+        'Inventory.model.ItemStockDetailPricing'
     ],
 
     constructor: function(cfg) {
         var me = this;
         cfg = cfg || {};
         me.callParent([Ext.apply({
-            model: 'Inventory.model.Brand',
-            storeId: 'BufferedBrand',
+            model: 'Inventory.model.ItemStockDetailPricing',
+            storeId: 'BufferedItemPricingView',
             pageSize: 50,
             batchActions: true,
             remoteFilter: true,
@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedBrand', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Brand/GetBrands'
+                    read: '../Inventory/api/ItemPricing/GetItemPricingViews'
                 },
                 reader: {
                     type: 'json',

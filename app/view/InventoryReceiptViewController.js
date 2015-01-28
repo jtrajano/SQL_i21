@@ -159,10 +159,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{itemUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
-                            value: '{grdInventoryReceipt.selection.intItemId}'
+                            value: '{grdInventoryReceipt.selection.intItemId}',
+                            conjunction: 'and'
                         },{
                             column: 'intLocationId',
-                            value: '{current.intItemLocationId}'
+                            value: '{current.intLocationId}',
+                            conjunction: 'and'
                         }]
                     }
                 },
@@ -520,7 +522,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.column.itemId === 'colUOM')
         {
-            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
+            current.set('dblUnitCost', records[0].get('dblLastCost'));
+            current.set('dblUnitRetail', records[0].get('dblLastCost'));
         }
         else if (combo.column.itemId === 'colPackageType')
         {

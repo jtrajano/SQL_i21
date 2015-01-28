@@ -67,6 +67,28 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
+        [HttpGet]
+        [ActionName("GetItemPricingViews")]
+        public HttpResponseMessage GetItemPricingViews(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        {
+            filter = string.IsNullOrEmpty(filter) ? "" : filter;
+
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<vyuICGetItemPricing>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intPricingKey", "DESC");
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<vyuICGetItemPricing>(searchFilters, true);
+
+            var data = _ItemPricingBRL.GetItemPricingViews(page, start, limit, sortSelector, predicate);
+
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = data.ToList()
+            });
+        }
+
         [HttpPost]
         public HttpResponseMessage PostItemPricings(IEnumerable<tblICItemPricing> pricings, bool continueOnConflict = false)
         {

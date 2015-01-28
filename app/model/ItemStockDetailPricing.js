@@ -28,6 +28,7 @@ Ext.define('Inventory.model.ItemStockDetailPricing', {
             }
         },
         { name: 'intLocationId', type: 'int', allowNull: true },
+        { name: 'intItemLocationId', type: 'int', allowNull: true },
         { name: 'dblRetailPrice', type: 'float'},
         { name: 'dblWholesalePrice', type: 'float'},
         { name: 'dblLargeVolumePrice', type: 'float'},

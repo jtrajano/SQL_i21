@@ -55,6 +55,16 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
+        public IQueryable<vyuICGetItemPricing> GetItemPricingViews(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<vyuICGetItemPricing, bool>> predicate)
+        {
+            return _db.GetQuery<vyuICGetItemPricing>()
+                .Where(predicate) //Filter the Main DataSource Based on Search Query
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .AsNoTracking();
+        }
+
         public void AddItemPricing(tblICItemPricing pricing)
         {
             _db.AddNew<tblICItemPricing>(pricing);
