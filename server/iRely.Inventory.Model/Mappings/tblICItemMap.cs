@@ -209,6 +209,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strAllowNegativeInventory).HasColumnName("strAllowNegativeInventory");
             this.Property(t => t.strCostingMethod).HasColumnName("strCostingMethod");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.strInventoryTracking).HasColumnName("strInventoryTracking");
+            this.Property(t => t.strStatus).HasColumnName("strStatus");
             this.Property(t => t.strIssueUOM).HasColumnName("strIssueUOM");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strLocationName).HasColumnName("strLocationName");

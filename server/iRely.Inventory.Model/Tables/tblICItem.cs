@@ -232,6 +232,9 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strType { get; set; }
         public string strDescription { get; set; }
+        public string strLotTracking { get; set; }
+        public string strInventoryTracking { get; set; }
+        public string strStatus { get; set; }
         public int? intLocationId { get; set; }
         public string strLocationName { get; set; }
         public string strLocationType { get; set; }
