@@ -104,4 +104,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Notes Receivable
 :R .\NR\1_NRStartingNumber.sql
 
+--Grain
+:R .\GR\1_MasterTables.sql
+
 print 'END POST DEPLOYMENT'

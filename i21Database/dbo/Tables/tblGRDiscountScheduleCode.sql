@@ -4,8 +4,8 @@
     [intDiscountScheduleId] INT NOT NULL, 
     [strDiscountCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDiscountCodeDescription] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
-    [intDiscountCalculationOption] INT NOT NULL DEFAULT 1, 
-    [intShrinkCalculationOption] INT NOT NULL DEFAULT 1, 
+    [intDiscountCalculationOptionId] INT NOT NULL DEFAULT 1, 
+    [intShrinkCalculationOptionId] INT NOT NULL DEFAULT 1, 
     [ysnZeroIsValid] BIT NOT NULL DEFAULT 1, 
     [dblMinimumValue] NUMERIC(5, 3) NOT NULL DEFAULT 0, 
     [dblMaximumValue] NUMERIC(5, 3) NOT NULL DEFAULT 99.999, 
@@ -21,7 +21,9 @@
     CONSTRAINT [UK_tblGRDiscountScheduleCode_strDiscountCode] UNIQUE ([strDiscountCode], [intDiscountScheduleId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRDiscountSchedule_intDiscountScheduleId] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [tblGRDiscountSchedule]([intDiscountScheduleId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGLAccount_intPurchaseAccountId] FOREIGN KEY ([intPurchaseAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
-    CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGLAccount_intSalesAccountId] FOREIGN KEY ([intSalesAccountId]) REFERENCES [tblGLAccount]([intAccountId])
+    CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGLAccount_intSalesAccountId] FOREIGN KEY ([intSalesAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
+    CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRDiscountCalculationOption_intValueFieldId_intDiscountCalculationOptionId] FOREIGN KEY ([intDiscountCalculationOptionId]) REFERENCES [tblGRDiscountCalculationOption]([intValueFieldId]),
+	CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRShrinkCalculationOption_intValueFieldId_intShrinkCalculationOptionId] FOREIGN KEY ([intShrinkCalculationOptionId]) REFERENCES [tblGRShrinkCalculationOption]([intValueFieldId])
 )
 
 GO
@@ -68,7 +70,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblGRDiscountScheduleCode',
     @level2type = N'COLUMN',
-    @level2name = N'intDiscountCalculationOption'
+    @level2name = 'intDiscountCalculationOptionId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Shrink Calculation Option',
@@ -77,7 +79,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblGRDiscountScheduleCode',
     @level2type = N'COLUMN',
-    @level2name = N'intShrinkCalculationOption'
+    @level2name = 'intShrinkCalculationOptionId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Zero Valid Indicator',
