@@ -40,11 +40,11 @@
     [intSplitId] INT NULL, 
     [intDistributionOption] INT NULL, 
     [intDiscountSchedule] INT NULL, 
-    [intDiscountLocationId] INT NULL, 
+    [strDiscountLocation] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [dtmDeferDate] DATETIME NULL, 
     [strContractNumber] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL, 
     [intContractSequence] INT NULL, 
-    [intContractLocation] INT NULL, 
+    [strContractLocation] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [dblUnitPrice] DECIMAL(9, 5) NULL, 
     [dblUnitBasis] DECIMAL(9, 5) NULL, 
     [dblTicketFees] DECIMAL(7, 2) NULL, 
@@ -71,12 +71,14 @@
     [strVarietyType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strFarmNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strFieldNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
+	[strDiscountComment] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblSCTicket_tblSCTicketPool_intTicketPoolId] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 
-    CONSTRAINT [FK_tblSCTicket_tblSCScaleSetup_intScaleSetupId] FOREIGN KEY ([intScaleSetupId]) REFERENCES [tblSCScaleSetup]([intScaleSetupId]) 
+    CONSTRAINT [FK_tblSCTicket_tblSCScaleSetup_intScaleSetupId] FOREIGN KEY ([intScaleSetupId]) REFERENCES [tblSCScaleSetup]([intScaleSetupId]), 
+    CONSTRAINT [FK_tblSCTicket_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )
 
 GO
@@ -432,13 +434,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intDiscountSchedule'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Discount Location Id',
+    @value = N'Discount Location',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
-    @level2name = N'intDiscountLocationId'
+    @level2name = 'strDiscountLocation'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Defer Data and Time',
@@ -459,13 +461,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strContractNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Contract Location Id',
+    @value = N'Contract Location',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
-    @level2name = N'intContractLocation'
+    @level2name = 'strContractLocation'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Contract Sequence',
@@ -639,7 +641,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strLoadNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Load Location Id',
+    @value = N'Load Location',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -727,3 +729,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'intTicketPoolId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Discount Comment',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strDiscountComment'
