@@ -7,6 +7,7 @@
     [dblIncrementValue] NUMERIC(5, 3) NOT NULL, 
     [dblDiscountValue] NUMERIC(8, 6) NOT NULL, 
     [dblShrinkValue] NUMERIC(6, 4) NOT NULL, 
+    [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblGRDiscountScheduleLine] PRIMARY KEY ([intDiscountScheduleLineId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleLine_tblGRDiscountScheduleCode] FOREIGN KEY ([intDiscountScheduleCodeId]) REFERENCES [tblGRDiscountScheduleCode]([intDiscountScheduleCodeId]) 
 )
