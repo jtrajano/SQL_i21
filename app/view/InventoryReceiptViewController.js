@@ -24,12 +24,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboReceiptType: {
                 value: '{current.strReceiptType}',
                 store: '{receiptTypes}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{checkReadOnlyWithSource}'
             },
             cboVendor: {
                 value: '{current.intVendorId}',
                 store: '{vendor}',
-                readOnly: '{current.ysnPosted}',
+                readOnly: '{checkReadOnlyWithSource}',
                 hidden: '{checkHiddenInTransferReceipt}'
             },
             txtVendorName: {
@@ -53,7 +53,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 //                    value: '{current.intVendorId}',
 //                    conjunction: 'and'
 //                }],
-                readOnly: '{checkReadOnlyIfDirect}'
+                readOnly: '{checkReadOnlyWithSource}'
             },
             cboLocation: {
                 value: '{current.intLocationId}',
@@ -592,6 +592,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
     },
 
+    onInventoryClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var grd = win.down('#grdInventoryReceipt');
+
+        var selected = grd.getSelectionModel().getSelection();
+
+        if (selected) {
+            if (selected.length > 0){
+                var current = selected[0];
+                if (!current.phantom)
+                    iRely.Functions.openScreen('Inventory.view.Item', current.get('intItemId'));
+            }
+        }
+    },
+
     onReceiveClick: function(button, e, eOpts) {
         var me = this;
         var win = button.up('window');
@@ -828,6 +843,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnRecap": {
                 click: this.onRecapClick
+            },
+            "#btnInventory": {
+                click: this.onInventoryClick
             },
             "#cboShipFrom": {
                 beforequery: this.onShipFromBeforeQuery,

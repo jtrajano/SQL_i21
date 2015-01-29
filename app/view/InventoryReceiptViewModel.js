@@ -166,6 +166,17 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 var isDirect = (get('current.strReceiptType') === 'Direct')
                 return isDirect;
             }
+        },
+        checkReadOnlyWithSource: function(get) {
+            if (get('current.ysnPosted') === true){
+                return true
+            }
+            else {
+                if ((get('current.strReceiptType') !== 'Direct') && (get('current.intSourceId') !== null)) {
+                    return true;
+                }
+                else { return false; }
+            }
         }
     }
 

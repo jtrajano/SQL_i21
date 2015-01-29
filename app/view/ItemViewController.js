@@ -1817,6 +1817,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = view.up('window');
         var me = win.controller;
         var vm = win.getViewModel();
+        var pricingRecord = record;
 
         var defaultLocation = 0;
         if (app.DefaultLocation > 0){
@@ -1836,13 +1837,13 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemPricingScreen('edit', win, record, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
+                me.openItemPricingScreen('edit', win, pricingRecord, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    me.openItemPricingScreen('edit', win, record, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
+                    me.openItemPricingScreen('edit', win, pricingRecord, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
                 }
             });
         }
