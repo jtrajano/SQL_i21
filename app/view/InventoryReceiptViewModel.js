@@ -105,6 +105,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'companylocationbuffered'
         },
         poSource: {
+            autoLoad: true,
             type: 'purchaseorder'
         },
         shipFrom: {

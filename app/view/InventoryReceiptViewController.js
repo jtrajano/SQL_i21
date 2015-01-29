@@ -412,6 +412,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var current = vm.data.current;
 
                 if (current) {
+                    //Validate PO Date versus Receipt Date
+                    if (current.get('strReceiptType') === 'Purchase Order') {
+                        var cboSource = config.window.down('#cboSource');
+                        var index = cboSource.store.findExact(cboSource.valueField, cboSource.getValue());
+                        var sourcePO = cboSource.store.getAt(index);
+
+                        if (sourcePO){
+                            if (sourcePO.get('dtmDate')) {
+                                if (current.get('dtmReceiptDate') < sourcePO.get('dtmDate')){
+                                    iRely.Functions.showErrorDialog("The Purchase Order Date must not be later than the specified Receipt Date.");
+                                    action(false);
+                                }
+                                else { action(true); }
+                            }
+                        }
+                    }
+
+                    //Validate Logged in User's default location against the selected Location for the receipt
                     if (current.get('strReceiptType') !== 'Direct') {
 
                         if (app.DefaultLocation > 0) {

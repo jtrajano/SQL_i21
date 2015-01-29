@@ -562,7 +562,6 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1.2,
                                                 "layout|margins": null,
-                                                "margin": null,
                                                 "name": null,
                                                 "readOnly": true,
                                                 "width": null
@@ -614,7 +613,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": "0 5",
+                                                "margin": "0 0 0 5",
                                                 "name": null,
                                                 "valueField": "intCompanyLocationId",
                                                 "width": null
@@ -670,7 +669,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": null,
+                                                "margin": "0 0 0 5",
                                                 "name": null,
                                                 "valueField": "intPurchaseId",
                                                 "width": null
