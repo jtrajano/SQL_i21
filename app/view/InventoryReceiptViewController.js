@@ -590,34 +590,60 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onRecapClick: function(button, e, eOpts) {
         var me = this;
         var win = button.up('window');
+        var cboCurrency = win.down('#cboCurrency');
         var context = win.context;
 
-        var doPost = function() {
-            var strReceiptNumber = win.viewModel.data.current.get('strReceiptNumber');
-            var posted = win.viewModel.data.current.get('ysnPosted');
+        var doRecap = function(recapButton, currentRecord, currency){
+            "use strict";
+            var me = this;
 
-            var options = {
-                postURL             : '../Inventory/api/Receipt/Receive',
-                strTransactionId    : strReceiptNumber,
-                isPost              : !posted,
-                isRecap             : true,
-                callback            : me.onAfterReceive,
-                scope               : me
-            };
-
-            CashManagement.common.BusinessRules.callPostRequest(options);
+            // Call the buildRecapData to generate the recap data
+            CashManagement.common.BusinessRules.buildRecapData({
+                postURL: '../CashManagement/api/bankdepositposting',
+                strTransactionId: currentRecord.get('strTransactionId'),
+                ysnPosted: currentRecord.get('ysnPosted'),
+                ysnVoid: currentRecord.get('ysnVoid'),
+                scope: me,
+                success: function(){
+                    // If data is generated, show the recap screen.
+                    CashManagement.common.BusinessRules.showRecap({
+                        strTransactionId: currentRecord.get('strTransactionId'),
+                        ysnPosted: currentRecord.get('ysnPosted'),
+                        dtmDate: currentRecord.get('dtmDate'),
+                        strDescription: currentRecord.get('strMemo'),
+                        strCurrencyId: currency,
+                        dblExchangeRate: currentRecord.get('dblExchangeRate'),
+                        scope: me,
+                        postCallback: function(){
+                            me.onReceiveClick(recapButton);
+                        },
+                        unpostCallback: function(){
+                            me.onReceiveClick(recapButton);
+                        }
+                    });
+                },
+                failure: function(message){
+                    // Show why recap failed.
+                    var msgBox = iRely.Functions;
+                    msgBox.showCustomDialog(
+                        msgBox.dialogType.ERROR,
+                        msgBox.dialogButtonType.OK,
+                        message
+                    );
+                }
+            });
         };
 
         // If there is no data change, do the post.
         if (!context.data.hasChanges()){
-            doPost();
+            doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
             return;
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
             successFn: function() {
-                doPost();
+                doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
             }
         });
     },
