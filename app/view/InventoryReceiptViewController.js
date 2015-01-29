@@ -44,15 +44,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboSource: {
                 value: '{current.intSourceId}',
                 store: '{poSource}',
-                defaultFilters: [{
-                    column: 'intOrderStatusId',
-                    value: '1',
-                    conjunction: 'and'
-                },{
-                    column: 'intVendorId',
-                    value: '{current.intVendorId}',
-                    conjunction: 'and'
-                }],
+//                defaultFilters: [{
+//                    column: 'intOrderStatusId',
+//                    value: 1,
+//                    conjunction: 'and'
+//                },{
+//                    column: 'intVendorId',
+//                    value: '{current.intVendorId}',
+//                    conjunction: 'and'
+//                }],
                 readOnly: '{checkReadOnlyIfDirect}'
             },
             cboLocation: {
@@ -298,6 +298,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
+            validateRecord: me.validateRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
@@ -393,7 +394,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     createRecord: function(config, action) {
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
-        record.set('strReceiptType', app.DefaultLocation);
+        record.set('strReceiptType', 'Direct');
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         if (app.UserId > 0)
@@ -402,6 +403,45 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('intBlanketRelease', 0);
         record.set('ysnPosted', false);
         action(record);
+    },
+
+    validateRecord: function(config, action) {
+        this.validateRecord(config, function(result) {
+            if (result) {
+                var vm = config.window.viewModel;
+                var current = vm.data.current;
+
+                if (current) {
+                    if (current.get('strReceiptType') !== 'Direct') {
+
+                        if (app.DefaultLocation > 0) {
+                            if (app.DefaultLocation !== current.get('intLocationId')) {
+                                var result = function(button) {
+                                    if (button === 'yes') {
+                                        action(true);
+                                    }
+                                    else {
+                                        action(false);
+                                    }
+                                };
+
+                                var msgBox = iRely.Functions;
+                                msgBox.showCustomDialog(
+                                    msgBox.dialogType.WARNING,
+                                    msgBox.dialogButtonType.YESNO,
+                                    "The Location is different from the default user location. Do you want to continue?",
+                                    result
+                                );
+                            }
+                            else { action(true) }
+                        }
+                        else { action(true) }
+                    }
+                    else { action(true) }
+                }
+                else { action(true) }
+            }
+        });
     },
 
     onStoreLoad: function(store, records, success, eOpts) {
@@ -792,6 +832,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#cboShipFrom": {
                 beforequery: this.onShipFromBeforeQuery,
                 select: this.onShipFromSelect
+            },
+            "#cboSource": {
+                beforequery: this.onShipFromBeforeQuery
             }
         })
     }
