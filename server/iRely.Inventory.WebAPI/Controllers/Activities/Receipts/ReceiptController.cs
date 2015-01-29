@@ -94,7 +94,7 @@ namespace iRely.Invetory.WebAPI.Controllers
         [HttpPost]
         public HttpResponseMessage Receive(Inventory.BRL.Common.Posting_RequestModel receipt)
         {
-            var result = _ReceiptBRL.PostTransaction(receipt, false);
+            var result = _ReceiptBRL.PostTransaction(receipt, receipt.isRecap);
             _ReceiptBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new

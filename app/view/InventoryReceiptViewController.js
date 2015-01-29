@@ -599,20 +599,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../CashManagement/api/bankdepositposting',
-                strTransactionId: currentRecord.get('strTransactionId'),
+                postURL: '../Inventory/api/Receipt/Receive',
+                strTransactionId: currentRecord.get('strReceiptNumber'),
                 ysnPosted: currentRecord.get('ysnPosted'),
-                ysnVoid: currentRecord.get('ysnVoid'),
                 scope: me,
                 success: function(){
                     // If data is generated, show the recap screen.
                     CashManagement.common.BusinessRules.showRecap({
-                        strTransactionId: currentRecord.get('strTransactionId'),
+                        strTransactionId: currentRecord.get('strReceiptNumber'),
                         ysnPosted: currentRecord.get('ysnPosted'),
-                        dtmDate: currentRecord.get('dtmDate'),
-                        strDescription: currentRecord.get('strMemo'),
+                        dtmDate: currentRecord.get('dtmReceiptDate'),
                         strCurrencyId: currency,
-                        dblExchangeRate: currentRecord.get('dblExchangeRate'),
+                        dblExchangeRate: 1,
                         scope: me,
                         postCallback: function(){
                             me.onReceiveClick(recapButton);
