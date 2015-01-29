@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPREmployee](
 	[intEntityId]	[int] NOT NULL,
-	[intEmployeeId] [int] NOT NULL IDENTITY (1, 1),
+	[intEmployeeId] [int] NULL,
 	[strEmployeeId] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strType] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
 	[strFirstName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
