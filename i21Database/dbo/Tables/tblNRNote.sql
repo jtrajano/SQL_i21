@@ -39,5 +39,6 @@
 	[intNoteId] ASC
 ) ON [PRIMARY],
 CONSTRAINT [FK_tblNRNote_tblNRNoteDescription_intDescriptionId] FOREIGN KEY([intDescriptionId])
-REFERENCES [tblNRNoteDescription] ([intDescriptionId])
+REFERENCES [tblNRNoteDescription] ([intDescriptionId]), 
+    CONSTRAINT [UK_tblNRNote_strNoteNumber] UNIQUE ([strNoteNumber]) 
 ) ON [PRIMARY]
