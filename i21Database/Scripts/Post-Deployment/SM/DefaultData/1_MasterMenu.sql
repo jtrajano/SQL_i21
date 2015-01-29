@@ -1611,6 +1611,10 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
 		WHERE strMenuName = 'Terms' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.Term'
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Company Location' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerModuleId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+		WHERE strMenuName = 'Company Location' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.CompanyLocation'
+
 	/*-------------------------------  */
 	/*-- End Update System Manager Menu */
 	/*-------------------------------  */
