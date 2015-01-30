@@ -1862,7 +1862,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
                 else { return false; }
             });
-            defaultLocation = record.get('intItemLocationId');
+            if (record) defaultLocation = record.get('intItemLocationId');
         }
 
         if (vm.data.current.phantom === true) {
@@ -1901,7 +1901,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
                 else { return false; }
             });
-            defaultLocation = record.get('intItemLocationId');
+            if (record) defaultLocation = record.get('intItemLocationId');
         }
 
         if (vm.data.current.phantom === true) {
