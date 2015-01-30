@@ -10,16 +10,19 @@ BEGIN
 	IF(NOT EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @purchaseId))
 	BEGIN
 		RAISERROR(51033, 11, 1); --Not Exists
+		RETURN;
 	END
 
 	IF(NOT EXISTS(SELECT 1 FROM tblPOPurchaseDetail WHERE intPurchaseId = @purchaseId AND intItemId = @itemId AND intLineNo = @lineNo))
 	BEGIN
 		RAISERROR(51034, 11, 1); --PO item not exists
+		RETURN;
 	END
 
 	IF(EXISTS(SELECT 1 FROM tblPOPurchaseDetail WHERE intPurchaseId = @purchaseId AND intItemId = @itemId AND intLineNo = @lineNo AND (dblQtyReceived + @receivedNum) > dblQtyOrdered))
 	BEGIN
 		RAISERROR(51035, 11, 1); --received item exceeds
+		RETURN;
 	END
 
 	UPDATE A
