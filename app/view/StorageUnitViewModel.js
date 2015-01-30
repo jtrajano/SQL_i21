@@ -21,6 +21,7 @@ Ext.define('Inventory.view.StorageUnitViewModel', {
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedCategory',
         'Inventory.store.BufferedFactoryUnitType',
+        'Inventory.store.BufferedStorageLocation',
         'Inventory.store.BufferedCommodity',
         'Inventory.store.BufferedRestriction',
         'Inventory.store.BufferedMeasurement',
@@ -31,6 +32,9 @@ Ext.define('Inventory.view.StorageUnitViewModel', {
     stores: {
         location: {
             type: 'companylocationbuffered'
+        },
+        parentUnit: {
+            type: 'icbufferedstoragelocation'
         },
         batchSizeUOM: {
             type: 'icbuffereduom'

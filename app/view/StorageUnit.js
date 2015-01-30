@@ -266,10 +266,32 @@ Ext.define('Inventory.view.StorageUnit', {
                                             readOnly: true
                                         },
                                         {
-                                            xtype: 'combobox',
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intStorageLocationId',
+                                                    dataType: 'numeric',
+                                                    text: 'Storage Location Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strName',
+                                                    dataType: 'string',
+                                                    text: 'Storage Location',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 1
+                                                }
+                                            ],
                                             itemId: 'cboParentUnit',
                                             fieldLabel: 'Parent Unit',
-                                            labelWidth: 110
+                                            labelWidth: 110,
+                                            displayField: 'strName',
+                                            valueField: 'intStorageLocationId'
                                         },
                                         {
                                             xtype: 'gridcombobox',
