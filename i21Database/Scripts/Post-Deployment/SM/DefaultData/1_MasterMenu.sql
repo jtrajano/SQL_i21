@@ -1581,6 +1581,19 @@ GO
 	/*-- Start Update System Manager Menu */
 	/*----------------------------------  */
 
+	DECLARE @SystemManagerAdminMenuId INT
+	SELECT @SystemManagerAdminMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+	
+	DECLARE @SystemManagerAdminUtilitiesMenuId INT
+	SELECT @SystemManagerAdminUtilitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
+		
+		/* ------------------------ */
+		/* -- Update Admin Menu  -- */
+		/* ------------------------ */
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+		WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ImportLegacyUsers'
+
 	DECLARE @SystemManagerModuleId INT
 	SELECT @SystemManagerModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Common Info' AND strModuleName = 'System Manager' AND intParentMenuID = 0
 		
