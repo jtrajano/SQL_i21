@@ -53,7 +53,8 @@ Ext.define('Inventory.model.ReceiptItem', {
 
     validators: [
         {type: 'presence', field: 'strItemNo'},
-        {type: 'presence', field: 'strUnitMeasure'}
+        {type: 'presence', field: 'strUnitMeasure'},
+        {type: 'presence', field: 'dblOpenReceive'}
     ]
 
 });
