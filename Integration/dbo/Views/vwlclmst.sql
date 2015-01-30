@@ -27,6 +27,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		,vwlcl_user_id	=	aglcl_user_id
 		,vwlcl_user_rev_dt	=	aglcl_user_rev_dt
 		,A4GLIdentity	=	CAST(A4GLIdentity   AS INT)
+		,intConcurrencyId = 0 
 		FROM aglclmst
 		')
 GO
@@ -52,6 +53,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		,vwlcl_user_id	=	CAST(NULL AS CHAR(16))
 		,vwlcl_user_rev_dt	=	NULL
 		,A4GLIdentity	=	CAST(A4GLIdentity   AS INT)
+		,intConcurrencyId = 0 
 		FROM ptlclmst
 		')
 

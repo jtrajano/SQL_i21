@@ -36,6 +36,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		,vwitm_last_un_cost = agitm_last_un_cost  
 		,vwitm_avg_un_cost    = agitm_avg_un_cost  
 		,vwitm_std_un_cost    = agitm_std_un_cost  
+		,intConcurrencyId = 0 
 		FROM agitmmst
 		')
 GO
@@ -69,6 +70,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		,vwitm_last_un_cost = CAST(0.00  AS DECIMAL(18,6))    
 		,vwitm_avg_un_cost    = ptitm_avg_cost  
 		,vwitm_std_un_cost    = ptitm_std_cost  
+		,intConcurrencyId = 0 
 		FROM ptitmmst
 		')
 GO
