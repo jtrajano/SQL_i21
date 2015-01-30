@@ -11,7 +11,7 @@ AS
 			D.dblBasis,
 			D.dblCashPrice,
 			D.intFutureMarketId,
-			D.intFuturesMonthYearId,
+			D.strFuturesMonth,
 			D.intContractOptHeaderId,
 			D.intContractSeq,
 			D.intConcurrencyId,

@@ -13,7 +13,7 @@ BEGIN TRY
 			@Futures				DECIMAL(12,4),
 			@Basis					DECIMAL(12,4),
 			@FutureMarketId			INT,
-			@FuturesMonthYearId		INT,
+			@FuturesMonth			NVARCHAR(50),
 			@ContractOptHeaderId	INT,
 			@CurrentQty				DECIMAL(12,4),
 			@ContractSeq			INT,
@@ -30,7 +30,7 @@ BEGIN TRY
 			@Futures				=	dblFutures,
 			@Basis					=	dblBasis,
 			@FutureMarketId			=	intFutureMarketId,
-			@FuturesMonthYearId		=	intFuturesMonthYearId,
+			@FuturesMonth			=	strFuturesMonth,
 			@ContractOptHeaderId	=	intContractOptHeaderId
 			
 	FROM	OPENXML(@idoc, 'root',2)
@@ -44,7 +44,7 @@ BEGIN TRY
 			dblFutures				DECIMAL(12,4),
 			dblBasis				DECIMAL(12,4),
 			intFutureMarketId		INT,
-			intFuturesMonthYearId	INT,
+			strFuturesMonth			NVARCHAR(50),
 			intContractOptHeaderId	INT
 	)  
 	  
@@ -75,7 +75,7 @@ BEGIN TRY
 				intConcurrencyId,	intContractHeaderId,	intContractSeq,			intCompanyLocationId,
 				dtmStartDate,		intItemId,				dtmEndDate,				intFreightTermId,
 				intShipViaId,		dblQuantity,			intUnitMeasureId,		intPricingType,
-				dblFutures,			dblBasis,				intFutureMarketId,		intFuturesMonthYearId,
+				dblFutures,			dblBasis,				intFutureMarketId,		strFuturesMonth,
 				dblCashPrice,		intCurrencyId,			dblRate,				strCurrencyReference,
 				intMarketZoneId,	intDiscount,			intDiscountSchedule,	intContractOptHeaderId,
 				strBuyerSeller,		intBillTo,				intFreightRateId,		strFobBasis,
@@ -86,7 +86,7 @@ BEGIN TRY
 				1,					intContractHeaderId,	@ContractSeq,			intCompanyLocationId,
 				dtmStartDate,		intItemId,				dtmEndDate,				intFreightTermId,
 				intShipViaId,		@CurrentQty-@Quantity,	intUnitMeasureId,		intPricingType,
-				dblFutures,			dblBasis,				intFutureMarketId,		intFuturesMonthYearId,
+				dblFutures,			dblBasis,				intFutureMarketId,		strFuturesMonth,
 				dblCashPrice,		intCurrencyId,			dblRate,				strCurrencyReference,
 				intMarketZoneId,	intDiscount,			intDiscountSchedule,	intContractOptHeaderId,
 				strBuyerSeller,		intBillTo,				intFreightRateId,		strFobBasis,
@@ -127,7 +127,7 @@ BEGIN TRY
 				dblBasis				=	@Basis,
 				dblCashPrice			=	@Futures + @Basis,
 				intFutureMarketId		=	@FutureMarketId	,
-				intFuturesMonthYearId	=	@FuturesMonthYearId	,
+				strFuturesMonth			=	@FuturesMonth	,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
 				intPricingType			=	1	
@@ -141,7 +141,7 @@ BEGIN TRY
 				dblBasis				=	@Basis,
 				dblCashPrice			=	@Futures + @Basis,
 				intFutureMarketId		=	@FutureMarketId	,
-				intFuturesMonthYearId	=	@FuturesMonthYearId	,
+				strFuturesMonth			=	@FuturesMonth	,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
 				intPricingType			=	1	
