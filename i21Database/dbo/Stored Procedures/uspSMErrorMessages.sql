@@ -131,3 +131,15 @@ EXEC sp_addmessage 50031,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50032) EXEC sp_dropmessage 50032, 'us_english'	
 SET @strmessage = 'G/L entries are expected. Cannot continue because it is missing.'
 EXEC sp_addmessage 50032,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50032) EXEC sp_dropmessage 50032, 'us_english'	
+SET @strmessage = 'Purchase Order does not exists.'
+EXEC sp_addmessage 51033,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50032) EXEC sp_dropmessage 50032, 'us_english'	
+SET @strmessage = 'Purchase Order item does not exists.'
+EXEC sp_addmessage 51034,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50032) EXEC sp_dropmessage 50032, 'us_english'	
+SET @strmessage = 'You cannot receive item more than to its ordered.'
+EXEC sp_addmessage 51035,11,@strmessage,'us_english','False'

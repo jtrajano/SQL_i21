@@ -1032,6 +1032,7 @@
     <Build Include="dbo\Tables\tblCTAssociation.sql" />
     <Build Include="dbo\Tables\tblGRDiscountCalculationOption.sql" />
     <Build Include="dbo\Tables\tblGRShrinkCalculationOption.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOReceived.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

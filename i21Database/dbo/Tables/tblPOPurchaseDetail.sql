@@ -5,7 +5,7 @@
     [intItemId] INT NULL, 
     [intUnitOfMeasureId] INT NOT NULL, 
     [intAccountId] INT NOT NULL, 
-	[intBinLocationId] INT NULL,
+	[intStorageLocationId] INT NULL,
 	[intLocationId] INT NOT NULL,
 	[intTaxId] INT NOT NULL DEFAULT 0,
     [dblQtyOrdered] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
