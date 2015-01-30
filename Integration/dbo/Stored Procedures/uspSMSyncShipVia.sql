@@ -28,10 +28,14 @@ IF @ToOrigin = 1
 		UPDATE 
 			tblSMShipVia
 		SET
-			strShipViaOriginKey = REPLICATE(''0'',10 - LEN(RTRIM(LTRIM(CAST(intShipViaID as nvarchar(20)))))) + CAST(intShipViaID as nvarchar(20))
+			strShipViaOriginKey = 
+				(CASE WHEN EXISTS(SELECT null FROM [sscarmst] WHERE [sscar_name] COLLATE Latin1_General_CI_AS = [strShipVia])
+					THEN (SELECT TOP 1 [sscar_key] FROM [sscarmst] WHERE [sscar_name] COLLATE Latin1_General_CI_AS = [strShipVia])
+					ELSE REPLICATE(''0'',10 - LEN(RTRIM(LTRIM(CAST(intShipViaID as nvarchar(20)))))) + CAST(intShipViaID as nvarchar(20))
+				END)
 		WHERE 
 			strShipViaOriginKey IS NULL
-			OR RTRIM(LTRIM(strShipViaOriginKey)) = ''''	
+			OR RTRIM(LTRIM(strShipViaOriginKey)) = ''''
 	END
 
 IF(LOWER(@ShipViaIds) = ''all'')

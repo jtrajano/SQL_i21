@@ -46,31 +46,36 @@ BEGIN
 		,[intSort]
 		,[intConcurrencyId])
 	SELECT
-		 [sscar_key]			AS [strShipViaOriginKey]
-		,[sscar_name]			AS [strShipVia]
-		,[sscar_name]			AS [strShippingService]
-		,[sscar_name]			AS [strName]
-		,[sscar_addr]			AS [strAddress]
-		,[sscar_city]			AS [strCity]
-		,[sscar_state]			AS [strState]
-		,[sscar_zip]			AS [strZipCode]
-		,[sscar_fed_id]			AS [strFederalId]
-		,[sscar_trans_lic_no]	AS [strTransporterLicense]
-		,[sscar_ifta_no]		AS [strMotorCarrierIFTA]
-		,[sscar_trans_mode]		AS [strTransportationMode]
-		,(CASE WHEN [sscar_co_owned_yn] = ''Y'' 
+		 AG.[sscar_key]			AS [strShipViaOriginKey]
+		 ,(CASE WHEN EXISTS(SELECT [sscar_key], [sscar_name] FROM [sscarmst] WHERE RTRIM(LTRIM([sscar_key])) <> RTRIM(LTRIM(AG.[sscar_key])) AND RTRIM(LTRIM([sscar_name])) = RTRIM(LTRIM(AG.[sscar_name])))
+					THEN 
+						RTRIM(LTRIM(AG.[sscar_name])) + '' - '' + RTRIM(LTRIM(AG.[sscar_key]))
+					ELSE
+						RTRIM(LTRIM(AG.[sscar_name]))
+				  END)				AS [strShipVia]
+		,AG.[sscar_name]			AS [strShippingService]
+		,AG.[sscar_name]			AS [strName]
+		,AG.[sscar_addr]			AS [strAddress]
+		,AG.[sscar_city]			AS [strCity]
+		,AG.[sscar_state]			AS [strState]
+		,AG.[sscar_zip]			AS [strZipCode]
+		,AG.[sscar_fed_id]			AS [strFederalId]
+		,AG.[sscar_trans_lic_no]	AS [strTransporterLicense]
+		,AG.[sscar_ifta_no]		AS [strMotorCarrierIFTA]
+		,AG.[sscar_trans_mode]		AS [strTransportationMode]
+		,(CASE WHEN AG.[sscar_co_owned_yn] = ''Y'' 
 			THEN 1
 			ELSE 0
 		 END)					AS [ysnCompanyOwnedCarrier]
 		,1
-		,ROW_NUMBER() OVER (ORDER BY [sscar_name])
+		,ROW_NUMBER() OVER (ORDER BY AG.[sscar_name])
 								AS [intSort]
 		,0						AS [intConcurrencyId]
 	FROM
-		[sscarmst]
+		[sscarmst] AG
 	LEFT OUTER JOIN
 		[tblSMShipVia] SV
-			ON RTRIM(LTRIM([sscar_key] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(SV.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS))										
+			ON RTRIM(LTRIM(AG.[sscar_key] COLLATE Latin1_General_CI_AS)) = RTRIM(LTRIM(SV.[strShipViaOriginKey] COLLATE Latin1_General_CI_AS))										
 	WHERE
 		SV.[strShipViaOriginKey] IS NULL		
 
