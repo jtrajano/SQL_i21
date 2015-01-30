@@ -118,15 +118,15 @@ BEGIN
 				SET 
 				ptsrv_code = SrvCharge.strServiceChargeCode,
 				ptsrv_desc = SUBSTRING(SrvCharge.strDescription,1,20),
-				ptsrv_pct = SrvCharge.dblPercentage
+				ptsrv_pct = CAST((SrvCharge.dblPercentage/100) as decimal(5,5))
 				,ptsrv_pct_freq = (CASE	WHEN SrvCharge.strFrequency = ''Daily''
 											THEN ''D''
 										WHEN SrvCharge.strFrequency = ''Monthly''
 											THEN ''M''
 										ELSE ''D''
 									END)
-				,ptsrv_amt = SrvCharge.dblServiceChargeAPR 
-				,ptsrv_min_svchg = SrvCharge.dblMinimumCharge 
+				,ptsrv_amt = CAST(SrvCharge.dblServiceChargeAPR as decimal(9,2)) 
+				,ptsrv_min_svchg = CAST(SrvCharge.dblMinimumCharge as decimal(9,2))
 				,ptsrv_grace_per = SrvCharge.intGracePeriod 
 				,ptsrv_applied = (CASE	WHEN SrvCharge.strFrequency = ''Invoice''
 											THEN ''I''
@@ -157,15 +157,15 @@ BEGIN
 			SELECT 
 				strServiceChargeCode,
 				SUBSTRING(strDescription,1,20),
-				dblPercentage
+				CAST((dblPercentage/100) as decimal(5,5))
 				,(CASE	WHEN strFrequency = ''Daily''
 						THEN ''D''
 					WHEN strFrequency = ''Monthly''
 						THEN ''M''
 					ELSE ''D''
 				END)
-				,dblServiceChargeAPR
-				,dblMinimumCharge
+				,CAST(dblServiceChargeAPR as decimal(9,2))
+				,CAST(dblMinimumCharge as decimal(9,2))
 				,intGracePeriod
 				,(CASE	WHEN strAppliedPer = ''Invoice''
 							THEN ''I''
@@ -211,15 +211,15 @@ BEGIN
 			 ptsrv_code
 			,ptsrv_desc
 			,''Percent''
-			,ptsrv_pct
+			,CAST((ptsrv_pct * 100) AS numeric(18,2))
 			,(CASE	WHEN ptsrv_pct_freq = ''D''
 						THEN ''Daily''
 					WHEN ptsrv_pct_freq = ''M''
 						THEN ''Monthly''
 					ELSE ''''
 				END)
-			,ptsrv_amt
-			,ptsrv_min_svchg
+			,CAST(ptsrv_amt AS numeric(18,2))
+			,CAST(ptsrv_min_svchg  AS numeric(18,2))
 			,ptsrv_grace_per
 			,(CASE	WHEN ptsrv_applied = ''I''
 						THEN ''Invoice''
