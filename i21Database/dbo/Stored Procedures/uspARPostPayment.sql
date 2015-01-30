@@ -230,7 +230,28 @@ IF (ISNULL(@recap, 0) = 0)
 					tblGLAccount G
 						ON L.intSalesDiscounts = G.intAccountId						
 				WHERE
-					G.intAccountId IS NULL				
+					G.intAccountId IS NULL		
+					
+				--Bank Account
+				INSERT INTO 
+					#tmpARReceivableInvalidData
+				SELECT 
+					'The Deposit Account is not linked to any of the active Bank Account in Cash Management'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				LEFT OUTER JOIN
+					tblCMBankAccount BA
+						ON A.intAccountId = BA.intGLAccountId 						
+				WHERE
+					BA.intGLAccountId IS NULL
+					OR BA.ysnActive = 0	
 					
 
 				--NOT BALANCE +overpayment
@@ -820,19 +841,19 @@ BEGIN
 					ON A.strRecordNumber = B.strTransactionId
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 
-			---- Creating the temp table:
-			--DECLARE @isSuccessful BIT
-			--CREATE TABLE #tmpCMBankTransaction (
-			-- --intTransactionId INT PRIMARY KEY,
-			-- strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
-			-- UNIQUE (strTransactionId))
+			-- Creating the temp table:
+			DECLARE @isSuccessful BIT
+			CREATE TABLE #tmpCMBankTransaction (
+			 --intTransactionId INT PRIMARY KEY,
+			 strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
+			 UNIQUE (strTransactionId))
 
-			--INSERT INTO #tmpCMBankTransaction
-			-- SELECT strRecordNumber FROM tblARPayment A
-			-- INNER JOIN #tmpARReceivablePostData B ON A.intPaymentId = B.intPaymentId
+			INSERT INTO #tmpCMBankTransaction
+			 SELECT strRecordNumber FROM tblARPayment A
+			 INNER JOIN #tmpARReceivablePostData B ON A.intPaymentId = B.intPaymentId
 
-			---- Calling the stored procedure
-			--EXEC uspCMBankTransactionReversal @userId, @isSuccessful OUTPUT
+			-- Calling the stored procedure
+			EXEC uspCMBankTransactionReversal @userId, @isSuccessful OUTPUT
 
 			--update payment record based on record from tblCMBankTransaction
 			UPDATE tblARPayment
@@ -940,72 +961,74 @@ BEGIN
 				INNER JOIN tblARInvoice C
 					ON A.intInvoiceId = C.intInvoiceId
 
-			----Insert to bank transaction
-			--INSERT INTO tblCMBankTransaction(
-			--	strTransactionId,
-			--	intBankTransactionTypeId,
-			--	intBankAccountId,
-			--	intCurrencyId,
-			--	dblExchangeRate,
-			--	dtmDate,
-			--	strPayee,
-			--	intPayeeId,
-			--	strAddress,
-			--	strZipCode,
-			--	strCity,
-			--	strState,
-			--	strCountry,
-			--	dblAmount,
-			--	strAmountInWords,
-			--	strMemo,
-			--	strReferenceNo,
-			--	ysnCheckToBePrinted,
-			--	ysnCheckVoid,
-			--	ysnPosted,
-			--	strLink,
-			--	ysnClr,
-			--	dtmDateReconciled,
-			--	intCreatedUserId,
-			--	dtmCreated,
-			--	intLastModifiedUserId,
-			--	dtmLastModified,
-			--	intConcurrencyId
-			--)
-			--SELECT
-			--	strTransactionId = A.strRecordNumber,
-			--	intBankTransactionTypeID = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AR Payment'),
-			--	intBankAccountID = A.intBankAccountId,
-			--	intCurrencyID = A.intCurrencyId,
-			--	dblExchangeRate = 0,
-			--	dtmDate = A.dtmDatePaid,
-			--	strPayee = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityId),
-			--	intPayeeID = B.intEntityId,
-			--	strAddress = '',
-			--	strZipCode = '',
-			--	strCity = '',
-			--	strState = '',
-			--	strCountry = '',
-			--	dblAmount = A.dblAmountPaid,
-			--	strAmountInWords = dbo.fnConvertNumberToWord(A.dblAmountPaid),
-			--	strMemo = '',
-			--	strReferenceNo = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE '' END,
-			--	ysnCheckToBePrinted = 1,
-			--	ysnCheckVoid = 0,
-			--	ysnPosted = 1,
-			--	strLink = @batchId,
-			--	ysnClr = 0,
-			--	dtmDateReconciled = NULL,
-			--	intCreatedUserID = @userId,
-			--	dtmCreated = GETDATE(),
-			--	intLastModifiedUserID = NULL,
-			--	dtmLastModified = GETDATE(),
-			--	intConcurrencyId = 1
-			--	FROM tblARPayment A
-			--		INNER JOIN tblARCustomer B
-			--			ON A.intCustomerId = B.intCustomerId
-			--		--LEFT JOIN tblSMPaymentMethod C ON A.intPaymentMethodId = C.intPaymentMethodID
-			--	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
-			--	--AND C.strPaymentMethod = 'Check'
+			--Insert to bank transaction
+			INSERT INTO tblCMBankTransaction(
+				strTransactionId,
+				intBankTransactionTypeId,
+				intBankAccountId,
+				intCurrencyId,
+				dblExchangeRate,
+				dtmDate,
+				strPayee,
+				intPayeeId,
+				strAddress,
+				strZipCode,
+				strCity,
+				strState,
+				strCountry,
+				dblAmount,
+				strAmountInWords,
+				strMemo,
+				strReferenceNo,
+				ysnCheckToBePrinted,
+				ysnCheckVoid,
+				ysnPosted,
+				strLink,
+				ysnClr,
+				dtmDateReconciled,
+				intCreatedUserId,
+				dtmCreated,
+				intLastModifiedUserId,
+				dtmLastModified,
+				strSourceSystem,
+				intConcurrencyId
+			)
+			SELECT
+				strTransactionId = A.strRecordNumber,
+				intBankTransactionTypeID = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AR Payment'),
+				intBankAccountID = (SELECT TOP 1 intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = A.intAccountId),
+				intCurrencyID = A.intCurrencyId,
+				dblExchangeRate = 0,
+				dtmDate = A.dtmDatePaid,
+				strPayee = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityId),
+				intPayeeID = B.intEntityId,
+				strAddress = '',
+				strZipCode = '',
+				strCity = '',
+				strState = '',
+				strCountry = '',
+				dblAmount = A.dblAmountPaid,
+				strAmountInWords = dbo.fnConvertNumberToWord(A.dblAmountPaid),
+				strMemo = '',
+				strReferenceNo = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE '' END,
+				ysnCheckToBePrinted = 1,
+				ysnCheckVoid = 0,
+				ysnPosted = 1,
+				strLink = @batchId,
+				ysnClr = 0,
+				dtmDateReconciled = NULL,
+				intCreatedUserID = @userId,
+				dtmCreated = GETDATE(),
+				intLastModifiedUserID = NULL,
+				dtmLastModified = GETDATE(),
+				strSourceSystem = 'AR',
+				intConcurrencyId = 1
+				FROM tblARPayment A
+					INNER JOIN tblARCustomer B
+						ON A.intCustomerId = B.intCustomerId
+					--INNER JOIN tblCMBankAccount CM
+					--	ON A.intAccountId = CM.intGLAccountId
+				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 
 			--Insert Successfully posted transactions.
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
