@@ -145,7 +145,7 @@ BEGIN
 	SELECT	intItemId = DetailItems.intItemId  
 			,intLocationId = Header.intLocationId  
 			,dtmDate = Header.dtmReceiptDate  
-			,dblUnitQty = DetailItems.dblReceived  
+			,dblUnitQty = DetailItems.dblOpenReceive  
 			,dblUOMQty = 1  
 			,dblCost = DetailItems.dblUnitCost  
 			,dblSalesPrice = 0  
