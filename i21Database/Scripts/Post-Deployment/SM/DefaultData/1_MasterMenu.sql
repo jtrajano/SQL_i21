@@ -12,7 +12,7 @@ GO
 GO
 	PRINT N'INSERT MASTER MENU FOR THE FIRST TIME ONLY'
 GO
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File Formats'	AND strModuleName = 'Cash Management' AND strCommand = 'CashManagement.controller.BankFileFormat')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File Formats'	AND strModuleName = 'Cash Management' AND (strCommand = 'CashManagement.controller.BankFileFormat' OR strCommand = 'CashManagement.view.BankFileFormat'))
 	BEGIN
 		DELETE FROM tblSMMasterMenu
 
