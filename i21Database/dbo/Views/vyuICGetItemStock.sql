@@ -23,6 +23,7 @@ SELECT
 	strIssueUOM = (SELECT TOP 1 strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = ItemLocation.intIssueUOMId),
 	ItemLocation.intSubLocationId,
 	ItemLocation.intStorageLocationId,
+	StorageLocation.strName AS strStorageLocationName,
 	ItemLocation.dblMinOrder,
 	ItemLocation.dblReorderPoint,
 	ItemLocation.intAllowNegativeInventory,
@@ -40,5 +41,6 @@ SELECT
 	
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
+LEFT JOIN tblICStorageLocation StorageLocation ON ItemLocation.intStorageLocationId = StorageLocation.intStorageLocationId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblICItemStock ItemStock ON ItemStock.intItemId = Item.intItemId AND ItemLocation.intLocationId = ItemStock.intLocationId
