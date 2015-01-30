@@ -1640,7 +1640,7 @@ GO
 	/* ------------------------------------------------- */
 
 	UPDATE tblSMMasterMenu SET strCommand = REPLACE(strCommand,'FinancialReportDesigner.controller.','FinancialReportDesigner.view.') WHERE strCommand like 'FinancialReportDesigner.controller.%'
-	UPDATE tblSMMasterMenu SET strCommand = 'FinancialReportDesigner.view.HeaderFooterDesigner' WHERE strCommand = 'FinancialReportDesigner.controller.HeaderDesigner'
+	UPDATE tblSMMasterMenu SET strCommand = 'FinancialReportDesigner.view.HeaderFooterDesigner' WHERE strCommand = 'FinancialReportDesigner.view.HeaderDesigner'
 	
 	/* ------------------------------------------------- */
 	/* ---- End Update FRD Menu Commands for MVVM ------ */
