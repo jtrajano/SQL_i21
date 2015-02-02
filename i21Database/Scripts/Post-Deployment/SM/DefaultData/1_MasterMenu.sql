@@ -1583,13 +1583,21 @@ GO
 
 	DECLARE @SystemManagerAdminMenuId INT
 	SELECT @SystemManagerAdminMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+
+		/* ---------------------------------- */
+		/* -- Update Admin Utilities Menu  -- */
+		/* ---------------------------------- */
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User Security' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+		WHERE strMenuName = 'User Security' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.UserSecurity'
+
 	
 	DECLARE @SystemManagerAdminUtilitiesMenuId INT
 	SELECT @SystemManagerAdminUtilitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
 		
-		/* ------------------------ */
-		/* -- Update Admin Menu  -- */
-		/* ------------------------ */
+		/* ---------------------------------- */
+		/* -- Update Admin Utilities Menu  -- */
+		/* ---------------------------------- */
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
 		WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ImportLegacyUsers'
