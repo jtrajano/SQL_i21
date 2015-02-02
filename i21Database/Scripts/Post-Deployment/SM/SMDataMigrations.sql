@@ -22,3 +22,8 @@ SET strDashboardRole = 'User'
 WHERE ISNULL(strDashboardRole, '') = ''
 
 GO
+
+
+-- Add the SQL Server custom messages
+EXEC dbo.uspSMErrorMessages
+GO

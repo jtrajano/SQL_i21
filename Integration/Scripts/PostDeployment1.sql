@@ -15,8 +15,6 @@ Post-Deployment Script Template
 IF OBJECT_ID('tempdb..##tblOriginMod') IS NOT NULL DROP TABLE ##tblOriginMod
 GO
 
--- Add the SQL Server custom messages
-EXEC dbo.uspSMErrorMessages
 
 :r "..\Scripts\AP\TransferImportedTermsData.sql"
 :r "..\Scripts\AP\TransferImportedVendorData.sql"
