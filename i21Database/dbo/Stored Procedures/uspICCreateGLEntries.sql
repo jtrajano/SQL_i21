@@ -28,7 +28,7 @@ DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
 INSERT INTO @GLAccounts (
 	intItemId 
-	,intLocationId 
+	,intItemLocationId 
 	,intInventoryId 
 	,intContraInventoryId 
 	,intWriteOffSoldId 
@@ -36,28 +36,28 @@ INSERT INTO @GLAccounts (
 	,intAutoNegativeId 
 )
 SELECT	Query.intItemId
-		,Query.intLocationId
+		,Query.intItemLocationId
 		,intInventoryId = Inventory.intAccountId
 		,intContraInventoryId = ContraInventory.intAccountId
 		,intWriteOffSoldId = WriteOffSold.intAccountId
 		,intRevalueSoldId = RevalueSold.intAccountId
 		,intAutoNegativeId = AutoNegative.intAccountId
 FROM	(
-			SELECT DISTINCT intItemId, intLocationId 
+			SELECT DISTINCT intItemId, intItemLocationId 
 			FROM	dbo.tblICInventoryTransaction TRANS 
 			WHERE	TRANS.strBatchId = @strBatchId
 		) Query
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_Inventory) Inventory
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_ContraInventory) ContraInventory
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_WriteOffSold) WriteOffSold
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_RevalueSold) RevalueSold
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intLocationId, @UseGLAccount_AutoNegative) AutoNegative;
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @UseGLAccount_Inventory) Inventory
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @UseGLAccount_ContraInventory) ContraInventory
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @UseGLAccount_WriteOffSold) WriteOffSold
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @UseGLAccount_RevalueSold) RevalueSold
+		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @UseGLAccount_AutoNegative) AutoNegative;
 
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
 	dtmDate
 	,intItemId
-	,intLocationId
+	,intItemLocationId
 	,intTransactionId
 	,strTransactionId
 	,dblUnitQty
@@ -74,7 +74,7 @@ AS
 (
 	SELECT	TRANS.dtmDate
 			,TRANS.intItemId
-			,TRANS.intLocationId
+			,TRANS.intItemLocationId
 			,TRANS.intTransactionId
 			,TRANS.strTransactionId
 			,TRANS.dblUnitQty
@@ -122,7 +122,7 @@ SELECT
 FROM	ForGLEntries_CTE  
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intLocationId = GLAccounts.intLocationId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
@@ -159,7 +159,7 @@ SELECT
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intLocationId = GLAccounts.intLocationId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
@@ -199,7 +199,7 @@ SELECT
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intLocationId = GLAccounts.intLocationId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
@@ -235,7 +235,7 @@ SELECT
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intLocationId = GLAccounts.intLocationId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intWriteOffSoldId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
@@ -276,7 +276,7 @@ SELECT
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intLocationId = GLAccounts.intLocationId 
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId 
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
@@ -312,7 +312,7 @@ SELECT
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intLocationId = GLAccounts.intLocationId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueSoldId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
@@ -352,7 +352,7 @@ SELECT
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intLocationId = GLAccounts.intLocationId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit
@@ -388,7 +388,7 @@ SELECT
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
-			AND ForGLEntries_CTE.intLocationId = GLAccounts.intLocationId
+			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 		CROSS APPLY dbo.fnGetDebit(ISNULL(dblUnitQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) Debit

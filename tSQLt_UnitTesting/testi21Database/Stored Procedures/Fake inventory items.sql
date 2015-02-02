@@ -39,6 +39,7 @@ BEGIN
 	DECLARE @WriteOffSold_Default AS INT = 4000
 	DECLARE @RevalueSold_Default AS INT = 5000 
 	DECLARE @AutoNegative_Default AS INT = 6000
+	DECLARE @InventoryInTransit_Default AS INT = 7000
 
 	DECLARE @Inventory_NewHaven AS INT = 1001
 	DECLARE @CostOfGoods_NewHaven AS INT = 2001
@@ -46,6 +47,7 @@ BEGIN
 	DECLARE @WriteOffSold_NewHaven AS INT = 4001
 	DECLARE @RevalueSold_NewHaven AS INT = 5001
 	DECLARE @AutoNegative_NewHaven AS INT = 6001
+	DECLARE @InventoryInTransit_NewHaven AS INT = 7001
 
 	DECLARE @Inventory_BetterHaven AS INT = 1002
 	DECLARE @CostOfGoods_BetterHaven AS INT = 2002
@@ -53,6 +55,7 @@ BEGIN
 	DECLARE @WriteOffSold_BetterHaven AS INT = 4002
 	DECLARE @RevalueSold_BetterHaven AS INT = 5002
 	DECLARE @AutoNegative_BetterHaven AS INT = 6002
+	DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
 
 	DECLARE @SegmentId_DEFAULT_LOCATION AS INT = 100
 	DECLARE @SegmentId_NEW_HAVEN_LOCATION AS INT = 101
@@ -65,6 +68,7 @@ BEGIN
 	DECLARE @Account_WriteOffSold AS NVARCHAR(100) = 'Write-Off Sold'
 	DECLARE @Account_RevalueSold AS NVARCHAR(100) = 'Revalue Sold'
 	DECLARE @Account_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
+	DECLARE @Account_InventoryInTransit AS NVARCHAR(100) = 'Inventory In Transit'
 
 	-- Declare the categories
 	DECLARE @HotItems AS INT = 1
@@ -96,6 +100,7 @@ BEGIN
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_WriteOffSold, @WriteOffSold_Default);
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_RevalueSold, @RevalueSold_Default);
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @Account_AutoNegative, @AutoNegative_Default);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@Default_Location, @@Account_InventoryInTransit, @InventoryInTransit_Default);
 
 		-- Use tblSMCompanyLocation to store the GL Accounts. This will change in 15.2 where GL accounts will be retrieved in tblSMCompanyLocationAccount
 		UPDATE	tblSMCompanyLocation 
@@ -105,6 +110,7 @@ BEGIN
 				,intWriteOffSold = @WriteOffSold_Default
 				,intRevalueSold = @RevalueSold_Default
 				,intAutoNegativeSold = @AutoNegative_Default
+				,intInventoryInTransit = @InventoryInTransit_Default
 		FROM	tblSMCompanyLocation 
 		WHERE	intCompanyLocationId = @Default_Location
 
@@ -115,6 +121,7 @@ BEGIN
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_WriteOffSold, @WriteOffSold_NewHaven);
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_RevalueSold, @RevalueSold_NewHaven);
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_AutoNegative, @AutoNegative_NewHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@NewHaven, @Account_InventoryInTransit, @InventoryInTransit_NewHaven);
 
 		-- Use tblSMCompanyLocation to store the GL Accounts. This will change in 15.2 where GL accounts will be retrieved in tblSMCompanyLocationAccount
 		UPDATE	tblSMCompanyLocation 
@@ -124,6 +131,7 @@ BEGIN
 				,intWriteOffSold = @WriteOffSold_NewHaven
 				,intRevalueSold = @RevalueSold_NewHaven
 				,intAutoNegativeSold = @AutoNegative_NewHaven
+				,intInventoryInTransit = @InventoryInTransit_NewHaven
 		FROM	tblSMCompanyLocation 
 		WHERE	intCompanyLocationId = @NewHaven
 
@@ -134,6 +142,7 @@ BEGIN
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_WriteOffSold, @WriteOffSold_BetterHaven);
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_RevalueSold, @RevalueSold_BetterHaven);
 		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_AutoNegative, @AutoNegative_BetterHaven);
+		--INSERT INTO dbo.tblSMCompanyLocationAccount (intCompanyLocationId, strAccountDescription, intAccountId) VALUES (@BetterHaven, @Account_InventoryInTransit, @InventoryInTransit_BetterHaven);
 
 		-- Use tblSMCompanyLocation to store the GL Accounts. This will change in 15.2 where GL accounts will be retrieved in tblSMCompanyLocationAccount
 		UPDATE	tblSMCompanyLocation 
@@ -143,6 +152,7 @@ BEGIN
 				,intWriteOffSold = @WriteOffSold_BetterHaven
 				,intRevalueSold = @RevalueSold_BetterHaven
 				,intAutoNegativeSold = @AutoNegative_BetterHaven
+				,intInventoryInTransit = @InventoryInTransit_BetterHaven
 		FROM	tblSMCompanyLocation 
 		WHERE	intCompanyLocationId = @BetterHaven
 	END
@@ -207,6 +217,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_WriteOffSold, @WriteOffSold_Default);
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_RevalueSold, @RevalueSold_Default);
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_AutoNegative, @AutoNegative_Default);
+		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, @Account_InventoryInTransit, @InventoryInTransit_Default);
 
 		-- Add the G/L accounts for STICKY GRAINS
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_Inventory, @Inventory_NewHaven);
@@ -215,6 +226,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_WriteOffSold, @WriteOffSold_NewHaven);
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_RevalueSold, @RevalueSold_NewHaven);
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_AutoNegative, @AutoNegative_NewHaven);
+		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@StickyGrains, @Account_InventoryInTransit, @InventoryInTransit_NewHaven);
 
 		-- Add the G/L accounts for PREMIUM GRAINS 
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_Inventory, @Inventory_BetterHaven);
@@ -223,6 +235,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_WriteOffSold, @WriteOffSold_BetterHaven);
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_RevalueSold, @RevalueSold_BetterHaven);
 		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_AutoNegative, @AutoNegative_BetterHaven);
+		INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@PremiumGrains, @Account_InventoryInTransit, @InventoryInTransit_BetterHaven);
 
 		-- Add the G/L accounts for COLD GRAINS 
 		-- No item level g/l account overrides for cold grains. Use g/l from category

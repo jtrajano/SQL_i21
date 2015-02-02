@@ -86,7 +86,7 @@ BEGIN
 				,intTransactionId
 				,strTransactionId
 				,intItemId
-				,intLocationId
+				,intItemLocationId
 		)
 		SELECT	dtmDate = '1/1/2014'
 				,dblStockIn = 25
@@ -95,7 +95,7 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0000001'
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 		UNION ALL 
 		SELECT	dtmDate = '1/2/2014'
 				,dblStockIn = 100
@@ -104,7 +104,7 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0000001'
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 
 		-- Add fake data for tblICInventoryFIFOOut
 		INSERT INTO dbo.tblICInventoryFIFOOut (
@@ -132,7 +132,7 @@ BEGIN
 			,intTransactionTypeId
 			,ysnIsUnposted
 			,intItemId
-			,intLocationId
+			,intItemLocationId
 			,strBatchId
 		)
 		SELECT	dtmDate = '1/1/2014'
@@ -147,7 +147,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,strBatchId = 'BATCH-0001'
 
 		UNION ALL 
@@ -163,7 +163,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryReceipt
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,strBatchId = 'BATCH-0002'
 		UNION ALL 
 		SELECT	dtmDate = '1/2/2014'
@@ -178,7 +178,7 @@ BEGIN
 				,intTransactionTypeId = @REVALUE_SOLD
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,strBatchId = 'BATCH-0002'
 		UNION ALL 
 		SELECT	dtmDate = '1/2/2014'
@@ -193,7 +193,7 @@ BEGIN
 				,intTransactionTypeId = @WRITE_OFF_SOLD
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,strBatchId = 'BATCH-0002'
 		UNION ALL 
 		SELECT	dtmDate = '1/2/2014'
@@ -208,7 +208,7 @@ BEGIN
 				,intTransactionTypeId = @AUTO_NEGATIVE
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,strBatchId = 'BATCH-0002'
 
 		-- Setup the expected data for FIFO

@@ -71,7 +71,7 @@ BEGIN
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -100
 				,dblUOMQty = 1
@@ -85,7 +85,7 @@ BEGIN
 				,intLotId = NULL
 		UNION ALL 
 		SELECT 	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -75
 				,dblUOMQty = 1
@@ -101,7 +101,7 @@ BEGIN
 		-- Setup the expected tblICInventoryTransaction 
 		INSERT INTO expected (
 				intItemId 
-				,intLocationId 
+				,intItemLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -118,7 +118,7 @@ BEGIN
 				,intConcurrencyId 
 		)
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -100
 				,dblCost = 22.00
@@ -135,7 +135,7 @@ BEGIN
 				,intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -75
 				,dblCost = 22.00
@@ -163,7 +163,7 @@ BEGIN
 
 		INSERT INTO actual (
 				intItemId 
-				,intLocationId 
+				,intItemLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -180,7 +180,7 @@ BEGIN
 				,intConcurrencyId 		
 		)
 		SELECT	intItemId 
-				,intLocationId 
+				,intItemLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 

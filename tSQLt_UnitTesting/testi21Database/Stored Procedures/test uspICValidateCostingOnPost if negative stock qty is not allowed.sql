@@ -24,7 +24,7 @@ BEGIN
 		-- Insert a record to process 
 		INSERT	@Items (
 				intItemId
-				, intLocationId
+				, intItemLocationId
 				, dtmDate
 				, dblUnitQty
 				, dblUOMQty
@@ -38,7 +38,7 @@ BEGIN
 				, intLotId
 		)
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @BetterHaven -- <<< NEGATIVE STOCK IS NOT ALLOWED AT THIS LOCATION
+				,intItemLocationId = @BetterHaven -- <<< NEGATIVE STOCK IS NOT ALLOWED AT THIS LOCATION
 				,dtmDate = GETDATE()
 				,dblUnitQty = -10
 				,dblUOMQty = 1
@@ -52,7 +52,7 @@ BEGIN
 				,intLotId = NULL 
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = GETDATE()
 				,dblUnitQty = -10000
 				,dblUOMQty = 1
@@ -66,7 +66,7 @@ BEGIN
 				,intLotId = NULL 
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,dtmDate = GETDATE()
 				,dblUnitQty = -10000
 				,dblUOMQty = 1

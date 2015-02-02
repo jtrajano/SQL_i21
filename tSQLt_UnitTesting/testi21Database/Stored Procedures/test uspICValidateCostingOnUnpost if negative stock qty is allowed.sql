@@ -22,15 +22,15 @@ BEGIN
 		-- Insert the items unpost 
 		INSERT	@Items (
 				intItemId
-				,intLocationId
+				,intItemLocationId
 				,dblTotalQty
 		)
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dblTotalQty = -10000
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,dblTotalQty = -10000
 
 		-- Use the simple item mock data

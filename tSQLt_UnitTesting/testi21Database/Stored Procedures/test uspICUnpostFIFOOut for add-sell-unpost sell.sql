@@ -84,7 +84,7 @@ BEGIN
 			,intTransactionId
 			,strTransactionId
 			,intItemId
-			,intLocationId
+			,intItemLocationId
 		)
 		VALUES (
 			'1/1/2014'
@@ -114,7 +114,7 @@ BEGIN
 			,intTransactionTypeId
 			,ysnIsUnposted
 			,intItemId
-			,intLocationId
+			,intItemLocationId
 			,strBatchId
 		)
 		SELECT	dtmDate = '1/1/2014'
@@ -129,7 +129,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryReceipt
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,strBatchId = 'BATCH-0001'
 		UNION ALL 
 		SELECT	dtmDate = '1/4/2014'
@@ -144,7 +144,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven		
+				,intItemLocationId = @NewHaven		
 				,strBatchId = 'BATCH-0002'		
 		UNION ALL 
 		SELECT	dtmDate = '1/4/2014'
@@ -159,7 +159,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,strBatchId = 'BATCH-0003'
 
 		-- Setup the expected data for FIFO

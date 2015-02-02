@@ -29,13 +29,13 @@ WITH	(HOLDLOCK)
 AS		ItemStock	
 USING (
 		SELECT	intItemId
-				,intLocationId
+				,intItemLocationId
 				,Aggregrate_OnOrderQty = SUM(ISNULL(dblUnitQty, 0) * ISNULL(dblUOMQty, 0))					
 		FROM	@ItemsToIncrease
-		GROUP BY intItemId, intLocationId
+		GROUP BY intItemId, intItemLocationId
 ) AS Source_Query  
 	ON ItemStock.intItemId = Source_Query.intItemId
-	AND ItemStock.intLocationId = Source_Query.intLocationId
+	AND ItemStock.intItemLocationId = Source_Query.intItemLocationId
 
 
 -- If matched, update the On-Order qty 
@@ -47,7 +47,7 @@ WHEN MATCHED THEN
 WHEN NOT MATCHED THEN 
 	INSERT (
 		intItemId
-		,intLocationId
+		,intItemLocationId
 		,intSubLocationId
 		,dblAverageCost
 		,dblUnitOnHand
@@ -59,7 +59,7 @@ WHEN NOT MATCHED THEN
 	)
 	VALUES (
 		Source_Query.intItemId
-		,Source_Query.intLocationId
+		,Source_Query.intItemLocationId
 		,NULL 
 		,0
 		,0

@@ -22,19 +22,19 @@ BEGIN
 		-- Insert the items unpost 
 		INSERT	@Items (
 				intItemId
-				,intLocationId
+				,intItemLocationId
 				,dblTotalQty
 		)
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @BetterHaven -- <<< NEGATIVE STOCK IS NOT ALLOWED AT THIS LOCATION
+				,intItemLocationId = @BetterHaven -- <<< NEGATIVE STOCK IS NOT ALLOWED AT THIS LOCATION
 				,dblTotalQty = -10 
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dblTotalQty = -10000
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,dblTotalQty = -10000
 
 		-- Use the simple item mock data

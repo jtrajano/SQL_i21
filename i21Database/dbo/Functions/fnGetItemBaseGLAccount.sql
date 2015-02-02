@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnGetItemBaseGLAccount]
 (
 	@intItemId INT 
-	,@intLocationId INT
+	,@intItemLocationId INT
 	,@strAccountDescription NVARCHAR(255)
 )
 RETURNS INT
@@ -32,13 +32,17 @@ BEGIN
 						INNER JOIN tblICCategoryAccount CategoryAccounts
 							ON Category.intCategoryId = CategoryAccounts.intCategoryId
 				WHERE	ItemLocation.intItemId = @intItemId
-						AND ItemLocation.intLocationId = @intLocationId
+						AND ItemLocation.intItemLocationId = @intItemLocationId
 						AND CategoryAccounts.strAccountDescription = @strAccountDescription 			
 			) AS CategoryLevel
 				ON 1 = 1
 			FULL JOIN (
 				-- Get the base account at the Company Location level
-				SELECT	intAccountId = dbo.fnGetGLAccountFromCompanyLocation (@intLocationId, @strAccountDescription)
+                SELECT	intAccountId = dbo.fnGetGLAccountFromCompanyLocation (tblICItemLocation.intLocationId, @strAccountDescription)
+                FROM	tblICItemLocation 
+                WHERE	tblICItemLocation.intItemLocationId = @intItemLocationId
+						AND tblICItemLocation.intItemId = @intItemId
+
 			) AS CompanyLocationLevel
 				ON 1 = 1
 	

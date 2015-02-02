@@ -5,14 +5,14 @@ BEGIN
 	BEGIN 
 		CREATE TABLE expected (
 			intItemId INT
-			,intLocationId INT
+			,intItemLocationId INT
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
 		)
 
 		CREATE TABLE actual (
 			intItemId INT
-			,intLocationId INT
+			,intItemLocationId INT
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
 		)

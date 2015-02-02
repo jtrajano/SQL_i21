@@ -22,7 +22,7 @@ BEGIN
 		-- Insert a record to process 
 		INSERT	@Items (
 				intItemId
-				, intLocationId
+				, intItemLocationId
 				, dtmDate
 				, dblUnitQty
 				, dblUOMQty
@@ -36,7 +36,7 @@ BEGIN
 				, intLotId
 		)
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = GETDATE()
 				,dblUnitQty = 10
 				,dblUOMQty = 1
@@ -50,7 +50,7 @@ BEGIN
 				,intLotId = NULL 
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = @NewHaven
 				,dtmDate = GETDATE()
 				,dblUnitQty = 10
 				,dblUOMQty = 1
@@ -64,7 +64,7 @@ BEGIN
 				,intLotId = NULL 
 		UNION ALL 
 		SELECT	intItemId = @PremiumGrains
-				,intLocationId = @BetterHaven
+				,intItemLocationId = @BetterHaven
 				,dtmDate = GETDATE()
 				,dblUnitQty = 10
 				,dblUOMQty = 1

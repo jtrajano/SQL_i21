@@ -31,7 +31,7 @@
 
 CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	@intItemId AS INT
-	,@intLocationId AS INT
+	,@intItemLocationId AS INT
 	,@dtmDate AS DATETIME
 	,@dblUnitQty AS NUMERIC(18,6)
 	,@dblUOMQty AS NUMERIC(18,6)
@@ -90,12 +90,12 @@ BEGIN
 		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
 
 		SELECT @dblCost = AverageCost
-		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intLocationId)
+		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId)
 
 		-- Insert the inventory transaction record
 		INSERT INTO dbo.tblICInventoryTransaction (
 			[intItemId] 
-			,[intLocationId] 
+			,[intItemLocationId] 
 			,[dtmDate] 
 			,[dblUnitQty] 
 			,[dblCost] 
@@ -113,7 +113,7 @@ BEGIN
 			,[intConcurrencyId] 
 		)			
 		SELECT	[intItemId] = @intItemId
-				,[intLocationId] = @intLocationId
+				,[intItemLocationId] = @intItemLocationId
 				,[dtmDate] = @dtmDate
 				,[dblUnitQty] = @dblReduceQty
 				,[dblCost] = @dblCost
@@ -139,7 +139,7 @@ BEGIN
 		BEGIN 
 			EXEC dbo.uspICReduceStockInFIFO
 				@intItemId
-				,@intLocationId
+				,@intItemLocationId
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
@@ -180,7 +180,7 @@ BEGIN
 		-- Insert the inventory transaction record
 		INSERT INTO dbo.tblICInventoryTransaction (
 			[intItemId] 
-			,[intLocationId] 
+			,[intItemLocationId] 
 			,[dtmDate] 
 			,[dblUnitQty] 
 			,[dblCost] 
@@ -198,7 +198,7 @@ BEGIN
 			,[intConcurrencyId] 
 		)			
 		SELECT	[intItemId] = @intItemId
-				,[intLocationId] = @intLocationId
+				,[intItemLocationId] = @intItemLocationId
 				,[dtmDate] = @dtmDate
 				,[dblUnitQty] = @FullQty
 				,[dblCost] = @dblCost
@@ -220,7 +220,7 @@ BEGIN
 		BEGIN 
 			EXEC dbo.uspICIncreaseStockInFIFO
 				@intItemId
-				,@intLocationId
+				,@intItemLocationId
 				,@dtmDate
 				,@dblAddQty
 				,@dblCost
@@ -243,7 +243,7 @@ BEGIN
 			-- Insert the inventory transaction record
 			INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
-				,[intLocationId] 
+				,[intItemLocationId] 
 				,[dtmDate] 
 				,[dblUnitQty] 
 				,[dblCost] 
@@ -264,11 +264,11 @@ BEGIN
 			)
 			-- Add Write-Off Sold (using the current average cost)
 			SELECT	[intItemId] = @intItemId
-					,[intLocationId] = @intLocationId
+					,[intLocationId] = @intItemLocationId
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = 0
 					,[dblCost] = 0
-					,[dblValue] = @QtyOffset * dbo.fnGetItemAverageCost(@intItemId, @intLocationId)
+					,[dblValue] = @QtyOffset * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @intCurrencyId
 					,[dblExchangeRate] = @dblExchangeRate
@@ -286,7 +286,7 @@ BEGIN
 			-- Add Revalue Sold (to the new cost)
 			UNION ALL 
 			SELECT	[intItemId] = @intItemId
-					,[intLocationId] = @intLocationId
+					,[intItemLocationId] = @intItemLocationId
 					,[dtmDate] = @dtmDate
 					,[dblUnitQty] = 0
 					,[dblCost] = 0
@@ -334,7 +334,7 @@ BEGIN
 					ON FifoOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
 					AND FifoOut.intInventoryFIFOId IS NULL 
 					AND TRANS.intItemId = @intItemId
-					AND TRANS.intLocationId = @intLocationId
+					AND TRANS.intItemLocationId = @intItemLocationId
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
 					AND @NewFifoId IS NOT NULL  
@@ -342,7 +342,7 @@ BEGIN
 		-- Add Auto Negative (if current stock qty is still negative after adding it) 
 		INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
-				,[intLocationId] 
+				,[intItemLocationId] 
 				,[dtmDate] 
 				,[dblUnitQty] 
 				,[dblCost] 
@@ -360,13 +360,13 @@ BEGIN
 				,[intConcurrencyId] 
 		)
 		SELECT	[intItemId] = @intItemId
-				,[intLocationId] = @intLocationId
+				,[intItemLocationId] = @intItemLocationId
 				,[dtmDate] = @dtmDate
 				,[dblUnitQty] = 0
 				,[dblCost] = 0
 				,[dblValue] = 
 							(((@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand) * @dblCost) 
-							- [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intLocationId)
+							- [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intItemLocationId)
 				,[dblSalesPrice] = @dblSalesPrice
 				,[intCurrencyId] = @intCurrencyId
 				,[dblExchangeRate] = @dblExchangeRate
@@ -382,6 +382,6 @@ BEGIN
 		WHERE	(@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand < 0 
 				AND (@dblUnitQty * @dblUOMQty) > 0 
 				AND Stock.intItemId = @intItemId
-				AND Stock.intLocationId = @intLocationId	
+				AND Stock.intItemLocationId = @intItemLocationId	
 	END 
 END 

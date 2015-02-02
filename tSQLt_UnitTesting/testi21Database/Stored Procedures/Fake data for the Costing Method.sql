@@ -35,7 +35,7 @@ BEGIN
 
 	DROP VIEW vyuAPRptPurchase
 	EXEC tSQLt.FakeTable 'dbo.tblICItem';
-	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICItemAccount', @Identity = 1;
 
@@ -124,25 +124,25 @@ BEGIN
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCategoryId) VALUES (@HotGrains, @BetterHaven, @DoNotAllowNegativeStock, @HotItems)
 		
 	-- Add stock information for all items under the DEFAULT LOCATION 
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@WetGrains, @Default_Location,	100)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@StickyGrains, @Default_Location, 150)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@PremiumGrains, @Default_Location, 200)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@ColdGrains, @Default_Location, 250)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@HotGrains, @Default_Location, 300)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@WetGrains, 1,	100)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@StickyGrains, 2, 150)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@PremiumGrains, 3, 200)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@ColdGrains, 4, 250)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@HotGrains, 5, 300)
 
 	-- Add stock information for all items under NEW HAVEN
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@WetGrains, @NewHaven, 0)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@StickyGrains, @NewHaven, 0)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@PremiumGrains, @NewHaven, 0)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@ColdGrains, @NewHaven, 0)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@HotGrains, @NewHaven, 0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@WetGrains, 6, 0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@StickyGrains, 7, 0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@PremiumGrains, 8, 0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@ColdGrains, 9, 0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@HotGrains, 10, 0)
 
 	-- Add stock information for all items under BETTER HAVEN
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@WetGrains, @BetterHaven, 0)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@StickyGrains, @BetterHaven, 0)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@PremiumGrains, @BetterHaven, 0)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@ColdGrains, @BetterHaven,	0)
-	INSERT INTO tblICItemStock (intItemId, intLocationId, dblUnitOnHand) VALUES (@HotGrains, @BetterHaven,	0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@WetGrains, 11, 0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@StickyGrains, 12, 0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@PremiumGrains, 13, 0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@ColdGrains, 14, 0)
+	INSERT INTO tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@HotGrains, 15, 0)
 
 	-- Add the G/L accounts for WET GRAINS
 	INSERT INTO tblICItemAccount (intItemId, strAccountDescription, intAccountId) VALUES (@WetGrains, 'Inventory', 1000);
