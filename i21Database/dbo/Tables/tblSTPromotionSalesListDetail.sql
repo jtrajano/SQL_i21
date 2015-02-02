@@ -8,11 +8,6 @@
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTPromotionSalesListDetail] PRIMARY KEY ([intPromoSalesListDetailId]), 
 	CONSTRAINT [FK_tblSTPromotionSalesListDetail_tblSTPromotionSalesList] FOREIGN KEY ([intPromoSalesListId]) REFERENCES [tblSTPromotionSalesList]([intPromoSalesListId]),
-    CONSTRAINT [FK_tblSTPromotionSalesListDetail_tblSTPromotionItemList] FOREIGN KEY ([intPromoItemListId]) REFERENCES [tblSTPromotionItemList]([intPromoItemListId])
-	);
-GO
-ALTER TABLE [dbo].[tblSTPromotionSalesListDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblSTPromotionSalesListDetail_tblSTPromotionSalesList_intPromoSalesListId] FOREIGN KEY([intPromoSalesListId])
-REFERENCES [dbo].[tblSTPromotionSalesList] ([intPromoSalesListId]) ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[tblSTPromotionSalesListDetail] CHECK CONSTRAINT [FK_tblSTPromotionSalesListDetail_tblSTPromotionSalesList_intPromoSalesListId]
-GO
+    CONSTRAINT [FK_tblSTPromotionSalesListDetail_tblSTPromotionItemList] FOREIGN KEY ([intPromoItemListId]) REFERENCES [tblSTPromotionItemList]([intPromoItemListId]),
+	CONSTRAINT [FK_tblSTPromotionSalesListDetail_tblSTPromotionSalesList_intPromoSalesListId] FOREIGN KEY ([intPromoSalesListId]) REFERENCES [tblSTPromotionSalesList]([intPromoSalesListId]) ON DELETE CASCADE
+);

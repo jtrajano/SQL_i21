@@ -36,7 +36,7 @@
     [dtmLastUpdateDate] DATETIME NULL, 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTPromotionSalesList] PRIMARY KEY CLUSTERED ([intPromoSalesListId] ASC), 
-    CONSTRAINT [AK_tblSTPromotionSalesList_intStoreId_intPromoSalesId] UNIQUE NONCLUSTERED([intStoreId],[intPromoSalesId] ASC), 
+    CONSTRAINT [AK_tblSTPromotionSalesList_intStoreId_strPromoType_intPromoSalesId] UNIQUE NONCLUSTERED([intStoreId],[strPromoType],[intPromoSalesId] ASC), 
     CONSTRAINT [FK_tblSTPromotionSalesList_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]), 
     CONSTRAINT [FK_tblSTPromotionSalesList_tblSTSubcategoryRegProd] FOREIGN KEY ([intRegProdId]) REFERENCES [tblSTSubcategoryRegProd]([intRegProdId]), 
     CONSTRAINT [FK_tblSTPromotionSalesList_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) 
