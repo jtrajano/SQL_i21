@@ -44,6 +44,7 @@ Ext.define('Inventory.model.ItemStock', {
         { name: 'dblUnitOnHand', type: 'float'},
         { name: 'dblOrderCommitted', type: 'float'},
         { name: 'dblOnOrder', type: 'float'},
+        { name: 'dblBackOrder', type: 'float'},
         { name: 'dblAverageCost', type: 'float'},
         { name: 'dblLastCountRetail', type: 'float'},
         { name: 'intSort', type: 'int'}

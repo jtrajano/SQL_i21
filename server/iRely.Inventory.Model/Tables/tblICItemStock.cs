@@ -19,6 +19,7 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitOnHand { get; set; }
         public decimal? dblOrderCommitted { get; set; }
         public decimal? dblOnOrder { get; set; }
+        public decimal? dblBackOrder { get; set; }
         public decimal? dblLastCountRetail { get; set; }
         public int? intSort { get; set; }
 

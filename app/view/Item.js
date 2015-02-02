@@ -3779,7 +3779,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colStockOnHand',
-                                                        width: 70,
+                                                        width: 100,
                                                         align: 'right',
                                                         text: 'On Hand',
                                                         editor: {
@@ -3791,7 +3791,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colStockCommitted',
-                                                        width: 80,
+                                                        width: 100,
                                                         align: 'right',
                                                         text: 'Committed',
                                                         editor: {
@@ -3803,9 +3803,21 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colStockOnOrder',
-                                                        width: 70,
+                                                        width: 100,
                                                         align: 'right',
                                                         text: 'On Order',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockBackOrder',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'Back Order',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',

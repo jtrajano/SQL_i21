@@ -518,7 +518,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colStockOnHand: 'dblUnitOnHand',
                 colStockCommitted: 'dblOrderCommitted',
-                colStockOnOrder: 'dblOnOrder'
+                colStockOnOrder: 'dblOnOrder',
+                colStockBackOrder: 'dblBackOrder'
             },
 
             //-------------//

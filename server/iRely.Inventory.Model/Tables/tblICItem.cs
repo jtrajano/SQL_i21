@@ -258,6 +258,7 @@ namespace iRely.Inventory.Model
         public decimal? dblAverageCost { get; set; }
         public decimal? dblOnOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
+        public decimal? dblBackOrder { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }
