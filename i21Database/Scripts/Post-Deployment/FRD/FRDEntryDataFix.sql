@@ -42,28 +42,3 @@ UPDATE tblFRColumnDesignSegment
 GO
 	PRINT N'END UPDATE NEW FORIEGN KEYS'
 GO
-
-
-
-
---=====================================================================================================================================
--- 	UPDATE DATA TYPES
-
--- FIELD MAPPING
-
----------------------------------------------------------------------------------------------------------------------------------------
-
-GO
-	PRINT N'BEGIN UPDATE DATA TYPES'
-GO
-
-UPDATE tblFRRowDesignCalculation 
-	SET intRowDetailId = (SELECT TOP 1 intRowDetailId FROM tblFRRowDesign WHERE tblFRRowDesign.intRowId = tblFRRowDesignCalculation.intRowId and tblFRRowDesign.intRefNo = tblFRRowDesignCalculation.intRefNoId),
-		intRowDetailRefNo = (SELECT TOP 1 intRowDetailId FROM tblFRRowDesign WHERE tblFRRowDesign.intRowId = tblFRRowDesignCalculation.intRowId and tblFRRowDesign.intRefNo = tblFRRowDesignCalculation.intRefNoCalc)
-	WHERE intRowDetailId IS NULL
-
-GO
-	PRINT N'END UPDATE DATA TYPES'
-GO
-
-
