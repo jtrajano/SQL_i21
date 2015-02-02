@@ -52,7 +52,7 @@
     [strReportDepartmentAtGrossOrNet] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
     [intLoyaltyDiscountMop] INT NULL, 
     [intLoyaltyDiscountCategoryId] INT NULL, 
-    [ysnBreakoutPropCardTotal] BIT COLLATE Latin1_General_CI_AS NULL, 
+    [ysnBreakoutPropCardTotal] BIT NULL, 
     [intRemovePropCardMop] INT NULL, 
     [intAddPropCardMop] INT NULL, 
     [strPropNetworkCardName] NVARCHAR(16) COLLATE Latin1_General_CI_AS NULL, 
