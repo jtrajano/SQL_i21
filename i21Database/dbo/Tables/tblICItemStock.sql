@@ -20,6 +20,7 @@ Type the overview for the table here.
 		[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblBackOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblLastCountRetail] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
@@ -149,3 +150,12 @@ Type the overview for the table here.
 		@level1name = N'tblICItemStock',
 		@level2type = N'COLUMN',
 		@level2name = N'dblAverageCost'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Back Order',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblBackOrder'

@@ -37,7 +37,8 @@ SELECT
 	ItemStock.dblUnitOnHand,
 	ItemStock.dblAverageCost,
 	ItemStock.dblOnOrder,
-	ItemStock.dblOrderCommitted
+	ItemStock.dblOrderCommitted,
+	ItemStock.dblBackOrder
 	
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
