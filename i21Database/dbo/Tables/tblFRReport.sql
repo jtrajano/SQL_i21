@@ -29,7 +29,7 @@
     [intRowId]                  INT             NULL,
     [intColumnId]               INT             NULL,
     [intMapId]                  INT             NULL,
-    [strOrientation]            NCHAR (15)      COLLATE Latin1_General_CI_AS NULL,
+    [strOrientation]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [ysnLowPriority]            BIT             DEFAULT 0 NULL,
     [intSort]                   INT             DEFAULT 0 NULL,
     [intConcurrencyId]          INT             DEFAULT 1 NOT NULL,
