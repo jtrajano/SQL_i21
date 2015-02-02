@@ -29,7 +29,7 @@ EXEC dbo.uspICProcessToItemReceipt
 SELECT @itemReceiptNumber = strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @itemReceiptId
 
 UPDATE A
-	SET intOrderStatusId = 2--Pending
+	SET intOrderStatusId = 7--Pending
 FROM tblPOPurchase A
 WHERE intPurchaseId = @poId
 
