@@ -2,9 +2,9 @@
     "name": "Inventory",
     "settings": {
         "cmd": {
-            "license": "commercial",
-            "cmdVersion": "5.0.3.276",
-            "frameworkVersion": "5.0.1.1189"
+            "license": "",
+            "cmdVersion": "",
+            "frameworkVersion": ""
         },
         "canvasControls": {
             "viewportSize": {
@@ -23,7 +23,10 @@
         "cacheBust": false,
         "buildShouldOverwriteIndex": true,
         "generateArchitectVersion": true,
-        "displayfield-ExtBox1-1274-inputEl": "Not Installed"
+        "displayfield-ExtBox1-1274-inputEl": "Not Installed",
+        "projectHasEnabledWebServer": false,
+        "lockUrlPrefix": false,
+        "installStatus": "Not Installed"
     },
     "xdsVersion": "3.1.0",
     "xdsBuild": 1943,
