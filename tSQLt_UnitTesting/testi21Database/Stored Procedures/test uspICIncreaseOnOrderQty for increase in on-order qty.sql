@@ -34,22 +34,22 @@ BEGIN
 		-----------------------------------
 		CREATE TABLE expected (
 			intItemId INT
-			,intLocationId INT
+			,intItemLocationId INT
 			,dblOnOrder NUMERIC(18,6)
 		)
 
 		INSERT INTO expected (
 				intItemId
-				,intLocationId
+				,intItemLocationId
 				,dblOnOrder
 		)
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dblOnOrder = 100
 
 		CREATE TABLE actual (
 			intItemId INT
-			,intLocationId INT
+			,intItemLocationId INT
 			,dblOnOrder NUMERIC(18,6)
 		)
 
@@ -64,7 +64,7 @@ BEGIN
 		---------------------------------------------------
 		INSERT INTO @Items 
 		SELECT 	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = 'November 24, 2014'
 				,dblUnitQty = 100
 				,dblUOMQty = 1
@@ -84,15 +84,15 @@ BEGIN
 
 		INSERT INTO actual (
 				intItemId
-				,intLocationId
+				,intItemLocationId
 				,dblOnOrder
 		)
 		SELECT	intItemId
-				,intLocationId
+				,intItemLocationId
 				,dblOnOrder
 		FROM	tblICItemStock 
 		WHERE	intItemId = @WetGrains
-				AND intLocationId = @Default_Location
+				AND intItemLocationId = @Default_Location
 	END 
 
 	-- Assert

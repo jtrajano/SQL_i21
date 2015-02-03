@@ -8,12 +8,15 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
 		-- Create the variables for the internal transaction types used by costing. 	
-		DECLARE @Inventory_Auto_Negative AS INT = 1;
-		DECLARE @Inventory_Write_Off_Sold AS INT = 2;
-		DECLARE @Inventory_Revalue_Sold AS INT = 3;
+		DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
+		DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
+		DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;		
+		DECLARE @InventoryTransactionTypeId_PurchaseType AS INT = 4;
+		DECLARE @InventoryTransactionTypeId_SaleType AS INT = 5;
 		
-		DECLARE @PurchaseType AS INT = 1
-		DECLARE @SaleType AS INT = 2
+		DECLARE @InventoryTransactionTypeName_AutoNegative AS NVARCHAR(50) = 'Inventory Auto Negative'  
+		DECLARE @InventoryTransactionTypeName_RevalueSold AS NVARCHAR(50) = 'Inventory Revalue Sold'  
+		DECLARE @InventoryTransactionTypeName_WriteOffSold AS NVARCHAR(50) = 'Inventory Write-Off Sold'  		
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -58,14 +61,11 @@ BEGIN
 		DECLARE @EACH AS INT = 1;
 		
 		DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'  
-		DECLARE @Inventory_Auto_Negative_Name AS NVARCHAR(50) = 'Inventory Auto Negative'  
-		DECLARE @Inventory_Revalue_Sold_Name AS NVARCHAR(50) = 'Inventory Revalue Sold'  
-		DECLARE @Inventory_WriteOff_Sold_Name AS NVARCHAR(50) = 'Inventory Write-Off Sold'  
 
 		-- Insert a fake data in the Inventory transaction table 
 		INSERT INTO tblICInventoryTransaction (
 				intItemId
-				,intLocationId
+				,intItemLocationId
 				,dtmDate
 				,dblUnitQty
 				,dblCost
@@ -84,7 +84,7 @@ BEGIN
 				,intConcurrencyId
 		)
 		SELECT 	intItemId = @StickyGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 2
 				,dtmDate = 'January 17, 2014'
 				,dblUnitQty = -11
 				,dblCost = 1.50
@@ -95,7 +95,7 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'SALE-00001'
 				,strBatchId = 'BATCH-000001'
-				,intTransactionTypeId = @Inventory_Auto_Negative
+				,intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
 				,intLotId = NULL 
 				,strTransactionForm = 'Inventory Shipment'
 				,dtmCreated = GETDATE()
@@ -159,7 +159,7 @@ BEGIN
 			,intEntityId				= 1
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= @Inventory_Auto_Negative_Name
+			,strTransactionType			= @InventoryTransactionTypeName_AutoNegative
 			,strTransactionForm			= 'Inventory Shipment'
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
@@ -188,31 +188,37 @@ BEGIN
 			,intEntityId				= 1 
 			,strTransactionId			= 'SALE-00001'
 			,intTransactionId			= 1
-			,strTransactionType			= @Inventory_Auto_Negative_Name
+			,strTransactionType			= @InventoryTransactionTypeName_AutoNegative
 			,strTransactionForm			= 'Inventory Shipment'
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1	
 		FROM dbo.tblGLAccount
-		WHERE intAccountId = @AutoNegative_Default
-				
+		WHERE intAccountId = @AutoNegative_Default				
 	END 
+	
+	--select 'debug tblICInventoryTransaction', * from tblICInventoryTransaction 
+	--select * from tblICInventoryTransactionType	
+	--select 'fnGetItemGLAccountAsTable', * from dbo.fnGetItemGLAccountAsTable (2, 2, 'Auto-Negative') AutoNegative;
 	
 	-- Act
 	BEGIN 
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
-				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
+				,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
 				,@intUserId AS INT = 1
 
 		INSERT INTO actual 
 		EXEC dbo.uspICCreateGLEntries
 			@strBatchId
-			,@UseGLAccount_ContraInventory
+			,@AccountCategory_ContraInventory
 			,@intUserId
 			
 		-- Remove the column dtmDateEntered. We don't need to assert it. 
 		ALTER TABLE actual 
 		DROP COLUMN dtmDateEntered			
 	END 
+	
+	select 'expected', * from expected
+	select 'actual', * from actual
 	
 	-- Assert
 	BEGIN 

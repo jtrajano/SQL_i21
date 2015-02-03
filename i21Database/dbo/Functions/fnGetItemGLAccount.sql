@@ -5,7 +5,7 @@
  Parameters: 
 	 @intItemId: The item id where the g/l account may have an override. 
 	 @intLocationId: The location is where "default" g/l account id is defined. If nothing is found in the item level and category level, this is the g/l account id used. 
-	 @strAccountDescription: The specific account description to retrieve. For example: "Inventory", "Cost of Goods"
+	 @strAccountCategory: The specific account description to retrieve. For example: "Inventory", "Cost of Goods"
  
  Sample usage: 
  DECLARE @intItemId AS INT
@@ -21,18 +21,20 @@
 
 CREATE FUNCTION [dbo].[fnGetItemGLAccount] (
 	@intItemId INT
-	,@intLocationId INT
-	,@strAccountDescription NVARCHAR(255)
+	,@intItemLocationId INT
+	,@strAccountCategory NVARCHAR(255)
 )
 RETURNS INT
 AS 
 BEGIN 
 	DECLARE @intGLAccountId AS INT
 
-	SET @intGLAccountId = dbo.fnGetGLAccountIdFromProfitCenter(
-				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, @strAccountDescription)
-				,dbo.fnGetItemProfitCenter(@intLocationId)
-		);		
+	SELECT	@intGLAccountId = dbo.fnGetGLAccountIdFromProfitCenter(
+				dbo.fnGetItemBaseGLAccount(@intItemId, @intItemLocationId, @strAccountCategory)
+				,dbo.fnGetItemProfitCenter(tblICItemLocation.intLocationId)
+			)	
+	FROM	dbo.tblICItemLocation
+	WHERE	intItemLocationId = @intItemLocationId
 
 	RETURN @intGLAccountId
 END 

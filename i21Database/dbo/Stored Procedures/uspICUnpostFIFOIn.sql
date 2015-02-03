@@ -50,7 +50,7 @@ FROM	(
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
 					AND inventory_transaction.strTransactionId = Source_Query.strTransactionId
 					AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intLocationId) IN (@AVERAGECOST, @FIFO) 
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@AVERAGECOST, @FIFO) 
 					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
 
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
@@ -80,7 +80,7 @@ FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
 -- If there are out records, create a negative stock cost bucket 
 INSERT INTO dbo.tblICInventoryFIFO (
 		intItemId
-		,intLocationId
+		,intItemLocationId
 		,dtmDate
 		,dblStockIn
 		,dblStockOut
@@ -92,7 +92,7 @@ INSERT INTO dbo.tblICInventoryFIFO (
 		,intConcurrencyId
 )
 SELECT	intItemId = OutTransactions.intItemId
-		,intLocationId = OutTransactions.intLocationId
+		,intItemLocationId = OutTransactions.intItemLocationId
 		,dtmDate = OutTransactions.dtmDate
 		,dblStockIn = 0 
 		,dblStockOut = ABS(OutTransactions.dblUnitQty)

@@ -1,8 +1,8 @@
 ﻿
 CREATE FUNCTION [dbo].[fnGetItemGLAccountAsTable] (
 	@intItemId INT
-	,@intLocationId INT
-	,@strAccountDescription NVARCHAR(255)
+	,@intItemLocationId INT
+	,@strAccountCategory NVARCHAR(255)
 )
 RETURNS TABLE 
 RETURN (
@@ -46,7 +46,7 @@ RETURN (
 																					INNER JOIN dbo.tblGLAccountCategory AccntCategory
 																						ON tblICItemAccount.intAccountCategoryId = AccntCategory.intAccountCategoryId
 																			WHERE	tblICItemAccount.intItemId = @intItemId
-																					AND AccntCategory.strAccountCategory = @strAccountDescription
+																					AND AccntCategory.strAccountCategory = @strAccountCategory
 																		) AS ItemLevel
 																		FULL JOIN (
 																			-- Get the base account at the Item-Location level and then at the Category. 
@@ -59,13 +59,17 @@ RETURN (
 																					INNER JOIN dbo.tblGLAccountCategory AccntCategory
 																						ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
 																			WHERE	ItemLocation.intItemId = @intItemId
-																					AND ItemLocation.intLocationId = @intLocationId
-																					AND AccntCategory.strAccountCategory = @strAccountDescription 			
+																					AND ItemLocation.intItemLocationId = @intItemLocationId
+																					AND AccntCategory.strAccountCategory = @strAccountCategory 			
 																		) AS CategoryLevel
 																			ON CategoryLevel.intAccountId = CategoryLevel.intAccountId
 																		FULL JOIN (
-																			-- Get the base account at the Company Location level
-																			SELECT	intAccountId = dbo.fnGetGLAccountFromCompanyLocation (@intLocationId, @strAccountDescription)
+																			-- Get the base account at the Company Location level																			
+                                                                            SELECT    intAccountId = dbo.fnGetGLAccountFromCompanyLocation (tblICItemLocation.intLocationId, @strAccountCategory)
+                                                                            FROM    tblICItemLocation 
+                                                                            WHERE    tblICItemLocation.intItemLocationId = @intItemLocationId
+                                                                                    AND tblICItemLocation.intItemId = @intItemId
+
 																		) AS CompanyLocationLevel
 																			ON CompanyLocationLevel.intAccountId = CompanyLocationLevel.intAccountId
 
@@ -73,8 +77,10 @@ RETURN (
 																ON SegmentMap.intAccountId = ItemBaseGLAccountId.intAccountId
 															
 															-- Join in this table will get the profit center (value of intAccountSegmentId as stored in tblSMCompanyLocation.intProfitCenter)
-															INNER JOIN tblSMCompanyLocation 
-																ON tblSMCompanyLocation.intCompanyLocationId = @intLocationId																
+                                                            INNER JOIN tblICItemLocation 
+                                                                ON tblICItemLocation.intItemLocationId = @intItemLocationId
+                                                            INNER JOIN tblSMCompanyLocation
+                                                                ON tblSMCompanyLocation.intCompanyLocationId = tblICItemLocation.intLocationId
 																
 													WHERE	Structure.strType <> 'Divider'
 												) AS TemplateStructure 

@@ -81,7 +81,7 @@ BEGIN
 				,intTransactionId
 				,strTransactionId
 				,intItemId
-				,intLocationId
+				,intItemLocationId
 		)
 		SELECT	dtmDate = '1/1/2014'
 				,dblStockIn = 100
@@ -90,7 +90,7 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0000001'
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = 6
 		UNION ALL 
 		SELECT	dtmDate = '1/4/2014'
 				,dblStockIn = 15
@@ -99,7 +99,7 @@ BEGIN
 				,intTransactionId = 2
 				,strTransactionId = 'InvShip-0000002'
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = 6
 		UNION ALL 
 		SELECT	dtmDate = '1/6/2014'
 				,dblStockIn = 130
@@ -108,7 +108,7 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0000001'
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = 6
 
 		-- Add fake data for tblICInventoryFIFOOut
 		INSERT INTO dbo.tblICInventoryFIFOOut (intInventoryFIFOId, intInventoryTransactionId, dblQty) VALUES (3, 4, 100)
@@ -128,7 +128,7 @@ BEGIN
 			,intTransactionTypeId
 			,ysnIsUnposted
 			,intItemId
-			,intLocationId
+			,intItemLocationId
 			,strBatchId
 		)
 		SELECT	dtmDate = '1/1/2014'
@@ -143,7 +143,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0001'
 		UNION ALL 
 		SELECT	dtmDate = '1/4/2014'
@@ -158,7 +158,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven		
+				,intItemLocationId = 6		
 				,strBatchId = 'BATCH-0002'		
 		UNION ALL 
 		SELECT	dtmDate = '1/6/2014'
@@ -173,7 +173,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryReceipt
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0003'
 		-- Revalue sold for InvShip-0000001
 		UNION ALL 		
@@ -189,7 +189,7 @@ BEGIN
 				,intTransactionTypeId = @REVALUE_SOLD
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0003'
 		-- Write-Off sold for InvShip-0000001
 		UNION ALL 		
@@ -205,7 +205,7 @@ BEGIN
 				,intTransactionTypeId = @WRITE_OFF_SOLD
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0003'
 		-- Revalue sold for InvShip-0000002
 		UNION ALL 		
@@ -221,7 +221,7 @@ BEGIN
 				,intTransactionTypeId = @REVALUE_SOLD
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0003'
 		-- Write-Off sold for InvShip-0000002
 		UNION ALL 		
@@ -237,7 +237,7 @@ BEGIN
 				,intTransactionTypeId = @WRITE_OFF_SOLD
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @NewHaven
+				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0003'
 
 		-- Setup the expected data for FIFO

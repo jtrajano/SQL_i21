@@ -24,7 +24,7 @@ BEGIN
 		-- Insert a record to process 
 		INSERT	@Items (
 				intItemId
-				, intLocationId
+				, intItemLocationId
 				, dtmDate
 				, dblUnitQty
 				, dblUOMQty
@@ -38,7 +38,7 @@ BEGIN
 				, intLotId
 		)
 		SELECT	intItemId = @InvalidItem
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = GETDATE()
 				,dblUnitQty = 10
 				,dblUOMQty = 1

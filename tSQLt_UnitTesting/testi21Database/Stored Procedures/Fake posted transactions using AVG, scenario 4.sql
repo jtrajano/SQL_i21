@@ -173,7 +173,7 @@ BEGIN
 			INSERT INTO dbo.tblICInventoryFIFO (
 					dtmDate
 					,intItemId
-					,intLocationId
+					,intItemLocationId
 					,dblStockIn
 					,dblStockOut
 					,dblCost
@@ -182,7 +182,7 @@ BEGIN
 			)
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @WetGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 1
 					,dblStockIn = 0
 					,dblStockOut = 75 
 					,dblCost = 2.00
@@ -191,7 +191,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @StickyGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 2
 					,dblStockIn = 0
 					,dblStockOut = 75
 					,dblCost = 2.00
@@ -200,7 +200,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @PremiumGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 3
 					,dblStockIn = 0
 					,dblStockOut = 75
 					,dblCost = 2.00
@@ -209,7 +209,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @ColdGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 4
 					,dblStockIn = 0
 					,dblStockOut = 75
 					,dblCost = 2.00
@@ -218,7 +218,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @HotGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 5
 					,dblStockIn = 0
 					,dblStockOut = 75 
 					,dblCost = 2.00
@@ -231,32 +231,32 @@ BEGIN
 		----------------------------------------------------------------
 		INSERT INTO dbo.tblICItemStock(
 				intItemId
-				,intLocationId
+				,intItemLocationId
 				,dblAverageCost
 				,dblUnitOnHand	
 		)
 		SELECT 	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 1
 				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75
 		UNION ALL 
 		SELECT 	intItemId = @StickyGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 2
 				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75
 		UNION ALL 
 		SELECT 	intItemId = @PremiumGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 3
 				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75
 		UNION ALL 
 		SELECT 	intItemId = @ColdGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 4
 				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75	
 		UNION ALL 
 		SELECT 	intItemId = @HotGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 5
 				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75
 
@@ -281,7 +281,7 @@ BEGIN
 				,intTransactionTypeId
 				,ysnIsUnposted
 				,intItemId
-				,intLocationId
+				,intItemLocationId
 				,strBatchId
 				,dblExchangeRate
 		)
@@ -297,7 +297,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 1
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1		
 		UNION ALL 
@@ -313,7 +313,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @StickyGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 2
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1
 		UNION ALL 
@@ -329,7 +329,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @PremiumGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 3
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1
 		UNION ALL 
@@ -345,7 +345,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @ColdGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 4
 				,strBatchId = @strBatchId			
 				,dblExchangeRate = 1
 		UNION ALL 
@@ -361,7 +361,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @HotGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = 5
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1
 
@@ -593,9 +593,11 @@ BEGIN
 		UPDATE	ItemStock
 		SET		dblUnitOnHand += 100
 				,dblAverageCost = 2.15
-		FROM	dbo.tblICItemStock ItemStock
-		WHERE	intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND intLocationId = @Default_Location
+		FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemStock.intItemId = ItemLocation.intItemId
+					AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
+		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+				AND ItemLocation.intLocationId = @Default_Location
 
 		----------------------------------------------------------------
 		-- Fake data for tblICInventoryFIFO
@@ -612,7 +614,7 @@ BEGIN
 			INSERT INTO dbo.tblICInventoryFIFO (
 					dtmDate
 					,intItemId
-					,intLocationId
+					,intItemLocationId
 					,dblStockIn
 					,dblStockOut
 					,dblCost
@@ -621,7 +623,7 @@ BEGIN
 			)
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @WetGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 1
 					,dblStockIn = 100
 					,dblStockOut = 75 
 					,dblCost = 2.15
@@ -630,7 +632,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @StickyGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 2
 					,dblStockIn = 100
 					,dblStockOut = 75
 					,dblCost = 2.15
@@ -639,7 +641,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @PremiumGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 3
 					,dblStockIn = 100
 					,dblStockOut = 75
 					,dblCost = 2.15
@@ -648,7 +650,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @ColdGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 4
 					,dblStockIn = 100
 					,dblStockOut = 75
 					,dblCost = 2.15
@@ -657,7 +659,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
 					,intItemId = @HotGrains 
-					,intLocationId = @Default_Location
+					,intItemLocationId = 5
 					,dblStockIn = 100
 					,dblStockOut = 75 
 					,dblCost = 2.15
@@ -715,7 +717,7 @@ BEGIN
 				,intTransactionTypeId
 				,ysnIsUnposted
 				,intItemId
-				,intLocationId
+				,intItemLocationId
 				,strBatchId
 				,dblExchangeRate
 				,intCurrencyId
@@ -732,7 +734,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @WetGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 1
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -749,7 +751,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Write-Off Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @WetGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 1
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -766,7 +768,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Revalue Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @WetGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 1
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -783,7 +785,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @StickyGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 2
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -800,7 +802,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Write-Off Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @StickyGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 2
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -817,7 +819,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Revalue Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @StickyGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 2
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -834,7 +836,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @PremiumGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 3
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -851,7 +853,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Write-Off Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @PremiumGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 3
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -868,7 +870,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Revalue Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @PremiumGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 3
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -885,7 +887,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @ColdGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 4
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -902,7 +904,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Write-Off Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @ColdGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 4
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -919,7 +921,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Revalue Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @ColdGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 4
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -936,7 +938,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @HotGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 5
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -953,7 +955,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Write-Off Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @HotGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 5
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -970,7 +972,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Revalue Sold')
 					,ysnIsUnposted = 0
 					,intItemId = @HotGrains
-					,intLocationId = @Default_Location
+					,intItemLocationId = 5
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
