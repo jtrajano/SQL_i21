@@ -11,9 +11,11 @@ GLAccount.strAccountId,
 GLAccount.intAccountGroupId,
 GLAccountGroup.strAccountGroup,
 GLAccountGroup.strAccountType,
-ItemAccount.strAccountDescription AS strAccountCategory,
+ItemAccount.intAccountCategoryId,
+GLAccountCategory.strAccountCategory,
 ItemAccount.intSort
 FROM vyuICGetItemStock Item
 INNER JOIN tblICItemAccount ItemAccount ON ItemAccount.intItemId = Item.intItemId
+LEFT JOIN tblGLAccountCategory GLAccountCategory ON GLAccountCategory.intAccountCategoryId = ItemAccount.intAccountCategoryId
 LEFT JOIN tblGLAccount GLAccount ON GLAccount.intAccountId = ItemAccount.intAccountId
 LEFT JOIN tblGLAccountGroup GLAccountGroup ON GLAccountGroup.intAccountGroupId = GLAccount.intAccountGroupId

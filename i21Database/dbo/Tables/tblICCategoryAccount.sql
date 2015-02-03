@@ -14,14 +14,15 @@ Type the overview for the table here.
 	(
 		[intCategoryAccountId] INT NOT NULL IDENTITY, 
 		[intCategoryId] INT NOT NULL, 
-		[strAccountDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[intAccountCategoryId] INT NULL, 
 		[intAccountId] INT NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCategoryAccount] PRIMARY KEY ([intCategoryAccountId]), 
 		CONSTRAINT [FK_tblICCategoryAccount_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICCategoryAccount_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
-		CONSTRAINT [AK_tblICCategoryAccount] UNIQUE ([strAccountDescription], [intCategoryId]) 
+		CONSTRAINT [AK_tblICCategoryAccount] UNIQUE ([intAccountCategoryId], [intCategoryId]), 
+		CONSTRAINT [FK_tblICCategoryAccount_tblGLAccountCategory] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId]) 
 	)
 	GO
 
@@ -65,12 +66,14 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Account Description',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCategoryAccount',
-		@level2type = N'COLUMN',
-		@level2name = N'strAccountDescription'
+	
 	GO
+
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Account Category Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICCategoryAccount',
+    @level2type = N'COLUMN',
+    @level2name = N'intAccountCategoryId'

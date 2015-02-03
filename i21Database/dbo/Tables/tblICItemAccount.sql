@@ -14,14 +14,15 @@ Type the overview for the table here.
 	(
 		[intItemAccountId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
-		[strAccountDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[intAccountCategoryId] INT NULL, 
 		[intAccountId] INT NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemAccount] PRIMARY KEY ([intItemAccountId]), 
 		CONSTRAINT [FK_tblICItemAccount_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemAccount_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
-		CONSTRAINT [AK_tblICItemAccount] UNIQUE ([strAccountDescription], [intItemId])
+		CONSTRAINT [AK_tblICItemAccount] UNIQUE ([intAccountCategoryId], [intItemId]), 
+		CONSTRAINT [FK_tblICItemAccount_tblGLAccountCategory] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId])
 	)
 
 	GO
@@ -44,14 +45,7 @@ Type the overview for the table here.
 		@level2name = N'intItemId'
 	GO
 
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Account Description',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemAccount',
-		@level2type = N'COLUMN',
-		@level2name = N'strAccountDescription'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Account Id',
@@ -82,3 +76,12 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
 	GO
+
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Account Category Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemAccount',
+    @level2type = N'COLUMN',
+    @level2name = N'intAccountCategoryId'

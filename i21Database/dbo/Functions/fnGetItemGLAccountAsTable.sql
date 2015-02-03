@@ -43,8 +43,10 @@ RETURN (
 																			SELECT	TOP 1 
 																					intAccountId
 																			FROM	dbo.tblICItemAccount
+																					INNER JOIN dbo.tblGLAccountCategory AccntCategory
+																						ON tblICItemAccount.intAccountCategoryId = AccntCategory.intAccountCategoryId
 																			WHERE	tblICItemAccount.intItemId = @intItemId
-																					AND tblICItemAccount.strAccountDescription = @strAccountDescription 
+																					AND AccntCategory.strAccountCategory = @strAccountDescription
 																		) AS ItemLevel
 																		FULL JOIN (
 																			-- Get the base account at the Item-Location level and then at the Category. 
@@ -54,9 +56,11 @@ RETURN (
 																						ON ItemLocation.intCategoryId = Category.intCategoryId
 																					INNER JOIN tblICCategoryAccount CategoryAccounts
 																						ON Category.intCategoryId = CategoryAccounts.intCategoryId
+																					INNER JOIN dbo.tblGLAccountCategory AccntCategory
+																						ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
 																			WHERE	ItemLocation.intItemId = @intItemId
 																					AND ItemLocation.intLocationId = @intLocationId
-																					AND CategoryAccounts.strAccountDescription = @strAccountDescription 			
+																					AND AccntCategory.strAccountCategory = @strAccountDescription 			
 																		) AS CategoryLevel
 																			ON CategoryLevel.intAccountId = CategoryLevel.intAccountId
 																		FULL JOIN (
