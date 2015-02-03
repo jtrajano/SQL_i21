@@ -65,7 +65,7 @@ BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountCategory' AND object_id = object_id('tblGLAccountCategory'))
 	BEGIN
 		EXEC('
-		DELETE FROM tblICItemAccount WHERE ISNULL(strAccountDescription, '''') <> ''''
+		DELETE FROM tblICItemAccount WHERE ISNULL(strAccountDescription, '''') = ''''
 		')
 	END
 END
@@ -75,7 +75,7 @@ BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountCategory' AND object_id = object_id('tblGLAccountCategory'))
 	BEGIN
 		EXEC('
-		DELETE FROM tblICCategoryAccount WHERE ISNULL(strAccountDescription, '''') <> ''''
+		DELETE FROM tblICCategoryAccount WHERE ISNULL(strAccountDescription, '''') = ''''
 		')
 	END
 END
