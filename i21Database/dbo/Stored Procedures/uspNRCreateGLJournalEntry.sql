@@ -188,8 +188,8 @@ BEGIN
 		BEGIN
 			IF @PayExtra = 0
 			BEGIN
-				--SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
-				SET @intDebitAccountId = @intCashAccount
+				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+				--SET @intDebitAccountId = @intCashAccount
 				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 				SET @strReference = 'NR Schd Payment'
 			END
@@ -198,16 +198,16 @@ BEGIN
 				IF @ExtraPayment = 0
 				BEGIN
 					SELECT TOP 1 @dblTransAmt = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId
-					--SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
-					SET @intDebitAccountId = @intCashAccount
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+					--SET @intDebitAccountId = @intCashAccount
 					SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 					SET @strReference = 'NR Schd Payment'
 				END
 				ELSE
 				BEGIN
 					SET @dblTransAmt = @ExtraPayment
-					--SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
-					SET @intDebitAccountId = @intCashAccount
+					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+					--SET @intDebitAccountId = @intCashAccount
 					SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 					SET @strReference = 'NR Schd Payment'
 				END		
@@ -215,8 +215,8 @@ BEGIN
 			IF @LateCharge > 0
 			BEGIN
 				SET @dblTransAmt = @LateCharge
-				--SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
-				SET @intDebitAccountId = @intCashAccount
+				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+				--SET @intDebitAccountId = @intCashAccount
 				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 				SET @strReference = 'ScheduledLateFee'
 			END			
@@ -354,8 +354,8 @@ BEGIN
 		END	
 		If @TransactionTypeId = 4
 		BEGIN
-			--SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
-			SET @intDebitAccountId = @intCashAccount
+			SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+			--SET @intDebitAccountId = @intCashAccount
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 			SET @strReference = 'NR Payment'
 		END	
