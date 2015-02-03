@@ -18,7 +18,7 @@
 	[dtmTerminationDate] DATETIME NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] PRIMARY KEY ([intDiscountScheduleCodeId]), 
-    CONSTRAINT [UK_tblGRDiscountScheduleCode_strDiscountCode] UNIQUE ([strDiscountCode], [intDiscountScheduleId]), 
+    CONSTRAINT [UK_tblGRDiscountScheduleCode_strDiscountCode_intDiscountScheduleId_dtmEffectiveDate_dtmTerminationDate] UNIQUE ([strDiscountCode], [intDiscountScheduleId], [dtmEffectiveDate], [dtmTerminationDate]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRDiscountSchedule_intDiscountScheduleId] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [tblGRDiscountSchedule]([intDiscountScheduleId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGLAccount_intPurchaseAccountId] FOREIGN KEY ([intPurchaseAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGLAccount_intSalesAccountId] FOREIGN KEY ([intSalesAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
