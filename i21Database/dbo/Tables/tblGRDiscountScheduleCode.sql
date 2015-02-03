@@ -3,7 +3,7 @@
 	[intDiscountScheduleCodeId] INT NOT NULL  IDENTITY, 
     [intDiscountScheduleId] INT NOT NULL, 
     [strDiscountCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strDiscountCodeDescription] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+    [strDiscountCodeDescription] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intDiscountCalculationOptionId] INT NOT NULL DEFAULT 1, 
     [intShrinkCalculationOptionId] INT NOT NULL DEFAULT 1, 
     [ysnZeroIsValid] BIT NOT NULL DEFAULT 1, 
