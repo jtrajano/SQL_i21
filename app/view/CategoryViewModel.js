@@ -26,7 +26,8 @@ Ext.define('Inventory.view.CategoryViewModel', {
         'AccountsPayable.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
         'Inventory.store.Class',
-        'Inventory.store.Family'
+        'Inventory.store.Family',
+        'GeneralLedger.store.BufAccountCategory'
     ],
 
     stores: {
@@ -74,49 +75,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
                 name: 'strDescription'
             }
         },
-        accountDescriptions: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Sales'
-                },
-                {
-                    strDescription: 'Purchase'
-                },
-                {
-                    strDescription: 'Inventory'
-                },
-                {
-                    strDescription: 'Variance'
-                },
-                {
-                    strDescription: 'COGS'
-                },
-                {
-                    strDescription: 'Expenses'
-                },
-                {
-                    strDescription: 'Write Off Sold'
-                },
-                {
-                    strDescription: 'Revalue Sold'
-                },
-                {
-                    strDescription: 'Auto Negative'
-                },
-                {
-                    strDescription: 'A/P Clearing'
-                },
-                {
-                    strDescription: 'Inventory In-Transit'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
+        accountCategory: Ext.create('GeneralLedger.store.BufAccountCategory'),
         inventoryTrackings: {
             autoLoad: true,
             data: [

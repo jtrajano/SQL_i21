@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
     {
         public int intCategoryAccountId { get; set; }
         public int intCategoryId { get; set; }
-        public string strAccountDescription { get; set; }
+        public int? intAccountCategoryId { get; set; }
         public int? intAccountId { get; set; }
         public int? intSort { get; set; }
 
@@ -74,8 +74,28 @@ namespace iRely.Inventory.Model
                 _accountGroup = value;
             }
         }
+        private string _accountCategory;
+        [NotMapped]
+        public string strAccountCategory
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_accountCategory))
+                    if (tblGLAccountCategory != null)
+                        return tblGLAccountCategory.strAccountCategory;
+                    else
+                        return null;
+                else
+                    return _accountCategory;
+            }
+            set
+            {
+                _accountCategory = value;
+            }
+        }
 
         public tblICCategory tblICCategory { get; set; }
         public tblGLAccount tblGLAccount { get; set; }
+        public tblGLAccountCategory tblGLAccountCategory { get; set; }
     }
 }

@@ -1025,12 +1025,39 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "displayField": "strDescription",
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intAccountCategoryId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Account Category Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strAccountCategory',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Account Category',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strAccountCategory",
                                                         "itemId": "cboAccountDescription",
-                                                        "valueField": "strDescription"
+                                                        "valueField": "strAccountCategory"
                                                     },
                                                     "name": "MyComboBox",
-                                                    "designerId": "da1af9af-f3be-4b4b-a90b-56c4b7591e5b"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "da1af9af-f3be-4b4b-a90b-56c4b7591e5b",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1131,21 +1158,6 @@
                                             },
                                             "name": "MyColumn24",
                                             "designerId": "879a5e0a-8c0a-4065-a570-64cf007122ce"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "flex": 1,
-                                                "itemId": "colAccountGroup",
-                                                "text": "Account Group"
-                                            },
-                                            "name": "MyColumn56",
-                                            "designerId": "e46ad431-7f08-4175-b8e7-3aa82f0a9529"
                                         },
                                         {
                                             "type": "Ext.grid.View",

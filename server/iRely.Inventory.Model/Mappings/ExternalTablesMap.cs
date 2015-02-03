@@ -43,6 +43,20 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblGLAccountCategoryMap : EntityTypeConfiguration<tblGLAccountCategory>
+    {
+        public tblGLAccountCategoryMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intAccountCategoryId);
+
+            // Table & Column Mappings
+            this.ToTable("tblGLAccountCategory");
+            this.Property(t => t.intAccountCategoryId).HasColumnName("intAccountCategoryId");
+            this.Property(t => t.strAccountCategory).HasColumnName("strAccountCategory");
+        }
+    }
+
     public class vyuAPVendorMap : EntityTypeConfiguration<vyuAPVendor>
     {
         public vyuAPVendorMap()

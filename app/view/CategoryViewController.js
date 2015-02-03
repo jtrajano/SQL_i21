@@ -77,16 +77,20 @@ Ext.define('Inventory.view.CategoryViewController', {
 
             grdGlAccounts: {
                 colAccountCategory: {
-                    dataIndex: 'strAccountDescription',
+                    dataIndex: 'strAccountCategory',
                     editor: {
-                        store: '{accountDescriptions}'
+                        store: '{accountCategory}'
                     }
                 },
                 colAccountGroup : 'strAccountGroup',
                 colAccountId: {
                     dataIndex: 'strAccountId',
                     editor: {
-                        store: '{glAccount}'
+                        store: '{glAccount}',
+                        defaultFilters: [{
+                            column: 'intAccountCategoryId',
+                            value: '{grdGlAccounts.selection.intAccountCategoryId}'
+                        }]
                     }
                 },
                 colAccountDescription: 'strDescription'
@@ -240,6 +244,10 @@ Ext.define('Inventory.view.CategoryViewController', {
             current.set('strDescription', records[0].get('strDescription'));
             current.set('strAccountGroup', records[0].get('strAccountGroup'));
         }
+        else if (combo.column.itemId === 'colAccountCategory')
+        {
+            current.set('intAccountCategoryId', records[0].get('intAccountCategoryId'));
+        }
     },
 
     onVendorXRefSelect: function(combo, records, eOpts) {
@@ -341,6 +349,9 @@ Ext.define('Inventory.view.CategoryViewController', {
     init: function(application) {
         this.control({
             "#cboAccountId": {
+                select: this.onAccountSelect
+            },
+            "#cboAccountCategory": {
                 select: this.onAccountSelect
             },
             "#btnAddLocation": {

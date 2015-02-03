@@ -46,7 +46,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         'AccountsReceivable.store.CustomerBuffered',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CountryBuffered',
-        'GeneralLedger.store.BufAccountId'
+        'GeneralLedger.store.BufAccountId',
+        'GeneralLedger.store.BufAccountCategory'
     ],
 
     stores: {
@@ -165,49 +166,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
 
 
-        accountDescriptions: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Sales'
-                },
-                {
-                    strDescription: 'Purchase'
-                },
-                {
-                    strDescription: 'Inventory'
-                },
-                {
-                    strDescription: 'Variance'
-                },
-                {
-                    strDescription: 'COGS'
-                },
-                {
-                    strDescription: 'Expenses'
-                },
-                {
-                    strDescription: 'Write Off Sold'
-                },
-                {
-                    strDescription: 'Revalue Sold'
-                },
-                {
-                    strDescription: 'Auto Negative'
-                },
-                {
-                    strDescription: 'A/P Clearing'
-                },
-                {
-                    strDescription: 'Inventory In-Transit'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
+        accountCategory: Ext.create('GeneralLedger.store.BufAccountCategory'),
+
         glAccountId: {
             type: 'bufAccountid'
         },

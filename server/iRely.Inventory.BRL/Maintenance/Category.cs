@@ -47,6 +47,7 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICCategory>()
                 .Include("tblICCategoryAccounts.tblGLAccount")
+                .Include("tblICCategoryAccounts.tblGLAccountCategory")
                 .Include("tblICCategoryLocations.tblSMCompanyLocation")
                 .Include("tblICCategoryVendors.vyuAPVendor")
                 .Include("tblICCategoryVendors.tblICCategoryLocation.tblSMCompanyLocation")

@@ -182,6 +182,7 @@ namespace iRely.Inventory.Model
         
         public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
         public DbSet<tblGLAccount> tblGLAccounts { get; set; }
+        public DbSet<tblGLAccountCategory> tblGLAccountCategories { get; set; }
         public DbSet<vyuAPVendor> vyuAPVendors { get; set; }
         public DbSet<tblARCustomer> tblARCustomers { get; set; }
         public DbSet<tblSMCountry> tblSMCountries { get; set; }
@@ -315,6 +316,7 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblSMCompanyLocationMap());
             modelBuilder.Configurations.Add(new tblGLAccountMap());
+            modelBuilder.Configurations.Add(new tblGLAccountCategoryMap());
             modelBuilder.Configurations.Add(new vyuAPVendorMap());
             modelBuilder.Configurations.Add(new tblARCustomerMap());
             modelBuilder.Configurations.Add(new tblSMCountryMap());

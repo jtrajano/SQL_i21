@@ -136,6 +136,18 @@ namespace iRely.Inventory.Model
 
     }
 
+    public class tblGLAccountCategory
+    {
+        public int intAccountCategoryId { get; set; }
+        public string strAccountCategory { get; set; }
+        
+        public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
+        public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
+        public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
+    }
+
+    
+
     public class vyuAPVendor
     {
         public int intEntityId { get; set; }

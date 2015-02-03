@@ -9,6 +9,8 @@ Ext.define('Inventory.model.ItemStockDetailAccount', {
     ],
 
     fields: [
+        { name: 'intAccountKey', type: 'int'},
+        { name: 'intKey', type: 'int'},
         { name: 'intItemAccountId', type: 'int'},
         { name: 'intItemId', type: 'int',
             reference: {
@@ -27,16 +29,13 @@ Ext.define('Inventory.model.ItemStockDetailAccount', {
                 }
             }
         },
-        { name: 'strAccountDescription', type: 'string'},
-        { name: 'intAccountId', type: 'int', allowNull: true },
-        { name: 'intSort', type: 'int'},
-
+        { name: 'intAccountId', type: 'int'},
         { name: 'strAccountId', type: 'string'},
-        { name: 'strDescription', type: 'string'}
-    ],
-
-    validators: [
-        { type: 'presence', field: 'strAccountDescription' },
-        { type: 'presence', field: 'strAccountId' }
+        { name: 'intAccountGroupId', type: 'int'},
+        { name: 'strAccountGroup', type: 'string'},
+        { name: 'strAccountType', type: 'string'},
+        { name: 'intAccountCategoryId', type: 'int'},
+        { name: 'strAccountCategory', type: 'string'},
+        { name: 'intSort', type: 'int'}
     ]
 });

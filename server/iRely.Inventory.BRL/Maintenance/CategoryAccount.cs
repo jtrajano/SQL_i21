@@ -47,6 +47,7 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICCategoryAccount>()
                 .Include(p => p.tblGLAccount)
+                .Include(p => p.tblGLAccountCategory)
                 .Where(w => query.Where(predicate).Any(a => a.intCategoryAccountId == w.intCategoryAccountId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

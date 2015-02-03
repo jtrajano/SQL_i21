@@ -125,16 +125,20 @@ Ext.define('Inventory.view.ItemViewController', {
             //--------------//
             grdGlAccounts: {
                 colGLAccountCategory: {
-                    dataIndex: 'strAccountDescription',
+                    dataIndex: 'strAccountCategory',
                     editor: {
-                        store: '{accountDescriptions}'
+                        store: '{accountCategory}'
                     }
                 },
                 colAccountGroup : 'strAccountGroup',
                 colGLAccountId: {
                     dataIndex: 'strAccountId',
                     editor: {
-                        store: '{glAccountId}'
+                        store: '{glAccountId}',
+                        defaultFilters: [{
+                            column: 'intAccountCategoryId',
+                            value: '{grdGlAccounts.selection.intAccountCategoryId}'
+                        }]
                     }
                 },
                 colDescription: 'strDescription'
@@ -1639,6 +1643,10 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('strDescription', records[0].get('strDescription'));
             current.set('strAccountGroup', records[0].get('strAccountGroup'));
         }
+        else if (combo.column.itemId === 'colGLAccountCategory')
+        {
+            current.set('intAccountCategoryId', records[0].get('intAccountCategoryId'));
+        }
     },
 
     // </editor-fold>
@@ -2174,6 +2182,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 select: this.onUOMUnitMeasureSelect
             },
             "#cboGLAccountId": {
+                select: this.onGLAccountSelect
+            },
+            "#cboAccountCategory": {
                 select: this.onGLAccountSelect
             },
             "#cboPOSCategoryId": {

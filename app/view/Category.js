@@ -493,10 +493,24 @@ Ext.define('Inventory.view.Category', {
                                                         text: 'Account Category',
                                                         flex: 1,
                                                         editor: {
-                                                            xtype: 'combobox',
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intAccountCategoryId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Account Category Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strAccountCategory',
+                                                                    dataType: 'string',
+                                                                    text: 'Account Category',
+                                                                    flex: 1
+                                                                }
+                                                            ],
                                                             itemId: 'cboAccountDescription',
-                                                            displayField: 'strDescription',
-                                                            valueField: 'strDescription'
+                                                            displayField: 'strAccountCategory',
+                                                            valueField: 'strAccountCategory'
                                                         }
                                                     },
                                                     {
@@ -553,12 +567,6 @@ Ext.define('Inventory.view.Category', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colAccountDescription',
                                                         text: 'Description',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colAccountGroup',
-                                                        text: 'Account Group',
                                                         flex: 1
                                                     }
                                                 ],

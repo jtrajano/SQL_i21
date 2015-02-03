@@ -305,6 +305,7 @@ namespace iRely.Inventory.Model
         public int? intAccountId { get; set; }
         public string strAccountId { get; set; }
         public int? intAccountGroupId { get; set; }
+        public int? intAccountCategoryId { get; set; }
         public string strAccountGroup { get; set; }
         public string strAccountType { get; set; }
         public string strAccountCategory { get; set; }
