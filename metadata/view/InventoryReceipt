@@ -642,62 +642,6 @@
                                                 "columns": [
                                                     "[",
                                                     "\t{",
-                                                    "\t\tdataIndex: 'intPurchaseId',",
-                                                    "\t\tdataType: 'numeric',",
-                                                    "\t\ttext: 'Purchase Order Id',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strPurchaseOrderNumber',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'PO Number',",
-                                                    "\t\tflex: 1",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strVendorOrderNumber',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Vendor Order Number',",
-                                                    "\t\tflex: 1",
-                                                    "\t}",
-                                                    "]"
-                                                ],
-                                                "designer|createAlias": "gridcombobox",
-                                                "displayField": "strPurchaseOrderNumber",
-                                                "fieldLabel": "Source",
-                                                "itemId": "cboSource",
-                                                "labelAlign": "top",
-                                                "labelWidth": 80,
-                                                "layout|flex": 1,
-                                                "layout|margins": null,
-                                                "margin": "0 0 0 5",
-                                                "name": null,
-                                                "valueField": "intPurchaseId",
-                                                "width": null
-                                            },
-                                            "name": "MyComboBox",
-                                            "configAlternates": {
-                                                "columns": "array"
-                                            },
-                                            "designerId": "525cb4c3-0957-41a8-946d-816afdfd0160",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "columns",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.form.field.ComboBox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "columns": [
-                                                    "[",
-                                                    "\t{",
                                                     "\t\tdataIndex: 'intCompanyLocationId',",
                                                     "\t\tdataType: 'numeric',",
                                                     "\t\ttext: 'Location Id',",
@@ -1511,7 +1455,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter132",
+                                                    "name": "filter1",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1526,6 +1470,22 @@
                                             "codeClass": "Ext.selection.CheckboxModel",
                                             "name": "MyCheckboxSelectionModel2",
                                             "designerId": "ce852480-76ec-459e-abce-97f5745b94ac"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strSourceNumber",
+                                                "itemId": "colISourceNumber",
+                                                "text": "Source No.",
+                                                "width": 100
+                                            },
+                                            "name": "MyColumn9",
+                                            "designerId": "68d72edf-cde5-4ff3-a50e-4a2e01235288"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2350,7 +2310,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter133",
+                                                    "name": "filter11",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3088,7 +3048,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter134",
+                                                    "name": "filter12",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3919,7 +3879,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter135",
+                                                    "name": "filter13",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4362,7 +4322,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

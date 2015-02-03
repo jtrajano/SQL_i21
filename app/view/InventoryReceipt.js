@@ -347,37 +347,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'gridcombobox',
                                                         columns: [
                                                             {
-                                                                dataIndex: 'intPurchaseId',
-                                                                dataType: 'numeric',
-                                                                text: 'Purchase Order Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strPurchaseOrderNumber',
-                                                                dataType: 'string',
-                                                                text: 'PO Number',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strVendorOrderNumber',
-                                                                dataType: 'string',
-                                                                text: 'Vendor Order Number',
-                                                                flex: 1
-                                                            }
-                                                        ],
-                                                        flex: 1,
-                                                        itemId: 'cboSource',
-                                                        margin: '0 0 0 5',
-                                                        fieldLabel: 'Source',
-                                                        labelAlign: 'top',
-                                                        labelWidth: 80,
-                                                        displayField: 'strPurchaseOrderNumber',
-                                                        valueField: 'intPurchaseId'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
-                                                            {
                                                                 dataIndex: 'intCompanyLocationId',
                                                                 dataType: 'numeric',
                                                                 text: 'Location Id',
@@ -742,6 +711,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        dataIndex: 'strSourceNumber',
+                                                        itemId: 'colISourceNumber',
+                                                        width: 100,
+                                                        text: 'Source No.'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colItemNo',
                                                         width: 100,
                                                         dataIndex: 'strItemNo',
@@ -809,20 +785,20 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblQtyOrdered',
                                                         itemId: 'colQtyOrdered',
                                                         width: 75,
                                                         align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
                                                         text: 'Ordered',
                                                         format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblQtyOrdered',
                                                         itemId: 'colReceived',
                                                         width: 75,
                                                         align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
                                                         text: 'Received',
                                                         format: '0,000.##'
                                                     },
