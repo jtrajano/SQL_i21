@@ -224,14 +224,16 @@ BEGIN
 			,intTransactionId = 1
 			,strModuleName = 'Inventory'
 	FROM	(
-				SELECT Stock.intItemId, Stock.intItemLocationId, Inventory.intAccountId FROM dbo.tblICItemStock Stock
-				OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intItemLocationId, @UseGLAccount_Inventory) Inventory
+				SELECT	Stock.intItemId, Stock.intItemLocationId, Inventory.intAccountId 
+				FROM	dbo.tblICItemStock Stock INNER JOIN dbo.tblICItemLocation ItemLocation
+							ON Stock.intItemId = ItemLocation.intItemId
+							AND Stock.intItemLocationId = ItemLocation.intItemLocationId							
+						OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intItemLocationId, @UseGLAccount_Inventory) Inventory
+				WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+						AND ItemLocation.intLocationId = @Default_Location				
 			) InventoryAccountSetup
 			INNER JOIN dbo.tblGLAccount GLAccount
 				ON InventoryAccountSetup.intAccountId = GLAccount.intAccountId
-				
-	WHERE	InventoryAccountSetup.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-			AND InventoryAccountSetup.intItemLocationId = @Default_Location
 	UNION ALL 
 	SELECT	dtmDate = '01/16/2014'
 			,strBatchId = @strBatchId
@@ -255,13 +257,15 @@ BEGIN
 			,strModuleName = 'Inventory'
 	FROM	(
 				SELECT	Stock.intItemId, Stock.intItemLocationId, AutoNegative.intAccountId 
-				FROM	dbo.tblICItemStock Stock
+				FROM	dbo.tblICItemStock Stock INNER JOIN dbo.tblICItemLocation ItemLocation
+							ON Stock.intItemId = ItemLocation.intItemId
+							AND Stock.intItemLocationId = ItemLocation.intItemLocationId							
 						OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intItemLocationId, @UseGLAccount_AutoNegative) AutoNegative
+				WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+						AND ItemLocation.intLocationId = @Default_Location						
 			) InventoryAccountSetup
 			INNER JOIN dbo.tblGLAccount GLAccount
 				ON InventoryAccountSetup.intAccountId = GLAccount.intAccountId
-	WHERE	InventoryAccountSetup.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-			AND InventoryAccountSetup.intItemLocationId = @Default_Location					
 	-- END Reverse the posted GL entries
 	
 	
@@ -356,13 +360,15 @@ BEGIN
 			,strTransactionForm = NULL
 	FROM	(
 				SELECT	Stock.intItemId, Stock.intItemLocationId, AutoNegative.intAccountId 
-				FROM	dbo.tblICItemStock Stock
+				FROM	dbo.tblICItemStock Stock INNER JOIN dbo.tblICItemLocation ItemLocation
+							ON Stock.intItemId = ItemLocation.intItemId
+							AND Stock.intItemLocationId = ItemLocation.intItemLocationId							
 						OUTER APPLY dbo.fnGetItemGLAccountAsTable (Stock.intItemId, Stock.intItemLocationId, @UseGLAccount_AutoNegative) AutoNegative
+				WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+						AND ItemLocation.intLocationId = @Default_Location						
 			) InventoryAccountSetup
 			INNER JOIN dbo.tblGLAccount GLAccount
 				ON InventoryAccountSetup.intAccountId = GLAccount.intAccountId
-	WHERE	InventoryAccountSetup.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-			AND InventoryAccountSetup.intItemLocationId = @Default_Location	
 	-- END Reverse of the inventory transactions
 
 	-- BEGIN Setup the expected Item Stock
@@ -415,7 +421,7 @@ BEGIN
 	-- Return the stock to the negative cost bucket
 	SELECT	intInventoryFIFOId = 1
 			,intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 1
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -425,7 +431,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 2
 			,intItemId = @StickyGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 2
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -435,7 +441,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 3
 			,intItemId = @PremiumGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 3
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -445,7 +451,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 4
 			,intItemId = @ColdGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 4
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -455,7 +461,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 5
 			,intItemId = @HotGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 5
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -467,7 +473,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 6
 			,intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 1
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -477,7 +483,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 7
 			,intItemId = @StickyGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 2
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -487,7 +493,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 8
 			,intItemId = @PremiumGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 3
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -497,7 +503,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 9
 			,intItemId = @ColdGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 4
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -507,7 +513,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 10
 			,intItemId = @HotGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 5
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -656,17 +662,19 @@ BEGIN
 			,intTransactionId
 	)	
 	SELECT	intInventoryFIFOId
-			,intItemId
-			,intItemLocationId
+			,fifo.intItemId
+			,fifo.intItemLocationId
 			,dtmDate
 			,dblStockIn
 			,dblStockOut
 			,dblCost
 			,strTransactionId
 			,intTransactionId		
-	FROM	dbo.tblICInventoryFIFO
-	WHERE	intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
-			AND intItemLocationId IN (@Default_Location)
+	FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON fifo.intItemId = ItemLocation.intItemId
+				AND fifo.intItemLocationId = ItemLocation.intItemLocationId
+	WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
+			AND ItemLocation.intLocationId = @Default_Location	
 				
 	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
 	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';

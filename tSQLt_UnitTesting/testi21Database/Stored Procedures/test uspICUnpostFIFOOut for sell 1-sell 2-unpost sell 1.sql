@@ -90,7 +90,7 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0000001'
 				,intItemId = @WetGrains
-				,intItemLocationId = @NewHaven
+				,intItemLocationId = 6
 		UNION ALL 
 		SELECT	dtmDate = '1/4/2014'
 				,dblStockIn = 0
@@ -99,7 +99,7 @@ BEGIN
 				,intTransactionId = 2
 				,strTransactionId = 'InvShip-0000002'
 				,intItemId = @WetGrains
-				,intItemLocationId = @NewHaven
+				,intItemLocationId = 6
 
 		-- Add fake data for tblICInventoryFIFOOut
 		-- None needed for the fifo-out table 
@@ -133,7 +133,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intItemLocationId = @NewHaven
+				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0001'
 		UNION ALL 
 		SELECT	dtmDate = '1/4/2014'
@@ -148,7 +148,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intItemLocationId = @NewHaven		
+				,intItemLocationId = 6		
 				,strBatchId = 'BATCH-0002'		
 		UNION ALL 
 		SELECT	dtmDate = '1/5/2014'
@@ -163,7 +163,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryShipment
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intItemLocationId = @NewHaven
+				,intItemLocationId = 6
 				,strBatchId = 'BATCH-0003'
 
 		-- Setup the expected data for FIFO

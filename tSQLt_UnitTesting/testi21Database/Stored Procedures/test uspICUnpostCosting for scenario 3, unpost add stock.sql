@@ -286,7 +286,7 @@ BEGIN
 	-- Plug the out-qty 
 	SELECT	intInventoryFIFOId = 1
 			,intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 1
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -296,7 +296,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 2
 			,intItemId = @StickyGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 2
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -306,7 +306,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 3
 			,intItemId = @PremiumGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 3
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -316,7 +316,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 4
 			,intItemId = @ColdGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 4
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -326,7 +326,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 5
 			,intItemId = @HotGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 5
 			,dtmDate = '01/01/2014'
 			,dblStockIn = 100
 			,dblStockOut = 100
@@ -337,7 +337,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 6
 			,intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 1
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -347,7 +347,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 7
 			,intItemId = @StickyGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 2
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -357,7 +357,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 8
 			,intItemId = @PremiumGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 3
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -367,7 +367,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 9
 			,intItemId = @ColdGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 4
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -377,7 +377,7 @@ BEGIN
 	UNION ALL 
 	SELECT	intInventoryFIFOId = 10
 			,intItemId = @HotGrains
-			,intItemLocationId = @Default_Location
+			,intItemLocationId = 5
 			,dtmDate = '01/16/2014'
 			,dblStockIn = 0
 			,dblStockOut = 75
@@ -522,18 +522,20 @@ BEGIN
 			,intTransactionId
 	)	
 	SELECT	intInventoryFIFOId
-			,intItemId
-			,intItemLocationId
+			,fifo.intItemId
+			,fifo.intItemLocationId
 			,dtmDate
 			,dblStockIn
 			,dblStockOut
 			,dblCost
 			,strTransactionId
 			,intTransactionId		
-	FROM	dbo.tblICInventoryFIFO
-	WHERE	intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
-			AND intItemLocationId IN (@Default_Location)
-				
+	FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON fifo.intItemId = ItemLocation.intItemId
+				AND fifo.intItemLocationId = ItemLocation.intItemLocationId			
+	WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
+			AND ItemLocation.intLocationId = @Default_Location
+		
 	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
 	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
 	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
@@ -564,3 +566,4 @@ IF OBJECT_ID('expectedFIFO') IS NOT NULL
 
 IF OBJECT_ID('actualFIFO') IS NOT NULL 
 	DROP TABLE dbo.actualFIFO
+GO

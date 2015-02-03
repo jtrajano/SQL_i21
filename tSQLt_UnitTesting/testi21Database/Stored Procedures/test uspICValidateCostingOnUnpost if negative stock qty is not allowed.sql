@@ -26,15 +26,15 @@ BEGIN
 				,dblTotalQty
 		)
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @BetterHaven -- <<< NEGATIVE STOCK IS NOT ALLOWED AT THIS LOCATION
+				,intItemLocationId = 11 --@BetterHaven -- <<< NEGATIVE STOCK IS NOT ALLOWED AT THIS LOCATION
 				,dblTotalQty = -10 
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = 1 --@Default_Location
 				,dblTotalQty = -10000
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @NewHaven
+				,intItemLocationId = 6 --@NewHaven
 				,dblTotalQty = -10000
 
 		-- Use the simple item mock data

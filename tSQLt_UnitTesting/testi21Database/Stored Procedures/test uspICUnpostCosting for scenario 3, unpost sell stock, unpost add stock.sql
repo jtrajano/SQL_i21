@@ -295,7 +295,7 @@ BEGIN
 		-- The In qty will remain at 100. 
 		SELECT	intInventoryFIFOId = 1
 				,intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = 1
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -306,7 +306,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 2
 				,intItemId = @StickyGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = 2
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -317,7 +317,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 3
 				,intItemId = @PremiumGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = 3
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -328,7 +328,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 4
 				,intItemId = @ColdGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = 4
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -339,7 +339,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 5
 				,intItemId = @HotGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = 5
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -500,7 +500,7 @@ BEGIN
 					ON expectedItemStock.intItemId = ItemLocation.intItemId
 					AND expectedItemStock.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location				
+				AND ItemLocation.intLocationId = @Default_Location
 			
 		-- Expect FIFO in records are plugged out to prevent further use in the future. 
 		UPDATE	expectedFIFO
@@ -652,8 +652,8 @@ BEGIN
 			,ysnIsUnposted
 	)	
 	SELECT	intInventoryFIFOId
-			,intItemId
-			,intItemLocationId
+			,fifo.intItemId
+			,fifo.intItemLocationId
 			,dtmDate
 			,dblStockIn
 			,dblStockOut
@@ -661,15 +661,16 @@ BEGIN
 			,strTransactionId
 			,intTransactionId		
 			,ysnIsUnposted
-	FROM	dbo.tblICInventoryFIFO
-	WHERE	intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
-			AND intItemLocationId IN (@Default_Location)		
+	FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON fifo.intItemId = ItemLocation.intItemId
+				AND fifo.intItemLocationId = ItemLocation.intItemLocationId
+	WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
+			AND ItemLocation.intLocationId = @Default_Location
 				
 	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
 	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
 	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
-	EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';	
-
+	EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';
 END 
 
 -- Clean-up: remove the tables used in the unit test

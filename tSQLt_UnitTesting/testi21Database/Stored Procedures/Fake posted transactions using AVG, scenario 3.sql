@@ -587,7 +587,7 @@ BEGIN
 					ON ItemStock.intItemId = ItemLocation.intItemId
 					AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intItemLocationId = @Default_Location
+				AND ItemLocation.intLocationId = @Default_Location
 
 		-- Add out qty in the fifo table
 		UPDATE	FIFO
@@ -596,7 +596,7 @@ BEGIN
 					ON FIFO.intItemId = ItemLocation.intItemId
 					AND FIFO.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intItemLocationId = @Default_Location
+				AND ItemLocation.intLocationId = @Default_Location
 
 		-- Add the fifo out records
 		INSERT INTO dbo.tblICInventoryFIFOOut (
