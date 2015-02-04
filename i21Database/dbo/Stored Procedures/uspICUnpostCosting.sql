@@ -43,17 +43,17 @@ DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 BEGIN 
 	INSERT INTO @ItemsToUnpost (
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dblTotalQty
 	)
 	SELECT	ItemTrans.intItemId
-			,ItemTrans.intItemLocationId
+			,ItemTrans.intLocationId
 			,SUM(ISNULL(ItemTrans.dblUnitQty, 0) * -1)
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
-	GROUP BY ItemTrans.intItemId, ItemTrans.intItemLocationId
+	GROUP BY ItemTrans.intItemId, ItemTrans.intLocationId
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ BEGIN
 	-------------------------------------------------
 	INSERT INTO dbo.tblICInventoryTransaction (
 			[intItemId]
-			,[intItemLocationId] 
+			,[intLocationId] 
 			,[dtmDate] 
 			,[dblUnitQty] 
 			,[dblCost] 
@@ -121,7 +121,7 @@ BEGIN
 			,[intConcurrencyId] 
 	)			
 	SELECT	[intItemId]				= ActualTransaction.intItemId
-			,[intItemLocationId]	= ActualTransaction.intItemLocationId
+			,[intLocationId]		= ActualTransaction.intLocationId
 			,[dtmDate]				= ActualTransaction.dtmDate
 			,[dblUnitQty]			= ActualTransaction.dblUnitQty * -1
 			,[dblCost]				= ActualTransaction.dblCost 
@@ -160,7 +160,7 @@ BEGIN
 		UPDATE	Stock
 		SET		Stock.dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) + ItemToUnpost.dblTotalQty > 0 THEN 
 													-- Recalculate the average cost
-													dbo.fnRecalculateAverageCost(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) 
+													dbo.fnRecalculateAverageCost(Stock.intItemId, Stock.intLocationId) 
 												ELSE 
 													-- Use the same average cost. 
 													Stock.dblAverageCost
@@ -169,7 +169,7 @@ BEGIN
 				-- ,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
 		FROM	dbo.tblICItemStock AS Stock INNER JOIN @ItemsToUnpost ItemToUnpost
 					ON Stock.intItemId = ItemToUnpost.intItemId
-					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
+					AND Stock.intLocationId = ItemToUnpost.intLocationId
 	END
 
 	---------------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ BEGIN
 	BEGIN 
 		INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
-				,[intItemLocationId] 
+				,[intLocationId] 
 				,[dtmDate] 
 				,[dblUnitQty] 
 				,[dblCost] 
@@ -197,11 +197,11 @@ BEGIN
 				,[ysnIsUnposted]
 		)
 		SELECT	[intItemId] = ItemToUnpost.intItemId
-				,[intItemLocationId] = ItemToUnpost.intItemLocationId
+				,[intLocationId] = ItemToUnpost.intLocationId
 				,[dtmDate] = TransactionToReverse.dtmDate
 				,[dblUnitQty] = 0
 				,[dblCost] = 0
-				,[dblValue] = (Stock.dblUnitOnHand * Stock.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)
+				,[dblValue] = (Stock.dblUnitOnHand * Stock.dblAverageCost) - [dbo].[fnGetItemTotalValueFromTransactions](Stock.intItemId, Stock.intLocationId)
 				,[dblSalesPrice] = 0
 				,[intCurrencyId] = TransactionToReverse.intCurrencyId
 				,[dblExchangeRate] = TransactionToReverse.dblExchangeRate
@@ -216,8 +216,8 @@ BEGIN
 				,[ysnIsUnposted] = 0
 		FROM	dbo.tblICItemStock AS Stock INNER JOIN @ItemsToUnpost ItemToUnpost
 						ON Stock.intItemId = ItemToUnpost.intItemId
-						AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
-						AND dbo.fnGetCostingMethod(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) = @AVERAGECOST
+						AND Stock.intLocationId = ItemToUnpost.intLocationId
+						AND dbo.fnGetCostingMethod(ItemToUnpost.intItemId, ItemToUnpost.intLocationId) = @AVERAGECOST
 				,(
 					SELECT TOP 1
 							ItemTransaction.dtmDate
@@ -231,7 +231,7 @@ BEGIN
 					WHERE	ItemTransaction.intTransactionId = @intTransactionId
 							AND ItemTransaction.strTransactionId = @strTransactionId
 				) TransactionToReverse 
-		WHERE	(Stock.dblUnitOnHand * Stock.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) <> 0
+		WHERE	(Stock.dblUnitOnHand * Stock.dblAverageCost) - [dbo].[fnGetItemTotalValueFromTransactions](Stock.intItemId, Stock.intLocationId) <> 0
 	END
 END
 

@@ -24,7 +24,7 @@ BEGIN
 		-- Add item stock records
 		INSERT INTO tblICItemStock (
 				[intItemId]
-				,[intItemLocationId]
+				,[intLocationId]
 				,[intSubLocationId]
 				,[dblAverageCost]
 				,[dblUnitOnHand]
@@ -36,7 +36,7 @@ BEGIN
 		)
 		-- Add Item Stock for Wet Grains
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intLocationId] = @Default_Location
 				,[intSubLocationId] = NULL
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -47,7 +47,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @NewHaven
+				,[intLocationId] = @NewHaven
 				,[intSubLocationId] = NULL
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -58,7 +58,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @BetterHaven
+				,[intLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -71,7 +71,7 @@ BEGIN
 		-- Add Item Stock for Sticky Grains
 		UNION ALL 
 		SELECT	[intItemId] = @StickyGrains
-				,[intItemLocationId] = @Default_Location
+				,[intLocationId] = @Default_Location
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -82,7 +82,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @StickyGrains
-				,[intItemLocationId] = @NewHaven
+				,[intLocationId] = @NewHaven
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -93,7 +93,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @StickyGrains
-				,[intItemLocationId] = @BetterHaven
+				,[intLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -106,7 +106,7 @@ BEGIN
 		-- Add Item Stock for Premium Grains
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
-				,[intItemLocationId] = @Default_Location
+				,[intLocationId] = @Default_Location
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -117,7 +117,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
-				,[intItemLocationId] = @NewHaven
+				,[intLocationId] = @NewHaven
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -128,7 +128,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
-				,[intItemLocationId] = @BetterHaven
+				,[intLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -141,7 +141,7 @@ BEGIN
 		-- Add Item Stock for Cold Grains
 		UNION ALL 
 		SELECT	[intItemId] = @ColdGrains
-				,[intItemLocationId] = @Default_Location
+				,[intLocationId] = @Default_Location
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -152,7 +152,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @ColdGrains
-				,[intItemLocationId] = @NewHaven
+				,[intLocationId] = @NewHaven
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -163,7 +163,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @ColdGrains
-				,[intItemLocationId] = @BetterHaven
+				,[intLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -176,7 +176,7 @@ BEGIN
 		-- Add Item Stock for Hot Grains
 		UNION ALL 
 		SELECT	[intItemId] = @HotGrains
-				,[intItemLocationId] = @Default_Location
+				,[intLocationId] = @Default_Location
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -187,7 +187,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @HotGrains
-				,[intItemLocationId] = @NewHaven
+				,[intLocationId] = @NewHaven
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
@@ -198,7 +198,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @HotGrains
-				,[intItemLocationId] = @BetterHaven
+				,[intLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
 				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 

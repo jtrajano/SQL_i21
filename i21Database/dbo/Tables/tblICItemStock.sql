@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intItemStockId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
-		[intItemLocationId] INT NOT NULL, 
+		[intLocationId] INT NOT NULL, 
 		[intSubLocationId] INT NULL, 
 		[dblAverageCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -26,12 +26,12 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemStock] PRIMARY KEY ([intItemStockId]), 
 		CONSTRAINT [FK_tblICItemStock_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemStock_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
+		CONSTRAINT [FK_tblICItemStock_tblICItemLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 	)
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intItemId_intLocationId]
-		ON [dbo].[tblICItemStock]([intItemId] ASC, [intItemLocationId] ASC)
+		ON [dbo].[tblICItemStock]([intItemId] ASC, [intLocationId] ASC)
 		INCLUDE(dblUnitOnHand, dblAverageCost);
 	GO
 
@@ -55,13 +55,13 @@ Type the overview for the table here.
 		@level2name = N'intItemId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Item Location Id',
+		@value = N'Location Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICItemStock',
 		@level2type = N'COLUMN',
-		@level2name = N'intItemLocationId'
+		@level2name = N'intLocationId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Sub Location Id',

@@ -86,7 +86,7 @@ BEGIN
 				,intTransactionId
 				,strTransactionId
 				,intItemId
-				,intItemLocationId
+				,intLocationId
 		)
 		SELECT	dtmDate = '1/1/2014'
 				,dblStockIn = 100
@@ -95,7 +95,7 @@ BEGIN
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0000001'
 				,intItemId = @WetGrains
-				,intItemLocationId = 6
+				,intLocationId = @NewHaven
 		UNION ALL 
 		SELECT	dtmDate = '1/2/2014'
 				,dblStockIn = 23
@@ -104,7 +104,7 @@ BEGIN
 				,intTransactionId = 2
 				,strTransactionId = 'InvRcpt-0000002'
 				,intItemId = @WetGrains
-				,intItemLocationId = 6
+				,intLocationId = @NewHaven
 
 		-- Add fake data for tblICInventoryFIFOOut
 		-- No fifo out data.
@@ -123,7 +123,7 @@ BEGIN
 			,intTransactionTypeId
 			,ysnIsUnposted
 			,intItemId
-			,intItemLocationId
+			,intLocationId
 			,strBatchId
 		)
 		SELECT	dtmDate = '1/1/2014'
@@ -138,7 +138,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryReceipt
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intItemLocationId = 6
+				,intLocationId = @NewHaven
 				,strBatchId = 'BATCH-0001'
 		UNION ALL 
 		SELECT	dtmDate = '1/2/2014'
@@ -153,7 +153,7 @@ BEGIN
 				,intTransactionTypeId = @InventoryReceipt
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intItemLocationId = 6
+				,intLocationId = @NewHaven
 				,strBatchId = 'BATCH-0002'
 
 		-- Setup the expected data for FIFO

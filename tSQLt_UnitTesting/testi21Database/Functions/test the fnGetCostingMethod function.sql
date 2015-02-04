@@ -26,104 +26,92 @@ BEGIN
 
 	-- Setup the fake table and data 
 	BEGIN 
-		EXEC tSQLt.FakeTable 'dbo.tblICItemLocation';
+		EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
 		INSERT INTO tblICItemLocation(
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,intCostingMethod
 			,intCategoryId
-			,intLocationId
 		)
 		-- Add location for Item 1
 		-- Add item-location, costing method is average cost
 		SELECT	intItemId = @Item1
-				,intItemLocationId = @LocationA
+				,intLocationId = @LocationA
 				,intCostingMethod = @AverageCost
 				,intCategoryId = NULL
-				,intLocationId = @LocationA * 100
 		-- Add costing method for FIFO			
 		UNION ALL
 		SELECT	intItemId = @Item1
-				,intItemLocationId = @LocationB
+				,intLocationId = @LocationB
 				,intCostingMethod = @FIFO	
 				,intCategoryId = NULL
-				,intLocationId = @LocationB * 100
 		-- Add costing method for LIFO
 		UNION ALL
 		SELECT	intItemId = @Item1
-				,intItemLocationId = @LocationC
+				,intLocationId = @LocationC
 				,intCostingMethod = @LIFO	
 				,intCategoryId = NULL
-				,intLocationId = @LocationC * 100
 		-- Add costing method for Standard Cost
 		UNION ALL
 		SELECT	intItemId = @Item1
-				,intItemLocationId = @LocationD
+				,intLocationId = @LocationD
 				,intCostingMethod = @StandardCost
 				,intCategoryId = NULL
-				,intLocationId = @LocationD * 100
 
 		-- Add location for Item 2		
 		-- Add item-location, costing method is average cost but category is set to FIFO. 
 		-- Item must use FIFO costing because of the category. 
 		UNION ALL 
 		SELECT	intItemId = @Item2
-				,intItemLocationId = @LocationA
+				,intLocationId = @LocationA
 				,intCostingMethod = NULL
 				,intCategoryId = @Category_On_FIFO
-				,intLocationId = @LocationA * 100
 		-- Add costing method for FIFO			
 		UNION ALL
 		SELECT	intItemId = @Item2
-				,intItemLocationId = @LocationB
+				,intLocationId = @LocationB
 				,intCostingMethod = NULL
 				,intCategoryId = @Category_On_FIFO
-				,intLocationId = @LocationB * 100
 		-- Add costing method for LIFO
 		UNION ALL
 		SELECT	intItemId = @Item2
-				,intItemLocationId = @LocationC
+				,intLocationId = @LocationC
 				,intCostingMethod = NULL
 				,intCategoryId = @Category_On_FIFO
-				,intLocationId = @LocationC * 100
 		-- Add costing method for Standard Cost
 		UNION ALL
 		SELECT	intItemId = @Item2
-				,intItemLocationId = @LocationD
+				,intLocationId = @LocationD
 				,intCostingMethod = NULL
-				,intCategoryId = @Category_On_FIFO
-				,intLocationId = @LocationD * 100
+				,intCategoryId = @Category_On_FIFO								
 
 		-- Add location for Item 3
 		-- Add item-location, costing method is average cost but category is set to LIFO. 
 		-- It must use Costing method at item-location level. 
 		UNION ALL 
 		SELECT	intItemId = @Item3
-				,intItemLocationId = @LocationA
+				,intLocationId = @LocationA
 				,intCostingMethod = @AverageCost
 				,intCategoryId = @Category_On_LIFO
-				,intLocationId = @LocationA * 100
 		-- Add costing method for FIFO			
 		UNION ALL
 		SELECT	intItemId = @Item3
-				,intItemLocationId = @LocationB
+				,intLocationId = @LocationB
 				,intCostingMethod = @AverageCost
 				,intCategoryId = @Category_On_LIFO
-				,intLocationId = @LocationB * 100
 		-- Add costing method for LIFO
 		UNION ALL
 		SELECT	intItemId = @Item3
-				,intItemLocationId = @LocationC
+				,intLocationId = @LocationC
 				,intCostingMethod = @AverageCost 
 				,intCategoryId = @Category_On_LIFO
-				,intLocationId = @LocationC * 100
 		-- Add costing method for Standard Cost
 		UNION ALL
 		SELECT	intItemId = @Item3
-				,intItemLocationId = @LocationD
+				,intLocationId = @LocationD
 				,intCostingMethod = @AverageCost 
-				,intCategoryId = @Category_On_LIFO
-				,intLocationId = @LocationD * 100
+				,intCategoryId = @Category_On_LIFO				
+
 		
 		-- Setup a fake table and data for tblICCategory
 		EXEC tSQLt.FakeTable 'dbo.tblICCategory', @Identity = 1;

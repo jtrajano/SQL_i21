@@ -116,7 +116,7 @@ BEGIN
 				,intVendorId = @Vendor_CoolAmish
 				,strReceiptType = @ReceiptType_PurchaseOrder
 				,intSourceId = 1
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,strVendorRefNo = N'This is a reference'
 				,intShipViaId = @ShipVia_UPS
 				,intCurrencyId = @Currency_USD

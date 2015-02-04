@@ -34,22 +34,22 @@ BEGIN
 		-----------------------------------
 		CREATE TABLE expected (
 			intItemId INT
-			,intItemLocationId INT
+			,intLocationId INT
 			,dblOnOrder NUMERIC(18,6)
 		)
 
 		INSERT INTO expected (
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,dblOnOrder
 		)
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dblOnOrder = -450
 
 		CREATE TABLE actual (
 			intItemId INT
-			,intItemLocationId INT
+			,intLocationId INT
 			,dblOnOrder NUMERIC(18,6)
 		)
 
@@ -64,7 +64,7 @@ BEGIN
 		---------------------------------------------------
 		INSERT INTO @Items 
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 24, 2014'
 				,dblUnitQty = -200
 				,dblUOMQty = 1
@@ -78,7 +78,7 @@ BEGIN
 				,intLotId = NULL
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 24, 2014'
 				,dblUnitQty = -250
 				,dblUOMQty = 1
@@ -98,15 +98,15 @@ BEGIN
 
 		INSERT INTO actual (
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,dblOnOrder
 		)
 		SELECT	intItemId
-				,intItemLocationId
+				,intLocationId
 				,dblOnOrder
 		FROM	tblICItemStock 
 		WHERE	intItemId = @WetGrains
-				AND intItemLocationId = @Default_Location
+				AND intLocationId = @Default_Location
 	END 
 
 	-- Assert

@@ -59,7 +59,7 @@ BEGIN
 
 	CREATE TABLE expectedInventoryTransaction (
 		intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dtmDate DATETIME
 		,dblUnitQty NUMERIC(18,6)
 		,dblCost NUMERIC(18,6)
@@ -78,7 +78,7 @@ BEGIN
 
 	CREATE TABLE actualInventoryTransaction (
 		intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dtmDate DATETIME
 		,dblUnitQty NUMERIC(18,6)
 		,dblCost NUMERIC(18,6)
@@ -97,14 +97,14 @@ BEGIN
 
 	CREATE TABLE expectedItemStock (
 		intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dblAverageCost NUMERIC(18,6)
 		,dblUnitOnHand NUMERIC(18,6)
 	)
 
 	CREATE TABLE actualItemStock (
 		intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dblAverageCost NUMERIC(18,6)
 		,dblUnitOnHand NUMERIC(18,6)
 	)
@@ -155,7 +155,7 @@ BEGIN
 	-- Reverse of the inventory transactions
 	INSERT INTO expectedInventoryTransaction (
 			intItemId 
-			,intItemLocationId 
+			,intLocationId 
 			,dtmDate 
 			,dblUnitQty 
 			,dblCost 
@@ -172,7 +172,7 @@ BEGIN
 			,strTransactionForm 
 	)
 	SELECT	intItemId 
-			,intItemLocationId 
+			,intLocationId 
 			,dtmDate 
 			,dblUnitQty 
 			,dblCost 
@@ -192,7 +192,7 @@ BEGIN
 			AND strTransactionId = @strTransactionId
 	UNION ALL 
 	SELECT	intItemId 
-			,intItemLocationId 
+			,intLocationId 
 			,dtmDate 
 			-- Reverse the unit qty
 			--{
@@ -218,32 +218,32 @@ BEGIN
 	-- Expect the stock goes back to zero. The average cost should remain the same. 
 	INSERT INTO expectedItemStock (
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dblAverageCost
 			,dblUnitOnHand
 	)
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = 1
+			,intLocationId = @Default_Location
 			,dblAverageCost = 2.00
 			,dblUnitOnHand = 0 
 	UNION ALL
 	SELECT	intItemId = @StickyGrains
-			,intItemLocationId = 2
+			,intLocationId = @Default_Location
 			,dblAverageCost = 2.00
 			,dblUnitOnHand = 0
 	UNION ALL
 	SELECT	intItemId = @PremiumGrains
-			,intItemLocationId = 3
+			,intLocationId = @Default_Location
 			,dblAverageCost = 2.00
 			,dblUnitOnHand = 0
 	UNION ALL
 	SELECT	intItemId = @ColdGrains
-			,intItemLocationId = 4
+			,intLocationId = @Default_Location
 			,dblAverageCost = 2.00
 			,dblUnitOnHand = 0
 	UNION ALL
 	SELECT	intItemId = @HotGrains
-			,intItemLocationId = 5
+			,intLocationId = @Default_Location
 			,dblAverageCost = 2.00
 			,dblUnitOnHand = 0
 							
@@ -322,7 +322,7 @@ BEGIN
 	-- Reverse of the inventory transactions
 	INSERT INTO actualInventoryTransaction (
 			intItemId 
-			,intItemLocationId 
+			,intLocationId 
 			,dtmDate 
 			,dblUnitQty 
 			,dblCost 
@@ -339,7 +339,7 @@ BEGIN
 			,strTransactionForm 
 	)
 	SELECT	intItemId 
-			,intItemLocationId 
+			,intLocationId 
 			,dtmDate 
 			,dblUnitQty 
 			,dblCost 
@@ -361,12 +361,12 @@ BEGIN
 	-- Actual item stock data
 	INSERT INTO actualItemStock (
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dblAverageCost
 			,dblUnitOnHand
 	)
 	SELECT	intItemId 
-			,intItemLocationId 
+			,intLocationId 
 			,dblAverageCost 
 			,dblUnitOnHand 
 	FROM dbo.tblICItemStock	

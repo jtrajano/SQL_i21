@@ -38,28 +38,6 @@ BEGIN
 				
 		-- Generate the fake data. 
 		EXEC testi21Database.[Fake inventory items]
-
-		/*
-			tblICItemLocation
-			-------------------------------------------------------------
-			Item Location Id	Item			Location
-			----------------	-------------	-------------------------
-			1					Wet Grains		Default Location
-			2					Sticky Grains	Default Location
-			3					Premium Grains	Default Location
-			4					Cold Grains		Default Location
-			5					Hot Grains		Default Location
-			6					Wet Grains		New Haven
-			7					Sticky Grains	New Haven
-			8					Premium Grains	New Haven
-			9					Cold Grains		New Haven
-			10					Hot Grains		New Haven
-			11					Wet Grains		Better Haven
-			12					Sticky Grains	Better Haven
-			13					Premium Grains	Better Haven
-			14					Cold Grains		Better Haven
-			15					Hot Grains		Better Haven		
-		*/
 	END
 
 	-- Act

@@ -7,10 +7,10 @@ BEGIN
 		-- Create the assert tables 
 		-- Assert table for the expected
 		SELECT	intItemId				= PODetail.intItemId
-				,intItemLocationId		= ItemLocation.intItemLocationId
+				,intLocationId			= PODetail.intLocationId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 				,dblUnitQty				= PODetail.dblQtyOrdered 
-				,dblUOMQty				= ItemUOM.dblUnitQty 
+				,dblUOMQty				= UOMConversion.dblConversionToStock 
 				,dblCost				= PODetail.dblCost
 				,dblSalesPrice			= 0
 				,intCurrencyId			= PO.intCurrencyId
@@ -22,14 +22,10 @@ BEGIN
 		INTO	expected
 		FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 					ON PO.intPurchaseId = PODetail.intPurchaseId
-				INNER JOIN dbo.tblICItemUOM ItemUOM
-					ON PODetail.intItemId = ItemUOM.intItemId
-					AND PODetail.intUnitOfMeasureId = ItemUOM.intUnitMeasureId
-				INNER JOIN dbo.tblICUnitMeasure UOM
-					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-				INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON PODetail.intItemId = ItemLocation.intItemId
-					AND PODetail.intLocationId = ItemLocation.intLocationId
+				LEFT JOIN dbo.tblICUnitMeasure UOM
+					ON PODetail.intUnitOfMeasureId = UOM.intUnitMeasureId
+				INNER JOIN dbo.tblICUnitMeasureConversion UOMConversion
+					ON UOM.intUnitMeasureId = UOMConversion.intUnitMeasureId
 		WHERE	1 = 0
 
 		-- Assert table for the actual 
@@ -43,7 +39,7 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual (
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dtmDate
 			,dblUnitQty
 			,dblUOMQty

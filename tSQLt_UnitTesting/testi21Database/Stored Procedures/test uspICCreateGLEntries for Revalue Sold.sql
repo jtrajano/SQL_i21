@@ -65,7 +65,7 @@ BEGIN
 		-- Insert a fake data in the Inventory transaction table 
 		INSERT INTO tblICInventoryTransaction (
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,dtmDate
 				,dblUnitQty
 				,dblCost
@@ -84,7 +84,7 @@ BEGIN
 				,intConcurrencyId
 		)
 		SELECT 	intItemId = @StickyGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'January 17, 2014'
 				,dblUnitQty = -11
 				,dblCost = 1.50

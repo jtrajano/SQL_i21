@@ -5,7 +5,7 @@ BEGIN
 	BEGIN 
 		CREATE TABLE expected (
 			intItemId INT
-			,intItemLocationId INT
+			,intLocationId INT
 			,dtmDate  DATETIME
 			,dblUnitQty NUMERIC(18,6)
 			,dblCost NUMERIC(18,6)
@@ -20,7 +20,7 @@ BEGIN
 
 		CREATE TABLE actual (
 			intItemId INT
-			,intItemLocationId INT
+			,intLocationId INT
 			,dtmDate  DATETIME
 			,dblUnitQty NUMERIC(18,6)
 			,dblCost NUMERIC(18,6)
@@ -53,7 +53,7 @@ BEGIN
 		-- Create the expected data
 		INSERT INTO expected (
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dtmDate
 			,dblUnitQty
 			,dblCost
@@ -67,7 +67,7 @@ BEGIN
 		)
 		SELECT 			
 			intItemId = @ColdGrains
-			,intItemLocationId = @BetterHaven
+			,intLocationId = @BetterHaven
 			,dtmDate = '10/11/2014'
 			,dblUnitQty = 1
 			,dblCost = 100
@@ -81,7 +81,7 @@ BEGIN
 		UNION ALL 
 		SELECT 			
 			intItemId = @HotGrains
-			,intItemLocationId = @BetterHaven
+			,intLocationId = @BetterHaven
 			,dtmDate = '10/11/2014'
 			,dblUnitQty = 2
 			,dblCost = 15.11
@@ -98,7 +98,7 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual (
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dtmDate
 			,dblUnitQty
 			,dblCost
@@ -112,7 +112,7 @@ BEGIN
 		)
 		SELECT 
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dtmDate
 			,dblUnitQty
 			,dblCost

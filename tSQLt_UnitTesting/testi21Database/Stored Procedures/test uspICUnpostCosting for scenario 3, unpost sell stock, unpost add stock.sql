@@ -59,7 +59,7 @@ BEGIN
 
 	CREATE TABLE expectedInventoryTransaction (
 		intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dtmDate DATETIME
 		,dblUnitQty NUMERIC(18,6)
 		,dblCost NUMERIC(18,6)
@@ -78,7 +78,7 @@ BEGIN
 
 	CREATE TABLE actualInventoryTransaction (
 		intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dtmDate DATETIME
 		,dblUnitQty NUMERIC(18,6)
 		,dblCost NUMERIC(18,6)
@@ -97,14 +97,14 @@ BEGIN
 	
 	CREATE TABLE expectedItemStock (
 		intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dblAverageCost NUMERIC(18,6)
 		,dblUnitOnHand NUMERIC(18,6)
 	)
 
 	CREATE TABLE actualItemStock (
 		intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dblAverageCost NUMERIC(18,6)
 		,dblUnitOnHand NUMERIC(18,6)
 	)
@@ -112,7 +112,7 @@ BEGIN
 	CREATE TABLE expectedFIFO (
 		intInventoryFIFOId INT
 		,intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dtmDate DATETIME
 		,dblStockIn NUMERIC(18,6)
 		,dblStockOut NUMERIC(18,6)
@@ -125,7 +125,7 @@ BEGIN
 	CREATE TABLE actualFIFO (
 		intInventoryFIFOId INT
 		,intItemId INT
-		,intItemLocationId INT
+		,intLocationId INT
 		,dtmDate DATETIME
 		,dblStockIn NUMERIC(18,6)
 		,dblStockOut NUMERIC(18,6)
@@ -187,7 +187,7 @@ BEGIN
 		-- Reverse of the inventory transactions
 		INSERT INTO expectedInventoryTransaction (
 				intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -204,7 +204,7 @@ BEGIN
 				,strTransactionForm 
 		)
 		SELECT	intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -224,7 +224,7 @@ BEGIN
 				AND strTransactionId = @strTransactionId
 		UNION ALL 
 		SELECT	intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				-- Reverse the unit qty
 				--{
@@ -250,32 +250,32 @@ BEGIN
 		-- Expect the stock to go back to 100. The average cost should remain the same. 
 		INSERT INTO expectedItemStock (
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,dblAverageCost
 				,dblUnitOnHand
 		)
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = 1
+				,intLocationId = @Default_Location
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @StickyGrains
-				,intItemLocationId = 2
+				,intLocationId = @Default_Location
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @PremiumGrains
-				,intItemLocationId = 3
+				,intLocationId = @Default_Location
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @ColdGrains
-				,intItemLocationId = 4
+				,intLocationId = @Default_Location
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @HotGrains
-				,intItemLocationId = 5
+				,intLocationId = @Default_Location
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 			
@@ -283,7 +283,7 @@ BEGIN
 		INSERT INTO dbo.expectedFIFO (
 				intInventoryFIFOId
 				,intItemId
-				,intItemLocationId
+				,intLocationId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
@@ -295,7 +295,7 @@ BEGIN
 		-- The In qty will remain at 100. 
 		SELECT	intInventoryFIFOId = 1
 				,intItemId = @WetGrains
-				,intItemLocationId = 1
+				,intLocationId = @Default_Location
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -306,7 +306,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 2
 				,intItemId = @StickyGrains
-				,intItemLocationId = 2
+				,intLocationId = @Default_Location
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -317,7 +317,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 3
 				,intItemId = @PremiumGrains
-				,intItemLocationId = 3
+				,intLocationId = @Default_Location
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -328,7 +328,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 4
 				,intItemId = @ColdGrains
-				,intItemLocationId = 4
+				,intLocationId = @Default_Location
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -339,7 +339,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 5
 				,intItemId = @HotGrains
-				,intItemLocationId = 5
+				,intLocationId = @Default_Location
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -433,7 +433,7 @@ BEGIN
 		-- Reverse of the inventory transactions
 		INSERT INTO expectedInventoryTransaction (
 				intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -450,7 +450,7 @@ BEGIN
 				,strTransactionForm 
 		)
 		SELECT	intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				,dblUnitQty 
 				,dblCost 
@@ -470,7 +470,7 @@ BEGIN
 				AND strTransactionId = @strTransactionId
 		UNION ALL 
 		SELECT	intItemId 
-				,intItemLocationId 
+				,intLocationId 
 				,dtmDate 
 				-- Reverse the unit qty
 				--{
@@ -496,21 +496,17 @@ BEGIN
 		-- Expect the stock goes back to zero. The average cost should remain the same. 
 		UPDATE	expectedItemStock
 		SET		dblUnitOnHand -= 100
-		FROM	expectedItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON expectedItemStock.intItemId = ItemLocation.intItemId
-					AND expectedItemStock.intItemLocationId = ItemLocation.intItemLocationId
-		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location
+		FROM	expectedItemStock
+		WHERE	intLocationId = @Default_Location
+				AND intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
 			
 		-- Expect FIFO in records are plugged out to prevent further use in the future. 
 		UPDATE	expectedFIFO
 		SET		dblStockOut = 100
 				,ysnIsUnposted = 1
-		FROM	expectedFIFO INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON expectedFIFO.intItemId = ItemLocation.intItemId
-					AND expectedFIFO.intItemLocationId = ItemLocation.intItemLocationId
-		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location		
+		FROM	expectedFIFO
+		WHERE	intLocationId = @Default_Location
+				AND intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)	
 
 		-- Do the act
 		INSERT INTO @GLDetail (
@@ -589,7 +585,7 @@ BEGIN
 	-- Reverse of the inventory transactions
 	INSERT INTO actualInventoryTransaction (
 			intItemId 
-			,intItemLocationId 
+			,intLocationId 
 			,dtmDate 
 			,dblUnitQty 
 			,dblCost 
@@ -606,7 +602,7 @@ BEGIN
 			,strTransactionForm 
 	)
 	SELECT	intItemId 
-			,intItemLocationId 
+			,intLocationId 
 			,dtmDate 
 			,dblUnitQty 
 			,dblCost 
@@ -628,12 +624,12 @@ BEGIN
 	-- Actual item stock data
 	INSERT INTO actualItemStock (
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dblAverageCost
 			,dblUnitOnHand
 	)
 	SELECT	intItemId 
-			,intItemLocationId 
+			,intLocationId 
 			,dblAverageCost 
 			,dblUnitOnHand 
 	FROM dbo.tblICItemStock		
@@ -642,7 +638,7 @@ BEGIN
 	INSERT INTO dbo.actualFIFO (
 			intInventoryFIFOId
 			,intItemId
-			,intItemLocationId
+			,intLocationId
 			,dtmDate
 			,dblStockIn
 			,dblStockOut
@@ -652,8 +648,8 @@ BEGIN
 			,ysnIsUnposted
 	)	
 	SELECT	intInventoryFIFOId
-			,fifo.intItemId
-			,fifo.intItemLocationId
+			,intItemId
+			,intLocationId
 			,dtmDate
 			,dblStockIn
 			,dblStockOut
@@ -661,16 +657,15 @@ BEGIN
 			,strTransactionId
 			,intTransactionId		
 			,ysnIsUnposted
-	FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICItemLocation ItemLocation
-				ON fifo.intItemId = ItemLocation.intItemId
-				AND fifo.intItemLocationId = ItemLocation.intItemLocationId
-	WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
-			AND ItemLocation.intLocationId = @Default_Location
+	FROM	dbo.tblICInventoryFIFO
+	WHERE	intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
+			AND intLocationId IN (@Default_Location)		
 				
 	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
 	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
 	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
-	EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';
+	EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';	
+
 END 
 
 -- Clean-up: remove the tables used in the unit test

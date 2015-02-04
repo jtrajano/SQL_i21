@@ -47,7 +47,7 @@ BEGIN
 			intInventoryReceiptId
 			,intItemId
 			,dblOrderQty
-			,dblOpenReceive
+			,dblReceived
 			,dblUnitCost
 		)
 		VALUES (

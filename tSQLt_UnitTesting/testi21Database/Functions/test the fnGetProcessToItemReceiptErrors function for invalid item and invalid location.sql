@@ -5,14 +5,14 @@ BEGIN
 	BEGIN 
 		CREATE TABLE expected (
 			intItemId INT
-			,intItemLocationId INT
+			,intLocationId INT
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
 		)
 
 		CREATE TABLE actual (
 			intItemId INT
-			,intItemLocationId INT
+			,intLocationId INT
 			,strText NVARCHAR(MAX) NULL
 			,intErrorCode INT
 		)
@@ -34,18 +34,18 @@ BEGIN
 		-- Setup the expected data
 		INSERT INTO expected (
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,strText
 				,intErrorCode
 		)
 		-- Invalid item and invalid location
 		SELECT	intItemId = @InvalidItem
-				,intItemLocationId = @InvalidLocation
+				,intLocationId = @InvalidLocation
 				,strText = FORMATMESSAGE(50027)
 				,intErrorCode = 50027
 		--UNION ALL
 		--SELECT	intItemId = @InvalidItem
-		--		,intItemLocationId = @InvalidLocation
+		--		,intLocationId = @InvalidLocation
 		--		,strText = FORMATMESSAGE(50028)
 		--		,intErrorCode = 50028
 

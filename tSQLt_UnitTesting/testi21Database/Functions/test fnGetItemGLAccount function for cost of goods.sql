@@ -4,7 +4,7 @@ BEGIN
 	-- Arrange
 	BEGIN 
 		DECLARE @intItemId AS INT
-		DECLARE @intItemLocationId AS INT
+		DECLARE @intLocationId AS INT
 
 		-- GL Account types used in inventory costing
 		DECLARE @Inventory AS INT = 1;
@@ -29,28 +29,6 @@ BEGIN
 
 		-- Create the Fake data 
 		EXEC testi21Database.[Fake inventory items]
-
-		/*
-			tblICItemLocation
-			-------------------------------------------------------------
-			Item Location Id	Item			Location
-			----------------	-------------	-------------------------
-			1					Wet Grains		Default Location
-			2					Sticky Grains	Default Location
-			3					Premium Grains	Default Location
-			4					Cold Grains		Default Location
-			5					Hot Grains		Default Location
-			6					Wet Grains		New Haven
-			7					Sticky Grains	New Haven
-			8					Premium Grains	New Haven
-			9					Cold Grains		New Haven
-			10					Hot Grains		New Haven
-			11					Wet Grains		Better Haven
-			12					Sticky Grains	Better Haven
-			13					Premium Grains	Better Haven
-			14					Cold Grains		Better Haven
-			15					Hot Grains		Better Haven		
-		*/
 	END 
 	
 	-- Test case: Get the contra account for "Cost of Goods"
@@ -59,7 +37,7 @@ BEGIN
 		DELETE FROM expected
 		
 		SET @intItemId = 1; -- WET GRAINS
-		SET @intItemLocationId = 6; -- NEW HAVEN
+		SET @intLocationId = 2; -- NEW HAVEN
 		
 		INSERT actual (
 			[Inventory]
@@ -68,8 +46,8 @@ BEGIN
 			,[WriteOffSold]
 			,[AutoNegative]
 		)
-		SELECT	[Inventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intItemLocationId, 'Inventory')
-				,[ContraInventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intItemLocationId, 'Cost of Goods')
+		SELECT	[Inventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'Inventory')
+				,[ContraInventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'Cost of Goods')
 				,[RevalueSold] = NULL 
 				,[WriteOffSold] = NULL 
 				,[AutoNegative] = NULL 	

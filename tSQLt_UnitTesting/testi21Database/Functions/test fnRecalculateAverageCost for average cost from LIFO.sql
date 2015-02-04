@@ -8,7 +8,7 @@ BEGIN
 	-- Setup the fake data
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFO', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation';
+	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
 
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -32,48 +32,44 @@ BEGIN
 	-- Add fake data to the item location table
 	INSERT INTO dbo.tblICItemLocation (
 			intItemId
-			,intItemLocationId
 			,intLocationId
 			,intCostingMethod
 	)
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
-			,intLocationId = @Default_Location * 100
+			,intLocationId = @Default_Location
 			,intCostingMethod = @LIFO
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = @NewHaven
-			,intLocationId = @NewHaven * 100
+			,intLocationId = @NewHaven
 			,intCostingMethod = @LIFO	
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = @BetterHaven
-			,intLocationId = @BetterHaven * 100
+			,intLocationId = @BetterHaven
 			,intCostingMethod = @LIFO				
 	
 	-- Add fake data to the fifo table
 	-- The function fnRecalculateAverageCost should ignore this data. 
 	INSERT INTO dbo.tblICInventoryFIFO (
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dblStockIn
 			,dblStockOut
 			,dblCost		
 	)
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intLocationId = @Default_Location
 			,dblStockIn = 100
 			,dblStockOut = 100
 			,dblCost = 2.50
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intLocationId = @Default_Location
 			,dblStockIn = 20
 			,dblStockOut = 10
 			,dblCost = 2.50
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intLocationId = @Default_Location
 			,dblStockIn = 50
 			,dblStockOut = 0
 			,dblCost = 2.25
@@ -81,25 +77,25 @@ BEGIN
 	-- Add fake data in the lifo table. 
 	INSERT INTO dbo.tblICInventoryLIFO (
 			intItemId
-			,intItemLocationId
+			,intLocationId
 			,dblStockIn
 			,dblStockOut
 			,dblCost		
 	)
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intLocationId = @Default_Location
 			,dblStockIn = 100
 			,dblStockOut = 100
 			,dblCost = 2.50
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intLocationId = @Default_Location
 			,dblStockIn = 90
 			,dblStockOut = 10
 			,dblCost = 2.50
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
-			,intItemLocationId = @Default_Location
+			,intLocationId = @Default_Location
 			,dblStockIn = 26
 			,dblStockOut = 0
 			,dblCost = 2.25

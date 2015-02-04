@@ -9,11 +9,11 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFO', @Identity = 1;
 		
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLIFO]
-			ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOId] DESC);
+			ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intLocationId] ASC, [intInventoryLIFOId] DESC);
 
 		DECLARE 
 			@intItemId AS INT
-			,@intItemLocationId AS INT
+			,@intLocationId AS INT
 			,@dtmDate AS DATETIME
 			,@dblUnitQty AS NUMERIC(18,6)
 			,@dblUOMQty AS NUMERIC(18,6)
@@ -30,7 +30,7 @@ BEGIN
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL, 
 			[intItemId] INT NOT NULL,
-			[intItemLocationId] INT NOT NULL,
+			[intLocationId] INT NOT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -51,7 +51,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intInventoryTransactionId] INT NOT NULL, 
 			[intItemId] INT NOT NULL,
-			[intItemLocationId] INT NOT NULL,
+			[intLocationId] INT NOT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -75,7 +75,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICPostLIFO
 			@intItemId
-			,@intItemLocationId
+			,@intLocationId
 			,@dtmDate
 			,@dblUnitQty
 			,@dblUOMQty
@@ -92,7 +92,7 @@ BEGIN
 		INSERT INTO actual (
 				[intInventoryTransactionId]
 				,[intItemId]
-				,[intItemLocationId]
+				,[intLocationId]
 				,[dtmDate]
 				,[dblUnitQty]
 				,[dblCost]
@@ -111,7 +111,7 @@ BEGIN
 		)
 		SELECT	[intInventoryTransactionId]
 				,[intItemId]
-				,[intItemLocationId]
+				,[intLocationId]
 				,[dtmDate]
 				,[dblUnitQty]
 				,[dblCost]
@@ -129,7 +129,7 @@ BEGIN
 				,[intConcurrencyId]		
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
-				AND intItemLocationId = @intItemLocationId
+				AND intLocationId = @intLocationId
 	END 
 
 	-- Assert

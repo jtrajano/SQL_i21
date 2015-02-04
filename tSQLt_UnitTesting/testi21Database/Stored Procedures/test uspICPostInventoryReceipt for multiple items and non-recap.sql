@@ -48,10 +48,10 @@ BEGIN
 			,@dtmDate	
 		);	
 	
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost) VALUES (1, @WetGrains, 10, 10, 12.50);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost) VALUES (1, @StickyGrains, 20, 10, 13.50);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost) VALUES (1, @PremiumGrains, 30, 10, 9.10);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost) VALUES (1, @WetGrains, 40, 10, 15.52);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblReceived,dblUnitCost) VALUES (1, @WetGrains, 10, 10, 12.50);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblReceived,dblUnitCost) VALUES (1, @StickyGrains, 20, 10, 13.50);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblReceived,dblUnitCost) VALUES (1, @PremiumGrains, 30, 10, 9.10);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblReceived,dblUnitCost) VALUES (1, @WetGrains, 40, 10, 15.52);
 		
 		CREATE TABLE actual (
 			dblDebit NUMERIC(18,6)

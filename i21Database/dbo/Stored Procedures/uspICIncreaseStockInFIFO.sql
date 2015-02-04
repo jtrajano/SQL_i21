@@ -8,7 +8,7 @@
 */
 CREATE PROCEDURE dbo.uspICIncreaseStockInFIFO
 	@intItemId AS INT
-	,@intItemLocationId AS INT
+	,@intLocationId AS INT
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
@@ -51,10 +51,10 @@ WITH	(HOLDLOCK)
 AS		fifo_bucket
 USING (
 	SELECT	intItemId = @intItemId
-			,intItemLocationId = @intItemLocationId	
+			,intLocationId = @intLocationId	
 ) AS Source_Query  
 	ON fifo_bucket.intItemId = Source_Query.intItemId
-	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
+	AND fifo_bucket.intLocationId = Source_Query.intLocationId
 	-- Update an existing negative stock 
 	AND fifo_bucket.dblStockIn < fifo_bucket.dblStockOut
 
@@ -89,7 +89,7 @@ WHEN MATCHED THEN
 WHEN NOT MATCHED AND @FullQty > 0 THEN 
 	INSERT (
 		[intItemId]
-		,[intItemLocationId]
+		,[intLocationId]
 		,[dtmDate]
 		,[dblStockIn]
 		,[dblStockOut]
@@ -102,7 +102,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 	)
 	VALUES (
 		@intItemId
-		,@intItemLocationId
+		,@intLocationId
 		,@dtmDate
 		,@FullQty
 		,@TotalQtyOffset
@@ -125,7 +125,7 @@ IF @RemainingQty = 0
 BEGIN 
 	INSERT dbo.tblICInventoryFIFO (
 		[intItemId]
-		,[intItemLocationId]
+		,[intLocationId]
 		,[dtmDate]
 		,[dblStockIn]
 		,[dblStockOut]
@@ -138,7 +138,7 @@ BEGIN
 	)
 	VALUES (
 		@intItemId
-		,@intItemLocationId
+		,@intLocationId
 		,@dtmDate
 		,@FullQty
 		,@FullQty

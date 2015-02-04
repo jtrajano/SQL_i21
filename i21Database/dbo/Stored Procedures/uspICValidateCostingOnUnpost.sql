@@ -22,7 +22,7 @@ SET ANSI_WARNINGS OFF
 
 CREATE TABLE #FoundErrors (
 	intItemId INT
-	,intItemLocationId INT
+	,intLocationId INT
 	,strText NVARCHAR(MAX)
 	,intErrorCode INT
 )
@@ -31,10 +31,10 @@ CREATE TABLE #FoundErrors (
 -- Store the result in a temporary table. 
 INSERT INTO #FoundErrors
 SELECT	Errors.intItemId
-		,Errors.intItemLocationId
+		,Errors.intLocationId
 		,Errors.strText
 		,Errors.intErrorCode
-FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnUnpostErrors(Item.intItemId, Item.intItemLocationId, Item.dblTotalQty) Errors
+FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnUnpostErrors(Item.intItemId, Item.intLocationId, Item.dblTotalQty) Errors
 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 -- Check for negative stock qty 

@@ -169,32 +169,32 @@ BEGIN
 		----------------------------------------------------------------
 		INSERT INTO dbo.tblICItemStock(
 				intItemId
-				,intItemLocationId
+				,intLocationId
 				,dblAverageCost
 				,dblUnitOnHand	
 		)
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = 6
+				,intLocationId = @NewHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100
 		UNION ALL 
 		SELECT 	intItemId = @StickyGrains
-				,intItemLocationId = 7
+				,intLocationId = @NewHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100	
 		UNION ALL 
 		SELECT 	intItemId = @PremiumGrains
-				,intItemLocationId = 8
+				,intLocationId = @NewHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100		
 		UNION ALL 
 		SELECT 	intItemId = @ColdGrains
-				,intItemLocationId = 9
+				,intLocationId = @NewHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100	
 		UNION ALL 
 		SELECT 	intItemId = @HotGrains
-				,intItemLocationId = 10
+				,intLocationId = @NewHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100
 
@@ -205,7 +205,7 @@ BEGIN
 			INSERT INTO dbo.tblICInventoryFIFO (
 					dtmDate
 					,intItemId
-					,intItemLocationId
+					,intLocationId
 					,dblStockIn
 					,dblStockOut
 					,dblCost
@@ -214,7 +214,7 @@ BEGIN
 			)
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @WetGrains 
-					,intItemLocationId = 6
+					,intLocationId = @NewHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -223,7 +223,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @StickyGrains 
-					,intItemLocationId = 7
+					,intLocationId = @NewHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -232,7 +232,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @PremiumGrains 
-					,intItemLocationId = 8
+					,intLocationId = @NewHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -241,7 +241,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @ColdGrains 
-					,intItemLocationId = 9
+					,intLocationId = @NewHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -250,7 +250,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @HotGrains 
-					,intItemLocationId = 10
+					,intLocationId = @NewHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -279,7 +279,7 @@ BEGIN
 				,intTransactionTypeId
 				,ysnIsUnposted
 				,intItemId
-				,intItemLocationId
+				,intLocationId
 				,strBatchId
 				,dblExchangeRate
 				,intCurrencyId
@@ -295,7 +295,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @WetGrains
-					,intItemLocationId = 6
+					,intLocationId = @NewHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -311,7 +311,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @StickyGrains
-					,intItemLocationId = 7
+					,intLocationId = @NewHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -327,7 +327,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @PremiumGrains
-					,intItemLocationId = 8
+					,intLocationId = @NewHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -343,7 +343,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @ColdGrains
-					,intItemLocationId = 9
+					,intLocationId = @NewHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -359,7 +359,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @HotGrains
-					,intItemLocationId = 10
+					,intLocationId = @NewHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -583,18 +583,16 @@ BEGIN
 		-- Reduce stock qty from the Item Stock table 
 		UPDATE	ItemStock
 		SET		dblUnitOnHand -= 75
-		FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON ItemStock.intItemLocationId = ItemLocation.intItemLocationId
-		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @NewHaven
+		FROM	dbo.tblICItemStock ItemStock
+		WHERE	intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+				AND intLocationId = @NewHaven
 
 		-- Add out qty in the fifo table
 		UPDATE	FIFO
 		SET		dblStockOut += 75
-		FROM	dbo.tblICInventoryFIFO FIFO INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON FIFO.intItemLocationId = ItemLocation.intItemLocationId
-		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @NewHaven
+		FROM	dbo.tblICInventoryFIFO FIFO
+		WHERE	intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+				AND intLocationId = @NewHaven
 
 		-- Add the fifo out records
 		INSERT INTO dbo.tblICInventoryFIFOOut (
@@ -639,7 +637,7 @@ BEGIN
 				,intTransactionTypeId
 				,ysnIsUnposted
 				,intItemId
-				,intItemLocationId
+				,intLocationId
 				,strBatchId
 		)
 		SELECT	dtmDate = '01/16/2014'
@@ -654,7 +652,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intItemLocationId = 6
+				,intLocationId = @NewHaven
 				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
@@ -669,7 +667,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @StickyGrains
-				,intItemLocationId = 7
+				,intLocationId = @NewHaven
 				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
@@ -684,7 +682,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @PremiumGrains
-				,intItemLocationId = 8
+				,intLocationId = @NewHaven
 				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
@@ -699,7 +697,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @ColdGrains
-				,intItemLocationId = 9
+				,intLocationId = @NewHaven
 				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
@@ -714,7 +712,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @HotGrains
-				,intItemLocationId = 10
+				,intLocationId = @NewHaven
 				,strBatchId = @strBatchId
 
 		----------------------------------------------------------------

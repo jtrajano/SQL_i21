@@ -8,12 +8,12 @@ BEGIN
 
 		-- Re-add the clustered index. This is critical for the LIFO table because it arranges the data physically by that order. 
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLIFO]
-			ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOId] DESC);
+			ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intLocationId] ASC, [intInventoryLIFOId] DESC);
 
 		-- Create the expected and actual tables 
 		CREATE TABLE expected (
 			[intItemId] INT 
-			,[intItemLocationId] INT 
+			,[intLocationId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -24,7 +24,7 @@ BEGIN
 
 		CREATE TABLE actual (
 			[intItemId] INT 
-			,[intItemLocationId] INT 
+			,[intLocationId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -36,14 +36,14 @@ BEGIN
 		-- Create a fake data for tblICInventoryLIFO
 		/***************************************************************************************************************************************************************************************************************
 		The initial data in tblICInventoryLIFO
-		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		intItemId   intLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
 		----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 		No record.
 		***************************************************************************************************************************************************************************************************************/
 
 		-- Create the variables used by uspICReduceStockInLIFO
 		DECLARE @intItemId AS INT = 1
-				,@intItemLocationId AS INT = 1
+				,@intLocationId AS INT = 1
 				,@dtmDate AS DATETIME = 'January 3, 2014'
 				,@dblSoldQty NUMERIC(18,6) = -10
 				,@dblCost AS NUMERIC(18,6) = 33.19
@@ -60,7 +60,7 @@ BEGIN
 		-- Setup the expected values 
 		INSERT INTO expected (
 				[intItemId] 
-				,[intItemLocationId] 
+				,[intLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -69,7 +69,7 @@ BEGIN
 				,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @intItemId
-				,[intItemLocationId] = @intItemLocationId
+				,[intLocationId] = @intLocationId
 				,[dtmDate] = @dtmDate
 				,[dblStockIn] = 0
 				,[dblStockOut] = ABS(@dblSoldQty)
@@ -79,7 +79,7 @@ BEGIN
 
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like:  
-		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		_m_		intItemId   intLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
 		-----	----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 		new		1           1                 2014-01-03 00:00:00.000 0.000000                                10.000000                               33.190000                               1                1
 				***************************************************************************************************************************************************************************************************************/
@@ -94,7 +94,7 @@ BEGIN
 		BEGIN 					
 			EXEC [dbo].[uspICReduceStockInLIFO]
 				@intItemId
-				,@intItemLocationId
+				,@intLocationId
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
@@ -120,7 +120,7 @@ BEGIN
 
 		INSERT INTO actual (
 				[intItemId] 
-				,[intItemLocationId] 
+				,[intLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -130,7 +130,7 @@ BEGIN
 		)
 		SELECT
 				[intItemId] 
-				,[intItemLocationId] 
+				,[intLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -139,7 +139,7 @@ BEGIN
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryLIFO
 		WHERE	intItemId = @intItemId
-				AND intItemLocationId = @intItemLocationId
+				AND intLocationId = @intLocationId
 	END 
 
 	-- Assert

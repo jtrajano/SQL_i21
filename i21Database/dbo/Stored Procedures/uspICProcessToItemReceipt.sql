@@ -26,7 +26,7 @@ BEGIN TRY
 	-- Get the items to process
 	INSERT INTO @ItemsToReceive (
 		intItemId
-		,intItemLocationId
+		,intLocationId
 		,dtmDate
 		,dblUnitQty
 		,dblUOMQty

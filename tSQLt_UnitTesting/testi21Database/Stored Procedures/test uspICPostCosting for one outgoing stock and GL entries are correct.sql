@@ -74,7 +74,7 @@ BEGIN
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -100
 				,dblUOMQty = 1
