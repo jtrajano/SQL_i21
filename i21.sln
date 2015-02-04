@@ -7,6 +7,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Integration", "Integration\
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "i21PreDeployment", "i21PreDeployment\i21PreDeployment.sqlproj", "{028BB3F5-8243-4984-B4A2-B9F59F905A3C}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "tSQLt_UnitTesting", "tSQLt_UnitTesting\tSQLt_UnitTesting.sqlproj", "{EC6666E5-B9E5-4A93-A016-5D8D65D2EE28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,12 @@ Global
 		{028BB3F5-8243-4984-B4A2-B9F59F905A3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{028BB3F5-8243-4984-B4A2-B9F59F905A3C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{028BB3F5-8243-4984-B4A2-B9F59F905A3C}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{EC6666E5-B9E5-4A93-A016-5D8D65D2EE28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC6666E5-B9E5-4A93-A016-5D8D65D2EE28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC6666E5-B9E5-4A93-A016-5D8D65D2EE28}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{EC6666E5-B9E5-4A93-A016-5D8D65D2EE28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC6666E5-B9E5-4A93-A016-5D8D65D2EE28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC6666E5-B9E5-4A93-A016-5D8D65D2EE28}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

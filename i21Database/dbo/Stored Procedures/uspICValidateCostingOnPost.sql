@@ -29,7 +29,7 @@ SET ANSI_WARNINGS OFF
 
 CREATE TABLE #FoundErrors (
 	intItemId INT
-	,intLocationId INT
+	,intItemLocationId INT
 	,strText NVARCHAR(MAX)
 	,intErrorCode INT
 )
@@ -38,10 +38,10 @@ CREATE TABLE #FoundErrors (
 -- Store the result in a temporary table. 
 INSERT INTO #FoundErrors
 SELECT	Errors.intItemId
-		,Errors.intLocationId
+		,Errors.intItemLocationId
 		,Errors.strText
 		,Errors.intErrorCode
-FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostErrors(Item.intItemId, Item.intLocationId, Item.dblUnitQty * Item.dblUOMQty) Errors
+FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostErrors(Item.intItemId, Item.intItemLocationId, Item.dblUnitQty * Item.dblUOMQty) Errors
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 

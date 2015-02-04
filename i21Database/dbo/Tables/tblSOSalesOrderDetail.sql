@@ -3,7 +3,7 @@
     [intSalesOrderId]       INT             NOT NULL,
     [intCompanyLocationId]  INT             CONSTRAINT [DF__tblSOSale__intCo__54065212] DEFAULT ((0)) NOT NULL,
     [intItemId]             INT             NULL,
-    [strItemDescription]    NVARCHAR (250)  NULL,
+    [strItemDescription]    NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intItemUOMId]          INT             NULL,
     [dblQtyOrdered]         NUMERIC (18, 6) NULL,
     [dblQtyAllocated]       NUMERIC (18, 6) NULL,
@@ -11,7 +11,7 @@
     [intTaxId]              INT             NULL,
     [dblPrice]              NUMERIC (18, 6) NULL,
     [dblTotal]              NUMERIC (18, 6) NULL,
-    [strComments]           NVARCHAR (250)  NULL,
+    [strComments]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]          INT             NULL,
     [intCOGSAccountId]      INT             NULL,
     [intSalesAccountId]     INT             NULL,
@@ -20,4 +20,3 @@
     CONSTRAINT [PK_tblSOSalesOrderDetail] PRIMARY KEY CLUSTERED ([intSalesOrderDetailId] ASC),
     CONSTRAINT [FK_tblSOSalesOrderDetail_tblSOSalesOrder] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId]) ON DELETE CASCADE
 );
-

@@ -81,7 +81,7 @@ BEGIN
 		INSERT INTO @ItemsToPost  
 		-- in (Stock goes up to 200)  
 		SELECT  intItemId = @WetGrains  
-				,intLocationId = @Default_Location  
+				,intItemLocationId = @Default_Location  
 				,dtmDate = 'November 17, 2014'  
 				,dblUnitQty = 100  
 				,dblUOMQty = 1  
@@ -96,7 +96,7 @@ BEGIN
 				-- out (Stock goes down to 170)  
 		UNION ALL  
 		SELECT  intItemId = @WetGrains  
-				,intLocationId = @Default_Location  
+				,intItemLocationId = @Default_Location  
 				,dtmDate = 'November 17, 2014'  
 				,dblUnitQty = -30  
 				,dblUOMQty = 1  
@@ -111,7 +111,7 @@ BEGIN
 		-- out (Stock goes down to 135)  
 		UNION ALL  
 		SELECT  intItemId = @WetGrains  
-				,intLocationId = @Default_Location  
+				,intItemLocationId = @Default_Location  
 				,dtmDate = 'November 17, 2014'  
 				,dblUnitQty = -35  
 				,dblUOMQty = 1  
@@ -126,7 +126,7 @@ BEGIN
 		-- out (Stock goes down to 90)  
 		UNION ALL  
 		SELECT  intItemId = @WetGrains  
-				,intLocationId = @Default_Location  
+				,intItemLocationId = @Default_Location  
 				,dtmDate = 'November 17, 2014'  
 				,dblUnitQty = -45  
 				,dblUOMQty = 1  
@@ -141,7 +141,7 @@ BEGIN
 		-- out (Stock goes down to -42)  
 		UNION ALL  
 		SELECT  intItemId = @WetGrains  
-				,intLocationId = @Default_Location  
+				,intItemLocationId = @Default_Location  
 				,dtmDate = 'November 17, 2014'  
 				,dblUnitQty = -132  
 				,dblUOMQty = 1  
@@ -156,7 +156,7 @@ BEGIN
 		-- in (Stock goes up to -22)  
 		UNION ALL    
 		SELECT  intItemId = @WetGrains  
-				,intLocationId = @Default_Location  
+				,intItemLocationId = @Default_Location  
 				,dtmDate = 'November 17, 2014'  
 				,dblUnitQty = 20  
 				,dblUOMQty = 1  
@@ -171,7 +171,7 @@ BEGIN
 		-- in (Stock goes up to 0)  
 		UNION ALL      
 		SELECT  intItemId = @WetGrains  
-				,intLocationId = @Default_Location  
+				,intItemLocationId = @Default_Location  
 				,dtmDate = 'November 17, 2014'  
 				,dblUnitQty = 22  
 				,dblUOMQty = 1  
@@ -186,7 +186,7 @@ BEGIN
 		-- in (Stock goes up to 100)  
 		UNION ALL      
 		SELECT  intItemId = @WetGrains  
-				,intLocationId = @Default_Location  
+				,intItemLocationId = @Default_Location  
 				,dtmDate = 'November 17, 2014'  
 				,dblUnitQty = 100  
 				,dblUOMQty = 1  

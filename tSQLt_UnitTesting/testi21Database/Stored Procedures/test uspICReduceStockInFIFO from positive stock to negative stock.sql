@@ -8,7 +8,7 @@ BEGIN
 
 		-- Re-add the clustered index. This is critical for the FIFO table because it arranges the data physically by that order. 
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryFIFO]
-			ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intLocationId] ASC, [intInventoryFIFOId] ASC);
+			ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOId] ASC);
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -26,13 +26,13 @@ BEGIN
 		-- Create a fake data for tblICInventoryFIFO
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryFIFO
-			intItemId   intLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+			intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
 			----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 			1           1                 2014-01-01 00:00:00.000 100.000000                              0.000000                                11.440000                               1                1
 			***************************************************************************************************************************************************************************************************************/
 		INSERT INTO dbo.tblICInventoryFIFO (
 			[intItemId]
-			,[intLocationId]
+			,[intItemLocationId]
 			,[dtmDate]
 			,[dblStockIn]
 			,[dblStockOut]
@@ -42,7 +42,7 @@ BEGIN
 			,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @WetGrains
-				,[intLocationId] = @Default_Location
+				,[intItemLocationId] = @Default_Location
 				,[dtmDate] = 'January 1, 2014'
 				,[dblStockIn] = 100
 				,[dblStockOut] = 0
@@ -54,7 +54,7 @@ BEGIN
 		-- Create the expected and actual tables 
 		CREATE TABLE expected (
 			[intItemId] INT 
-			,[intLocationId] INT 
+			,[intItemLocationId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -65,7 +65,7 @@ BEGIN
 
 		CREATE TABLE actual (
 			[intItemId] INT 
-			,[intLocationId] INT 
+			,[intItemLocationId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -76,7 +76,7 @@ BEGIN
 
 		-- Create the variables used by uspICReduceStockInFIFO
 		DECLARE @intItemId AS INT = @WetGrains
-				,@intLocationId AS INT = @Default_Location
+				,@intItemLocationId AS INT = @Default_Location
 				,@dtmDate AS DATETIME = 'January 12, 2014'
 				,@dblSoldQty NUMERIC(18,6) = -125
 				,@dblCost AS NUMERIC(18,6) = 45.66
@@ -93,7 +93,7 @@ BEGIN
 		-- Setup the expected values 
 		INSERT INTO expected (
 				[intItemId] 
-				,[intLocationId] 
+				,[intItemLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -102,7 +102,7 @@ BEGIN
 				,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @WetGrains
-				,[intLocationId] = @Default_Location
+				,[intItemLocationId] = @Default_Location
 				,[dtmDate] = 'January 1, 2014'
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
@@ -111,7 +111,7 @@ BEGIN
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
-				,[intLocationId] = @Default_Location
+				,[intItemLocationId] = @Default_Location
 				,[dtmDate] = 'January 12, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 25
@@ -121,7 +121,7 @@ BEGIN
 
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like:  
-		_m_		intItemId   intLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
 		-----	----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 		upt		1           1                 2014-01-01 00:00:00.000 100.000000                              100.000000                              11.440000                               1                1
 		new		1           1                 2014-01-12 00:00:00.000 0.000000                                25.000000                               45.660000                               1                1
@@ -140,7 +140,7 @@ BEGIN
 						
 			EXEC dbo.uspICReduceStockInFIFO
 				@intItemId
-				,@intLocationId
+				,@intItemLocationId
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
@@ -183,7 +183,7 @@ BEGIN
 
 		INSERT INTO actual (
 				[intItemId] 
-				,[intLocationId] 
+				,[intItemLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -193,7 +193,7 @@ BEGIN
 		)
 		SELECT
 				[intItemId] 
-				,[intLocationId] 
+				,[intItemLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -202,7 +202,7 @@ BEGIN
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryFIFO
 		WHERE	intItemId = @intItemId
-				AND intLocationId = @intLocationId
+				AND intItemLocationId = @intItemLocationId
 	END 
 
 	-- Assert

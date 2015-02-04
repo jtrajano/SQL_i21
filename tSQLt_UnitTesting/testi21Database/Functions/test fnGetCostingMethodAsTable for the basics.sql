@@ -12,7 +12,7 @@ BEGIN
 		)
 
 		DECLARE @intItemId AS INT
-		DECLARE @intLocationId AS INT
+		DECLARE @intItemLocationId AS INT
 
 	END
 
@@ -21,7 +21,7 @@ BEGIN
 	BEGIN 		
 		INSERT INTO actual
 		SELECT CostingMethod 
-		FROM dbo.fnGetCostingMethodAsTable(@intItemId, @intLocationId)
+		FROM dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
 	END 
 
 	-- Assert 

@@ -6,7 +6,7 @@
 
 CREATE PROCEDURE [dbo].[uspICReduceStockInFIFO]
 	@intItemId AS INT
-	,@intLocationId AS INT
+	,@intItemLocationId AS INT
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
@@ -41,10 +41,10 @@ WITH	(HOLDLOCK)
 AS		fifo_bucket	
 USING (
 	SELECT	intItemId = @intItemId
-			,intLocationId = @intLocationId	
+			,intItemLocationId = @intItemLocationId	
 ) AS Source_Query  
 	ON fifo_bucket.intItemId = Source_Query.intItemId
-	AND fifo_bucket.intLocationId = Source_Query.intLocationId
+	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
 	AND (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) > 0 
 	AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket.dtmDate) = 1
 
@@ -80,7 +80,7 @@ WHEN MATCHED THEN
 WHEN NOT MATCHED THEN 
 	INSERT (
 		[intItemId]
-		,[intLocationId]
+		,[intItemLocationId]
 		,[dtmDate]
 		,[dblStockIn]
 		,[dblStockOut]
@@ -93,7 +93,7 @@ WHEN NOT MATCHED THEN
 	)
 	VALUES (
 		@intItemId
-		,@intLocationId
+		,@intItemLocationId
 		,@dtmDate
 		,0
 		,@dblQty

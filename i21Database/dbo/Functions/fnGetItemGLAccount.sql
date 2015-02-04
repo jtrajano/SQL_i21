@@ -21,7 +21,7 @@
 
 CREATE FUNCTION [dbo].[fnGetItemGLAccount] (
 	@intItemId INT
-	,@intLocationId INT
+	,@intItemLocationId INT
 	,@strAccountDescription NVARCHAR(255)
 )
 RETURNS INT
@@ -29,10 +29,12 @@ AS
 BEGIN 
 	DECLARE @intGLAccountId AS INT
 
-	SET @intGLAccountId = dbo.fnGetGLAccountIdFromProfitCenter(
-				dbo.fnGetItemBaseGLAccount(@intItemId, @intLocationId, @strAccountDescription)
-				,dbo.fnGetItemProfitCenter(@intLocationId)
-		);		
+	SELECT	@intGLAccountId = dbo.fnGetGLAccountIdFromProfitCenter(
+				dbo.fnGetItemBaseGLAccount(@intItemId, @intItemLocationId, @strAccountDescription)
+				,dbo.fnGetItemProfitCenter(tblICItemLocation.intLocationId)
+			)	
+	FROM	dbo.tblICItemLocation
+	WHERE	intItemLocationId = @intItemLocationId
 
 	RETURN @intGLAccountId
 END 
