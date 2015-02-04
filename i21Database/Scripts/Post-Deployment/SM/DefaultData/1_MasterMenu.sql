@@ -1676,6 +1676,7 @@ GO
 	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.TabSetup' WHERE strCommand = 'Dashboard.controller.TabSetup'
 	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.PanelSettings' WHERE strCommand = 'Dashboard.controller.PanelSettings'
 	UPDATE tblSMMasterMenu SET strCommand = 'Reports.view.Connection' WHERE strCommand = 'Dashboard.controller.DashboardConnection'
+	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.PanelList' WHERE strCommand = 'Dashboard.controller.PanelList'
 
 	/* ------------------------------------------------- */
 	/* -- End Update Dashboard Menu Commands for MVVM -- */
