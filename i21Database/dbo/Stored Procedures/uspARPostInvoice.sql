@@ -475,7 +475,7 @@ BEGIN
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId
 	LEFT JOIN
-		tblICItemPricing IP
+		vyuICGetItemPricing IP
 			ON B.intItemId = IP.intItemId  AND B.intCompanyLocationId = IP.intLocationId		
 	INNER JOIN 
 		#tmpPostInvoiceData	P
@@ -518,7 +518,7 @@ BEGIN
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId 
 	LEFT JOIN
-		tblICItemPricing IP
+		vyuICGetItemPricing IP
 			ON B.intItemId = IP.intItemId AND B.intCompanyLocationId = IP.intLocationId						
 	INNER JOIN 
 		#tmpPostInvoiceData	P
@@ -1039,7 +1039,7 @@ ELSE
 			Units U
 				ON A.intAccountId = U.intAccountId 	
 		LEFT JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON B.intItemId = IP.intItemId AND B.intCompanyLocationId = IP.intLocationId					
 		INNER JOIN 
 			#tmpPostInvoiceData	P
@@ -1083,7 +1083,7 @@ ELSE
 			Units U
 				ON A.intAccountId = U.intAccountId 	
 		LEFT JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON B.intItemId = IP.intItemId  AND B.intCompanyLocationId = IP.intLocationId								
 		INNER JOIN 
 			#tmpPostInvoiceData	P

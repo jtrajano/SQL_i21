@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intItemVendorXrefId] INT NOT NULL IDENTITY , 
 		[intItemId] INT NOT NULL, 
-		[intLocationId] INT NOT NULL, 
+		[intItemLocationId] INT NOT NULL, 
 		[intVendorId] INT NOT NULL, 
 		[strVendorProduct] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strProductDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
@@ -24,7 +24,7 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemVendorXref] PRIMARY KEY ([intItemVendorXrefId]), 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemVendorXref_tblICItemLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
+		CONSTRAINT [FK_tblICItemVendorXref_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 		CONSTRAINT [FK_tblICItemVendorXref_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 	)
@@ -49,13 +49,13 @@ Type the overview for the table here.
 		@level2name = N'intItemId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Location Id',
+		@value = N'Item Location Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICItemVendorXref',
 		@level2type = N'COLUMN',
-		@level2name = N'intLocationId'
+		@level2name = 'intItemLocationId'
 	GO
 
 	GO
