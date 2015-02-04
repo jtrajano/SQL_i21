@@ -12,9 +12,11 @@
     [ysnActive]         BIT             NULL,
     [ysnSystem]         BIT             NULL,
     [strCashFlow]       NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [intAccountCategoryId] INT NULL, 
     CONSTRAINT [PK_GLAccount_AccountId] PRIMARY KEY CLUSTERED ([intAccountId] ASC),
     CONSTRAINT [FK_tblGLAccount_tblGLAccountGroup] FOREIGN KEY ([intAccountGroupId]) REFERENCES [dbo].[tblGLAccountGroup] ([intAccountGroupId]) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT [FK_tblGLAccount_tblGLAccountUnit] FOREIGN KEY ([intAccountUnitId]) REFERENCES [dbo].[tblGLAccountUnit] ([intAccountUnitId])
+    CONSTRAINT [FK_tblGLAccount_tblGLAccountUnit] FOREIGN KEY ([intAccountUnitId]) REFERENCES [dbo].[tblGLAccountUnit] ([intAccountUnitId]),
+	CONSTRAINT [FK_tblGLAccount_tblGLAccountCategory] FOREIGN KEY([intAccountCategoryId])REFERENCES [dbo].[tblGLAccountCategory] ([intAccountCategoryId])
 );
 GO
 

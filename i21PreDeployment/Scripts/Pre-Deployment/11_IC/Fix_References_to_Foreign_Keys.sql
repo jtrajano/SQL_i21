@@ -37,3 +37,45 @@ BEGIN
 		WHERE intUnitMeasureId NOT IN (SELECT intItemUOMId FROM tblICItemUOM)')
 	END
 END
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountDescription' AND object_id = object_id('tblICItemAccount'))
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountCategory' AND object_id = object_id('tblGLAccountCategory'))
+	BEGIN
+		EXEC('
+		UPDATE tblICItemAccount
+		SET strAccountDescription = (SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = tblICItemAccount.strAccountDescription)
+		')
+	END
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountDescription' AND object_id = object_id('tblICCategoryAccount'))
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountCategory' AND object_id = object_id('tblGLAccountCategory'))
+	BEGIN
+		EXEC('
+		UPDATE tblICCategoryAccount
+		SET strAccountDescription = (SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = tblICCategoryAccount.strAccountDescription)
+		')
+	END
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountDescription' AND object_id = object_id('tblICItemAccount'))
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountCategory' AND object_id = object_id('tblGLAccountCategory'))
+	BEGIN
+		EXEC('
+		DELETE FROM tblICItemAccount WHERE ISNULL(strAccountDescription, '''') = ''''
+		')
+	END
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountDescription' AND object_id = object_id('tblICCategoryAccount'))
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'strAccountCategory' AND object_id = object_id('tblGLAccountCategory'))
+	BEGIN
+		EXEC('
+		DELETE FROM tblICCategoryAccount WHERE ISNULL(strAccountDescription, '''') = ''''
+		')
+	END
+END
