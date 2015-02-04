@@ -1042,6 +1042,8 @@
     <Build Include="dbo\Stored Procedures\uspARInsertToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCreateEFTGLJournalEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGenerateEFTSchedule.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLot.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotOut.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
