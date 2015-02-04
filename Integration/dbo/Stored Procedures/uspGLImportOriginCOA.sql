@@ -1,4 +1,5 @@
-﻿IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
+﻿GO
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
 BEGIN 
 
 	EXEC('
@@ -103,8 +104,14 @@ BEGIN
 				UPDATE @tblQuery
 				SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = ''Equity'' and intParentGroupId = 0)
 				WHERE glact_type = ''Q''
+
+					
+				DECLARE @SegmentStructureId INT, @PrimaryStructureId INT
+				SELECT TOP 1 @SegmentStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Segment''
+				SELECT TOP 1 @PrimaryStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary''
+
 		
-				DELETE tblGLAccountSegment where intAccountStructureId IN (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary'')		
+				DELETE tblGLAccountSegment where intAccountStructureId = @PrimaryStructureId		
 		
 				INSERT tblGLAccountSegment
 					(strCode
@@ -118,14 +125,14 @@ BEGIN
 				SELECT
 					SegmentCode
 					,CodeDescription
-					,(SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary'')
+					,@PrimaryStructureId
 					,glact_type = CASE WHEN glact_type = '''' THEN NULL ELSE glact_type END
 					,1
 					,0
 					,0
 					,null
 				FROM @tblQuery
-				WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment)
+				WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = @PrimaryStructureId)
 		
 			END
 		
@@ -147,7 +154,7 @@ BEGIN
 					GROUP BY glprc_sub_acct									
 									
 			
-				DELETE tblGLAccountSegment where intAccountStructureId IN (SELECT intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Segment'')
+				DELETE tblGLAccountSegment where intAccountStructureId = @SegmentStructureId
 		
 				INSERT tblGLAccountSegment
 					(strCode
@@ -161,14 +168,14 @@ BEGIN
 				SELECT
 					REPLICATE(''0'', (select len(max(SegmentCode)) from #segments) - len(SegmentCode)) + '''' + CAST(SegmentCode AS NVARCHAR(50)) SegmentCode
 					,glprc_desc
-					,(SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Segment'')
+					,@SegmentStructureId
 					,null
 					,1
 					,0
 					,0
 					,null
 				FROM #segments
-				WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment)
+				WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = @SegmentStructureId)
 		
 				DROP TABLE #segments		
 			END
