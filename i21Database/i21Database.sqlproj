@@ -1040,8 +1040,9 @@
     <Build Include="dbo\Tables\tblSOSalesOrder.sql" />
     <Build Include="dbo\Views\vyuSOSalesOrderSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertToInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspNRCreateEFTGLJournalEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspSODuplicateSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGenerateEFTSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateEFTGLJournalEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
