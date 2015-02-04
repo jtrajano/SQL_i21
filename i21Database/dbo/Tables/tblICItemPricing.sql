@@ -185,7 +185,7 @@ Type the overview for the table here.
 		@level2name = N'dblAmountPercent'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Item Unit Measure Id',
+		@value = N'Item Unit of Measure Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',

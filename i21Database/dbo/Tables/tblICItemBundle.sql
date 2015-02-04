@@ -17,7 +17,7 @@ Type the overview for the table here.
 		[intBundleItemId] INT NOT NULL, 
 		[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[intUnitMeasureId] INT NULL, 
+		[intItemUnitMeasureId] INT NULL, 
 		[dblUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
@@ -25,7 +25,7 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICItemBundle] PRIMARY KEY ([intItemBundleId]),
 		CONSTRAINT [FK_tblICItemBundle_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemBundle_BundleItem] FOREIGN KEY ([intBundleItemId]) REFERENCES [tblICItem]([intItemId]), 
-		CONSTRAINT [FK_tblICItemBundle_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+		CONSTRAINT [FK_tblICItemBundle_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 	)
 
 	GO
@@ -75,13 +75,13 @@ Type the overview for the table here.
 		@level2name = N'dblQuantity'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Unit Measure Id',
+		@value = N'Item Unit of Measure Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICItemBundle',
 		@level2type = N'COLUMN',
-		@level2name = N'intUnitMeasureId'
+		@level2name = 'intItemUnitMeasureId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Unit',

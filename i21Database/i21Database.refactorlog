@@ -1925,4 +1925,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="313bb48a-ab5a-44ec-b3b1-65bc2b94cd7a" ChangeDateTime="02/04/2015 05:36:28">
+    <Property Name="ElementName" Value="[dbo].[tblICItemAssembly].[intUnitMeasureId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemAssembly]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemUnitMeasureId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="62af9c60-5be3-4677-a37c-c0241ffbdf41" ChangeDateTime="02/04/2015 05:37:34">
+    <Property Name="ElementName" Value="[dbo].[tblICItemBundle].[intUnitMeasureId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemBundle]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemUnitMeasureId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c98e508d-e490-46b0-af1d-d2e5967042cf" ChangeDateTime="02/04/2015 05:38:56">
+    <Property Name="ElementName" Value="[dbo].[tblICItemKitDetail].[intUnitMeasureId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemKitDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemUnitMeasureId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e5059014-91c0-407c-9bf8-1b94a8ed47b8" ChangeDateTime="02/04/2015 05:40:21">
+    <Property Name="ElementName" Value="[dbo].[tblICItemVendorXref].[intUnitMeasureId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemVendorXref]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemUnitMeasureId" />
+  </Operation>
 </Operations>
