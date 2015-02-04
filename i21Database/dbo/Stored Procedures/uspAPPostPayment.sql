@@ -258,7 +258,7 @@ BEGIN
 				INNER JOIN tblAPBill C
 					ON B.intBillId = C.intBillId
 			WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM #tmpPayablePostData)
-			AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount)
+			AND B.dblPayment <> 0 AND C.ysnPaid = 0 AND C.dblAmountDue < (B.dblPayment + B.dblDiscount - B.dblInterest)
 
 			INSERT INTO #tmpPayableInvalidData
 			SELECT 
