@@ -6,5 +6,7 @@ SELECT
 ,dtmDate
 FROM 
 dbo.tblARInvoice
+WHERE
+strTransactionType = 'Invoice'
 
 
