@@ -250,7 +250,7 @@ IF (ISNULL(@recap, 0) = 0)
 				INSERT INTO 
 					#tmpARReceivableInvalidData
 				SELECT 
-					'The Deposit Account is not linked to any of the active Bank Account in Cash Management'
+					'The Cash Account is not linked to any of the active Bank Account in Cash Management'
 					,'Receivable'
 					,A.strRecordNumber
 					,@batchId
@@ -259,13 +259,20 @@ IF (ISNULL(@recap, 0) = 0)
 					tblARPayment A
 				INNER JOIN
 					#tmpARReceivablePostData P
-						ON A.intPaymentId = P.intPaymentId						 
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblGLAccount GL
+						ON A.intAccountId = GL.intAccountId 
+				INNER JOIN 
+					tblGLAccountGroup AG
+						ON GL.intAccountGroupId = AG.intAccountGroupId 											 
 				LEFT OUTER JOIN
 					tblCMBankAccount BA
 						ON A.intAccountId = BA.intGLAccountId 						
 				WHERE
-					BA.intGLAccountId IS NULL
-					OR BA.ysnActive = 0	
+					AG.strAccountGroup = 'Cash Accounts'
+					AND (BA.intGLAccountId IS NULL
+						 OR BA.ysnActive = 0)
 					
 
 				--NOT BALANCE +overpayment
@@ -1007,7 +1014,7 @@ BEGIN
 				strSourceSystem,
 				intConcurrencyId
 			)
-			SELECT
+			SELECT DISTINCT
 				strTransactionId = A.strRecordNumber,
 				intBankTransactionTypeID = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AR Payment'),
 				intBankAccountID = (SELECT TOP 1 intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = A.intAccountId),
@@ -1040,9 +1047,20 @@ BEGIN
 				FROM tblARPayment A
 					INNER JOIN tblARCustomer B
 						ON A.intCustomerId = B.intCustomerId
-					--INNER JOIN tblCMBankAccount CM
-					--	ON A.intAccountId = CM.intGLAccountId
-				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+				INNER JOIN
+					tblGLAccount GL
+						ON A.intAccountId = GL.intAccountId 
+				INNER JOIN 
+					tblGLAccountGroup AG
+						ON GL.intAccountGroupId = AG.intAccountGroupId 											 
+				INNER JOIN
+					tblCMBankAccount BA
+						ON A.intAccountId = BA.intGLAccountId 						
+				WHERE
+					AG.strAccountGroup = 'Cash Accounts'
+					AND BA.intGLAccountId IS NOT NULL
+					AND BA.ysnActive = 1
+					AND A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 
 			--Insert Successfully posted transactions.
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
