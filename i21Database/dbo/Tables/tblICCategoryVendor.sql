@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intCategoryVendorId] INT NOT NULL IDENTITY, 
 		[intCategoryId] INT NOT NULL, 
-		[intLocationId] INT NULL, 
+		[intCategoryLocationId] INT NULL, 
 		[intVendorId] INT NULL, 
 		[strVendorDepartment] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL  , 
 		[ysnAddOrderingUPC] BIT NULL, 
@@ -30,7 +30,7 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICCategoryVendor] PRIMARY KEY ([intCategoryVendorId]), 
 		CONSTRAINT [FK_tblICCategoryVendor_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICCategoryVendor_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
-		CONSTRAINT [FK_tblICCategoryVendor_tblICCategoryLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblICCategoryLocation]([intCategoryLocationId])
+		CONSTRAINT [FK_tblICCategoryVendor_tblICCategoryLocation] FOREIGN KEY ([intCategoryLocationId]) REFERENCES [tblICCategoryLocation]([intCategoryLocationId])
 	)
 
 	GO
@@ -53,13 +53,13 @@ Type the overview for the table here.
 		@level2name = N'intCategoryId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Store Id',
+		@value = N'Category Location Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICCategoryVendor',
 		@level2type = N'COLUMN',
-		@level2name = 'intLocationId'
+		@level2name = 'intCategoryLocationId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Vendor Id',

@@ -2,7 +2,7 @@
 -- This function will retrieve the costing method configured in an item (and per location).
 CREATE FUNCTION [dbo].[fnGetCostingMethod](
 	@intItemId INT
-	,@intLocationId INT
+	,@intItemLocationId INT
 )
 RETURNS INT
 AS 
@@ -13,8 +13,8 @@ BEGIN
 	SELECT	@costingMethod = ISNULL(ItemLocation.intCostingMethod, Category.intCostingMethod)
 	FROM	dbo.tblICItemLocation ItemLocation LEFT JOIN dbo.tblICCategory Category
 				ON ItemLocation.intCategoryId = Category.intCategoryId
-	WHERE	intItemId = @intItemId
-			AND intLocationId = @intLocationId
+	WHERE	ItemLocation.intItemId = @intItemId
+			AND ItemLocation.intItemLocationId = @intItemLocationId
 
 	RETURN @costingMethod;	
 END

@@ -16,14 +16,14 @@ Type the overview for the table here.
 		[intItemKitId] INT NOT NULL, 
 		[intItemId] INT NOT NULL, 
 		[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[intUnitMeasureId] INT NULL, 
+		[intItemUnitMeasureId] INT NULL, 
 		[dblPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[ysnSelected] INT NULL, 
 		[inSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemKitDetail] PRIMARY KEY ([intItemKitDetailId]), 
 		CONSTRAINT [FK_tblICItemKitDetail_tblICItemKit] FOREIGN KEY ([intItemKitId]) REFERENCES [tblICItemKit]([intItemKitId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemKitDetail_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+		CONSTRAINT [FK_tblICItemKitDetail_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 	)
 
 	GO
@@ -64,13 +64,13 @@ Type the overview for the table here.
 		@level2name = N'dblQuantity'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Unit Measure Id',
+		@value = N'Item Unit of Measure Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICItemKitDetail',
 		@level2type = N'COLUMN',
-		@level2name = N'intUnitMeasureId'
+		@level2name = 'intItemUnitMeasureId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Price',

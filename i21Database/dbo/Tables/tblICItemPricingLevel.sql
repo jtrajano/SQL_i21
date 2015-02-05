@@ -14,9 +14,9 @@ Type the overview for the table here.
 	(
 		[intItemPricingLevelId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
-		[intLocationId] INT NOT NULL, 
+		[intItemLocationId] INT NOT NULL, 
 		[strPriceLevel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[intUnitMeasureId] INT NULL, 
+		[intItemUnitMeasureId] INT NULL, 
 		[dblUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMin] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMax] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -30,8 +30,8 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemPricingLevel] PRIMARY KEY ([intItemPricingLevelId]), 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
-		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
+		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 	)
 
 	GO
@@ -54,13 +54,13 @@ Type the overview for the table here.
 		@level2name = N'intItemId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Location Id',
+		@value = N'Item Location Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICItemPricingLevel',
 		@level2type = N'COLUMN',
-		@level2name = N'intLocationId'
+		@level2name = 'intItemLocationId'
 	GO
 
 	GO
@@ -74,13 +74,13 @@ Type the overview for the table here.
 		@level2name = N'strPriceLevel'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Unit of Measure Id',
+		@value = N'Item Unit of Measure Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICItemPricingLevel',
 		@level2type = N'COLUMN',
-		@level2name = N'intUnitMeasureId'
+		@level2name = 'intItemUnitMeasureId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Units',

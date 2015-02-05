@@ -4,7 +4,7 @@ BEGIN
 	-- Arrange
 	BEGIN 
 		DECLARE @intItemId AS INT
-		DECLARE @intLocationId AS INT
+		DECLARE @intItemLocationId AS INT
 
 		-- GL Account types used in inventory costing
 		DECLARE @Inventory AS INT = 1;
@@ -42,8 +42,8 @@ BEGIN
 				,[WriteOffSold]
 				,[AutoNegative]
 		)
-		SELECT	[Inventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'Inventory')
-				,[ContraInventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intLocationId, 'Cost of Goods')
+		SELECT	[Inventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intItemLocationId, 'Inventory')
+				,[ContraInventory] = [dbo].[fnGetItemGLAccount](@intItemId, @intItemLocationId, 'Cost of Goods')
 				,[RevalueSold] = NULL 
 				,[WriteOffSold] = NULL 
 				,[AutoNegative] = NULL 	

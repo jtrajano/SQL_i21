@@ -8,7 +8,7 @@
 *	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetProcessToItemReceiptErrors(A.intItemId, A.intLocationId, (A.dblUnitQty * A.dblUOMQty)) B
 * 
 */
-CREATE FUNCTION fnGetProcessToItemReceiptErrors (@intItemId AS INT, @intLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0)
+CREATE FUNCTION fnGetProcessToItemReceiptErrors (@intItemId AS INT, @intItemLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0)
 RETURNS TABLE 
 AS
 RETURN (
@@ -16,7 +16,7 @@ RETURN (
 	SELECT * FROM (
 		-- Check for any invalid item.
 		SELECT	intItemId = @intItemId
-				,intLocationId = @intLocationId
+				,intItemLocationId = @intItemLocationId
 				,strText = FORMATMESSAGE(50027)
 				,intErrorCode = 50027
 		WHERE	NOT EXISTS (

@@ -53,8 +53,8 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 
 		-- Create the expected and actual tables. 
-		SELECT intItemId, intLocationId, dblAverageCost, dblUnitOnHand INTO expected FROM dbo.tblICItemStock WHERE 1 = 0		
-		SELECT intItemId, intLocationId, dblAverageCost, dblUnitOnHand INTO actual FROM dbo.tblICItemStock WHERE 1 = 0
+		SELECT intItemId, intItemLocationId, dblAverageCost, dblUnitOnHand INTO expected FROM dbo.tblICItemStock WHERE 1 = 0		
+		SELECT intItemId, intItemLocationId, dblAverageCost, dblUnitOnHand INTO actual FROM dbo.tblICItemStock WHERE 1 = 0
 
 		-- Declare the variables used by uspICPostCosting
 		DECLARE @ItemsToPost AS ItemCostingTableType;
@@ -65,7 +65,7 @@ BEGIN
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -100
 				,dblUOMQty = 1
@@ -79,7 +79,7 @@ BEGIN
 				,intLotId = NULL
 		UNION ALL 
 		SELECT 	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -75
 				,dblUOMQty = 1
@@ -95,12 +95,12 @@ BEGIN
 		-- Setup the expected g/l entries 
 		INSERT INTO expected (
 				intItemId
-				,intLocationId
+				,intItemLocationId
 				,dblAverageCost
 				,dblUnitOnHand
 		)
 		SELECT	intItemId = @WetGrains
-				,intLocationId = @Default_Location
+				,intItemLocationId = @Default_Location
 				,dblAverageCost = 22.00 -- Retain the same average cost
 				,dblUnitOnHand = -75 -- Reduce stock from 100 to -75
 	END 
@@ -117,17 +117,17 @@ BEGIN
 
 		INSERT INTO actual (
 				intItemId
-				,intLocationId
+				,intItemLocationId
 				,dblAverageCost
 				,dblUnitOnHand	
 		)
 		SELECT	intItemId
-				,intLocationId
+				,intItemLocationId
 				,dblAverageCost
 				,dblUnitOnHand
 		FROM	dbo.tblICItemStock
 		WHERE	intItemId = @WetGrains
-				AND intLocationId = @Default_Location
+				AND intItemLocationId = @Default_Location
 	END 
 	
 	-- Assert

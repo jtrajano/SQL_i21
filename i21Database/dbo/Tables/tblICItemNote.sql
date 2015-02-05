@@ -14,14 +14,14 @@ Type the overview for the table here.
 	(
 		[intItemNoteId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
-		[intLocationId] INT NOT NULL, 
+		[intItemLocationId] INT NOT NULL, 
 		[strCommentType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemNote] PRIMARY KEY ([intItemNoteId]), 
 		CONSTRAINT [FK_tblICItemNote_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemNote_tblICItemLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])
+		CONSTRAINT [FK_tblICItemNote_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])
 	)
 
 	GO
@@ -44,13 +44,13 @@ Type the overview for the table here.
 		@level2name = N'intItemId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Location Id',
+		@value = N'Item Location Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICItemNote',
 		@level2type = N'COLUMN',
-		@level2name = N'intLocationId'
+		@level2name = 'intItemLocationId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Comment Type',

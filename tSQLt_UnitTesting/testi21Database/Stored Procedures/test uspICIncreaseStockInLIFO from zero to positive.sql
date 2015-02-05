@@ -7,7 +7,7 @@ BEGIN
 
 		-- Re-add the clustered index. This is critical for the LIFO table because it arranges the data physically by that order. 
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLIFO]
-			ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intLocationId] ASC, [intInventoryLIFOId] DESC);
+			ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOId] DESC);
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -24,7 +24,7 @@ BEGIN
 
 		CREATE TABLE expected (
 			[intItemId] INT 
-			,[intLocationId] INT 
+			,[intItemLocationId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -35,7 +35,7 @@ BEGIN
 
 		CREATE TABLE actual (
 			[intItemId] INT 
-			,[intLocationId] INT 
+			,[intItemLocationId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -46,7 +46,7 @@ BEGIN
 
 		-- Create the variables used by uspICIncreaseStockInLIFO
 		DECLARE @intItemId AS INT				= @PremiumGrains
-				,@intLocationId AS INT			= @BetterHaven
+				,@intItemLocationId AS INT			= @BetterHaven
 				,@dtmDate AS DATETIME			= 'January 2, 2014'
 				,@dblQty NUMERIC(18,6)			= 40
 				,@dblCost AS NUMERIC(18,6)		= 88.77
@@ -66,7 +66,7 @@ BEGIN
 		-- Setup the expected values 
 		INSERT INTO expected (
 				[intItemId] 
-				,[intLocationId] 
+				,[intItemLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -75,7 +75,7 @@ BEGIN
 				,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @PremiumGrains
-				,[intLocationId] = @BetterHaven
+				,[intItemLocationId] = @BetterHaven
 				,[dtmDate] = 'January 2, 2014'
 				,[dblStockIn] = 40
 				,[dblStockOut] = 0
@@ -85,7 +85,7 @@ BEGIN
 
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like: 
-		_m_		intItemId   intLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
+		_m_		intItemId   intItemLocationId dtmDate                 dblStockIn                              dblStockOut                             dblCost                                 intCreatedUserId intConcurrencyId
 		-----	----------- ----------------- ----------------------- --------------------------------------- --------------------------------------- --------------------------------------- ---------------- ----------------
 		new		3           3                 2014-01-02 00:00:00.000 40.000000                               0.000000                                88.770000                               1                1
 				***************************************************************************************************************************************************************************************************************/							
@@ -105,7 +105,7 @@ BEGIN
 						
 			EXEC dbo.uspICIncreaseStockInLIFO
 				@intItemId
-				,@intLocationId
+				,@intItemLocationId
 				,@dtmDate
 				,@dblQty
 				,@dblCost
@@ -138,7 +138,7 @@ BEGIN
 
 		INSERT INTO actual (
 				[intItemId] 
-				,[intLocationId] 
+				,[intItemLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -148,7 +148,7 @@ BEGIN
 		)
 		SELECT
 				[intItemId] 
-				,[intLocationId] 
+				,[intItemLocationId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -157,7 +157,7 @@ BEGIN
 				,[intConcurrencyId]
 		FROM	dbo.tblICInventoryLIFO
 		WHERE	intItemId = @intItemId
-				AND intLocationId = @intLocationId
+				AND intItemLocationId = @intItemLocationId
 	END 
 
 	-- Assert

@@ -48,7 +48,7 @@ FROM	(
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intLocationId) IN (@AVERAGECOST, @FIFO) 
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@AVERAGECOST, @FIFO) 
 					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
 					AND 
 					(

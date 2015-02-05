@@ -15,7 +15,7 @@ RETURNS TABLE
 AS
 RETURN 
 	SELECT	intItemId
-			,intLocationId
+			,intItemLocationId
 			,dtmDate
 			,dblUnitQty
 			,dblCost

@@ -37,7 +37,7 @@ SET ANSI_WARNINGS OFF
 -- Declare the variables to use for the cursor
 DECLARE @intId AS INT 
 		,@intItemId AS INT
-		,@intLocationId AS INT 
+		,@intItemLocationId AS INT 
 		,@dtmDate AS DATETIME
 		,@dblUnitQty AS NUMERIC(18, 6) 
 		,@dblUOMQty AS NUMERIC(18, 6)
@@ -76,7 +76,7 @@ DECLARE loopItems CURSOR LOCAL FAST_FORWARD
 FOR 
 SELECT  intId
 		,intItemId
-		,intLocationId
+		,intItemLocationId
 		,dtmDate
 		,dblUnitQty
 		,dblUOMQty
@@ -93,7 +93,7 @@ FROM	@ItemsToPost
 OPEN loopItems;
 
 -- Initial fetch attempt
-FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
+FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -105,7 +105,7 @@ BEGIN
 
 	-- Get the costing method of an item 
 	SELECT	@CostingMethod = CostingMethod 
-	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intLocationId)
+	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
 
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
@@ -115,7 +115,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICPostAverageCosting
 			@intItemId
-			,@intLocationId
+			,@intItemLocationId
 			,@dtmDate
 			,@dblUnitQty
 			,@dblUOMQty
@@ -135,7 +135,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICPostFIFO
 			@intItemId
-			,@intLocationId
+			,@intItemLocationId
 			,@dtmDate
 			,@dblUnitQty
 			,@dblUOMQty
@@ -155,7 +155,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICPostLIFO
 			@intItemId
-			,@intLocationId
+			,@intItemLocationId
 			,@dtmDate
 			,@dblUnitQty
 			,@dblUOMQty
@@ -188,12 +188,12 @@ BEGIN
 		AS		ItemStock	
 		USING (
 				SELECT	intItemId = @intItemId
-						,intLocationId = @intLocationId
+						,intItemLocationId = @intItemLocationId
 						,Qty = ISNULL(@dblUnitQty, 0)  * ISNULL(@dblUOMQty, 0)
 						,Cost = @dblCost
 		) AS StockToUpdate
 			ON ItemStock.intItemId = StockToUpdate.intItemId
-			AND ItemStock.intLocationId = StockToUpdate.intLocationId
+			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
 
 		-- If matched, update the average cost and unit on hand qty. 
 		WHEN MATCHED THEN 
@@ -205,7 +205,7 @@ BEGIN
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				intItemId
-				,intLocationId
+				,intItemLocationId
 				,intSubLocationId
 				,dblAverageCost
 				,dblUnitOnHand
@@ -217,7 +217,7 @@ BEGIN
 			)
 			VALUES (
 				StockToUpdate.intItemId
-				,StockToUpdate.intLocationId
+				,StockToUpdate.intItemLocationId
 				,NULL 
 				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, 0, 0) -- dblAverageCost
 				,StockToUpdate.Qty -- dblUnitOnHand
@@ -232,7 +232,7 @@ BEGIN
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
-	FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId
+	FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
