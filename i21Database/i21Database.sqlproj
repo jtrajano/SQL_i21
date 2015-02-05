@@ -1101,9 +1101,6 @@
     </ArtifactReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\CT\2_StartingNumber.sql" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountCategory.sql" />
   </ItemGroup>
 </Project>
