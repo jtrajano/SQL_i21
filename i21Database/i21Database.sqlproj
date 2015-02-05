@@ -1057,6 +1057,7 @@
     <Build Include="dbo\Tables\tblCCDealerSite.sql" />
     <Build Include="dbo\Tables\tblCCSite.sql" />
     <Build Include="dbo\Tables\tblCCVendorDefault.sql" />
+    <Build Include="dbo\Views\vyuARRecapTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
