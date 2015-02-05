@@ -37,7 +37,9 @@ Ext.define('Inventory.view.InventoryUOMViewModel', {
                     strDescription: 'Volume'
                 },{
                     strDescription: 'Weight'
-                },
+                },{
+                    strDescription: 'Packed'
+                }
             ],
             fields: {
                 name: 'strDescription'
