@@ -12,25 +12,25 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemVendorXref");
-            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemVendorXrefId).HasColumnName("intItemVendorXrefId");
-            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.intVendorId).HasColumnName("intVendorId");
-            this.Property(t => t.strProductDescription).HasColumnName("strProductDescription");
             this.Property(t => t.strVendorProduct).HasColumnName("strVendorProduct");
+            this.Property(t => t.strProductDescription).HasColumnName("strProductDescription");
+            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor");
+            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
+            this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemVendorXrefs)
-                .HasForeignKey(p => p.intLocationId);
+                .HasForeignKey(p => p.intItemLocationId);
             this.HasOptional(p => p.vyuAPVendor)
                 .WithMany(p => p.tblICItemVendorXrefs)
                 .HasForeignKey(p => p.intVendorId);
-            this.HasOptional(p => p.tblICUnitMeasure)
+            this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICItemVendorXrefs)
-                .HasForeignKey(p => p.intUnitMeasureId);
+                .HasForeignKey(p => p.intItemUnitMeasureId);
                 
         }
     }

@@ -12,22 +12,21 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemStock");
-            this.Property(t => t.dblBackOrder).HasColumnName("dblBackOrder");
-            this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder");
-            this.Property(t => t.dblOrderCommitted).HasColumnName("dblOrderCommitted");
-            this.Property(t => t.dblUnitOnHand).HasColumnName("dblUnitOnHand");
-            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemStockId).HasColumnName("intItemStockId");
-            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost");
-            this.Property(t => t.dblLastCountRetail).HasColumnName("dblLastCountRetail");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost");
+            this.Property(t => t.dblUnitOnHand).HasColumnName("dblUnitOnHand");
+            this.Property(t => t.dblOrderCommitted).HasColumnName("dblOrderCommitted");
+            this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder");
+            this.Property(t => t.dblBackOrder).HasColumnName("dblBackOrder");
+            this.Property(t => t.dblLastCountRetail).HasColumnName("dblLastCountRetail");
+            this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemStocks)
-                .HasForeignKey(p => p.intLocationId);
+                .HasForeignKey(p => p.intItemLocationId);
         }
     }
 }

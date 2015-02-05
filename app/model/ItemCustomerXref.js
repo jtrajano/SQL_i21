@@ -39,12 +39,12 @@ Ext.define('Inventory.model.ItemCustomerXref', {
                 }
             }
         },
-        { name: 'intLocationId', type: 'int', allowNull: true},
-        { name: 'intCustomerId', type: 'int', allowNull: true},
-        { name: 'strCustomerProduct', type: 'string', allowNull: true},
-        { name: 'strProductDescription', type: 'string'},
-        { name: 'strPickTicketNotes', type: 'string'},
-        { name: 'intSort', type: 'int'},
+        { name: 'intItemLocationId', type: 'int', allowNull: true },
+        { name: 'intCustomerId', type: 'int', allowNull: true },
+        { name: 'strCustomerProduct', type: 'string' },
+        { name: 'strProductDescription', type: 'string' },
+        { name: 'strPickTicketNotes', type: 'string' },
+        { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strCustomerNumber', type: 'string'}

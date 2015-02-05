@@ -457,6 +457,7 @@ Ext.define('Inventory.view.Category', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
+                                                reference: 'grdGlAccounts',
                                                 itemId: 'grdGlAccounts',
                                                 margin: -1,
                                                 dockedItems: [

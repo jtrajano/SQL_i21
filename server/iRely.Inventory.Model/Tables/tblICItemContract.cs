@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
     {
         public int intItemContractId { get; set; }
         public int intItemId { get; set; }
-        public int? intLocationId { get; set; }
+        public int? intItemLocationId { get; set; }
         public string strContractItemName { get; set; }
         public int? intCountryId { get; set; }
         public string strGrade { get; set; }
@@ -22,7 +22,7 @@ namespace iRely.Inventory.Model
         public decimal? dblYieldPercent { get; set; }
         public decimal? dblTolerancePercent { get; set; }
         public decimal? dblFranchisePercent { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         private string _location;
         [NotMapped]

@@ -12,10 +12,11 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICCategoryAccount");
-            this.Property(t => t.intAccountId).HasColumnName("intAccountId");
             this.Property(t => t.intCategoryAccountId).HasColumnName("intCategoryAccountId");
             this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
             this.Property(t => t.intAccountCategoryId).HasColumnName("intAccountCategoryId");
+            this.Property(t => t.intAccountId).HasColumnName("intAccountId");
+            this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasRequired(p => p.tblGLAccount)
                 .WithMany(p => p.tblICCategoryAccounts)

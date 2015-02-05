@@ -12,12 +12,16 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemUPC");
-            this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemUPCId).HasColumnName("intItemUPCId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
+            this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty");
             this.Property(t => t.strUPCCode).HasColumnName("strUPCCode");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+
+            this.HasOptional(p => p.tblICItemUOM)
+                .WithMany(p => p.tblICItemUPCs)
+                .HasForeignKey(p => p.intItemUnitMeasureId);
         }
     }
 }

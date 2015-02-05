@@ -46,7 +46,7 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemUPC>()
-                .Include(p => p.tblICUnitMeasure)
+                .Include(p => p.tblICItemUOM)
                 .Where(w => query.Where(predicate).Any(a => a.intItemUPCId == w.intItemUPCId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

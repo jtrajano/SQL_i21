@@ -12,22 +12,22 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemContract");
-            this.Property(t => t.dblFranchisePercent).HasColumnName("dblFranchisePercent");
-            this.Property(t => t.dblTolerancePercent).HasColumnName("dblTolerancePercent");
-            this.Property(t => t.dblYieldPercent).HasColumnName("dblYieldPercent");
-            this.Property(t => t.intCountryId).HasColumnName("intCountryId");
             this.Property(t => t.intItemContractId).HasColumnName("intItemContractId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
-            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.strContractItemName).HasColumnName("strContractItemName");
-            this.Property(t => t.strGarden).HasColumnName("strGarden");
+            this.Property(t => t.intCountryId).HasColumnName("intCountryId");
             this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.strGradeType).HasColumnName("strGradeType");
+            this.Property(t => t.strGarden).HasColumnName("strGarden");
+            this.Property(t => t.dblYieldPercent).HasColumnName("dblYieldPercent");
+            this.Property(t => t.dblTolerancePercent).HasColumnName("dblTolerancePercent");
+            this.Property(t => t.dblFranchisePercent).HasColumnName("dblFranchisePercent");
+            this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemContracts)
-                .HasForeignKey(p => p.intLocationId);
+                .HasForeignKey(p => p.intItemLocationId);
             this.HasOptional(p => p.tblSMCountry)
                 .WithMany(p => p.tblICItemContracts)
                 .HasForeignKey(p => p.intCountryId);

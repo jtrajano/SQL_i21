@@ -28,11 +28,11 @@ Ext.define('Inventory.model.ItemKitDetail', {
                 }
             }},
         { name: 'intItemId', type: 'int', allowNull: true },
-        { name: 'dblQuantity', type: 'float'},
-        { name: 'intUnitMeasureId', type: 'int', allowNull: true },
-        { name: 'dblPrice', type: 'float'},
-        { name: 'ysnSelected', type: 'int'},
-        { name: 'inSort', type: 'int'},
+        { name: 'dblQuantity', type: 'float' },
+        { name: 'intItemUnitMeasureId', type: 'int', allowNull: true },
+        { name: 'dblPrice', type: 'float' },
+        { name: 'ysnSelected', type: 'int', allowNull: true },
+        { name: 'inSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string'},
         { name: 'strDescription', type: 'string'},

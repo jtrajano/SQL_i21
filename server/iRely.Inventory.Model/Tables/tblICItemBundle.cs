@@ -16,10 +16,10 @@ namespace iRely.Inventory.Model
         public int? intBundleItemId { get; set; }
         public string strDescription { get; set; }
         public decimal? dblQuantity { get; set; }
-        public int? intUnitMeasureId { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
         public decimal? dblUnit { get; set; }
         public decimal? dblPrice { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         private string _item;
         [NotMapped]
@@ -47,8 +47,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_uom))
-                    if (tblICUnitMeasure != null)
-                        return tblICUnitMeasure.strUnitMeasure;
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUnitMeasure;
                     else
                         return null;
                 else
@@ -62,6 +62,6 @@ namespace iRely.Inventory.Model
 
         public tblICItem tblICItem { get; set; }
         public tblICItem BundleItem { get; set; }
-        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICItemUOM tblICItemUOM { get; set; }
     }
 }

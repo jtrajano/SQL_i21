@@ -13,13 +13,13 @@ namespace iRely.Inventory.Model
     {
         public int intItemVendorXrefId { get; set; }
         public int intItemId { get; set; }
-        public int? intLocationId { get; set; }
+        public int? intItemLocationId { get; set; }
         public int? intVendorId { get; set; }
         public string strVendorProduct { get; set; }
         public string strProductDescription { get; set; }
         public decimal? dblConversionFactor { get; set; }
-        public int? intUnitMeasureId { get; set; }
-        public int intSort { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
+        public int? intSort { get; set; }
 
         private string _location;
         [NotMapped]
@@ -66,8 +66,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_unitmeasure))
-                    if (tblICUnitMeasure != null)
-                        return tblICUnitMeasure.strUnitMeasure;
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUnitMeasure;
                     else
                         return null;
                 else
@@ -82,6 +82,6 @@ namespace iRely.Inventory.Model
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }
         public vyuAPVendor vyuAPVendor { get; set; }
-        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICItemUOM tblICItemUOM { get; set; }
     }
 }

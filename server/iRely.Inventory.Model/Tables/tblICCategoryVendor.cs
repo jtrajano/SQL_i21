@@ -13,8 +13,8 @@ namespace iRely.Inventory.Model
     {
         public int intCategoryVendorId { get; set; }
         public int intCategoryId { get; set; }
-        public int intLocationId { get; set; }
-        public int intVendorId { get; set; }
+        public int? intCategoryLocationId { get; set; }
+        public int? intVendorId { get; set; }
         public string strVendorDepartment { get; set; }
         public bool ysnAddOrderingUPC { get; set; }
         public bool ysnUpdateExistingRecords { get; set; }
@@ -24,6 +24,7 @@ namespace iRely.Inventory.Model
         public int? intSellClassId { get; set; }
         public int? intOrderClassId { get; set; }
         public string strComments { get; set; }
+        public int? intSort { get; set; }
 
         private string _location;
         [NotMapped]

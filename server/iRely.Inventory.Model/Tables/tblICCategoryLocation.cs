@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
     {
         public int intCategoryLocationId { get; set; }
         public int intCategoryId { get; set; }
-        public int intLocationId { get; set; }
+        public int? intLocationId { get; set; }
         public int? intRegisterDepartmentId { get; set; }
         public bool ysnUpdatePrices { get; set; }
         public bool ysnUseTaxFlag1 { get; set; }
@@ -44,8 +44,8 @@ namespace iRely.Inventory.Model
         public bool ysnPrePriced { get; set; }
         public bool ysnIdRequiredLiquor { get; set; }
         public bool ysnIdRequiredCigarette { get; set; }
-        public int intMinimumAge { get; set; }
-        public int intSort { get; set; }
+        public int? intMinimumAge { get; set; }
+        public int? intSort { get; set; }
 
         private string _location;
         [NotMapped]

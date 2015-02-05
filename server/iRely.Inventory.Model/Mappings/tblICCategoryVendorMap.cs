@@ -12,23 +12,24 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICCategoryVendor");
-            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
             this.Property(t => t.intCategoryVendorId).HasColumnName("intCategoryVendorId");
-            this.Property(t => t.intFamilyId).HasColumnName("intFamilyId");
-            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
-            this.Property(t => t.intOrderClassId).HasColumnName("intOrderClassId");
-            this.Property(t => t.intSellClassId).HasColumnName("intSellClassId");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.intCategoryLocationId).HasColumnName("intCategoryLocationId");
             this.Property(t => t.intVendorId).HasColumnName("intVendorId");
-            this.Property(t => t.strComments).HasColumnName("strComments");
             this.Property(t => t.strVendorDepartment).HasColumnName("strVendorDepartment");
-            this.Property(t => t.ysnAddNewRecords).HasColumnName("ysnAddNewRecords");
             this.Property(t => t.ysnAddOrderingUPC).HasColumnName("ysnAddOrderingUPC");
             this.Property(t => t.ysnUpdateExistingRecords).HasColumnName("ysnUpdateExistingRecords");
+            this.Property(t => t.ysnAddNewRecords).HasColumnName("ysnAddNewRecords");
             this.Property(t => t.ysnUpdatePrice).HasColumnName("ysnUpdatePrice");
+            this.Property(t => t.intFamilyId).HasColumnName("intFamilyId");
+            this.Property(t => t.intSellClassId).HasColumnName("intSellClassId");
+            this.Property(t => t.intOrderClassId).HasColumnName("intOrderClassId");
+            this.Property(t => t.strComments).HasColumnName("strComments");
+            this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasRequired(p => p.tblICCategoryLocation)
                 .WithMany(p => p.tblICCategoryVendors)
-                .HasForeignKey(p => p.intLocationId);
+                .HasForeignKey(p => p.intCategoryLocationId);
             this.HasOptional(p => p.Family)
                 .WithMany(p => p.tblICCategoryVendors)
                 .HasForeignKey(p => p.intFamilyId);

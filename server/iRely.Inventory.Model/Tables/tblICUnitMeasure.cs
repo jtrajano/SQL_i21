@@ -27,14 +27,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICStorageUnitType> DimensionUnitTypes { get; set; }
         public ICollection<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
         public ICollection<tblICRinFeedStockUOM> tblICRinFeedStockUOMs { get; set; }
-        public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
-        public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
-        public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
-
-        public ICollection<tblICItemKitDetail> tblICItemKitDetails { get; set; }
-        public ICollection<tblICItemAssembly> tblICItemAssemblies { get; set; }
-        public ICollection<tblICItemBundle> tblICItemBundles { get; set; }
-
+        
         public ICollection<tblICUnitMeasureConversion> StockUnitMeasureConversions { get; set; }
         public ICollection<tblICPackTypeDetail> SourcePackTypeDetails { get; set; }
         public ICollection<tblICPackTypeDetail> TargetPackTypeDetails { get; set; }

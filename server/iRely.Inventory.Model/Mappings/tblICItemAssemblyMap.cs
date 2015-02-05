@@ -12,23 +12,22 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemAssembly");
-            this.Property(t => t.dblCost).HasColumnName("dblCost");
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity");
-            this.Property(t => t.dblUnit).HasColumnName("dblUnit");
-            this.Property(t => t.intAssemblyItemId).HasColumnName("intAssemblyItemId");
-            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
             this.Property(t => t.intItemAssemblyId).HasColumnName("intItemAssemblyId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+            this.Property(t => t.intAssemblyItemId).HasColumnName("intAssemblyItemId");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity");
+            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
+            this.Property(t => t.dblUnit).HasColumnName("dblUnit");
+            this.Property(t => t.dblCost).HasColumnName("dblCost");
+            this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.AssemblyItem)
                 .WithMany(p => p.AssemblyItems)
                 .HasForeignKey(p => p.intAssemblyItemId);
-            this.HasOptional(p => p.tblICUnitMeasure)
+            this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICItemAssemblies)
-                .HasForeignKey(p => p.intUnitMeasureId);
+                .HasForeignKey(p => p.intItemUnitMeasureId);
         }
     }
 }

@@ -13,18 +13,18 @@ namespace iRely.Inventory.Model
     {
         public int intItemSpecialPricingId { get; set; }
         public int intItemId { get; set; }
-        public int? intLocationId { get; set; }
+        public int? intItemLocationId { get; set; }
         public string strPromotionType { get; set; }
         public DateTime? dtmBeginDate { get; set; }
         public DateTime? dtmEndDate { get; set; }
-        public int? intUnitMeasureId { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
         public decimal? dblUnit { get; set; }
         public string strDiscountBy { get; set; }
         public decimal? dblDiscount { get; set; }
         public decimal? dblUnitAfterDiscount { get; set; }
         public decimal? dblAccumulatedQty { get; set; }
         public decimal? dblAccumulatedAmount { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         private string _location;
         [NotMapped]

@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
     {
         public int intItemUOMId { get; set; }
         public int intItemId { get; set; }
-        public int intUnitMeasureId { get; set; }
+        public int? intUnitMeasureId { get; set; }
         public decimal? dblUnitQty { get; set; }
         public decimal? dblSellQty { get; set; }
         public decimal? dblWeight { get; set; }
@@ -103,8 +103,16 @@ namespace iRely.Inventory.Model
 
         public tblICItem tblICItem { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
+
+        public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
         public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
         public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
+        public ICollection<tblICItemKitDetail> tblICItemKitDetails { get; set; }
+        public ICollection<tblICItemAssembly> tblICItemAssemblies { get; set; }
+        public ICollection<tblICItemBundle> tblICItemBundles { get; set; }
+        public ICollection<tblICItemUPC> tblICItemUPCs { get; set; }
+
     }
+
 }

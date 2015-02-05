@@ -39,15 +39,16 @@ Ext.define('Inventory.model.ItemStock', {
                 }
             }
         },
-        { name: 'intLocationId', type: 'int', allowNull: true },
-        { name: 'intSubLocationId', type: 'int'},
-        { name: 'dblUnitOnHand', type: 'float'},
-        { name: 'dblOrderCommitted', type: 'float'},
-        { name: 'dblOnOrder', type: 'float'},
-        { name: 'dblBackOrder', type: 'float'},
-        { name: 'dblAverageCost', type: 'float'},
-        { name: 'dblLastCountRetail', type: 'float'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intItemLocationId', type: 'int', allowNull: true },
+        { name: 'intSubLocationId', type: 'int', allowNull: true },
+        { name: 'dblAverageCost', type: 'float' },
+        { name: 'dblUnitOnHand', type: 'float' },
+        { name: 'dblOrderCommitted', type: 'float' },
+        { name: 'dblOnOrder', type: 'float' },
+        { name: 'dblBackOrder', type: 'float' },
+        { name: 'dblLastCountRetail', type: 'float' },
+        { name: 'intSort', type: 'int', allowNull: true }
+
     ],
 
     validators: [

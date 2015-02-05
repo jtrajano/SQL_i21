@@ -39,13 +39,13 @@ Ext.define('Inventory.model.ItemVendorXref', {
                 }
             }
         },
-        { name: 'intLocationId', type: 'int', allowNull: true},
-        { name: 'intVendorId', type: 'int', allowNull: true},
-        { name: 'strVendorProduct', type: 'string', allowNull: true},
-        { name: 'strProductDescription', type: 'string'},
-        { name: 'dblConversionFactor', type: 'float'},
-        { name: 'intUnitMeasureId', type: 'int', allowNull: true },
-        { name: 'intSort', type: 'int'},
+        { name: 'intItemLocationId', type: 'int', allowNull: true },
+        { name: 'intVendorId', type: 'int', allowNull: true },
+        { name: 'strVendorProduct', type: 'string' },
+        { name: 'strProductDescription', type: 'string' },
+        { name: 'dblConversionFactor', type: 'float' },
+        { name: 'intItemUnitMeasureId', type: 'int', allowNull: true },
+        { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strVendorId', type: 'string'},

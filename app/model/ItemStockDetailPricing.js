@@ -27,26 +27,31 @@ Ext.define('Inventory.model.ItemStockDetailPricing', {
                 }
             }
         },
+        { name: 'strDescription', type: 'string' },
+        { name: 'strUpcCode', type: 'string' },
+        { name: 'strUPCDescription', type: 'string' },
+        { name: 'intItemPricingId', type: 'int', allowNull: true },
         { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'intItemLocationId', type: 'int', allowNull: true },
-        { name: 'dblRetailPrice', type: 'float'},
-        { name: 'dblWholesalePrice', type: 'float'},
-        { name: 'dblLargeVolumePrice', type: 'float'},
-        { name: 'dblSalePrice', type: 'float'},
-        { name: 'dblMSRPPrice', type: 'float'},
-        { name: 'strPricingMethod', type: 'string'},
-        { name: 'dblAmountPercent', type: 'float'},
-        { name: 'dblLastCost', type: 'float'},
-        { name: 'dblStandardCost', type: 'float'},
-        { name: 'dblMovingAverageCost', type: 'float'},
-        { name: 'dblEndMonthCost', type: 'float'},
-        { name: 'ysnActive', type: 'boolean'},
-        { name: 'intSort', type: 'int'},
-
-        { name: 'strLocationName', type: 'string'}
-    ],
-
-    validators: [
-        {type: 'presence', field: 'intLocationId'}
+        { name: 'strLocationName', type: 'string' },
+        { name: 'strLocationType', type: 'string' },
+        { name: 'intItemUnitMeasureId', type: 'int', allowNull: true },
+        { name: 'strUnitMeasure', type: 'string' },
+        { name: 'strUnitType', type: 'string' },
+        { name: 'ysnStockUnit', type: 'boolean' },
+        { name: 'dblRetailPrice', type: 'float' },
+        { name: 'dblWholesalePrice', type: 'float' },
+        { name: 'dblLargeVolumePrice', type: 'float' },
+        { name: 'dblAmountPercent', type: 'float' },
+        { name: 'dblSalePrice', type: 'float' },
+        { name: 'dblMSRPPrice', type: 'float' },
+        { name: 'strPricingMethod', type: 'string' },
+        { name: 'dblLastCost', type: 'float' },
+        { name: 'dblStandardCost', type: 'float' },
+        { name: 'dblMovingAverageCost', type: 'float' },
+        { name: 'dblEndMonthCost', type: 'float' },
+        { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
+        { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
+        { name: 'intSort', type: 'int', allowNull: true },
     ]
 });

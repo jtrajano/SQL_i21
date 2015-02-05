@@ -13,12 +13,12 @@ namespace iRely.Inventory.Model
     {
         public int intItemCustomerXrefId { get; set; }
         public int intItemId { get; set; }
-        public int? intLocationId { get; set; }
+        public int? intItemLocationId { get; set; }
         public int? intCustomerId { get; set; }
         public string strCustomerProduct { get; set; }
         public string strProductDescription { get; set; }
         public string strPickTicketNotes { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         private string _location;
         [NotMapped]

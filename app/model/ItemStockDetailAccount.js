@@ -29,13 +29,13 @@ Ext.define('Inventory.model.ItemStockDetailAccount', {
                 }
             }
         },
-        { name: 'intAccountId', type: 'int'},
-        { name: 'strAccountId', type: 'string'},
-        { name: 'intAccountGroupId', type: 'int'},
-        { name: 'strAccountGroup', type: 'string'},
-        { name: 'strAccountType', type: 'string'},
-        { name: 'intAccountCategoryId', type: 'int'},
-        { name: 'strAccountCategory', type: 'string'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intAccountId', type: 'int', allowNull: true },
+        { name: 'strAccountId', type: 'string' },
+        { name: 'intAccountGroupId', type: 'int', allowNull: true },
+        { name: 'strAccountGroup', type: 'string' },
+        { name: 'strAccountType', type: 'string' },
+        { name: 'intAccountCategoryId', type: 'int', allowNull: true },
+        { name: 'strAccountCategory', type: 'string' },
+        { name: 'intSort', type: 'int', allowNull: true },
     ]
 });

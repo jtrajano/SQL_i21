@@ -12,28 +12,28 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemPricingLevel");
-            this.Property(t => t.dblCommissionRate).HasColumnName("dblCommissionRate");
-            this.Property(t => t.dblMax).HasColumnName("dblMax");
-            this.Property(t => t.dblMin).HasColumnName("dblMin");
+            this.Property(t => t.intItemPricingLevelId).HasColumnName("intItemPricingLevelId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.strPriceLevel).HasColumnName("strPriceLevel");
+            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
             this.Property(t => t.dblUnit).HasColumnName("dblUnit");
+            this.Property(t => t.dblMin).HasColumnName("dblMin");
+            this.Property(t => t.dblMax).HasColumnName("dblMax");
+            this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
+            this.Property(t => t.strCommissionOn).HasColumnName("strCommissionOn");
+            this.Property(t => t.dblCommissionRate).HasColumnName("dblCommissionRate");
             this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice");
             this.Property(t => t.dtmBeginDate).HasColumnName("dtmBeginDate");
             this.Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
-            this.Property(t => t.intItemPricingLevelId).HasColumnName("intItemPricingLevelId");
-            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intSort).HasColumnName("intSort");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
-            this.Property(t => t.strCommissionOn).HasColumnName("strCommissionOn");
-            this.Property(t => t.strPriceLevel).HasColumnName("strPriceLevel");
-            this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
 
             this.HasOptional(p => p.tblICItemLocation)
                 .WithMany(p => p.tblICItemPricingLevels)
-                .HasForeignKey(p => p.intLocationId);
+                .HasForeignKey(p => p.intItemLocationId);
             this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICItemPricingLevels)
-                .HasForeignKey(p => p.intUnitMeasureId);
+                .HasForeignKey(p => p.intItemUnitMeasureId);
         }
     }
 }

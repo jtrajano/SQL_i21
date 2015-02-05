@@ -12,22 +12,21 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemKitDetail");
-            this.Property(t => t.dblPrice).HasColumnName("dblPrice");
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity");
-            this.Property(t => t.inSort).HasColumnName("inSort");
-            this.Property(t => t.intConcurrencyId).HasColumnName("intConcurrencyId");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemKitDetailId).HasColumnName("intItemKitDetailId");
             this.Property(t => t.intItemKitId).HasColumnName("intItemKitId");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity");
+            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
+            this.Property(t => t.dblPrice).HasColumnName("dblPrice");
             this.Property(t => t.ysnSelected).HasColumnName("ysnSelected");
+            this.Property(t => t.inSort).HasColumnName("inSort");
 
             this.HasOptional(p => p.tblICItem)
                 .WithMany(p => p.tblICItemKitDetails)
                 .HasForeignKey(p => p.intItemId);
-            this.HasOptional(p => p.tblICUnitMeasure)
+            this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICItemKitDetails)
-                .HasForeignKey(p => p.intUnitMeasureId);
+                .HasForeignKey(p => p.intItemUnitMeasureId);
         }
     }
 }

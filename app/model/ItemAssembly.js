@@ -39,12 +39,12 @@ Ext.define('Inventory.model.ItemAssembly', {
                 }
             }},
         { name: 'intAssemblyItemId', type: 'int', allowNull: true },
-        { name: 'strDescription', type: 'string'},
-        { name: 'dblQuantity', type: 'float'},
-        { name: 'intUnitMeasureId', type: 'int', allowNull: true },
-        { name: 'dblUnit', type: 'float'},
-        { name: 'dblCost', type: 'float'},
-        { name: 'intSort', type: 'int'},
+        { name: 'strDescription', type: 'string' },
+        { name: 'dblQuantity', type: 'float' },
+        { name: 'intItemUnitMeasureId', type: 'int', allowNull: true },
+        { name: 'dblUnit', type: 'float' },
+        { name: 'dblCost', type: 'float' },
+        { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'}

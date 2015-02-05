@@ -40,16 +40,16 @@ Ext.define('Inventory.model.ItemContract', {
                 }
             }
         },
-        { name: 'intLocationId', type: 'int', allowNull: true},
-        { name: 'strContractItemName', type: 'string', allowNull: true},
+        { name: 'intItemLocationId', type: 'int', allowNull: true },
+        { name: 'strContractItemName', type: 'string' },
         { name: 'intCountryId', type: 'int', allowNull: true },
-        { name: 'strGrade', type: 'string'},
-        { name: 'strGradeType', type: 'string'},
-        { name: 'strGarden', type: 'string'},
-        { name: 'dblYieldPercent', type: 'float'},
-        { name: 'dblTolerancePercent', type: 'float'},
-        { name: 'dblFranchisePercent', type: 'float'},
-        { name: 'intSort', type: 'int'},
+        { name: 'strGrade', type: 'string' },
+        { name: 'strGradeType', type: 'string' },
+        { name: 'strGarden', type: 'string' },
+        { name: 'dblYieldPercent', type: 'float' },
+        { name: 'dblTolerancePercent', type: 'float' },
+        { name: 'dblFranchisePercent', type: 'float' },
+        { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strLocationName', type: 'string'},
         { name: 'strCountry', type: 'string'}

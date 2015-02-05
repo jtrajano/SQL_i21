@@ -47,7 +47,7 @@ namespace iRely.Inventory.BRL
             var query = GetVendorXrefSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemVendorXref>()
                 .Include(p => p.vyuAPVendor)
-                .Include(p => p.tblICUnitMeasure)
+                .Include(p => p.tblICItemUOM)
                 .Include("tblICItemLocation.tblSMCompanyLocation")
                 .Where(w => query.Where(predicate).Any(a => a.intItemVendorXrefId == w.intItemVendorXrefId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)

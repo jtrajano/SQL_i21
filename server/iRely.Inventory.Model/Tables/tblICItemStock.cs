@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
     {
         public int intItemStockId { get; set; }
         public int intItemId { get; set; }
-        public int? intLocationId { get; set; }
+        public int? intItemLocationId { get; set; }
         public int? intSubLocationId { get; set; }
         public decimal? dblAverageCost { get; set; }
         public decimal? dblUnitOnHand { get; set; }

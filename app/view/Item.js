@@ -763,6 +763,7 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
+                                                                reference: 'grdGlAccounts',
                                                                 itemId: 'grdGlAccounts',
                                                                 margin: -1,
                                                                 forceFit: true,

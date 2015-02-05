@@ -13,10 +13,10 @@ namespace iRely.Inventory.Model
     {
         public int intItemUPCId { get; set; }
         public int intItemId { get; set; }
-        public int intUnitMeasureId { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
         public decimal? dblUnitQty { get; set; }
         public string strUPCCode { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         private string _unitmeasure;
         [NotMapped]
@@ -25,8 +25,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_unitmeasure))
-                    if (tblICUnitMeasure != null)
-                        return tblICUnitMeasure.strUnitMeasure;
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUnitMeasure;
                     else
                         return null;
                 else
@@ -39,7 +39,7 @@ namespace iRely.Inventory.Model
         }
 
         public tblICItem tblICItem { get; set; }
-        public tblICUnitMeasure tblICUnitMeasure { get; set; }
+        public tblICItemUOM tblICItemUOM { get; set; }
 
     }
 }
