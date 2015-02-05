@@ -204,7 +204,7 @@ BEGIN
 		
 		-- Retrieve the highest number part in the transaction id. 
 		SELECT	@intNumber = MAX(CAST(REPLACE(strBatchId, @strPrefix, '') AS INT))	
-		FROM	dbo.tblGLDetail
+		FROM	dbo.tblGLDetail  WHERE strBatchId LIKE @strPrefix + '%'
 		
 		IF (@intNumber IS NOT NULL)	
 		BEGIN 	
