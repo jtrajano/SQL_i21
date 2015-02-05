@@ -12,6 +12,7 @@ BEGIN
 		([intCustomerId]
 		,[dtmDate]
 		,[dtmDueDate]
+		,[dtmPostDate]
 		,[intCurrencyId]
 		,[intCompanyLocationId]
 		,[intSalespersonId]
@@ -47,6 +48,7 @@ BEGIN
 		[intCustomerId]
 		,GETDATE() --Date
 		,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
+		,GETDATE() --Post Date
 		,[intCurrencyId]
 		,[intCompanyLocationId]
 		,[intSalespersonId]
