@@ -127,7 +127,7 @@ Ext.define('Inventory.view.CommodityViewModel', {
             type: 'icbuffereduom'
         },
         glAccount: {
-            type: 'bufAccountid'
+            type: 'glbufaccountid'
         },
         location: {
             type: 'companylocationbuffered'
