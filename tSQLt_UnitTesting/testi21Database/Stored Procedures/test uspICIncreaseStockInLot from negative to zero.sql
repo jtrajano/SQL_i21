@@ -1,11 +1,11 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICIncreaseStockInLot from negative to positive]
+﻿CREATE PROCEDURE [testi21Database].[test uspICIncreaseStockInLot from negative to zero]
 AS
 BEGIN
 	-- Arrange 
 	BEGIN 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;		
 
-		-- Re-add the clustered index. This is critical for the Lot table because it arranges the data physically by that order. 
+		-- Re-add the clustered index. This is critical for the Lot table because it arranges the data physically by that order. \
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLot]
 			ON [dbo].[tblICInventoryLot]([intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC);
 
@@ -25,14 +25,15 @@ BEGIN
 		DECLARE @LotId AS INT = 12345
 
 		-- Create a fake data for tblICInventoryLot
-			/***************************************************************************************************************************************************************************************************************
-			The initial data in tblICInventoryLot
-			intItemId   intItemLocationId intLotId	dblStockIn	dblStockOut		dblCost		intCreatedUserId intConcurrencyId
-			----------- ----------------- ---------	-----------	------------	---------	---------------- ----------------
-			3           3                 12345		0.000000	77.000000		13.000000	1                1					
-			3           3                 12345		0.000000	56.000000		14.000000	1                1
-			3           3                 12345		0.000000	30.000000		15.000000	1                1
-			***************************************************************************************************************************************************************************************************************/
+		/***************************************************************************************************************************************************************************************************************
+		The initial data in tblICInventoryLot
+		intItemId   intItemLocationId intLotId	dblStockIn	dblStockOut		dblCost		intCreatedUserId intConcurrencyId
+		----------- ----------------- ---------	-----------	------------	---------	---------------- ----------------
+		3           3                 12345		0.000000	77.000000		13.000000	1                1					
+		3           3                 12345		0.000000	56.000000		14.000000	1                1
+		3           3                 12345		0.000000	30.000000		15.000000	1                1
+		***************************************************************************************************************************************************************************************************************/
+
 		INSERT INTO dbo.tblICInventoryLot (
 			[intItemId]
 			,[intItemLocationId]
@@ -100,11 +101,11 @@ BEGIN
 		DECLARE @intItemId AS INT					= @PremiumGrains
 				,@intItemLocationId AS INT			= @BetterHaven
 				,@intLotId AS INT					= @LotId
-				,@dblQty NUMERIC(18,6)				= 200
+				,@dblQty NUMERIC(18,6)				= 163
 				,@dblCost AS NUMERIC(18,6)			= 22
 				,@intUserId AS INT					= 1
 				,@FullQty AS NUMERIC(18,6)
-				,@strTransactionId AS NVARCHAR(40)	= 'NEWSTOCK-00001'
+				,@strTransactionId AS NVARCHAR(40)	= 'NewStock-00001'
 				,@intTransactionId AS INT			= 4
 				,@TotalQtyOffset AS NUMERIC(18,6)	= 0			
 				,@RemainingQty AS NUMERIC(18,6) 
@@ -126,6 +127,7 @@ BEGIN
 				,[intCreatedUserId] 
 				,[intConcurrencyId]
 		)
+		-- There is an offset to the negative stock
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intLotId] = @LotId
@@ -134,6 +136,7 @@ BEGIN
 				,[dblCost] = 13.00
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 2
+		-- There is a partial offset to the negative stock
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
@@ -143,6 +146,7 @@ BEGIN
 				,[dblCost] = 14.00
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 2
+		-- Incoming stock can't offset this negative stock
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
@@ -152,25 +156,26 @@ BEGIN
 				,[dblCost] = 15.00
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 2
+		-- Incoming stock is fully consumed by the negative stocks
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intLotId] = @LotId
-				,[dblStockIn] = 200
+				,[dblStockIn] = 163
 				,[dblStockOut] = 163
 				,[dblCost] = 22
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 1
-
+				
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like: 
 		_m_		intItemId   intItemLocationId intLotId	dblStockIn	dblStockOut		dblCost		intCreatedUserId intConcurrencyId
-				----------- ----------------- ---------	-----------	------------	---------	---------------- ----------------
-		upt		3           3                 12345		77.000000	77.000000		13.000000	1                2					
-		upt		3           3                 12345		56.000000	56.000000		14.000000	1                2
-		upt		3           3                 12345		30.000000	30.000000		15.000000	1                2
-		new		3           3                 12345		200.000000	163.000000		22.000000	1                1
-				***************************************************************************************************************************************************************************************************************/
+		-----	----------- ----------------- ---------	-----------	------------	---------	---------------- ----------------
+		upt		3           3                 12345		77.000000	77.000000		13.000000	1                1					
+		upt		3           3                 12345		56.000000	56.000000		14.000000	1                1
+		upt		3           3                 12345		30.000000	30.000000		15.000000	1                1
+		new		3           3                 12345		163.000000	163.000000		22.000000	1                1		
+				***************************************************************************************************************************************************************************************************************/							
 	END 
 	
 	-- Act
@@ -232,27 +237,17 @@ BEGIN
 				EXEC tSQLt.AssertEquals 15.00, @CostUsed
 				EXEC tSQLt.AssertEquals 30.00, @QtyOffset
 				EXEC tSQLt.AssertEquals 3, @UpdatedLotId
-			END
-
-			-- Assert on 4th pass
-			-- the cost to offset is NULL 
-			-- the qty offset is NULL 
-			IF (@intIterationCounter = 4) 
-			BEGIN 
-				EXEC tSQLt.AssertEquals NULL, @CostUsed
-				EXEC tSQLt.AssertEquals NULL, @QtyOffset
-				EXEC tSQLt.AssertEquals NULL, @UpdatedLotId
-			END
+			END 
 
 			SET @dblQty = @RemainingQty;
 			SET @TotalQtyOffset += ISNULL(@QtyOffset, 0)
 		END 
-		
-		-- Assert the new Lot id is 4
-		EXEC tSQLt.AssertEquals 4, @NewLotId
 
-		-- Assert the iteration will only repeat 4 times
-		EXEC tSQLt.AssertEquals 4, @intIterationCounter;
+		-- Assert that the new Lot id is 4
+		EXEC tSQLt.AssertEquals 4, @NewLotId
+		
+		-- Assert the iteration is only limited to 3
+		EXEC tSQLt.AssertEquals 3, @intIterationCounter;
 
 		INSERT INTO actual (
 				[intItemId] 
@@ -289,5 +284,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-
 END
