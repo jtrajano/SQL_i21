@@ -121,7 +121,8 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{glAccountId}',
                         defaultFilters: [{
                             column: 'intAccountCategoryId',
-                            value: '{grdGlAccounts.selection.intAccountCategoryId}'
+                            value: '{grdGlAccounts.selection.intAccountCategoryId}',
+                            conjunction: 'and'
                         }]
                     }
                 },
@@ -410,7 +411,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     editor: {
                         store: '{pricingLevel}',
                         defaultFilters: [{
-                            column: 'intItemLocationId',
+                            column: 'intLocationId',
                             value: '{grdPricingLevel.selection.intLocationId}'
                         }]
                     }
@@ -1616,15 +1617,15 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepAccount');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colGLAccountId')
-        {
+        if (combo.column.itemId === 'colGLAccountId') {
             current.set('intAccountId', records[0].get('intAccountId'));
             current.set('strDescription', records[0].get('strDescription'));
-            current.set('strAccountGroup', records[0].get('strAccountGroup'));
         }
-        else if (combo.column.itemId === 'colGLAccountCategory')
-        {
+        else if (combo.column.itemId === 'colGLAccountCategory') {
             current.set('intAccountCategoryId', records[0].get('intAccountCategoryId'));
+            current.set('intAccountId', null);
+            current.set('strAccountId', null);
+            current.set('strDescription', null);
         }
     },
 
