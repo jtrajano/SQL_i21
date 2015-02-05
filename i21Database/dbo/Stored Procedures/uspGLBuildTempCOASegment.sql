@@ -14,21 +14,24 @@ BEGIN
 	END 
 
 	BEGIN
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = N'Segment' and (strStructureName = N'Location' OR strStructureName LIKE N'Profit Center%')) AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
+	PRINT 'Begin updating of Account Structure to Location'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = N'Segment' and (strStructureName = N'Location' OR strStructureName LIKE N'Profit Center%'))
 	BEGIN
-		--TODO: Push on 15.1 (GL-1285)
-		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Location', N'Segment', 4, N'0', 2, 1, 1, 5, NULL, NULL)
-		PRINT 'Inserted Location Segment'
+		INSERT tblGLAccountStructure ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Location', N'Segment', 4, N'0', 2, 1, 1, 5, NULL, NULL)
+		PRINT 'No Location and Profit Center segment. Inserted Location Segment'
 	END
 	ELSE
 	BEGIN
-		UPDATE tblGLAccountStructure SET strStructureName = 'Location'
-	    WHERE strStructureName LIKE 'Profit Center%' and strType = 'Segment'
-		PRINT 'Updated Profit Center to Location'
 		
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType  = N'Segment' and strStructureName = N'Location')
+		BEGIN
+			UPDATE tblGLAccountStructure SET strStructureName = 'Location' WHERE strStructureName LIKE 'Profit Center%' and strType = 'Segment'
+			PRINT 'Updated Profit Center Segment to Location'
+		END
+		ELSE
+			PRINT 'Location Segment is already existing. No update needed'
 	END
-				
+	PRINT 'End updating of Account Structure to Location'		
 
 
 

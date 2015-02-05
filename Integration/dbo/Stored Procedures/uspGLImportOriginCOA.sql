@@ -17,6 +17,7 @@ BEGIN
 		@ysnBuild		BIT = 0,
 		@result			NVARCHAR(500) = '''' OUTPUT
 		AS
+		DECLARE @SegmentStructureId INT, @PrimaryStructureId INT
 
 		SET QUOTED_IDENTIFIER OFF
 		SET ANSI_NULLS ON
@@ -63,6 +64,8 @@ BEGIN
 			BEGIN
 				DECLARE	@Length		INT
 						,@query		VARCHAR(500)	
+				SELECT TOP 1 @SegmentStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Segment''
+				SELECT TOP 1 @PrimaryStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary''
 					
 				SET @Length = ISNULL((SELECT intLength FROM tblGLAccountStructure WHERE strType = ''Primary''),0)
 				SET @query = ''SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst WHERE LEN(glact_acct1_8) = '' + CAST(@Length AS NVARCHAR(10)) + '' GROUP BY glact_acct1_8,glact_type''		
@@ -104,13 +107,7 @@ BEGIN
 				UPDATE @tblQuery
 				SET glact_type = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountType = ''Equity'' and intParentGroupId = 0)
 				WHERE glact_type = ''Q''
-
-					
-				DECLARE @SegmentStructureId INT, @PrimaryStructureId INT
-				SELECT TOP 1 @SegmentStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Segment''
-				SELECT TOP 1 @PrimaryStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary''
-
-		
+						
 				DELETE tblGLAccountSegment where intAccountStructureId = @PrimaryStructureId		
 		
 				INSERT tblGLAccountSegment
@@ -138,7 +135,9 @@ BEGIN
 		
 			-- IMPORT SEGMENT ACCOUNT
 			IF @ysnSegment = 1
-			BEGIN											
+			BEGIN	
+				SELECT TOP 1 @SegmentStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Segment''
+				SELECT TOP 1 @PrimaryStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary''										
 				SELECT glprc_sub_acct AS SegmentCode
 						  ,glprc_desc = ISNULL((SELECT glprc_desc FROM glprcmst WHERE glprc_sub_acct = tblC.glprc_sub_acct),'''')
 					INTO #segments

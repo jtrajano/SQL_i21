@@ -173,4 +173,13 @@ GO
 
 GO
 	PRINT N'End normalize Versions intSort..'
+	PRINT N'Begin normalize Help Desk Group and User Configuration.'
+GO
+
+	update tblHDGroupUserConfig
+		set tblHDGroupUserConfig.intUserSecurityEntityId = 
+			(select tblSMUserSecurity.intEntityId from tblSMUserSecurity where tblSMUserSecurity.intUserSecurityID = tblHDGroupUserConfig.intUserSecurityId)
+
+GO
+	PRINT N'End normalize Help Desk Group and User Configuration.'
 GO
