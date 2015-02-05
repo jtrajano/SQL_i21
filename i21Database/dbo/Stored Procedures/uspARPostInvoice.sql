@@ -45,11 +45,6 @@ CREATE TABLE #tmpInvalidInvoiceData (
 	intTransactionId INT
 );
 
-IF(@batchId IS NULL)
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
-
-SET @batchIdUsed = @batchId
-
 --DECLARRE VARIABLES
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
@@ -79,6 +74,24 @@ BEGIN
 	END
 END
 
+IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
+	BEGIN
+		SELECT TOP 1
+			@batchId = GL.strBatchId
+		FROM
+			tblGLDetailRecap GL
+		INNER JOIN 
+			#tmpPostInvoiceData I
+				ON GL.intTransactionId = I.intInvoiceId 
+		WHERE
+			GL.strTransactionType IN ('Credit Memo','Invoice')
+			AND	GL.strModuleName = @MODULE_NAME
+	END
+
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
+
+SET @batchIdUsed = @batchId
 
 --IF (@InvoiceBatchId IS NOT NULL)
 --BEGIN
@@ -1339,4 +1352,3 @@ Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvalidInvoiceData')) DROP TABLE #tmpInvalidInvoiceData
 
 GO
-
