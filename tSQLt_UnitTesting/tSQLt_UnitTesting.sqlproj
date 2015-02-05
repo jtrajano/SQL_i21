@@ -647,6 +647,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot from negative to zero.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot from positive to positive.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot from zero to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from negative to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to zero stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from zero to negative stock.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
