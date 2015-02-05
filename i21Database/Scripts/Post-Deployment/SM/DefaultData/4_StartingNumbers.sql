@@ -236,6 +236,51 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Lot Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 25
+			,[strTransactionType]	= N'PurchaseContract'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'PurchaseContract')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 26
+			,[strTransactionType]	= N'SaleContract'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'SaleContract')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 27
+			,[strTransactionType]	= N'DPContract'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'DPContract')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 28
+			,[strTransactionType]	= N'Notes Receivable'
+			,[strPrefix]			= N'NR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Notes Receivable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Notes Receivable')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 29
+			,[strTransactionType]	= N'Sales Order'
+			,[strPrefix]			= N'SO-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Receivable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Sales Order')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
