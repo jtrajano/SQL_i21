@@ -640,6 +640,7 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\Fake posted transactions using FIFO, scenario 3.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
