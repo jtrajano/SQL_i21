@@ -968,6 +968,9 @@ END
 		SET
 			ysnPosted = 0
 			,ysnPaid = 0
+			,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
+			,dblDiscount = ISNULL(dblDiscount, 0.000000)
+			,dblPayment = ISNULL(dblPayment, 0.000000)
 		FROM
 			tblARInvoice 
 		WHERE 
@@ -1007,6 +1010,9 @@ END
 			tblARInvoice
 		SET
 			ysnPosted = 1
+			,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
+			,dblDiscount = ISNULL(dblDiscount, 0.000000)
+			,dblPayment = ISNULL(dblPayment, 0.000000)
 		WHERE
 			tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
 
