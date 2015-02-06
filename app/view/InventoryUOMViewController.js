@@ -41,8 +41,8 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                 value: '{current.strUnitType}',
                 store: '{unitTypes}'
             },
-            txtDecimalDisplay: '{current.intDecimalDisplay}',
-            txtDecimalCalculation: '{current.intDecimalCalculation}',
+            txtDecimalPlacesToDisplay: '{current.intDecimalDisplay}',
+            txtDecimalPlacesForCalculatation: '{current.intDecimalCalculation}',
 
             grdConversion: {
                 colConversionStockUOM: {
@@ -210,7 +210,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             "#cboStockUom": {
                 select: this.onUOMSelect
             },
-            "#txtDecimalCalculation": {
+            "#txtDecimalPlacesForCalculatation": {
                 change: this.onDecimalCalculationChange
             }
         });

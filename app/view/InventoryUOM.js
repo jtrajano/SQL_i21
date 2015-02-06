@@ -22,10 +22,10 @@ Ext.define('Inventory.view.InventoryUOM', {
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.form.field.Number',
         'Ext.form.field.ComboBox',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
-        'Ext.form.field.Number',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
@@ -171,12 +171,17 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         labelWidth: 80
                                     },
                                     {
-                                        xtype: 'combobox',
+                                        xtype: 'numberfield',
                                         flex: 1.2,
-                                        itemId: 'cboDecimalPlacesToDisplay',
+                                        itemId: 'txtDecimalPlacesToDisplay',
                                         margin: '0 0 0 5',
                                         fieldLabel: 'Decimal Places to Display',
-                                        labelWidth: 180
+                                        labelWidth: 180,
+                                        hideTrigger: true,
+                                        allowDecimals: false,
+                                        allowExponential: false,
+                                        maxValue: 6,
+                                        minValue: 0
                                     }
                                 ]
                             },
@@ -193,15 +198,22 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         flex: 1,
                                         itemId: 'cboUnitType',
                                         fieldLabel: 'Unit Type',
-                                        labelWidth: 80
+                                        labelWidth: 80,
+                                        displayField: 'strDescription',
+                                        valueField: 'strDescription'
                                     },
                                     {
-                                        xtype: 'combobox',
+                                        xtype: 'numberfield',
                                         flex: 1.2,
-                                        itemId: 'cboDecimalPlacesForCalculatation',
+                                        itemId: 'txtDecimalPlacesForCalculatation',
                                         margin: '0 0 0 5',
                                         fieldLabel: 'Decimal Places for Calculatation',
-                                        labelWidth: 180
+                                        labelWidth: 180,
+                                        hideTrigger: true,
+                                        allowDecimals: false,
+                                        allowExponential: false,
+                                        maxValue: 6,
+                                        minValue: 0
                                     }
                                 ]
                             },

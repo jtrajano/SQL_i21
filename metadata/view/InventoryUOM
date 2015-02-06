@@ -276,20 +276,25 @@
                             "designerId": "4a8fca37-5409-418f-a224-25c69b5b1410"
                         },
                         {
-                            "type": "Ext.form.field.ComboBox",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "allowDecimals": false,
+                                "allowExponential": false,
                                 "fieldLabel": "Decimal Places to Display",
-                                "itemId": "cboDecimalPlacesToDisplay",
+                                "hideTrigger": true,
+                                "itemId": "txtDecimalPlacesToDisplay",
                                 "labelWidth": 180,
                                 "layout|flex": 1.2,
-                                "margin": "0 0 0 5"
+                                "margin": "0 0 0 5",
+                                "maxValue": 6,
+                                "minValue": 0
                             },
-                            "name": "MyComboBox3",
+                            "name": "MyNumberField45",
                             "designerId": "3da1d04f-d0a4-4a02-9df7-5e3ae9d7f582"
                         }
                     ]
@@ -319,29 +324,36 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "displayField": "strDescription",
                                 "fieldLabel": "Unit Type",
                                 "itemId": "cboUnitType",
                                 "labelWidth": 80,
-                                "layout|flex": 1
+                                "layout|flex": 1,
+                                "valueField": "strDescription"
                             },
                             "name": "MyComboBox1",
                             "designerId": "c39fa417-5b6a-4ab4-834c-156284f47467"
                         },
                         {
-                            "type": "Ext.form.field.ComboBox",
+                            "type": "Ext.form.field.Number",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "allowDecimals": false,
+                                "allowExponential": false,
                                 "fieldLabel": "Decimal Places for Calculatation",
-                                "itemId": "cboDecimalPlacesForCalculatation",
+                                "hideTrigger": true,
+                                "itemId": "txtDecimalPlacesForCalculatation",
                                 "labelWidth": 180,
                                 "layout|flex": 1.2,
-                                "margin": "0 0 0 5"
+                                "margin": "0 0 0 5",
+                                "maxValue": 6,
+                                "minValue": 0
                             },
-                            "name": "MyComboBox2",
+                            "name": "MyNumberField44",
                             "designerId": "843669ee-4c9d-4975-be22-3f73335ec533"
                         }
                     ]
@@ -597,7 +609,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "clicksToEdit": 1,
-                                "designer|displayName": null,
+                                "designer|displayName": "cepConversion",
                                 "pluginId": "cepConversion"
                             },
                             "name": "MyCellEditingPlugin",
@@ -617,7 +629,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging13",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
