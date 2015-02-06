@@ -195,7 +195,7 @@ Ext.define('Inventory.view.ItemPricingViewController', {
                }
 
                if (!isValid){
-                   iRely.Functions.showErrorDialog('Begin Date overlaps another previously configured Pricing.');
+                   iRely.Functions.showErrorDialog('Begin and End Dates overlap another previously configured Pricing.');
                }
 
                action(isValid);
