@@ -47,8 +47,8 @@ BEGIN
         )
 	SELECT
 			[intCustomerId]
-           ,[dtmDate]
-           ,[dtmDueDate]
+           ,GETDATE() --Date
+		   ,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
            ,[intCurrencyId]
            ,[intCompanyLocationId]
            ,[intSalespersonId]
