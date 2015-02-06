@@ -711,10 +711,36 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strSourceNumber',
-                                                        itemId: 'colISourceNumber',
+                                                        itemId: 'colSourceNumber',
                                                         width: 100,
-                                                        text: 'Source No.'
+                                                        dataIndex: 'strSourceNumber',
+                                                        text: 'Source No.',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intPurchaseId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Purchase Order Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strPurchaseOrderNumber',
+                                                                    dataType: 'string',
+                                                                    text: 'PO Number',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strVendorOrderNumber',
+                                                                    dataType: 'string',
+                                                                    text: 'Vendor Order Number',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboSource',
+                                                            displayField: 'strPurchaseOrderNumber',
+                                                            valueField: 'strPurchaseOrderNumber'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

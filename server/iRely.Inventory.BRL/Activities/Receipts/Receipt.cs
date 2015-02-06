@@ -52,6 +52,7 @@ namespace iRely.Inventory.BRL
                 .Include("tblICInventoryReceiptItems.tblICItem")
                 .Include("tblICInventoryReceiptItems.tblICUnitMeasure")
                 .Include("tblICInventoryReceiptItems.tblICPackType")
+                .Include("tblICInventoryReceiptItems.vyuICGetReceiptItemSource")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes")
                 .Include("tblICInventoryReceiptInspections.tblMFQAProperty")
