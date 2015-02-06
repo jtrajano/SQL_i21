@@ -34,7 +34,6 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,dtmReceiptDate
 		,intVendorId
 		,strReceiptType
-		,intSourceId
 		,intBlanketRelease
 		,intLocationId
 		,strVendorRefNo
@@ -71,7 +70,6 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intVendorId			= PO.intVendorId
 		,strReceiptType			= @ReceiptType_PurchaseOrder
-		,intSourceId			= PO.intPurchaseId 
 		,intBlanketRelease		= NULL
 		,intLocationId			= PO.intShipToId
 		,strVendorRefNo			= PO.strReference
@@ -120,6 +118,7 @@ END
 INSERT INTO dbo.tblICInventoryReceiptItem (
 	intInventoryReceiptId
     ,intLineNo
+	,intSourceId
     ,intItemId
 	,dblOrderQty
 	,dblOpenReceive
@@ -135,6 +134,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 )
 SELECT	intInventoryReceiptId = @InventoryReceiptId
 		,intLineNo				= PODetail.intLineNo
+		,intSourceId			= @PurchaseOrderId
 		,intItemId				= PODetail.intItemId
 		,dblOrderQty			= ISNULL(PODetail.dblQtyOrdered, 0)
 		,dblOpenReceive			= ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)
