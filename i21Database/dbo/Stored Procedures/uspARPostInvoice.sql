@@ -461,8 +461,8 @@ BEGIN
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
-		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN  ISNULL(IP.dblCost, B.dblTotal) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN  ISNULL(IP.dblCost, B.dblTotal) ELSE 0 END) END, --Invoice Detail
-		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE  ISNULL(IP.dblCost, B.dblTotal) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE  ISNULL(IP.dblCost, B.dblTotal) END) END, -- Invoice
+		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN  ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN  ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) END, --Invoice Detail
+		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE  ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE  ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) END, -- Invoice
 		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN  ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0)  ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN  ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0)  ELSE 0 END) END,
 		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0)  END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0)  END) END,
 		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -529,8 +529,8 @@ BEGIN
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
-		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblCost, B.dblTotal) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblCost, B.dblTotal) END) END, --Invoice Detail
-		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblCost, B.dblTotal) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblCost, B.dblTotal) ELSE 0 END) END, -- Invoice
+		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) END, --Invoice Detail
+		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) END, -- Invoice
 		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -633,8 +633,8 @@ BEGIN
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
-		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE B.dblTotal END) END, --Invoice Detail
-		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN B.dblTotal ELSE 0 END) END, -- Invoice
+		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) END, --Invoice Detail
+		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) END, -- Invoice
 		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -673,8 +673,8 @@ BEGIN
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
-		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE B.dblTotal END) END, --Invoice Detail
-		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN B.dblTotal ELSE 0 END) END, -- Invoice
+		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) END, --Invoice Detail
+		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) END, -- Invoice
 		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -1074,8 +1074,8 @@ ELSE
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,
-			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblCost, B.dblTotal) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblCost, B.dblTotal) ELSE 0 END) END,
-			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblCost, B.dblTotal) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblCost, B.dblTotal) END) END,
+			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) END,
+			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) END,
 			dblDebitUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 			dblCreditUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) END) END,
 			dtmDate = A.dtmDate,
@@ -1143,8 +1143,8 @@ ELSE
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,
-			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblCost, B.dblTotal) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblCost, B.dblTotal) END) END,
-			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblCost, B.dblTotal) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblCost, B.dblTotal) ELSE 0 END) END,
+			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) END,
+			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) END,
 			dblDebitUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 			dblCreditUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 			dtmDate = A.dtmDate,
@@ -1249,8 +1249,8 @@ ELSE
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,									
-			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE B.dblTotal END) END,
-			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN B.dblTotal ELSE 0 END) END,
+			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) END,
+			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) END,
 			dblDebitUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 			dblCreditUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 			dtmDate = A.dtmDate,
@@ -1290,8 +1290,8 @@ ELSE
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,
-			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE B.dblTotal END) END,
-			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN  (CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN B.dblTotal ELSE 0 END) END,
+			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) END,
+			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN  (CASE WHEN @post = 1 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) END,
 			dblDebitUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 			dblCreditUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 			dtmDate = A.dtmDate,
