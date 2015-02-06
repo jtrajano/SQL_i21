@@ -1,16 +1,18 @@
-﻿CREATE PROCEDURE uspARInsertToInvoice
+﻿CREATE PROCEDURE [dbo].[uspARInsertToInvoice]
 	@SalesOrderId	INT = 0,
-	@UserId			INT = 0
+	@UserId			INT = 0,
+	@InvoiceId		INT = NULL OUTPUT
 
 	AS
 BEGIN
 
-	DECLARE @InvoiceId INT
+	DECLARE @NewInvoiceId INT
 	
 	INSERT INTO tblARInvoice
 		([intCustomerId]
 		,[dtmDate]
 		,[dtmDueDate]
+		,[dtmPostDate]
 		,[intCurrencyId]
 		,[intCompanyLocationId]
 		,[intSalespersonId]
@@ -46,6 +48,7 @@ BEGIN
 		[intCustomerId]
 		,GETDATE() --Date
 		,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
+		,GETDATE() --Post Date
 		,[intCurrencyId]
 		,[intCompanyLocationId]
 		,[intSalespersonId]
@@ -80,7 +83,7 @@ BEGIN
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
 
-	SET @InvoiceId = SCOPE_IDENTITY()
+	SET @NewInvoiceId = SCOPE_IDENTITY()
 
 	INSERT INTO [dbo].[tblARInvoiceDetail]
 	   ([intInvoiceId]
@@ -98,7 +101,7 @@ BEGIN
 	   ,[intInventoryAccountId]
 	   )		
 	SELECT 
-		 @InvoiceId
+		 @NewInvoiceId
 		,intCompanyLocationId
 		,intItemId
 		,strItemDescription
@@ -117,4 +120,6 @@ BEGIN
 	
 	UPDATE tblSOSalesOrder SET strOrderStatus = 'Complete', ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
 	
+	
+	SET @InvoiceId  = @NewInvoiceId
 END
