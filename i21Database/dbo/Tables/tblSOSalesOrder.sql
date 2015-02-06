@@ -62,7 +62,7 @@ BEGIN
 	
 	--EXEC uspARFixStartingNumbers 17
 	--IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
-	EXEC uspSMGetStartingNumber 30, @SalesOrderNumber OUT
+	EXEC uspSMGetStartingNumber 29, @SalesOrderNumber OUT
 
 	SELECT TOP 1 @intSalesOrderId = intSalesOrderId FROM @inserted
 	

@@ -51,14 +51,6 @@ DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Receive Payments'
 SET @recapId = '1'
 
---SET BatchId
-IF(@batchId IS NULL)
-	BEGIN
-		EXEC uspSMGetStartingNumber 3, @batchId OUT
-	END
-
-SET @batchIdUsed = @batchId
-
 DECLARE @UserEntityID int
 SET @UserEntityID = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @userId),@userId)
 
@@ -76,6 +68,28 @@ IF (@param IS NOT NULL)
 				INSERT INTO #tmpARReceivablePostData SELECT intID FROM fnGetRowsFromDelimitedValues(@param)
 			END
 	END
+	
+--SET BatchId
+IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
+	BEGIN
+		SELECT TOP 1
+			@batchId = GL.strBatchId
+		FROM
+			tblGLDetailRecap GL
+		INNER JOIN 
+			#tmpARReceivablePostData I
+				ON GL.intTransactionId = I.intPaymentId
+		WHERE
+			GL.strTransactionType = @SCREEN_NAME
+			AND	GL.strModuleName = @MODULE_NAME
+	END
+	
+IF(@batchId IS NULL)
+	BEGIN
+		EXEC uspSMGetStartingNumber 3, @batchId OUT
+	END
+
+SET @batchIdUsed = @batchId	
 
 IF(@beginDate IS NOT NULL)
 	BEGIN
@@ -236,7 +250,7 @@ IF (ISNULL(@recap, 0) = 0)
 				INSERT INTO 
 					#tmpARReceivableInvalidData
 				SELECT 
-					'The Deposit Account is not linked to any of the active Bank Account in Cash Management'
+					'The Cash Account is not linked to any of the active Bank Account in Cash Management'
 					,'Receivable'
 					,A.strRecordNumber
 					,@batchId
@@ -245,13 +259,20 @@ IF (ISNULL(@recap, 0) = 0)
 					tblARPayment A
 				INNER JOIN
 					#tmpARReceivablePostData P
-						ON A.intPaymentId = P.intPaymentId						 
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblGLAccount GL
+						ON A.intAccountId = GL.intAccountId 
+				INNER JOIN 
+					tblGLAccountGroup AG
+						ON GL.intAccountGroupId = AG.intAccountGroupId 											 
 				LEFT OUTER JOIN
 					tblCMBankAccount BA
 						ON A.intAccountId = BA.intGLAccountId 						
 				WHERE
-					BA.intGLAccountId IS NULL
-					OR BA.ysnActive = 0	
+					AG.strAccountGroup = 'Cash Accounts'
+					AND (BA.intGLAccountId IS NULL
+						 OR BA.ysnActive = 0)
 					
 
 				--NOT BALANCE +overpayment
@@ -993,7 +1014,7 @@ BEGIN
 				strSourceSystem,
 				intConcurrencyId
 			)
-			SELECT
+			SELECT DISTINCT
 				strTransactionId = A.strRecordNumber,
 				intBankTransactionTypeID = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AR Payment'),
 				intBankAccountID = (SELECT TOP 1 intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = A.intAccountId),
@@ -1026,9 +1047,20 @@ BEGIN
 				FROM tblARPayment A
 					INNER JOIN tblARCustomer B
 						ON A.intCustomerId = B.intCustomerId
-					--INNER JOIN tblCMBankAccount CM
-					--	ON A.intAccountId = CM.intGLAccountId
-				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+				INNER JOIN
+					tblGLAccount GL
+						ON A.intAccountId = GL.intAccountId 
+				INNER JOIN 
+					tblGLAccountGroup AG
+						ON GL.intAccountGroupId = AG.intAccountGroupId 											 
+				INNER JOIN
+					tblCMBankAccount BA
+						ON A.intAccountId = BA.intGLAccountId 						
+				WHERE
+					AG.strAccountGroup = 'Cash Accounts'
+					AND BA.intGLAccountId IS NOT NULL
+					AND BA.ysnActive = 1
+					AND A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 
 			--Insert Successfully posted transactions.
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1323,21 +1355,21 @@ Post_Cleanup:
 			AND dblPayment = 0
 		END
 
-		----IF(@post = 1)
-		----BEGIN
+		IF(@post = 1)
+		BEGIN
 
-		----	----clean gl detail recAR after posting
-		----	--DELETE FROM tblGLDetailRecap
-		----	--FROM tblGLDetailRecap A
-		----	--INNER JOIN #tmpARReceivablePostData B ON A.intTransactionId = B.intPaymentId 
+			----clean gl detail recAR after posting
+			DELETE FROM tblGLDetailRecap
+			FROM tblGLDetailRecap A
+			INNER JOIN #tmpARReceivablePostData B ON A.intTransactionId = B.intPaymentId 
 
 		
-		----	----removed from tblARInvalidTransaction the successful records
-		----	--DELETE FROM tblARInvalidTransaction
-		----	--FROM tblARInvalidTransaction A
-		----	--INNER JOIN #tmpARReceivablePostData B ON A.intTransactionId = B.intPaymentId 
+			----removed from tblARInvalidTransaction the successful records
+			--DELETE FROM tblARInvalidTransaction
+			--FROM tblARInvalidTransaction A
+			--INNER JOIN #tmpARReceivablePostData B ON A.intTransactionId = B.intPaymentId 
 
-		----END
+		END
 
 	END
 

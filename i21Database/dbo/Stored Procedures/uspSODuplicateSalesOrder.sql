@@ -1,11 +1,12 @@
-﻿CREATE PROCEDURE uspSODuplicateSalesOrder
+﻿CREATE PROCEDURE [dbo].[uspSODuplicateSalesOrder]
 	@SalesOrderId	INT = 0,
-	@UserId			INT = 0
+	@UserId			INT = 0,
+	@NewSalesOrderId INT = NULL OUTPUT
 
 	AS
 BEGIN
 
-	DECLARE @NewSalesOrderId INT
+	
 	
 	INSERT INTO tblSOSalesOrder
 		(   [intCustomerId]
@@ -47,7 +48,7 @@ BEGIN
 	SELECT
 			[intCustomerId]
            ,GETDATE() --Date
-           ,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
+		   ,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
            ,[intCurrencyId]
            ,[intCompanyLocationId]
            ,[intSalespersonId]
@@ -66,7 +67,7 @@ BEGIN
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
-           ,[strComments]
+           ,[strComments] + ' DUP: ' + [strSalesOrderNumber]
            ,[strShipToLocationName]
            ,[strShipToAddress]
            ,[strShipToCity]
