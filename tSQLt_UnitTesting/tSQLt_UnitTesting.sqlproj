@@ -680,6 +680,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostLot, May 15. Purchase 15 stocks at 27 dollars each.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method for manual lot items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method for serial lot items.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

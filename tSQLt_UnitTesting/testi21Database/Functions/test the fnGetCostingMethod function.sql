@@ -2,10 +2,31 @@
 AS 
 BEGIN
 	-- Arrange	
-	DECLARE @AverageCost AS INT = 1
-			,@FIFO AS INT = 2
-			,@LIFO AS INT = 3
-			,@StandardCost AS INT = 4 	
+	DECLARE @AverageCost AS INT
+			,@FIFO AS INT
+			,@LIFO AS INT
+			,@StandardCost AS INT
+			,@LotCost AS INT
+
+	SELECT	@AverageCost = intCostingMethodId
+	FROM	dbo.tblICCostingMethod
+	WHERE	strCostingMethod = 'Average Cost'
+
+	SELECT	@FIFO = intCostingMethodId
+	FROM	dbo.tblICCostingMethod
+	WHERE	strCostingMethod = 'FIFO'
+
+	SELECT	@LIFO = intCostingMethodId
+	FROM	dbo.tblICCostingMethod
+	WHERE	strCostingMethod = 'lifo'
+
+	SELECT	@StandardCost = intCostingMethodId
+	FROM	dbo.tblICCostingMethod
+	WHERE	strCostingMethod = 'STANDARD COST'
+
+	SELECT	@LotCost = intCostingMethodId
+	FROM	dbo.tblICCostingMethod
+	WHERE	strCostingMethod = 'Lot Cost'
 
 	DECLARE @actual AS INT;
 	
@@ -13,6 +34,8 @@ BEGIN
 			,@Item2 AS INT = 2
 			,@Item3 AS INT = 3
 			,@Item4 AS INT = 4
+			,@LotItem1 AS INT = 5
+			,@LotItem2 AS INT = 6
 	
 	DECLARE @LocationA AS INT = 100
 			,@LocationB AS INT = 200
@@ -140,13 +163,17 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICItem', @Identity = 1;
 		INSERT tblICItem (
 			strDescription
+			,strLotTracking
 		)
-		SELECT strDescription = 'I am item 1'
-		UNION ALL SELECT strDescription = 'I am item 2'
-		UNION ALL SELECT strDescription = 'I am item 3'
-		UNION ALL SELECT strDescription = 'I am item 4'
+		SELECT strDescription = 'I am item 1', strLotTracking = 'No'
+		UNION ALL SELECT strDescription = 'I am item 2', strLotTracking = NULL
+		UNION ALL SELECT strDescription = 'I am item 3', strLotTracking = 'No'
+		UNION ALL SELECT strDescription = 'I am item 4', strLotTracking = 'No'
+		UNION ALL SELECT strDescription = 'I am item 5', strLotTracking = 'Yes, Manual'
+		UNION ALL SELECT strDescription = 'I am item 6', strLotTracking = 'Yes, Serial Number'
 	END
-	
+
+
 	-- Test average cost
 	BEGIN		
 		-- Act
@@ -156,7 +183,7 @@ BEGIN
 		-- Assert
 		EXEC tSQLt.AssertEquals @AverageCost, @actual;
 	END
-	
+
 	-- Test FIFO
 	BEGIN 
 		-- Act
@@ -229,4 +256,58 @@ BEGIN
 		-- Assert
 		EXEC tSQLt.AssertEquals NULL, @actual;
 	END			
+
+	-- Test the Lot tracking: 'Yes, Manual'
+	BEGIN 
+		-- Act
+		SELECT @actual = [dbo].[fnGetCostingMethod](@LotItem1, NULL);
+
+		-- Assert
+		EXEC tSQLt.AssertEquals @LotCost, @actual;
+	END
+
+	-- Test the Lot tracking: 'Yes, Manual'
+	BEGIN 
+		-- Act
+		SELECT @actual = [dbo].[fnGetCostingMethod](@LotItem1, @LocationA);
+
+		-- Assert
+		EXEC tSQLt.AssertEquals @LotCost, @actual;
+	END
+
+	-- Test the Lot tracking: 'Yes, Serial Number'
+	BEGIN 
+		-- Act
+		SELECT @actual = [dbo].[fnGetCostingMethod](@LotItem2, NULL);
+
+		-- Assert
+		EXEC tSQLt.AssertEquals @LotCost, @actual;
+	END
+
+	-- Test the Lot tracking: 'Yes, Serial Number'
+	BEGIN 
+		-- Act
+		SELECT @actual = [dbo].[fnGetCostingMethod](@LotItem2, @LocationA);
+
+		-- Assert
+		EXEC tSQLt.AssertEquals @LotCost, @actual;
+	END
+
+	-- Test the Lot tracking: 'No'
+	BEGIN 
+		-- Act
+		SELECT @actual = [dbo].[fnGetCostingMethod](@Item1, NULL);
+
+		-- Assert
+		EXEC tSQLt.AssertEquals NULL, @actual;
+	END
+
+	-- Test the Lot tracking: 'No'
+	BEGIN 
+		-- Act
+		SELECT @actual = [dbo].[fnGetCostingMethod](@Item1, @LocationA);
+
+		-- Assert
+		EXEC tSQLt.AssertEquals @AverageCost, @actual;
+	END
 END

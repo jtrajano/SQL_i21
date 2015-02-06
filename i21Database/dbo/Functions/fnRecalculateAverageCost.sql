@@ -28,7 +28,7 @@ BEGIN
 	END 
 	ELSE 
 	BEGIN 
-		-- Recaculate the average cost from the lifo table
+		-- Recalculate the average cost from the lifo table
 		SELECT	@TotalQty = SUM(ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0))
 				,@TotalValue = SUM( (ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0)) * ISNULL(lifo.dblCost,0))
 		FROM	dbo.tblICInventoryLIFO lifo	

@@ -4,8 +4,6 @@
 -- --------------------------------------------------
 
 print('/*******************  BEGIN Populate Inventory Transaction Types *******************/')
-
-TRUNCATE TABLE tblICInventoryTransactionType
 GO
 
 INSERT INTO dbo.[tblICInventoryTransactionType] (
@@ -37,4 +35,5 @@ SELECT
 	[strName] = 'Inventory Shipment'
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 5)
 
+GO
 print('/*******************  END Populate Inventory Transaction Types *******************/')

@@ -1065,6 +1065,8 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostLotIn.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Tables\tblICCostingMethod.sql" />
+    <None Include="Scripts\Post-Deployment\IC\4_CostingMethods.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
