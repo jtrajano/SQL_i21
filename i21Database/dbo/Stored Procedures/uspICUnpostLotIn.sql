@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICUnpostFIFOIn]
+﻿CREATE PROCEDURE [dbo].[uspICUnpostLotIn]
 	@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT
 AS
@@ -19,6 +19,7 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
 		,@STANDARDCOST AS INT = 4 	
+		,@LOT AS INT = 5
 
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
@@ -50,7 +51,7 @@ FROM	(
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
 					AND inventory_transaction.strTransactionId = Source_Query.strTransactionId
 					AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@AVERAGECOST, @FIFO) 
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LOT) 
 					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
 
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
@@ -65,23 +66,23 @@ WHERE	Changes.Action = 'UPDATE'
 
 -- If there are revalue records, reduce the In-qty of the negative stock buckets
 -- Since the In-qty is unposted, it must bring back these buckets back to negative qty. 
-UPDATE	fifoBucket
-SET		fifoBucket.dblStockIn = ISNULL(fifoBucket.dblStockIn, 0) - fifoOutGrouped.dblQty
-FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
-			SELECT	fifoOut.intRevalueFifoId, dblQty = SUM(fifoOut.dblQty)
-			FROM	dbo.tblICInventoryFIFOOut fifoOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
-						ON fifoOut.intInventoryTransactionId = Reversal.intInventoryTransactionId
-			WHERE	fifoOut.intRevalueFifoId IS NOT NULL 	
-			GROUP BY fifoOut.intRevalueFifoId
-		) AS fifoOutGrouped
-			ON fifoOutGrouped.intRevalueFifoId = fifoBucket.intInventoryFIFOId
+UPDATE	LotBucket
+SET		LotBucket.dblStockIn = ISNULL(LotBucket.dblStockIn, 0) - LotOutGrouped.dblQty
+FROM	dbo.tblICInventoryLot LotBucket INNER JOIN (
+			SELECT	LotOut.intRevalueLotId, dblQty = SUM(LotOut.dblQty)
+			FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+						ON LotOut.intInventoryTransactionId = Reversal.intInventoryTransactionId
+			WHERE	LotOut.intRevalueLotId IS NOT NULL 	
+			GROUP BY LotOut.intRevalueLotId
+		) AS LotOutGrouped
+			ON LotOutGrouped.intRevalueLotId = LotBucket.intInventoryLotId
 ;
 
 -- If there are out records, create a negative stock cost bucket 
-INSERT INTO dbo.tblICInventoryFIFO (
+INSERT INTO dbo.tblICInventoryLot (
 		intItemId
 		,intItemLocationId
-		,dtmDate
+		,intLotId
 		,dblStockIn
 		,dblStockOut
 		,dblCost
@@ -93,7 +94,7 @@ INSERT INTO dbo.tblICInventoryFIFO (
 )
 SELECT	intItemId = OutTransactions.intItemId
 		,intItemLocationId = OutTransactions.intItemLocationId
-		,dtmDate = OutTransactions.dtmDate
+		,intLotId = OutTransactions.intLotId
 		,dblStockIn = 0 
 		,dblStockOut = ABS(OutTransactions.dblUnitQty)
 		,dblCost = OutTransactions.dblCost
@@ -102,22 +103,23 @@ SELECT	intItemId = OutTransactions.intItemId
 		,dtmCreated = GETDATE()
 		,intCreatedUserId = OutTransactions.intCreatedUserId
 		,intConcurrencyId = 1
-FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICInventoryFIFOOut fifoOut
-			ON fifo.intInventoryFIFOId = fifoOut.intInventoryFIFOId
+FROM	dbo.tblICInventoryLot Lot INNER JOIN dbo.tblICInventoryLotOut LotOut
+			ON Lot.intInventoryLotId = LotOut.intInventoryLotId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
-			ON OutTransactions.intInventoryTransactionId = fifoOut.intInventoryTransactionId
+			ON OutTransactions.intInventoryTransactionId = LotOut.intInventoryTransactionId
 			AND OutTransactions.dblUnitQty < 0 
-WHERE	fifo.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
-		AND fifo.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
+WHERE	Lot.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
+		AND Lot.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
 ;
+
 -- Plug the Out-qty so that it can't be used for future out-transactions. 
 -- Mark the record as unposted too. 
-UPDATE	fifoBucket
+UPDATE	LotBucket
 SET		dblStockOut = dblStockIn
 		,ysnIsUnposted = 1
-FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
-			ON fifoBucket.intTransactionId = Reversal.intTransactionId
-			AND fifoBucket.strTransactionId = Reversal.strTransactionId
+FROM	dbo.tblICInventoryLot LotBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+			ON LotBucket.intTransactionId = Reversal.intTransactionId
+			AND LotBucket.strTransactionId = Reversal.strTransactionId
 WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
 ;

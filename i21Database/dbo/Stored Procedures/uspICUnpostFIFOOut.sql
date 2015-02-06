@@ -23,7 +23,7 @@ DECLARE @AVERAGECOST AS INT = 1
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
 -- Then grab the updated records and store it to the @InventoryToReverse variable
-INSERT INTO #tmpInventoryTranactionStockToReverse (
+INSERT INTO #tmpInventoryTransactionStockToReverse (
 	intInventoryTransactionId
 	,intTransactionId
 	,strTransactionId
@@ -77,7 +77,7 @@ WHERE	Changes.Action = 'UPDATE'
 UPDATE	fifoBucket
 SET		dblStockIn = dblStockOut
 		,ysnIsUnposted = 1
-FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN #tmpInventoryTranactionStockToReverse InventoryToReverse
+FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
 			ON fifoBucket.intTransactionId = InventoryToReverse.intTransactionId
 			AND fifoBucket.strTransactionId = InventoryToReverse.strTransactionId
 WHERE	InventoryToReverse.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
@@ -88,7 +88,7 @@ UPDATE	fifoBucket
 SET		fifoBucket.dblStockOut = ISNULL(fifoBucket.dblStockOut, 0) - fifoOutGrouped.dblQty
 FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
 			SELECT	fifoOut.intInventoryFIFOId, dblQty = SUM(fifoOut.dblQty)
-			FROM	dbo.tblICInventoryFIFOOut fifoOut INNER JOIN #tmpInventoryTranactionStockToReverse InventoryToReverse
+			FROM	dbo.tblICInventoryFIFOOut fifoOut INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
 						ON fifoOut.intInventoryTransactionId = InventoryToReverse.intInventoryTransactionId	
 			GROUP BY fifoOut.intInventoryFIFOId
 		) AS fifoOutGrouped

@@ -17,6 +17,8 @@ Type the overview for the table here.
 		[intItemLocationId] INT NOT NULL, 
 		[intSubLocationId] INT NULL, 
 		[dblAverageCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblLastCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblStandardCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -29,12 +31,9 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemStock_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 	)
 	GO
-
 	CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intItemId_intLocationId]
 		ON [dbo].[tblICItemStock]([intItemId] ASC, [intItemLocationId] ASC)
 		INCLUDE(dblUnitOnHand, dblAverageCost);
-	GO
-
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
@@ -100,20 +99,6 @@ Type the overview for the table here.
 		@level1name = N'tblICItemStock',
 		@level2type = N'COLUMN',
 		@level2name = N'dblOnOrder'
-	GO
-
-	GO
-
-	GO
-
-	GO
-
-	GO
-
-	GO
-
-	GO
-
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Sort Field',

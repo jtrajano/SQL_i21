@@ -653,6 +653,33 @@
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to zero stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from zero to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Jan 1. Purchase 20 stocks @ 20 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Apr 12. Purchase 75 stocks at 19 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Apr 7. Sold 60 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Feb 10. Purchase 20 stocks at 21 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Feb 15. Purchase 20 stocks at 21.75 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Mar 1. Sold 40 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Mar 15. Sold 50 stocks.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, May 15. Purchase 15 stocks at 27 dollars each.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -15,7 +15,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the temp table 
-CREATE TABLE #tmpInventoryTranactionStockToReverse (
+CREATE TABLE #tmpInventoryTransactionStockToReverse (
 	intInventoryTransactionId INT NOT NULL 
 	,intTransactionId INT NULL 
 	,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -93,7 +93,7 @@ BEGIN
 	END
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTranactionStockToReverse) 
+IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 
 BEGIN 
 	-------------------------------------------------
 	-- Create reversal of the inventory transactions
@@ -140,7 +140,7 @@ BEGIN
 			,[dtmCreated]			= GETDATE()
 			,[intCreatedUserId]		= @intUserId
 			,[intConcurrencyId]		= 1
-	FROM	#tmpInventoryTranactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
+	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 
 	--------------------------------------------------------------
@@ -226,7 +226,7 @@ BEGIN
 							,ItemTransaction.intTransactionId
 							,ItemTransaction.strTransactionId
 							,ItemTransaction.strTransactionForm
-					FROM	#tmpInventoryTranactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ItemTransaction
+					FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ItemTransaction
 								ON ItemTransactionsToReverse.intInventoryTransactionId = ItemTransaction.intInventoryTransactionId
 					WHERE	ItemTransaction.intTransactionId = @intTransactionId
 							AND ItemTransaction.strTransactionId = @strTransactionId
@@ -245,5 +245,5 @@ EXEC dbo.uspICCreateReversalGLEntries
 	,@intUserId
 ;
 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTranactionStockToReverse')) 
-	DROP TABLE #tmpInventoryTranactionStockToReverse
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+	DROP TABLE #tmpInventoryTransactionStockToReverse

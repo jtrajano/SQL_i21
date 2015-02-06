@@ -964,9 +964,6 @@
     </Build>
     <Build Include="dbo\User Defined Types\InventoryTranactionStockToReverse.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
-      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="dbo\Functions\fnCalculateInterestToDate.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCalculateInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCreateGLJournalEntry.sql" />
@@ -1061,6 +1058,13 @@
     <Build Include="dbo\Tables\tblICInventoryLotOut.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLot.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLotIn.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
