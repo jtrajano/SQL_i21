@@ -682,6 +682,11 @@
     </Build>
     <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method for manual lot items.sql" />
     <Build Include="testi21Database\Functions\test fnGetCostingMethodAsTable for retrieving the costing method for serial lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for add 1-add 2-unpost add 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
