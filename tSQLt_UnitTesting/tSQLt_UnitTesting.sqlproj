@@ -687,6 +687,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for add-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for sell-add-unpost add.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOut for add-sell-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOut for sell 1-sell 2-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOut for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

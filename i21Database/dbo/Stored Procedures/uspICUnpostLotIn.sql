@@ -23,7 +23,7 @@ DECLARE @AVERAGECOST AS INT = 1
 
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
--- Then grab the updated records and store it into the @InventoryToReverse variable
+-- Then grab the updated records and store it into the #tmpInventoryTransactionStockToReverse temp table
 INSERT INTO #tmpInventoryTransactionStockToReverse (
 	intInventoryTransactionId
 	,intTransactionId
