@@ -5,9 +5,6 @@
 
 print('/*******************  BEGIN Populate Inventory Transaction Types *******************/')
 
-TRUNCATE TABLE tblICInventoryTransactionType
-GO
-
 -- Use UPSERT to populate the inventory transaction types
 MERGE 
 INTO	dbo.tblICInventoryTransactionType
