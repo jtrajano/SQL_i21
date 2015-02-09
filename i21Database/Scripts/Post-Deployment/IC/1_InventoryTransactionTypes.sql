@@ -8,33 +8,44 @@ print('/*******************  BEGIN Populate Inventory Transaction Types ********
 TRUNCATE TABLE tblICInventoryTransactionType
 GO
 
-INSERT INTO dbo.[tblICInventoryTransactionType] (
-	[intTransactionTypeId],
-	[strName]
-)
-SELECT 
-	[intTransactionTypeId] = 1,
-	[strName] = 'Inventory Auto Negative'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 1)
-UNION ALL
-SELECT 
-	[intTransactionTypeId] = 2,
-	[strName] = 'Inventory Write-Off Sold'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 2)
-UNION ALL
-SELECT 
-	[intTransactionTypeId] = 3,
-	[strName] = 'Inventory Revalue Sold'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 3)
-UNION ALL 
-SELECT 
-	[intTransactionTypeId] = 4,
-	[strName] = 'Inventory Receipt'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 4)
-UNION ALL 
-SELECT 
-	[intTransactionTypeId] = 5,
-	[strName] = 'Inventory Shipment'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICInventoryTransactionType] WHERE [intTransactionTypeId] = 5)
+-- Use UPSERT to populate the inventory transaction types
+MERGE 
+INTO	dbo.tblICInventoryTransactionType
+WITH	(HOLDLOCK) 
+AS		InventoryTransactionTypes
+USING	(
+		SELECT	id = 1
+				,name = 'Inventory Auto Negative'
+		UNION ALL 
+		SELECT	id = 2
+				,name = 'Inventory Write-Off Sold'
+		UNION ALL 
+		SELECT	id = 3
+				,name = 'Inventory Revalue Sold'
+		UNION ALL 
+		SELECT	id = 4
+				,name = 'Inventory Receipt'
+		UNION ALL 
+		SELECT	id = 5
+				,name = 'Inventory Shipment'
+) AS InventoryTransactionTypeHardValues
+	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
+
+-- When id is matched but name is not, then update the name. 
+WHEN MATCHED AND InventoryTransactionTypes.strName <> InventoryTransactionTypeHardValues.name THEN 
+	UPDATE 
+	SET 	strName = InventoryTransactionTypeHardValues.name
+
+-- When id is missing, then do an insert. 
+WHEN NOT MATCHED THEN
+	INSERT (
+		intTransactionTypeId
+		,strName
+	)
+	VALUES (
+		InventoryTransactionTypeHardValues.id
+		,InventoryTransactionTypeHardValues.name
+	)
+;
 
 print('/*******************  END Populate Inventory Transaction Types *******************/')
