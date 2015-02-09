@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting for scenario 3, unpost add stock, unpost sell stock]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting on FIFO for scenario 3, unpost sell stock, unpost add stock]
 AS
 -- Arrange 
 BEGIN 
@@ -119,6 +119,7 @@ BEGIN
 		,dblCost NUMERIC(18,6)
 		,strTransactionId NVARCHAR(40)
 		,intTransactionId INT		
+		,ysnIsUnposted BIT 		
 	)
 	
 	CREATE TABLE actualFIFO (
@@ -130,16 +131,17 @@ BEGIN
 		,dblStockOut NUMERIC(18,6)
 		,dblCost NUMERIC(18,6)
 		,strTransactionId NVARCHAR(40)
-		,intTransactionId INT		
+		,intTransactionId INT
+		,ysnIsUnposted BIT 		
 	)	
 END 
 
 -- Act
 BEGIN
-	-- Begin: Unpost Add Stock 
+	-- Begin: Unpost Sell Stock 
 	BEGIN 
 		SET @strBatchId = 'BATCH-0000003'
-		SET @strTransactionId = 'InvRcpt-0001'
+		SET @strTransactionId = 'InvShip-0001'
 		SET @intTransactionId = 1
 
 		-- Setup the expected data. 
@@ -173,7 +175,7 @@ BEGIN
 				,ISNULL(dblCreditUnit, 0)
 				,strDescription
 				,strCode
-				,intJournalLineNo = intJournalLineNo + 10
+				,intJournalLineNo = intJournalLineNo + 5
 				,ysnIsUnposted = 1
 				,strTransactionId
 				,intTransactionId 
@@ -181,7 +183,7 @@ BEGIN
 		FROM	dbo.tblGLDetail
 		WHERE	tblGLDetail.intTransactionId = @intTransactionId
 				AND tblGLDetail.strTransactionId = @strTransactionId
-
+				
 		-- Reverse of the inventory transactions
 		INSERT INTO expectedInventoryTransaction (
 				intItemId 
@@ -245,7 +247,7 @@ BEGIN
 				AND strTransactionId = @strTransactionId
 			
 		-- Setup the expected Item Stock
-		-- Expect the stock goes back to zero. The average cost should remain the same. 
+		-- Expect the stock to go back to 100. The average cost should remain the same. 
 		INSERT INTO expectedItemStock (
 				intItemId
 				,intItemLocationId
@@ -255,27 +257,27 @@ BEGIN
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 1
 				,dblAverageCost = 2.15
-				,dblUnitOnHand = -75
+				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @StickyGrains
 				,intItemLocationId = 2
 				,dblAverageCost = 2.15
-				,dblUnitOnHand = -75
+				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @PremiumGrains
 				,intItemLocationId = 3
 				,dblAverageCost = 2.15
-				,dblUnitOnHand = -75
+				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @ColdGrains
 				,intItemLocationId = 4
 				,dblAverageCost = 2.15
-				,dblUnitOnHand = -75
+				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @HotGrains
 				,intItemLocationId = 5
 				,dblAverageCost = 2.15
-				,dblUnitOnHand = -75
+				,dblUnitOnHand = 100
 			
 		-- Setup the expected FIFO data
 		INSERT INTO dbo.expectedFIFO (
@@ -288,109 +290,64 @@ BEGIN
 				,dblCost
 				,strTransactionId
 				,intTransactionId
+				,ysnIsUnposted
 		)
-		-- Plug the out-qty 
+		-- The In qty will remain at 100. 
 		SELECT	intInventoryFIFOId = 1
 				,intItemId = @WetGrains
 				,intItemLocationId = 1
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
-				,dblStockOut = 100
+				,dblStockOut = 0
 				,dblCost = 2.15
 				,strTransactionId = 'InvRcpt-0001'
 				,intTransactionId = 1
+				,ysnIsUnposted = 0
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 2
 				,intItemId = @StickyGrains
 				,intItemLocationId = 2
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
-				,dblStockOut = 100
+				,dblStockOut = 0
 				,dblCost = 2.15
 				,strTransactionId = 'InvRcpt-0001'
 				,intTransactionId = 1
+				,ysnIsUnposted = 0
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 3
 				,intItemId = @PremiumGrains
 				,intItemLocationId = 3
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
-				,dblStockOut = 100
+				,dblStockOut = 0
 				,dblCost = 2.15
 				,strTransactionId = 'InvRcpt-0001'
 				,intTransactionId = 1
+				,ysnIsUnposted = 0
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 4
 				,intItemId = @ColdGrains
 				,intItemLocationId = 4
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
-				,dblStockOut = 100
+				,dblStockOut = 0
 				,dblCost = 2.15
 				,strTransactionId = 'InvRcpt-0001'
 				,intTransactionId = 1							
+				,ysnIsUnposted = 0
 		UNION ALL 
 		SELECT	intInventoryFIFOId = 5
 				,intItemId = @HotGrains
 				,intItemLocationId = 5
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
-				,dblStockOut = 100
+				,dblStockOut = 0
 				,dblCost = 2.15
 				,strTransactionId = 'InvRcpt-0001'
-				,intTransactionId = 1
-		-- When add stock is removed, all the sold stocks from it need to have negative fifo entries 
-		UNION ALL 
-		SELECT	intInventoryFIFOId = 6
-				,intItemId = @WetGrains
-				,intItemLocationId = 1
-				,dtmDate = '01/16/2014'
-				,dblStockIn = 0
-				,dblStockOut = 75
-				,dblCost = 2.15
-				,strTransactionId = 'InvShip-0001'
-				,intTransactionId = 1			
-		UNION ALL 
-		SELECT	intInventoryFIFOId = 7
-				,intItemId = @StickyGrains
-				,intItemLocationId = 2
-				,dtmDate = '01/16/2014'
-				,dblStockIn = 0
-				,dblStockOut = 75
-				,dblCost = 2.15
-				,strTransactionId = 'InvShip-0001'
-				,intTransactionId = 1	
-		UNION ALL 
-		SELECT	intInventoryFIFOId = 8
-				,intItemId = @PremiumGrains
-				,intItemLocationId = 3
-				,dtmDate = '01/16/2014'
-				,dblStockIn = 0
-				,dblStockOut = 75
-				,dblCost = 2.15
-				,strTransactionId = 'InvShip-0001'
-				,intTransactionId = 1	
-		UNION ALL 
-		SELECT	intInventoryFIFOId = 9
-				,intItemId = @ColdGrains
-				,intItemLocationId = 4
-				,dtmDate = '01/16/2014'
-				,dblStockIn = 0
-				,dblStockOut = 75
-				,dblCost = 2.15
-				,strTransactionId = 'InvShip-0001'
-				,intTransactionId = 1	
-		UNION ALL 
-		SELECT	intInventoryFIFOId = 10
-				,intItemId = @HotGrains
-				,intItemLocationId = 5
-				,dtmDate = '01/16/2014'
-				,dblStockIn = 0
-				,dblStockOut = 75
-				,dblCost = 2.15
-				,strTransactionId = 'InvShip-0001'
 				,intTransactionId = 1					
-
+				,ysnIsUnposted = 0
+		
 		-- Do the act
 		INSERT INTO @GLDetail (
 			[dtmDate] 
@@ -425,12 +382,12 @@ BEGIN
 			,@strBatchId
 			,@intUserId
 	END 
-	-- End: Unpost Add Stock 
+	-- End: Unpost Sell Stock 
 	
-	-- Begin: Unpost Sell Stock
+	-- Begin: Unpost Add Stock
 	BEGIN 
 		SET @strBatchId = 'BATCH-0000004'
-		SET @strTransactionId = 'InvShip-0001'
+		SET @strTransactionId = 'InvRcpt-0001'
 		SET @intTransactionId = 1
 
 		-- Setup the expected data. 
@@ -464,7 +421,7 @@ BEGIN
 				,ISNULL(dblCreditUnit, 0)
 				,strDescription
 				,strCode
-				,intJournalLineNo = intJournalLineNo + 10
+				,intJournalLineNo = intJournalLineNo + 15
 				,ysnIsUnposted = 1
 				,strTransactionId
 				,intTransactionId 
@@ -538,23 +495,23 @@ BEGIN
 		-- Setup the expected Item Stock
 		-- Expect the stock goes back to zero. The average cost should remain the same. 
 		UPDATE	expectedItemStock
-		SET		dblUnitOnHand += 75
+		SET		dblUnitOnHand -= 100
 		FROM	expectedItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON expectedItemStock.intItemId = ItemLocation.intItemId
 					AND expectedItemStock.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
 				AND ItemLocation.intLocationId = @Default_Location
 			
-		-- Expect FIFO in records are plugged out to prevent further use in the future. 		
+		-- Expect FIFO in records are plugged out to prevent further use in the future. 
 		UPDATE	expectedFIFO
-		SET		dblStockIn += 75
+		SET		dblStockOut = 100
+				,ysnIsUnposted = 1
 		FROM	expectedFIFO INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON expectedFIFO.intItemId = ItemLocation.intItemId
 					AND expectedFIFO.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location
-				AND expectedFIFO.dblStockOut = 75
-	
+				AND ItemLocation.intLocationId = @Default_Location		
+
 		-- Do the act
 		INSERT INTO @GLDetail (
 			[dtmDate] 
@@ -587,9 +544,9 @@ BEGIN
 			@intTransactionId
 			,@strTransactionId
 			,@strBatchId
-			,@intUserId
+			,@intUserId				
 	END 
-	-- End: Unpost Sell Stock
+	-- End: Unpost Add Stock
 END 
 
 -- Assert
@@ -692,19 +649,21 @@ BEGIN
 			,dblCost
 			,strTransactionId
 			,intTransactionId
+			,ysnIsUnposted
 	)	
 	SELECT	intInventoryFIFOId
-			,tblICInventoryFIFO.intItemId
-			,tblICInventoryFIFO.intItemLocationId
+			,fifo.intItemId
+			,fifo.intItemLocationId
 			,dtmDate
 			,dblStockIn
 			,dblStockOut
 			,dblCost
 			,strTransactionId
 			,intTransactionId		
-	FROM	dbo.tblICInventoryFIFO INNER JOIN dbo.tblICItemLocation ItemLocation
-				ON tblICInventoryFIFO.intItemId = ItemLocation.intItemId
-				AND tblICInventoryFIFO.intItemLocationId = ItemLocation.intItemLocationId
+			,ysnIsUnposted
+	FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON fifo.intItemId = ItemLocation.intItemId
+				AND fifo.intItemLocationId = ItemLocation.intItemLocationId
 	WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
 			AND ItemLocation.intLocationId = @Default_Location
 				

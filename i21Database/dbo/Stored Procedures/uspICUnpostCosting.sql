@@ -63,19 +63,18 @@ BEGIN
 	EXEC dbo.uspICValidateCostingOnUnpost @ItemsToUnpost
 END 
 
+-- Get the transaction type 
+DECLARE @TransactionType AS INT 
+SELECT TOP 1 
+		@TransactionType = intTransactionTypeId
+FROM	dbo.tblICInventoryTransaction
+WHERE	intTransactionId = @intTransactionId
+		AND strTransactionId = @strTransactionId
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Call the FIFO unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	DECLARE @TransactionType AS INT 
-
-	-- Get the transaction type 
-	SELECT TOP 1 
-			@TransactionType = intTransactionTypeId
-	FROM	dbo.tblICInventoryTransaction
-	WHERE	intTransactionId = @intTransactionId
-			AND strTransactionId = @strTransactionId
-
 	-- Reverse the "IN" qty 
 	IF @TransactionType IN (@InventoryReceipt)
 	BEGIN 
@@ -88,6 +87,27 @@ BEGIN
 	IF @TransactionType IN (@InventoryShipment)
 	BEGIN 
 		EXEC dbo.uspICUnpostFIFOOut
+			@strTransactionId
+			,@intTransactionId
+	END
+END
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Call the LOT unpost stored procedures 
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	-- Reverse the "IN" qty 
+	IF @TransactionType IN (@InventoryReceipt)
+	BEGIN 
+		EXEC dbo.uspICUnpostLotIn 
+			@strTransactionId
+			,@intTransactionId
+	END
+
+	-- Reverse the "OUT" qty 
+	IF @TransactionType IN (@InventoryShipment)
+	BEGIN 
+		EXEC dbo.uspICUnpostLotOut
 			@strTransactionId
 			,@intTransactionId
 	END

@@ -1,9 +1,9 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting for posted Inventory Receipt]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting on AVG for posted Inventory Shipment]
 AS
 -- Arrange 
 BEGIN 
-	EXEC [testi21Database].[Fake posted transactions using AVG, scenario 1];
-
+	EXEC [testi21Database].[Fake posted transactions using AVG, scenario 2];
+	
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
 			,@StickyGrains AS INT = 2
@@ -14,11 +14,11 @@ BEGIN
 	-- Declare the variables for location
 	DECLARE @Default_Location AS INT = 1
 			,@NewHaven AS INT = 2
-			,@BetterHaven AS INT = 3
+			,@BetterHaven AS INT = 3	
 
 	DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-0000002'
 	DECLARE @intTransactionId AS INT = 1
-	DECLARE @strTransactionId AS NVARCHAR(40) = 'InvRcpt-0001'
+	DECLARE @strTransactionId AS NVARCHAR(40) = 'InvShip-0001'
 	DECLARE @intUserId AS INT = 1
 	DECLARE @GLDetail AS dbo.RecapTableType 
 
@@ -94,7 +94,7 @@ BEGIN
 		,strRelatedTransactionId NVARCHAR(40)
 		,strTransactionForm NVARCHAR(255)	
 	)
-
+	
 	CREATE TABLE expectedItemStock (
 		intItemId INT
 		,intItemLocationId INT
@@ -213,7 +213,7 @@ BEGIN
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
-
+			
 	-- Setup the expected Item Stock
 	-- Expect the stock goes back to zero. The average cost should remain the same. 
 	INSERT INTO expectedItemStock (
@@ -245,8 +245,8 @@ BEGIN
 	SELECT	intItemId = @HotGrains
 			,intItemLocationId = 5
 			,dblAverageCost = 2.00
-			,dblUnitOnHand = 0
-							
+			,dblUnitOnHand = 0	
+	
 	-- Do the act
 	INSERT INTO @GLDetail (
 		[dtmDate] 
@@ -357,7 +357,7 @@ BEGIN
 	FROM	dbo.tblICInventoryTransaction
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
-
+	
 	-- Actual item stock data
 	INSERT INTO actualItemStock (
 			intItemId
@@ -369,8 +369,8 @@ BEGIN
 			,intItemLocationId 
 			,dblAverageCost 
 			,dblUnitOnHand 
-	FROM dbo.tblICItemStock	
-			
+	FROM dbo.tblICItemStock		
+				
 	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
 	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
 	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
@@ -388,9 +388,9 @@ IF OBJECT_ID('expectedInventoryTransaction') IS NOT NULL
 
 IF OBJECT_ID('actualInventoryTransaction') IS NOT NULL 
 	DROP TABLE dbo.actualInventoryTransaction
-
+	
 IF OBJECT_ID('expectedItemStock') IS NOT NULL 
 	DROP TABLE expectedItemStock
 
 IF OBJECT_ID('actualItemStock') IS NOT NULL 
-	DROP TABLE dbo.actualItemStock
+	DROP TABLE dbo.actualItemStock	

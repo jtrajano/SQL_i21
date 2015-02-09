@@ -97,6 +97,9 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
+	CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryFIFO]
+		ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOId] ASC);
+
 	---------------------------------------------------------------------------------------------------------------
 	-- Add stock (100 qty with $2.15) 
 	---------------------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting for scenario 4, unpost add stock, unpost sell stock]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting on FIFO for scenario 4, unpost add stock, unpost sell stock]
 AS
 -- Arrange 
 BEGIN 
