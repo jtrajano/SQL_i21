@@ -125,7 +125,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 	,dblReceived
     ,intUnitMeasureId
     ,intNoPackages
-	,intPackTypeId
+	,intPackageTypeId
     ,dblExpPackageWeight
     ,dblUnitCost
 	,dblLineTotal
@@ -141,7 +141,7 @@ SELECT	intInventoryReceiptId = @InventoryReceiptId
 		,dblReceived			= ISNULL(PODetail.dblQtyReceived, 0)
 		,intUnitMeasureId		= PODetail.intUnitOfMeasureId
 		,intNoPackages			= 0 -- None found from Purchase Order
-		,intPackTypeId			= 0 -- None found from Purchase Order
+		,intPackageTypeId		= NULL -- None found from Purchase Order
 		,dblExpPackageWeight	= 0 -- None found from Purchase Order
 		,dblUnitCost			= PODetail.dblCost
 		,dblLineTotal			= 0
