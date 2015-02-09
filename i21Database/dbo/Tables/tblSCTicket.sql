@@ -72,6 +72,7 @@
     [strFarmNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strFieldNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
 	[strDiscountComment] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+	[strCommodityCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),
@@ -738,3 +739,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'strDiscountComment'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Commodity Code',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strCommodityCode'
