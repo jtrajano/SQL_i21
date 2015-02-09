@@ -17,7 +17,6 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'strReceiptType', type: 'string'},
         { name: 'intVendorId', type: 'int', allowNull: true },
         { name: 'intTransferorId', type: 'int', allowNull: true },
-        { name: 'intSourceId', type: 'int', allowNull: true },
         { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'strReceiptNumber', type: 'string'},
         { name: 'dtmReceiptDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
