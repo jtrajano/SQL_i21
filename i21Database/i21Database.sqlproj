@@ -1070,6 +1070,7 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostLotOut.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+	<Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1112,9 +1113,6 @@
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
     </ArtifactReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\CT\2_StartingNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountCategory.sql" />

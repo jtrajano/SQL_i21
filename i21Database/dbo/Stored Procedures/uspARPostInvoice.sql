@@ -45,11 +45,6 @@ CREATE TABLE #tmpInvalidInvoiceData (
 	intTransactionId INT
 );
 
-IF(@batchId IS NULL)
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
-
-SET @batchIdUsed = @batchId
-
 --DECLARRE VARIABLES
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
@@ -79,6 +74,24 @@ BEGIN
 	END
 END
 
+IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
+	BEGIN
+		SELECT TOP 1
+			@batchId = GL.strBatchId
+		FROM
+			tblGLDetailRecap GL
+		INNER JOIN 
+			#tmpPostInvoiceData I
+				ON GL.intTransactionId = I.intInvoiceId 
+		WHERE
+			GL.strTransactionType IN ('Credit Memo','Invoice')
+			AND	GL.strModuleName = @MODULE_NAME
+	END
+
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
+
+SET @batchIdUsed = @batchId
 
 --IF (@InvoiceBatchId IS NOT NULL)
 --BEGIN
@@ -448,8 +461,8 @@ BEGIN
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
-		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN  ISNULL(IP.dblStandardCost, B.dblTotal) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN  ISNULL(IP.dblStandardCost, B.dblTotal) ELSE 0 END) END, --Invoice Detail
-		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE  ISNULL(IP.dblStandardCost, B.dblTotal) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE  ISNULL(IP.dblStandardCost, B.dblTotal) END) END, -- Invoice
+		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN  ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN  ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) END, --Invoice Detail
+		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE  ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE  ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) END, -- Invoice
 		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN  ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0)  ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN  ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0)  ELSE 0 END) END,
 		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0)  END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0)  END) END,
 		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -475,8 +488,33 @@ BEGIN
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId
 	LEFT JOIN
-		vyuICGetItemPricing IP
-			ON B.intItemId = IP.intItemId  AND B.intCompanyLocationId = IP.intLocationId		
+		(
+		SELECT 
+			ST.intLocationId
+			,(CASE 
+				WHEN ST.strCostingMethod = 'AVG' 
+					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+				WHEN ST.strCostingMethod = 'FIFO' 
+					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
+				WHEN ST.strCostingMethod = 'LIFO' 
+					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
+				ELSE  IP.dblStandardCost
+			 END) AS dblCost
+			,IP.intItemUnitMeasureId
+			,IP.intItemId 
+		FROM 
+			vyuICGetItemStock ST
+		INNER JOIN
+			tblICItemLocation IL
+				ON ST.intLocationId = IL.intLocationId	
+		INNER JOIN
+			tblICItemPricing IP
+				ON	ST.intItemId = IP.intItemId 
+				AND IL.intItemLocationId = IP.intItemLocationId
+		) IP
+			ON B.intItemId = IP.intItemId  
+			AND B.intCompanyLocationId = IP.intLocationId
+			AND B.intItemUOMId = IP.intItemUnitMeasureId 	
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
@@ -491,8 +529,8 @@ BEGIN
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
-		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblStandardCost, B.dblTotal) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblStandardCost, B.dblTotal) END) END, --Invoice Detail
-		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblStandardCost, B.dblTotal) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblStandardCost, B.dblTotal) ELSE 0 END) END, -- Invoice
+		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) END, --Invoice Detail
+		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) END, -- Invoice
 		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -518,8 +556,33 @@ BEGIN
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId 
 	LEFT JOIN
-		vyuICGetItemPricing IP
-			ON B.intItemId = IP.intItemId AND B.intCompanyLocationId = IP.intLocationId						
+		(
+		SELECT 
+			ST.intLocationId
+			,(CASE 
+				WHEN ST.strCostingMethod = 'AVG' 
+					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+				WHEN ST.strCostingMethod = 'FIFO' 
+					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
+				WHEN ST.strCostingMethod = 'LIFO' 
+					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
+				ELSE  IP.dblStandardCost
+			 END) AS dblCost
+			,IP.intItemUnitMeasureId
+			,IP.intItemId 
+		FROM 
+			vyuICGetItemStock ST
+		INNER JOIN
+			tblICItemLocation IL
+				ON ST.intLocationId = IL.intLocationId	
+		INNER JOIN
+			tblICItemPricing IP
+				ON	ST.intItemId = IP.intItemId 
+				AND IL.intItemLocationId = IP.intItemLocationId
+		) IP
+			ON B.intItemId = IP.intItemId  
+			AND B.intCompanyLocationId = IP.intLocationId
+			AND B.intItemUOMId = IP.intItemUnitMeasureId 						
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
@@ -570,8 +633,8 @@ BEGIN
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
-		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE B.dblTotal END) END, --Invoice Detail
-		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN B.dblTotal ELSE 0 END) END, -- Invoice
+		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) END, --Invoice Detail
+		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) END, -- Invoice
 		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -610,8 +673,8 @@ BEGIN
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
-		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE B.dblTotal END) END, --Invoice Detail
-		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN B.dblTotal ELSE 0 END) END, -- Invoice
+		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) END, --Invoice Detail
+		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) END, -- Invoice
 		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
@@ -905,6 +968,9 @@ END
 		SET
 			ysnPosted = 0
 			,ysnPaid = 0
+			,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
+			,dblDiscount = ISNULL(dblDiscount, 0.000000)
+			,dblPayment = ISNULL(dblPayment, 0.000000)
 		FROM
 			tblARInvoice 
 		WHERE 
@@ -944,6 +1010,9 @@ END
 			tblARInvoice
 		SET
 			ysnPosted = 1
+			,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
+			,dblDiscount = ISNULL(dblDiscount, 0.000000)
+			,dblPayment = ISNULL(dblPayment, 0.000000)
 		WHERE
 			tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
 
@@ -1011,8 +1080,8 @@ ELSE
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,
-			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblStandardCost, B.dblTotal) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblStandardCost, B.dblTotal) ELSE 0 END) END,
-			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblStandardCost, B.dblTotal) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblStandardCost, B.dblTotal) END) END,
+			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) END,
+			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) END,
 			dblDebitUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 			dblCreditUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) END) END,
 			dtmDate = A.dtmDate,
@@ -1039,8 +1108,33 @@ ELSE
 			Units U
 				ON A.intAccountId = U.intAccountId 	
 		LEFT JOIN
-			vyuICGetItemPricing IP
-				ON B.intItemId = IP.intItemId AND B.intCompanyLocationId = IP.intLocationId					
+		(
+		SELECT 
+			ST.intLocationId
+			,(CASE 
+				WHEN ST.strCostingMethod = 'AVG' 
+					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+				WHEN ST.strCostingMethod = 'FIFO' 
+					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
+				WHEN ST.strCostingMethod = 'LIFO' 
+					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
+				ELSE  IP.dblStandardCost
+			 END) AS dblCost
+			,IP.intItemUnitMeasureId
+			,IP.intItemId 
+		FROM 
+			vyuICGetItemStock ST
+		INNER JOIN
+			tblICItemLocation IL
+				ON ST.intLocationId = IL.intLocationId	
+		INNER JOIN
+			tblICItemPricing IP
+				ON	ST.intItemId = IP.intItemId 
+				AND IL.intItemLocationId = IP.intItemLocationId
+		) IP
+			ON B.intItemId = IP.intItemId  
+			AND B.intCompanyLocationId = IP.intLocationId
+			AND B.intItemUOMId = IP.intItemUnitMeasureId 					
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
@@ -1055,8 +1149,8 @@ ELSE
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,
-			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblStandardCost, B.dblTotal) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblStandardCost, B.dblTotal) END) END,
-			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblStandardCost, B.dblTotal) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblStandardCost, B.dblTotal) ELSE 0 END) END,
+			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) END) END,
+			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(IP.dblCost, ISNULL(B.dblTotal, 0.00)) ELSE 0 END) END,
 			dblDebitUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 			dblCreditUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 			dtmDate = A.dtmDate,
@@ -1083,8 +1177,33 @@ ELSE
 			Units U
 				ON A.intAccountId = U.intAccountId 	
 		LEFT JOIN
-			vyuICGetItemPricing IP
-				ON B.intItemId = IP.intItemId  AND B.intCompanyLocationId = IP.intLocationId								
+		(
+		SELECT 
+			ST.intLocationId
+			,(CASE 
+				WHEN ST.strCostingMethod = 'AVG' 
+					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+				WHEN ST.strCostingMethod = 'FIFO' 
+					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
+				WHEN ST.strCostingMethod = 'LIFO' 
+					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
+				ELSE  IP.dblStandardCost
+			 END) AS dblCost
+			,IP.intItemUnitMeasureId
+			,IP.intItemId 
+		FROM 
+			vyuICGetItemStock ST
+		INNER JOIN
+			tblICItemLocation IL
+				ON ST.intLocationId = IL.intLocationId	
+		INNER JOIN
+			tblICItemPricing IP
+				ON	ST.intItemId = IP.intItemId 
+				AND IL.intItemLocationId = IP.intItemLocationId
+		) IP
+			ON B.intItemId = IP.intItemId  
+			AND B.intCompanyLocationId = IP.intLocationId
+			AND B.intItemUOMId = IP.intItemUnitMeasureId 								
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
@@ -1136,8 +1255,8 @@ ELSE
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,									
-			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE B.dblTotal END) END,
-			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN B.dblTotal ELSE 0 END) END,
+			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) END,
+			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) END,
 			dblDebitUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 			dblCreditUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 			dtmDate = A.dtmDate,
@@ -1177,8 +1296,8 @@ ELSE
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,
-			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE B.dblTotal END) END,
-			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN  (CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN B.dblTotal ELSE 0 END) END,
+			dblDebit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END) END,
+			dblCredit = CASE WHEN A.strTransactionType = 'Invoice' THEN  (CASE WHEN @post = 1 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(B.dblTotal, 0.00) ELSE 0 END) END,
 			dblDebitUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(A.dblInvoiceTotal, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
 			dblCreditUnit = CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(A.dblInvoiceTotal, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,
 			dtmDate = A.dtmDate,
@@ -1339,4 +1458,3 @@ Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvalidInvoiceData')) DROP TABLE #tmpInvalidInvoiceData
 
 GO
-

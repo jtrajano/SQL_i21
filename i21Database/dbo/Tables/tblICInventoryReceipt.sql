@@ -16,7 +16,6 @@ Type the overview for the table here.
 		[strReceiptType] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[intVendorId] [int] NULL,
 		[intTransferorId] [int] NULL,
-		[intSourceId] [int] NULL,
 		[intLocationId] [int] NULL,
 		[strReceiptNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[dtmReceiptDate] [datetime] NOT NULL DEFAULT (getdate()),
@@ -108,14 +107,7 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'strReceiptType'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Source Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
-		@level2name = N'intSourceId'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Blanket Release',

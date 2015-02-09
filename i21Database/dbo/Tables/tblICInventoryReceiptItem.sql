@@ -15,6 +15,7 @@ Type the overview for the table here.
 		[intInventoryReceiptItemId] INT NOT NULL IDENTITY, 
 		[intInventoryReceiptId] INT NOT NULL, 
 		[intLineNo] INT NOT NULL, 
+		[intSourceId] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[dblOrderQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOpenReceive] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -59,3 +60,12 @@ Type the overview for the table here.
 		@level1name = N'tblICInventoryReceiptItem',
 		@level2type = N'COLUMN',
 		@level2name = N'intLineNo'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Source Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryReceiptItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intSourceId'

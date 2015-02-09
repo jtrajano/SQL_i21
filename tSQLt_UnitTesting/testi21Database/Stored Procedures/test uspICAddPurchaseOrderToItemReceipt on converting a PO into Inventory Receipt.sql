@@ -68,7 +68,6 @@ BEGIN
 				,dtmReceiptDate
 				,intVendorId
 				,strReceiptType
-				,intSourceId
 				,intLocationId
 				,strVendorRefNo
 				,intShipViaId
@@ -90,6 +89,7 @@ BEGIN
 		SELECT	intInventoryReceiptId
 				,intLineNo
 				,intItemId
+				,intSourceId
 				,dblOrderQty
 				,dblOpenReceive
 				,dblReceived
@@ -115,7 +115,6 @@ BEGIN
 				,dtmReceiptDate = dbo.fnRemoveTimeOnDate(GETDATE())
 				,intVendorId = @Vendor_CoolAmish
 				,strReceiptType = @ReceiptType_PurchaseOrder
-				,intSourceId = 1
 				,intItemLocationId = @Default_Location
 				,strVendorRefNo = N'This is a reference'
 				,intShipViaId = @ShipVia_UPS
@@ -138,6 +137,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 1
 				,intItemId = @WetGrains
+				,intSourceId = 1
 				,dblOrderQty = 10
 				,dblOpenReceive = 10
 				,dblReceived = 0
@@ -153,6 +153,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 2
 				,intItemId = @PremiumGrains
+				,intSourceId = 1
 				,dblOrderQty = 5
 				,dblOpenReceive = 5
 				,dblReceived = 0
@@ -168,6 +169,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 3
 				,intItemId = @HotGrains
+				,intSourceId = 1
 				,dblOrderQty = 2
 				,dblOpenReceive = 2
 				,dblReceived = 0
@@ -183,6 +185,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 4
 				,intItemId = @ColdGrains
+				,intSourceId = 1
 				,dblOrderQty = 4
 				,dblOpenReceive = 4
 				,dblReceived = 0
@@ -209,7 +212,6 @@ BEGIN
 				,dtmReceiptDate
 				,intVendorId
 				,strReceiptType
-				,intSourceId
 				,intLocationId
 				,strVendorRefNo
 				,intShipViaId
@@ -230,6 +232,7 @@ BEGIN
 		SELECT	intInventoryReceiptId
 				,intLineNo
 				,intItemId
+				,intSourceId
 				,dblOrderQty
 				,dblOpenReceive
 				,dblReceived
