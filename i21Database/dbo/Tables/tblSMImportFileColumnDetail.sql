@@ -12,7 +12,7 @@
 	[intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	CONSTRAINT [PK_tblSMImportFileColumnDetail] PRIMARY KEY ([intImportFileColumnDetailId]),
-	CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileHeader_intImportFileHeaderId] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]),  
-	CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileRecordMarker_intImportFileRecordMarkerId] FOREIGN KEY ([intImportFileRecordMarkerId]) REFERENCES [dbo].[tblSMImportFileRecordMarker] ([intImportFileRecordMarkerId]),  
-	CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileTable_intImportFileTableId] FOREIGN KEY ([intImportFileTableId]) REFERENCES [dbo].[tblSMImportFileTable] ([intImportFileTableId]), 
+	CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileHeader_intImportFileHeaderId] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]) ON DELETE CASCADE,  
+	CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileRecordMarker_intImportFileRecordMarkerId] FOREIGN KEY ([intImportFileRecordMarkerId]) REFERENCES [dbo].[tblSMImportFileRecordMarker] ([intImportFileRecordMarkerId]) ON DELETE CASCADE,  
+	CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileTable_intImportFileTableId] FOREIGN KEY ([intImportFileTableId]) REFERENCES [dbo].[tblSMImportFileTable] ([intImportFileTableId]) ON DELETE CASCADE, 
 )

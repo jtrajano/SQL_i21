@@ -7,5 +7,5 @@
 	[intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	CONSTRAINT [PK_tblSMImportFileTable] PRIMARY KEY ([intImportFileTableId]),
-	CONSTRAINT [FK_tblSMImportFileTable_tblSMImportHeader_intImportFileHeaderId] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]) 
+	CONSTRAINT [FK_tblSMImportFileTable_tblSMImportHeader_intImportFileHeaderId] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]) ON DELETE CASCADE
 )
