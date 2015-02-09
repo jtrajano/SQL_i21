@@ -12,7 +12,6 @@
 	[dblGross] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblFees] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblNet] DECIMAL(18, 6) NULL DEFAULT 0, 
-	[ysnPosted]  BIT  DEFAULT ((0)) NOT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblCCDealerHeader] PRIMARY KEY ([intDealerHeaderId]),

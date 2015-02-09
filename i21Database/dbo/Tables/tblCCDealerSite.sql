@@ -6,7 +6,6 @@
 	[strMerchantCategory] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTransactionType] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnSharedFee]  BIT  DEFAULT ((0)) NOT NULL,
-	[intSharedFeePercentage] [int] DEFAULT ((0)) NOT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 
