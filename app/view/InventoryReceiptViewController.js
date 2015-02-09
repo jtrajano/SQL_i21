@@ -571,7 +571,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colItemNo')
+        if (combo.itemId === 'cboItem')
         {
             if (win.viewModel.data.current.get('strReceiptType') === 'Direct'){
                 current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));
@@ -614,13 +614,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     break;
             }
         }
-        else if (combo.column.itemId === 'colUOM')
+        else if (combo.itemId === 'cboItemUOM')
         {
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
         }
-        else if (combo.column.itemId === 'colPackageType')
+        else if (combo.itemId === 'cboItemPackType')
         {
             current.set('intPackTypeId', records[0].get('intPackTypeId'));
         }
