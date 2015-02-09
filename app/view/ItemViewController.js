@@ -1810,13 +1810,13 @@ Ext.define('Inventory.view.ItemViewController', {
 
         var defaultLocation = 0;
         if (app.DefaultLocation > 0){
-            var record = Ext.Array.findBy(win.viewModel.data.current.tblICItemLocations().data.items, function(record) {
+            var itemLocation = Ext.Array.findBy(win.viewModel.data.current.tblICItemLocations().data.items, function(record) {
                 if (record.get('intItemLocationId') === app.DefaultLocation){
                     return true;
                 }
                 else { return false; }
             });
-            defaultLocation = record.get('intItemLocationId');
+            if (itemLocation) defaultLocation = itemLocation.get('intItemLocationId');
         }
 
         if (!record){

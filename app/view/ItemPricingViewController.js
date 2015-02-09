@@ -6,7 +6,11 @@ Ext.define('Inventory.view.ItemPricingViewController', {
         binding: {
             cboLocation: {
                 value: '{current.intItemLocationId}',
-                store: '{Location}'
+                store: '{Location}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}'
+                }]
             },
             cboUnitMeasure: {
                 value: '{current.intItemUnitMeasureId}',
