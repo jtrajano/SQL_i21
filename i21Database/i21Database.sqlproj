@@ -1058,7 +1058,6 @@
     <Build Include="dbo\Tables\tblCCSite.sql" />
     <Build Include="dbo\Tables\tblCCVendorDefault.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
-    <Build Include="dbo\Views\vyuICGetPackedUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
