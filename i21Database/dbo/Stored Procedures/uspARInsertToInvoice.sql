@@ -6,7 +6,10 @@
 	AS
 BEGIN
 
-	DECLARE @NewInvoiceId INT
+	DECLARE @NewInvoiceId INT,
+			@DateOnly DATETIME
+			
+	SELECT @DateOnly = CAST(GETDATE() as date)
 	
 	INSERT INTO tblARInvoice
 		([intCustomerId]
@@ -46,13 +49,13 @@ BEGIN
 	)
 	SELECT
 		[intCustomerId]
-		,GETDATE() --Date
-		,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
-		,GETDATE() --Post Date
+		,@DateOnly --Date
+		,[dbo].fnGetDueDateBasedOnTerm(@DateOnly,intTermId) --Due Date
+		,@DateOnly --Post Date
 		,[intCurrencyId]
 		,[intCompanyLocationId]
 		,[intSalespersonId]
-		,GETDATE() --Ship Date
+		,@DateOnly --Ship Date
 		,[intShipViaId]
 		,[strPONumber]
 		,[intTermId]
