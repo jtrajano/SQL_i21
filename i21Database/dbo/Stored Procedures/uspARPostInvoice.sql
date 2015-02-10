@@ -84,7 +84,7 @@ IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
 			#tmpPostInvoiceData I
 				ON GL.intTransactionId = I.intInvoiceId 
 		WHERE
-			GL.strTransactionType IN ('Credit Memo','Invoice')
+			GL.strTransactionType IN ('Credit Memo','Invoice', 'Overpayment')
 			AND	GL.strModuleName = @MODULE_NAME
 	END
 

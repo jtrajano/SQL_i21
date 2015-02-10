@@ -1045,7 +1045,8 @@
     <Build Include="dbo\Stored Procedures\uspNRCreateEFTGLJournalEntry.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
     <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
-    <Build Include="dbo\Tables\tblSMTaxClass.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateOverPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeleteOverPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
