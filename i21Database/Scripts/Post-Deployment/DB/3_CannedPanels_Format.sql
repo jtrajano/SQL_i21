@@ -29,9 +29,17 @@ Create TABLE #TempCannedPanelFormat
 )
 
 print('/*******************  BEGIN INSERTING canned panels on temporary panel format table  *******************/')
+
 INSERT INTO #TempCannedPanelFormat VALUES (3, N'gacnt_due_rev_dt', N'>', N'0', N'', -657931, N'Regular', 0, N'Cell', 33, 0, 2, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelFormat VALUES (5, N'gacnt_due_rev_dt', N'>', N'0', N'', -657931, N'Regular', 0, N'Cell', 33, 0, 2, N'', 0, 1, 17)
+INSERT INTO #TempCannedPanelFormat VALUES (8, N'gacnt_due_rev_dt', N'>', N'0', N'', -657931, N'Regular', 0, N'Cell', 33, 0, 2, N'', 0, 1, 17)
+
+INSERT INTO #TempCannedPanelFormat VALUES (9, N'gacnt_due_rev_dt', N'>', N'0', N'', -657931, N'Regular', 0, N'Cell', 33, 0, 2, N'', 0, 1, 17)
+
+INSERT INTO #TempCannedPanelFormat VALUES (10, N'strStatus', N'Contains', N'01', N'', -256, N'Bold', 0, N'Row', 255, 6, 4, N'Grid', 0, 0, 110)
+
+INSERT INTO #TempCannedPanelFormat VALUES (11, N'strPriority', N'Contains', N'Sev 1', N'', -256, N'Bold', 0, N'Row', 255, 0, 5, N'Grid', 0, 0, 110)
+
 print('/*******************  END INSERTING canned panels on temporary panel format table  *******************/')
 
 print('/*******************  BEGIN DELETE old panel format records  *******************/')

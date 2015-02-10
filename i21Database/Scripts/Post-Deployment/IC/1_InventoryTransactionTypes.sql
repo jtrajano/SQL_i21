@@ -5,7 +5,6 @@
 
 print('/*******************  BEGIN Populate Inventory Transaction Types *******************/')
 GO
-
 -- Use UPSERT to populate the inventory transaction types
 MERGE 
 INTO	dbo.tblICInventoryTransactionType
@@ -45,6 +44,5 @@ WHEN NOT MATCHED THEN
 		,InventoryTransactionTypeHardValues.name
 	)
 ;
-
 GO
 print('/*******************  END Populate Inventory Transaction Types *******************/')
