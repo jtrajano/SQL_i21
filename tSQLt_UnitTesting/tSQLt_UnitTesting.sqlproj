@@ -731,6 +731,15 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Functions\test fnRecalculateAverageCost for average cost from Lot.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for add 1-add 2-unpost add 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for add-sell-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for sell 1-sell 2-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
