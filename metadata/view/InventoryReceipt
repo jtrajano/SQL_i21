@@ -1455,7 +1455,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter128",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2058,30 +2058,24 @@
                                                     "userConfig": {
                                                         "columns": [
                                                             "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intPackTypeId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Pack Type Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strPackName',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Pack Name',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
+                                                            "    {",
+                                                            "        dataIndex: 'intUnitMeasureId',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Unit Of Measure ID',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strUnitMeasure',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Unit Measure',",
+                                                            "        flex: 1",
+                                                            "    }",
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strPackName",
-                                                        "itemId": "cboItemPackType",
-                                                        "valueField": "strPackName"
+                                                        "displayField": "strUnitMeasure",
+                                                        "itemId": "cboPackageType",
+                                                        "valueField": "strUnitMeasure"
                                                     },
                                                     "name": "MyComboBox14",
                                                     "configAlternates": {
@@ -2360,7 +2354,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter129",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3098,7 +3092,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter130",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3929,7 +3923,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter131",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4372,7 +4366,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging12",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

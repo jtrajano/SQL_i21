@@ -136,7 +136,7 @@ namespace iRely.Inventory.Model
         public decimal? dblReceived { get; set; }
         public int? intUnitMeasureId { get; set; }
         public int? intNoPackages { get; set; }
-        public int? intPackTypeId { get; set; }
+        public int? intPackageTypeId { get; set; }
         public decimal? dblExpPackageWeight { get; set; }
         public decimal? dblUnitCost { get; set; }
         public decimal? dblLineTotal { get; set; }
@@ -244,8 +244,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_packName))
-                    if (tblICPackType != null)
-                        return tblICPackType.strPackName;
+                    if (PackageType != null)
+                        return PackageType.strUnitMeasure;
                     else
                         return null;
                 else
@@ -260,7 +260,7 @@ namespace iRely.Inventory.Model
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public tblICItem tblICItem { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
-        public tblICPackType tblICPackType { get; set; }
+        public tblICUnitMeasure PackageType { get; set; }
         public vyuICGetReceiptItemSource vyuICGetReceiptItemSource { get; set; }
 
         

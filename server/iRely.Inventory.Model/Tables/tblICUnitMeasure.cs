@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -40,6 +41,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
+        public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItemPacks { get; set; }
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public ICollection<tblICInventoryShipmentItem> WeightInventoryShipmentItems { get; set; }
     }
@@ -75,5 +77,19 @@ namespace iRely.Inventory.Model
 
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public tblICUnitMeasure StockUnitMeasure { get; set; }
+    }
+
+    public class vyuICGetPackedUOM
+    {
+        [Key]
+        public int intUnitMeasureConversionId { get; set; }
+        public int? intUnitMeasureId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUnitType { get; set; }
+        public string strSymbol { get; set; }
+        public int? intStockUnitMeasureId { get; set; }
+        public string strConversionUOM { get; set; }
+        public decimal? dblConversionFromStock { get; set; }
+        public decimal? dblConversionToStock { get; set; }
     }
 }
