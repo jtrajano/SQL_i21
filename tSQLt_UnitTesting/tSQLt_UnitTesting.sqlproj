@@ -716,6 +716,21 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on FIFO for scenario 4, unpost sell stock, unpost add stock.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake posted transactions using LIFO, scenario 3.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake posted transactions using LIFO, scenario 4.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on LIFO for scenario 3, unpost add stock, unpost sell stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on LIFO for scenario 3, unpost add stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on LIFO for scenario 3, unpost sell stock, unpost add stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on LIFO for scenario 3, unpost sell stock.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Functions\test fnRecalculateAverageCost for average cost from Lot.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

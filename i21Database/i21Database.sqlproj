@@ -1070,7 +1070,13 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostLotOut.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
-	<Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOIn.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOOut.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

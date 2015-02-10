@@ -93,6 +93,28 @@ BEGIN
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
+-- Call the LIFO unpost stored procedures 
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	-- Reverse the "IN" qty 
+	IF @TransactionType IN (@InventoryReceipt)
+	BEGIN 
+		EXEC dbo.uspICUnpostLIFOIn 
+			@strTransactionId
+			,@intTransactionId
+	END
+
+	-- Reverse the "OUT" qty 
+	IF @TransactionType IN (@InventoryShipment)
+	BEGIN 
+		EXEC dbo.uspICUnpostLIFOOut
+			@strTransactionId
+			,@intTransactionId
+	END
+END
+
+
+-----------------------------------------------------------------------------------------------------------------------------
 -- Call the LOT unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
@@ -180,7 +202,7 @@ BEGIN
 		UPDATE	Stock
 		SET		Stock.dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) + ItemToUnpost.dblTotalQty > 0 THEN 
 													-- Recalculate the average cost
-													dbo.fnRecalculateAverageCost(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) 
+													dbo.fnRecalculateAverageCost(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId, Stock.dblAverageCost) 
 												ELSE 
 													-- Use the same average cost. 
 													Stock.dblAverageCost

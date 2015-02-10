@@ -2,15 +2,15 @@
 /*
 	Scenario 3: Add stock, Sell Stock 
 
-	tblICInventoryFIFO
+	tblICInventoryLIFO
 	-----------------------------------------------------------------
-	Fifo Id	Date		In		Out		Cost	Inbound Transaction
+	LIFO Id	Date		In		Out		Cost	Inbound Transaction
 	-------	---------	------	-----	------	---------------------
 	1		1/1/2014	100		75		$2.15	InvRcpt-00001
 
-	tblICInventoryFIFOOut
+	tblICInventoryLIFOOut
 	-----------------------------------------------------------------
-	Id		Fifo Id		Inventory Transaction Id	Revalue Id	Qty
+	Id		LIFO Id		Inventory Transaction Id	Revalue Id	Qty
 	-----	---------	-------------------------	----------	-----
 	1		1			InvShip-00001				NULL		75
 
@@ -31,7 +31,7 @@
 				Inventory							161.250		2
 */
 ---------------------------------------------------------------------------------------------------
-CREATE PROCEDURE [testi21Database].[Fake posted transactions using FIFO, scenario 3]
+CREATE PROCEDURE [testi21Database].[Fake posted transactions using LIFO, scenario 3]
 AS
 
 BEGIN
@@ -46,10 +46,13 @@ BEGIN
 			,@HotGrains AS INT = 5
 
 	-- Declare the variables for location
-	DECLARE @Default_Location AS INT = 1
-			,@NewHaven AS INT = 2
-			,@BetterHaven AS INT = 3
-				
+	DECLARE	@BetterHaven AS INT = 3
+			,@WetGrains_BetterHaven AS INT = 11
+			,@StickyGrains_BetterHaven AS INT = 12
+			,@PremiumGrains_BetterHaven AS INT = 13
+			,@ColdGrains_BetterHaven AS INT = 14
+			,@HotGrains_BetterHaven AS INT = 15
+			
 	-- Declare the variables for the currencies
 	DECLARE @USD AS INT = 1;	
 	DECLARE @USD_ExchangeRate AS NUMERIC(18,6) = 1;
@@ -58,22 +61,6 @@ BEGIN
 	DECLARE @Each AS INT = 1
 
 	-- Declare the account ids
-	DECLARE @Inventory_Default AS INT = 1000
-	DECLARE @CostOfGoods_Default AS INT = 2000
-	DECLARE @APClearing_Default AS INT = 3000
-	DECLARE @WriteOffSold_Default AS INT = 4000
-	DECLARE @RevalueSold_Default AS INT = 5000 
-	DECLARE @AutoNegative_Default AS INT = 6000
-	DECLARE @InventoryInTransit_Default AS INT = 7000
-
-	DECLARE @Inventory_NewHaven AS INT = 1001
-	DECLARE @CostOfGoods_NewHaven AS INT = 2001
-	DECLARE @APClearing_NewHaven AS INT = 3001
-	DECLARE @WriteOffSold_NewHaven AS INT = 4001
-	DECLARE @RevalueSold_NewHaven AS INT = 5001
-	DECLARE @AutoNegative_NewHaven AS INT = 6001
-	DECLARE @InventoryInTransit_NewHaven AS INT = 7001
-
 	DECLARE @Inventory_BetterHaven AS INT = 1002
 	DECLARE @CostOfGoods_BetterHaven AS INT = 2002
 	DECLARE @APClearing_BetterHaven AS INT = 3002
@@ -91,14 +78,23 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipment', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentItem', @Identity = 1;
 	
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFO', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOOut', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
-	CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryFIFO]
-		ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOId] ASC);
+	CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLIFO]
+		ON [dbo].[tblICInventoryLIFO]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOId] DESC);		
+	
+	-- Negative stock options
+	DECLARE @AllowNegativeStock AS INT = 1
+	DECLARE @AllowNegativeStockWithWriteOff AS INT = 2
+	DECLARE @DoNotAllowNegativeStock AS INT = 3
+
+	-- Setup the allow negative stock for LIFO	
+	UPDATE dbo.tblICItemLocation
+	SET intAllowNegativeInventory = @AllowNegativeStockWithWriteOff
 
 	---------------------------------------------------------------------------------------------------------------
 	-- Add stock (100 qty with $2.15) 
@@ -120,7 +116,7 @@ BEGIN
 				,intEntityId = 1
 				,intCreatedUserId = 1
 				,strReceiptNumber = 'InvRcpt-0001'
-				,intLocationId = @Default_Location
+				,intLocationId = @BetterHaven
 				,ysnPosted = 1
 				,intCurrencyId = @USD
 
@@ -177,35 +173,35 @@ BEGIN
 				,dblUnitOnHand	
 		)
 		SELECT 	intItemId = @WetGrains
-				,intItemLocationId = 1
+				,intItemLocationId = @WetGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100
 		UNION ALL 
 		SELECT 	intItemId = @StickyGrains
-				,intItemLocationId = 2
+				,intItemLocationId = @StickyGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100	
 		UNION ALL 
 		SELECT 	intItemId = @PremiumGrains
-				,intItemLocationId = 3
+				,intItemLocationId = @PremiumGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100		
 		UNION ALL 
 		SELECT 	intItemId = @ColdGrains
-				,intItemLocationId = 4
+				,intItemLocationId = @ColdGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100	
 		UNION ALL 
 		SELECT 	intItemId = @HotGrains
-				,intItemLocationId = 5
+				,intItemLocationId = @HotGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100
 
 		----------------------------------------------------------------
-		-- Fake data for tblICInventoryFIFO
+		-- Fake data for tblICInventoryLIFO
 		----------------------------------------------------------------
 		BEGIN 
-			INSERT INTO dbo.tblICInventoryFIFO (
+			INSERT INTO dbo.tblICInventoryLIFO (
 					dtmDate
 					,intItemId
 					,intItemLocationId
@@ -217,7 +213,7 @@ BEGIN
 			)
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @WetGrains 
-					,intItemLocationId = 1
+					,intItemLocationId = @WetGrains_BetterHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -226,7 +222,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @StickyGrains 
-					,intItemLocationId = 2
+					,intItemLocationId = @StickyGrains_BetterHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -235,7 +231,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @PremiumGrains 
-					,intItemLocationId = 3
+					,intItemLocationId = @PremiumGrains_BetterHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -244,7 +240,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @ColdGrains 
-					,intItemLocationId = 4
+					,intItemLocationId = @ColdGrains_BetterHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -253,7 +249,7 @@ BEGIN
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,intItemId = @HotGrains 
-					,intItemLocationId = 5
+					,intItemLocationId = @HotGrains_BetterHaven
 					,dblStockIn = 100
 					,dblStockOut = 0 
 					,dblCost = 2.15
@@ -262,7 +258,7 @@ BEGIN
 		END 
 
 		----------------------------------------------------------------
-		-- Fake data for tblICInventoryFIFOOut
+		-- Fake data for tblICInventoryLIFOOut
 		----------------------------------------------------------------
 		-- No data required	
 
@@ -298,7 +294,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @WetGrains
-					,intItemLocationId = 1
+					,intItemLocationId = @WetGrains_BetterHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -314,7 +310,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @StickyGrains
-					,intItemLocationId = 2
+					,intItemLocationId = @StickyGrains_BetterHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -330,7 +326,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @PremiumGrains
-					,intItemLocationId = 3
+					,intItemLocationId = @PremiumGrains_BetterHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -346,7 +342,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @ColdGrains
-					,intItemLocationId = 4
+					,intItemLocationId = @ColdGrains_BetterHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -362,7 +358,7 @@ BEGIN
 					,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Receipt')
 					,ysnIsUnposted = 0
 					,intItemId = @HotGrains
-					,intItemLocationId = 5
+					,intItemLocationId = @HotGrains_BetterHaven
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
@@ -388,7 +384,7 @@ BEGIN
 			)
 			-- @WetGrains
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 215.00
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -400,7 +396,7 @@ BEGIN
 					,intCurrencyId = @USD
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @APClearing_NewHaven
+					,intAccountId = @APClearing_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 215.00
 					,intTransactionId = 1
@@ -413,7 +409,7 @@ BEGIN
 			-- @StickyGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 215.00
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -425,7 +421,7 @@ BEGIN
 					,intCurrencyId = @USD
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @APClearing_NewHaven
+					,intAccountId = @APClearing_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 215.00
 					,intTransactionId = 1
@@ -438,7 +434,7 @@ BEGIN
 			-- @PremiumGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 215.00
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -450,7 +446,7 @@ BEGIN
 					,intCurrencyId = @USD
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @APClearing_NewHaven
+					,intAccountId = @APClearing_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 215.00
 					,intTransactionId = 1
@@ -463,7 +459,7 @@ BEGIN
 			-- @ColdGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 215.00
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -475,7 +471,7 @@ BEGIN
 					,intCurrencyId = @USD
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @APClearing_NewHaven
+					,intAccountId = @APClearing_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 215.00
 					,intTransactionId = 1
@@ -488,7 +484,7 @@ BEGIN
 			-- @HotGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 215.00
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -500,7 +496,7 @@ BEGIN
 					,intCurrencyId = @USD
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,intAccountId = @APClearing_NewHaven
+					,intAccountId = @APClearing_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 215.00
 					,intTransactionId = 1
@@ -520,12 +516,12 @@ BEGIN
 			SELECT	dtmDate = '01/01/2014'
 					,dblDebit = (215.00 * 5)
 					,dblCredit = 0
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,dblDebit = 0
 					,dblCredit = (215.00 * 5)
-					,intAccountId = @APClearing_NewHaven
+					,intAccountId = @APClearing_BetterHaven
 
 		END
 	END 
@@ -547,7 +543,7 @@ BEGIN
 		)
 		SELECT	dtmShipDate = '01/16/2014'
 				,strBOLNumber = 'InvShip-00001'
-				,intShipFromLocationId = @Default_Location			
+				,intShipFromLocationId = @BetterHaven			
 				,intEntityId = 1
 				,intCreatedUserId = 1
 				,ysnPosted = 1
@@ -589,39 +585,39 @@ BEGIN
 		FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemStock.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location
+				AND ItemLocation.intLocationId = @BetterHaven
 
-		-- Add out qty in the fifo table
-		UPDATE	FIFO
+		-- Add out qty in the LIFO table
+		UPDATE	LIFO
 		SET		dblStockOut += 75
-		FROM	dbo.tblICInventoryFIFO FIFO INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON FIFO.intItemLocationId = ItemLocation.intItemLocationId
+		FROM	dbo.tblICInventoryLIFO LIFO INNER JOIN dbo.tblICItemLocation ItemLocation
+					ON LIFO.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location
+				AND ItemLocation.intLocationId = @BetterHaven
 
-		-- Add the fifo out records
-		INSERT INTO dbo.tblICInventoryFIFOOut (
-				intInventoryFIFOId
+		-- Add the LIFO out records
+		INSERT INTO dbo.tblICInventoryLIFOOut (
+				intInventoryLIFOId
 				,intInventoryTransactionId
 				,dblQty
 		)
-		SELECT	intInventoryFIFOId = 1
+		SELECT	intInventoryLIFOId = 1
 				,intInventoryTransactionId = 6
 				,dblQty = 75
 		UNION ALL 
-		SELECT	intInventoryFIFOId = 2
+		SELECT	intInventoryLIFOId = 2
 				,intInventoryTransactionId = 7
 				,dblQty = 75
 		UNION ALL 
-		SELECT	intInventoryFIFOId = 3
+		SELECT	intInventoryLIFOId = 3
 				,intInventoryTransactionId = 8
 				,dblQty = 75
 		UNION ALL 
-		SELECT	intInventoryFIFOId = 4
+		SELECT	intInventoryLIFOId = 4
 				,intInventoryTransactionId = 9
 				,dblQty = 75
 		UNION ALL 
-		SELECT	intInventoryFIFOId = 5
+		SELECT	intInventoryLIFOId = 5
 				,intInventoryTransactionId = 10
 				,dblQty = 75
 
@@ -657,7 +653,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
-				,intItemLocationId = 1
+				,intItemLocationId = @WetGrains_BetterHaven
 				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
@@ -672,7 +668,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @StickyGrains
-				,intItemLocationId = 2
+				,intItemLocationId = @StickyGrains_BetterHaven
 				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
@@ -687,7 +683,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @PremiumGrains
-				,intItemLocationId = 3
+				,intItemLocationId = @PremiumGrains_BetterHaven
 				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
@@ -702,7 +698,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @ColdGrains
-				,intItemLocationId = 4
+				,intItemLocationId = @ColdGrains_BetterHaven
 				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
@@ -717,7 +713,7 @@ BEGIN
 				,intTransactionTypeId = (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Shipment')
 				,ysnIsUnposted = 0
 				,intItemId = @HotGrains
-				,intItemLocationId = 5
+				,intItemLocationId = @HotGrains_BetterHaven
 				,strBatchId = @strBatchId
 
 		----------------------------------------------------------------
@@ -738,7 +734,7 @@ BEGIN
 			)
 			-- @WetGrains
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 161.250
 					,intTransactionId = 1
@@ -749,7 +745,7 @@ BEGIN
 					,@strBatchId
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @InventoryInTransit_NewHaven
+					,intAccountId = @InventoryInTransit_BetterHaven
 					,dblDebit = 161.250
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -761,7 +757,7 @@ BEGIN
 			-- @StickyGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 161.250
 					,intTransactionId = 1
@@ -772,7 +768,7 @@ BEGIN
 					,@strBatchId
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @InventoryInTransit_NewHaven
+					,intAccountId = @InventoryInTransit_BetterHaven
 					,dblDebit = 161.250
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -784,7 +780,7 @@ BEGIN
 			-- @PremiumGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 161.250
 					,intTransactionId = 1
@@ -795,7 +791,7 @@ BEGIN
 					,@strBatchId
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @InventoryInTransit_NewHaven
+					,intAccountId = @InventoryInTransit_BetterHaven
 					,dblDebit = 161.250
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -807,7 +803,7 @@ BEGIN
 			-- @ColdGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 161.250
 					,intTransactionId = 1
@@ -818,7 +814,7 @@ BEGIN
 					,@strBatchId
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @InventoryInTransit_NewHaven
+					,intAccountId = @InventoryInTransit_BetterHaven
 					,dblDebit = 161.250
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -830,7 +826,7 @@ BEGIN
 			-- @HotGrains
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 					,dblDebit = 0
 					,dblCredit = 161.250
 					,intTransactionId = 1
@@ -841,7 +837,7 @@ BEGIN
 					,@strBatchId
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
-					,intAccountId = @InventoryInTransit_NewHaven
+					,intAccountId = @InventoryInTransit_BetterHaven
 					,dblDebit = 161.250
 					,dblCredit = 0
 					,intTransactionId = 1
@@ -860,12 +856,12 @@ BEGIN
 			SELECT	dtmDate = '01/16/2014'
 					,dblDebit = 0
 					,dblCredit = (161.25 * 5)
-					,intAccountId = @Inventory_NewHaven
+					,intAccountId = @Inventory_BetterHaven
 			UNION ALL 
 			SELECT	dtmDate = '01/16/2014'
 					,dblDebit = (161.25 * 5)
 					,dblCredit = 0
-					,intAccountId = @InventoryInTransit_NewHaven
+					,intAccountId = @InventoryInTransit_BetterHaven
 		END 
 	END 
 END

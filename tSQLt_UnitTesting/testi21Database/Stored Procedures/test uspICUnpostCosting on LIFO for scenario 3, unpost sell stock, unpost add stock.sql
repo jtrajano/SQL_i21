@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting on FIFO for scenario 3, unpost sell stock, unpost add stock]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCosting on LIFO for scenario 3, unpost sell stock, unpost add stock]
 AS
 -- Arrange 
 BEGIN 
-	EXEC [testi21Database].[Fake posted transactions using FIFO, scenario 3];
+	EXEC [testi21Database].[Fake posted transactions using LIFO, scenario 3];
 	
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -12,9 +12,12 @@ BEGIN
 			,@HotGrains AS INT = 5
 
 	-- Declare the variables for location
-	DECLARE @Default_Location AS INT = 1
-			,@NewHaven AS INT = 2
-			,@BetterHaven AS INT = 3	
+	DECLARE @BetterHaven AS INT = 3	
+			,@WetGrains_BetterHaven AS INT = 11
+			,@StickyGrains_BetterHaven AS INT = 12
+			,@PremiumGrains_BetterHaven AS INT = 13
+			,@ColdGrains_BetterHaven AS INT = 14
+			,@HotGrains_BetterHaven AS INT = 15
 
 	DECLARE @strBatchId AS NVARCHAR(20)
 	DECLARE @intTransactionId AS INT = 1
@@ -109,8 +112,8 @@ BEGIN
 		,dblUnitOnHand NUMERIC(18,6)
 	)
 	
-	CREATE TABLE expectedFIFO (
-		intInventoryFIFOId INT
+	CREATE TABLE expectedLIFO (
+		intInventoryLIFOId INT
 		,intItemId INT
 		,intItemLocationId INT
 		,dtmDate DATETIME
@@ -122,8 +125,8 @@ BEGIN
 		,ysnIsUnposted BIT 		
 	)
 	
-	CREATE TABLE actualFIFO (
-		intInventoryFIFOId INT
+	CREATE TABLE actualLIFO (
+		intInventoryLIFOId INT
 		,intItemId INT
 		,intItemLocationId INT
 		,dtmDate DATETIME
@@ -255,33 +258,33 @@ BEGIN
 				,dblUnitOnHand
 		)
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = 1
+				,intItemLocationId = @WetGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @StickyGrains
-				,intItemLocationId = 2
+				,intItemLocationId = @StickyGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @PremiumGrains
-				,intItemLocationId = 3
+				,intItemLocationId = @PremiumGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @ColdGrains
-				,intItemLocationId = 4
+				,intItemLocationId = @ColdGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 		UNION ALL
 		SELECT	intItemId = @HotGrains
-				,intItemLocationId = 5
+				,intItemLocationId = @HotGrains_BetterHaven
 				,dblAverageCost = 2.15
 				,dblUnitOnHand = 100
 			
-		-- Setup the expected FIFO data
-		INSERT INTO dbo.expectedFIFO (
-				intInventoryFIFOId
+		-- Setup the expected LIFO data
+		INSERT INTO dbo.expectedLIFO (
+				intInventoryLIFOId
 				,intItemId
 				,intItemLocationId
 				,dtmDate
@@ -293,9 +296,9 @@ BEGIN
 				,ysnIsUnposted
 		)
 		-- The In qty will remain at 100. 
-		SELECT	intInventoryFIFOId = 1
+		SELECT	intInventoryLIFOId = 1
 				,intItemId = @WetGrains
-				,intItemLocationId = 1
+				,intItemLocationId = @WetGrains_BetterHaven
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -304,9 +307,9 @@ BEGIN
 				,intTransactionId = 1
 				,ysnIsUnposted = 0
 		UNION ALL 
-		SELECT	intInventoryFIFOId = 2
+		SELECT	intInventoryLIFOId = 2
 				,intItemId = @StickyGrains
-				,intItemLocationId = 2
+				,intItemLocationId = @StickyGrains_BetterHaven
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -315,9 +318,9 @@ BEGIN
 				,intTransactionId = 1
 				,ysnIsUnposted = 0
 		UNION ALL 
-		SELECT	intInventoryFIFOId = 3
+		SELECT	intInventoryLIFOId = 3
 				,intItemId = @PremiumGrains
-				,intItemLocationId = 3
+				,intItemLocationId = @PremiumGrains_BetterHaven
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -326,9 +329,9 @@ BEGIN
 				,intTransactionId = 1
 				,ysnIsUnposted = 0
 		UNION ALL 
-		SELECT	intInventoryFIFOId = 4
+		SELECT	intInventoryLIFOId = 4
 				,intItemId = @ColdGrains
-				,intItemLocationId = 4
+				,intItemLocationId = @ColdGrains_BetterHaven
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -337,9 +340,9 @@ BEGIN
 				,intTransactionId = 1							
 				,ysnIsUnposted = 0
 		UNION ALL 
-		SELECT	intInventoryFIFOId = 5
+		SELECT	intInventoryLIFOId = 5
 				,intItemId = @HotGrains
-				,intItemLocationId = 5
+				,intItemLocationId = @HotGrains_BetterHaven
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -500,17 +503,17 @@ BEGIN
 					ON expectedItemStock.intItemId = ItemLocation.intItemId
 					AND expectedItemStock.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location
+				AND ItemLocation.intLocationId = @BetterHaven
 			
-		-- Expect FIFO in records are plugged out to prevent further use in the future. 
-		UPDATE	expectedFIFO
+		-- Expect LIFO in records are plugged out to prevent further use in the future. 
+		UPDATE	expectedLIFO
 		SET		dblStockOut = 100
 				,ysnIsUnposted = 1
-		FROM	expectedFIFO INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON expectedFIFO.intItemId = ItemLocation.intItemId
-					AND expectedFIFO.intItemLocationId = ItemLocation.intItemLocationId
+		FROM	expectedLIFO INNER JOIN dbo.tblICItemLocation ItemLocation
+					ON expectedLIFO.intItemId = ItemLocation.intItemId
+					AND expectedLIFO.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
-				AND ItemLocation.intLocationId = @Default_Location		
+				AND ItemLocation.intLocationId = @BetterHaven		
 
 		-- Do the act
 		INSERT INTO @GLDetail (
@@ -638,9 +641,9 @@ BEGIN
 			,dblUnitOnHand 
 	FROM dbo.tblICItemStock		
 	
-	-- Actual fifo data 
-	INSERT INTO dbo.actualFIFO (
-			intInventoryFIFOId
+	-- Actual LIFO data 
+	INSERT INTO dbo.actualLIFO (
+			intInventoryLIFOId
 			,intItemId
 			,intItemLocationId
 			,dtmDate
@@ -651,9 +654,9 @@ BEGIN
 			,intTransactionId
 			,ysnIsUnposted
 	)	
-	SELECT	intInventoryFIFOId
-			,fifo.intItemId
-			,fifo.intItemLocationId
+	SELECT	intInventoryLIFOId
+			,LIFO.intItemId
+			,LIFO.intItemLocationId
 			,dtmDate
 			,dblStockIn
 			,dblStockOut
@@ -661,16 +664,16 @@ BEGIN
 			,strTransactionId
 			,intTransactionId		
 			,ysnIsUnposted
-	FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICItemLocation ItemLocation
-				ON fifo.intItemId = ItemLocation.intItemId
-				AND fifo.intItemLocationId = ItemLocation.intItemLocationId
+	FROM	dbo.tblICInventoryLIFO LIFO INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON LIFO.intItemId = ItemLocation.intItemId
+				AND LIFO.intItemLocationId = ItemLocation.intItemLocationId
 	WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @HotGrains, @ColdGrains)
-			AND ItemLocation.intLocationId = @Default_Location
+			AND ItemLocation.intLocationId = @BetterHaven
 				
 	EXEC tSQLt.AssertEqualsTable 'expectedGLDetail', 'actualGLDetail';
 	EXEC tSQLt.AssertEqualsTable 'expectedInventoryTransaction', 'actualInventoryTransaction';
 	EXEC tSQLt.AssertEqualsTable 'expectedItemStock', 'actualItemStock';
-	EXEC tSQLt.AssertEqualsTable 'expectedFIFO', 'actualFIFO';
+	EXEC tSQLt.AssertEqualsTable 'expectedLIFO', 'actualLIFO';
 END 
 
 -- Clean-up: remove the tables used in the unit test
@@ -692,8 +695,8 @@ IF OBJECT_ID('expectedItemStock') IS NOT NULL
 IF OBJECT_ID('actualItemStock') IS NOT NULL 
 	DROP TABLE dbo.actualItemStock	
 	
-IF OBJECT_ID('expectedFIFO') IS NOT NULL 
-	DROP TABLE expectedFIFO
+IF OBJECT_ID('expectedLIFO') IS NOT NULL 
+	DROP TABLE expectedLIFO
 
-IF OBJECT_ID('actualFIFO') IS NOT NULL 
-	DROP TABLE dbo.actualFIFO
+IF OBJECT_ID('actualLIFO') IS NOT NULL 
+	DROP TABLE dbo.actualLIFO

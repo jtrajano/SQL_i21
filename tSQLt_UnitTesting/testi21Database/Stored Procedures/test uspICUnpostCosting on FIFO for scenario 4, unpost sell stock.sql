@@ -2,7 +2,7 @@
 AS
 -- Arrange 
 BEGIN 
-	EXEC [testi21Database].[Fake posted transactions using AVG, scenario 4];
+	EXEC [testi21Database].[Fake posted transactions using FIFO, scenario 4];
 	
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
