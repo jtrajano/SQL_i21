@@ -178,10 +178,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colPackageType: {
                     dataIndex: 'strPackName',
                     editor: {
-                        store: '{packageType}'
+                        store: '{itemPackType}'
                     }
-                },
-                colExpPackageWt: 'dblExpPackageWeight'
+                }
+//                colExpPackageWt: 'dblUnitCost'
             },
 
             grdLotTracking: {
@@ -342,7 +342,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        var colTaxDetails = grdInventoryReceipt.columns[17];
+        var colTaxDetails = grdInventoryReceipt.columns[12];
         var btnViewTaxDetail = colTaxDetails.items[0];
         if (btnViewTaxDetail){
             btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
@@ -356,7 +356,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (txtReceived){
             txtReceived.on('change', me.onCalculateTotalAmount);
         }
-        var colUnitCost = grdInventoryReceipt.columns[9];
+        var colUnitCost = grdInventoryReceipt.columns[11];
         var txtUnitCost = colUnitCost.getEditor();
         if (txtUnitCost){
             txtUnitCost.on('change', me.onCalculateTotalAmount);
@@ -620,16 +620,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
         }
-        else if (combo.itemId === 'cboPackageType')
+        else if (combo.itemId === 'cboItemPackType')
         {
-            current.set('intPackageTypeId', records[0].get('intUnitMeasureId'));
-
-            var convertTo = records[0].get('dblConversionToStock');
-            var noPackages = current.get('intNoPackages');
-            var qtyReceive = current.get('dblOpenReceive');
-            var final = noPackages * convertTo / qtyReceive * noPackages;
-
-            current.set('dblExpPackageWeight', final);
+            current.set('intPackTypeId', records[0].get('intPackTypeId'));
         }
     },
 
@@ -809,7 +802,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (store){
             var data = store.data;
-            var calculatedTotal = 0;
+            var calculatedTotal = 0
             Ext.Array.each(data.items, function(row) {
                 var dblReceived = row.get('dblReceived');
                 var dblUnitCost = row.get('dblUnitCost');
@@ -819,7 +812,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dblUnitCost = newValue;
                 var rowTotal = dblReceived * dblUnitCost;
                 calculatedTotal += rowTotal;
-            });
+            })
             txtCalculatedAmount.setValue(calculatedTotal);
             var difference = calculatedTotal - (txtInvoiceAmount.getValue());
             txtDifference.setValue(difference);
@@ -840,30 +833,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     record.set('dblUnitRetail', context.value);
                 }
                 record.set('dblLineTotal', value);
-            }
-        }
-        else if (context.field === 'intNoPackages')
-        {
-            if (context.record) {
-                var record = context.record;
-                var grid = context.column.up('grid');
-                var cboPackageType = grid.columns[15].getEditor();
-                
-                if (cboPackageType){
-                    var packStore = cboPackageType.store;
-                    if (packStore) {
-                        var index = packStore.findExact('intUnitMeasureId', context.value);
-                        var sourcePackage = packStore.getAt(index);
-                        if (sourcePackage) {
-                            var convertTo = sourcePackage.get('dblConversionToStock');
-                            var noPackages = context.value;
-                            var qtyReceive = record.get('dblOpenReceive');
-                            var final = noPackages * convertTo / qtyReceive * noPackages;
-
-                            record.set('dblExpPackageWeight', final);
-                        }
-                    }
-                }
             }
         }
     },
@@ -1153,7 +1122,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 beforequery: this.onShipFromBeforeQuery,
                 select: this.onReceiptItemSelect
             },
-            "#cboPackageType": {
+            "#cboItemPackType": {
                 select: this.onReceiptItemSelect
             },
             "#cboCalculationBasis": {

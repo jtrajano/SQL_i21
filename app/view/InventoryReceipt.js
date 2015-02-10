@@ -961,21 +961,27 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataIndex: 'intPackTypeId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Unit Of Measure ID',
+                                                                    text: 'Pack Type Id',
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataIndex: 'strPackName',
                                                                     dataType: 'string',
-                                                                    text: 'Unit Measure',
+                                                                    text: 'Pack Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboPackageType',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
+                                                            itemId: 'cboItemPackType',
+                                                            displayField: 'strPackName',
+                                                            valueField: 'strPackName'
                                                         }
                                                     },
                                                     {

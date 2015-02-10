@@ -206,7 +206,6 @@ namespace iRely.Inventory.Model
         public DbSet<tblMFQAProperty> tblMFQAProperties { get; set; }
         public DbSet<vyuSMGetLocationPricingLevel> vyuSMGetLocationPricingLevels { get; set; }
         public DbSet<vyuICGetReceiptItemSource> vyuICGetReceiptItemSources { get; set; }
-        public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -343,7 +342,6 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new vyuSMGetLocationPricingLevelMap());
             modelBuilder.Configurations.Add(new vyuICGetReceiptItemSourceMap());
-            modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
         }
     }
 }

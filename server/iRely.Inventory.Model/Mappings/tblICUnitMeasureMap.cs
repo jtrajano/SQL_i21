@@ -47,25 +47,4 @@ namespace iRely.Inventory.Model
                 .HasForeignKey(p => p.intStockUnitMeasureId);
         }
     }
-
-    public class vyuICGetPackedUOMMap : EntityTypeConfiguration<vyuICGetPackedUOM>
-    {
-        public vyuICGetPackedUOMMap()
-        {
-            // Primary Key
-            this.HasKey(p => p.intUnitMeasureConversionId);
-
-            // Table & Column Mappings
-            this.ToTable("vyuICGetPackedUOM");
-            this.Property(t => t.intUnitMeasureConversionId).HasColumnName("intUnitMeasureConversionId");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
-            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
-            this.Property(t => t.strUnitType).HasColumnName("strUnitType");
-            this.Property(t => t.strSymbol).HasColumnName("strSymbol");
-            this.Property(t => t.intStockUnitMeasureId).HasColumnName("intStockUnitMeasureId");
-            this.Property(t => t.strConversionUOM).HasColumnName("strConversionUOM");
-            this.Property(t => t.dblConversionFromStock).HasColumnName("dblConversionFromStock");
-            this.Property(t => t.dblConversionToStock).HasColumnName("dblConversionToStock");
-        }
-    }
 }

@@ -8,7 +8,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedItemStockDetailView',
         'Inventory.store.BufferedItemPricingView',
         'Inventory.store.BufferedItemUnitMeasure',
-        'Inventory.store.BufferedPackedUOM',
+        'Inventory.store.BufferedPackType',
         'AccountsPayable.store.VendorBuffered',
         'AccountsPayable.store.PurchaseOrder',
         'AccountsPayable.store.VendorLocation',
@@ -95,8 +95,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         itemUOM: {
             type: 'icbuffereditempricingview'
         },
-        packageType: {
-            type: 'icbufferedpackeduom'
+        itemPackType: {
+            type: 'icbufferedpacktype'
         },
         vendor: {
             type: 'vendorbuffered'

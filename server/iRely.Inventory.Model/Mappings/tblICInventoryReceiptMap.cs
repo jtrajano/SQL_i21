@@ -78,7 +78,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblReceived).HasColumnName("dblReceived");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.intNoPackages).HasColumnName("intNoPackages");
-            this.Property(t => t.intPackageTypeId).HasColumnName("intPackageTypeId");
+            this.Property(t => t.intPackTypeId).HasColumnName("intPackTypeId");
             this.Property(t => t.dblExpPackageWeight).HasColumnName("dblExpPackageWeight");
             this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost");
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal");
@@ -88,11 +88,11 @@ namespace iRely.Inventory.Model
                 .WithMany(p => p.tblICInventoryReceiptItems)
                 .HasForeignKey(p => p.intItemId);
             this.HasOptional(p => p.tblICUnitMeasure)
-                .WithMany(p => p.tblICInventoryReceiptItemPacks)
-                .HasForeignKey(p => p.intUnitMeasureId);
-            this.HasOptional(p => p.PackageType)
                 .WithMany(p => p.tblICInventoryReceiptItems)
-                .HasForeignKey(p => p.intPackageTypeId);
+                .HasForeignKey(p => p.intUnitMeasureId);
+            this.HasOptional(p => p.tblICPackType)
+                .WithMany(p => p.tblICInventoryReceiptItems)
+                .HasForeignKey(p => p.intPackTypeId);
             this.HasOptional(p => p.vyuICGetReceiptItemSource)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
                 

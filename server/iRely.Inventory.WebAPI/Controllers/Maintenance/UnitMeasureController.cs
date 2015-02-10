@@ -67,30 +67,6 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
-        [HttpGet]
-        [ActionName("GetPackedUOMs")]
-        public HttpResponseMessage GetPackedUOMs(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
-        {
-            filter = string.IsNullOrEmpty(filter) ? "" : filter;
-
-            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
-            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<vyuICGetPackedUOM>();
-            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intUnitMeasureConversionId", "DESC");
-
-            if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<vyuICGetPackedUOM>(searchFilters, true);
-
-            var total = _UnitMeasureBRL.GetPackedUOMCount(predicate);
-            var data = _UnitMeasureBRL.GetPackedUOMs(page, start, page == 0 ? total : limit, sortSelector, predicate);
-
-            return Request.CreateResponse(HttpStatusCode.OK, new
-            {
-                data = data.ToList(),
-                total = total
-            });
-        }
-
         [HttpPost]
         public HttpResponseMessage PostUnitMeasures(IEnumerable<tblICUnitMeasure> UnitMeasures, bool continueOnConflict = false)
         {
