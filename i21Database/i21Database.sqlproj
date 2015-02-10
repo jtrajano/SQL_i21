@@ -1043,20 +1043,6 @@
     <Build Include="dbo\Stored Procedures\uspSODuplicateSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGenerateEFTSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCreateEFTGLJournalEntry.sql" />
-    <Build Include="dbo\Tables\tblCCImportDealerBatchDetail.sql" />
-    <Build Include="dbo\Tables\tblCCImportDealerDetail.sql" />
-    <Build Include="dbo\Tables\tblCCImportDealerHeader.sql" />
-    <Build Include="dbo\Tables\tblSMImportFileColumnDetail.sql" />
-    <Build Include="dbo\Tables\tblSMImportFileHeader.sql" />
-    <Build Include="dbo\Tables\tblSMImportFileRecordMarker.sql" />
-    <Build Include="dbo\Tables\tblSMImportFileTable.sql" />
-    <Build Include="dbo\Tables\tblCCCompanyOwnedSite.sql" />
-    <Build Include="dbo\Tables\tblCCDealerBatchDetail.sql" />
-    <Build Include="dbo\Tables\tblCCDealerDetail.sql" />
-    <Build Include="dbo\Tables\tblCCDealerHeader.sql" />
-    <Build Include="dbo\Tables\tblCCDealerSite.sql" />
-    <Build Include="dbo\Tables\tblCCSite.sql" />
-    <Build Include="dbo\Tables\tblCCVendorDefault.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
   </ItemGroup>
   <ItemGroup>
