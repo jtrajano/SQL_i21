@@ -71,7 +71,7 @@
 	[ysnUpdateCaseCost] BIT NULL, 
     [dtmInvoiceCloseDate] DATETIME NULL, 
     [strTaxIdPassword] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL, 
-    [strRrgisterClass] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
+    [intRegisterId] INT  NULL, 
     [dtmRegisterPricebookUpdateDate] DATETIME NULL, 
     [dtmRegisterPricebookUpdateTime] DATETIME NULL, 
     [dtmRegisterItemListUpdateDate] DATETIME NULL, 
@@ -113,4 +113,5 @@
     CONSTRAINT [FK_tblSTStore_tblAPVendor_intBegVendorNumberId] FOREIGN KEY ([intBegVendorNumberId]) REFERENCES [tblAPVendor]([intVendorId]), 
     CONSTRAINT [FK_tblSTStore_tblAPVendor_intEndVendorNumberId] FOREIGN KEY ([intEndVendorNumberId]) REFERENCES [tblAPVendor]([intVendorId]), 
 	CONSTRAINT [FK_tblSTStore_tblICCategory_intLoyaltyDiscountCategoryId] FOREIGN KEY ([intLoyaltyDiscountCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
+	CONSTRAINT [FK_tblSTStore_tblSTRegister] FOREIGN KEY ([intRegisterId]) REFERENCES [tblSTRegister]([intRegisterId]), 
    );
