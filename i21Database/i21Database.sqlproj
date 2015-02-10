@@ -1044,6 +1044,7 @@
     <Build Include="dbo\Stored Procedures\uspNRGenerateEFTSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCreateEFTGLJournalEntry.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
+    <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
