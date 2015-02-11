@@ -5,6 +5,7 @@
 	[strSubject] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCustomerNumber] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[intCustomerContactId] [int] NULL,
+	[intCustomerId] [int] NULL,
 	[intTicketTypeId] [int] NOT NULL,
 	[intTicketStatusId] [int] NOT NULL,
 	[intTicketPriorityId] [int] NOT NULL,
@@ -19,6 +20,8 @@
 	[intLastModifiedUserId] [int] NULL,
 	[intLastModifiedUserEntityId] [int] NULL,
 	[dtmLastModified] [datetime] NULL,
+	[dblQuotedHours] [numeric](18, 6) NULL,
+	[dblActualHours] [numeric](18, 6) NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
@@ -28,7 +31,8 @@
     CONSTRAINT [FK_Ticket_TicketPriority] FOREIGN KEY ([intTicketPriorityId]) REFERENCES [dbo].[tblHDTicketPriority] ([intTicketPriorityId]),
     CONSTRAINT [FK_Ticket_TicketProduct] FOREIGN KEY ([intTicketProductId]) REFERENCES [dbo].[tblHDTicketProduct] ([intTicketProductId]),
     CONSTRAINT [FK_Ticket_Module] FOREIGN KEY ([intModuleId]) REFERENCES [dbo].[tblHDModule] ([intModuleId]),
-    CONSTRAINT [FK_Ticket_Version] FOREIGN KEY ([intVersionId]) REFERENCES [dbo].[tblHDVersion] ([intVersionId])
+    CONSTRAINT [FK_Ticket_Version] FOREIGN KEY ([intVersionId]) REFERENCES [dbo].[tblHDVersion] ([intVersionId]),
+    CONSTRAINT [FK_Ticket_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intCustomerId])
 )
 
 GO
@@ -418,3 +422,30 @@ CREATE TRIGGER [dbo].[trgHDTicketHistory]
 		end catch
 
 	commit transaction;
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Customer Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intCustomerId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Quoted Hours',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'dblQuotedHours'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Actual Hours',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'dblActualHours'

@@ -2,6 +2,7 @@
 	AS 
 	select
 		intContactId = ec.intEntityId
+		,intCustomerId = c.intCustomerId
 		,c.strCustomerNumber
 		,strCompanyName = e.strName
 		,strContactName = eec.strName
