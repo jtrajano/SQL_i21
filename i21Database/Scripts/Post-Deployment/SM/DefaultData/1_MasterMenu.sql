@@ -1326,6 +1326,45 @@ GO
 
 GO
 
+    /* -------------------------- */
+    /*-- Add Announcements Menu --*/
+    /* ----------------------//-- */
+
+    DECLARE @SystemManagerAdminMenuId INT
+    SELECT @SystemManagerAdminMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+
+        /* ------------------------------ */
+        /* -- Create Announcement Menu -- */
+        /* ------------------------------ */
+        IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @SystemManagerAdminMenuId)
+        INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+        VALUES ('Announcements', 'Help Desk', @SystemManagerAdminMenuId, 'Announcements', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 2)
+
+        DECLARE @HelpDeskAnnouncementId INT
+        SELECT @HelpDeskAnnouncementId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @SystemManagerAdminMenuId
+
+            IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskAnnouncementId)
+                INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+                VALUES ('Maintenance', 'Help Desk', @HelpDeskAnnouncementId, 'Announcement Maintenance', 'Screen', 'HelpDesk.view.Announcement', 'small-screen', 0, 0, 0, 1, 0, 1)
+            ELSE
+                UPDATE tblSMMasterMenu
+                SET strCommand = 'HelpDesk.view.Announcement', intSort = 0
+                WHERE strMenuName = 'Maintenance' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskAnnouncementId
+
+            IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Announcement Types' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskAnnouncementId)
+                INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+                VALUES ('Announcement Types', 'Help Desk', @HelpDeskAnnouncementId, 'Announcement Types', 'Screen', 'HelpDesk.view.AnnouncementType', 'small-screen', 0, 0, 0, 1, 1, 1)
+            ELSE
+                UPDATE tblSMMasterMenu
+                SET strCommand = 'HelpDesk.view.AnnouncementType', intSort = 1
+                WHERE strMenuName = 'Announcement Types' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskAnnouncementId
+
+    /*------------------------  */
+    /*-- End Announcements Menu */
+    /*------------------------  */
+
+GO
+
 	/* ----------------------------------------------- */
 	/* --   Update Financial Reports Module Menu    -- */
 	/* ----------------------------------------------- */
