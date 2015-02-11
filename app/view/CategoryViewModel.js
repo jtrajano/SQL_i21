@@ -89,6 +89,9 @@ Ext.define('Inventory.view.CategoryViewModel', {
         freightItem:{
             type: 'icbufferedcompactitem'
         },
+        accountCategory: {
+            type: 'glbufaccountcategory'
+        },
         glAccount: {
             type: 'glbufaccountid'
         },
