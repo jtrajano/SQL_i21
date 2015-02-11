@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsdf71433c20774911a681a6838b02e517888ab8a7de04bb56f0bb5b603ee7f2f9))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets4cc4dd787d5a431d9bf327be9de39b6f33e3beef2248bc0027878b4da28c7972))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsdf71433c20774911a681a6838b02e517888ab8a7de04bb56f0bb5b603ee7f2f9 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets4cc4dd787d5a431d9bf327be9de39b6f33e3beef2248bc0027878b4da28c7972 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "df71433c20774911a681a6838b02e517888ab8a7de04bb56f0bb5b603ee7f2f9"; }
+            get { return "4cc4dd787d5a431d9bf327be9de39b6f33e3beef2248bc0027878b4da28c7972"; }
         }
 
         /// <summary>
@@ -2383,12 +2383,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptItemSource
-        [CodeFirstDatabaseSchema.vyuICGetReceiptItemSource](T1.vyuICGetReceiptItemSource_intInventoryReceiptItemId, T1.vyuICGetReceiptItemSource_intSourceId, T1.vyuICGetReceiptItemSource_strSourceId)
+        [CodeFirstDatabaseSchema.vyuICGetReceiptItemSource](T1.vyuICGetReceiptItemSource_intInventoryReceiptItemId, T1.vyuICGetReceiptItemSource_intSourceId, T1.vyuICGetReceiptItemSource_strSourceId, T1.vyuICGetReceiptItemSource_dtmDate)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICGetReceiptItemSource_intInventoryReceiptItemId, 
             T.intSourceId AS vyuICGetReceiptItemSource_intSourceId, 
             T.strSourceId AS vyuICGetReceiptItemSource_strSourceId, 
+            T.dtmDate AS vyuICGetReceiptItemSource_dtmDate, 
             True AS _from0
         FROM InventoryEntities.vyuICGetReceiptItemSources AS T
     ) AS T1");
@@ -4876,12 +4877,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptItemSources
-        [iRely.Inventory.Model.vyuICGetReceiptItemSource](T1.vyuICGetReceiptItemSource_intInventoryReceiptItemId, T1.vyuICGetReceiptItemSource_intSourceId, T1.vyuICGetReceiptItemSource_strSourceId)
+        [iRely.Inventory.Model.vyuICGetReceiptItemSource](T1.vyuICGetReceiptItemSource_intInventoryReceiptItemId, T1.vyuICGetReceiptItemSource_intSourceId, T1.vyuICGetReceiptItemSource_strSourceId, T1.vyuICGetReceiptItemSource_dtmDate)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICGetReceiptItemSource_intInventoryReceiptItemId, 
             T.intSourceId AS vyuICGetReceiptItemSource_intSourceId, 
             T.strSourceId AS vyuICGetReceiptItemSource_strSourceId, 
+            T.dtmDate AS vyuICGetReceiptItemSource_dtmDate, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetReceiptItemSource AS T
     ) AS T1");

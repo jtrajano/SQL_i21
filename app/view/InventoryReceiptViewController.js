@@ -416,46 +416,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     //Validate PO Date versus Receipt Date
                     if (current.get('strReceiptType') === 'Purchase Order') {
                         var grdInventoryReceipt = config.window.down('#grdInventoryReceipt');
-                        var colSourceNumber = grdInventoryReceipt.columns[0];
-                        var cboSource = colSourceNumber.getEditor();
+//                        var colSourceNumber = grdInventoryReceipt.columns[0];
+//                        var cboSource = colSourceNumber.getEditor();
 
                         var receiptItems = current.tblICInventoryReceiptItems().data.items;
-                        var sourceItems = [];
-                        if (receiptItems){
-                            Ext.Array.each(receiptItems, function(item) {
-                                if (!item.phantom) {
-                                    var exists = Ext.Array.findBy(sourceItems, function(record) {
-                                        if (record.intSourceId === item.get('intSourceId')){
-                                            return true;
-                                        }
-                                        else { return false; }
-                                    });
-
-                                    if (!exists){
-                                        var index = cboSource.store.findExact(cboSource.valueField, cboSource.getValue());
-                                        var sourcePO = cboSource.store.getAt(index);
-                                        var poDate = null;
-                                        var poNumber = null;
-                                        if (sourcePO){
-                                            poDate = sourcePO.get('dtmDate');
-                                            poNumber = sourcePO.get('strPurchaseOrderNumber');
-                                        }
-
-                                        var newItem = {
-                                            intSourceId: row.get('intSourceId'),
-                                            strPurchaseOrderNumber: poNumber,
-                                            dtmDate: poDate
-                                        };
-                                        sourceItems.push(newItem);
-                                    }
-                                }
-                            });
-                        }
-
-                        Ext.Array.each(sourceItems, function(item) {
+                        Ext.Array.each(receiptItems, function(item) {
                             if (item.dtmDate !== null) {
-                                if (current.get('dtmReceiptDate') < item.dtmDate) {
-                                    iRely.Functions.showErrorDialog('The Purchase Order Date of ' + item.strPurchaseOrderNumber + 'must not be later than the Receipt Date');
+                                if (current.get('dtmReceiptDate') < item.get('dtmSourceDate')) {
+                                    iRely.Functions.showErrorDialog('The Purchase Order Date of ' + item.get('strSourceId') + ' must not be later than the Receipt Date');
                                     action(false);
                                 }
                             }
@@ -913,6 +881,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     current.set('intLineNo', row.get('intLineNo'));
                     current.set('intSourceId', po.get('intPurchaseId'));
                     current.set('strSourceId', po.get('strPurchaseOrderNumber'));
+                    current.set('dtmSourceDate', po.get('dtmDate'));
                     current.set('intItemId', row.get('intItemId'));
                     current.set('strItemNo', row.get('item').strItemNo);
                     current.set('dblOrderQty', row.get('dblQtyOrdered'));
@@ -933,6 +902,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         intLineNo				: row.get('intLineNo')
                         ,intSourceId			: po.get('intPurchaseId')
                         ,strSourceId			: po.get('strPurchaseOrderNumber')
+                        ,dtmSourceDate          : po.get('dtmDate')
                         ,intItemId				: row.get('intItemId')
                         ,strItemNo              : row.get('item').strItemNo
                         ,dblOrderQty			: row.get('dblQtyOrdered')

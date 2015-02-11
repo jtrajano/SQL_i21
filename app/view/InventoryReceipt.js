@@ -377,7 +377,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'datefield',
                                                         itemId: 'dtmReceiptDate',
-                                                        width: 80,
+                                                        minWidth: 100,
+                                                        width: 100,
                                                         fieldLabel: 'Receipt Date',
                                                         labelAlign: 'top',
                                                         labelWidth: 75

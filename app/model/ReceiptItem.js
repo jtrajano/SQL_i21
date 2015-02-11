@@ -31,6 +31,9 @@ Ext.define('Inventory.model.ReceiptItem', {
             }
         },
         { name: 'intLineNo', type: 'int'},
+        { name: 'intSourceId', type: 'int'},
+        { name: 'strSourceId', type: 'string'},
+        { name: 'dtmSourceDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'dblOrderQty', type: 'float'},
         { name: 'dblOpenReceive', type: 'float'},
