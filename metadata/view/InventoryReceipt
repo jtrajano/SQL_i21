@@ -702,8 +702,9 @@
                                                 "labelWidth": 75,
                                                 "layout|flex": null,
                                                 "margin": null,
+                                                "minWidth": 100,
                                                 "name": null,
-                                                "width": 80
+                                                "width": 100
                                             },
                                             "name": "MyDateField4",
                                             "designerId": "5acaf3bf-e827-40ab-ba23-e53a81e1b537"

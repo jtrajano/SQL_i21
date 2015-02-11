@@ -111,6 +111,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intInventoryReceiptItemId).HasColumnName("intInventoryReceiptItemId");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.strSourceId).HasColumnName("strSourceId");
+            this.Property(t => t.dtmDate).HasColumnName("dtmDate");
         }
     }
 

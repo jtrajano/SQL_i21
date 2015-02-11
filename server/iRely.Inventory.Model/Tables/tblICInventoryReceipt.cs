@@ -161,6 +161,22 @@ namespace iRely.Inventory.Model
                 _sourceId = value;
             }
         }
+        private DateTime? _sourceDate = null;
+        [NotMapped]
+        public DateTime? dtmSourceDate
+        {
+            get
+            {
+                if (vyuICGetReceiptItemSource != null)
+                    return vyuICGetReceiptItemSource.dtmDate;
+                else
+                    return _sourceDate;
+            }
+            set
+            {
+                _sourceDate = value;
+            }
+        }
         private string _itemNo;
         [NotMapped]
         public string strItemNo
@@ -274,6 +290,7 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptItemId { get; set; }
         public int? intSourceId { get; set; }
         public string strSourceId { get; set; }
+        public DateTime? dtmDate { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
