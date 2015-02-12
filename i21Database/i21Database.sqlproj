@@ -1081,6 +1081,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateStockPathRoot.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateStockPathNode.sql" />
     <Build Include="dbo\Functions\fnGetInventoryTransactionId.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreatePOInventoryTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

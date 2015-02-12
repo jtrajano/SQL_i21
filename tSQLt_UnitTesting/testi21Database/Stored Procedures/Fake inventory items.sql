@@ -15,8 +15,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;		
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;		
 	EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure';
-	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;
-	
+	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;	
 		
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1

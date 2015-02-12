@@ -56,10 +56,10 @@ BEGIN
 		-- Add node for PO-0001
 		BEGIN 
 			SELECT	@ancestorId = AncestorId.intInventoryTransactionId				
-			FROM	dbo.fnGetInventoryTransactionId(NULL, NULL) AncestorId	
+			FROM	dbo.fnGetInventoryTransactionId(NULL, NULL, @intItemId, @intItemLocationId) AncestorId	
 
 			SELECT	@descendantId = DescendantId.intInventoryTransactionId 
-			FROM	dbo.fnGetInventoryTransactionId('PO-0001', 1) DescendantId
+			FROM	dbo.fnGetInventoryTransactionId('PO-0001', 1, @intItemId, @intItemLocationId) DescendantId
 
 			-- Act on the stored procedure under test. 
 			EXEC dbo.uspICCreateStockPathNode
@@ -72,10 +72,10 @@ BEGIN
 		-- Test node
 		BEGIN 
 			SELECT	@ancestorId = AncestorId.intInventoryTransactionId				
-			FROM	dbo.fnGetInventoryTransactionId('PO-0001', 1) AncestorId	
+			FROM	dbo.fnGetInventoryTransactionId('PO-0001', 1, @intItemId, @intItemLocationId) AncestorId	
 
 			SELECT	@descendantId = DescendantId.intInventoryTransactionId 
-			FROM	dbo.fnGetInventoryTransactionId('INVRCPT-0001', 1) DescendantId
+			FROM	dbo.fnGetInventoryTransactionId('INVRCPT-0001', 1, @intItemId, @intItemLocationId) DescendantId
 
 			-- Act on the stored procedure under test. 
 			EXEC dbo.uspICCreateStockPathNode

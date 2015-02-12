@@ -54,10 +54,10 @@ BEGIN
 				,@descendantId AS INT
 
 		SELECT	@ancestorId = AncestorId.intInventoryTransactionId				
-		FROM	dbo.fnGetInventoryTransactionId(NULL, NULL) AncestorId	
+		FROM	dbo.fnGetInventoryTransactionId(NULL, NULL, @intItemId, @intItemLocationId) AncestorId	
 
 		SELECT	@descendantId = DescendantId.intInventoryTransactionId 
-		FROM	dbo.fnGetInventoryTransactionId('PO-0001', 1) DescendantId
+		FROM	dbo.fnGetInventoryTransactionId('PO-0001', 1, @intItemId, @intItemLocationId) DescendantId
 
 		-- Act on the stored procedure under test. 
 		EXEC dbo.uspICCreateStockPathNode

@@ -781,6 +781,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for SO-0002-2.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnGetInventoryTransactionId for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetInventoryTransactionId for invalid args.sql" />
+    <Build Include="testi21Database\Functions\test fnGetInventoryTransactionId for valid args.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreatePOInventoryTransaction for creating the PO transaction to tblICInventoryTransaction.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
