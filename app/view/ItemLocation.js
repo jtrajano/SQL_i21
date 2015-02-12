@@ -28,16 +28,16 @@ Ext.define('Inventory.view.ItemLocation', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 689,
+    height: 680,
     hidden: false,
-    minHeight: 660,
+    maxHeight: 680,
+    minHeight: 680,
     minWidth: 995,
     width: 995,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
     title: 'Item Location',
-    maximizable: true,
 
     items: [
         {
@@ -332,6 +332,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                             itemId: 'cboCostingMethod',
                                             margin: '0 0 0 5',
                                             fieldLabel: 'Costing Method',
+                                            labelWidth: 98,
                                             displayField: 'strDescription',
                                             valueField: 'intCostingMethodId'
                                         }
@@ -379,45 +380,94 @@ Ext.define('Inventory.view.ItemLocation', {
                                             itemId: 'cboStorageLocation',
                                             margin: '0 0 0 5',
                                             fieldLabel: 'Storage Location',
+                                            labelWidth: 98,
                                             displayField: 'strName',
                                             valueField: 'intStorageLocationId'
                                         }
                                     ]
                                 },
                                 {
-                                    xtype: 'gridcombobox',
-                                    columns: [
+                                    xtype: 'container',
+                                    margin: '0 0 5 0',
+                                    layout: {
+                                        type: 'hbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
                                         {
-                                            dataIndex: 'intUnitMeasureId',
-                                            dataType: 'numeric',
-                                            text: 'Unit Of Measure ID',
-                                            hidden: true
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intUnitMeasureId',
+                                                    dataType: 'numeric',
+                                                    text: 'Unit Of Measure ID',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitMeasure',
+                                                    dataType: 'string',
+                                                    text: 'Unit Measure',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitType',
+                                                    dataType: 'string',
+                                                    text: 'Unit Type',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'checkcolumn',
+                                                    dataIndex: 'ysnStockUnit',
+                                                    dataType: 'boolean',
+                                                    text: 'Stock Unit',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            flex: 1,
+                                            itemId: 'cboIssueUOM',
+                                            fieldLabel: 'Issue UOM',
+                                            labelWidth: 80,
+                                            displayField: 'strIssueUOM',
+                                            valueField: 'intItemIssueUOM'
                                         },
                                         {
-                                            dataIndex: 'strUnitMeasure',
-                                            dataType: 'string',
-                                            text: 'Unit Measure',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strUnitType',
-                                            dataType: 'string',
-                                            text: 'Unit Type',
-                                            flex: 1
-                                        },
-                                        {
-                                            xtype: 'checkcolumn',
-                                            dataIndex: 'ysnStockUnit',
-                                            dataType: 'boolean',
-                                            text: 'Stock Unit',
-                                            flex: 1
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intUnitMeasureId',
+                                                    dataType: 'numeric',
+                                                    text: 'Unit Of Measure ID',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitMeasure',
+                                                    dataType: 'string',
+                                                    text: 'Unit Measure',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitType',
+                                                    dataType: 'string',
+                                                    text: 'Unit Type',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'checkcolumn',
+                                                    dataIndex: 'ysnStockUnit',
+                                                    dataType: 'boolean',
+                                                    text: 'Stock Unit',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            flex: 1,
+                                            itemId: 'cboReceiveUom',
+                                            margin: '0 0 0 5',
+                                            fieldLabel: 'Receive UOM',
+                                            labelWidth: 98,
+                                            displayField: 'strUnitMeasure',
+                                            valueField: 'intItemUOMId'
                                         }
-                                    ],
-                                    itemId: 'cboReceiveUom',
-                                    fieldLabel: 'Receive UOM',
-                                    labelWidth: 80,
-                                    displayField: 'strUnitMeasure',
-                                    valueField: 'intItemUOMId'
+                                    ]
                                 }
                             ]
                         }

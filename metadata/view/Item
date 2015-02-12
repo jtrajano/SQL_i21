@@ -908,40 +908,6 @@
                                                 "align": "right",
                                                 "dataIndex": "number",
                                                 "format": "0",
-                                                "itemId": "colDetailSellQty",
-                                                "text": "Sell Qty",
-                                                "width": 62
-                                            },
-                                            "name": "MyNumberColumn1",
-                                            "designerId": "9e3fc688-82e7-4817-85e5-d5e69603f50e",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldStyle": "text-align:right",
-                                                        "hideTrigger": true
-                                                    },
-                                                    "name": "MyNumberField3",
-                                                    "designerId": "8fd1742d-39b2-4fc4-ab01-4f188ee6bbc7"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "number",
-                                                "format": "0",
                                                 "itemId": "colDetailWeight",
                                                 "text": "Weight",
                                                 "width": 62
@@ -975,70 +941,12 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 2,
-                                                "itemId": "colDetailDescription",
-                                                "minWidth": 120,
-                                                "text": "Package Description"
-                                            },
-                                            "name": "MyColumn1",
-                                            "designerId": "6e79ead5-5b76-4b2d-a512-96881c3fab79",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyTextField7",
-                                                    "designerId": "a3c4a272-e50a-4d8d-a692-4eed112ebac3"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 2,
-                                                "itemId": "colDetailUpcCode",
+                                                "itemId": "colWeightUOM",
                                                 "minWidth": 80,
-                                                "text": "UPC Code"
+                                                "text": "Weight UOM"
                                             },
-                                            "name": "MyColumn23",
-                                            "designerId": "57be5075-40ca-438c-99ec-cd53ee934ba8",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyTextField7",
-                                                    "designerId": "15cb622c-13ed-4daf-90ea-3699035dfdb6"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": null,
-                                                "itemId": "colDetailShortUPC",
-                                                "text": "Short UPC",
-                                                "width": 70
-                                            },
-                                            "name": "MyColumn24",
-                                            "designerId": "23774939-b130-4af8-a189-2df006975a5a"
+                                            "name": "MyColumn35",
+                                            "designerId": "1358026d-bfaa-4eff-bb83-8b57a35f7652"
                                         },
                                         {
                                             "type": "Ext.grid.column.Check",
@@ -1188,6 +1096,24 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "itemId": "colDimensionUOM",
+                                                "minWidth": 80,
+                                                "text": "Dimension UOM",
+                                                "width": 91
+                                            },
+                                            "name": "MyColumn23",
+                                            "designerId": "2e045d6f-270d-4e59-9d69-2a0d23e1391a"
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -1222,6 +1148,24 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": null,
+                                                "itemId": "colVolumeUOM",
+                                                "minWidth": 80,
+                                                "text": "Volume UOM",
+                                                "width": 80
+                                            },
+                                            "name": "MyColumn48",
+                                            "designerId": "85002c9f-01ea-45ff-8a9d-fc4a2770ae8c"
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -1233,7 +1177,8 @@
                                                 "dataIndex": "number",
                                                 "format": "0",
                                                 "itemId": "colDetailMaxQty",
-                                                "text": "Max Qty"
+                                                "text": "Max Qty",
+                                                "width": 73
                                             },
                                             "name": "MyNumberColumn7",
                                             "designerId": "5355459c-6f8b-4711-9562-75e31610eb91",
@@ -11698,7 +11643,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging12",
                     "designerId": "64f13019-953f-46dc-920e-9a395d3cb3c9",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

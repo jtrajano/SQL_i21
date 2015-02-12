@@ -10,14 +10,14 @@
         "defaultFocus": null,
         "designer|userAlias": "icitemlocation",
         "designer|userClassName": "ItemLocation",
-        "height": 689,
+        "height": 680,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": null,
-        "maximizable": true,
-        "minHeight": 660,
+        "maxHeight": 680,
+        "maximizable": null,
+        "minHeight": 680,
         "minWidth": 995,
         "minimizable": null,
         "reference": null,
@@ -565,6 +565,7 @@
                                                 "fieldLabel": "Costing Method",
                                                 "itemId": "cboCostingMethod",
                                                 "labelAlign": null,
+                                                "labelWidth": 98,
                                                 "layout|flex": 1,
                                                 "margin": "0 0 0 5",
                                                 "valueField": "intCostingMethodId"
@@ -642,6 +643,7 @@
                                                 "displayField": "strName",
                                                 "fieldLabel": "Storage Location",
                                                 "itemId": "cboStorageLocation",
+                                                "labelWidth": 98,
                                                 "layout|flex": 1,
                                                 "margin": "0 0 0 5",
                                                 "valueField": "intStorageLocationId"
@@ -662,60 +664,138 @@
                                     ]
                                 },
                                 {
-                                    "type": "Ext.form.field.ComboBox",
+                                    "type": "Ext.container.Container",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intUnitMeasureId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\ttext: 'Unit Of Measure ID',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Measure',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strUnitType',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Unit Type',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "        xtype: 'checkcolumn',",
-                                            "\t\tdataIndex: 'ysnStockUnit',",
-                                            "\t\tdataType: 'boolean',",
-                                            "\t\ttext: 'Stock Unit',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strUnitMeasure",
-                                        "fieldLabel": "Receive UOM",
-                                        "itemId": "cboReceiveUom",
-                                        "labelWidth": 80,
+                                        "container|align": "stretch",
+                                        "designer|displayName": "container",
+                                        "layout": "hbox",
                                         "layout|flex": null,
-                                        "valueField": "intItemUOMId"
+                                        "margin": "0 0 5 0"
                                     },
-                                    "name": "MyComboBox26",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "58d855fb-516a-42a2-a084-51549e240291",
-                                    "customConfigs": [
+                                    "name": "MyContainer1",
+                                    "designerId": "358b6649-b214-4142-b480-d7383ce8f937",
+                                    "cn": [
                                         {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intUnitMeasureId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Unit Of Measure ID',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strUnitMeasure',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Unit Measure',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strUnitType',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Unit Type',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "        xtype: 'checkcolumn',",
+                                                    "\t\tdataIndex: 'ysnStockUnit',",
+                                                    "\t\tdataType: 'boolean',",
+                                                    "\t\ttext: 'Stock Unit',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strIssueUOM",
+                                                "fieldLabel": "Issue UOM",
+                                                "itemId": "cboIssueUOM",
+                                                "labelWidth": 80,
+                                                "layout|flex": 1,
+                                                "valueField": "intItemIssueUOM"
+                                            },
+                                            "name": "MyComboBox16",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "1812d10d-d199-4f33-93b8-10aaeba4beb4",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intUnitMeasureId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Unit Of Measure ID',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strUnitMeasure',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Unit Measure',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strUnitType',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Unit Type',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "        xtype: 'checkcolumn',",
+                                                    "\t\tdataIndex: 'ysnStockUnit',",
+                                                    "\t\tdataType: 'boolean',",
+                                                    "\t\ttext: 'Stock Unit',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strUnitMeasure",
+                                                "fieldLabel": "Receive UOM",
+                                                "itemId": "cboReceiveUom",
+                                                "labelWidth": 98,
+                                                "layout|flex": 1,
+                                                "margin": "0 0 0 5",
+                                                "valueField": "intItemUOMId"
+                                            },
+                                            "name": "MyComboBox26",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "58d855fb-516a-42a2-a084-51549e240291",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
@@ -1939,7 +2019,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging18",
+                    "name": "statusbarpaging11",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
