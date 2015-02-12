@@ -740,6 +740,47 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for sell 1-sell 2-unpost sell 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake Item Stock Path.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for Item Stock Path.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathRoot for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathRoot for valid arguments.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathRoot for invalid arg 1.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathRoot for invalid arg 2.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for PO-0001.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVRCPT-0001.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVSHIP-0001.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVSHIP-0002.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for SO-0002-1.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVRCPT-0002.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVSHIP-0003.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for SO-0002-2.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -1077,6 +1077,10 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostLIFOOut.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Tables\tblICItemStockPath.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateStockPathRoot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateStockPathNode.sql" />
+    <Build Include="dbo\Functions\fnGetInventoryTransactionId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
