@@ -10,18 +10,18 @@
         "defaultFocus": null,
         "designer|userAlias": "buildassemblyblend",
         "designer|userClassName": "BuildAssemblyBlend",
-        "height": 629,
+        "height": 625,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 525,
-        "minWidth": 660,
+        "minHeight": 625,
+        "minWidth": 765,
         "minimizable": null,
         "reference": null,
         "title": "Build Assembly/Blend",
-        "width": 766
+        "width": 765
     },
     "name": "CertificationProgram1",
     "designerId": "20fac8bb-55d9-4aff-83c3-5ab38be80bdd",
@@ -752,7 +752,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter161",
+                                    "name": "filter1",
                                     "designerId": "5fbc10f4-aec3-4a1c-aa64-227db4fba5a3",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -919,7 +919,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging122",
+                    "name": "statusbarpaging1",
                     "designerId": "efc2b220-9ee5-484d-9265-6473eb69e982",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

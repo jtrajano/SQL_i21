@@ -33,11 +33,11 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 629,
+    height: 625,
     hidden: false,
-    minHeight: 525,
-    minWidth: 660,
-    width: 766,
+    minHeight: 625,
+    minWidth: 765,
+    width: 765,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -359,9 +359,9 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                         },
                         {
                             xtype: 'gridcolumn',
-                            dataIndex: 'string',
                             width: 63,
                             defaultWidth: 90,
+                            dataIndex: 'string',
                             text: 'UOM'
                         },
                         {

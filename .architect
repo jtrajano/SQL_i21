@@ -8225,8 +8225,8 @@
         "topInstance": "20fac8bb-55d9-4aff-83c3-5ab38be80bdd"
     },
     "inspectorState": {
-        "topInstance": null,
-        "selectedInstance": null
+        "topInstance": "20fac8bb-55d9-4aff-83c3-5ab38be80bdd",
+        "selectedInstance": "20fac8bb-55d9-4aff-83c3-5ab38be80bdd"
     },
     "editMode": "design",
     "userSettings": {
