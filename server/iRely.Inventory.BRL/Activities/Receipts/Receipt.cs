@@ -51,7 +51,7 @@ namespace iRely.Inventory.BRL
                 .Include(p=> p.tblSMFreightTerm)
                 .Include("tblICInventoryReceiptItems.tblICItem")
                 .Include("tblICInventoryReceiptItems.tblICUnitMeasure")
-                .Include("tblICInventoryReceiptItems.tblICPackType")
+                .Include("tblICInventoryReceiptItems.PackageType")
                 .Include("tblICInventoryReceiptItems.vyuICGetReceiptItemSource")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes")
