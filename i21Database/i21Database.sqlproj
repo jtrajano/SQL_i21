@@ -1045,6 +1045,8 @@
     <Build Include="dbo\Stored Procedures\uspNRCreateEFTGLJournalEntry.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
     <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
+    <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
+    <Build Include="dbo\Tables\tblHDAnnouncement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
