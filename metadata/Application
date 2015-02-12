@@ -6,7 +6,10 @@
     },
     "codeClass": null,
     "userConfig": {
-        "name": "Inventory"
+        "name": "Inventory",
+        "views": [
+            "BuildAssemblyBlend"
+        ]
     },
     "name": "Application",
     "designerId": "application"

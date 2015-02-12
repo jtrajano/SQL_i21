@@ -455,6 +455,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'txtBlanketReleaseNumber',
                                                                         fieldLabel: 'Blanket Release No',
                                                                         labelWidth: 110,
+                                                                        hideTrigger: true,
                                                                         allowDecimals: false
                                                                     },
                                                                     {

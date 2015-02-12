@@ -496,9 +496,9 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colWeightUOM',
                                                         minWidth: 80,
+                                                        dataIndex: 'string',
                                                         text: 'Weight UOM',
                                                         flex: 2
                                                     },

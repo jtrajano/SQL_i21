@@ -850,6 +850,7 @@
                                                             "userConfig": {
                                                                 "allowDecimals": false,
                                                                 "fieldLabel": "Blanket Release No",
+                                                                "hideTrigger": true,
                                                                 "itemId": "txtBlanketReleaseNumber",
                                                                 "labelWidth": 110,
                                                                 "layout|flex": null,
@@ -1455,7 +1456,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter140",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2360,7 +2361,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter141",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3098,7 +3099,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter142",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3929,7 +3930,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter143",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4372,7 +4373,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging110",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

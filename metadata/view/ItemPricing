@@ -839,6 +839,7 @@
                                     "userConfig": {
                                         "fieldLabel": "End Date",
                                         "itemId": "dtpEndDate",
+                                        "labelWidth": 110,
                                         "layout|flex": 1,
                                         "margin": "0 0 0 5",
                                         "tabIndex": 15
@@ -866,7 +867,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging116",
                     "designerId": "ee98d62c-330d-4829-b90b-22407d93d85f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -478,7 +478,8 @@ Ext.define('Inventory.view.ItemPricing', {
                                     tabIndex: 15,
                                     itemId: 'dtpEndDate',
                                     margin: '0 0 0 5',
-                                    fieldLabel: 'End Date'
+                                    fieldLabel: 'End Date',
+                                    labelWidth: 110
                                 }
                             ]
                         }
