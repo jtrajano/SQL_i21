@@ -1953,7 +1953,7 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemUnitMeasureId" />
   </Operation>
-  <Operation Name="Rename Refactor" Key="a929eff4-ff5b-44ea-8735-2defb5a0c27e" ChangeDateTime="02/11/2015 01:51:58">
+  <Operation Name="Rename Refactor" Key="c8b802e3-e907-4dcf-899c-fcdabd434219" ChangeDateTime="02/09/2015 05:36:44">
     <Property Name="ElementName" Value="[dbo].[tblICInventoryReceiptItem].[intPackTypeId]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
     <Property Name="ParentElementName" Value="[dbo].[tblICInventoryReceiptItem]" />
