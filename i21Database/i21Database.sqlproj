@@ -1051,6 +1051,7 @@
     <Build Include="dbo\Views\vyuICGetPackedUOM.sql" />
     <Build Include="dbo\Tables\tblSMTaxCode.sql" />
     <Build Include="dbo\Tables\tblSMTaxType.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateCashEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

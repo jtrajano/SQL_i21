@@ -250,7 +250,7 @@ BEGIN
 	IF @GenerateType = 'GeneratePayment'
 	BEGIN
 	
-		SELECT @dblTransAmt = dblBalance FROM dbo.tblNRScheduleTransaction Where intScheduleTransId = @SchdTransId
+		SELECT @dblTransAmt = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intScheduleTransId = @SchdTransId
 		SET @strReference = 'NREFTPayment'
 		
 		SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
@@ -283,35 +283,35 @@ BEGIN
 			   )
 		
 		
-		SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
-		SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
-		SET @dblTransAmt = @dblPrincipal + @dblInterest
+		--SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
+		--SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+		--SET @dblTransAmt = @dblPrincipal + @dblInterest
 		
-		INSERT INTO [dbo].[tblGLJournalDetail]
-			   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
-		 VALUES
-			   (2 ---------------------------------------intLineNo
-			   ,@intJournalId ---------------------------intJournalId
-			   ,GETDATE() -------------------------------dtmDate
-			   ,@intDebitAccountId ----------------------intAccountId
-			   ,@dblTransAmt ----------------------------dblDebit
-			   ,0 ---------------------------------------dblDebitRate
-			   ,0 ---------------------------------------dblCredit
-			   ,0 ---------------------------------------dblCreditRate
-			   ,0 ---------------------------------------dblDebitUnit
-			   ,0 ---------------------------------------dblCreditUnit
-			   ,@strDetailDesc --------------------------strDescription
-			   ,1 ---------------------------------------intConcurrencyId
-			   ,0 ---------------------------------------dblUnitsInLBS
-			   ,@strNoteNumber --------------------------strDocument
-			   ,'' --------------------------------------strComments
-			   ,@strReference ---------------------------strReference
-			   ,0 ---------------------------------------dblDebitUnitsInLBS
-			   ,NULL ------------------------------------strCorrecting
-			   ,NULL ------------------------------------strSourcePgm
-			   ,NULL ------------------------------------strCheckBookNo
-			   ,NULL ------------------------------------strWorkArea
-		   )
+		--INSERT INTO [dbo].[tblGLJournalDetail]
+		--	   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
+		-- VALUES
+		--	   (2 ---------------------------------------intLineNo
+		--	   ,@intJournalId ---------------------------intJournalId
+		--	   ,GETDATE() -------------------------------dtmDate
+		--	   ,@intDebitAccountId ----------------------intAccountId
+		--	   ,@dblTransAmt ----------------------------dblDebit
+		--	   ,0 ---------------------------------------dblDebitRate
+		--	   ,0 ---------------------------------------dblCredit
+		--	   ,0 ---------------------------------------dblCreditRate
+		--	   ,0 ---------------------------------------dblDebitUnit
+		--	   ,0 ---------------------------------------dblCreditUnit
+		--	   ,@strDetailDesc --------------------------strDescription
+		--	   ,1 ---------------------------------------intConcurrencyId
+		--	   ,0 ---------------------------------------dblUnitsInLBS
+		--	   ,@strNoteNumber --------------------------strDocument
+		--	   ,'' --------------------------------------strComments
+		--	   ,@strReference ---------------------------strReference
+		--	   ,0 ---------------------------------------dblDebitUnitsInLBS
+		--	   ,NULL ------------------------------------strCorrecting
+		--	   ,NULL ------------------------------------strSourcePgm
+		--	   ,NULL ------------------------------------strCheckBookNo
+		--	   ,NULL ------------------------------------strWorkArea
+		--   )
 		   
 	END
 	

@@ -279,11 +279,12 @@ BEGIN TRY
 		END
 		IF(@TransTypeID = 4)
 		BEGIN
-			IF(@NoteType = 'Scheduled Invoice')
+			IF(@NoteType = 'Scheduled Invoice' AND @CheckNumber <> 'AutoSchedule')
 			BEGIN
 				DECLARE @ExpectedPayAmount numeric(18,6), @LateFee numeric(18,6)
 				SELECT TOP 1 @ExpectedPayAmount = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId
-				SELECT TOP 1 @LateFee = dblLateFeePayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId AND dblLateFeePayAmt > 0 
+				SELECT TOP 1 @LateFee = dblLateFeePayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId 
+				AND dblLateFeePayAmt > 0 
 				AND CAST(CONVERT(nvarchar(10),dtmLateFeePaidOn,101)AS DateTime)  = CAST(CONVERT(nvarchar(10),GETDATE(),101)AS DateTime)
 				ORDER BY intScheduleTransId DESC
 				
@@ -292,22 +293,29 @@ BEGIN TRY
 					DECLARE @ExtraAmount numeric(18,6)
 					SET @ExtraAmount = (@Amount - @ExpectedPayAmount)
 					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, @ExtraAmount, 0, ''
-					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, @ExpectedPayAmount, 0, ''
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExtraAmount
+					
+					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, 0, 0, ''
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExpectedPayAmount
+					
 				END
 				ELSE
 				BEGIN
 					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount
 				END
 				
 				IF(ISNULL(@LateFee,0) <> 0)
 				BEGIN
 					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, @LateFee, ''
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @LateFee
 				END
 				
 			END
 			ELSE
 			BEGIN
 				EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
+				EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount
 			END
 		END
 		IF(@TransTypeID = 6)
@@ -397,7 +405,7 @@ BEGIN TRY
 		
 	--EXEC [dbo].[Note_Future_Trans_Update] @intNoteId=@intNoteId
 		
-	
+	--RETURN @intNoteTransId
 
 	  	COMMIT TRANSACTION	
 	  	
@@ -410,3 +418,4 @@ BEGIN CATCH
  IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 END CATCH
+
