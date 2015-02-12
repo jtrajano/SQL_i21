@@ -1049,6 +1049,7 @@
     <Build Include="dbo\Stored Procedures\uspARDeleteOverPayment.sql" />
     <Build Include="dbo\Tables\tblSMTaxClass.sql" />
     <Build Include="dbo\Tables\tblSMTaxCode.sql" />
+    <Build Include="dbo\Tables\tblSMTaxType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
