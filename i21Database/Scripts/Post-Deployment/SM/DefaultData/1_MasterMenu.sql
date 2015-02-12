@@ -1469,9 +1469,6 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'General Journal' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.GeneralJournal'
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Account Structure' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountStructure'
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Clone Account' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountClone'
-		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'GL Account Detail' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.GLAccountDetail'
-		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Reminder List' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.ReminderList'
-		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Import Budget from CSV' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.ImportBudgetFromCSV'
 
 	/* ---------------------------------------- */
 	/* --   End General Ledger Module Menu   -- */
