@@ -57,6 +57,7 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
 		,@STANDARDCOST AS INT = 4
+		,@LOTCOST AS INT = 5
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
@@ -170,18 +171,31 @@ BEGIN
 			,@intUserId;
 	END
 
+	-- LIFO 
+	IF (@CostingMethod = @LOTCOST)
+	BEGIN 
+		EXEC dbo.uspICPostLot
+			@intItemId
+			,@intItemLocationId
+			,@dtmDate
+			,@intLotId
+			,@dblUnitQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intUserId;
+	END
+
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
 	--------------------------------------------------
 	BEGIN 
-		--UPDATE	Stock
-		--SET		Stock.dblAverageCost = dbo.fnCalculateAverageCost((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
-		--		,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
-		--		,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
-		--FROM	dbo.tblICItemStock AS Stock
-		--WHERE	Stock.intItemId = @intItemId
-		--		AND Stock.intLocationId = @intLocationId;
-
 		MERGE	
 		INTO	dbo.tblICItemStock 
 		WITH	(HOLDLOCK) 
