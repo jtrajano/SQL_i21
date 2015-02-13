@@ -1047,6 +1047,7 @@
     <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncement.sql" />
+    <Build Include="dbo\Tables\tblHDProject.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
