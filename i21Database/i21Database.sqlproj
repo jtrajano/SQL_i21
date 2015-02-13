@@ -1052,6 +1052,7 @@
     <Build Include="dbo\Tables\tblSMTaxCode.sql" />
     <Build Include="dbo\Tables\tblSMTaxType.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCreateCashEntry.sql" />
+    <Build Include="dbo\Views\vyuARRecapTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
