@@ -2,6 +2,8 @@
  @intNoteId int
 ,@intNoteTransId Int
 ,@dblAmount decimal(18,6)
+, @intGLAccountId Int
+, @intTransactionId int = 0	OUTPUT		
 AS
 BEGIN TRY
 
@@ -10,8 +12,7 @@ BEGIN TRY
 	, @strPayee nvarchar(300)		, @intEntityId Int			, @strAddress nvarchar(65)				, @strZipCode nvarchar(42)
 	, @strCity  nvarchar(85)		, @strState nvarchar(60)	, @strCountry nvarchar(75)				--, @dblAmount decimal(18,6)
 	, @strMemo nvarchar(255)		, @intCreatedUserId Int		, @dtmTranCreated datetime				, @strAmountInWords nvarchar(max)
-	, @intTransactionId int			, @strDescription nvarchar(255)
-	, @ErrMsg nvarchar(max)
+	, @strDescription nvarchar(255)	, @ErrMsg nvarchar(max)
 	
 	--Get constant values
 	SET @intBankTransactionTypeId = 18
@@ -21,6 +22,7 @@ BEGIN TRY
 	SELECT @intBankAccountId = intAccountId, @strDescription = strDescription FROM dbo.tblGLAccount 
 	Where intAccountId in (Select intGLAccountId From dbo.tblCMBankAccount) 
 	AND intAccountGroupId In (Select intAccountGroupId from dbo.tblGLAccountGroup Where strAccountGroup = 'Cash Accounts')
+	
 	
 	--Get currency Id
 	SET @intCurrencyId = (
@@ -87,7 +89,7 @@ BEGIN TRY
            ,[intCreatedUserId]           ,[dtmCreated]        ,[intLastModifiedUserId]    ,[dtmLastModified]
            ,[intConcurrencyId])
      VALUES
-           (@intTransactionId            ,@dtmDate            ,@intBankAccountId          ,@strDescription
+           (@intTransactionId            ,@dtmDate            ,@intGLAccountId          ,@strDescription
            ,0				             ,@dblAmount          ,NULL				          ,NULL
            ,@intCreatedUserId            ,@dtmTranCreated     ,@intCreatedUserId          ,GETDATE()
            ,1)

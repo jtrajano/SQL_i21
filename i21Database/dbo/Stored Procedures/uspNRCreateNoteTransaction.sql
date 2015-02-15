@@ -279,6 +279,7 @@ BEGIN TRY
 		END
 		IF(@TransTypeID = 4)
 		BEGIN
+			DECLARE @intCMTransactionId Int, @intGLReceivableAccountId Int
 			IF(@NoteType = 'Scheduled Invoice' AND @CheckNumber <> 'AutoSchedule')
 			BEGIN
 				DECLARE @ExpectedPayAmount numeric(18,6), @LateFee numeric(18,6)
@@ -288,39 +289,62 @@ BEGIN TRY
 				AND CAST(CONVERT(nvarchar(10),dtmLateFeePaidOn,101)AS DateTime)  = CAST(CONVERT(nvarchar(10),GETDATE(),101)AS DateTime)
 				ORDER BY intScheduleTransId DESC
 				
+				SET @Comments = ''
+				
 				IF(ISNULL(@Amount,0) > @ExpectedPayAmount)
 				BEGIN
 					DECLARE @ExtraAmount numeric(18,6)
 					SET @ExtraAmount = (@Amount - @ExpectedPayAmount)
-					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, @ExtraAmount, 0, ''
-					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExtraAmount
+					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, @ExtraAmount, 0, ''
+					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExtraAmount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
+					SET @Comments = @Comments + CAST(@intCMTransactionId as nvarchar(30))
+					SET @intCMTransactionId = 0
 					
-					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, 0, 0, ''
-					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExpectedPayAmount
+					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, 0, 0, ''
+					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExpectedPayAmount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
+					SET @Comments = @Comments + ',' + CAST(@intCMTransactionId as nvarchar(30))
+					SET @intCMTransactionId = 0
 					
 				END
 				ELSE
 				BEGIN
-					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
-					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount
+					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
+					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
+					SET @Comments = @Comments + CAST(@intCMTransactionId as nvarchar(30))
+					SET @intCMTransactionId = 0
 				END
 				
 				IF(ISNULL(@LateFee,0) <> 0)
 				BEGIN
-					EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, @LateFee, ''
-					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @LateFee
+					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, @LateFee, ''
+					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @LateFee, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
+					SET @Comments = @Comments + ',' + CAST(@intCMTransactionId as nvarchar(30))
+					SET @intCMTransactionId = 0
 				END
+				
+				UPDATE dbo.tblNRNoteTransaction Set strTransComments = @Comments Where intNoteTransId = @intNoteTransId
 				
 			END
 			ELSE
 			BEGIN
-				EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
-				EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount
+				--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
+				SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+				EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
+				SET @Comments = @Comments + CAST(@intCMTransactionId as nvarchar(30))
+				SET @intCMTransactionId = 0
+				
+				UPDATE dbo.tblNRNoteTransaction Set strTransComments = @Comments Where intNoteTransId = @intNoteTransId
+				
 			END
 		END
 		IF(@TransTypeID = 6)
 		BEGIN
-			EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, @TransTypeID, @intNoteTransId, @UserId, 0, 0, 0, ''
+			--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, @TransTypeID, @intNoteTransId, @UserId, 0, 0, 0, ''
+			EXEC dbo.uspNRCreateCashRevarseEntry @intNoteTransId
 		END
 		IF(@TransTypeID = 7)
 		BEGIN
@@ -418,4 +442,3 @@ BEGIN CATCH
  IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 END CATCH
-

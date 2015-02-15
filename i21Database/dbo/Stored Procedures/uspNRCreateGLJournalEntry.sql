@@ -100,40 +100,40 @@ BEGIN
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 			SET @strReference = 'Scheduled Invoice'
 		END
-		IF @TransactionTypeId = 4
-		BEGIN
+		--IF @TransactionTypeId = 4
+		--BEGIN
 			
-			IF @PayExtra = 0
-			BEGIN
-				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-				SET @strReference = 'NR Schd Payment'
-			END
-			ELSE
-			BEGIN
-				IF @ExtraPayment = 0
-				BEGIN
-					SELECT TOP 1 @dblTransAmt = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId --and dtmExpectedPayDate 
-					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
-					SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-					SET @strReference = 'NR Schd Payment'
-				END
-				ELSE
-				BEGIN
-					SET @dblTransAmt = @ExtraPayment
-					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-					SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-					SET @strReference = 'NR Schd Payment'
-				END				
-			END	
-			IF @LateCharge > 0
-			BEGIN
-				SET @dblTransAmt = @LateCharge
-				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
-				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-				SET @strReference = 'ScheduledLateFee'
-			END		
-		END
+		--	IF @PayExtra = 0
+		--	BEGIN
+		--		SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+		--		SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+		--		SET @strReference = 'NR Schd Payment'
+		--	END
+		--	ELSE
+		--	BEGIN
+		--		IF @ExtraPayment = 0
+		--		BEGIN
+		--			SELECT TOP 1 @dblTransAmt = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId --and dtmExpectedPayDate 
+		--			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+		--			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+		--			SET @strReference = 'NR Schd Payment'
+		--		END
+		--		ELSE
+		--		BEGIN
+		--			SET @dblTransAmt = @ExtraPayment
+		--			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+		--			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+		--			SET @strReference = 'NR Schd Payment'
+		--		END				
+		--	END	
+		--	IF @LateCharge > 0
+		--	BEGIN
+		--		SET @dblTransAmt = @LateCharge
+		--		SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+		--		SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+		--		SET @strReference = 'ScheduledLateFee'
+		--	END		
+		--END
 		IF @TransactionTypeId = 7
 		BEGIN	
 			If @PayExtra = 1
@@ -320,12 +320,12 @@ BEGIN
 				SET @strReference = 'Fee for NR'
 			END
 		END	
-		If @TransactionTypeId = 4
-		BEGIN
-			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-			SET @strReference = 'NR Payment'
-		END
+		--If @TransactionTypeId = 4
+		--BEGIN
+		--	SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+		--	SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+		--	SET @strReference = 'NR Payment'
+		--END
 		--If @TransactionTypeId = 6
 		--BEGIN
 		--	SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'
@@ -405,12 +405,12 @@ BEGIN
 		--	SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 		--	SET @strReference = 'NR Payment'
 		--END	
-		If @TransactionTypeId = 6
-		BEGIN
-			SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
-			SET @strReference = 'NR Payment'
-		END
+		--If @TransactionTypeId = 6
+		--BEGIN
+		--	SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+		--	SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
+		--	SET @strReference = 'NR Payment'
+		--END
 		IF @TransactionTypeId = 7
 		BEGIN	
 			If @PayExtra = 1

@@ -253,34 +253,34 @@ BEGIN
 		SELECT @dblTransAmt = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intScheduleTransId = @SchdTransId
 		SET @strReference = 'NREFTPayment'
 		
-		SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
-		SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
+		--SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+		--SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 		
-		INSERT INTO [dbo].[tblGLJournalDetail]
-			   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
-		 VALUES
-			   (1 ---------------------------------------intLineNo
-			   ,@intJournalId ---------------------------intJournalId
-			   ,GETDATE() -------------------------------dtmDate
-			   ,@intCreditAccountId ---------------------intAccountId
-			   ,0 ---------------------------------------dblDebit
-			   ,0 ---------------------------------------dblDebitRate
-			   ,@dblTransAmt ----------------------------dblCredit
-			   ,0 ---------------------------------------dblCreditRate
-			   ,0 ---------------------------------------dblDebitUnit
-			   ,0 ---------------------------------------dblCreditUnit
-			   ,@strDetailDesc --------------------------strDescription
-			   ,1 ---------------------------------------intConcurrencyId
-			   ,0 ---------------------------------------dblUnitsInLBS
-			   ,@strNoteNumber --------------------------strDocument
-			   ,'' --------------------------------------strComments
-			   ,@strReference ---------------------------strReference
-			   ,0 ---------------------------------------dblDebitUnitsInLBS
-			   ,NULL ------------------------------------strCorrecting
-			   ,NULL ------------------------------------strSourcePgm
-			   ,NULL ------------------------------------strCheckBookNo
-			   ,NULL ------------------------------------strWorkArea
-			   )
+		--INSERT INTO [dbo].[tblGLJournalDetail]
+		--	   ([intLineNo],[intJournalId],[dtmDate],[intAccountId],[dblDebit],[dblDebitRate],[dblCredit],[dblCreditRate],[dblDebitUnit],[dblCreditUnit],[strDescription],[intConcurrencyId],[dblUnitsInLBS],[strDocument],[strComments],[strReference],[dblDebitUnitsInLBS],[strCorrecting],[strSourcePgm],[strCheckBookNo],[strWorkArea])
+		-- VALUES
+		--	   (1 ---------------------------------------intLineNo
+		--	   ,@intJournalId ---------------------------intJournalId
+		--	   ,GETDATE() -------------------------------dtmDate
+		--	   ,@intCreditAccountId ---------------------intAccountId
+		--	   ,0 ---------------------------------------dblDebit
+		--	   ,0 ---------------------------------------dblDebitRate
+		--	   ,@dblTransAmt ----------------------------dblCredit
+		--	   ,0 ---------------------------------------dblCreditRate
+		--	   ,0 ---------------------------------------dblDebitUnit
+		--	   ,0 ---------------------------------------dblCreditUnit
+		--	   ,@strDetailDesc --------------------------strDescription
+		--	   ,1 ---------------------------------------intConcurrencyId
+		--	   ,0 ---------------------------------------dblUnitsInLBS
+		--	   ,@strNoteNumber --------------------------strDocument
+		--	   ,'' --------------------------------------strComments
+		--	   ,@strReference ---------------------------strReference
+		--	   ,0 ---------------------------------------dblDebitUnitsInLBS
+		--	   ,NULL ------------------------------------strCorrecting
+		--	   ,NULL ------------------------------------strSourcePgm
+		--	   ,NULL ------------------------------------strCheckBookNo
+		--	   ,NULL ------------------------------------strWorkArea
+		--	   )
 		
 		
 		--SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRCashAccount'

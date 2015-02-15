@@ -1053,6 +1053,10 @@
     <Build Include="dbo\Tables\tblSMTaxType.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCreateCashEntry.sql" />
     <Build Include="dbo\Views\vyuARRecapTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateCashRevarseEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRReport1098.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRReportAgedNotes.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRReportUCCTracking.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
