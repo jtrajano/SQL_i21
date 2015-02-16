@@ -1565,6 +1565,10 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller', 'view') 
 		WHERE strMenuName = 'User Security' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.UserSecurity'
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller', 'view') 
+		WHERE strMenuName = 'User Roles' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.UserRole'
+
 	
 	DECLARE @SystemManagerAdminUtilitiesMenuId INT
 	SELECT @SystemManagerAdminUtilitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
