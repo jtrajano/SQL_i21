@@ -1158,6 +1158,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         switch (newValue) {
             case 'Assembly':
+            case 'Assembly/Blend':
             case 'Assembly/Formula/Blend':
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
