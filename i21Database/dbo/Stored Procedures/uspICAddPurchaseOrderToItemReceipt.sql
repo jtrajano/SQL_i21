@@ -133,7 +133,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intConcurrencyId
 )
 SELECT	intInventoryReceiptId = @InventoryReceiptId
-		,intLineNo				= PODetail.intLineNo
+		,intLineNo				= PODetail.intPurchaseDetailId
 		,intSourceId			= @PurchaseOrderId
 		,intItemId				= PODetail.intItemId
 		,dblOrderQty			= ISNULL(PODetail.dblQtyOrdered, 0)
