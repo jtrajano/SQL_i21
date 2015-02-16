@@ -9,7 +9,6 @@ SELECT
 	UOM.strSymbol,
 	UOMConvert.intStockUnitMeasureId,
 	strConversionUOM = (SELECT strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = UOMConvert.intStockUnitMeasureId),
-	UOMConvert.dblConversionFromStock,
 	UOMConvert.dblConversionToStock
 FROM tblICUnitMeasureConversion UOMConvert
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = UOMConvert.intUnitMeasureId

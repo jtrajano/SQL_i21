@@ -500,7 +500,7 @@ BEGIN
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,NULL AS intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
@@ -568,7 +568,7 @@ BEGIN
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,NuLL as intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
@@ -1120,7 +1120,7 @@ ELSE
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,NULL as intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
@@ -1189,7 +1189,7 @@ ELSE
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,NULL as intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST

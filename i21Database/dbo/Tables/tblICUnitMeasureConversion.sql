@@ -16,7 +16,6 @@ Type the overview for the table here.
 		[intUnitMeasureId] INT NOT NULL, 
 		[intStockUnitMeasureId] INT NOT NULL, 
 		[dblConversionToStock] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblConversionFromStock] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICUnitMeasureConversion] PRIMARY KEY ([intUnitMeasureConversionId]), 
@@ -61,14 +60,7 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'dblConversionToStock'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Conversion From Stock Unit of Measure',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICUnitMeasureConversion',
-		@level2type = N'COLUMN',
-		@level2name = N'dblConversionFromStock'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Sort Field',

@@ -1960,4 +1960,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intPackageTypeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="73fe4624-e75c-44dc-ace8-e0aa21a40e0d" ChangeDateTime="02/16/2015 16:44:17">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryUOM].[intItemUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryUOM]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCategoryUOMId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ff517d5e-97a1-439f-ac29-a4f84f380eb2" ChangeDateTime="02/16/2015 16:44:26">
+    <Property Name="ElementName" Value="[dbo].[tblICCategoryUOM].[intItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCategoryUOM]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCategoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d71721f8-6a34-4d34-913b-4e5ddd1760cc" ChangeDateTime="02/16/2015 16:50:48">
+    <Property Name="ElementName" Value="[dbo].[tblICItemPricing].[dblMovingAverageCost]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemPricing]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblAverageCost" />
+  </Operation>
 </Operations>

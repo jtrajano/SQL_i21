@@ -10,10 +10,10 @@ Type the overview for the table here.
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblICItemUOM]
+	CREATE TABLE [dbo].[tblICCategoryUOM]
 	(
-		[intItemUOMId] INT NOT NULL IDENTITY , 
-		[intItemId] INT NOT NULL,
+		[intCategoryUOMId] INT NOT NULL IDENTITY , 
+		[intCategoryId] INT NOT NULL,
 		[intUnitMeasureId] INT NOT NULL, 
 		[dblUnitQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblSellQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -33,12 +33,12 @@ Type the overview for the table here.
 		[dblMaxQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
-		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
-		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblICItemUOM_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblICItemUOM_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblICItemUOM_VolumeUOM] FOREIGN KEY ([intVolumeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [PK_tblICCategoryUOM] PRIMARY KEY ([intCategoryUOMId]), 
+		CONSTRAINT [FK_tblICCategoryUOM_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ON DELETE CASCADE, 
+		CONSTRAINT [FK_tblICCategoryUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [FK_tblICCategoryUOM_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [FK_tblICCategoryUOM_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [FK_tblICCategoryUOM_VolumeUOM] FOREIGN KEY ([intVolumeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 	)
 
 GO
@@ -47,25 +47,25 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
-    @level2name = N'intItemUOMId'
+    @level2name = N'intCategoryUOMId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Item Id',
+    @value = N'Category Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
-    @level2name = N'intItemId'
+    @level2name = N'intCategoryId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Unit Measure Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'intUnitMeasureId'
 GO
@@ -74,7 +74,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'dblUnitQty'
 GO
@@ -83,7 +83,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'dblSellQty'
 GO
@@ -92,7 +92,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'dblWeight'
 GO
@@ -101,7 +101,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'strDescription'
 GO
@@ -110,7 +110,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'strUpcCode'
 GO
@@ -119,7 +119,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'ysnStockUnit'
 GO
@@ -128,7 +128,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'ysnAllowPurchase'
 GO
@@ -137,7 +137,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'ysnAllowSale'
 GO
@@ -146,16 +146,25 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'dblLength'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Width',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICCategoryUOM',
+    @level2type = N'COLUMN',
+    @level2name = N'dblWidth'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Height',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'dblHeight'
 GO
@@ -164,7 +173,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'dblVolume'
 GO
@@ -173,7 +182,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'dblMaxQty'
 GO
@@ -182,25 +191,25 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'intSort'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Width',
+    @value = N'Concurrency Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
-    @level2name = N'dblWidth'
+    @level2name = N'intConcurrencyId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Weight Unit of Measure Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'intWeightUOMId'
 GO
@@ -209,7 +218,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'intDimensionUOMId'
 GO
@@ -218,6 +227,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
-    @level1name = N'tblICItemUOM',
+    @level1name = N'tblICCategoryUOM',
     @level2type = N'COLUMN',
     @level2name = N'intVolumeUOMId'
