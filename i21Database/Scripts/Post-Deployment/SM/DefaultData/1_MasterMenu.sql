@@ -1413,6 +1413,15 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'General Journal' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.GeneralJournal'
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Account Structure' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountStructure'
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Clone Account' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountClone'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'GL Account Detail' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.GLAccountDetail'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Reminder List' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.ReminderList'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Import Budget from CSV' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.ImportBudgetFromCSV'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Import GL from CSV' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.ImportFromCSV'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'GL Import Logs' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.ImportLogs'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Import GL from Subledger' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.ImportFromSubledger'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Segment Accounts' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.SegmentAccounts'
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Build Accounts' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.BuildAccounts'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.BatchPosting' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.GLBatchPosting'
 
 	/* ---------------------------------------- */
 	/* --   End General Ledger Module Menu   -- */
