@@ -72,5 +72,7 @@ SELECT	[intItemId]						= @intItemId
 		,[dtmCreated]					= GETDATE()
 		,[intCreatedUserId]				= @intUserId
 		,[intConcurrencyId]				= 1
+WHERE	@intItemId IS NOT NULL
+		AND @intItemLocationId IS NOT NULL 
 
 SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
