@@ -6,7 +6,10 @@
 	AS
 BEGIN
 
-	DECLARE @NewInvoiceId INT
+	DECLARE @NewInvoiceId INT,
+			@DateOnly DATETIME
+			
+	SELECT @DateOnly = CAST(GETDATE() as date)
 	
 	INSERT INTO tblARInvoice
 		([intCustomerId]
@@ -46,23 +49,23 @@ BEGIN
 	)
 	SELECT
 		[intCustomerId]
-		,GETDATE() --Date
-		,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
-		,GETDATE() --Post Date
+		,@DateOnly --Date
+		,[dbo].fnGetDueDateBasedOnTerm(@DateOnly,intTermId) --Due Date
+		,@DateOnly --Post Date
 		,[intCurrencyId]
 		,[intCompanyLocationId]
 		,[intSalespersonId]
-		,GETDATE() --Ship Date
+		,@DateOnly --Ship Date
 		,[intShipViaId]
 		,[strPONumber]
 		,[intTermId]
-		,[dblSalesOrderSubtotal]
-		,[dblShipping]
-		,[dblTax]
-		,[dblSalesOrderTotal]
-		,[dblDiscount]
-		,[dblAmountDue]
-		,[dblPayment]
+		,ROUND([dblSalesOrderSubtotal],2)
+		,ROUND([dblShipping],2)
+		,ROUND([dblTax],2)
+		,ROUND([dblSalesOrderTotal],2)
+		,ROUND([dblDiscount],2)
+		,ROUND([dblAmountDue],2)
+		,ROUND([dblPayment],2)
 		,'Invoice'
 		,0 --Payment Method
 		,[intAccountId]
@@ -108,8 +111,8 @@ BEGIN
 		,intItemUOMId
 		,dblQtyOrdered
 		,dblQtyOrdered
-		,dblPrice
-		,dblTotal
+		,ROUND(dblPrice,2)
+		,ROUND(dblTotal,2)
 		,intAccountId
 	    ,intCOGSAccountId
 		,intSalesAccountId

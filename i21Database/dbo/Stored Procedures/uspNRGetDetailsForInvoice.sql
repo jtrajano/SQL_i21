@@ -22,9 +22,9 @@ BEGIN
 			BEGIN
 				SELECT * FROM 
 				(
-					Select 0 [intInvoiceId]
+					Select DISTINCT 0 [intInvoiceId]
 					, a.ptivc_invc_no [strInvoiceNumber]
-					, CAST(a.ptivc_rev_dt as nvarchar )  [dtmDate]
+					, CONVERT(Date, CAST(a.ptivc_rev_dt as nvarchar ))  [dtmDate]
 					, CASE WHEN a.ptivc_type = 'I'  
 							THEN (isnull(a.ptivc_bal_due,0) - isnull(b.ptpye_amt,0)) 
 							ELSE (isnull(c.ptcrd_amt,0) - isnull(c.ptcrd_amt_used,0) - isnull(b.ptpye_amt,0)) 
@@ -53,9 +53,9 @@ BEGIN
 			BEGIN
 				SELECT * FROM 
 				(
-					Select 0 [intInvoiceId]
+					Select DISTINCT 0 [intInvoiceId]
 					, a.agivc_ivc_no [strInvoiceNumber]
-					, CAST(a.agivc_rev_dt as nvarchar )  [dtmDate]
+					, CONVERT(Date, CAST(a.agivc_rev_dt as nvarchar ))  [dtmDate]
 					, CASE WHEN a.agivc_type = 'I'  
 							THEN (isnull(a.agivc_bal_due,0) - isnull(b.agpye_amt,0)) 
 							ELSE (isnull(c.agcrd_amt,0) - isnull(c.agcrd_amt_used,0) - isnull(b.agpye_amt,0)) 

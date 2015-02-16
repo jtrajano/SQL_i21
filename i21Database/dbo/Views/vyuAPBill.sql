@@ -20,13 +20,13 @@ FROM
 	ON A.intVendorId = B.intVendorId
 	INNER JOIN tblGLAccount C
 		ON A.intAccountId = C.intAccountId
-	LEFT JOIN
+	OUTER APPLY
 	(
-		SELECT
-		D.intBillId
-		,E.strPaymentInfo
-		,ROW_NUMBER() OVER(PARTITION BY D.intBillId ORDER BY E.dtmDatePaid DESC) AS Id
+		SELECT TOP 1
+			D.intBillId
+			,E.strPaymentInfo
 		FROM tblAPPaymentDetail D
 			INNER JOIN tblAPPayment E ON D.intPaymentId = E.intPaymentId
-		WHERE E.ysnPosted = 1
-	) AS Payment ON A.intBillId = Payment.intBillId AND Id = 1 --get only the latest payment info
+		WHERE E.ysnPosted = 1 AND A.intBillId = D.intBillId
+		ORDER BY intBillId, E.dtmDatePaid DESC --get only the latest payment
+	) Payment

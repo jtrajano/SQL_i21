@@ -84,7 +84,7 @@ IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
 			#tmpPostInvoiceData I
 				ON GL.intTransactionId = I.intInvoiceId 
 		WHERE
-			GL.strTransactionType IN ('Credit Memo','Invoice')
+			GL.strTransactionType IN ('Credit Memo','Invoice', 'Overpayment')
 			AND	GL.strModuleName = @MODULE_NAME
 	END
 
@@ -500,17 +500,14 @@ BEGIN
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,IP.intItemUnitMeasureId AS intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
 		INNER JOIN
-			tblICItemLocation IL
-				ON ST.intLocationId = IL.intLocationId	
-		INNER JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON	ST.intItemId = IP.intItemId 
-				AND IL.intItemLocationId = IP.intItemLocationId
+				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
 			AND B.intCompanyLocationId = IP.intLocationId
@@ -568,17 +565,14 @@ BEGIN
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,IP.intItemUnitMeasureId as intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
 		INNER JOIN
-			tblICItemLocation IL
-				ON ST.intLocationId = IL.intLocationId	
-		INNER JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON	ST.intItemId = IP.intItemId 
-				AND IL.intItemLocationId = IP.intItemLocationId
+				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
 			AND B.intCompanyLocationId = IP.intLocationId
@@ -1120,17 +1114,14 @@ ELSE
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,IP.intItemUnitMeasureId as intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
 		INNER JOIN
-			tblICItemLocation IL
-				ON ST.intLocationId = IL.intLocationId	
-		INNER JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON	ST.intItemId = IP.intItemId 
-				AND IL.intItemLocationId = IP.intItemLocationId
+				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
 			AND B.intCompanyLocationId = IP.intLocationId
@@ -1189,17 +1180,14 @@ ELSE
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,IP.intItemUnitMeasureId as intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
 		INNER JOIN
-			tblICItemLocation IL
-				ON ST.intLocationId = IL.intLocationId	
-		INNER JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON	ST.intItemId = IP.intItemId 
-				AND IL.intItemLocationId = IP.intItemLocationId
+				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
 			AND B.intCompanyLocationId = IP.intLocationId

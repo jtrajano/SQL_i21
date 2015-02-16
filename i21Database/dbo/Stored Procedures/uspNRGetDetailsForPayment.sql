@@ -30,7 +30,7 @@ BEGIN
  , @strSchdLateAppliedOn = strSchdLateAppliedOn, @dblSchdLateFee = dblSchdLateFee    
  FROM dbo.tblNRNote WHERE intNoteId = @intNoteId      
    
- DECLARE @tbl AS TABLE (intPaymentNumber int, dtmExpectedPayDate Date, dblAmount numeric(18,6), dblLateCharge numeric(18,6) )    
+ DECLARE @tbl AS TABLE (intPaymentNumber int, dtmExpectedPayDate Date, dblAmount numeric(18,2), dblLateCharge numeric(18,6) )    
     
  DECLARE curCalcInt CURSOR FOR      
  SELECT intPaymentNo       
@@ -165,3 +165,4 @@ WHERE intNoteId = @intNoteId  and dtmExpectedPayDate <= GETDATE()
 	
 
 End
+

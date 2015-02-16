@@ -805,14 +805,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\i21Database\i21Database.sqlproj">
-      <Name>i21Database</Name>
-      <Project>{2e49b212-114b-4cfd-a343-2a2061e987bc}</Project>
-      <Private>True</Private>
-      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
   </ItemGroup>
   <ItemGroup>

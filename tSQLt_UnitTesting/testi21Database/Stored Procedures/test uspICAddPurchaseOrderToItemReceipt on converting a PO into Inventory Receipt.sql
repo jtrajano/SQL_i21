@@ -95,7 +95,7 @@ BEGIN
 				,dblReceived
 				,intUnitMeasureId
 				,intNoPackages
-				,intPackTypeId
+				--,intPackTypeId
 				,dblExpPackageWeight
 				,dblUnitCost
 				,dblLineTotal
@@ -143,7 +143,7 @@ BEGIN
 				,dblReceived = 0
 				,intUnitMeasureId = @UOMBushel
 				,intNoPackages = 0
-				,intPackTypeId = 0 
+				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 50.00
 				,dblLineTotal = 0
@@ -159,7 +159,7 @@ BEGIN
 				,dblReceived = 0
 				,intUnitMeasureId = @UOMBushel
 				,intNoPackages = 0
-				,intPackTypeId = 0 
+				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 100.00
 				,dblLineTotal = 0
@@ -175,7 +175,7 @@ BEGIN
 				,dblReceived = 0
 				,intUnitMeasureId = @UOMBushel
 				,intNoPackages = 0
-				,intPackTypeId = 0 
+				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 200.00
 				,dblLineTotal = 0
@@ -191,7 +191,7 @@ BEGIN
 				,dblReceived = 0
 				,intUnitMeasureId = @UOMBushel
 				,intNoPackages = 0
-				,intPackTypeId = 0 
+				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 125.00
 				,dblLineTotal = 0
@@ -238,7 +238,7 @@ BEGIN
 				,dblReceived
 				,intUnitMeasureId
 				,intNoPackages
-				,intPackTypeId
+				--,intPackTypeId
 				,dblExpPackageWeight
 				,dblUnitCost
 				,dblLineTotal

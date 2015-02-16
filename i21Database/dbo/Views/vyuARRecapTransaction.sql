@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARRecapTransaction]
 WITH SCHEMABINDING
-AS
+AS 
 
 SELECT
 A.dblCredit
@@ -36,4 +36,3 @@ INNER JOIN dbo.tblGLAccount B
 	ON A.intAccountId = B.intAccountId
 INNER JOIN dbo.tblGLAccountGroup C
 	ON B.intAccountGroupId = C.intAccountGroupId
-
