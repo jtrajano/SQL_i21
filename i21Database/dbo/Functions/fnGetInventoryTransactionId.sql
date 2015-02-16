@@ -12,10 +12,16 @@ CREATE FUNCTION [dbo].[fnGetInventoryTransactionId] (
 RETURNS TABLE 
 AS 
 
-RETURN 
-SELECT	intInventoryTransactionId
-FROM	dbo.tblICInventoryTransaction
-WHERE	strTransactionId = @strId
-		AND intTransactionId = @intId
-		AND intItemId = @intItemId
-		AND intItemLocationId = @intItemLocationId
+RETURN
+
+SELECT	InventoryTransaction.intInventoryTransactionId
+FROM	dbo.tblICInventoryTransaction InventoryTransaction INNER JOIN dbo.tblICInventoryTransactionType InventoryTransactionType
+			ON InventoryTransaction.intTransactionTypeId = InventoryTransactionType.intTransactionTypeId
+WHERE	InventoryTransaction.strTransactionId = @strId
+		AND InventoryTransaction.intTransactionId = @intId
+		AND InventoryTransaction.intItemId = @intItemId
+		AND InventoryTransaction.intItemLocationId = @intItemLocationId
+		AND ISNULL(InventoryTransaction.ysnIsUnposted, 0) = 0
+		AND InventoryTransactionType.strName IN (
+			'Inventory Receipt', 'Inventory Shipment', 'Purchase Order', 'Sales Order'
+		)

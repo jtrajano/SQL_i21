@@ -290,52 +290,7 @@ BEGIN
 					AND TRANS.intItemLocationId = @intItemLocationId
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
-					AND @NewFifoId IS NOT NULL  
-
-		-- Add Auto Negative (if current stock qty is still negative after adding it) 
-		--INSERT INTO dbo.tblICInventoryTransaction (
-		--		[intItemId] 
-		--		,[intItemLocationId] 
-		--		,[dtmDate] 
-		--		,[dblUnitQty] 
-		--		,[dblCost] 
-		--		,[dblValue]
-		--		,[dblSalesPrice] 
-		--		,[intCurrencyId] 
-		--		,[dblExchangeRate] 
-		--		,[intTransactionId] 
-		--		,[strTransactionId] 
-		--		,[strBatchId] 
-		--		,[intTransactionTypeId] 
-		--		,[strTransactionForm]
-		--		,[dtmCreated] 
-		--		,[intCreatedUserId] 
-		--		,[intConcurrencyId] 
-		--)
-		--SELECT	[intItemId] = @intItemId
-		--		,[intItemLocationId] = @intItemLocationId
-		--		,[dtmDate] = @dtmDate
-		--		,[dblUnitQty] = 0
-		--		,[dblCost] = 0
-		--		,[dblValue] = 
-		--					(((@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand) * @dblCost) 
-		--					- [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intItemLocationId)
-		--		,[dblSalesPrice] = @dblSalesPrice
-		--		,[intCurrencyId] = @intCurrencyId
-		--		,[dblExchangeRate] = @dblExchangeRate
-		--		,[intTransactionId] = @intTransactionId
-		--		,[strTransactionId] = @strTransactionId
-		--		,[strBatchId] = @strBatchId
-		--		,[intTransactionTypeId] = @Inventory_Auto_Negative
-		--		,[strTransactionForm] = @TransactionTypeName
-		--		,[dtmCreated] = GETDATE()
-		--		,[intCreatedUserId] = @intUserId
-		--		,[intConcurrencyId] = 1
-		--FROM	[dbo].[tblICItemStock] Stock
-		--WHERE	(@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand < 0 
-		--		AND (@dblUnitQty * @dblUOMQty) > 0 
-		--		AND Stock.intItemId = @intItemId
-		--		AND Stock.intItemLocationId = @intItemLocationId	
+					AND @NewFifoId IS NOT NULL  	
 
 		SET @dblValue = 0
 		SELECT	@dblValue = (((@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand) * @dblCost) 

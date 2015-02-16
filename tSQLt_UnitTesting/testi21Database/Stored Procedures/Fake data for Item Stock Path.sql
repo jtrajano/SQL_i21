@@ -35,7 +35,7 @@ BEGIN
 				|
 				+--- INVSHIP-0003 (id: 8, Another partial shipment for SO-0002)
 						|
-						+--- SO-0002 (id: 9)
+						+--- SO-0002 (id: 6)
 	*/
 	DECLARE @WetGrains AS INT = 1
 	DECLARE @WetGrains_NewHaven AS INT = 6
@@ -62,6 +62,7 @@ BEGIN
 		,ysnIsUnposted
 		,intTransactionTypeId
 	)
+	-- intInventoryTransactionId: 1
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/01/2014'
@@ -74,6 +75,7 @@ BEGIN
 			,intTransactionId = 1
 			,ysnIsUnposted = 0
 			,intTransactionTypeId = @PuchaseOrder
+	-- intInventoryTransactionId: 2
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
@@ -87,6 +89,7 @@ BEGIN
 			,intTransactionId = 1
 			,ysnIsUnposted = 0
 			,intTransactionTypeId = @InventoryReceipt
+	-- intInventoryTransactionId: 3
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
@@ -100,6 +103,7 @@ BEGIN
 			,intTransactionId = 1
 			,ysnIsUnposted = 0
 			,intTransactionTypeId = @InventoryShipment
+	-- intInventoryTransactionId: 4
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
@@ -113,6 +117,7 @@ BEGIN
 			,intTransactionId = 1
 			,ysnIsUnposted = 0
 			,intTransactionTypeId = @SalesOrder
+	-- intInventoryTransactionId: 5
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
@@ -126,6 +131,7 @@ BEGIN
 			,intTransactionId = 2
 			,ysnIsUnposted = 0
 			,intTransactionTypeId = @InventoryShipment
+	-- intInventoryTransactionId: 6
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
@@ -139,6 +145,7 @@ BEGIN
 			,intTransactionId = 2
 			,ysnIsUnposted = 0
 			,intTransactionTypeId = @SalesOrder
+	-- intInventoryTransactionId: 7
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
@@ -152,6 +159,7 @@ BEGIN
 			,intTransactionId = 2
 			,ysnIsUnposted = 0
 			,intTransactionTypeId = @InventoryReceipt
+	-- intInventoryTransactionId: 8
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
@@ -164,5 +172,65 @@ BEGIN
 			,strTransactionId = 'INVSHIP-0003'
 			,intTransactionId = 3
 			,ysnIsUnposted = 0
+			,intTransactionTypeId = @InventoryShipment
+
+	-- intInventoryTransactionId: 9
+	UNION ALL 
+	SELECT	intItemId = @WetGrains
+			,intItemLocationId = @WetGrains_NewHaven
+			,dtmDate = '01/05/2014'
+			,dblUnitQty = -30
+			,dblCost = 2.00
+			,dblValue = 0
+			,dblSalesPrice = 17.00
+			,strBatchId = 'BATCH-0003'
+			,strTransactionId = 'INVSHIP-0002'
+			,intTransactionId = 2
+			,ysnIsUnposted = 0
+			,intTransactionTypeId = @InventoryAutoNegative
+
+	-- intInventoryTransactionId: 10
+	UNION ALL 
+	SELECT	intItemId = @WetGrains
+			,intItemLocationId = @WetGrains_NewHaven
+			,dtmDate = '01/05/2014'
+			,dblUnitQty = -30
+			,dblCost = 2.00
+			,dblValue = 0
+			,dblSalesPrice = 17.00
+			,strBatchId = 'BATCH-0003'
+			,strTransactionId = 'INVSHIP-0002'
+			,intTransactionId = 2
+			,ysnIsUnposted = 0
+			,intTransactionTypeId = @InventoryWriteOffSold
+
+	-- intInventoryTransactionId: 11
+	UNION ALL 
+	SELECT	intItemId = @WetGrains
+			,intItemLocationId = @WetGrains_NewHaven
+			,dtmDate = '01/05/2014'
+			,dblUnitQty = -30
+			,dblCost = 2.00
+			,dblValue = 0
+			,dblSalesPrice = 17.00
+			,strBatchId = 'BATCH-0003'
+			,strTransactionId = 'INVSHIP-0002'
+			,intTransactionId = 2
+			,ysnIsUnposted = 0
+			,intTransactionTypeId = @InventoryRevalueSold
+
+	-- intInventoryTransactionId: 12 (Unposted INVSHIP-0002)
+	UNION ALL 
+	SELECT	intItemId = @WetGrains
+			,intItemLocationId = @WetGrains_NewHaven
+			,dtmDate = '01/05/2014'
+			,dblUnitQty = -30
+			,dblCost = 2.00
+			,dblValue = 0
+			,dblSalesPrice = 17.00
+			,strBatchId = 'BATCH-0003'
+			,strTransactionId = 'INVSHIP-0002'
+			,intTransactionId = 2
+			,ysnIsUnposted = 1
 			,intTransactionTypeId = @InventoryShipment
 END 
