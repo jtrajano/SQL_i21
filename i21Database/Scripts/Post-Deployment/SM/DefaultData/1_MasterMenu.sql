@@ -1689,6 +1689,19 @@ GO
 	SET @ARMaintenanceId = (SELECT TOP 1 intMenuID FROM [tblSMMasterMenu] WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARModuleId)
 
 	/*---------------------------------  */
+	/*-- START Update AR Activitie Menu */
+	/*---------------------------------  */
+		SET @ARMenuName = 'Batch Posting'
+		SET @ARCommand ='AccountsReceivable.view.BatchPosting'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARActivitiesId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARActivitiesId
+		END
+	/*---------------------------------  */
+	/*-- END Update AR Activitie Menu */
+	/*---------------------------------  */	
+	
+	/*---------------------------------  */
 	/*-- START Update AR Maintenance Menu */
 	/*---------------------------------  */
 		SET @ARMenuName = 'Market Zone'
