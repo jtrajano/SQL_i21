@@ -26,8 +26,6 @@ Type the overview for the table here.
 		[dblStandardCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblAverageCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblEndMonthCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dtmBeginDate] DATETIME NULL DEFAULT getdate(),
-		[dtmEndDate] DATETIME NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemPricing] PRIMARY KEY ([intItemPricingId]), 
@@ -184,20 +182,6 @@ Type the overview for the table here.
 	GO
 	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Begin Date',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemPricing',
-		@level2type = N'COLUMN',
-		@level2name = N'dtmBeginDate'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'End Date',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemPricing',
-		@level2type = N'COLUMN',
-		@level2name = N'dtmEndDate'
+	

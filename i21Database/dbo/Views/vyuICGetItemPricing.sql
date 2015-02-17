@@ -29,8 +29,6 @@ ItemPricing.dblLastCost,
 ItemPricing.dblStandardCost,
 ItemPricing.dblAverageCost,
 ItemPricing.dblEndMonthCost,
-ItemPricing.dtmBeginDate,
-ItemPricing.dtmEndDate,
 ItemPricing.intSort
 FROM vyuICGetItemStock Item
 INNER JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Item.intItemId and ItemPricing.intItemLocationId = Item.intItemLocationId
