@@ -1059,6 +1059,7 @@
     <Build Include="dbo\Tables\tblMFRecipeItemType.sql" />
     <Build Include="dbo\Tables\tblMFRecipeSubstituteItem.sql" />
     <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
+    <Build Include="dbo\Views\vyuHDProjectSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

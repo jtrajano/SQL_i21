@@ -6,8 +6,6 @@
 	[intCustomerId] [int] NOT NULL,
 	[intCustomerContactId] [int] NOT NULL,
 	[intTicketTypeId] [int] NOT NULL,
-	[intTicketProductId] [int] NOT NULL,
-	[intVersionId] [int] NOT NULL,
 	[dtmGoLive] [datetime] NULL,
 	[intPercentComplete] [int] NULL,
 	[ysnCompleted] [bit] NULL,
@@ -19,9 +17,7 @@
 	CONSTRAINT [UNQ_ProjectName] UNIQUE ([strProjectName]),
     CONSTRAINT [FK_Project_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intCustomerId]),
     CONSTRAINT [FK_Project_Contact] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].[tblEntityContact] ([intContactId]),
-    CONSTRAINT [FK_Project_TicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId]),
-    CONSTRAINT [FK_Project_TicketProduct] FOREIGN KEY ([intTicketProductId]) REFERENCES [dbo].[tblHDTicketProduct] ([intTicketProductId]),
-    CONSTRAINT [FK_Version_Version] FOREIGN KEY ([intVersionId]) REFERENCES [dbo].[tblHDVersion] ([intVersionId])
+    CONSTRAINT [FK_Project_TicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId])
 )
 
 GO
@@ -78,24 +74,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDProject',
     @level2type = N'COLUMN',
     @level2name = N'intTicketTypeId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Ticket Product Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblHDProject',
-    @level2type = N'COLUMN',
-    @level2name = N'intTicketProductId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Version Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblHDProject',
-    @level2type = N'COLUMN',
-    @level2name = N'intVersionId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Go Live Date',
