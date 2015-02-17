@@ -344,9 +344,9 @@
                             "userConfig": {
                                 "allowDecimals": false,
                                 "allowExponential": false,
-                                "fieldLabel": "Decimal Places for Calculatation",
+                                "fieldLabel": "Decimal Places for Calculation",
                                 "hideTrigger": true,
-                                "itemId": "txtDecimalPlacesForCalculatation",
+                                "itemId": "txtDecimalPlacesForCalculation",
                                 "labelWidth": 180,
                                 "layout|flex": 1.2,
                                 "margin": "0 0 0 5",
@@ -541,39 +541,6 @@
                                     },
                                     "name": "MyNumberField",
                                     "designerId": "10387d1c-7339-49cb-8056-b7c7553dc68b"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.grid.column.Number",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "dataIndex": "string",
-                                "flex": null,
-                                "itemId": "colConversionFromStockUOM",
-                                "minWidth": 110,
-                                "text": "Conversion From",
-                                "width": 110
-                            },
-                            "name": "MyNumberColumn2",
-                            "designerId": "daa83075-b606-4528-bc24-5de3ad0430a1",
-                            "cn": [
-                                {
-                                    "type": "Ext.form.field.Number",
-                                    "reference": {
-                                        "name": "editor",
-                                        "type": "object"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "itemId": "txtConvertFromStock"
-                                    },
-                                    "name": "MyNumberField1",
-                                    "designerId": "3816c14f-dfa1-4f99-a542-6bd88dcafc5b"
                                 }
                             ]
                         },

@@ -205,9 +205,9 @@ Ext.define('Inventory.view.InventoryUOM', {
                                     {
                                         xtype: 'numberfield',
                                         flex: 1.2,
-                                        itemId: 'txtDecimalPlacesForCalculatation',
+                                        itemId: 'txtDecimalPlacesForCalculation',
                                         margin: '0 0 0 5',
-                                        fieldLabel: 'Decimal Places for Calculatation',
+                                        fieldLabel: 'Decimal Places for Calculation',
                                         labelWidth: 180,
                                         hideTrigger: true,
                                         allowDecimals: false,
@@ -308,18 +308,6 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         editor: {
                                             xtype: 'numberfield',
                                             itemId: 'txtConvertToStock'
-                                        }
-                                    },
-                                    {
-                                        xtype: 'numbercolumn',
-                                        itemId: 'colConversionFromStockUOM',
-                                        minWidth: 110,
-                                        width: 110,
-                                        dataIndex: 'string',
-                                        text: 'Conversion From',
-                                        editor: {
-                                            xtype: 'numberfield',
-                                            itemId: 'txtConvertFromStock'
                                         }
                                     }
                                 ],

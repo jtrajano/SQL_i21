@@ -12,21 +12,21 @@ using IdeaBlade.Linq;
 
 namespace iRely.Inventory.BRL
 {
-    public class ItemUnitMeasure : IDisposable
+    public class CategoryUOM : IDisposable
     {
         private Repository _db;
 
-        public ItemUnitMeasure()
+        public CategoryUOM()
         {
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICItemUOM> GetSearchQuery()
+        public IQueryable<tblICCategoryUOM> GetSearchQuery()
         {
-            return _db.GetQuery<tblICItemUOM>();
+            return _db.GetQuery<tblICCategoryUOM>();
         }
 
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICItemUOM, bool>> predicate)
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICCategoryUOM, bool>> predicate)
         {
             return GetSearchQuery()
                 .Where(predicate)
@@ -37,39 +37,39 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICItemUOM, bool>> predicate)
+        public int GetCount(Expression<Func<tblICCategoryUOM, bool>> predicate)
         {
             return GetSearchQuery().Where(predicate).Count();
         }
 
-        public IQueryable<tblICItemUOM> GetItemUnitMeasures(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICItemUOM, bool>> predicate)
+        public IQueryable<tblICCategoryUOM> GetCategoryUOMs(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICCategoryUOM, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
-            return _db.GetQuery<tblICItemUOM>()
+            return _db.GetQuery<tblICCategoryUOM>()
                 .Include(p => p.tblICUnitMeasure)
                 .Include(p => p.WeightUOM)
                 .Include(p => p.DimensionUOM)
                 .Include(p => p.VolumeUOM)
-                .Where(w => query.Where(predicate).Any(a => a.intItemUOMId == w.intItemUOMId)) //Filter the Main DataSource Based on Search Query
+                .Where(w => query.Where(predicate).Any(a => a.intCategoryUOMId == w.intCategoryUOMId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)
                 .Take(limit)
                 .AsNoTracking();
         }
 
-        public void AddItemUnitMeasure(tblICItemUOM uom)
+        public void AddCategoryUOM(tblICCategoryUOM uom)
         {
-            _db.AddNew<tblICItemUOM>(uom);
+            _db.AddNew<tblICCategoryUOM>(uom);
         }
 
-        public void UpdateItemUnitMeasure(tblICItemUOM uom)
+        public void UpdateCategoryUOM(tblICCategoryUOM uom)
         {
-            _db.UpdateBatch<tblICItemUOM>(uom);
+            _db.UpdateBatch<tblICCategoryUOM>(uom);
         }
 
-        public void DeleteItemUnitMeasure(tblICItemUOM uom)
+        public void DeleteCategoryUOM(tblICCategoryUOM uom)
         {
-            _db.Delete<tblICItemUOM>(uom);
+            _db.Delete<tblICCategoryUOM>(uom);
         }
 
         public SaveResult Save(bool continueOnConflict)

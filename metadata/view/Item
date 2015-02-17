@@ -554,7 +554,7 @@
                                                                 "displayField": "strBrandCode",
                                                                 "fieldLabel": "Brand",
                                                                 "itemId": "cboBrand",
-                                                                "labelWidth": 40,
+                                                                "labelWidth": 80,
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
                                                                 "margin": "0 0 0 5",
@@ -635,6 +635,24 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "displayField": "strLotTracking",
+                                                                "fieldLabel": "Lot Tracking",
+                                                                "itemId": "cboLotTracking",
+                                                                "labelWidth": 80,
+                                                                "layout|flex": 1,
+                                                                "valueField": "strLotTracking"
+                                                            },
+                                                            "name": "MyComboBox6",
+                                                            "designerId": "3a43a43f-e0cb-4c25-8d07-ede2f4b76de2"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
                                                                 "columns": [
                                                                     "[",
                                                                     "    {",
@@ -663,6 +681,7 @@
                                                                 "labelWidth": 80,
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 0 0 5",
                                                                 "valueField": "strDescription"
                                                             },
                                                             "name": "MyComboBox7",
@@ -677,25 +696,6 @@
                                                                     "type": "string"
                                                                 }
                                                             ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "displayField": "strLotTracking",
-                                                                "fieldLabel": "Lot Tracking",
-                                                                "itemId": "cboLotTracking",
-                                                                "labelWidth": 80,
-                                                                "layout|flex": 1,
-                                                                "margin": "0 0 0 5",
-                                                                "valueField": "strLotTracking"
-                                                            },
-                                                            "name": "MyComboBox6",
-                                                            "designerId": "3a43a43f-e0cb-4c25-8d07-ede2f4b76de2"
                                                         }
                                                     ]
                                                 }
@@ -973,6 +973,85 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "dataIndex": "intUnitMeasureId",
+                                                "flex": 1.3,
+                                                "itemId": "colDetailWeightUOM",
+                                                "minWidth": 95,
+                                                "text": "Weight UOM"
+                                            },
+                                            "name": "MyColumn35",
+                                            "designerId": "c79dfa0e-e61a-4014-9358-8f7cc484cc3c",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "    {",
+                                                            "        dataIndex: 'intUnitMeasureId',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Unit Of Measure ID',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strUnitMeasure',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Unit Measure',",
+                                                            "        flex: 1",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strUnitType',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Unit Type',",
+                                                            "        flex: 1",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'intDecimalCalculation',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Decimal Places for Calculation',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'intDecimalDisplay',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Decimal Places for Display',",
+                                                            "        hidden: true",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUnitMeasure",
+                                                        "itemId": "cboDetailWeightUOM",
+                                                        "valueField": "strUnitMeasure"
+                                                    },
+                                                    "name": "MyComboBox1",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "93c97bea-e1d2-481d-80a6-837e8dbdf247",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 2,
                                                 "itemId": "colDetailDescription",
@@ -1188,6 +1267,85 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "intUnitMeasureId",
+                                                "flex": 1.3,
+                                                "itemId": "colDetailDimensionUOM",
+                                                "minWidth": 95,
+                                                "text": "Dimension UOM"
+                                            },
+                                            "name": "MyColumn48",
+                                            "designerId": "e524c75d-940b-45a0-876c-320d959319c1",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "    {",
+                                                            "        dataIndex: 'intUnitMeasureId',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Unit Of Measure ID',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strUnitMeasure',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Unit Measure',",
+                                                            "        flex: 1",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strUnitType',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Unit Type',",
+                                                            "        flex: 1",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'intDecimalCalculation',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Decimal Places for Calculation',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'intDecimalDisplay',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Decimal Places for Display',",
+                                                            "        hidden: true",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUnitMeasure",
+                                                        "itemId": "cboDetailDimensionUOM",
+                                                        "valueField": "strUnitMeasure"
+                                                    },
+                                                    "name": "MyComboBox1",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "60d349f3-c258-464f-b2c8-9c22e46e4e84",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -1218,6 +1376,85 @@
                                                     },
                                                     "name": "MyNumberField9",
                                                     "designerId": "43ff5aef-d466-4870-8760-500645106a64"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "intUnitMeasureId",
+                                                "flex": 1.3,
+                                                "itemId": "colDetailVolumeUOM",
+                                                "minWidth": 95,
+                                                "text": "Volume UOM"
+                                            },
+                                            "name": "MyColumn50",
+                                            "designerId": "66431ad3-8851-4a73-98af-6df9ec8e89f9",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "    {",
+                                                            "        dataIndex: 'intUnitMeasureId',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Unit Of Measure ID',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strUnitMeasure',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Unit Measure',",
+                                                            "        flex: 1",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strUnitType',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Unit Type',",
+                                                            "        flex: 1",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'intDecimalCalculation',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Decimal Places for Calculation',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'intDecimalDisplay',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Decimal Places for Display',",
+                                                            "        hidden: true",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUnitMeasure",
+                                                        "itemId": "cboDetailVolumeUOM",
+                                                        "valueField": "strUnitMeasure"
+                                                    },
+                                                    "name": "MyComboBox1",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "553c54ab-758a-447e-9809-5ece680816ca",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },

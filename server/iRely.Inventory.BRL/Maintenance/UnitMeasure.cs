@@ -55,11 +55,11 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICUnitMeasure>()
                     .Include("tblICUnitMeasureConversions.StockUnitMeasure")
+                    .Include("ConversionFactors.ConversionTo")
                     .Where(w => query.Where(predicate).Any(a => a.intUnitMeasureId == w.intUnitMeasureId)) //Filter the Main DataSource Based on Search Query
                     .OrderBySelector(sortSelector)
                     .Skip(start)
-                    .Take(limit)
-                    .AsNoTracking();
+                    .Take(limit);
         }
 
         public IQueryable<vyuICGetPackedUOM> GetPackedUOMs(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<vyuICGetPackedUOM, bool>> predicate)

@@ -51,12 +51,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboLotTracking: {
                 value: '{current.strLotTracking}',
-                store: '{lotTrackings}',
-                readOnly: '{checkLotTrackingVisibility}'
+                store: '{lotTracking}'
             },
             cboTracking: {
                 value: '{current.strInventoryTracking}',
-                store: '{tracking}'
+                store: '{invTracking}',
+                readOnly: '{checkLotTracking}'
             },
 
             grdUnitOfMeasure: {
@@ -75,6 +75,17 @@ Ext.define('Inventory.view.ItemViewController', {
                 colDetailWeight: {
                     dataIndex: 'dblWeight'
                 },
+                colDetailWeightUOM: {
+                    dataIndex: 'strWeightUOM',
+                    editor: {
+                        store: '{weightUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: 'Weight',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colDetailDescription: 'strDescription',
                 colDetailUpcCode: 'strUpcCode',
                 colStockUnit: 'ysnStockUnit',
@@ -82,11 +93,32 @@ Ext.define('Inventory.view.ItemViewController', {
                 colAllowPurchase: 'ysnAllowPurchase',
                 colConvertToStock: 'dblConvertToStock',
                 colConvertFromStock: 'dblConvertFromStock',
-
                 colDetailLength: 'dblLength',
                 colDetailWidth: 'dblWidth',
                 colDetailHeight: 'dblHeight',
+                colDetailDimensionUOM: {
+                    dataIndex: 'strDimensionUOM',
+                    editor: {
+                        store: '{dimensionUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: '',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colDetailVolume: 'dblVolume',
+                colDetailVolumeUOM: {
+                    dataIndex: 'strVolumeUOM',
+                    editor: {
+                        store: '{volumeUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: 'Volume',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colDetailMaxQty: 'dblMaxQty'
             },
 
@@ -1443,14 +1475,16 @@ Ext.define('Inventory.view.ItemViewController', {
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
-            var selModel = grid.getSelectionModel();
 
-            var current = selModel.getSelection()[0];
+            var current = grid.view.getRecord(rowIndex);
 
             if (checked === true){
                 var uoms = grid.store.data.items;
                 uoms.forEach(function(uom){
-                    if (uom !== current && uom.dummy !== true){
+                    if (uom === current){
+                        current.set('dblUnitQty', 1);
+                    }
+                    if (uom !== current){
                         uom.set('ysnStockUnit', false);
                         uom.set('ysnAllowPurchase', false);
                         uom.set('ysnAllowSale', false);
@@ -1461,6 +1495,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 if (current){
                     current.set('ysnAllowPurchase', false);
                     current.set('ysnAllowSale', false);
+                    current.set('dblUnitQty', 1);
                 }
             }
         }

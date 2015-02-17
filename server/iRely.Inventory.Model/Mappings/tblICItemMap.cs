@@ -244,7 +244,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblEndMonthCost).HasColumnName("dblEndMonthCost");
             this.Property(t => t.dblLargeVolumePrice).HasColumnName("dblLargeVolumePrice");
             this.Property(t => t.dblLastCost).HasColumnName("dblLastCost");
-            this.Property(t => t.dblMovingAverageCost).HasColumnName("dblMovingAverageCost");
+            this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost");
             this.Property(t => t.dblMSRPPrice).HasColumnName("dblMSRPPrice");
             this.Property(t => t.dblRetailPrice).HasColumnName("dblRetailPrice");
             this.Property(t => t.dblSalePrice).HasColumnName("dblSalePrice");

@@ -16,7 +16,6 @@ Ext.define('Inventory.model.PackedUOM', {
         { name: 'strSymbol', type: 'string' },
         { name: 'intStockUnitMeasureId', type: 'int', allowNull: true },
         { name: 'strConversionUOM', type: 'string' },
-        { name: 'dblConversionFromStock', type: 'float' },
         { name: 'dblConversionToStock', type: 'float' }
     ]
 });

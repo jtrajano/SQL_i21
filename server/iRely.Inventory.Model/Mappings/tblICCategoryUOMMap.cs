@@ -3,17 +3,17 @@ using System.Data.Entity.ModelConfiguration;
 
 namespace iRely.Inventory.Model
 {
-    public class tblICItemUOMMap : EntityTypeConfiguration<tblICItemUOM>
+    public class tblICCategoryUOMMap: EntityTypeConfiguration<tblICCategoryUOM>
     {
-        public tblICItemUOMMap()
+        public tblICCategoryUOMMap()
         {
             // Primary Key
-            this.HasKey(t => t.intItemUOMId);
+            this.HasKey(t => t.intCategoryUOMId);
 
             // Table & Column Mappings
-            this.ToTable("tblICItemUOM");
-            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.ToTable("tblICCategoryUOM");
+            this.Property(t => t.intCategoryUOMId).HasColumnName("intCategoryUOMId");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty");
             this.Property(t => t.dblSellQty).HasColumnName("dblSellQty");
@@ -34,16 +34,16 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasRequired(p => p.tblICUnitMeasure)
-                .WithMany(p => p.tblICItemUOMs)
+                .WithMany(p => p.tblICCategoryUOMs)
                 .HasForeignKey(p => p.intUnitMeasureId);
             this.HasOptional(p => p.WeightUOM)
-                .WithMany(p => p.WeightItemUOMs)
+                .WithMany(p => p.WeightCategoryUOMs)
                 .HasForeignKey(p => p.intWeightUOMId);
             this.HasOptional(p => p.DimensionUOM)
-                .WithMany(p => p.DimensionItemUOMs)
+                .WithMany(p => p.DimensionCategoryUOMs)
                 .HasForeignKey(p => p.intDimensionUOMId);
             this.HasOptional(p => p.VolumeUOM)
-                .WithMany(p => p.VolumeItemUOMs)
+                .WithMany(p => p.VolumeCategoryUOMs)
                 .HasForeignKey(p => p.intVolumeUOMId);
         }
     }

@@ -313,7 +313,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboBrand',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Brand',
-                                                                        labelWidth: 40,
+                                                                        labelWidth: 80,
                                                                         displayField: 'strBrandCode',
                                                                         valueField: 'intBrandId'
                                                                     }
@@ -343,6 +343,15 @@ Ext.define('Inventory.view.Item', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'combobox',
+                                                                        flex: 1,
+                                                                        itemId: 'cboLotTracking',
+                                                                        fieldLabel: 'Lot Tracking',
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strLotTracking',
+                                                                        valueField: 'strLotTracking'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
                                                                         columns: [
                                                                             {
                                                                                 dataIndex: 'intCategoryId',
@@ -365,20 +374,11 @@ Ext.define('Inventory.view.Item', {
                                                                         ],
                                                                         flex: 1,
                                                                         itemId: 'cboTracking',
+                                                                        margin: '0 0 0 5',
                                                                         fieldLabel: 'Inv. Valuation',
                                                                         labelWidth: 80,
                                                                         displayField: 'strDescription',
                                                                         valueField: 'strDescription'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        flex: 1,
-                                                                        itemId: 'cboLotTracking',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'Lot Tracking',
-                                                                        labelWidth: 80,
-                                                                        displayField: 'strLotTracking',
-                                                                        valueField: 'strLotTracking'
                                                                     }
                                                                 ]
                                                             }
@@ -496,16 +496,62 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        dataIndex: 'number',
                                                         itemId: 'colDetailWeight',
                                                         width: 62,
                                                         align: 'right',
-                                                        dataIndex: 'number',
                                                         text: 'Weight',
                                                         format: '0',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailWeightUOM',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Weight UOM',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailWeightUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
                                                         }
                                                     },
                                                     {
@@ -598,6 +644,52 @@ Ext.define('Inventory.view.Item', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailDimensionUOM',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Dimension UOM',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailDimensionUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailVolume',
                                                         width: 62,
@@ -609,6 +701,52 @@ Ext.define('Inventory.view.Item', {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailVolumeUOM',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Volume UOM',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailVolumeUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
                                                         }
                                                     },
                                                     {

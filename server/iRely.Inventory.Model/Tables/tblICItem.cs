@@ -243,7 +243,10 @@ namespace iRely.Inventory.Model
     {
         public int intPricingKey { get; set; }
         public int intKey { get; set; }
-        public int intItemPricingId { get; set; }
+        public string strDescription { get; set; }
+        public string strUpcCode { get; set; }
+        public string strUPCDescription { get; set; }
+        public int? intItemPricingId { get; set; }
         public int? intItemId { get; set; }
         public int? intLocationId { get; set; }
         public int? intItemLocationId { get; set; }
@@ -263,7 +266,7 @@ namespace iRely.Inventory.Model
         public string strPricingMethod { get; set; }
         public decimal? dblLastCost { get; set; }
         public decimal? dblStandardCost { get; set; }
-        public decimal? dblMovingAverageCost { get; set; }
+        public decimal? dblAverageCost { get; set; }
         public decimal? dblEndMonthCost { get; set; }
         public DateTime? dtmBeginDate { get; set; }
         public DateTime? dtmEndDate { get; set; }

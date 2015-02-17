@@ -14,7 +14,6 @@ namespace iRely.Inventory.Model
         public int intItemPricingId { get; set; }
         public int intItemId { get; set; }
         public int? intItemLocationId { get; set; }
-        public int? intItemUnitMeasureId { get; set; }
         public decimal? dblRetailPrice { get; set; }
         public decimal? dblWholesalePrice { get; set; }
         public decimal? dblLargeVolumePrice { get; set; }
@@ -24,10 +23,8 @@ namespace iRely.Inventory.Model
         public string strPricingMethod { get; set; }
         public decimal? dblLastCost { get; set; }
         public decimal? dblStandardCost { get; set; }
-        public decimal? dblMovingAverageCost { get; set; }
+        public decimal? dblAverageCost { get; set; }
         public decimal? dblEndMonthCost { get; set; }
-        public DateTime? dtmBeginDate { get; set; }
-        public DateTime? dtmEndDate { get; set; }
         public int? intSort { get; set; }
 
         private string _location;
@@ -49,47 +46,8 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
-        private string _unitmeasure;
-        [NotMapped]
-        public string strUnitMeasure
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_unitmeasure))
-                    if (tblICItemUOM != null)
-                        return tblICItemUOM.strUnitMeasure;
-                    else
-                        return null;
-                else
-                    return _unitmeasure;
-            }
-            set
-            {
-                _unitmeasure = value;
-            }
-        }
-        private string _upc;
-        [NotMapped]
-        public string strUPC
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_upc))
-                    if (tblICItemUOM != null)
-                        return tblICItemUOM.strUpcCode;
-                    else
-                        return null;
-                else
-                    return _upc;
-            }
-            set
-            {
-                _upc = value;
-            }
-        }
 
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }
-        public tblICItemUOM tblICItemUOM { get; set; }
     }
 }

@@ -96,6 +96,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
         public DbSet<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         public DbSet<tblICCategoryVendor> tblICCategoryVendors { get; set; }
+        public DbSet<tblICCategoryUOM> tblICCategoryUOMs { get; set; }
         public DbSet<tblICCertification> tblICCertifications { get; set; }
         public DbSet<tblICCertificationCommodity> tblICCertificationCommoditys { get; set; }
         public DbSet<tblICCommodity> tblICCommoditys { get; set; }
@@ -216,6 +217,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICCategoryAccountMap());
             modelBuilder.Configurations.Add(new tblICCategoryLocationMap());
             modelBuilder.Configurations.Add(new tblICCategoryVendorMap());
+            modelBuilder.Configurations.Add(new tblICCategoryUOMMap());
             modelBuilder.Configurations.Add(new tblICCertificationMap());
             modelBuilder.Configurations.Add(new tblICCertificationCommodityMap());
             modelBuilder.Configurations.Add(new tblICCommodityMap());

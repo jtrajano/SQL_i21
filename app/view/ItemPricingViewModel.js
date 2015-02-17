@@ -18,7 +18,6 @@ Ext.define('Inventory.view.ItemPricingViewModel', {
     alias: 'viewmodel.icitempricing',
 
     requires: [
-        'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedItemLocation'
     ],
 
@@ -46,9 +45,6 @@ Ext.define('Inventory.view.ItemPricingViewModel', {
         },
         Location: {
             type: 'icbuffereditemlocation'
-        },
-        itemUOM: {
-            type: 'icbuffereditemunitmeasure'
         }
     },
 
