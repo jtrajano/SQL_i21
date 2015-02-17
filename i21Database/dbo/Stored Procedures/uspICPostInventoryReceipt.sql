@@ -155,10 +155,11 @@ BEGIN
 			,strTransactionId = Header.strReceiptNumber  
 			,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 			,intLotId = NULL   
-	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItems  
-				ON Header.intInventoryReceiptId = DetailItems.intInventoryReceiptId  
-			INNER JOIN dbo.tblICItemLocation ItemLocation
+	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON Header.intLocationId = ItemLocation.intLocationId
+			INNER JOIN dbo.tblICInventoryReceiptItem DetailItems  
+				ON Header.intInventoryReceiptId = DetailItems.intInventoryReceiptId 
+				AND ItemLocation.intItemId = DetailItems.intItemId
 	WHERE	Header.intInventoryReceiptId = @intTransactionId   
   
 	-- Call the post routine 

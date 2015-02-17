@@ -32,6 +32,7 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
 		INSERT INTO tblICInventoryReceipt (
 			strReceiptNumber
@@ -73,7 +74,7 @@ BEGIN
 		INSERT INTO expected VALUES (0, 125.000000)
 		
 	END 
-	
+
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICPostInventoryReceipt

@@ -192,8 +192,13 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20
-					,dblUnitOnHand = 20
+			SET		dblUnitOnHand = 20
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemPricing 
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20					
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
 

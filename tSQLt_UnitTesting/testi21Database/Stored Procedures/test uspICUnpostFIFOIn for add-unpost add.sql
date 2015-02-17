@@ -62,7 +62,7 @@ BEGIN
 		)
 
 		-- Create the temp table 
-		CREATE TABLE #tmpInventoryTranactionStockToReverse (
+		CREATE TABLE #tmpInventoryTransactionStockToReverse (
 			intInventoryTransactionId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -187,7 +187,7 @@ BEGIN
 		EXEC dbo.uspICUnpostFIFOIn @strTransactionId, @intTransactionId
 
 		INSERT INTO actualTransactionToReverse
-		SELECT * FROM #tmpInventoryTranactionStockToReverse
+		SELECT * FROM #tmpInventoryTransactionStockToReverse
 				
 		-- Get the actual FIFO data
 		INSERT INTO actualFIFO (
