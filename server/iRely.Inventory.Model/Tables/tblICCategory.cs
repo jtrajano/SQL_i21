@@ -16,6 +16,7 @@ namespace iRely.Inventory.Model
             this.tblICCategoryAccounts = new List<tblICCategoryAccount>();
             this.tblICCategoryLocations = new List<tblICCategoryLocation>();
             this.tblICCategoryVendors = new List<tblICCategoryVendor>();
+            this.tblICCategoryUOMs = new List<tblICCategoryUOM>();
         }
 
         public int intCategoryId { get; set; }
@@ -57,6 +58,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
         public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
+        public ICollection<tblICCategoryUOM> tblICCategoryUOMs { get; set; }
 
         public tblICCatalog tblICCatalog { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }

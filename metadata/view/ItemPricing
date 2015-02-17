@@ -393,7 +393,7 @@
                                         "allowExponential": false,
                                         "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
-                                        "fieldLabel": "Moving Avg Cost",
+                                        "fieldLabel": "Average Cost",
                                         "fieldStyle": "text-align:right",
                                         "hideTrigger": true,
                                         "itemId": "txtAverageCost",

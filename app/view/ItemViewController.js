@@ -1436,22 +1436,18 @@ Ext.define('Inventory.view.ItemViewController', {
         if (combo.column.itemId === 'colDetailUnitMeasure')
         {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
-            current.set('intDecimalDisplay', records[0].get('intDecimalDisplay'));
-            current.set('intDecimalCalculation', records[0].get('intDecimalCalculation'));
-
-            var calculationDecimal = records[0].get('intDecimalCalculation');
-
-            var colConvertToStock = grid.columns[8];
-            if (colConvertToStock.getEditor()) {
-                colConvertToStock.format = '0.00';
-                colConvertToStock.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(calculationDecimal);
-            }
-            var colConvertFromStock = grid.columns[9];
-            if (colConvertFromStock.getEditor()) {
-                colConvertFromStock.format = '0.00';
-                colConvertFromStock.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(calculationDecimal);
-            }
-
+        }
+        else if (combo.column.itemId === 'colDetailWeightUOM')
+        {
+            current.set('intWeightUOMId', records[0].get('intUnitMeasureId'));
+        }
+        else if (combo.column.itemId === 'colDetailDimensionUOM')
+        {
+            current.set('intDimensionUOMId', records[0].get('intUnitMeasureId'));
+        }
+        else if (combo.column.itemId === 'colDetailVolumeUOM')
+        {
+            current.set('intVolumeUOMId', records[0].get('intUnitMeasureId'));
         }
     },
 

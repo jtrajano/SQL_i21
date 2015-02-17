@@ -233,7 +233,7 @@ Ext.define('Inventory.view.ItemPricing', {
                                     tabIndex: 5,
                                     itemId: 'txtAverageCost',
                                     margin: '',
-                                    fieldLabel: 'Moving Avg Cost',
+                                    fieldLabel: 'Average Cost',
                                     labelWidth: 110,
                                     checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',

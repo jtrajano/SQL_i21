@@ -51,6 +51,7 @@ namespace iRely.Inventory.BRL
                 .Include("tblICCategoryLocations.tblSMCompanyLocation")
                 .Include("tblICCategoryVendors.vyuAPVendor")
                 .Include("tblICCategoryVendors.tblICCategoryLocation.tblSMCompanyLocation")
+                .Include("tblICCategoryUOMs.tblICUnitMeasure")
                 .Where(w => query.Where(predicate).Any(a => a.intCategoryId == w.intCategoryId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

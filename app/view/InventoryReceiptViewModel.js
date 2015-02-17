@@ -173,8 +173,15 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return true
             }
             else {
-                if ((get('current.strReceiptType') !== 'Direct') && (get('current.intSourceId') !== null)) {
-                    return true;
+                if (get('current.strReceiptType') !== 'Direct') {
+                    if (get('current.tblICInventoryReceiptItems').data.items.length > 0){
+                        var current = get('current.tblICInventoryReceiptItems').data.items[0];
+                        if (current.get('intSourceId') !== null) {
+                            return true;
+                        }
+                        else { return false; }
+                    }
+                    else { return false; }
                 }
                 else { return false; }
             }

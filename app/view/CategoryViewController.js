@@ -52,6 +52,69 @@ Ext.define('Inventory.view.CategoryViewController', {
                 readOnly: '{checkAutoCalculateFreight}'
             },
 
+            grdUnitOfMeasure: {
+                colDetailUnitMeasure: {
+                    dataIndex: 'strUnitMeasure',
+                    editor: {
+                        store: '{uomUnitMeasure}'
+                    }
+                },
+                colDetailUnitQty: {
+                    dataIndex: 'dblUnitQty'
+                },
+                colDetailSellQty: {
+                    dataIndex: 'dblSellQty'
+                },
+                colDetailWeight: {
+                    dataIndex: 'dblWeight'
+                },
+                colDetailWeightUOM: {
+                    dataIndex: 'strWeightUOM',
+                    editor: {
+                        store: '{weightUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: 'Weight',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
+                colDetailDescription: 'strDescription',
+                colDetailUpcCode: 'strUpcCode',
+                colStockUnit: 'ysnStockUnit',
+                colAllowSale: 'ysnAllowSale',
+                colAllowPurchase: 'ysnAllowPurchase',
+                colConvertToStock: 'dblConvertToStock',
+                colConvertFromStock: 'dblConvertFromStock',
+                colDetailLength: 'dblLength',
+                colDetailWidth: 'dblWidth',
+                colDetailHeight: 'dblHeight',
+                colDetailDimensionUOM: {
+                    dataIndex: 'strDimensionUOM',
+                    editor: {
+                        store: '{dimensionUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: '',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
+                colDetailVolume: 'dblVolume',
+                colDetailVolumeUOM: {
+                    dataIndex: 'strVolumeUOM',
+                    editor: {
+                        store: '{volumeUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: 'Volume',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
+                colDetailMaxQty: 'dblMaxQty'
+            },
+
             grdLocation: {
                 colLocationId: 'strLocationName',
                 colLocationCashRegisterDept: 'intRegisterDepartmentId',
@@ -173,6 +236,13 @@ Ext.define('Inventory.view.CategoryViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdVendorCategoryXref'),
                         deleteButton : win.down('#btnDeleteVendorCategoryXref')
+                    })
+                },
+                {
+                    key: 'tblICCategoryUOMs',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: win.down('#grdUnitOfMeasure'),
+                        deleteButton : win.down('#btnDeleteUom')
                     })
                 }
             ]
@@ -330,8 +400,37 @@ Ext.define('Inventory.view.CategoryViewController', {
         grdLocation.store.load();
     },
 
+    onUOMUnitMeasureSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepDetailUOM');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colDetailUnitMeasure')
+        {
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+        }
+        else if (combo.column.itemId === 'colDetailWeightUOM')
+        {
+            current.set('intWeightUOMId', records[0].get('intUnitMeasureId'));
+        }
+        else if (combo.column.itemId === 'colDetailDimensionUOM')
+        {
+            current.set('intDimensionUOMId', records[0].get('intUnitMeasureId'));
+        }
+        else if (combo.column.itemId === 'colDetailVolumeUOM')
+        {
+            current.set('intVolumeUOMId', records[0].get('intUnitMeasureId'));
+        }
+    },
+
     init: function(application) {
         this.control({
+            "#cboDetailUnitMeasure": {
+                select: this.onUOMUnitMeasureSelect
+            },
             "#cboAccountId": {
                 select: this.onAccountSelect
             },
