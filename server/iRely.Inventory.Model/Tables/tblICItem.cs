@@ -230,7 +230,6 @@ namespace iRely.Inventory.Model
         public int? intCostingMethod { get; set; }
         public string strCostingMethod { get; set; }
         public decimal? dblUnitOnHand { get; set; }
-        public decimal? dblAverageCost { get; set; }
         public decimal? dblOnOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
         public decimal? dblBackOrder { get; set; }

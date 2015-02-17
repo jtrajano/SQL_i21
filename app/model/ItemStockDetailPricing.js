@@ -48,7 +48,7 @@ Ext.define('Inventory.model.ItemStockDetailPricing', {
         { name: 'strPricingMethod', type: 'string' },
         { name: 'dblLastCost', type: 'float' },
         { name: 'dblStandardCost', type: 'float' },
-        { name: 'dblMovingAverageCost', type: 'float' },
+        { name: 'dblAverageCost', type: 'float' },
         { name: 'dblEndMonthCost', type: 'float' },
         { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
