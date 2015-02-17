@@ -490,10 +490,11 @@ BEGIN
 	LEFT JOIN
 		(
 		SELECT 
+			DISTINCT
 			ST.intLocationId
 			,(CASE 
 				WHEN ST.strCostingMethod = 'AVG' 
-					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+					THEN (CASE WHEN ISNULL(IP.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblAverageCost END) 
 				WHEN ST.strCostingMethod = 'FIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
 				WHEN ST.strCostingMethod = 'LIFO' 
@@ -555,10 +556,11 @@ BEGIN
 	LEFT JOIN
 		(
 		SELECT 
+			DISTINCT
 			ST.intLocationId
 			,(CASE 
 				WHEN ST.strCostingMethod = 'AVG' 
-					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+					THEN (CASE WHEN ISNULL(IP.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblAverageCost END) 
 				WHEN ST.strCostingMethod = 'FIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
 				WHEN ST.strCostingMethod = 'LIFO' 
@@ -1104,10 +1106,11 @@ ELSE
 		LEFT JOIN
 		(
 		SELECT 
+			DISTINCT
 			ST.intLocationId
 			,(CASE 
 				WHEN ST.strCostingMethod = 'AVG' 
-					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+					THEN (CASE WHEN ISNULL(IP.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblAverageCost END) 
 				WHEN ST.strCostingMethod = 'FIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
 				WHEN ST.strCostingMethod = 'LIFO' 
@@ -1170,10 +1173,11 @@ ELSE
 		LEFT JOIN
 		(
 		SELECT 
+			DISTINCT
 			ST.intLocationId
 			,(CASE 
 				WHEN ST.strCostingMethod = 'AVG' 
-					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+					THEN (CASE WHEN ISNULL(IP.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblAverageCost END) 
 				WHEN ST.strCostingMethod = 'FIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
 				WHEN ST.strCostingMethod = 'LIFO' 
