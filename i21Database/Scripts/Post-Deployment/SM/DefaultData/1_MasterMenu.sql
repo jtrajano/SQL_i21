@@ -1157,6 +1157,7 @@ GO
 		/* ------------------------------------------------ */
 		/* --   Create Notes Receivable Reports Menu     -- */
 		/* ------------------------------------------------ */
+		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
 			VALUES ('Reports', 'Notes Receivable', @NotesReceivableModuleId, 'Reports', 'Folder', '', 'small-folder', 1, 0, 0, 0, 3, 1)
@@ -1168,46 +1169,62 @@ GO
 		DECLARE @NotesReceivableReportsId INT
 		SELECT @NotesReceivableReportsId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableModuleId
 		
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivable Statement' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES ('Notes Receivable Statement', 'Notes Receivable', @NotesReceivableReportsId, 'Notes Receivable Statement', 'Report', 'Notes Receivable Statement', 'small-report', 0, 0, 0, 1, 0, 1)
-		ELSE
-			UPDATE tblSMMasterMenu
-			SET strCommand = 'Notes Receivable Statement', intSort = 0
-			WHERE strMenuName = 'Notes Receivable Statement' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		/* F O R  1 5 . 2 */
+		--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivable Statement' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		--	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		--	VALUES ('Notes Receivable Statement', 'Notes Receivable', @NotesReceivableReportsId, 'Notes Receivable Statement', 'Report', 'Notes Receivable Statement', 'small-report', 0, 0, 0, 1, 0, 1)
+		--ELSE
+		--	UPDATE tblSMMasterMenu
+		--	SET strCommand = 'Notes Receivable Statement', intSort = 0
+		--	WHERE strMenuName = 'Notes Receivable Statement' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Detail' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES ('Notes Detail', 'Notes Receivable', @NotesReceivableReportsId, 'Notes Detail', 'Report', 'Notes Detail', 'small-report', 0, 0, 0, 1, 0, 1)
-		ELSE
-			UPDATE tblSMMasterMenu
-			SET strCommand = 'Notes Detail', intSort = 0
-			WHERE strMenuName = 'Notes Detail' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Detail' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		--	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		--	VALUES ('Notes Detail', 'Notes Receivable', @NotesReceivableReportsId, 'Notes Detail', 'Report', 'Notes Detail', 'small-report', 0, 0, 0, 1, 0, 1)
+		--ELSE
+		--	UPDATE tblSMMasterMenu
+		--	SET strCommand = 'Notes Detail', intSort = 0
+		--	WHERE strMenuName = 'Notes Detail' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes GL Balancing' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES ('Notes GL Balancing', 'Notes Receivable', @NotesReceivableReportsId, 'Notes GL Balancing', 'Report', 'Notes GL Balancing', 'small-report', 0, 0, 0, 1, 0, 1)
-		ELSE
-			UPDATE tblSMMasterMenu
-			SET strCommand = 'Notes GL Balancing', intSort = 0
-			WHERE strMenuName = 'Notes GL Balancing' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes GL Balancing' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		--	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		--	VALUES ('Notes GL Balancing', 'Notes Receivable', @NotesReceivableReportsId, 'Notes GL Balancing', 'Report', 'Notes GL Balancing', 'small-report', 0, 0, 0, 1, 0, 1)
+		--ELSE
+		--	UPDATE tblSMMasterMenu
+		--	SET strCommand = 'Notes GL Balancing', intSort = 0
+		--	WHERE strMenuName = 'Notes GL Balancing' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Payment by Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES ('Notes Payment by Date', 'Notes Receivable', @NotesReceivableReportsId, 'Notes Payment by Date', 'Report', 'Notes Payment by Date', 'small-report', 0, 0, 0, 1, 0, 1)
-		ELSE
-			UPDATE tblSMMasterMenu
-			SET strCommand = 'Notes Payment by Date', intSort = 0
-			WHERE strMenuName = 'Notes Payment by Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Payment by Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		--	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		--	VALUES ('Notes Payment by Date', 'Notes Receivable', @NotesReceivableReportsId, 'Notes Payment by Date', 'Report', 'Notes Payment by Date', 'small-report', 0, 0, 0, 1, 0, 1)
+		--ELSE
+		--	UPDATE tblSMMasterMenu
+		--	SET strCommand = 'Notes Payment by Date', intSort = 0
+		--	WHERE strMenuName = 'Notes Payment by Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Notes on AS OF Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES ('Open Notes on AS OF Date', 'Notes Receivable', @NotesReceivableReportsId, 'Open Notes on AS OF Date', 'Report', 'Open Notes on AS OF Date', 'small-report', 0, 0, 0, 1, 0, 1)
-		ELSE
-			UPDATE tblSMMasterMenu
-			SET strCommand = 'Open Notes on AS OF Date', intSort = 0
-			WHERE strMenuName = 'Open Notes on AS OF Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
-
+		--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Notes on AS OF Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		--	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		--	VALUES ('Open Notes on AS OF Date', 'Notes Receivable', @NotesReceivableReportsId, 'Open Notes on AS OF Date', 'Report', 'Open Notes on AS OF Date', 'small-report', 0, 0, 0, 1, 0, 1)
+		--ELSE
+		--	UPDATE tblSMMasterMenu
+		--	SET strCommand = 'Open Notes on AS OF Date', intSort = 0
+		--	WHERE strMenuName = 'Open Notes on AS OF Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivable Statement' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivable Statement' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Detail' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Notes Detail' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes GL Balancing' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Notes GL Balancing' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Payment by Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Notes Payment by Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Notes on AS OF Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Open Notes on AS OF Date' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId
+		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'UCC Tracking' AND strModuleName = 'Notes Receivable' AND intParentMenuID = @NotesReceivableReportsId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
 			VALUES ('UCC Tracking', 'Notes Receivable', @NotesReceivableReportsId, 'UCC Tracking', 'Report', 'UCC Tracking', 'small-report', 0, 0, 0, 1, 0, 1)
