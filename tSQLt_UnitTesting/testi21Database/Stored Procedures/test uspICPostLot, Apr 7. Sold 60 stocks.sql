@@ -197,8 +197,14 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20
-					,dblUnitOnHand = @dblUnitQty
+			SET		dblUnitOnHand = @dblUnitQty
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemPricing
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -318,8 +324,14 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20.50
-					,dblUnitOnHand += @dblUnitQty
+			SET		dblUnitOnHand += @dblUnitQty
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemPricing
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20.50					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -438,8 +450,14 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20.916667
-					,dblUnitOnHand += @dblUnitQty
+			SET		dblUnitOnHand += @dblUnitQty
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemPricing
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20.916667					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -593,8 +611,14 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20.916667
-					,dblUnitOnHand += @dblUnitQty
+			SET		dblUnitOnHand += @dblUnitQty
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemPricing
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20.916667					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -763,8 +787,14 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20.916667
-					,dblUnitOnHand += @dblUnitQty
+			SET		dblUnitOnHand += @dblUnitQty
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemStock
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20.916667					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId

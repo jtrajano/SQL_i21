@@ -190,8 +190,14 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20
-					,dblUnitOnHand = 20
+			SET		dblUnitOnHand = 20
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemPricing
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -309,8 +315,14 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20.50
-					,dblUnitOnHand = 40
+			SET		dblUnitOnHand = 40
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemPricing
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20.50					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -428,8 +440,14 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20.916667
-					,dblUnitOnHand = 60
+			SET		dblUnitOnHand = 60
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemPricing
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20.916667					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId
@@ -582,8 +600,14 @@ BEGIN
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
-			SET		dblAverageCost = 20.916667
-					,dblUnitOnHand = 20
+			SET		dblUnitOnHand = 20
+					,intConcurrencyId += 1
+			WHERE	intItemId = @intItemId
+					AND intItemLocationId = @intItemLocationId
+
+			-- Update expected data in tblICItemPricing
+			UPDATE	tblICItemPricing 
+			SET		dblAverageCost = 20.916667					
 					,intConcurrencyId += 1
 			WHERE	intItemId = @intItemId
 					AND intItemLocationId = @intItemLocationId

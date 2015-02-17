@@ -57,8 +57,8 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 
 		-- Create the expected and actual tables. 
-		SELECT intItemId, intItemLocationId, dblAverageCost, dblUnitOnHand INTO expected FROM dbo.tblICItemStock WHERE 1 = 0		
-		SELECT intItemId, intItemLocationId, dblAverageCost, dblUnitOnHand INTO actual FROM dbo.tblICItemStock WHERE 1 = 0
+		SELECT intItemId, intItemLocationId, dblUnitOnHand INTO expected FROM dbo.tblICItemStock WHERE 1 = 0		
+		SELECT intItemId, intItemLocationId, dblUnitOnHand INTO actual FROM dbo.tblICItemStock WHERE 1 = 0
 
 		-- Declare the variables used by uspICPostCosting
 		DECLARE @ItemsToPost AS ItemCostingTableType;
@@ -86,12 +86,10 @@ BEGIN
 		INSERT INTO expected (
 				intItemId
 				,intItemLocationId
-				,dblAverageCost
 				,dblUnitOnHand
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
-				,dblAverageCost = 0 -- Since stock starts at zero, average cost is still zero 
 				,dblUnitOnHand = (0 - 100)  -- Reduce stock by 100
 	END 
 	
@@ -109,12 +107,10 @@ BEGIN
 		INSERT INTO actual (
 				intItemId
 				,intItemLocationId
-				,dblAverageCost
 				,dblUnitOnHand	
 		)
 		SELECT	intItemId
 				,intItemLocationId
-				,dblAverageCost
 				,dblUnitOnHand
 		FROM	dbo.tblICItemStock
 		WHERE	intItemId = @WetGrains

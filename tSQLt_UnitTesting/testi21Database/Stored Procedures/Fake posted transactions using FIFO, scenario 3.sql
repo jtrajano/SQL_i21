@@ -173,33 +173,55 @@ BEGIN
 		INSERT INTO dbo.tblICItemStock(
 				intItemId
 				,intItemLocationId
-				,dblAverageCost
 				,dblUnitOnHand	
 		)
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = 1
-				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100
 		UNION ALL 
 		SELECT 	intItemId = @StickyGrains
 				,intItemLocationId = 2
-				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100	
 		UNION ALL 
 		SELECT 	intItemId = @PremiumGrains
 				,intItemLocationId = 3
-				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100		
 		UNION ALL 
 		SELECT 	intItemId = @ColdGrains
 				,intItemLocationId = 4
-				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100	
 		UNION ALL 
 		SELECT 	intItemId = @HotGrains
 				,intItemLocationId = 5
-				,dblAverageCost = 2.15
 				,dblUnitOnHand	= 100
+
+		----------------------------------------------------------------
+		-- Fake data for tblICItemPricing
+		----------------------------------------------------------------
+		INSERT INTO dbo.tblICItemPricing(
+				intItemId
+				,intItemLocationId
+				,dblAverageCost
+		)
+		SELECT 	intItemId = @WetGrains
+				,intItemLocationId = 1
+				,dblAverageCost = 2.15
+		UNION ALL 
+		SELECT 	intItemId = @StickyGrains
+				,intItemLocationId = 2
+				,dblAverageCost = 2.15
+		UNION ALL 
+		SELECT 	intItemId = @PremiumGrains
+				,intItemLocationId = 3
+				,dblAverageCost = 2.15
+		UNION ALL 
+		SELECT 	intItemId = @ColdGrains
+				,intItemLocationId = 4
+				,dblAverageCost = 2.15
+		UNION ALL 
+		SELECT 	intItemId = @HotGrains
+				,intItemLocationId = 5
+				,dblAverageCost = 2.15
 
 		----------------------------------------------------------------
 		-- Fake data for tblICInventoryFIFO

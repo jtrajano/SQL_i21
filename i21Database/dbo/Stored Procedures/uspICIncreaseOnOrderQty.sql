@@ -8,20 +8,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Increase the On-Order Qty for the items
---UPDATE	Stock 
---SET		Stock.dblOnOrder = ISNULL(Stock.dblOnOrder, 0) + Items.Aggregrate_OnOrderQty
---FROM	dbo.tblICItemStock Stock INNER JOIN (
---			SELECT	intItemId
---					,intLocationId
---					,Aggregrate_OnOrderQty = SUM(ISNULL(dblUnitQty, 0) * ISNULL(dblUOMQty, 0))					
---			FROM	@ItemsToIncrease
---			GROUP BY intItemId, intLocationId
---		) Items 
---			ON Stock.intItemId = Items.intItemId
---			AND Stock.intLocationId = Items.intLocationId
-;
-
 -- Do an upsert for the Item Stock table when updating the On Order Qty
 MERGE	
 INTO	dbo.tblICItemStock 
@@ -49,7 +35,6 @@ WHEN NOT MATCHED THEN
 		intItemId
 		,intItemLocationId
 		,intSubLocationId
-		,dblAverageCost
 		,dblUnitOnHand
 		,dblOrderCommitted
 		,dblOnOrder
@@ -61,7 +46,6 @@ WHEN NOT MATCHED THEN
 		Source_Query.intItemId
 		,Source_Query.intItemLocationId
 		,NULL 
-		,0
 		,0
 		,0
 		,Source_Query.Aggregrate_OnOrderQty -- dblOnOrder

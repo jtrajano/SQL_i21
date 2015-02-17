@@ -13,7 +13,8 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICItemAccount', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICCategory';
 	EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;		
-	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;		
+	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICItemPricing', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure';
 	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;	
 		

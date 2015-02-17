@@ -231,33 +231,55 @@ BEGIN
 		INSERT INTO dbo.tblICItemStock(
 				intItemId
 				,intItemLocationId
-				,dblAverageCost
 				,dblUnitOnHand	
 		)
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_BetterHaven
-				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75
 		UNION ALL 
 		SELECT 	intItemId = @StickyGrains
 				,intItemLocationId = @StickyGrains_BetterHaven
-				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75
 		UNION ALL 
 		SELECT 	intItemId = @PremiumGrains
 				,intItemLocationId = @PremiumGrains_BetterHaven
-				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75
 		UNION ALL 
 		SELECT 	intItemId = @ColdGrains
 				,intItemLocationId = @ColdGrains_BetterHaven
-				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75	
 		UNION ALL 
 		SELECT 	intItemId = @HotGrains
 				,intItemLocationId = @HotGrains_BetterHaven
-				,dblAverageCost = 2.00
 				,dblUnitOnHand	= -75
+
+		----------------------------------------------------------------
+		-- Fake data for tblICItemPricing
+		----------------------------------------------------------------
+		INSERT INTO dbo.tblICItemPricing(
+				intItemId
+				,intItemLocationId
+				,dblAverageCost
+		)
+		SELECT 	intItemId = @WetGrains
+				,intItemLocationId = @WetGrains_BetterHaven
+				,dblAverageCost = 2.00
+		UNION ALL 
+		SELECT 	intItemId = @StickyGrains
+				,intItemLocationId = @StickyGrains_BetterHaven
+				,dblAverageCost = 2.00
+		UNION ALL 
+		SELECT 	intItemId = @PremiumGrains
+				,intItemLocationId = @PremiumGrains_BetterHaven
+				,dblAverageCost = 2.00
+		UNION ALL 
+		SELECT 	intItemId = @ColdGrains
+				,intItemLocationId = @ColdGrains_BetterHaven
+				,dblAverageCost = 2.00
+		UNION ALL 
+		SELECT 	intItemId = @HotGrains
+				,intItemLocationId = @HotGrains_BetterHaven
+				,dblAverageCost = 2.00
 
 		------------------------------
 		-- Add the LIFO out records
@@ -591,10 +613,20 @@ BEGIN
 		----------------------------------------------------------------
 		UPDATE	ItemStock
 		SET		dblUnitOnHand += 100
-				,dblAverageCost = 2.15
 		FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemStock.intItemId = ItemLocation.intItemId
 					AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
+		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
+				AND ItemLocation.intLocationId = @BetterHaven
+
+		----------------------------------------------------------------
+		-- Fake data for tblICItemPricing
+		----------------------------------------------------------------
+		UPDATE	ItemPricing 
+		SET		dblAverageCost = 2.15
+		FROM	dbo.tblICItemPricing ItemPricing INNER JOIN dbo.tblICItemLocation ItemLocation
+					ON ItemPricing.intItemId = ItemLocation.intItemId
+					AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 		WHERE	ItemLocation.intItemId IN (@WetGrains, @StickyGrains, @PremiumGrains, @ColdGrains, @HotGrains)
 				AND ItemLocation.intLocationId = @BetterHaven
 

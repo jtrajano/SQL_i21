@@ -503,11 +503,13 @@ BEGIN
 			,dblAverageCost
 			,dblUnitOnHand
 	)
-	SELECT	intItemId 
-			,intItemLocationId 
-			,dblAverageCost 
-			,dblUnitOnHand 
-	FROM dbo.tblICItemStock		
+	SELECT	ItemStock.intItemId 
+			,ItemStock.intItemLocationId 
+			,ItemPricing.dblAverageCost 
+			,ItemStock.dblUnitOnHand 
+	FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemPricing ItemPricing
+				ON ItemStock.intItemId = ItemPricing.intItemId
+				AND ItemStock.intItemLocationId = ItemPricing.intItemLocationId			
 	
 	-- Actual fifo data 
 	INSERT INTO dbo.actualFIFO (

@@ -199,19 +199,32 @@ BEGIN
 	-- Calculate the new average cost (if applicable)
 	---------------------------------------------------
 	BEGIN 
-		UPDATE	Stock
-		SET		Stock.dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) + ItemToUnpost.dblTotalQty > 0 THEN 
+		-- Update the avearge cost at the Item Pricing table
+		UPDATE	ItemPricing
+		SET		dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) + ItemToUnpost.dblTotalQty > 0 THEN 
 													-- Recalculate the average cost
-													dbo.fnRecalculateAverageCost(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId, Stock.dblAverageCost) 
+													dbo.fnRecalculateAverageCost(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId, ItemPricing.dblAverageCost) 
 												ELSE 
 													-- Use the same average cost. 
-													Stock.dblAverageCost
-										END 
-				,Stock.dblUnitOnHand = Stock.dblUnitOnHand + ItemToUnpost.dblTotalQty
-				-- ,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
-		FROM	dbo.tblICItemStock AS Stock INNER JOIN @ItemsToUnpost ItemToUnpost
+													ItemPricing.dblAverageCost
+										END
+		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
+					ON ItemPricing.intItemId = Stock.intItemId
+					AND ItemPricing.intItemLocationId = Stock.intItemLocationId		
+				INNER JOIN @ItemsToUnpost ItemToUnpost
 					ON Stock.intItemId = ItemToUnpost.intItemId
 					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
+
+		-- Update the Unit On Hand at the Item Stock table
+		UPDATE	Stock
+		SET		Stock.dblUnitOnHand = Stock.dblUnitOnHand + ItemToUnpost.dblTotalQty
+		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
+					ON ItemPricing.intItemId = Stock.intItemId
+					AND ItemPricing.intItemLocationId = Stock.intItemLocationId		
+				INNER JOIN @ItemsToUnpost ItemToUnpost
+					ON Stock.intItemId = ItemToUnpost.intItemId
+					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
+
 	END
 
 	---------------------------------------------------------------------------------------
@@ -243,7 +256,7 @@ BEGIN
 				,[dtmDate] = TransactionToReverse.dtmDate
 				,[dblUnitQty] = 0
 				,[dblCost] = 0
-				,[dblValue] = (Stock.dblUnitOnHand * Stock.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)
+				,[dblValue] = (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)
 				,[dblSalesPrice] = 0
 				,[intCurrencyId] = TransactionToReverse.intCurrencyId
 				,[dblExchangeRate] = TransactionToReverse.dblExchangeRate
@@ -256,7 +269,10 @@ BEGIN
 				,[intCreatedUserId] = @intUserId
 				,[intConcurrencyId] = 1
 				,[ysnIsUnposted] = 0
-		FROM	dbo.tblICItemStock AS Stock INNER JOIN @ItemsToUnpost ItemToUnpost
+		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
+					ON ItemPricing.intItemId = Stock.intItemId
+					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
+				INNER JOIN @ItemsToUnpost ItemToUnpost
 						ON Stock.intItemId = ItemToUnpost.intItemId
 						AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
 						AND dbo.fnGetCostingMethod(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) = @AVERAGECOST
@@ -273,7 +289,7 @@ BEGIN
 					WHERE	ItemTransaction.intTransactionId = @intTransactionId
 							AND ItemTransaction.strTransactionId = @strTransactionId
 				) TransactionToReverse 
-		WHERE	(Stock.dblUnitOnHand * Stock.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) <> 0
+		WHERE	(Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) <> 0
 	END
 END
 

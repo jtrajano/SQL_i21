@@ -52,9 +52,23 @@ BEGIN
 		DECLARE @RevalueSold_BetterHaven AS INT = 5002
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 
+		CREATE TABLE expected (
+			intItemId INT
+			,intItemLocationId INT
+			,dblAverageCost NUMERIC(18,6)
+			,dblUnitOnHand NUMERIC(18,6)
+		)
+
+		CREATE TABLE actual (
+			intItemId INT
+			,intItemLocationId INT
+			,dblAverageCost NUMERIC(18,6)
+			,dblUnitOnHand NUMERIC(18,6)
+		)
+
 		-- Create the expected and actual tables. 
-		SELECT intItemId, intItemLocationId, dblAverageCost, dblUnitOnHand INTO expected FROM dbo.tblICItemStock WHERE 1 = 0		
-		SELECT intItemId, intItemLocationId, dblAverageCost, dblUnitOnHand INTO actual FROM dbo.tblICItemStock WHERE 1 = 0
+		--SELECT intItemId, intItemLocationId, dblAverageCost, dblUnitOnHand INTO expected FROM dbo.tblICItemStock WHERE 1 = 0		
+		--SELECT intItemId, intItemLocationId, dblAverageCost, dblUnitOnHand INTO actual FROM dbo.tblICItemStock WHERE 1 = 0
 
 		-- Declare the variables used by uspICPostCosting
 		DECLARE @ItemsToPost AS ItemCostingTableType;
@@ -120,13 +134,15 @@ BEGIN
 				,dblAverageCost
 				,dblUnitOnHand	
 		)
-		SELECT	intItemId
-				,intItemLocationId
-				,dblAverageCost
-				,dblUnitOnHand
-		FROM	dbo.tblICItemStock
-		WHERE	intItemId = @WetGrains
-				AND intItemLocationId = @Default_Location
+		SELECT	ItemStock.intItemId
+				,ItemStock.intItemLocationId
+				,ItemPricing.dblAverageCost
+				,ItemStock.dblUnitOnHand
+		FROM	dbo.tblICItemStock ItemStock INNER JOIN dbo.tblICItemPricing ItemPricing
+					ON ItemStock.intItemId = ItemPricing.intItemId
+					AND ItemStock.intItemLocationId = ItemPricing.intItemLocationId
+		WHERE	ItemStock.intItemId = @WetGrains
+				AND ItemStock.intItemLocationId = @Default_Location
 	END 
 	
 	-- Assert
