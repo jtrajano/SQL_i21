@@ -1084,6 +1084,7 @@
     <Build Include="dbo\Stored Procedures\uspNRReportAgedNotes.sql" />
     <Build Include="dbo\Stored Procedures\uspNRReportUCCTracking.sql" />
     <Build Include="dbo\Tables\tblICCategoryUOM.sql" />
+    <Build Include="dbo\Views\vyuICGetUOMConversion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
