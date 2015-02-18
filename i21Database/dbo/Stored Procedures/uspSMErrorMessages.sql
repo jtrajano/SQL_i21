@@ -133,11 +133,11 @@ SET @strmessage = 'G/L entries are expected. Cannot continue because it is missi
 EXEC sp_addmessage 50032,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51033) EXEC sp_dropmessage 51033, 'us_english'	
-SET @strmessage = 'Purchase Order does not exists.'
+SET @strmessage = 'Purchase Order "%s" does not exists.'
 EXEC sp_addmessage 51033,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51034) EXEC sp_dropmessage 51034, 'us_english'	
-SET @strmessage = 'Purchase Order item does not exists.'
+SET @strmessage = 'Purchase Order item "%s" does not exists.'
 EXEC sp_addmessage 51034,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51035) EXEC sp_dropmessage 51035, 'us_english'	

@@ -1,34 +1,61 @@
 ﻿CREATE PROCEDURE [dbo].[uspPOReceived]
-	@purchaseId INT,
-	@receivedNum DECIMAL(18,6),
-	@itemId INT,
-	@lineNo INT
+	@receiptItemId INT
 AS
 BEGIN
+
+	DECLARE @purchaseId INT, @lineNo INT, @itemId INT;
+	DECLARE @purchaseOrderNumber NVARCHAR(50), @strItemNo NVARCHAR(50);
+	
+	DECLARE @receivedNum DECIMAL(18,6);
+
+	SELECT
+		B.intSourceId
+		,B.intLineNo
+		,B.dblReceived
+		,B.intItemId
+	INTO #tmpReceivedPOItems
+	FROM tblICInventoryReceipt A
+		LEFT JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
+	WHERE A.intInventoryReceiptId = @receiptItemId
+		
+	SELECT TOP 1 @purchaseId = intSourceId FROM #tmpReceivedPOItems
+	SELECT @purchaseOrderNumber = strPurchaseOrderNumber FROM tblPOPurchase WHERE intPurchaseId = @purchaseId
 
 	--Validate
 	IF(NOT EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @purchaseId))
 	BEGIN
-		RAISERROR(51033, 11, 1); --Not Exists
+		RAISERROR(51033, 11, 1, @purchaseOrderNumber); --Not Exists
 		RETURN;
 	END
 
-	IF(NOT EXISTS(SELECT 1 FROM tblPOPurchaseDetail WHERE intPurchaseId = @purchaseId AND intItemId = @itemId AND intLineNo = @lineNo))
+	IF(EXISTS(SELECT TOP 1 intLineNo FROM #tmpReceivedPOItems
+				WHERE NOT EXISTS
+				(
+					SELECT intItemId FROM tblPOPurchaseDetail WHERE intPurchaseId = @purchaseId AND intItemId = @itemId 
+					AND intPurchaseDetailId = intLineNo
+				)
+			)
+		)
 	BEGIN
 		RAISERROR(51034, 11, 1); --PO item not exists
 		RETURN;
 	END
 
-	IF(EXISTS(SELECT 1 FROM tblPOPurchaseDetail WHERE intPurchaseId = @purchaseId AND intItemId = @itemId AND intLineNo = @lineNo AND (dblQtyReceived + @receivedNum) > dblQtyOrdered))
+	IF(EXISTS(SELECT 1 FROM tblPOPurchaseDetail A 
+				INNER JOIN #tmpReceivedPOItems B 
+				ON A.intPurchaseDetailId = B.intLineNo AND A.intItemId = B.intItemId
+		WHERE intPurchaseId = @purchaseId AND (dblQtyReceived + B.dblReceived) > dblQtyOrdered))
 	BEGIN
 		RAISERROR(51035, 11, 1); --received item exceeds
 		RETURN;
 	END
 
 	UPDATE A
-		SET dblQtyReceived = (dblQtyReceived + @receivedNum)
+		SET dblQtyReceived = (dblQtyReceived + B.dblReceived)
 	FROM tblPOPurchaseDetail A
-	WHERE intPurchaseId = @purchaseId AND intItemId = @itemId AND intLineNo = @lineNo
+		INNER JOIN #tmpReceivedPOItems B ON A.intItemId = B.intItemId AND A.intPurchaseDetailId = B.intSourceId
+	WHERE intPurchaseId = @purchaseId
+	--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
 
 	UPDATE A
 		SET intOrderStatusId = CASE WHEN (SELECT SUM(dblQtyReceived) FROM tblPOPurchaseDetail WHERE intPurchaseId = @purchaseId) 
