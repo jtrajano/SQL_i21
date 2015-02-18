@@ -2,10 +2,12 @@
 	@intItemId INT
 	,@intItemLocationId INT
 	,@dtmDate DATETIME
-	,@dblUnitQty NUMERIC(18, 6)
+	,@dblQty NUMERIC(18, 6)
+	,@dblUOMQty NUMERIC(18, 6)
 	,@dblCost NUMERIC(18, 6)
 	,@dblValue NUMERIC(18, 6)
 	,@dblSalesPrice NUMERIC(18, 6)
+	,@intItemUOMId INT 
 	,@intCurrencyId INT
 	,@dblExchangeRate NUMERIC (38, 20)
 	,@intTransactionId INT
@@ -35,10 +37,12 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intItemLocationId]
 		,[intLotId]
 		,[dtmDate] 
-		,[dblUnitQty] 
+		,[dblQty] 
+		,[dblUOMQty]
 		,[dblCost] 
 		,[dblValue]
 		,[dblSalesPrice] 
+		,[intItemUOMId]
 		,[intCurrencyId] 
 		,[dblExchangeRate] 
 		,[intTransactionId] 
@@ -56,10 +60,12 @@ SELECT	[intItemId]						= @intItemId
 		,[intItemLocationId]			= @intItemLocationId
 		,[intLotId]						= @intLotId
 		,[dtmDate]						= @dtmDate
-		,[dblUnitQty]					= @dblUnitQty
+		,[dblQty]						= @dblQty
+		,[dblUOMQty]					= @dblUOMQty
 		,[dblCost]						= @dblCost
 		,[dblValue]						= @dblValue 
 		,[dblSalesPrice]				= @dblSalesPrice
+		,[intItemUOMId]					= @intItemUOMId
 		,[intCurrencyId]				= @intCurrencyId
 		,[dblExchangeRate]				= @dblExchangeRate
 		,[intTransactionId]				= @intTransactionId
@@ -73,6 +79,7 @@ SELECT	[intItemId]						= @intItemId
 		,[intCreatedUserId]				= @intUserId
 		,[intConcurrencyId]				= 1
 WHERE	@intItemId IS NOT NULL
-		AND @intItemLocationId IS NOT NULL 
+		AND @intItemLocationId IS NOT NULL
+		AND @intItemUOMId IS NOT NULL 
 
 SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();

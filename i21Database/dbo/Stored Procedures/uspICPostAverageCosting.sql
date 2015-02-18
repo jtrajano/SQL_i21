@@ -33,9 +33,10 @@ CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@dtmDate AS DATETIME
-	,@dblUnitQty AS NUMERIC(18,6)
+	,@dblQty AS NUMERIC(18,6)
 	,@dblUOMQty AS NUMERIC(18,6)
 	,@dblCost AS NUMERIC(18,6)
+	,@intItemUOMId AS INT
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	,@dblExchangeRate AS NUMERIC(18,6)
@@ -86,9 +87,9 @@ WHERE	intTransactionTypeId = @intTransactionTypeId
 -------------------------------------------------
 BEGIN 
 	-- Reduce stock 
-	IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) < 0)
+	IF (ISNULL(@dblQty, 0) * ISNULL(@dblUOMQty, 0) < 0)
 	BEGIN 
-		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+		SET @dblReduceQty = ISNULL(@dblQty, 0) * ISNULL(@dblUOMQty, 0)
 
 		SELECT @dblCost = AverageCost
 		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId)
@@ -97,10 +98,13 @@ BEGIN
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
 				,@dtmDate = @dtmDate
-				,@dblUnitQty = @dblReduceQty
+				,@dblQty  = @dblQty
+				,@dblUOMQty = @dblUOMQty
 				,@dblCost = @dblCost
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
+				,@intItemUOMId = @intItemUOMId
+				,@intItemUOMId = @intItemUOMId
 				,@intCurrencyId = @intCurrencyId
 				,@dblExchangeRate = @dblExchangeRate
 				,@intTransactionId = @intTransactionId
@@ -153,10 +157,10 @@ BEGIN
 	END
 
 	-- Add stock 
-	ELSE IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) > 0)
+	ELSE IF (ISNULL(@dblQty, 0) * ISNULL(@dblUOMQty, 0) > 0)
 	BEGIN 
 
-		SET @dblAddQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+		SET @dblAddQty = ISNULL(@dblQty, 0) * ISNULL(@dblUOMQty, 0)
 		SET @FullQty = @dblAddQty
 		SET @TotalQtyOffset = 0;
 		
@@ -164,10 +168,12 @@ BEGIN
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
 				,@dtmDate = @dtmDate
-				,@dblUnitQty = @FullQty
+				,@dblQty = @dblQty
+				,@dblUOMQty = @dblUOMQty
 				,@dblCost = @dblCost
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
+				,@intItemUOMId = @intItemUOMId
 				,@intCurrencyId = @intCurrencyId
 				,@dblExchangeRate = @dblExchangeRate
 				,@intTransactionId = @intTransactionId

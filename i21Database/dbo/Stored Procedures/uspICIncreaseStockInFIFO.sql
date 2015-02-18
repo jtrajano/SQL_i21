@@ -9,8 +9,10 @@
 CREATE PROCEDURE dbo.uspICIncreaseStockInFIFO
 	@intItemId AS INT
 	,@intItemLocationId AS INT
+	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
+	,@dblUOMQty NUMERIC(18,6)
 	,@dblCost AS NUMERIC(18,6)
 	,@intUserId AS INT
 	,@FullQty AS NUMERIC(18,6) 
@@ -52,20 +54,25 @@ AS		fifo_bucket
 USING (
 	SELECT	intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId	
+			,ItemUOM.intItemUOMId 
+			,ItemUOM.ysnStockUnit
+	FROM	dbo.tblICItemUOM ItemUOM
+	WHERE	ItemUOM.intItemId = @intItemId
+			AND ItemUOM.intItemUOMId = @intItemUOMId 
 ) AS Source_Query  
 	ON fifo_bucket.intItemId = Source_Query.intItemId
 	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
+
 	-- Update an existing negative stock 
 	AND fifo_bucket.dblStockIn < fifo_bucket.dblStockOut
 
--- Update an existing negative stock fifo bucket
-WHEN MATCHED THEN 
+-- Update an existing negative stock fifo bucket with the same UOM 
+WHEN MATCHED AND fifo_bucket.intItemUOMId = Source_Query.intItemUOMId THEN 
 	UPDATE 
 	SET	fifo_bucket.dblStockIn = ISNULL(fifo_bucket.dblStockIn, 0) 
 					+ CASE	WHEN (fifo_bucket.dblStockOut - fifo_bucket.dblStockIn) >= @dblQty THEN @dblQty
 							ELSE (fifo_bucket.dblStockOut - fifo_bucket.dblStockIn) 
-					END 
-
+					END
 		,fifo_bucket.intConcurrencyId = ISNULL(fifo_bucket.intConcurrencyId, 0) + 1
 		-- update the remaining qty
 		,@RemainingQty = 
@@ -94,6 +101,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[dblStockIn]
 		,[dblStockOut]
 		,[dblCost]
+		,[intItemUOMId]
 		,[strTransactionId]
 		,[intTransactionId]
 		,[dtmCreated]
@@ -107,6 +115,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@FullQty
 		,@TotalQtyOffset
 		,@dblCost
+		,@intItemUOMId
 		,@strTransactionId
 		,@intTransactionId
 		,GETDATE()
@@ -130,6 +139,7 @@ BEGIN
 		,[dblStockIn]
 		,[dblStockOut]
 		,[dblCost]
+		,[intItemUOMId]
 		,[strTransactionId]
 		,[intTransactionId]
 		,[dtmCreated]
@@ -143,6 +153,7 @@ BEGIN
 		,@FullQty
 		,@FullQty
 		,@dblCost
+		,@intItemUOMId
 		,@strTransactionId
 		,@intTransactionId
 		,GETDATE()

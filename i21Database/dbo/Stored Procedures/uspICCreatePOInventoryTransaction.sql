@@ -51,6 +51,7 @@ BEGIN
 			,dtmDate
 			,intTransactionId
 			,strTransactionId
+			,intItemUOMId
 	)
 	SELECT 	DISTINCT 
 			Items.intItemId 
@@ -58,6 +59,7 @@ BEGIN
 			,PO.dtmDate
 			,intTransactionId = Items.intSourceId
 			,strTransactionId = PO.strPurchaseOrderNumber
+			,Items.intUnitMeasureId
 	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem Items
 				ON Header.intInventoryReceiptId = Items.intInventoryReceiptId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -81,6 +83,8 @@ BEGIN
 						AND InvTransactions.strTransactionId = SOItems.strTransactionId
 			)
 
+	-- Update the ordered qty. 
+	-- Group it by item, location, and UOM. 
 	UPDATE	tempItems
 	SET		dblOrderQty = AggregrateOrderQty.dblOrderQty
 			,dblValue = AggregrateOrderQty.dblValue 
@@ -89,6 +93,7 @@ BEGIN
 						,dblValue = SUM(ISNULL(POItems.dblQtyOrdered, 0) * ISNULL(POItems.dblCost, 0)) 
 						,Items.intItemId
 						,Items.intItemLocationId
+						,POItems.intUnitOfMeasureId
 				FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail POItems
 							ON PO.intPurchaseId = POItems.intPurchaseId				
 						INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -97,10 +102,19 @@ BEGIN
 						INNER JOIN #tmpPurchaseOrderItems Items 
 							ON Items.intItemId = POItems.intItemId
 							AND Items.intItemLocationId = ItemLocation.intItemLocationId
-				GROUP BY Items.intItemId, Items.intItemLocationId
+				GROUP BY Items.intItemId, Items.intItemLocationId, POItems.intUnitOfMeasureId
 			) AggregrateOrderQty INNER JOIN #tmpPurchaseOrderItems tempItems
 				ON AggregrateOrderQty.intItemId = tempItems.intItemId
 				AND AggregrateOrderQty.intItemLocationId = tempItems.intItemLocationId
+				AND AggregrateOrderQty.intUnitOfMeasureId = tempItems.intItemUOMId
+
+	-- Get the UOM Qty 
+	UPDATE	tempItes
+	SET		dblUOMQty = ItemUOM.dblUnitQty
+	FROM	#tmpPurchaseOrderItems tempItems INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON tempItems.intItemId = ItemUOM.intItemId
+				AND tempItems.intUnitMeasureId = ItemUOM.intItemUOMId
+
 END
 
 -- Insert the Purchase Order to the Inventory Transaction table from the temporary table
@@ -131,10 +145,11 @@ BEGIN
 	SELECT 	intItemId 
 			,intItemLocationId
 			,dtmDate				
-			,dblUnitQty				= dblOrderQty -- (total qty ordered from PO)
+			,dblQty					= dblOrderQty -- (total qty ordered from PO)
+			,dblUOMQty				= Items.dblUOMQty -- (unit qty of the UOM)
 			,dblCost				= 0 -- Unable to track it. 
 			,dblValue				-- (total value from PO)				
-			,intItemUOMId			= 
+			,intItemUOMId			= Items.intItemUOMId -- UOM used in the PO. 
 			,dblSalesPrice			= 0 -- Tracking not needed
 			,intCurrencyId			= NULL -- Tracking not needed
 			,dblExchangeRate		= 1 -- Tracking not needed
@@ -148,7 +163,8 @@ BEGIN
 			,dtmCreated				= GETDATE()
 			,intCreatedUserId		= @intUserId
 			,intConcurrencyId		= 1
-	FROM	#tmpPurchaseOrderItems Items 
+	FROM	#tmpPurchaseOrderItems Items INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON Items.intItemUOMId = ItemUOM.intItemUOMId
 END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPurchaseOrderItems')) 

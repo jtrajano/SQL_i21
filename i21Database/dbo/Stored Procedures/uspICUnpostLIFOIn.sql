@@ -85,6 +85,7 @@ INSERT INTO dbo.tblICInventoryLIFO (
 		,dblStockIn
 		,dblStockOut
 		,dblCost
+		,intItemUOMId
 		,strTransactionId
 		,intTransactionId
 		,dtmCreated
@@ -95,8 +96,9 @@ SELECT	intItemId = OutTransactions.intItemId
 		,intItemLocationId = OutTransactions.intItemLocationId
 		,dtmDate = OutTransactions.dtmDate
 		,dblStockIn = 0 
-		,dblStockOut = ABS(OutTransactions.dblUnitQty)
+		,dblStockOut = ABS(ISNULL(OutTransactions.dblQty, 0) * ISNULL(OutTransactions.dblUOMQty, 1))
 		,dblCost = OutTransactions.dblCost
+		,intItemUOMId = OutTransactions.intItemUOMId
 		,strTransactionId = OutTransactions.strTransactionId
 		,intTransactionId = OutTransactions.intTransactionId
 		,dtmCreated = GETDATE()
@@ -106,7 +108,7 @@ FROM	dbo.tblICInventoryLIFO LIFO INNER JOIN dbo.tblICInventoryLIFOOut LIFOOut
 			ON LIFO.intInventoryLIFOId = LIFOOut.intInventoryLIFOId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
 			ON OutTransactions.intInventoryTransactionId = LIFOOut.intInventoryTransactionId
-			AND OutTransactions.dblUnitQty < 0 
+			AND ISNULL(OutTransactions.dblQty, 0) * ISNULL(OutTransactions.dblUOMQty, 1) < 0 
 WHERE	LIFO.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND LIFO.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
