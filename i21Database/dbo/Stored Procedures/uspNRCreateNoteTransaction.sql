@@ -44,6 +44,10 @@ BEGIN TRY
 	, @dblPrevUnpaidInterest Decimal(18,6) = NULL
 	, @intInvNoteTransId Int = NULL
 	
+	DECLARE @dtmPrevAsOfDate DateTime
+			, @intLastTransTypeID Int
+	
+	
 	SET @dblPrevPrincipal = NULL
 	SET @intInvDays = NULL
 	
@@ -59,6 +63,11 @@ BEGIN TRY
 	FROM dbo.tblNRNote WHERE intNoteId = @intNoteId
 	--SELECT @NoteType = strNoteType FROM dbo.tblNRNote Where intNoteId = @intNoteId
 	
+	SELECT top 1 @dtmPrevAsOfDate = dtmAsOfDate, @intLastTransTypeID = intNoteTransTypeId
+		, @dblPrevPrincipal = ISNULL(dblPrincipal,0)
+		, @dblPrevUnpaidInterest = ISNULL(dblUnpaidInterest,0)
+		FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId Order By intNoteTransId DESC
+		
 	
 	DECLARE CurTrans CURSOR FOR
 	SELECT 
@@ -144,18 +153,12 @@ BEGIN TRY
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 	
-		DECLARE @dtmPrevAsOfDate DateTime
-			, @intLastTransTypeID Int
-	
+		
 		IF @TransTypeID = 6
 		SET @Amount = @Amount * (-1)
 		
-		SELECT top 1 @dtmPrevAsOfDate = dtmAsOfDate, @intLastTransTypeID = intNoteTransTypeId
-		, @dblPrevPrincipal = ISNULL(ISNULL(@dblPrevPrincipal, dblPrincipal),0)
-		, @dblPrevUnpaidInterest = ISNULL(ISNULL(@dblPrevUnpaidInterest, dblUnpaidInterest),0)
-		FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId Order By intNoteTransId DESC
 		
-		if @dtmPrevAsOfDate = @AsOf
+		if CONVERT(nvarchar(10), @dtmPrevAsOfDate, 101) = CONVERT(nvarchar(10), @AsOf, 101)
 		BEGIN
 			Select Top 1 @Days = intTransDays From dbo.tblNRNoteTransaction WHERE intNoteId =  @intNoteId Order By intNoteTransId DESC
 		END
@@ -354,13 +357,14 @@ BEGIN TRY
 		-- ***** Amount Applied To Principal *****
 		IF(@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Principal' AND @Amount > 0)
 			SET @AmountAppliedToPrincipal = @Amount 
-		IF(@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Principal' AND @Amount < 0)
+		ELSE IF(@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Principal' AND @Amount < 0)
 			SET @AmountAppliedToPrincipal = @Amount  * (-1) 
 		ELSE IF(@TransTypeID= 1) 
 			SET @AmountAppliedToPrincipal = @Amount
 		ELSE IF(@TransTypeID= 6) 
 			SET @AmountAppliedToPrincipal = @Amount  * (-1)  
 		ELSE IF(@TransTypeID = 4) 
+		BEGIN
 			IF (@NoteType = 'Pay Principal First')
 			BEGIN
 				IF(@Amount>@dblPrevPrincipal)
@@ -375,7 +379,7 @@ BEGIN TRY
 				ELSE
 					SET @AmountAppliedToPrincipal = 0
 			END
-			
+		END	
 		ELSE
 			SET @AmountAppliedToPrincipal = 0			
 		
@@ -383,9 +387,12 @@ BEGIN TRY
 		-- ***** Amount Applied To Interest *****
 		IF (@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Interest' AND @Amount > 0) 
 			SET @AmountAppliesToInterest = @Amount 
-		IF(@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Interest' AND @Amount < 0) 
+		ELSE IF(@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Interest' AND @Amount < 0) 
 			SET @AmountAppliesToInterest = @Amount  * (-1)
-		IF(@TransTypeID= 4) 
+		ELSE IF(@TransTypeID= 1) 
+			SET @AmountAppliesToInterest = @Amount
+		ELSE IF(@TransTypeID= 4) 
+		BEGIN
 			IF (@NoteType = 'Pay Principal First')
 			BEGIN
 				IF(@Amount>@dblPrevPrincipal)
@@ -396,11 +403,11 @@ BEGIN TRY
 			IF (@NoteType = 'Pay Interest First' OR @NoteType = 'Scheduled Invoice')
 			BEGIN
 				IF(@Amount > @dblPrevUnpaidInterest)
-					SET @AmountAppliedToPrincipal = (@dblPrevUnpaidInterest) * (-1)
+					SET @AmountAppliesToInterest = (@dblPrevUnpaidInterest) * (-1)
 				ELSE
-					SET @AmountAppliedToPrincipal = (@Amount) * (-1)
+					SET @AmountAppliesToInterest = (@Amount) * (-1)
 			END
-			
+		END	
 		ELSE
 			SET @AmountAppliesToInterest = 0 
 			
