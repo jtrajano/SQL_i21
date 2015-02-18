@@ -1656,9 +1656,13 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
 		WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ImportLegacyUsers'
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Origin Menus' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
-        UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
-        WHERE strMenuName = 'Import Origin Menus' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ImportLegacyMenus'
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+		WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ImportLegacyUsers'
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Origin Conversions' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
+        UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller.OriginUtility','view.OriginConversions') 
+        WHERE strMenuName = 'Origin Conversions' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.OriginUtility'
 
 
 	DECLARE @SystemManagerModuleId INT
