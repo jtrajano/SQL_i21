@@ -24,13 +24,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             autoLoad: true,
             data: [
                 {
-                    strDescription: 'Contract'
+                    strDescription: 'Purchase Contract'
                 },{
                     strDescription: 'Purchase Order'
                 },{
-                    strDescription: 'Transfer Receipt'
-                },{
-                    strDescription: 'Direct Transfer'
+                    strDescription: 'Transfer Order'
                 },{
                     strDescription: 'Direct'
                 }
