@@ -1063,6 +1063,8 @@
     <Build Include="dbo\Tables\tblLGForwardingAgent.sql" />
     <Build Include="dbo\Tables\tblHDProjectKeyStoneAttendee.sql" />
     <Build Include="dbo\Tables\tblHDProjectCustomerChampion.sql" />
+    <Build Include="dbo\Tables\tblLGShippingLine.sql" />
+    <Build Include="dbo\Tables\tblLGTrucker.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
