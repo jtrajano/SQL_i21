@@ -971,17 +971,44 @@ GO
 				INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Time Off Types', 'Payroll', @PayrollTypesId, 'Time Off Types', 'Screen', 'Payroll.view.TimeOffType', 'small-screen', 1, 1, 0, 1, 4, 0
 
 GO
-	/* ------------------------------------------------------ */	
-	/* --   Add Common Info Recurring Transactions Menus   -- */
-	/* ------------------------------------------------------ */	
+	/* ------------------------------- */	
+	/* --   Add Common Info Menus   -- */
+	/* ------------------------------- */	
+
 		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Recurring Transactions')
 		BEGIN
 			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 			VALUES (N'Recurring Transactions', N'System Manager', 13, N'Recurring Transactions', N'Screen', N'i21.view.RecurringTransaction', N'small-screen', 0, 0, 0, 1, NULL, 1) 
 		END
-	/* ------------------------------------------------------ */
-	/* -- End Add Common Info Recurring Transactions Menus -- */
-	/* ------------------------------------------------------ */
+
+		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Tax Group')
+		BEGIN
+			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+			VALUES (N'Tax Group', N'System Manager', 13, N'Tax Group', N'Screen', N'i21.view.TaxGroup', N'small-screen', 0, 0, 0, 1, NULL, 1) 
+		END
+
+		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Tax Code')
+		BEGIN
+			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+			VALUES (N'Tax Code', N'System Manager', 13, N'Tax Code', N'Screen', N'i21.view.TaxCode', N'small-screen', 0, 0, 0, 1, NULL, 1) 
+		END
+
+		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Tax Type')
+		BEGIN
+			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+			VALUES (N'Tax Type', N'System Manager', 13, N'Tax Type', N'Screen', N'i21.view.TaxType', N'small-screen', 0, 0, 0, 1, NULL, 1) 
+		END
+
+		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Tax Class')
+		BEGIN
+			INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+			VALUES (N'Tax Class', N'System Manager', 13, N'Tax Class', N'Screen', N'i21.view.TaxClass', N'small-screen', 0, 0, 0, 1, NULL, 1) 
+		END
+
+	/* ------------------------------- */	
+	/* --   End Common Info Menus   -- */
+	/* ------------------------------- */	
+
 GO
 
 	/* --------------------------------------------------- */
