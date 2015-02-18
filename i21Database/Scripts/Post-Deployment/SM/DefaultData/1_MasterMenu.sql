@@ -1610,6 +1610,13 @@ GO
 		BEGIN 
 			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
 		END
+
+		SET @tmMenuName = 'Dispatch Deliveries'
+		SET @tmCommand ='TankManagement.view.DispatchDelivery'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
+		END
 	/*---------------------------------*/
 	/*-- END Update TM Activities Menu */
 	/*---------------------------------*/
