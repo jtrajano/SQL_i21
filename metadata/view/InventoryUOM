@@ -545,39 +545,6 @@
                             ]
                         },
                         {
-                            "type": "Ext.grid.column.Number",
-                            "reference": {
-                                "name": "columns",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "dataIndex": "string",
-                                "flex": null,
-                                "itemId": "colConversionFromStockUOM",
-                                "minWidth": 110,
-                                "text": "Conversion From",
-                                "width": 110
-                            },
-                            "name": "MyNumberColumn2",
-                            "designerId": "daa83075-b606-4528-bc24-5de3ad0430a1",
-                            "cn": [
-                                {
-                                    "type": "Ext.form.field.Number",
-                                    "reference": {
-                                        "name": "editor",
-                                        "type": "object"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "itemId": "txtConvertFromStock"
-                                    },
-                                    "name": "MyNumberField1",
-                                    "designerId": "3816c14f-dfa1-4f99-a542-6bd88dcafc5b"
-                                }
-                            ]
-                        },
-                        {
                             "type": "Ext.grid.View",
                             "reference": {
                                 "name": "viewConfig",
@@ -629,7 +596,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging114",
+                    "name": "statusbarpaging11",
                     "designerId": "0065255e-fbbc-413c-8c51-8b3ece401ce4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
