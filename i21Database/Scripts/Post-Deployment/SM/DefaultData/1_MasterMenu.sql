@@ -1738,7 +1738,7 @@ GO
 	/* ---- End Update FRD Menu Commands for MVVM ------ */
 	/* ------------------------------------------------- */
 
-	/* ------------------------------------------------- */
+/* ------------------------------------------------- */
 	/* --- START Update AR Menu Commands for MVVM ----- */
 	/* ------------------------------------------------- */
 
@@ -1803,7 +1803,13 @@ GO
 		BEGIN 
 			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
 		END		
-
+		
+		SET @ARMenuName = 'Customer Contact List'
+		SET @ARCommand ='AccountsReceivable.view.CustomerContactList'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
+		END	
 	/*---------------------------------  */
 	/*-- END Update AR Maintenance Menu */
 	/*---------------------------------  */	
