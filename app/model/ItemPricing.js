@@ -51,8 +51,6 @@ Ext.define('Inventory.model.ItemPricing', {
         { name: 'dblStandardCost', type: 'float' },
         { name: 'dblAverageCost', type: 'float' },
         { name: 'dblEndMonthCost', type: 'float' },
-        { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
-        { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intSort', type: 'int', allowNull: true },
         { name: 'strLocationName', type: 'string'}
     ],
@@ -61,7 +59,6 @@ Ext.define('Inventory.model.ItemPricing', {
         {type: 'presence', field: 'intItemLocationId'},
         {type: 'presence', field: 'dblStandardCost'},
         {type: 'presence', field: 'strPricingMethod'},
-        {type: 'presence', field: 'dblRetailPrice'},
-        {type: 'presence', field: 'dtmBeginDate'}
+        {type: 'presence', field: 'dblRetailPrice'}
     ]
 });

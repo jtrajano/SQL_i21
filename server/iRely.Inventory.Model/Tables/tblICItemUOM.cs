@@ -167,7 +167,6 @@ namespace iRely.Inventory.Model
         public tblICUnitMeasure VolumeUOM { get; set; }
 
         public ICollection<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
-        public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
         public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
         public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
         public ICollection<tblICItemKitDetail> tblICItemKitDetails { get; set; }

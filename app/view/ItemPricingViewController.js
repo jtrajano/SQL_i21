@@ -28,7 +28,7 @@ Ext.define('Inventory.view.ItemPricingViewController', {
             },
             txtLastCost: '{current.dblLastCost}',
             txtStandardCost: '{current.dblStandardCost}',
-            txtAverageCost: '{current.dblMovingAverageCost}',
+            txtAverageCost: '{current.dblAverageCost}',
             txtEndofMonthCost: '{current.dblEndMonthCost}'
         }
     },
@@ -66,7 +66,6 @@ Ext.define('Inventory.view.ItemPricingViewController', {
             me.defaultLocation = config.defaultLocation;
 
             if (config.action === 'new') {
-                me.uomId = config.uomId;
                 context.data.addRecord();
             } else {
                 var filter = [{
@@ -93,22 +92,5 @@ Ext.define('Inventory.view.ItemPricingViewController', {
         if (me.defaultLocation > 0)
             record.set('intItemLocationId', me.defaultLocation);
         action(record);
-    },
-
-    onUOMSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var win = combo.up('window');
-        var current = win.viewModel.data.current;
-        current.set('strUPC', records[0].get('strUpcCode'));
-    },
-
-    init: function(application) {
-        this.control({
-            "#cboUnitMeasure": {
-                select: this.onUOMSelect
-            }
-        })
     }
 });
