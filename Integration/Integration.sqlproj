@@ -240,5 +240,8 @@
     <None Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
     <None Include="dbo\Views\vyuTMOriginAccountStatus.sql" />
     <None Include="dbo\Stored Procedures\uspAPMoveToPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
 </Project>

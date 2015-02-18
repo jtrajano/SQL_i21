@@ -1084,6 +1084,7 @@
     <Build Include="dbo\Tables\tblICCategoryUOM.sql" />
     <Build Include="dbo\Views\vyuICGetUOMConversion.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupCode.sql" />
+	<Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
