@@ -137,7 +137,7 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
         }
         else if (combo.column.itemId === 'colPerUOM')
         {
-            current.set('intCommodityId', records[0].get('intCommodityId'));
+            current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
     },
 
