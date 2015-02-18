@@ -1960,4 +1960,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCostingMethodId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4091cc6c-80a9-406e-9a43-d035a3c4b84d" ChangeDateTime="02/12/2015 11:24:30">
+    <Property Name="ElementName" Value="[dbo].[tblSMTaxGroupCode].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMTaxGroupCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxGroupCodeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="62d92602-7c7f-488d-ac84-a6babffca21d" ChangeDateTime="02/12/2015 11:25:26">
+    <Property Name="ElementName" Value="[dbo].[tblSMTaxGroupCode].[ysnSeparate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMTaxGroupCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnSeparateOnInvoice" />
+  </Operation>
 </Operations>
