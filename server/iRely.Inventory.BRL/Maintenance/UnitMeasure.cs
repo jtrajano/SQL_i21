@@ -55,7 +55,7 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICUnitMeasure>()
                     .Include("tblICUnitMeasureConversions.StockUnitMeasure")
-                    .Include("ConversionFactors.ConversionTo")
+                    .Include(p=> p.vyuICGetUOMConversions)
                     .Where(w => query.Where(predicate).Any(a => a.intUnitMeasureId == w.intUnitMeasureId)) //Filter the Main DataSource Based on Search Query
                     .OrderBySelector(sortSelector)
                     .Skip(start)

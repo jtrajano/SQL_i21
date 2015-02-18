@@ -54,7 +54,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCategoryUOM> DimensionCategoryUOMs { get; set; }
         public ICollection<tblICCategoryUOM> VolumeCategoryUOMs { get; set; }
 
-        public ICollection<tblICUnitMeasureConversion> ConversionFactors { get; set; }
+        public ICollection<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
     }
 
     public class tblICUnitMeasureConversion : BaseEntity
@@ -87,8 +87,6 @@ namespace iRely.Inventory.Model
 
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public tblICUnitMeasure StockUnitMeasure { get; set; }
-        public tblICUnitMeasure ConversionTo { get; set; }
-
     }
 
     public class vyuICGetPackedUOM
@@ -102,5 +100,18 @@ namespace iRely.Inventory.Model
         public int? intStockUnitMeasureId { get; set; }
         public string strConversionUOM { get; set; }
         public decimal? dblConversionToStock { get; set; }
+    }
+
+    public class vyuICGetUOMConversion
+    {
+        [Key]
+        public int intUnitMeasureConversionId { get; set; }
+        public int intUnitMeasureId { get; set; }
+        public string strUnitMeasure { get; set; }
+        public int? intStockUnitMeasureId { get; set; }
+        public string strStockUOM { get; set; }
+        public decimal? dblConversionToStock { get; set; }
+
+        public tblICUnitMeasure tblICUnitMeasure { get; set; }
     }
 }

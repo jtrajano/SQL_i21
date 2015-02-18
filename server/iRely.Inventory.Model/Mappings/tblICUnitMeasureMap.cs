@@ -22,9 +22,9 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICUnitMeasureConversions)
                 .WithRequired(p => p.tblICUnitMeasure)
                 .HasForeignKey(p => p.intUnitMeasureId);
-            this.HasMany(p => p.ConversionFactors)
-               .WithRequired(p => p.ConversionTo)
-               .HasForeignKey(p => p.intStockUnitMeasureId);
+            this.HasMany(p => p.vyuICGetUOMConversions)
+                .WithRequired(p => p.tblICUnitMeasure)
+                .HasForeignKey(p => p.intStockUnitMeasureId);
         }
     }
 
@@ -65,6 +65,24 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSymbol).HasColumnName("strSymbol");
             this.Property(t => t.intStockUnitMeasureId).HasColumnName("intStockUnitMeasureId");
             this.Property(t => t.strConversionUOM).HasColumnName("strConversionUOM");
+            this.Property(t => t.dblConversionToStock).HasColumnName("dblConversionToStock");
+        }
+    }
+
+    public class vyuICGetUOMConversionMap : EntityTypeConfiguration<vyuICGetUOMConversion>
+    {
+        public vyuICGetUOMConversionMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intUnitMeasureConversionId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetUOMConversion");
+            this.Property(t => t.intUnitMeasureConversionId).HasColumnName("intUnitMeasureConversionId");
+            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.intStockUnitMeasureId).HasColumnName("intStockUnitMeasureId");
+            this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
             this.Property(t => t.dblConversionToStock).HasColumnName("dblConversionToStock");
         }
     }
