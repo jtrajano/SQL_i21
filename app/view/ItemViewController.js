@@ -649,7 +649,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colKitItem: {
                     dataIndex: 'strItemNo',
                     editor: {
-                        store: '{kitItem}'
+                        store: '{kitItem}',
+                        defaultFilters: [{
+                            column: 'strType',
+                            value: 'Inventory'
+                        }]
                     }
                 },
                 colKitItemDescription: 'strDescription',
