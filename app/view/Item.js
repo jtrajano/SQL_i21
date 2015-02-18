@@ -472,12 +472,12 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Unit Qty',
-                                                        format: '0',
+                                                        format: '0.00',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true,
-                                                            minValue: 1
+                                                            minValue: 0
                                                         }
                                                     },
                                                     {
@@ -487,25 +487,27 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Sell Qty',
-                                                        format: '0',
+                                                        format: '0.00',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
+                                                            hideTrigger: true,
+                                                            minValue: 0
                                                         }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        dataIndex: 'number',
                                                         itemId: 'colDetailWeight',
                                                         width: 62,
                                                         align: 'right',
+                                                        dataIndex: 'number',
                                                         text: 'Weight',
-                                                        format: '0',
+                                                        format: '0.00',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
+                                                            hideTrigger: true,
+                                                            minValue: 0
                                                         }
                                                     },
                                                     {
@@ -608,7 +610,7 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Length',
-                                                        format: '0',
+                                                        format: '0.00',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -622,7 +624,7 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Width',
-                                                        format: '0',
+                                                        format: '0.00',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -636,7 +638,7 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Height',
-                                                        format: '0',
+                                                        format: '0.00',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -696,7 +698,7 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Volume',
-                                                        format: '0',
+                                                        format: '0.00',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -755,7 +757,7 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Max Qty',
-                                                        format: '0',
+                                                        format: '0.00',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
