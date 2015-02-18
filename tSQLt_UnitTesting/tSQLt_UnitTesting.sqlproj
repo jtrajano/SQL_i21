@@ -793,6 +793,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspCMCheckPrint_QueuePrintJobs for the basics.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspPOReceived.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

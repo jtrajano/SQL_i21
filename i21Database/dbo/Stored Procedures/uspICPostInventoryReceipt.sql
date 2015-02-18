@@ -261,7 +261,8 @@ END
 -- If RECAP is FALSE,
 -- 1. Book the G/L entries
 -- 2. Update the ysnPosted flag in the transaction. Increase the concurrency. 
--- 3. Commit the save point 
+-- 3. Update the PO (if it exists)
+-- 4. Commit the save point 
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 
@@ -271,6 +272,10 @@ BEGIN
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 	WHERE	strReceiptNumber = @strTransactionId  
+
+	-- Update the received quantities from the Purchase Order
+	EXEC dbo.[uspPOReceived] @intTransactionId 
+		IF @@ERROR <> 0	GOTO Post_Exit
 
 	COMMIT TRAN @TransactionName
 END 

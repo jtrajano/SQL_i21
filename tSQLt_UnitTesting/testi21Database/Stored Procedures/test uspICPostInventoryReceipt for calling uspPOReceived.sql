@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceipt for one item and recap]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceipt for calling uspPOReceived]
 AS
 BEGIN
 	-- Arrange 
@@ -18,13 +18,14 @@ BEGIN
 				,@InvalidLocation AS INT = -1
 
 		DECLARE @ysnPost AS BIT = 1
-		DECLARE @ysnRecap AS BIT = 1
+		DECLARE @ysnRecap AS BIT = 0
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'Dummy-000001'
 		DECLARE @intUserId AS INT = 1
 		DECLARE @intEntityId AS INT = 1
 		DECLARE @dtmDate AS DATETIME = GETDATE()
 
 		EXEC [testi21Database].[Fake inventory items];
+		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;
@@ -60,22 +61,20 @@ BEGIN
 		);
 		
 		CREATE TABLE actual (
-			dblDebit NUMERIC(18,6)
-			,dblCredit NUMERIC(18,6)
+			receiptItemId INT
 		)
 		
 		CREATE TABLE expected (
-			dblDebit NUMERIC(18,6)
-			,dblCredit NUMERIC(18,6)
+			receiptItemId INT
 		)
-		
-		INSERT INTO expected VALUES (125.000000, 0)
-		INSERT INTO expected VALUES (0, 125.000000)
 		
 		-- Add a spy for uspPOReceived
 		EXEC tSQLt.SpyProcedure 'dbo.uspPOReceived';		
+
+		-- Setup the expected parameter for uspPOReceived
+		INSERT INTO expected (receiptItemId) VALUES (1)
 	END 
-	
+
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICPostInventoryReceipt
@@ -84,19 +83,16 @@ BEGIN
 			,@strTransactionId
 	 		,@intUserId
 			,@intEntityId
-			
-		INSERT INTO actual (dblDebit, dblCredit) 
-		SELECT dblDebit, dblCredit 
-		FROM dbo.tblGLDetailRecap
+		
+		-- Get the actual 
+		INSERT INTO actual (receiptItemId) 
+		SELECT receiptItemId
+		FROM dbo.uspPOReceived_SpyProcedureLog	
 	END 
 	
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
-
-		--Assert uspPOReceived is NOT called 
-		IF @ysnRecap = 1 AND EXISTS (SELECT 1 FROM dbo.uspPOReceived_SpyProcedureLog)
-			EXEC tSQLt.Fail 'uspPOReceived should NOT been called when @ysnRecap = 1'
 	END
 
 	-- Clean-up: remove the tables used in the unit test
