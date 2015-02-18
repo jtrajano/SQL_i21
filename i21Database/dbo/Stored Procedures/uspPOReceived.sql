@@ -5,7 +5,7 @@ BEGIN
 
 	DECLARE @purchaseId INT, @lineNo INT, @itemId INT;
 	DECLARE @purchaseOrderNumber NVARCHAR(50), @strItemNo NVARCHAR(50);
-	
+	DECLARE @posted BIT;
 	DECLARE @receivedNum DECIMAL(18,6);
 
 	SELECT
@@ -13,12 +13,13 @@ BEGIN
 		,B.intLineNo
 		,B.dblReceived
 		,B.intItemId
+		,A.ysnPosted
 	INTO #tmpReceivedPOItems
 	FROM tblICInventoryReceipt A
 		LEFT JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	WHERE A.intInventoryReceiptId = @receiptItemId
 		
-	SELECT TOP 1 @purchaseId = intSourceId FROM #tmpReceivedPOItems
+	SELECT TOP 1 @purchaseId = intSourceId, @posted = ysnPosted FROM #tmpReceivedPOItems
 	SELECT @purchaseOrderNumber = strPurchaseOrderNumber FROM tblPOPurchase WHERE intPurchaseId = @purchaseId
 
 	--Validate
@@ -51,7 +52,9 @@ BEGIN
 	END
 
 	UPDATE A
-		SET dblQtyReceived = (dblQtyReceived + B.dblReceived)
+		SET dblQtyReceived = CASE WHEN @posted = 1 
+								THEN (dblQtyReceived + B.dblReceived) 
+							ELSE (dblQtyReceived - B.dblReceived) END
 	FROM tblPOPurchaseDetail A
 		INNER JOIN #tmpReceivedPOItems B ON A.intItemId = B.intItemId AND A.intPurchaseDetailId = B.intSourceId
 	WHERE intPurchaseId = @purchaseId
