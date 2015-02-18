@@ -136,6 +136,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                         { dataIndex: 'strUnitType', value: 'Quantity', condition: 'eq'},
                         { dataIndex: 'strUnitType', value: 'Volume', condition: 'eq', conjunction: 'or'},
                         { dataIndex: 'strUnitType', value: 'Weight', condition: 'eq', conjunction: 'or'},
+                        { dataIndex: 'strUnitType', value: 'Packed', condition: 'eq', conjunction: 'or'},
                         { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq', conjunction: 'and' }
                     ];
                 break;
