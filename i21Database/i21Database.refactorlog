@@ -2086,4 +2086,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intRegisterId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a62bb98e-79e3-4ca1-ae66-afff5fb8e255" ChangeDateTime="02/18/2015 03:53:23">
+    <Property Name="ElementName" Value="[dbo].[tblHDProject].[dtmConfirmedKeystoneDates]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDProject]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmConfirmedKeystoneDate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8aee2db2-ecea-4aa5-89c8-6cd89ede616b" ChangeDateTime="02/18/2015 03:53:25">
+    <Property Name="ElementName" Value="[dbo].[tblHDProject].[strCustomerKeyProjectGoals]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDProject]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCustomerKeyProjectGoal" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ac98c815-f1e0-4f54-974a-ba077d865c3b" ChangeDateTime="02/18/2015 03:53:34">
+    <Property Name="ElementName" Value="[dbo].[tblHDProject].[strCustomModifications]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblHDProject]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCustomModification" />
+  </Operation>
 </Operations>
