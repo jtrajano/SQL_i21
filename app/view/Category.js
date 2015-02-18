@@ -908,7 +908,7 @@ Ext.define('Inventory.view.Category', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboAccountDescription',
+                                                            itemId: 'cboAccountCategory',
                                                             displayField: 'strAccountCategory',
                                                             valueField: 'strAccountCategory'
                                                         }
