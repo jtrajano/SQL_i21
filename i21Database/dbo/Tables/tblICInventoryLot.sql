@@ -80,6 +80,7 @@ Records must be maintained in this table even if the costing method for an item 
 		[dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+		[intItemUOMId] INT NOT NULL,
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,
 		[dtmCreated] DATETIME NULL, 

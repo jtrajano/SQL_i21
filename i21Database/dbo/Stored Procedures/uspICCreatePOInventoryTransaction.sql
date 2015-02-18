@@ -38,6 +38,8 @@ BEGIN
 		,intItemLocationId INT NOT NULL 
 		,dtmDate DATETIME
 		,dblOrderQty NUMERIC(18,6) DEFAULT 0
+		,dblUOMQty NUMERIC(18,6) DEFAULT 0
+		,intItemUOMId INT 
 		,dblValue NUMERIC(18,6)
 		,intTransactionId INT
 		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -107,9 +109,11 @@ BEGIN
 			intItemId
 			,intItemLocationId
 			,dtmDate
-			,dblUnitQty
+			,dblQty
+			,dblUOMQty
 			,dblCost
 			,dblValue
+			,intItemUOMId
 			,dblSalesPrice
 			,intCurrencyId
 			,dblExchangeRate
@@ -130,6 +134,7 @@ BEGIN
 			,dblUnitQty				= dblOrderQty -- (total qty ordered from PO)
 			,dblCost				= 0 -- Unable to track it. 
 			,dblValue				-- (total value from PO)				
+			,intItemUOMId			= 
 			,dblSalesPrice			= 0 -- Tracking not needed
 			,intCurrencyId			= NULL -- Tracking not needed
 			,dblExchangeRate		= 1 -- Tracking not needed
