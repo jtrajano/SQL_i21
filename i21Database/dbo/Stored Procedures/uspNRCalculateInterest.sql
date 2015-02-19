@@ -26,7 +26,7 @@ BEGIN
 		DECLARE @dblAsOfInterest Decimal(18,2), @dtmLastAsOfDate Datetime, @dblPrevPrincipal Decimal(18,2)
 		, @Days Int, @dblInterestToDate Decimal(18,2)
 		
-		SELECT TOP 1 @dtmLastAsOfDate = dtmAsOfDate, @dblPrevPrincipal = dblPrincipal FROM dbo.tblNRNoteTransaction ORDER BY intNoteTransId DESC
+		SELECT TOP 1 @dtmLastAsOfDate = dtmAsOfDate, @dblPrevPrincipal = dblPrincipal, @intTransTypeID = intNoteTransTypeId FROM dbo.tblNRNoteTransaction ORDER BY intNoteTransId DESC
 		
 		IF (CONVERT(nvarchar(10), @dtmLastAsOfDate, 101) = CONVERT(nvarchar(10), @dtmCurrentDate, 101))
 		BEGIN
@@ -38,14 +38,30 @@ BEGIN
 			SET @dblInterestToDate = @dblPrevPrincipal * ((@dblInterestRate/100)/360) * @Days
 		END
 		
-		SELECT TOP 1 ISNULL(@intNoteId,0) [intNoteId]
-		, ISNULL(@dblInterestToDate,0) as [dblInterestToDate] 
-		--, dtmExpectedPayDate [dtmPayDate],dblExpectedPayAmt [dblPayAmount]
-		, ISNULL(dblPrincipal,0) [dblPrincipal]
-		, ISNULL(dblUnpaidInterest,0) [dblInterest]
-		, ISNULL(dblPayOffBalance,0) [dblBalance]
-		FROM dbo.tblNRNoteTransaction 
-		ORDER BY intNoteTransId DESC
+		IF @intTransTypeID = 1
+		BEGIN
+			SELECT TOP 1 ISNULL(@intNoteId,0) [intNoteId]
+			, ISNULL(@dblInterestToDate,0) as [dblInterestToDate] 
+			--, dtmExpectedPayDate [dtmPayDate],dblExpectedPayAmt [dblPayAmount]
+			, ISNULL(dblPrincipal,0) [dblPrincipal]
+			, ISNULL(dblUnpaidInterest,0) [dblInterest]
+			, ISNULL(dblPayOffBalance,0) [dblBalance]
+			FROM dbo.tblNRNoteTransaction Where intNoteTransTypeId = 1 AND dblPrincipal <> 0
+			ORDER BY intNoteTransId DESC
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 ISNULL(@intNoteId,0) [intNoteId]
+			, ISNULL(@dblInterestToDate,0) as [dblInterestToDate] 
+			--, dtmExpectedPayDate [dtmPayDate],dblExpectedPayAmt [dblPayAmount]
+			, ISNULL(dblPrincipal,0) [dblPrincipal]
+			, ISNULL(dblUnpaidInterest,0) [dblInterest]
+			, ISNULL(dblPayOffBalance,0) [dblBalance]
+			FROM dbo.tblNRNoteTransaction 
+			ORDER BY intNoteTransId DESC
+		END
+		
+		
 		
 		 
 	END
