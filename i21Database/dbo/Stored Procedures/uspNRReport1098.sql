@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspNRReport1098]
- @1098Year Char(4) = '2015'
 AS
 BEGIN
+	DECLARE  @1098Year Char(4) = '2015'
 
 	DECLARE @tbl AS TABLE (intCustomerId Int, strCustomerNumber NVARCHAR(20), strName nvarchar(100) , strAddress nvarchar(100)
 							, strPhone nvarchar(50), strCity  NVARCHAR(100), strState NVARCHAR(100),strZipCode  NVARCHAR(100)
@@ -27,6 +27,9 @@ BEGIN
 	SET @StartDate = CAST('01/01/' + @1098Year as Datetime)
 	SET @EndDate = CAST('12/31/' + @1098Year as Datetime)
 	
+	print @StartDate
+	Print @EndDate
+	
 	SELECT 
 	@1098Year AS 'Year' 
 	, ( SELECT [strCompanyName] FROM [tblSMCompanySetup]) AS [Recipient]
@@ -49,4 +52,3 @@ BEGIN
 	WHERE N.strNoteType = 'Scheduled Invoice'
 
 END
-

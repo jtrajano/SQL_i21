@@ -180,7 +180,7 @@ BEGIN TRY
 			
 			SELECT @intNoteTransId = intNoteTransId FROM dbo.tblNRNoteTransaction Where RTRIM(strTransComments) =  CAST(@intScheduleTransId as nvarchar(20))
 			
-			EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
+			--EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
 			EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount
 			
 			

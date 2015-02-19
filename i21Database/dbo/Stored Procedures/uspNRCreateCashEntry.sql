@@ -18,10 +18,20 @@ BEGIN TRY
 	SET @intBankTransactionTypeId = 18
 	SET @dblExchangeRate = 1
 	
+	SELECT @strDescription = strDescription FROM dbo.tblGLAccount 
+	Where intAccountId = @intGLAccountId 
+	
+	
 --Bank accc - GL acc =  Cash acc from GL acc ( only 1 GL cash accpunt will be associated with Banc account GL account)
-	SELECT @intBankAccountId = intAccountId, @strDescription = strDescription FROM dbo.tblGLAccount 
-	Where intAccountId in (Select intGLAccountId From dbo.tblCMBankAccount) 
-	AND intAccountGroupId In (Select intAccountGroupId from dbo.tblGLAccountGroup Where strAccountGroup = 'Cash Accounts')
+	--SELECT @intBankAccountId = intAccountId, @strDescription = strDescription FROM dbo.tblGLAccount 
+	--Where intAccountId in (Select intGLAccountId From dbo.tblCMBankAccount) 
+	--AND intAccountGroupId In (Select intAccountGroupId from dbo.tblGLAccountGroup Where strAccountGroup = 'Cash Accounts')
+	
+	SELECT @intBankAccountId = intBankAccountId FROM dbo.tblCMBankAccount 
+	WHERE intGLAccountId IN (SELECT intAccountId FROM dbo.tblGLAccount WHERE intAccountGroupId IN 
+	(Select intAccountGroupId from dbo.tblGLAccountGroup Where strAccountGroup = 'Cash Accounts')
+	)
+	
 	
 	
 	--Get currency Id
