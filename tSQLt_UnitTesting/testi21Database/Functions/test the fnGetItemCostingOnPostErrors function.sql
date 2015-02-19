@@ -150,31 +150,31 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual
 		-- 1: Valid item and valid location. 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_1, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_1, NULL, NULL)
 		
 		-- 2: Invalid item and valid location
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@InvalidItem, @intItemLocationId_1, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@InvalidItem, @intItemLocationId_1, NULL, NULL)
 
 		-- 3: Valid item and invalid location
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@StickyGrains, @InvalidLocation, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@StickyGrains, @InvalidLocation, NULL, NULL)
 
 		-- 4: Invalid item and invalid location
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@InvalidItem, @InvalidLocation, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@InvalidItem, @InvalidLocation, NULL, NULL)
 
 		-- 5: Postive stock 
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_6, 10)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_6, 10, 1)
 
 		-- 6: Negative stock is not allowed 
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_11, -10)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_11, -10, 1)
 
 		-- 7: Negative stock is allowed
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_6, -10)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_6, -10, 1)
 		
 	END
 
@@ -186,6 +186,5 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE expected
-	
+		DROP TABLE expected	
 END 

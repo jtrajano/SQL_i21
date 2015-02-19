@@ -20,7 +20,7 @@ It only tracks the qty of those non-'Stock UOM's.
 	FK to the tblICItemUOM table. 
 	Maps: None
 
-*	[dblQty] NUMERIC(18, 6) NULL DEFAULT ((0))
+*	[dblOnHand] NUMERIC(18, 6) NULL DEFAULT ((0))
 	The number of stocks currently at the specific UOM. 
 	Maps: None
 
@@ -39,7 +39,8 @@ It only tracks the qty of those non-'Stock UOM's.
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL, 
 		[intItemUOMId] INT NOT NULL,
-		[dblQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((1)), 
 		CONSTRAINT [PK_tblICItemStockUOM] PRIMARY KEY ([intItemStockUOMId]), 
 		CONSTRAINT [FK_tblICItemStockUOM_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
@@ -47,5 +48,5 @@ It only tracks the qty of those non-'Stock UOM's.
 	GO
 	CREATE NONCLUSTERED INDEX [IX_tblICItemStockUOM_intItemId_intLocationId_intItemUOMId]
 		ON [dbo].[tblICItemStockUOM]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
-		INCLUDE(dblQty);
+		INCLUDE(dblOnHand);
 	GO

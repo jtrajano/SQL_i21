@@ -29,6 +29,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Declare the variables for the currencies and unit of measure
 		DECLARE @USD AS INT = 1;
 		
@@ -70,11 +77,13 @@ BEGIN
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -100
+				,dblQty = -100
 				,dblUOMQty = 1
 				,dblCost = 14.00
 				,dblSalesPrice = 20.00
+				,dblValue = 0
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
@@ -92,8 +101,7 @@ BEGIN
 				,intItemLocationId = @Default_Location
 				,dblUnitOnHand = (0 - 100)  -- Reduce stock by 100
 	END 
-	
-	
+
 	-- Act
 	BEGIN 	
 		-- Call uspICPostCosting to post the costing and generate the g/l entries  
@@ -128,5 +136,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-END 
-GO 
+END

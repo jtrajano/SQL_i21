@@ -38,8 +38,9 @@ SET ANSI_WARNINGS OFF
 DECLARE @intId AS INT 
 		,@intItemId AS INT
 		,@intItemLocationId AS INT 
+		,@intItemUOMId AS INT 
 		,@dtmDate AS DATETIME
-		,@dblUnitQty AS NUMERIC(18, 6) 
+		,@dblQty AS NUMERIC(18, 6) 
 		,@dblUOMQty AS NUMERIC(18, 6)
 		,@dblCost AS NUMERIC(18, 6)
 		,@dblSalesPrice AS NUMERIC(18, 6)
@@ -78,8 +79,9 @@ FOR
 SELECT  intId
 		,intItemId
 		,intItemLocationId
+		,intItemUOMId
 		,dtmDate
-		,dblUnitQty
+		,dblQty
 		,dblUOMQty
 		,dblCost
 		,dblSalesPrice
@@ -94,7 +96,7 @@ FROM	@ItemsToPost
 OPEN loopItems;
 
 -- Initial fetch attempt
-FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
+FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intItemLocationId, @intItemUOMId, @dtmDate, @dblQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -111,14 +113,15 @@ BEGIN
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
 	--------------------------------------------------------------------------------
-	-- Moving Average Cost
+	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST)
 	BEGIN 
 		EXEC dbo.uspICPostAverageCosting
 			@intItemId
 			,@intItemLocationId
+			,@intItemUOMId
 			,@dtmDate
-			,@dblUnitQty
+			,@dblQty
 			,@dblUOMQty
 			,@dblCost
 			,@dblSalesPrice
@@ -137,8 +140,9 @@ BEGIN
 		EXEC dbo.uspICPostFIFO
 			@intItemId
 			,@intItemLocationId
+			,@intItemUOMId
 			,@dtmDate
-			,@dblUnitQty
+			,@dblQty
 			,@dblUOMQty
 			,@dblCost
 			,@dblSalesPrice
@@ -157,8 +161,9 @@ BEGIN
 		EXEC dbo.uspICPostLIFO
 			@intItemId
 			,@intItemLocationId
+			,@intItemUOMId
 			,@dtmDate
-			,@dblUnitQty
+			,@dblQty
 			,@dblUOMQty
 			,@dblCost
 			,@dblSalesPrice
@@ -177,9 +182,10 @@ BEGIN
 		EXEC dbo.uspICPostLot
 			@intItemId
 			,@intItemLocationId
+			,@intItemUOMId
 			,@dtmDate
 			,@intLotId
-			,@dblUnitQty
+			,@dblQty
 			,@dblUOMQty
 			,@dblCost
 			,@dblSalesPrice
@@ -218,7 +224,7 @@ BEGIN
 		USING (
 				SELECT	intItemId = @intItemId
 						,intItemLocationId = @intItemLocationId
-						,Qty = ISNULL(@dblUnitQty, 0)  * ISNULL(@dblUOMQty, 0)
+						,Qty = ISNULL(@dblQty, 0)  * ISNULL(@dblUOMQty, 0)
 						,Cost = @dblCost
 		) AS StockToUpdate
 			ON ItemStock.intItemId = StockToUpdate.intItemId
@@ -255,6 +261,47 @@ BEGIN
 			)
 		;
 
+		-- Update the Item Stock UOM table
+		MERGE	
+		INTO	dbo.tblICItemStockUOM 
+		WITH	(HOLDLOCK) 
+		AS		ItemStock	
+		USING (
+				SELECT	intItemId = @intItemId
+						,intItemLocationId = @intItemLocationId
+						,intItemUOMId = @intItemUOMId
+						,Qty = ISNULL(@dblQty, 0)  
+						,Cost = @dblCost
+		) AS StockToUpdate
+			ON ItemStock.intItemId = StockToUpdate.intItemId
+			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
+			AND ItemStock.intItemUOMId = StockToUpdate.intItemUOMId
+
+		-- If matched, update the unit on hand qty. 
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET		dblOnHand = ISNULL(ItemStock.dblOnHand, 0) + StockToUpdate.Qty
+
+		-- If none found, insert a new item stock record
+		WHEN NOT MATCHED THEN 
+			INSERT (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dblOnHand
+				,dblOnOrder
+				,intConcurrencyId
+			)
+			VALUES (
+				StockToUpdate.intItemId
+				,StockToUpdate.intItemLocationId
+				,StockToUpdate.intItemUOMId				
+				,StockToUpdate.Qty 
+				,0
+				,1	
+			)
+		;
+
 		-- Update the Item Pricing table
 		MERGE	
 		INTO	dbo.tblICItemPricing 
@@ -263,7 +310,7 @@ BEGIN
 		USING (
 				SELECT	intItemId = @intItemId
 						,intItemLocationId = @intItemLocationId
-						,Qty = ISNULL(@dblUnitQty, 0)  * ISNULL(@dblUOMQty, 0)
+						,Qty = ISNULL(@dblQty, 0)  * ISNULL(@dblUOMQty, 0)
 						,Cost = @dblCost
 		) AS StockToUpdate
 			ON ItemPricing.intItemId = StockToUpdate.intItemId
@@ -298,7 +345,7 @@ BEGIN
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
-	FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intItemLocationId, @dtmDate, @dblUnitQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId
+	FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intItemLocationId, @intItemUOMId, @dtmDate, @dblQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop

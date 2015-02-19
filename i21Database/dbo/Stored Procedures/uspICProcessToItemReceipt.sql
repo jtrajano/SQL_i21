@@ -27,8 +27,9 @@ BEGIN TRY
 	INSERT INTO @ItemsToReceive (
 		intItemId
 		,intItemLocationId
+		,intItemUOMId
 		,dtmDate
-		,dblUnitQty
+		,dblQty
 		,dblUOMQty
 		,dblCost
 		,dblSalesPrice

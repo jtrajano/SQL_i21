@@ -12,7 +12,6 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInFIFO
 	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
-	,@dblUOMQty NUMERIC(18,6)
 	,@dblCost AS NUMERIC(18,6)
 	,@intUserId AS INT
 	,@FullQty AS NUMERIC(18,6) 
@@ -54,14 +53,11 @@ AS		fifo_bucket
 USING (
 	SELECT	intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId	
-			,ItemUOM.intItemUOMId 
-			,ItemUOM.ysnStockUnit
-	FROM	dbo.tblICItemUOM ItemUOM
-	WHERE	ItemUOM.intItemId = @intItemId
-			AND ItemUOM.intItemUOMId = @intItemUOMId 
+			,intItemUOMId = @intItemUOMId
 ) AS Source_Query  
 	ON fifo_bucket.intItemId = Source_Query.intItemId
 	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
+	AND fifo_bucket.intItemUOMId = Source_Query.intItemUOMId
 
 	-- Update an existing negative stock 
 	AND fifo_bucket.dblStockIn < fifo_bucket.dblStockOut
@@ -97,11 +93,11 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 	INSERT (
 		[intItemId]
 		,[intItemLocationId]
+		,[intItemUOMId]
 		,[dtmDate]
 		,[dblStockIn]
 		,[dblStockOut]
-		,[dblCost]
-		,[intItemUOMId]
+		,[dblCost]		
 		,[strTransactionId]
 		,[intTransactionId]
 		,[dtmCreated]
@@ -111,11 +107,11 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 	VALUES (
 		@intItemId
 		,@intItemLocationId
+		,@intItemUOMId
 		,@dtmDate
 		,@FullQty
 		,@TotalQtyOffset
-		,@dblCost
-		,@intItemUOMId
+		,@dblCost		
 		,@strTransactionId
 		,@intTransactionId
 		,GETDATE()
@@ -135,11 +131,11 @@ BEGIN
 	INSERT dbo.tblICInventoryFIFO (
 		[intItemId]
 		,[intItemLocationId]
+		,[intItemUOMId]
 		,[dtmDate]
 		,[dblStockIn]
 		,[dblStockOut]
-		,[dblCost]
-		,[intItemUOMId]
+		,[dblCost]		
 		,[strTransactionId]
 		,[intTransactionId]
 		,[dtmCreated]
@@ -149,16 +145,16 @@ BEGIN
 	VALUES (
 		@intItemId
 		,@intItemLocationId
+		,@intItemUOMId
 		,@dtmDate
 		,@FullQty
 		,@FullQty
 		,@dblCost
-		,@intItemUOMId
 		,@strTransactionId
 		,@intTransactionId
 		,GETDATE()
 		,@intUserId
-		,1	
+		,1
 	)
 
 	-- Do a follow-up retrieval of the new fifo id.
@@ -167,3 +163,4 @@ END
 
 -- If Update was not performed, assume an insert was done. 
 SELECT @NewFifoId = SCOPE_IDENTITY() WHERE @UpdatedFifoId IS NULL; 
+

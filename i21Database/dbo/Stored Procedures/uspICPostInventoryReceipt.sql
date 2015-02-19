@@ -129,9 +129,10 @@ BEGIN
 	DECLARE @ItemsToPost AS ItemCostingTableType  
 	INSERT INTO @ItemsToPost (  
 			intItemId  
-			,intItemLocationId  
+			,intItemLocationId 
+			,intItemUOMId  
 			,dtmDate  
-			,dblUnitQty  
+			,dblQty  
 			,dblUOMQty  
 			,dblCost  
 			,dblSalesPrice  
@@ -144,9 +145,10 @@ BEGIN
 	)  
 	SELECT	intItemId = DetailItems.intItemId  
 			,intItemLocationId = ItemLocation.intItemLocationId
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = Header.dtmReceiptDate  
-			,dblUnitQty = DetailItems.dblOpenReceive  
-			,dblUOMQty = 1  
+			,dblQty = DetailItems.dblOpenReceive  
+			,dblUOMQty = ItemUOM.dblUnitQty
 			,dblCost = DetailItems.dblUnitCost  
 			,dblSalesPrice = 0  
 			,intCurrencyId = Header.intCurrencyId  
@@ -160,6 +162,9 @@ BEGIN
 			INNER JOIN dbo.tblICInventoryReceiptItem DetailItems  
 				ON Header.intInventoryReceiptId = DetailItems.intInventoryReceiptId 
 				AND ItemLocation.intItemId = DetailItems.intItemId
+			INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON DetailItems.intItemId = ItemUOM.intItemId
+				AND DetailItems.intUnitMeasureId = ItemUOM.intItemUOMId
 	WHERE	Header.intInventoryReceiptId = @intTransactionId   
   
 	-- Call the post routine 

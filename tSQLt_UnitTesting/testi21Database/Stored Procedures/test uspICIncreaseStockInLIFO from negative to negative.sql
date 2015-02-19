@@ -22,6 +22,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Create a fake data for tblICInventoryLIFO
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryLIFO
@@ -34,6 +41,7 @@ BEGIN
 		INSERT INTO dbo.tblICInventoryLIFO (
 			[intItemId]
 			,[intItemLocationId]
+			,[intItemUOMId]
 			,[dtmDate]
 			,[dblStockIn]
 			,[dblStockOut]
@@ -45,6 +53,7 @@ BEGIN
 		-- Sold to negative
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 15, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 30
@@ -56,6 +65,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 14, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 56
@@ -67,6 +77,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 13, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 77
@@ -78,6 +89,7 @@ BEGIN
 		CREATE TABLE expected (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -89,6 +101,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -100,6 +113,7 @@ BEGIN
 		-- Create the variables used by uspICIncreaseStockInLIFO
 		DECLARE @intItemId AS INT				= @PremiumGrains
 				,@intItemLocationId AS INT		= @BetterHaven
+				,@intItemUOMId AS INT			= @PremiumGrains_BushelUOMId
 				,@dtmDate AS DATETIME			= 'January 16, 2014'
 				,@dblQty NUMERIC(18,6)			= 100
 				,@dblCost AS NUMERIC(18,6)		= 22
@@ -120,6 +134,7 @@ BEGIN
 		INSERT INTO expected (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -130,6 +145,7 @@ BEGIN
 		-- Incoming stock is fully consumed by the negative stocks
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 16, 2014'
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
@@ -140,6 +156,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 15, 2014'
 				,[dblStockIn] = 30
 				,[dblStockOut] = 30
@@ -150,6 +167,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 14, 2014'
 				,[dblStockIn] = 56
 				,[dblStockOut] = 56
@@ -160,13 +178,13 @@ BEGIN
 		UNION ALL 		
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 13, 2014'
 				,[dblStockIn] = 14
 				,[dblStockOut] = 77
 				,[dblCost] = 13.00
 				,[intCreatedUserId] = 1
 				,[intConcurrencyId] = 2
-
 				
 				/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like:  
@@ -194,6 +212,7 @@ BEGIN
 			EXEC dbo.uspICIncreaseStockInLIFO
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId
 				,@dtmDate
 				,@dblQty
 				,@dblCost
@@ -253,6 +272,7 @@ BEGIN
 		INSERT INTO actual (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -263,6 +283,7 @@ BEGIN
 		SELECT
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]

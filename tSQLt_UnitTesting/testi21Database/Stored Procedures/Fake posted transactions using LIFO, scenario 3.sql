@@ -69,6 +69,13 @@ BEGIN
 	DECLARE @AutoNegative_BetterHaven AS INT = 6002
 	DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
 
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
+
 	-- Batch Id
 	DECLARE @strBatchId AS NVARCHAR(40) = 'BATCH-0000001'
 
@@ -290,7 +297,8 @@ BEGIN
 		BEGIN 
 			INSERT INTO dbo.tblICInventoryTransaction (
 				dtmDate
-				,dblUnitQty
+				,dblQty
+				,dblUOMQty
 				,dblCost
 				,dblValue
 				,intTransactionId
@@ -306,7 +314,8 @@ BEGIN
 				,intCurrencyId
 			)
 			SELECT	dtmDate = '01/01/2014'
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -322,7 +331,8 @@ BEGIN
 					,intCurrencyId = @USD
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -338,7 +348,8 @@ BEGIN
 					,intCurrencyId = @USD
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -354,7 +365,8 @@ BEGIN
 					,intCurrencyId = @USD
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -370,7 +382,8 @@ BEGIN
 					,intCurrencyId = @USD
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -649,7 +662,7 @@ BEGIN
 		SET	@strBatchId = 'BATCH-0000002'
 		INSERT INTO dbo.tblICInventoryTransaction (
 				dtmDate
-				,dblUnitQty
+				,dblQty
 				,dblCost
 				,dblValue
 				,dblSalesPrice
@@ -664,7 +677,7 @@ BEGIN
 				,strBatchId
 		)
 		SELECT	dtmDate = '01/16/2014'
-				,dblUnitQty = -75
+				,dblQty = -75
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -679,7 +692,7 @@ BEGIN
 				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
-				,dblUnitQty = -75
+				,dblQty = -75
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -694,7 +707,7 @@ BEGIN
 				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
-				,dblUnitQty = -75
+				,dblQty = -75
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -709,7 +722,7 @@ BEGIN
 				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
-				,dblUnitQty = -75
+				,dblQty = -75
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -724,7 +737,7 @@ BEGIN
 				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
-				,dblUnitQty = -75
+				,dblQty = -75
 				,dblCost = 2.15
 				,dblValue = 0
 				,dblSalesPrice = 55.23

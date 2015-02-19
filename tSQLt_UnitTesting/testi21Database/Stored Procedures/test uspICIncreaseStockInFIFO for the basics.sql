@@ -32,6 +32,7 @@ BEGIN
 		-- Create the variables 
 		DECLARE @intItemId AS INT
 				,@intItemLocationId AS INT
+				,@intitemUOMId AS INT
 				,@dtmDate AS DATETIME
 				,@dblQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
@@ -54,6 +55,7 @@ BEGIN
 		EXEC dbo.uspICIncreaseStockInFIFO
 			@intItemId
 			,@intItemLocationId
+			,@intitemUOMId
 			,@dtmDate
 			,@dblQty
 			,@dblCost

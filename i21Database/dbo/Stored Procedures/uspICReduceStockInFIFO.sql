@@ -7,16 +7,17 @@
 CREATE PROCEDURE [dbo].[uspICReduceStockInFIFO]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
+	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
 	,@strTransactionId AS NVARCHAR(40)
-	,@intTransactionId AS INT 
+	,@intTransactionId AS INT
 	,@intUserId AS INT
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
 	,@QtyOffset AS NUMERIC(18,6) OUTPUT 
-	,@FifoId AS INT OUTPUT 
+	,@FifoId AS INT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -41,10 +42,12 @@ WITH	(HOLDLOCK)
 AS		fifo_bucket	
 USING (
 	SELECT	intItemId = @intItemId
-			,intItemLocationId = @intItemLocationId	
+			,intItemLocationId = @intItemLocationId
+			,intItemUOMId = @intItemUOMId
 ) AS Source_Query  
 	ON fifo_bucket.intItemId = Source_Query.intItemId
 	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
+	AND fifo_bucket.intItemUOMId = Source_Query.intItemUOMId
 	AND (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) > 0 
 	AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket.dtmDate) = 1
 
@@ -77,10 +80,11 @@ WHEN MATCHED THEN
 		,@FifoId = fifo_bucket.intInventoryFIFOId
 
 -- Insert a new fifo bucket
-WHEN NOT MATCHED THEN 
+WHEN NOT MATCHED THEN
 	INSERT (
 		[intItemId]
 		,[intItemLocationId]
+		,[intItemUOMId]
 		,[dtmDate]
 		,[dblStockIn]
 		,[dblStockOut]
@@ -94,6 +98,7 @@ WHEN NOT MATCHED THEN
 	VALUES (
 		@intItemId
 		,@intItemLocationId
+		,@intItemUOMId
 		,@dtmDate
 		,0
 		,@dblQty
@@ -102,6 +107,6 @@ WHEN NOT MATCHED THEN
 		,@intTransactionId
 		,GETDATE()
 		,@intUserId
-		,1	
+		,1
 	)
 ;

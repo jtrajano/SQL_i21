@@ -16,13 +16,12 @@ AS		ItemStock
 USING (
 		SELECT	intItemId
 				,intItemLocationId
-				,Aggregrate_OnOrderQty = SUM(ISNULL(dblUnitQty, 0) * ISNULL(dblUOMQty, 0))					
+				,Aggregrate_OnOrderQty = SUM(ISNULL(dblQty, 0) * ISNULL(dblUOMQty, 0))					
 		FROM	@ItemsToIncrease
 		GROUP BY intItemId, intItemLocationId
 ) AS Source_Query  
 	ON ItemStock.intItemId = Source_Query.intItemId
 	AND ItemStock.intItemLocationId = Source_Query.intItemLocationId
-
 
 -- If matched, update the On-Order qty 
 WHEN MATCHED THEN 
@@ -53,5 +52,46 @@ WHEN NOT MATCHED THEN
 		,NULL 
 		,1	
 	)		
+;
 
+-- Do an upsert for the Item Stock UOM table when updating the On Order Qty
+MERGE	
+INTO	dbo.tblICItemStockUOM
+WITH	(HOLDLOCK) 
+AS		ItemStock	
+USING (
+		SELECT	intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,Aggregrate_OnOrderQty = SUM(ISNULL(dblQty, 0))
+		FROM	@ItemsToIncrease
+		GROUP BY intItemId, intItemLocationId, intItemUOMId
+) AS Source_Query  
+	ON ItemStock.intItemId = Source_Query.intItemId
+	AND ItemStock.intItemLocationId = Source_Query.intItemLocationId
+	AND ItemStock.intItemUOMId = Source_Query.intItemUOMId
+
+-- If matched, update the On-Order qty 
+WHEN MATCHED THEN 
+	UPDATE 
+	SET		dblOnOrder = ISNULL(ItemStock.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty
+
+-- If none is found, insert a new item stock record
+WHEN NOT MATCHED THEN 
+	INSERT (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,dblOnHand
+		,dblOnOrder
+		,intConcurrencyId
+	)
+	VALUES (
+		Source_Query.intItemId
+		,Source_Query.intItemLocationId
+		,Source_Query.intItemUOMId
+		,0
+		,Source_Query.Aggregrate_OnOrderQty 
+		,1	
+	)
 ;

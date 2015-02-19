@@ -22,9 +22,17 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		CREATE TABLE expected (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -36,6 +44,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -46,7 +55,8 @@ BEGIN
 
 		-- Create the variables used by uspICIncreaseStockInLIFO
 		DECLARE @intItemId AS INT				= @PremiumGrains
-				,@intItemLocationId AS INT			= @BetterHaven
+				,@intItemLocationId AS INT		= @BetterHaven
+				,@intItemUOMId AS INT			= @PremiumGrains_BushelUOMId
 				,@dtmDate AS DATETIME			= 'January 2, 2014'
 				,@dblQty NUMERIC(18,6)			= 40
 				,@dblCost AS NUMERIC(18,6)		= 88.77
@@ -67,6 +77,7 @@ BEGIN
 		INSERT INTO expected (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -76,6 +87,7 @@ BEGIN
 		)
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 2, 2014'
 				,[dblStockIn] = 40
 				,[dblStockOut] = 0
@@ -106,6 +118,7 @@ BEGIN
 			EXEC dbo.uspICIncreaseStockInLIFO
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId
 				,@dtmDate
 				,@dblQty
 				,@dblCost
@@ -139,6 +152,7 @@ BEGIN
 		INSERT INTO actual (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -149,6 +163,7 @@ BEGIN
 		SELECT
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]

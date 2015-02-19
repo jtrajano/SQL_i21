@@ -30,16 +30,16 @@ BEGIN
 	WHERE	strName = 'Purchase Order'
 END 
 
--- Get a distinct list of items, per location, and per Purchase order. 
+-- Get a distinct list of items, per location, per UOM, and per Purchase order. 
 -- Store it in a temporary table 
 BEGIN 
 	CREATE TABLE #tmpPurchaseOrderItems (
 		intItemId INT NOT NULL 
 		,intItemLocationId INT NOT NULL 
+		,intItemUOMId INT 
 		,dtmDate DATETIME
 		,dblOrderQty NUMERIC(18,6) DEFAULT 0
-		,dblUOMQty NUMERIC(18,6) DEFAULT 0
-		,intItemUOMId INT 
+		,dblUOMQty NUMERIC(18,6) DEFAULT 0		
 		,dblValue NUMERIC(18,6)
 		,intTransactionId INT
 		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -48,18 +48,18 @@ BEGIN
 	INSERT INTO #tmpPurchaseOrderItems (
 			intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,dtmDate
 			,intTransactionId
-			,strTransactionId
-			,intItemUOMId
+			,strTransactionId			
 	)
 	SELECT 	DISTINCT 
 			Items.intItemId 
 			,ItemLocation.intItemLocationId
+			,Items.intUnitMeasureId
 			,PO.dtmDate
 			,intTransactionId = Items.intSourceId
-			,strTransactionId = PO.strPurchaseOrderNumber
-			,Items.intUnitMeasureId
+			,strTransactionId = PO.strPurchaseOrderNumber			
 	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem Items
 				ON Header.intInventoryReceiptId = Items.intInventoryReceiptId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -72,15 +72,16 @@ BEGIN
 			AND Items.intSourceId IS NOT NULL 
 
 	-- Remove duplicate records 
-	DELETE	SOItems
-	FROM	#tmpPurchaseOrderItems SOItems
+	DELETE	POItems
+	FROM	#tmpPurchaseOrderItems POItems
 	WHERE	EXISTS (
 				SELECT	TOP 1 1 
 				FROM	dbo.tblICInventoryTransaction InvTransactions
-				WHERE	InvTransactions.intItemId = SOItems.intItemId
-						AND InvTransactions.intItemLocationId = SOItems.intItemLocationId
-						AND InvTransactions.intTransactionId = SOItems.intTransactionId
-						AND InvTransactions.strTransactionId = SOItems.strTransactionId
+				WHERE	InvTransactions.intItemId = POItems.intItemId
+						AND InvTransactions.intItemLocationId = POItems.intItemLocationId
+						AND InvTransactions.intItemUOMId = POItems.intItemLocationId
+						AND InvTransactions.intTransactionId = POItems.intTransactionId
+						AND InvTransactions.strTransactionId = POItems.strTransactionId
 			)
 
 	-- Update the ordered qty. 
@@ -109,11 +110,11 @@ BEGIN
 				AND AggregrateOrderQty.intUnitOfMeasureId = tempItems.intItemUOMId
 
 	-- Get the UOM Qty 
-	UPDATE	tempItes
+	UPDATE	tempItems
 	SET		dblUOMQty = ItemUOM.dblUnitQty
 	FROM	#tmpPurchaseOrderItems tempItems INNER JOIN dbo.tblICItemUOM ItemUOM
 				ON tempItems.intItemId = ItemUOM.intItemId
-				AND tempItems.intUnitMeasureId = ItemUOM.intItemUOMId
+				AND tempItems.intItemUOMId = ItemUOM.intItemUOMId
 
 END
 
@@ -122,12 +123,12 @@ BEGIN
 	INSERT INTO dbo.tblICInventoryTransaction (
 			intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,dtmDate
 			,dblQty
 			,dblUOMQty
 			,dblCost
 			,dblValue
-			,intItemUOMId
 			,dblSalesPrice
 			,intCurrencyId
 			,dblExchangeRate
@@ -144,12 +145,12 @@ BEGIN
 	)
 	SELECT 	intItemId 
 			,intItemLocationId
+			,intItemUOMId			= Items.intItemUOMId -- UOM used in the PO. 
 			,dtmDate				
 			,dblQty					= dblOrderQty -- (total qty ordered from PO)
-			,dblUOMQty				= Items.dblUOMQty -- (unit qty of the UOM)
+			,dblUOMQty				= dblUOMQty -- (unit qty of the UOM)
 			,dblCost				= 0 -- Unable to track it. 
-			,dblValue				-- (total value from PO)				
-			,intItemUOMId			= Items.intItemUOMId -- UOM used in the PO. 
+			,dblValue				-- (total value from PO)			
 			,dblSalesPrice			= 0 -- Tracking not needed
 			,intCurrencyId			= NULL -- Tracking not needed
 			,dblExchangeRate		= 1 -- Tracking not needed
@@ -163,8 +164,7 @@ BEGIN
 			,dtmCreated				= GETDATE()
 			,intCreatedUserId		= @intUserId
 			,intConcurrencyId		= 1
-	FROM	#tmpPurchaseOrderItems Items INNER JOIN dbo.tblICItemUOM ItemUOM
-				ON Items.intItemUOMId = ItemUOM.intItemUOMId
+	FROM	#tmpPurchaseOrderItems Items 
 END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPurchaseOrderItems')) 

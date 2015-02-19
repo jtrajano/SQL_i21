@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspICPostInventoryTransaction]
 	@intItemId INT
 	,@intItemLocationId INT
+	,@intItemUOMId INT 
 	,@dtmDate DATETIME
 	,@dblQty NUMERIC(18, 6)
 	,@dblUOMQty NUMERIC(18, 6)
 	,@dblCost NUMERIC(18, 6)
 	,@dblValue NUMERIC(18, 6)
-	,@dblSalesPrice NUMERIC(18, 6)
-	,@intItemUOMId INT 
+	,@dblSalesPrice NUMERIC(18, 6)	
 	,@intCurrencyId INT
 	,@dblExchangeRate NUMERIC (38, 20)
 	,@intTransactionId INT
@@ -35,14 +35,14 @@ SET @InventoryTransactionIdentityId = NULL
 INSERT INTO dbo.tblICInventoryTransaction (
 		[intItemId] 
 		,[intItemLocationId]
+		,[intItemUOMId]
 		,[intLotId]
 		,[dtmDate] 
 		,[dblQty] 
 		,[dblUOMQty]
 		,[dblCost] 
 		,[dblValue]
-		,[dblSalesPrice] 
-		,[intItemUOMId]
+		,[dblSalesPrice] 		
 		,[intCurrencyId] 
 		,[dblExchangeRate] 
 		,[intTransactionId] 
@@ -58,14 +58,14 @@ INSERT INTO dbo.tblICInventoryTransaction (
 )
 SELECT	[intItemId]						= @intItemId
 		,[intItemLocationId]			= @intItemLocationId
+		,[intItemUOMId]					= @intItemUOMId
 		,[intLotId]						= @intLotId
 		,[dtmDate]						= @dtmDate
 		,[dblQty]						= @dblQty
 		,[dblUOMQty]					= @dblUOMQty
 		,[dblCost]						= @dblCost
 		,[dblValue]						= @dblValue 
-		,[dblSalesPrice]				= @dblSalesPrice
-		,[intItemUOMId]					= @intItemUOMId
+		,[dblSalesPrice]				= @dblSalesPrice		
 		,[intCurrencyId]				= @intCurrencyId
 		,[dblExchangeRate]				= @dblExchangeRate
 		,[intTransactionId]				= @intTransactionId

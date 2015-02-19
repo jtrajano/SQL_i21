@@ -97,7 +97,7 @@ SELECT	intItemId = OutTransactions.intItemId
 		,intItemLocationId = OutTransactions.intItemLocationId
 		,intLotId = OutTransactions.intLotId
 		,dblStockIn = 0 
-		,dblStockOut = ABS(ISNULL(OutTransactions.dblQty, 0) * ISNULL(OutTransactions.dblUOMQty, 1))
+		,dblStockOut = ABS(ISNULL(OutTransactions.dblQty, 0))
 		,dblCost = OutTransactions.dblCost
 		,intItemUOMId = OutTransactions.intItemUOMId
 		,strTransactionId = OutTransactions.strTransactionId
@@ -109,7 +109,7 @@ FROM	dbo.tblICInventoryLot Lot INNER JOIN dbo.tblICInventoryLotOut LotOut
 			ON Lot.intInventoryLotId = LotOut.intInventoryLotId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
 			ON OutTransactions.intInventoryTransactionId = LotOut.intInventoryTransactionId
-			AND ISNULL(OutTransactions.dblQty, 0) * ISNULL(OutTransactions.dblUOMQty, 1) < 0 
+			AND ISNULL(OutTransactions.dblQty, 0) < 0 
 WHERE	Lot.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND Lot.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0

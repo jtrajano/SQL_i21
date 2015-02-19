@@ -91,6 +91,13 @@ BEGIN
 	DECLARE @AutoNegative_BetterHaven AS INT = 6002
 	DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
 
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
+
 	-- Batch Id
 	DECLARE @strBatchId AS NVARCHAR(20) 
 	DECLARE @strTransactionId AS NVARCHAR(40)
@@ -295,7 +302,8 @@ BEGIN
 		----------------------------------------------------------------
 		INSERT INTO dbo.tblICInventoryTransaction (
 				dtmDate
-				,dblUnitQty
+				,dblQty
+				,dblUOMQty
 				,dblCost
 				,dblValue
 				,dblSalesPrice
@@ -311,7 +319,8 @@ BEGIN
 				,dblExchangeRate
 		)
 		SELECT	dtmDate = @dtmDate
-				,dblUnitQty = -75
+				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -327,7 +336,8 @@ BEGIN
 				,dblExchangeRate = 1		
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
-				,dblUnitQty = -75
+				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -343,7 +353,8 @@ BEGIN
 				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
-				,dblUnitQty = -75
+				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -359,7 +370,8 @@ BEGIN
 				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
-				,dblUnitQty = -75
+				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -375,7 +387,8 @@ BEGIN
 				,dblExchangeRate = 1
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
-				,dblUnitQty = -75
+				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -742,7 +755,8 @@ BEGIN
 		BEGIN 
 			INSERT INTO dbo.tblICInventoryTransaction (
 				dtmDate
-				,dblUnitQty
+				,dblQty
+				,dblUOMQty
 				,dblCost
 				,dblValue
 				,intTransactionId
@@ -759,7 +773,8 @@ BEGIN
 			)
 			----------------------------------------------------
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -776,7 +791,8 @@ BEGIN
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (75 * 2.00)
 					,intTransactionId = 1
@@ -793,7 +809,8 @@ BEGIN
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (-75 * 2.15)
 					,intTransactionId = 1
@@ -810,7 +827,8 @@ BEGIN
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -827,7 +845,8 @@ BEGIN
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (75 * 2.00)
 					,intTransactionId = 1
@@ -844,7 +863,8 @@ BEGIN
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (-75 * 2.15)
 					,intTransactionId = 1
@@ -861,7 +881,8 @@ BEGIN
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -878,7 +899,8 @@ BEGIN
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (75 * 2.00)
 					,intTransactionId = 1
@@ -895,7 +917,8 @@ BEGIN
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (-75 * 2.15)
 					,intTransactionId = 1
@@ -912,7 +935,8 @@ BEGIN
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -929,7 +953,8 @@ BEGIN
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (75 * 2.00)
 					,intTransactionId = 1
@@ -946,7 +971,8 @@ BEGIN
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (-75 * 2.15)
 					,intTransactionId = 1
@@ -963,7 +989,8 @@ BEGIN
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 100
+					,dblQty = 100
+					,dblUOMQty = 1
 					,dblCost = 2.15
 					,dblValue = 0
 					,intTransactionId = 1
@@ -980,7 +1007,8 @@ BEGIN
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (75 * 2.00)
 					,intTransactionId = 1
@@ -997,7 +1025,8 @@ BEGIN
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
-					,dblUnitQty = 0
+					,dblQty = 0
+					,dblUOMQty = 1
 					,dblCost = 0
 					,dblValue = (-75 * 2.15)
 					,intTransactionId = 1

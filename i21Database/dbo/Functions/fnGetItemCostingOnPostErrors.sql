@@ -5,10 +5,10 @@
 * Sample usage: 
 *
 *	SELECT	B.*
-*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnPostErrors(A.intItemId, A.intLocationId, (A.dblUnitQty * A.dblUOMQty)) B
+*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnPostErrors(A.intItemId, A.intLocationId, A.dblQty, A.dblUOMQty) B
 * 
 */
-CREATE FUNCTION fnGetItemCostingOnPostErrors (@intItemId AS INT, @intItemLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0)
+CREATE FUNCTION fnGetItemCostingOnPostErrors (@intItemId AS INT, @intItemLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0, @dblUOMQty AS NUMERIC(18,6) = 0)
 RETURNS TABLE 
 AS
 RETURN (
@@ -53,7 +53,7 @@ RETURN (
 								AND	Stock.intItemLocationId = Location.intItemLocationId
 					WHERE	Stock.intItemId = @intItemId 
 							AND Stock.intItemLocationId = @intItemLocationId 
-							AND ISNULL(@dblQty, 0) + ISNULL(Stock.dblUnitOnHand, 0) < 0 -- Check if the incoming or outgoing stock is going to be negative. 							
+							AND ISNULL(@dblQty, 0) *  ISNULL(@dblUOMQty, 0) + ISNULL(Stock.dblUnitOnHand, 0) < 0 -- Check if the incoming or outgoing stock is going to be negative. 							
 							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 				)
 
