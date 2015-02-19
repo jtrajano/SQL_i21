@@ -2,6 +2,8 @@
 -- There is another stored procedure of the same name in the i21Database project. 
 -- If there is an integration with the origin system, this stored procedure will be used. 
 -- Otherwise, the stored procedure in the i21Database will be used. 
+
+
 CREATE PROCEDURE uspCMUpdateOriginNextCheckNo
 	@strNextCheckNumber NVARCHAR(20)
 	,@intBankAccountId INT 
