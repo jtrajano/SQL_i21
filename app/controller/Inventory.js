@@ -64,5 +64,162 @@ Ext.define('Inventory.controller.Inventory', {
         today = new Date(yyyy, mm, dd, 1, 0, 0, 0);
 
         return today;
+    },
+
+    getICAccountCategories: function() {
+        var accounts = [
+            {
+                column: 'strAccountCategory',
+                value: 'End Inventory',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Fee Expense',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Fee Income',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Freight Expenses',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Interest Expense',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Interest Income',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Inventory',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Options Expense',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Options Expense',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Options Income',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Purchase Account',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Rail Freight',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Sales Account',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Storage Expense',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Storage Income',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Begin Inventory',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Broker Expense',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Contract Equity',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Contract Purchase Gain/Loss',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Contract Sales Gain/Loss',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Cost of Goods',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Currency Equity',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Currency Purchase Gain/Loss',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Currency Sales Gain/Loss',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Discount Receivable',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'DP Income',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'DP Liability',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Storage Income',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Storage Receivable',
+                conjunction: 'or'
+            },
+            {
+                column: 'strAccountCategory',
+                value: 'Variance Account',
+                conjunction: 'or'
+            }
+        ];
+
+        return accounts;
     }
 });

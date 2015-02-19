@@ -180,7 +180,9 @@ namespace iRely.Inventory.Model
         public DbSet<tblICInventoryShipment> tblICInventoryShipments { get; set; }
         public DbSet<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public DbSet<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
-        
+
+        public DbSet<tblICStockReservation> tblICStockReservations { get; set; }
+
         public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
         public DbSet<tblGLAccount> tblGLAccounts { get; set; }
         public DbSet<tblGLAccountCategory> tblGLAccountCategories { get; set; }
@@ -209,6 +211,7 @@ namespace iRely.Inventory.Model
         public DbSet<vyuICGetReceiptItemSource> vyuICGetReceiptItemSources { get; set; }
         public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
         public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
+
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -318,6 +321,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryShipmentMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemLotMap());
+
+            modelBuilder.Configurations.Add(new tblICStockReservationMap());
 
             modelBuilder.Configurations.Add(new tblSMCompanyLocationMap());
             modelBuilder.Configurations.Add(new tblGLAccountMap());

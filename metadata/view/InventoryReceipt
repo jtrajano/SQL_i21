@@ -1456,7 +1456,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter125",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1800,25 +1800,6 @@
                                                             "        dataType: 'string',",
                                                             "        text: 'Unit Type',",
                                                             "        flex: 1",
-                                                            "    },",
-                                                            "\t{",
-                                                            "\t\txtype: 'checkcolumn',",
-                                                            "\t\tdataIndex: 'ysnStockUnit',",
-                                                            "\t\tdataType: 'boolean',",
-                                                            "\t\ttext: 'Stock Unit',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "    {",
-                                                            "        dataIndex: 'intDecimalCalculation',",
-                                                            "        dataType: 'numeric',",
-                                                            "        text: 'Decimal Places for Calculation',",
-                                                            "        hidden: true",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'intDecimalDisplay',",
-                                                            "        dataType: 'numeric',",
-                                                            "        text: 'Decimal Places for Display',",
-                                                            "        hidden: true",
                                                             "    }",
                                                             "]"
                                                         ],
@@ -2355,7 +2336,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter126",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2380,12 +2361,56 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": "colLotID",
+                                                "itemId": "colLotId",
                                                 "text": "Lot ID",
                                                 "width": 100
                                             },
                                             "name": "MyColumn1",
-                                            "designerId": "162de61d-aae6-46b6-9166-ea2f1a8764ce"
+                                            "designerId": "162de61d-aae6-46b6-9166-ea2f1a8764ce",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intLotId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Lot Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLotNumber',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Lot Number',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strLotNumber",
+                                                        "itemId": "cboLotId",
+                                                        "valueField": "strLotNumber"
+                                                    },
+                                                    "name": "MyComboBox70",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "3960b09a-187c-41c2-b2f2-d7fd666197dd",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",
@@ -2398,8 +2423,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblQuantity",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colQuantity",
+                                                "itemId": "colLotQuantity",
                                                 "text": "Quantity",
                                                 "width": 70
                                             },
@@ -2410,6 +2434,18 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField44",
+                                                    "designerId": "a1f57ed2-6965-4714-baf6-8fe3c07224f3"
                                                 }
                                             ]
                                         },
@@ -2422,7 +2458,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": "colUOM",
+                                                "itemId": "colLotUOM",
                                                 "text": "UOM",
                                                 "width": 75
                                             },
@@ -2438,12 +2474,30 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": "colWeightUOM",
+                                                "itemId": "colLotWeightUOM",
                                                 "text": "Weight UOM",
                                                 "width": 75
                                             },
                                             "name": "MyColumn4",
-                                            "designerId": "92e8af37-fa03-4f1d-a36f-fdd1d3567c56"
+                                            "designerId": "92e8af37-fa03-4f1d-a36f-fdd1d3567c56",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strWeightUOM",
+                                                        "itemId": "cboLotWeightUOM",
+                                                        "valueField": "strWeightUOM"
+                                                    },
+                                                    "name": "MyComboBox71",
+                                                    "designerId": "340c1094-1554-4f84-8b19-c0fa44dd185b"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",
@@ -2457,7 +2511,7 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": "colGrossWeight",
+                                                "itemId": "colLotGrossWeight",
                                                 "text": "Gross",
                                                 "width": 65
                                             },
@@ -2469,31 +2523,17 @@
                                                     "name": "dataType",
                                                     "type": "string"
                                                 }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "string",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colTareWeight",
-                                                "text": "Tare",
-                                                "width": 65
-                                            },
-                                            "name": "MyNumberColumn8",
-                                            "designerId": "fd0cd388-d1b3-47b1-b572-5ffc8faf9089",
-                                            "customConfigs": [
+                                            ],
+                                            "cn": [
                                                 {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField45",
+                                                    "designerId": "eb833694-f040-4548-bf73-f5d5ba022903"
                                                 }
                                             ]
                                         },
@@ -2509,7 +2549,45 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": "colNetWeight",
+                                                "itemId": "colLotTareWeight",
+                                                "text": "Tare",
+                                                "width": 65
+                                            },
+                                            "name": "MyNumberColumn8",
+                                            "designerId": "fd0cd388-d1b3-47b1-b572-5ffc8faf9089",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField46",
+                                                    "designerId": "788020fe-085c-4788-a9fa-89c55a36f54e"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "string",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colLotNetWeight",
                                                 "text": "Net",
                                                 "width": 65
                                             },
@@ -2535,7 +2613,7 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": "colCost",
+                                                "itemId": "colLotCost",
                                                 "text": "Cost",
                                                 "width": 65
                                             },
@@ -2546,6 +2624,18 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField47",
+                                                    "designerId": "d4d26ea4-8e61-41f9-8f3b-09f9fabe749b"
                                                 }
                                             ]
                                         },
@@ -2558,15 +2648,32 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": null,
+                                                "itemId": "colLotStorageLocation",
                                                 "text": "Storage Location",
                                                 "width": 95
                                             },
                                             "name": "MyColumn22",
-                                            "designerId": "883da5a4-fadd-4496-af20-1a9f8d2f7025"
+                                            "designerId": "883da5a4-fadd-4496-af20-1a9f8d2f7025",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strLocationName",
+                                                        "itemId": "cboStorageLocation"
+                                                    },
+                                                    "name": "MyComboBox72",
+                                                    "designerId": "77b0abe2-12d2-4358-8c2c-0ce7c35acbc8"
+                                                }
+                                            ]
                                         },
                                         {
-                                            "type": "Ext.grid.column.Number",
+                                            "type": "Ext.grid.column.Column",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
@@ -2576,18 +2683,34 @@
                                                 "align": "right",
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colUnitUOM",
+                                                "itemId": "colLotUnitUOM",
                                                 "text": "Unit UOM",
                                                 "width": 81
                                             },
-                                            "name": "MyNumberColumn2",
+                                            "name": "MyColumn51",
                                             "designerId": "156d4ee5-9430-4399-91dd-5ed0492e50b5",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUnitUOM",
+                                                        "itemId": "cboLotUnitUOM"
+                                                    },
+                                                    "name": "MyComboBox73",
+                                                    "designerId": "d505f553-808b-430d-8c5f-6efb69a07e3f"
                                                 }
                                             ]
                                         },
@@ -2603,7 +2726,7 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": null,
+                                                "itemId": "colLotNoUnits",
                                                 "text": "No. of Units",
                                                 "width": 80
                                             },
@@ -2615,6 +2738,18 @@
                                                     "name": "dataType",
                                                     "type": "string"
                                                 }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField48",
+                                                    "designerId": "61106385-3974-4e81-8c84-2858231dc418"
+                                                }
                                             ]
                                         },
                                         {
@@ -2629,7 +2764,7 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": "colUnitsPallet",
+                                                "itemId": "colLotUnitsPallet",
                                                 "text": "Units/Pallet",
                                                 "width": 81
                                             },
@@ -2641,6 +2776,18 @@
                                                     "name": "dataType",
                                                     "type": "string"
                                                 }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField49",
+                                                    "designerId": "d19c1b59-8d96-4359-b1b3-02549ba71aa1"
+                                                }
                                             ]
                                         },
                                         {
@@ -2655,7 +2802,7 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": null,
+                                                "itemId": "colLotStatedGross",
                                                 "text": "Stated Gross Per Unit",
                                                 "width": 125
                                             },
@@ -2667,31 +2814,17 @@
                                                     "name": "dataType",
                                                     "type": "string"
                                                 }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "string",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": null,
-                                                "text": "Stated Tare Per Unit",
-                                                "width": 125
-                                            },
-                                            "name": "MyNumberColumn12",
-                                            "designerId": "fe060500-9e2a-465e-a063-4a44845db1aa",
-                                            "customConfigs": [
+                                            ],
+                                            "cn": [
                                                 {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField50",
+                                                    "designerId": "67a1dceb-a7fb-450d-ad86-6c0c12fa3be1"
                                                 }
                                             ]
                                         },
@@ -2707,7 +2840,45 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": null,
+                                                "itemId": "colLotStatedTare",
+                                                "text": "Stated Tare Per Unit",
+                                                "width": 125
+                                            },
+                                            "name": "MyNumberColumn12",
+                                            "designerId": "fe060500-9e2a-465e-a063-4a44845db1aa",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField51",
+                                                    "designerId": "bc0670c3-2384-440a-8af1-0d65cf44d834"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "string",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colLotStatedNet",
                                                 "text": "Stated Net Per Unit",
                                                 "width": 125
                                             },
@@ -2733,7 +2904,7 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": null,
+                                                "itemId": "colLotStatedTotalNet",
                                                 "text": "Stated Total Net",
                                                 "width": 125
                                             },
@@ -2759,7 +2930,7 @@
                                                 "dataIndex": "string",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": null,
+                                                "itemId": "colLotPhyVsStated",
                                                 "text": "Phy. Vs Stated",
                                                 "width": 125
                                             },
@@ -2782,12 +2953,55 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": null,
+                                                "itemId": "colLotParentLotId",
                                                 "text": "Parent Lot ID",
                                                 "width": 100
                                             },
                                             "name": "MyColumn34",
-                                            "designerId": "88478352-00af-41f7-85d4-d041f9134c58"
+                                            "designerId": "88478352-00af-41f7-85d4-d041f9134c58",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intLotId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Lot Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLotNumber',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Lot Number',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "displayField": "strLotNumber",
+                                                        "itemId": "cboLotParent",
+                                                        "valueField": "strLotNumber"
+                                                    },
+                                                    "name": "MyComboBox74",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "a8405ff5-c5f3-4198-89c0-02ad58160c5c",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2798,12 +3012,24 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": null,
+                                                "itemId": "colLotContainerNo",
                                                 "text": "Container No",
                                                 "width": 100
                                             },
                                             "name": "MyColumn36",
-                                            "designerId": "4b0f4571-f8a6-4676-9689-c86a4fc1481a"
+                                            "designerId": "4b0f4571-f8a6-4676-9689-c86a4fc1481a",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyTextField8",
+                                                    "designerId": "f3b99661-4a16-41ab-ac42-7741547f7994"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2814,12 +3040,24 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": null,
+                                                "itemId": "colLotGarden",
                                                 "text": "Garden",
                                                 "width": 75
                                             },
                                             "name": "MyColumn37",
-                                            "designerId": "60e52a8f-cceb-4a5d-b56e-973e9920ca05"
+                                            "designerId": "60e52a8f-cceb-4a5d-b56e-973e9920ca05",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyNumberField54",
+                                                    "designerId": "70f1a4d5-c523-4a49-be28-60a0b002c1b6"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2830,12 +3068,24 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": null,
+                                                "itemId": "colLotGrade",
                                                 "text": "Grade",
                                                 "width": 75
                                             },
                                             "name": "MyColumn38",
-                                            "designerId": "542b86a3-ad3e-46c6-8ebd-46c0fb5e55e9"
+                                            "designerId": "542b86a3-ad3e-46c6-8ebd-46c0fb5e55e9",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyTextField21",
+                                                    "designerId": "22d9cc48-b5b0-4ded-a045-fb386fa8e5af"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2846,12 +3096,30 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": null,
+                                                "itemId": "colLotOrigin",
                                                 "text": "Origin",
                                                 "width": 75
                                             },
                                             "name": "MyColumn39",
-                                            "designerId": "878e4ddc-846c-42f9-b173-a7ca0ab22ccc"
+                                            "designerId": "878e4ddc-846c-42f9-b173-a7ca0ab22ccc",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strCountry",
+                                                        "itemId": "cboLotOrigin",
+                                                        "valueField": "strCountry"
+                                                    },
+                                                    "name": "MyComboBox75",
+                                                    "designerId": "866ae80b-f3a3-42c1-aeca-e4ee1cd529b9"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2862,12 +3130,24 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": null,
+                                                "itemId": "colLotSeasonCropYear",
                                                 "text": "Season / Crop Year",
                                                 "width": 110
                                             },
                                             "name": "MyColumn40",
-                                            "designerId": "d10e5fb8-5472-4ccc-b65c-a28e401e72b3"
+                                            "designerId": "d10e5fb8-5472-4ccc-b65c-a28e401e72b3",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyTextField24",
+                                                    "designerId": "0dd9a887-873f-4e45-9275-b88ce01c5a49"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2878,12 +3158,24 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": null,
+                                                "itemId": "colLotVendorLotId",
                                                 "text": "Vendor Lot ID",
                                                 "width": 90
                                             },
                                             "name": "MyColumn41",
-                                            "designerId": "8d51b97d-2e2f-4a76-a447-a4de67fb6ce1"
+                                            "designerId": "8d51b97d-2e2f-4a76-a447-a4de67fb6ce1",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyTextField26",
+                                                    "designerId": "953bc0a0-628d-44b8-bf15-01642d080b91"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2894,12 +3186,24 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": null,
+                                                "itemId": "colLotManufacturedDate",
                                                 "text": "Manufactured Date",
                                                 "width": 110
                                             },
                                             "name": "MyColumn42",
-                                            "designerId": "b8348687-a7c1-41dc-98a5-4f6475da4070"
+                                            "designerId": "b8348687-a7c1-41dc-98a5-4f6475da4070",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyDateField3",
+                                                    "designerId": "c93f4e70-562d-4ec8-898c-adb5e9b13236"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2911,12 +3215,24 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
-                                                "itemId": null,
+                                                "itemId": "colLotRemarks",
                                                 "text": "Remarks",
                                                 "width": 200
                                             },
                                             "name": "MyColumn43",
-                                            "designerId": "3409acd0-a5bc-45cd-9afb-0bc329f6b1de"
+                                            "designerId": "3409acd0-a5bc-45cd-9afb-0bc329f6b1de",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyTextField27",
+                                                    "designerId": "a36b2dcf-9976-4748-9e88-2954990060ce"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2928,12 +3244,29 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": null,
-                                                "itemId": null,
+                                                "itemId": "colLotCondition",
                                                 "text": "Condition",
                                                 "width": 65
                                             },
                                             "name": "MyColumn44",
-                                            "designerId": "943bfcac-c344-4986-9d9d-b092141938ff"
+                                            "designerId": "943bfcac-c344-4986-9d9d-b092141938ff",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "displayField": "strDescription",
+                                                        "itemId": "cboLotCondition",
+                                                        "valueField": "strDescription"
+                                                    },
+                                                    "name": "MyComboBox76",
+                                                    "designerId": "15fc5ca9-0c35-48d2-89ba-1aa0be26ac6d"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Date",
@@ -2943,11 +3276,24 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "itemId": "colLotCertified",
                                                 "text": "Certified",
                                                 "width": 60
                                             },
                                             "name": "MyDateColumn",
-                                            "designerId": "ec097491-02f5-4ef5-85db-f0edbb32d4c4"
+                                            "designerId": "ec097491-02f5-4ef5-85db-f0edbb32d4c4",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyDateField9",
+                                                    "designerId": "47b79180-6118-40ab-ab88-d112e0a93c32"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.plugin.CellEditing",
@@ -3093,7 +3439,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter127",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3924,7 +4270,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter128",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4367,7 +4713,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging12",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

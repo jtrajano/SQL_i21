@@ -185,20 +185,68 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
 
             grdLotTracking: {
-                colParentLotId: 'strParentLotId',
-                colLotId: 'strLotId',
-                colLotContainerNo: 'strContainerNo',
-                colLotQtyOrdered: 'dblQuantity',
-                colLotUom: '',
-                colLotUnits: 'intUnits',
-                colLotUnitUom: 'intUnitUOMId',
-                colLotUnitPerPallet: 'intUnitPallet',
+                colLotId: {
+                    dataIndex: 'strLotId',
+                    editor: {
+                        store: '{lots}'
+                    }
+                },
+                colLotQuantity: 'dblQuantity',
+                colLotUOM: 'strUnitMeasure',
+                colLotWeightUOM: {
+                    dataIndex: 'strWeightUOM',
+                    editor: {
+                        store: '{weightUOM}'
+                    }
+                },
                 colLotGrossWeight: 'dblGrossWeight',
                 colLotTareWeight: 'dblTareWeight',
-                colLotNetWeight: '',
-                colLotWeightPerUnit: '',
-                colLotStatedGrossPerUnit: 'dblStatedGrossPerUnit',
-                colLotStatedTarePerUnit: 'dblStatedTarePerUnit'
+                colLotNetWeight: 'dblNetWeight',
+                colLotCost: 'dblCost',
+                colLotStorageLocation: {
+                    dataIndex: 'strStorageLocation',
+                    editor: {
+                        store: '{storageLocation}'
+                    }
+                },
+                colLotUnitUOM: {
+                    dataIndex: 'strUnitUOM',
+                    editor: {
+                        store: '{unitUOM}'
+                    }
+                },
+                colLotNoUnits: 'intUnits',
+                colLotUnitsPallet: 'intUnitPallet',
+                colLotStatedGross: 'dblStatedGrossPerUnit',
+                colLotStatedTare: 'dblStatedTarePerUnit',
+                colLotStatedNet: 'dblStatedNetPerUnit',
+                colLotPhyVsStated: 'dblPhyVsStated',
+                colLotParentLotId: {
+                    dataIndex: 'strParentLotId',
+                    editor: {
+                        store: '{parentLots}'
+                    }
+                },
+                colLotContainerNo: 'strContainerNo',
+                colLotGarden: 'intGarden',
+                colLotGrade: 'strGrade',
+                colLotOrigin: {
+                    dataIndex: 'strCountry',
+                    editor: {
+                        store: '{origin}'
+                    }
+                },
+                colLotSeasonCropYear: 'intSeasonCropYear',
+                colLotVendorLotId: 'strVendorLotId',
+                colLotManufacturedDate: 'dtmManufacturedDate',
+                colLotRemarks: 'strRemarks',
+                colLotCondition: {
+                    dataIndex: 'strCondition',
+                    editor: {
+                        store: '{condition}'
+                    }
+                },
+                colLotCertified: 'dtmCertified'
             },
 
             grdIncomingInspection: {
@@ -317,7 +365,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             key: 'tblICInventoryReceiptItemLots',
                             component: Ext.create('iRely.mvvm.grid.Manager', {
                                 grid: grdLotTracking,
-                                deleteButton : grdLotTracking.down('#btnDeleteInventoryReceipt')
+                                deleteButton : grdLotTracking.down('#btnRemoveLot')
                             })
                         }
                     ]
@@ -416,9 +464,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     //Validate PO Date versus Receipt Date
                     if (current.get('strReceiptType') === 'Purchase Order') {
                         var grdInventoryReceipt = config.window.down('#grdInventoryReceipt');
-//                        var colSourceNumber = grdInventoryReceipt.columns[0];
-//                        var cboSource = colSourceNumber.getEditor();
-
                         var receiptItems = current.tblICInventoryReceiptItems().data.items;
                         Ext.Array.each(receiptItems, function(item) {
                             if (item.dtmDate !== null) {
@@ -432,7 +477,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     //Validate Logged in User's default location against the selected Location for the receipt
                     if (current.get('strReceiptType') !== 'Direct') {
-
                         if (app.DefaultLocation > 0) {
                             if (app.DefaultLocation !== current.get('intLocationId')) {
                                 var result = function(button) {
@@ -443,7 +487,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         action(false);
                                     }
                                 };
-
                                 var msgBox = iRely.Functions;
                                 msgBox.showCustomDialog(
                                     msgBox.dialogType.WARNING,
@@ -544,6 +587,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             if (win.viewModel.data.current.get('strReceiptType') === 'Direct'){
                 current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));
                 current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
+
+                var colUOM = grid.columns[8];
+                var cboUOM = colUOM.getEditor();
+                var index = cboUOM.store.findExact('intItemUnitMeasureId', records[0].get('intReceiveUOMId'));
+                var uom = cboUOM.store.getAt(index);
+                if (uom){
+                    current.set('dblUnitCost', uom.get('dblLastCost'));
+                    current.set('dblUnitRetail', uom.get('dblLastCost'));
+                }
             }
 
             current.set('tblICItemPricings', records[0].tblICItemPricings());
@@ -584,6 +636,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.itemId === 'cboItemUOM')
         {
+            current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));

@@ -12,7 +12,7 @@ Ext.define('Inventory.model.Lot', {
 
     fields: [
         { name: 'intLotId', type: 'int'},
-        { name: 'strLotId', type: 'string'}
+        { name: 'strLotNumber', type: 'string'}
     ],
 
     validators: [

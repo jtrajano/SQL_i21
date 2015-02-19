@@ -303,25 +303,28 @@ namespace iRely.Inventory.Model
         public int? intLotId { get; set; }
         public string strParentLotId { get; set; }
         public string strLotId { get; set; }
-        public string strContainerNo { get; set; }
         public decimal? dblQuantity { get; set; }
-        public int intUnits { get; set; }
-        public int? intUnitUOMId { get; set; }
-        public int intUnitPallet { get; set; }
+        public int? intWeightUOMId { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
-        public int? intWeightUOMId { get; set; }
+        public decimal? dblCost { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public int? intUnitUOMId { get; set; }
+        public int? intUnits { get; set; }
+        public int? intUnitPallet { get; set; }
         public decimal? dblStatedGrossPerUnit { get; set; }
         public decimal? dblStatedTarePerUnit { get; set; }
-        public int? intStorageBinId { get; set; }
+        public string strContainerNo { get; set; }
         public int? intGarden { get; set; }
         public string strGrade { get; set; }
         public int? intOriginId { get; set; }
-        public int intSeasonCropYear { get; set; }
+        public int? intSeasonCropYear { get; set; }
         public string strVendorLotId { get; set; }
-        public DateTime dtmManufacturedDate { get; set; }
+        public DateTime? dtmManufacturedDate { get; set; }
         public string strRemarks { get; set; }
-        public int intSort { get; set; }
+        public string strCondition { get; set; }
+        public DateTime? dtmCertified { get; set; }
+        public int? intSort { get; set; }
 
         private string _uom;
         [NotMapped]

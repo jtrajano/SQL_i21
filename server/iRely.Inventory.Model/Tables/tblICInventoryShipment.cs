@@ -244,7 +244,7 @@ namespace iRely.Inventory.Model
             {
                 if (string.IsNullOrEmpty(_lotId))
                     if (tblICLot != null)
-                        return tblICLot.strLotId;
+                        return tblICLot.strLotNumber;
                     else
                         return null;
                 else

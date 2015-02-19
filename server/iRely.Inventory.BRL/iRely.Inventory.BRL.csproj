@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activities\Receipts\Lot.cs" />
     <Compile Include="Activities\Receipts\Receipt_Posting.cs" />
     <Compile Include="Activities\Shipments\Shipment.cs" />
     <Compile Include="Common\PricingLevel.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Maintenance\CategoryAccount.cs" />
     <Compile Include="Maintenance\CategoryVendor.cs" />
     <Compile Include="Maintenance\CategoryUOM.cs" />
+    <Compile Include="Maintenance\StockReservation.cs" />
     <Compile Include="Maintenance\ItemContract.cs" />
     <Compile Include="Maintenance\ItemCertification.cs" />
     <Compile Include="Maintenance\ItemXref.cs" />

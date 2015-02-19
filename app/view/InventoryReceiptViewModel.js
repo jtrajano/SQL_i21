@@ -9,6 +9,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedItemPricingView',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedPackedUOM',
+        'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedStorageLocation',
         'AccountsPayable.store.VendorBuffered',
         'AccountsPayable.store.PurchaseOrder',
         'AccountsPayable.store.VendorLocation',
@@ -16,7 +19,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'i21.store.CurrencyBuffered',
         'i21.store.FreightTermsBuffered',
         'i21.store.ShipViaBuffered',
-        'i21.store.UserListBuffered'
+        'i21.store.UserListBuffered',
+        'i21.store.CountryBuffered'
     ],
 
     stores: {
@@ -25,11 +29,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             data: [
                 {
                     strDescription: 'Purchase Contract'
-                },{
+                },
+                {
                     strDescription: 'Purchase Order'
-                },{
+                },
+                {
                     strDescription: 'Transfer Order'
-                },{
+                },
+                {
                     strDescription: 'Direct'
                 }
             ],
@@ -42,9 +49,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             data: [
                 {
                     strDescription: 'Weight'
-                },{
+                },
+                {
                     strDescription: 'Cost'
-                },{
+                },
+                {
                     strDescription: 'No'
                 }
             ],
@@ -57,11 +66,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             data: [
                 {
                     strDescription: 'Per Unit'
-                },{
+                },
+                {
                     strDescription: 'Per Ton'
-                },{
+                },
+                {
                     strDescription: 'Per Miles'
-                },{
+                },
+                {
                     strDescription: 'Flat Rate'
                 }
             ],
@@ -74,11 +86,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             data: [
                 {
                     strDescription: '01 - Intact'
-                },{
+                },
+                {
                     strDescription: '02 - Broken'
-                },{
+                },
+                {
                     strDescription: '03 - Missing'
-                },{
+                },
+                {
                     strDescription: '04 - Replaced'
                 }
             ],
@@ -91,6 +106,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'icbuffereditemstockdetailview'
         },
         itemUOM: {
+            autoLoad: true,
             type: 'icbuffereditempricingview'
         },
         packageType: {
@@ -129,6 +145,42 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         qaProperty: {
             type: 'icbufferedqaproperty'
+        },
+
+        lots: {
+            type: 'icbufferedlot'
+        },
+        parentLots: {
+            type: 'icbufferedlot'
+        },
+        weightUOM: {
+            type: 'icbuffereduom'
+        },
+        unitUOM: {
+            type: 'icbuffereduom'
+        },
+        storageLocation: {
+            type: 'icbufferedstoragelocation'
+        },
+        origin: {
+            type: 'countrybuffered'
+        },
+        condition: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Sound/Full'
+                },
+                {
+                    strDescription: 'Slack'
+                },
+                {
+                    strDescription: 'Damaged'
+                }
+            ],
+            fields: {
+                name: 'strDescription'
+            }
         }
     },
 
