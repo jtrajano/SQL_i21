@@ -518,7 +518,12 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
-	WHERE B.intItemId IS NOT NULL OR B.intItemId <> 0
+	INNER JOIN
+		tblICItem I
+			ON B.intItemId = I.intItemId 
+	WHERE 
+		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+		AND I.strType NOT IN ('Non-Inventory','Service')
 		
 	--CREDIT INVENTORY
 	UNION ALL 
@@ -586,7 +591,12 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
-	WHERE B.intItemId IS NOT NULL AND B.intItemId <> 0
+	INNER JOIN
+		tblICItem I
+			ON B.intItemId = I.intItemId 
+	WHERE 
+		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+		AND I.strType NOT IN ('Non-Inventory','Service')
 	
 	--DEBIT AR
 	UNION ALL 
@@ -662,7 +672,12 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
-	WHERE B.intItemId IS NULL OR B.intItemId = 0
+	INNER JOIN
+		tblICItem I
+			ON B.intItemId = I.intItemId 
+	WHERE 
+		(B.intItemId IS NULL OR B.intItemId = 0)
+		OR I.strType IN ('Non-Inventory','Service')
 
 	--CREDIT SALES
 	UNION ALL 
@@ -702,7 +717,12 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
-	WHERE B.intItemId IS NOT NULL AND B.intItemId <> 0
+	INNER JOIN
+		tblICItem I
+			ON B.intItemId = I.intItemId 
+	WHERE 
+		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+		AND I.strType NOT IN ('Non-Inventory','Service')
 
 	UNION ALL 
 	SELECT	
@@ -1138,7 +1158,12 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
-		WHERE B.intItemId IS NOT NULL AND B.intItemId <> 0
+			INNER JOIN
+		tblICItem I
+			ON B.intItemId = I.intItemId 
+	WHERE 
+		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+		AND I.strType NOT IN ('Non-Inventory','Service')
 
 		--CREDIT INVENTORY
 		UNION ALL 
@@ -1207,7 +1232,12 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
-		WHERE B.intItemId IS NOT NULL OR B.intItemId <> 0
+		INNER JOIN
+			tblICItem I
+				ON B.intItemId = I.intItemId 
+		WHERE 
+			(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+			AND I.strType NOT IN ('Non-Inventory','Service')
 		
 		--DEBIT AR
 		UNION ALL
@@ -1285,7 +1315,12 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
-		WHERE B.intItemId IS NULL OR B.intItemId = 0
+		INNER JOIN
+			tblICItem I
+				ON B.intItemId = I.intItemId 
+		WHERE 
+			(B.intItemId IS NULL OR B.intItemId = 0)
+			OR I.strType IN ('Non-Inventory','Service')
 
 		--CREDIT SALES
 		UNION ALL 
@@ -1326,7 +1361,13 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
-		WHERE B.intItemId IS NOT NULL OR B.intItemId <> 0
+		INNER JOIN
+			tblICItem I
+				ON B.intItemId = I.intItemId 
+		WHERE 
+			(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+			AND I.strType NOT IN ('Non-Inventory','Service')
+		
 				
 		UNION ALL 
 		SELECT	
