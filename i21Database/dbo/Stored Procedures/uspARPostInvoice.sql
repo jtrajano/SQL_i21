@@ -668,12 +668,9 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
-	INNER JOIN
-		tblICItem I
-			ON B.intItemId = I.intItemId 
 	WHERE 
 		(B.intItemId IS NULL OR B.intItemId = 0)
-		OR I.strType IN ('Non-Inventory','Service')
+		OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service')))
 
 	--CREDIT SALES
 	UNION ALL 
@@ -1307,12 +1304,9 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
-		INNER JOIN
-			tblICItem I
-				ON B.intItemId = I.intItemId 
 		WHERE 
 			(B.intItemId IS NULL OR B.intItemId = 0)
-			OR I.strType IN ('Non-Inventory','Service')
+			OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service')))
 
 		--CREDIT SALES
 		UNION ALL 
