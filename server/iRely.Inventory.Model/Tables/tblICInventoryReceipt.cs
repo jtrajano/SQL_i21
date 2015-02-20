@@ -131,6 +131,7 @@ namespace iRely.Inventory.Model
         public int? intLineNo { get; set; }
         public int? intSourceId { get; set; }
         public int? intItemId { get; set; }
+        public int? intSubLocationId { get; set; }
         public decimal? dblOrderQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
         public decimal? dblReceived { get; set; }
@@ -272,13 +273,32 @@ namespace iRely.Inventory.Model
                 _packName = value;
             }
         }
+        private string _subLocationName;
+        [NotMapped]
+        public string strSubLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocationName))
+                    if (tblSMCompanyLocationSubLocation != null)
+                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocationName;
+            }
+            set
+            {
+                _packName = value;
+            }
+        }
         
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public tblICItem tblICItem { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public tblICUnitMeasure PackageType { get; set; }
         public vyuICGetReceiptItemSource vyuICGetReceiptItemSource { get; set; }
-
+        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         
         public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
         public ICollection<tblICInventoryReceiptItemTax> tblICInventoryReceiptItemTaxes { get; set; }

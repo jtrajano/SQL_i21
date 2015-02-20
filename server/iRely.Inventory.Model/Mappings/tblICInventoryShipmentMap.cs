@@ -80,6 +80,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.WeightUnitMeasure)
                 .WithMany(p => p.WeightInventoryShipmentItems)
                 .HasForeignKey(p => p.intWeightUomId);
+            this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
+                .WithMany(p => p.tblICInventoryShipmentItems)
+                .HasForeignKey(p => p.intSubLocationId);
         }
     }
 

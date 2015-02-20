@@ -73,6 +73,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intLineNo).HasColumnName("intLineNo");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.dblOrderQty).HasColumnName("dblOrderQty");
             this.Property(t => t.dblOpenReceive).HasColumnName("dblOpenReceive");
             this.Property(t => t.dblReceived).HasColumnName("dblReceived");
@@ -95,7 +96,9 @@ namespace iRely.Inventory.Model
                 .HasForeignKey(p => p.intPackageTypeId);
             this.HasOptional(p => p.vyuICGetReceiptItemSource)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
-                
+            this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
+                .WithMany(p => p.tblICInventoryReceiptItems)
+                .HasForeignKey(p => p.intSubLocationId);
         }
     }
 
@@ -156,7 +159,6 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICLot)
                 .WithRequired(p => p.tblICInventoryReceiptItemLot)
                 .WillCascadeOnDelete(false);
-                
         }
     }
 

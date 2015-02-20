@@ -35,6 +35,7 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strSourceId', type: 'string'},
         { name: 'dtmSourceDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d'},
         { name: 'intItemId', type: 'int', allowNull: true },
+        { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'dblOrderQty', type: 'float'},
         { name: 'dblOpenReceive', type: 'float'},
         { name: 'dblReceived', type: 'float'},
@@ -51,7 +52,8 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strItemNo', type: 'string'},
         { name: 'strItemDescription', type: 'string'},
         { name: 'strLotTracking', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strSubLocationName', type: 'string'}
     ],
 
     validators: [

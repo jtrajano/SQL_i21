@@ -300,4 +300,22 @@ namespace iRely.Inventory.Model
         public int intCompanyLocationId { get; set; }
         public string strPriceLevel { get; set; }
     }
+
+    public class tblSMCompanyLocationSubLocation : BaseEntity
+    {
+        public int intCompanyLocationSubLocationId { get; set; }
+        public int intCompanyLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public string strSubLocationDescription { get; set; }
+        public string strClassification { get; set; }
+        public int? intNewLotBin { get; set; }
+        public int? intAuditBin { get; set; }
+        public string strAddressKey { get; set; }
+
+        public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
+        public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
+        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
+        public ICollection<tblICStorageLocation> tblICStorageLocations { get; set; }
+        public ICollection<tblICItemStock> tblICItemStocks { get; set; }
+    }
 }

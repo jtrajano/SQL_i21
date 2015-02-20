@@ -309,4 +309,24 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblSMCompanyLocationSubLocationMap : EntityTypeConfiguration<tblSMCompanyLocationSubLocation>
+    {
+        public tblSMCompanyLocationSubLocationMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intCompanyLocationSubLocationId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSMCompanyLocationSubLocation");
+            this.Property(t => t.intCompanyLocationSubLocationId).HasColumnName("intCompanyLocationSubLocationId");
+            this.Property(t => t.intCompanyLocationId).HasColumnName("intCompanyLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.strSubLocationDescription).HasColumnName("strSubLocationDescription");
+            this.Property(t => t.strClassification).HasColumnName("strClassification");
+            this.Property(t => t.intNewLotBin).HasColumnName("intNewLotBin");
+            this.Property(t => t.intAuditBin).HasColumnName("intAuditBin");
+            this.Property(t => t.strAddressKey).HasColumnName("strAddressKey");
+        }
+    }
+
 }

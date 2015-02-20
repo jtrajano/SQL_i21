@@ -20,6 +20,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'i21.store.FreightTermsBuffered',
         'i21.store.ShipViaBuffered',
         'i21.store.UserListBuffered',
+        'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.CountryBuffered'
     ],
 
@@ -102,6 +103,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
 
+        subLocation: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
         items: {
             type: 'icbuffereditemstockdetailview'
         },
@@ -154,10 +158,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'icbufferedlot'
         },
         weightUOM: {
-            type: 'icbuffereduom'
+            type: 'icbuffereditemunitmeasure'
         },
         unitUOM: {
-            type: 'icbuffereduom'
+            type: 'icbuffereditemunitmeasure'
         },
         storageLocation: {
             type: 'icbufferedstoragelocation'

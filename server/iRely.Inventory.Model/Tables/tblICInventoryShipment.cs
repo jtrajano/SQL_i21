@@ -218,9 +218,29 @@ namespace iRely.Inventory.Model
                 _weightUom = value;
             }
         }
+        private string _subLocationName;
+        [NotMapped]
+        public string strSubLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocationName))
+                    if (tblSMCompanyLocationSubLocation != null)
+                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocationName;
+            }
+            set
+            {
+                _subLocationName = value;
+            }
+        }
 
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
+        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public tblICItem tblICItem { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public tblICUnitMeasure WeightUnitMeasure { get; set; }

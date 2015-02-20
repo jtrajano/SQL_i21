@@ -53,7 +53,7 @@ namespace iRely.Invetory.WebAPI.Controllers
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
             var predicate = ExpressionBuilder.True<tblICLot>();
-            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intInventoryLotId", "DESC");
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intLotId", "DESC");
 
             if (searchFilters != null)
                 predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICLot>(searchFilters, true);

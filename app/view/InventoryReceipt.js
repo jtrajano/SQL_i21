@@ -800,7 +800,39 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         itemId: 'colSubLocation',
                                                         width: 90,
                                                         dataIndex: 'strDescription',
-                                                        text: 'Sub Location'
+                                                        text: 'Sub Location',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationSubLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Sub Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Sub Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboSubLocation',
+                                                            displayField: 'strSubLocationName',
+                                                            valueField: 'strSubLocationName'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -847,21 +879,33 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colUOM',
                                                         width: 76,
-                                                        dataIndex: 'strDescription',
+                                                        dataIndex: 'strUnitMeasure',
                                                         text: 'UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataIndex: 'intItemId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Unit Of Measure ID',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item UOM Id',
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strUnitMeasure',
                                                                     dataType: 'string',
-                                                                    text: 'Unit Measure',
+                                                                    text: 'UOM',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -1117,6 +1161,38 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         text: 'Weight UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'UOM',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
                                                             itemId: 'cboLotWeightUOM',
                                                             displayField: 'strWeightUOM',
                                                             valueField: 'strWeightUOM'
@@ -1179,8 +1255,29 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         text: 'Storage Location',
                                                         editor: {
                                                             xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intStorageLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Country Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strName',
+                                                                    dataType: 'string',
+                                                                    text: 'Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
                                                             itemId: 'cboStorageLocation',
-                                                            displayField: 'strLocationName'
+                                                            displayField: 'strName',
+                                                            valueField: 'strName'
                                                         }
                                                     },
                                                     {
@@ -1193,6 +1290,38 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         text: 'Unit UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'UOM',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
                                                             itemId: 'cboLotUnitUOM',
                                                             displayField: 'strUnitUOM'
                                                         }
@@ -1344,6 +1473,20 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         text: 'Origin',
                                                         editor: {
                                                             xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCountryID',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Country Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCountry',
+                                                                    dataType: 'string',
+                                                                    text: 'Country',
+                                                                    flex: 1
+                                                                }
+                                                            ],
                                                             itemId: 'cboLotOrigin',
                                                             displayField: 'strCountry',
                                                             valueField: 'strCountry'

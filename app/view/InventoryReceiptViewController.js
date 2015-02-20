@@ -149,7 +149,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colDescription: 'strItemDescription',
-                colSubLocation: '',
+                colSubLocation: {
+                    dataIndex: 'strSubLocationName',
+                    editor: {
+                        store: '{subLocation}',
+                        defaultFilters: [{
+                            column: 'intCompanyLocationId',
+                            value: '{current.intLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'strClassification',
+                            value: 'Inventory',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colLotTracking: 'strLotTracking',
                 colQtyOrdered: 'dblOrderQty',
                 colQtyToReceive: 'dblOpenReceive',
@@ -192,7 +206,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLotQuantity: 'dblQuantity',
-                colLotUOM: 'strUnitMeasure',
+                colLotUOM: {
+                    dataIndex: '{grdInventoryReceipt.selection.strUnitMeasure}'
+                },
                 colLotWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
@@ -212,7 +228,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotUnitUOM: {
                     dataIndex: 'strUnitUOM',
                     editor: {
-                        store: '{unitUOM}'
+                        store: '{unitUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdInventoryReceipt.selection.intItemId}',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colLotNoUnits: 'intUnits',
@@ -224,7 +245,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotParentLotId: {
                     dataIndex: 'strParentLotId',
                     editor: {
-                        store: '{parentLots}'
+                        store: '{parentLots}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdInventoryReceipt.selection.intItemId}',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colLotContainerNo: 'strContainerNo',
@@ -640,6 +666,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
+            return false;
         }
         else if (combo.itemId === 'cboPackageType')
         {
@@ -1169,11 +1196,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onFreightTermSelect
             },
             "#cboItem": {
-                beforequery: this.onShipFromBeforeQuery,
                 select: this.onReceiptItemSelect
             },
             "#cboItemUOM": {
-                beforequery: this.onShipFromBeforeQuery,
                 select: this.onReceiptItemSelect
             },
             "#cboPackageType": {

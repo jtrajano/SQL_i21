@@ -54,5 +54,13 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'strCondition', type: 'string' },
         { name: 'dtmCertified', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intSort', type: 'int', allowNull: true }
+    ],
+
+    validators: [
+        {type: 'presence', field: 'strWeightUOM'},
+        {type: 'presence', field: 'dblQuantity'},
+        {type: 'presence', field: 'dblGrossWeight'},
+        {type: 'presence', field: 'dblGrossWeight'},
+        {type: 'presence', field: 'dblGrossWeight'}
     ]
 });

@@ -42,8 +42,28 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
+        private string _subLocationName;
+        [NotMapped]
+        public string strSubLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocationName))
+                    if (tblSMCompanyLocationSubLocation != null)
+                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocationName;
+            }
+            set
+            {
+                _subLocationName = value;
+            }
+        }
         
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }
+        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
     }
 }

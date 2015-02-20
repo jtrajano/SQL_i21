@@ -1456,7 +1456,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter125",
+                                                    "name": "filter14",
                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1646,7 +1646,63 @@
                                                 "width": 90
                                             },
                                             "name": "MyColumn1",
-                                            "designerId": "0f567d0c-1633-4ddc-91b4-509cf9ccd1a7"
+                                            "designerId": "0f567d0c-1633-4ddc-91b4-509cf9ccd1a7",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Sub Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Sub Location Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubLocationDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strSubLocationName",
+                                                        "itemId": "cboSubLocation",
+                                                        "valueField": "strSubLocationName"
+                                                    },
+                                                    "name": "MyComboBox4",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "fba48e02-b92d-4bec-8ad9-1aa798883515",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -1765,7 +1821,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "dataIndex": "strDescription",
+                                                "dataIndex": "strUnitMeasure",
                                                 "itemId": "colUOM",
                                                 "text": "UOM",
                                                 "width": 76
@@ -1783,24 +1839,36 @@
                                                     "userConfig": {
                                                         "columns": [
                                                             "[",
-                                                            "    {",
-                                                            "        dataIndex: 'intUnitMeasureId',",
-                                                            "        dataType: 'numeric',",
-                                                            "        text: 'Unit Of Measure ID',",
-                                                            "        hidden: true",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'strUnitMeasure',",
-                                                            "        dataType: 'string',",
-                                                            "        text: 'Unit Measure',",
-                                                            "        flex: 1",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'strUnitType',",
-                                                            "        dataType: 'string',",
-                                                            "        text: 'Unit Type',",
-                                                            "        flex: 1",
-                                                            "    }",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intItemId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Item Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intItemUnitMeasureId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Item UOM Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'UOM',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Unit Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
@@ -1808,11 +1876,11 @@
                                                         "itemId": "cboItemUOM",
                                                         "valueField": "strUnitMeasure"
                                                     },
-                                                    "name": "MyComboBox11",
+                                                    "name": "MyComboBox",
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "eb2de23b-cb9b-4629-9b97-a296dd59d51c",
+                                                    "designerId": "c34d5356-73d7-4f1d-a082-817a1dd0813a",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -2336,7 +2404,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter126",
+                                                    "name": "filter15",
                                                     "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2489,13 +2557,57 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intItemId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Item Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intItemUnitMeasureId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Item UOM Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'UOM',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Unit Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strWeightUOM",
                                                         "itemId": "cboLotWeightUOM",
                                                         "valueField": "strWeightUOM"
                                                     },
                                                     "name": "MyComboBox71",
-                                                    "designerId": "340c1094-1554-4f84-8b19-c0fa44dd185b"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "340c1094-1554-4f84-8b19-c0fa44dd185b",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -2663,12 +2775,45 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intStorageLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Country Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strLocationName",
-                                                        "itemId": "cboStorageLocation"
+                                                        "displayField": "strName",
+                                                        "itemId": "cboStorageLocation",
+                                                        "valueField": "strName"
                                                     },
                                                     "name": "MyComboBox72",
-                                                    "designerId": "77b0abe2-12d2-4358-8c2c-0ce7c35acbc8"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "77b0abe2-12d2-4358-8c2c-0ce7c35acbc8",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -2705,12 +2850,56 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intItemId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Item Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intItemUnitMeasureId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Item UOM Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'UOM',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Unit Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitUOM",
                                                         "itemId": "cboLotUnitUOM"
                                                     },
                                                     "name": "MyComboBox73",
-                                                    "designerId": "d505f553-808b-430d-8c5f-6efb69a07e3f"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "d505f553-808b-430d-8c5f-6efb69a07e3f",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -3111,13 +3300,39 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCountryID',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Country Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strCountry',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Country',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strCountry",
                                                         "itemId": "cboLotOrigin",
                                                         "valueField": "strCountry"
                                                     },
                                                     "name": "MyComboBox75",
-                                                    "designerId": "866ae80b-f3a3-42c1-aeca-e4ee1cd529b9"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "866ae80b-f3a3-42c1-aeca-e4ee1cd529b9",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -3439,7 +3654,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter127",
+                                                    "name": "filter16",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4270,7 +4485,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter17",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4713,7 +4928,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

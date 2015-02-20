@@ -166,12 +166,31 @@ namespace iRely.Inventory.Model
                 _category = value;
             }
         }
+        private string _subLocationName;
+        [NotMapped]
+        public string strSubLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocationName))
+                    if (tblSMCompanyLocationSubLocation != null)
+                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocationName;
+            }
+            set
+            {
+                _subLocationName = value;
+            }
+        }
         
         public tblICItem tblICItem { get; set; }
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public vyuAPVendor vyuAPVendor { get; set; }
         public tblICCategory tblICCategory { get; set; }
-        
+        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public tblICCountGroup tblICCountGroup { get; set; }
 
         public ICollection<tblICItemNote> tblICItemNotes { get; set; }
