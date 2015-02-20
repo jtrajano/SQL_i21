@@ -2107,4 +2107,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strCustomModification" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b1be9bac-ccae-430f-ad71-f82c842cd79c" ChangeDateTime="02/18/2015 16:03:26">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutureMarket].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutureMarket]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intNoOfDecimal" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="59cf1a58-6e7e-4537-8886-c1e6b36c3b3e" ChangeDateTime="02/18/2015 16:57:46">
+    <Property Name="ElementName" Value="[dbo].[tblCommodityMarketMapping].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCommodityMarketMapping]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCommodityMarketId" />
+  </Operation>
 </Operations>

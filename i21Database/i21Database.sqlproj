@@ -1065,6 +1065,7 @@
     <Build Include="dbo\Tables\tblHDProjectCustomerChampion.sql" />
     <Build Include="dbo\Tables\tblLGShippingLine.sql" />
     <Build Include="dbo\Tables\tblLGTrucker.sql" />
+    <Build Include="dbo\Tables\tblRKCommodityMarketMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
