@@ -10,7 +10,7 @@ BEGIN TRY
 	INSERT  into @tbl 
 	SELECT efeft_eft_no FROM efeftmst 
 	  WHERE efeft_eft_type_cv = 'C' 
-	  --AND efeft_src_sys = 'NR' 
+	  AND efeft_src_sys = 'NR' 
 	  AND efeft_active_yn = 'Y' 
 	  order by efeft_eft_no
 
