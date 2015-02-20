@@ -192,10 +192,14 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'Sell')
+IF EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'Sell')
+BEGIN
+	DELETE FROM tblCTContractType WHERE Name = 'Sell'
+END
+IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'Sale')
 BEGIN
 	INSERT INTO tblCTContractType
-	SELECT 2,'Sell',1	
+	SELECT 2,'Sale',1	
 END
 GO
 
