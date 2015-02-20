@@ -10,7 +10,7 @@ BEGIN TRY
 	INSERT  into @tbl 
 	SELECT efeft_eft_no FROM efeftmst 
 	  WHERE efeft_eft_type_cv = 'C' 
-	  --AND efeft_src_sys = 'NR' 
+	  AND efeft_src_sys = 'NR' 
 	  AND efeft_active_yn = 'Y' 
 	  order by efeft_eft_no
 
@@ -181,7 +181,12 @@ BEGIN TRY
 			SELECT @intNoteTransId = intNoteTransId FROM dbo.tblNRNoteTransaction Where RTRIM(strTransComments) =  CAST(@intScheduleTransId as nvarchar(20))
 			
 			--EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
-			EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount
+			DECLARE @intGLReceivableAccountId int, @intCMTransactionId int
+			SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+		   --EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
+ 
+		    EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT
+			--EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount
 			
 			
 			UPDATE dbo.tblNRScheduleTransaction 

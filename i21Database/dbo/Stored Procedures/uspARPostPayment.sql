@@ -100,14 +100,14 @@ IF(@beginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO #tmpARReceivablePostData
 		SELECT intPaymentId FROM tblARPayment
-		WHERE dtmDatePaid BETWEEN @beginDate AND @endDate AND ysnPosted = @post
+		WHERE dtmDatePaid BETWEEN @beginDate AND @endDate AND ysnPosted = 0
 	END
 
 IF(@beginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO #tmpARReceivablePostData
 		SELECT intPaymentId FROM tblARPayment
-		WHERE intPaymentId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = @post
+		WHERE intPaymentId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
 	END
 
 --Removed excluded Invoices to post/unpost
@@ -1399,7 +1399,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
-	SET @recapId = (SELECT TOP 1 intPaymentId FROM #tmpARReceivablePostData) --only support recAR per record
+	SET @recapId = ISNULL((SELECT TOP 1 intPaymentId FROM #tmpARReceivablePostData),0) --only support recAR per record
 	SET @successfulCount = @totalRecords
 	GOTO Post_Cleanup
 	GOTO Post_Exit

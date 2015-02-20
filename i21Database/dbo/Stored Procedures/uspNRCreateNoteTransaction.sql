@@ -68,6 +68,13 @@ BEGIN TRY
 		, @dblPrevUnpaidInterest = ISNULL(dblUnpaidInterest,0)
 		FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId Order By intNoteTransId DESC
 		
+	IF @intLastTransTypeID = 1
+	BEGIN
+		SELECT top 1 @dtmPrevAsOfDate = dtmAsOfDate, @intLastTransTypeID = intNoteTransTypeId
+		, @dblPrevPrincipal = ISNULL(dblPrincipal,0)
+		, @dblPrevUnpaidInterest = ISNULL(dblUnpaidInterest,0)
+		FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId AND intNoteTransTypeId = 1 AND dblPrincipal <> 0 Order By intNoteTransId DESC
+	END	
 	
 	DECLARE CurTrans CURSOR FOR
 	SELECT 
@@ -160,7 +167,8 @@ BEGIN TRY
 		
 		if CONVERT(nvarchar(10), @dtmPrevAsOfDate, 101) = CONVERT(nvarchar(10), @AsOf, 101)
 		BEGIN
-			Select Top 1 @Days = intTransDays From dbo.tblNRNoteTransaction WHERE intNoteId =  @intNoteId Order By intNoteTransId DESC
+			--Select Top 1 @Days = intTransDays From dbo.tblNRNoteTransaction WHERE intNoteId =  @intNoteId Order By intNoteTransId DESC
+			SET @Days = 0
 		END
 		ELSE IF @TransTypeID = 6
 		BEGIN
@@ -350,6 +358,8 @@ BEGIN TRY
 		-- ***** Interest since last creation *****
 		IF @TransTypeID = 6
 			SET @InterestToDate = NULL
+		ELSE IF @Days = 0
+			SET @InterestToDate = 0
 		ELSE
 			SET @InterestToDate = @dblPrevPrincipal * ((@dblInterestRate/100)/360) * @Days
 			
