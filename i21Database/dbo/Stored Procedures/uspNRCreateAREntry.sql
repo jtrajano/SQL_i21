@@ -20,6 +20,7 @@ BEGIN
 	, @strLocation = strLocation
 	, @strPayType = strPayType
 	, @strUserID = intLastModifiedUserId 
+	, @dblAmount = dblTransAmount
 	FROM dbo.tblNRNoteTransaction Where intNoteTransId = @intNoteTransId
 	SELECT @blnSwitchOrigini21 = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'nrSwitchOrigini21'
 	SELECT @strOriginSystem = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'nrOriginSystem'			

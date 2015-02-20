@@ -229,10 +229,10 @@ BEGIN TRY
 		
 		SET @intNoteTransId = @@IDENTITY
 		
-		--IF(@TransTypeID = 1)
-		--BEGIN
-		--	EXEC dbo.uspNRCreateAREntry @intNoteTransId
-		--END
+		IF(@TransTypeID = 1)
+		BEGIN
+			EXEC dbo.uspNRCreateAREntry @intNoteTransId
+		END
 		IF(@TransTypeID = 4)
 		BEGIN
 			DECLARE @intCMTransactionId Int, @intGLReceivableAccountId Int

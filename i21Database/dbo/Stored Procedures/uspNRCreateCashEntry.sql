@@ -68,7 +68,7 @@ BEGIN
 		
 		SELECT @intCreatedUserId = intUserSecurityID FROM dbo.tblSMUserSecurity Where intEntityId = @intEntityId
 		
-		SET @strAmountInWords = dbo.fnCMConvertNumberToWord(@dblAmount)
+		SET @strAmountInWords = dbo.fnConvertNumberToWord(@dblAmount)
 
 		--INSERT into tblCMBankTransaction
 		INSERT INTO [dbo].[tblCMBankTransaction]
