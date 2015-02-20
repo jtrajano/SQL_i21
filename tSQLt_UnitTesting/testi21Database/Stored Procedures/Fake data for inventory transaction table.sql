@@ -43,7 +43,7 @@ BEGIN
 				, intItemLocationId = @NewHaven
 				, dblQty = 1
 				, dblCost = 100
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -57,7 +57,7 @@ BEGIN
 				, intItemLocationId = @NewHaven
 				, dblQty = 2
 				, dblCost = 100
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -71,7 +71,7 @@ BEGIN
 				, intItemLocationId = @NewHaven
 				, dblQty = 2
 				, dblCost = 100
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -95,7 +95,7 @@ BEGIN
 				, intItemLocationId = @BetterHaven
 				, dblQty = 1
 				, dblCost = 100
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -109,7 +109,7 @@ BEGIN
 				, intItemLocationId = @BetterHaven
 				, dblQty = 2
 				, dblCost = 15.11
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 781.20
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate

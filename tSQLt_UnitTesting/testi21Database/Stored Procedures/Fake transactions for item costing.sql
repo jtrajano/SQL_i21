@@ -38,11 +38,11 @@ BEGIN
 
 	-- Fake data for tblICInventoryFIFO
 	BEGIN
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@WetGrains, 1, 'January 1, 2014', 100, 0, 22.00, 1)
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@StickyGrains, 2, 'January 1, 2014', 150, 0, 33.00, 1)
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@PremiumGrains, 3, 'January 1, 2014', 200, 0, 44.00, 1)
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@ColdGrains, 4, 'January 1, 2014', 250, 0, 55.00, 1)
-		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@HotGrains, 5, 'January 1, 2014', 300, 0, 66.00, 1)
+		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@WetGrains, 1, @WetGrains_BushelUOMId, 'January 1, 2014', 100, 0, 22.00, 1)
+		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@StickyGrains, 2, @StickyGrains_BushelUOMId, 'January 1, 2014', 150, 0, 33.00, 1)
+		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@PremiumGrains, 3, @PremiumGrains_BushelUOMId, 'January 1, 2014', 200, 0, 44.00, 1)
+		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@ColdGrains, 4, @ColdGrains_BushelUOMId, 'January 1, 2014', 250, 0, 55.00, 1)
+		INSERT INTO dbo.tblICInventoryFIFO (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost, intConcurrencyId) VALUES (@HotGrains, 5, @HotGrains_BushelUOMId, 'January 1, 2014', 300, 0, 66.00, 1)
 	END 
 
 	-- Fake data for item stock table
@@ -95,10 +95,10 @@ BEGIN
 
 	-- Fake data for tblICInventoryTransaction
 	BEGIN 
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@WetGrains, 1, 'January 1, 2014', 100, 1, 22.00, NULL, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@StickyGrains, 2, 'January 1, 2014', 150, 1, 33.00, NULL, 0, 1, 1, 2, 'PURCHASE-200000', 'BATCH-200000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@PremiumGrains, 3, 'January 1, 2014', 200, 1, 44.00, NULL, 0, 1, 1, 3, 'PURCHASE-300000', 'BATCH-300000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@ColdGrains, 4, 'January 1, 2014', 250, 1, 55.00, NULL, 0, 1, 1, 4, 'PURCHASE-400000', 'BATCH-400000', @PurchaseType, NULL, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@HotGrains, 5, 'January 1, 2014', 300, 1, 66.00, NULL, 0, 1, 1, 5, 'PURCHASE-500000', 'BATCH-500000', @PurchaseType, NULL, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@WetGrains, 1, @WetGrains_BushelUOMId, 'January 1, 2014', 100, 1, 22.00, 0, 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100000', @PurchaseType, NULL, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@StickyGrains, 2, @StickyGrains_BushelUOMId, 'January 1, 2014', 150, 1, 33.00, 0, 0, 1, 1, 2, 'PURCHASE-200000', 'BATCH-200000', @PurchaseType, NULL, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@PremiumGrains, 3, @PremiumGrains_BushelUOMId, 'January 1, 2014', 200, 1, 44.00, 0, 0, 1, 1, 3, 'PURCHASE-300000', 'BATCH-300000', @PurchaseType, NULL, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@ColdGrains, 4, @ColdGrains_BushelUOMId, 'January 1, 2014', 250, 1, 55.00, 0, 0, 1, 1, 4, 'PURCHASE-400000', 'BATCH-400000', @PurchaseType, NULL, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId) VALUES (@HotGrains, 5, @HotGrains_BushelUOMId, 'January 1, 2014', 300, 1, 66.00, 0, 0, 1, 1, 5, 'PURCHASE-500000', 'BATCH-500000', @PurchaseType, NULL, 1)
 	END 
 END 

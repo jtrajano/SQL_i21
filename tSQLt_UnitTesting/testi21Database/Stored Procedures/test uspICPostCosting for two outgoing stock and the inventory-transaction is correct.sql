@@ -25,6 +25,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
 
@@ -72,10 +79,12 @@ BEGIN
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -100
+				,dblQty = -100
 				,dblUOMQty = 1
 				,dblCost = 14.00
+				,dblValue = 0
 				,dblSalesPrice = 25.00
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -86,10 +95,12 @@ BEGIN
 		UNION ALL 
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -75
+				,dblQty = -75
 				,dblUOMQty = 1
 				,dblCost = 14.00
+				,dblValue = 0
 				,dblSalesPrice = 30.00
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -102,8 +113,10 @@ BEGIN
 		INSERT INTO expected (
 				intItemId 
 				,intItemLocationId 
+				,intItemUOMId
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
+				,dblUOMQty 
 				,dblCost 
 				,dblValue 
 				,dblSalesPrice 
@@ -119,10 +132,12 @@ BEGIN
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -100
+				,dblQty = -100
+				,dblUOMQty = 1
 				,dblCost = 22.00
-				,dblValue = NULL 
+				,dblValue = 0
 				,dblSalesPrice = 25.00				
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -136,10 +151,12 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -75
+				,dblQty = -75
+				,dblUOMQty = 1
 				,dblCost = 22.00
-				,dblValue = NULL 
+				,dblValue = 0 
 				,dblSalesPrice = 30.00
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -164,8 +181,10 @@ BEGIN
 		INSERT INTO actual (
 				intItemId 
 				,intItemLocationId 
+				,intItemUOMId
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
+				,dblUOMQty 
 				,dblCost 
 				,dblValue 
 				,dblSalesPrice 
@@ -181,8 +200,10 @@ BEGIN
 		)
 		SELECT	intItemId 
 				,intItemLocationId 
+				,intItemUOMId
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
+				,dblUOMQty 
 				,dblCost 
 				,dblValue 
 				,dblSalesPrice 

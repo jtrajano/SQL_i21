@@ -20,6 +20,13 @@ BEGIN
 				,@ColdGrains AS INT = 4
 				,@HotGrains AS INT = 5
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Declare the variables for location
 		DECLARE @Default_Location AS INT = 1
 				,@NewHaven AS INT = 2
@@ -72,10 +79,12 @@ BEGIN
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 14, 2014'
-				,dblUnitQty = 100
+				,dblQty = 100
 				,dblUOMQty = 1
 				,dblCost = 14.00
+				,dblValue = 0
 				,dblSalesPrice = 0
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -87,9 +96,10 @@ BEGIN
 		-- Setup the expected g/l entries 
 		INSERT INTO expected (
 				intItemId 
-				,intItemLocationId 
+				,intItemLocationId  
+				,intItemUOMId
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
 				,dblCost 
 				,dblValue 
 				,dblSalesPrice 
@@ -105,10 +115,11 @@ BEGIN
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 14, 2014'
-				,dblUnitQty = 100
+				,dblQty = 100
 				,dblCost = 14.00
-				,dblValue = NULL 
+				,dblValue = 0 
 				,dblSalesPrice = 0 
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -133,8 +144,9 @@ BEGIN
 		INSERT INTO actual (
 				intItemId 
 				,intItemLocationId 
+				,intItemUOMId
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
 				,dblCost 
 				,dblValue 
 				,dblSalesPrice 
@@ -150,8 +162,9 @@ BEGIN
 		)
 		SELECT	intItemId 
 				,intItemLocationId 
+				,intItemUOMId
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
 				,dblCost 
 				,dblValue 
 				,dblSalesPrice 

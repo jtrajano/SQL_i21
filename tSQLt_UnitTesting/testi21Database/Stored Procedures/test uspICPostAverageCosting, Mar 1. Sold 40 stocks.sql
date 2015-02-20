@@ -163,7 +163,7 @@ BEGIN
 					,[dblQty] = @dblQty
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -203,7 +203,7 @@ BEGIN
 					,[dblQty] = @dblQty
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -299,7 +299,7 @@ BEGIN
 					,[dblQty] = @dblQty
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -339,7 +339,7 @@ BEGIN
 					,[dblQty] = @dblQty
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -437,7 +437,7 @@ BEGIN
 					,[dblQty] = @dblQty
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -477,7 +477,7 @@ BEGIN
 					,[dblQty] = @dblQty
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
@@ -575,7 +575,7 @@ BEGIN
 					,[dblQty] = @dblQty
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = @dblAverageCost_Expected
-					,[dblValue] = NULL 
+					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1

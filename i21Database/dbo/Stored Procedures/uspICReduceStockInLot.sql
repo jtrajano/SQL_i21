@@ -7,6 +7,7 @@
 CREATE PROCEDURE [dbo].[uspICReduceStockInLot]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
+	,@intItemUOMId AS INT 
 	,@intLotId AS INT
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
@@ -43,10 +44,12 @@ USING (
 	SELECT	intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId
 			,intLotId = @intLotId
+			,intItemUOMId = @intItemUOMId
 ) AS Source_Query  
 	ON Lot_bucket.intItemId = Source_Query.intItemId
 	AND Lot_bucket.intItemLocationId = Source_Query.intItemLocationId
-	AND Lot_bucket.intLotId = Source_Query.intLotId
+	AND Lot_bucket.intItemUOMId = Source_Query.intItemUOMId
+	AND Lot_bucket.intLotId = Source_Query.intLotId	
 	AND (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) > 0 
 
 -- Update an existing cost bucket
@@ -82,6 +85,7 @@ WHEN NOT MATCHED THEN
 	INSERT (
 		[intItemId]
 		,[intItemLocationId]
+		,[intItemUOMId]
 		,[intLotId]
 		,[dblStockIn]
 		,[dblStockOut]
@@ -95,6 +99,7 @@ WHEN NOT MATCHED THEN
 	VALUES (
 		@intItemId
 		,@intItemLocationId
+		,@intItemUOMId
 		,@intLotId
 		,0
 		,@dblQty

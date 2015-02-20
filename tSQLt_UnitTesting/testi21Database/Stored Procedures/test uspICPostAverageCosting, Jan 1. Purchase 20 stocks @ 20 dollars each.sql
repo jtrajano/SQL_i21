@@ -168,7 +168,7 @@ BEGIN
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
 					,[dblCost] = @dblCost
-					,[dblValue] = NULL 
+					,[dblValue] = 0 
 					,[dblSalesPrice] = @dblSalesPrice
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1

@@ -93,6 +93,7 @@ BEGIN
 					,@intItemUOMId = @intItemUOMId
 					,@dtmDate = @dtmDate
 					,@dblQty = @dblComputedUnitQty
+					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
@@ -144,6 +145,7 @@ BEGIN
 				,@intItemUOMId = @intItemUOMId
 				,@dtmDate = @dtmDate
 				,@dblQty = @FullQty
+				,@dblUOMQty = @dblUOMQty
 				,@dblCost = @dblCost
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
@@ -199,6 +201,7 @@ BEGIN
 						,@intItemUOMId = @intItemUOMId
 						,@dtmDate = @dtmDate
 						,@dblQty = 0
+						,@dblUOMQty = 0
 						,@dblCost = 0
 						,@dblValue = @dblValue
 						,@dblSalesPrice = @dblSalesPrice
@@ -225,6 +228,7 @@ BEGIN
 						,@intItemUOMId = @intItemUOMId
 						,@dtmDate = @dtmDate
 						,@dblQty = 0
+						,@dblUOMQty = 0
 						,@dblCost = 0
 						,@dblValue = @dblValue
 						,@dblSalesPrice = @dblSalesPrice
