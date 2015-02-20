@@ -1974,4 +1974,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnSeparateOnInvoice" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="82995362-5a29-49e9-a1ce-c44cbcb57aea" ChangeDateTime="02/19/2015 14:54:08">
+    <Property Name="ElementName" Value="[dbo].[tblICStockReservation].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStockReservation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStockReservationId" />
+  </Operation>
 </Operations>
