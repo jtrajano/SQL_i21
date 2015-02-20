@@ -9,7 +9,8 @@ The transaction types are:
 *	Type id 3 is Inventory Revalue Sold
 *	Type id 4 is Inventory Receipt
 *	Type id 5 is Inventory Shipment
-
+*	Type id 6 is Purchase Order
+*	Type id 7 is Sales Order
 
 ## Fields, description, and mapping. 
 *	Type the field name here

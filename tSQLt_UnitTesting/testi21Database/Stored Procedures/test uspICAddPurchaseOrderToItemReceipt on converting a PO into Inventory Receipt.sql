@@ -51,10 +51,10 @@ BEGIN
 		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightTermId, dblShipping, dblTotal, intVendorId) VALUES (1, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish)
 
 		-- Fake PO Detail data
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 1, @WetGrains, 10, 0, @UOMBushel, 50.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 2, @PremiumGrains, 5, 0, @UOMBushel, 100.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 3, @HotGrains, 2, 0, @UOMBushel, 200.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 4, @ColdGrains, 4, 0, @UOMBushel, 125.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 11, @WetGrains, 10, 0, @UOMBushel, 50.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 12, @PremiumGrains, 5, 0, @UOMBushel, 100.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 13, @HotGrains, 2, 0, @UOMBushel, 200.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 14, @ColdGrains, 4, 0, @UOMBushel, 125.00)
 
 		-- Fake starting numbers data
 		EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';
@@ -95,7 +95,7 @@ BEGIN
 				,dblReceived
 				,intUnitMeasureId
 				,intNoPackages
-				,intPackTypeId
+				--,intPackTypeId
 				,dblExpPackageWeight
 				,dblUnitCost
 				,dblLineTotal
@@ -143,11 +143,11 @@ BEGIN
 				,dblReceived = 0
 				,intUnitMeasureId = @UOMBushel
 				,intNoPackages = 0
-				,intPackTypeId = 0 
+				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 50.00
 				,dblLineTotal = 0
-				,intSort = 1
+				,intSort = 11
 				,intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intInventoryReceiptId = 1
@@ -159,11 +159,11 @@ BEGIN
 				,dblReceived = 0
 				,intUnitMeasureId = @UOMBushel
 				,intNoPackages = 0
-				,intPackTypeId = 0 
+				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 100.00
 				,dblLineTotal = 0
-				,intSort = 2
+				,intSort = 12
 				,intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intInventoryReceiptId = 1
@@ -175,11 +175,11 @@ BEGIN
 				,dblReceived = 0
 				,intUnitMeasureId = @UOMBushel
 				,intNoPackages = 0
-				,intPackTypeId = 0 
+				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 200.00
 				,dblLineTotal = 0
-				,intSort = 3
+				,intSort = 13
 				,intConcurrencyId = 1
 		UNION ALL 
 		SELECT	intInventoryReceiptId = 1
@@ -191,11 +191,11 @@ BEGIN
 				,dblReceived = 0
 				,intUnitMeasureId = @UOMBushel
 				,intNoPackages = 0
-				,intPackTypeId = 0 
+				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 125.00
 				,dblLineTotal = 0
-				,intSort = 4
+				,intSort = 14
 				,intConcurrencyId = 1					
 	END
 	
@@ -238,7 +238,7 @@ BEGIN
 				,dblReceived
 				,intUnitMeasureId
 				,intNoPackages
-				,intPackTypeId
+				--,intPackTypeId
 				,dblExpPackageWeight
 				,dblUnitCost
 				,dblLineTotal

@@ -1953,4 +1953,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemUnitMeasureId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="273ef658-62ef-4dfe-beb2-d9cc02b326e0" ChangeDateTime="02/06/2015 05:28:57">
+    <Property Name="ElementName" Value="[dbo].[tblICLot].[intLotId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICLot]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCostingMethodId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4091cc6c-80a9-406e-9a43-d035a3c4b84d" ChangeDateTime="02/12/2015 11:24:30">
+    <Property Name="ElementName" Value="[dbo].[tblSMTaxGroupCode].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMTaxGroupCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxGroupCodeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="62d92602-7c7f-488d-ac84-a6babffca21d" ChangeDateTime="02/12/2015 11:25:26">
+    <Property Name="ElementName" Value="[dbo].[tblSMTaxGroupCode].[ysnSeparate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMTaxGroupCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnSeparateOnInvoice" />
+  </Operation>
 </Operations>

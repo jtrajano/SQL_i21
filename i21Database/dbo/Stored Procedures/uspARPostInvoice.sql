@@ -84,7 +84,7 @@ IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
 			#tmpPostInvoiceData I
 				ON GL.intTransactionId = I.intInvoiceId 
 		WHERE
-			GL.strTransactionType IN ('Credit Memo','Invoice')
+			GL.strTransactionType IN ('Credit Memo','Invoice', 'Overpayment')
 			AND	GL.strModuleName = @MODULE_NAME
 	END
 
@@ -490,27 +490,25 @@ BEGIN
 	LEFT JOIN
 		(
 		SELECT 
+			DISTINCT
 			ST.intLocationId
 			,(CASE 
 				WHEN ST.strCostingMethod = 'AVG' 
-					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+					THEN (CASE WHEN ISNULL(IP.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblAverageCost END) 
 				WHEN ST.strCostingMethod = 'FIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
 				WHEN ST.strCostingMethod = 'LIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,IP.intItemUnitMeasureId AS intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
 		INNER JOIN
-			tblICItemLocation IL
-				ON ST.intLocationId = IL.intLocationId	
-		INNER JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON	ST.intItemId = IP.intItemId 
-				AND IL.intItemLocationId = IP.intItemLocationId
+				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
 			AND B.intCompanyLocationId = IP.intLocationId
@@ -518,7 +516,12 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
-	WHERE B.intItemId IS NOT NULL OR B.intItemId <> 0
+	INNER JOIN
+		tblICItem I
+			ON B.intItemId = I.intItemId 
+	WHERE 
+		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+		AND I.strType NOT IN ('Non-Inventory','Service')
 		
 	--CREDIT INVENTORY
 	UNION ALL 
@@ -558,27 +561,25 @@ BEGIN
 	LEFT JOIN
 		(
 		SELECT 
+			DISTINCT
 			ST.intLocationId
 			,(CASE 
 				WHEN ST.strCostingMethod = 'AVG' 
-					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+					THEN (CASE WHEN ISNULL(IP.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblAverageCost END) 
 				WHEN ST.strCostingMethod = 'FIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
 				WHEN ST.strCostingMethod = 'LIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,IP.intItemUnitMeasureId as intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
 		INNER JOIN
-			tblICItemLocation IL
-				ON ST.intLocationId = IL.intLocationId	
-		INNER JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON	ST.intItemId = IP.intItemId 
-				AND IL.intItemLocationId = IP.intItemLocationId
+				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
 			AND B.intCompanyLocationId = IP.intLocationId
@@ -586,7 +587,12 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
-	WHERE B.intItemId IS NOT NULL AND B.intItemId <> 0
+	INNER JOIN
+		tblICItem I
+			ON B.intItemId = I.intItemId 
+	WHERE 
+		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+		AND I.strType NOT IN ('Non-Inventory','Service')
 	
 	--DEBIT AR
 	UNION ALL 
@@ -662,7 +668,9 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
-	WHERE B.intItemId IS NULL OR B.intItemId = 0
+	WHERE 
+		(B.intItemId IS NULL OR B.intItemId = 0)
+		OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service')))
 
 	--CREDIT SALES
 	UNION ALL 
@@ -702,7 +710,12 @@ BEGIN
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
-	WHERE B.intItemId IS NOT NULL AND B.intItemId <> 0
+	INNER JOIN
+		tblICItem I
+			ON B.intItemId = I.intItemId 
+	WHERE 
+		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+		AND I.strType NOT IN ('Non-Inventory','Service')
 
 	UNION ALL 
 	SELECT	
@@ -1110,27 +1123,25 @@ ELSE
 		LEFT JOIN
 		(
 		SELECT 
+			DISTINCT
 			ST.intLocationId
 			,(CASE 
 				WHEN ST.strCostingMethod = 'AVG' 
-					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+					THEN (CASE WHEN ISNULL(IP.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblAverageCost END) 
 				WHEN ST.strCostingMethod = 'FIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
 				WHEN ST.strCostingMethod = 'LIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,IP.intItemUnitMeasureId as intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
 		INNER JOIN
-			tblICItemLocation IL
-				ON ST.intLocationId = IL.intLocationId	
-		INNER JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON	ST.intItemId = IP.intItemId 
-				AND IL.intItemLocationId = IP.intItemLocationId
+				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
 			AND B.intCompanyLocationId = IP.intLocationId
@@ -1138,7 +1149,12 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
-		WHERE B.intItemId IS NOT NULL AND B.intItemId <> 0
+			INNER JOIN
+		tblICItem I
+			ON B.intItemId = I.intItemId 
+	WHERE 
+		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+		AND I.strType NOT IN ('Non-Inventory','Service')
 
 		--CREDIT INVENTORY
 		UNION ALL 
@@ -1179,27 +1195,25 @@ ELSE
 		LEFT JOIN
 		(
 		SELECT 
+			DISTINCT
 			ST.intLocationId
 			,(CASE 
 				WHEN ST.strCostingMethod = 'AVG' 
-					THEN (CASE WHEN ISNULL(ST.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE ST.dblAverageCost END) 
+					THEN (CASE WHEN ISNULL(IP.dblAverageCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblAverageCost END) 
 				WHEN ST.strCostingMethod = 'FIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END)  -- temp
 				WHEN ST.strCostingMethod = 'LIFO' 
 					THEN (CASE WHEN ISNULL(IP.dblLastCost, 0.00) = 0 THEN  IP.dblStandardCost ELSE IP.dblLastCost END) 
 				ELSE  IP.dblStandardCost
 			 END) AS dblCost
-			,IP.intItemUnitMeasureId
+			,IP.intItemUnitMeasureId as intItemUnitMeasureId
 			,IP.intItemId 
 		FROM 
 			vyuICGetItemStock ST
 		INNER JOIN
-			tblICItemLocation IL
-				ON ST.intLocationId = IL.intLocationId	
-		INNER JOIN
-			tblICItemPricing IP
+			vyuICGetItemPricing IP
 				ON	ST.intItemId = IP.intItemId 
-				AND IL.intItemLocationId = IP.intItemLocationId
+				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
 			AND B.intCompanyLocationId = IP.intLocationId
@@ -1207,7 +1221,12 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
-		WHERE B.intItemId IS NOT NULL OR B.intItemId <> 0
+		INNER JOIN
+			tblICItem I
+				ON B.intItemId = I.intItemId 
+		WHERE 
+			(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+			AND I.strType NOT IN ('Non-Inventory','Service')
 		
 		--DEBIT AR
 		UNION ALL
@@ -1285,7 +1304,9 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
-		WHERE B.intItemId IS NULL OR B.intItemId = 0
+		WHERE 
+			(B.intItemId IS NULL OR B.intItemId = 0)
+			OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service')))
 
 		--CREDIT SALES
 		UNION ALL 
@@ -1326,7 +1347,13 @@ ELSE
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 
-		WHERE B.intItemId IS NOT NULL OR B.intItemId <> 0
+		INNER JOIN
+			tblICItem I
+				ON B.intItemId = I.intItemId 
+		WHERE 
+			(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+			AND I.strType NOT IN ('Non-Inventory','Service')
+		
 				
 		UNION ALL 
 		SELECT	

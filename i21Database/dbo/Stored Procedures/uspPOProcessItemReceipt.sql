@@ -14,6 +14,13 @@ SET ANSI_WARNINGS OFF
 DECLARE @itemReceiptId INT, @itemReceiptNumber NVARCHAR(50);
 -- Implement your code that validates the transaction you need to process.
 
+--Purchase order already closed.
+IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND intOrderStatusId = 3)
+BEGIN
+	RAISERROR(51036, 11, 1)
+	RETURN;
+END
+
 -- Add code to lock-out editing of the purchase order after it has been processed.
   
 -- Call inventory stored procedure to process your transaction into "Item Receipt"

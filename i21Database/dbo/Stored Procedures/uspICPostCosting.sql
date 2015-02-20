@@ -57,6 +57,7 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
 		,@STANDARDCOST AS INT = 4
+		,@LOTCOST AS INT = 5
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
@@ -170,18 +171,46 @@ BEGIN
 			,@intUserId;
 	END
 
+	-- LIFO 
+	IF (@CostingMethod = @LOTCOST)
+	BEGIN 
+		EXEC dbo.uspICPostLot
+			@intItemId
+			,@intItemLocationId
+			,@dtmDate
+			,@intLotId
+			,@dblUnitQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@intUserId;
+	END
+
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
 	--------------------------------------------------
 	BEGIN 
-		--UPDATE	Stock
-		--SET		Stock.dblAverageCost = dbo.fnCalculateAverageCost((@dblUnitQty * @dblUOMQty), @dblCost, Stock.dblUnitOnHand, Stock.dblAverageCost)
-		--		,Stock.dblUnitOnHand = (@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand
-		--		,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
-		--FROM	dbo.tblICItemStock AS Stock
-		--WHERE	Stock.intItemId = @intItemId
-		--		AND Stock.intLocationId = @intLocationId;
+		-- Get the current average cost and stock qty 
+		DECLARE @CurrentStockQty AS NUMERIC(18,6)
+		DECLARE @CurrentStockAveCost AS NUMERIC(18,6)
 
+		SELECT	@CurrentStockAveCost = dblAverageCost
+		FROM	dbo.tblICItemPricing ItemPricing
+		WHERE	ItemPricing.intItemId = @intItemId
+				AND ItemPricing.intItemLocationId = @intItemLocationId
+
+		SELECT	@CurrentStockQty = dblUnitOnHand
+		FROM	dbo.tblICItemStock ItemStock
+		WHERE	ItemStock.intItemId = @intItemId
+				AND ItemStock.intItemLocationId = @intItemLocationId
+
+		-- Update the Item Stock table
 		MERGE	
 		INTO	dbo.tblICItemStock 
 		WITH	(HOLDLOCK) 
@@ -195,11 +224,10 @@ BEGIN
 			ON ItemStock.intItemId = StockToUpdate.intItemId
 			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
 
-		-- If matched, update the average cost and unit on hand qty. 
+		-- If matched, update the unit on hand qty. 
 		WHEN MATCHED THEN 
 			UPDATE 
-			SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, ItemStock.dblUnitOnHand, ItemStock.dblAverageCost)
-					,dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + StockToUpdate.Qty
+			SET		dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + StockToUpdate.Qty
 
 		-- If none found, insert a new item stock record
 		WHEN NOT MATCHED THEN 
@@ -207,7 +235,6 @@ BEGIN
 				intItemId
 				,intItemLocationId
 				,intSubLocationId
-				,dblAverageCost
 				,dblUnitOnHand
 				,dblOrderCommitted
 				,dblOnOrder
@@ -219,15 +246,54 @@ BEGIN
 				StockToUpdate.intItemId
 				,StockToUpdate.intItemLocationId
 				,NULL 
-				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, 0, 0) -- dblAverageCost
 				,StockToUpdate.Qty -- dblUnitOnHand
 				,0
 				,0
 				,0
 				,NULL 
 				,1	
-			)		
+			)
+		;
 
+		-- Update the Item Pricing table
+		MERGE	
+		INTO	dbo.tblICItemPricing 
+		WITH	(HOLDLOCK) 
+		AS		ItemPricing
+		USING (
+				SELECT	intItemId = @intItemId
+						,intItemLocationId = @intItemLocationId
+						,Qty = ISNULL(@dblUnitQty, 0)  * ISNULL(@dblUOMQty, 0)
+						,Cost = @dblCost
+		) AS StockToUpdate
+			ON ItemPricing.intItemId = StockToUpdate.intItemId
+			AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
+
+		-- If matched, update the average cost, last cost, and standard cost
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost)
+					,dblLastCost = StockToUpdate.Cost
+					,dblStandardCost = CASE WHEN ISNULL(ItemPricing.dblStandardCost, 0) = 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblStandardCost END 
+
+		-- If none found, insert a new item pricing record
+		WHEN NOT MATCHED THEN 
+			INSERT (
+				intItemId
+				,intItemLocationId
+				,dblAverageCost 
+				,dblLastCost 
+				,dblStandardCost
+				,intConcurrencyId
+			)
+			VALUES (
+				StockToUpdate.intItemId
+				,StockToUpdate.intItemLocationId
+				,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, @CurrentStockAveCost)
+				,StockToUpdate.Cost
+				,StockToUpdate.Cost
+				,1
+			)
 		;
 	END 
 

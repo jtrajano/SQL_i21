@@ -39,7 +39,7 @@ BEGIN TRY
 	
 	-- Fee transaction one time entry when note is created
 	INSERT into dbo.tblNRNoteTransaction
-	SELECT @NoteId, GETDATE(), 2, 0, @Fee,@Fee, 0, 0, @Fee, '', NULL, '', '', '', '', 0, @Fee, '', GETDATE(), '', '', '', '', NULL, @UserId, 1
+	SELECT @NoteId, GETDATE(), 2, 0, @Fee,@Fee, 0, 0, @Fee, '', NULL, '', '', '', '', @Fee, 0, '', GETDATE(), '', '', '', '', NULL, @UserId, 1
 	SET @NoteTransId = @@IDENTITY
 	EXEC dbo.uspNRCreateGLJournalEntry @NoteId, 2, @NoteTransId, @UserId
 		

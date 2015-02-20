@@ -3,6 +3,7 @@
 As
 BEGIN
 
+
 -- Get Invoice List
 	
 	DECLARE @intCustomerId int, @blnSwitchOrigini21 bit, @strOriginSystem nvarchar(5), @strVersionNumber nvarchar(6)
@@ -22,12 +23,13 @@ BEGIN
 			BEGIN
 				SELECT * FROM 
 				(
-					Select 0 [intInvoiceId]
+					Select DISTINCT CAST(ROW_NUMBER() 
+						OVER (ORDER BY a.ptivc_invc_no) AS Int)  AS [intInvoiceId]
 					, a.ptivc_invc_no [strInvoiceNumber]
-					, CAST(a.ptivc_rev_dt as nvarchar )  [dtmDate]
+					, CONVERT(Date, CAST(a.ptivc_rev_dt as nvarchar ))  [dtmDate]
 					, CASE WHEN a.ptivc_type = 'I'  
-							THEN (isnull(a.ptivc_bal_due,0) - isnull(b.ptpye_amt,0)) 
-							ELSE (isnull(c.ptcrd_amt,0) - isnull(c.ptcrd_amt_used,0) - isnull(b.ptpye_amt,0)) 
+							THEN (isnull(a.ptivc_bal_due,0) ) --  - isnull(b.ptpye_amt,0)) 
+							ELSE (isnull(c.ptcrd_amt,0) - isnull(c.ptcrd_amt_used,0) ) --  - isnull(b.ptpye_amt,0)) 
 					  END  [dblAmount] 
 					, CAST(a.ptivc_loc_no as int)  AS intCompanyLocationId
 					, l.ptloc_name [strLocationName]
@@ -39,10 +41,11 @@ BEGIN
 					FROM  ptivcmst a 
 					LEFT OUTER JOIN ptcrdmst c ON a.ptivc_cus_no = c.ptcrd_cus_no AND a.ptivc_invc_no = c.ptcrd_invc_no 
 							AND a.ptivc_loc_no = c.ptcrd_loc_no   
-					LEFT OUTER JOIN ptpyemst b ON a.ptivc_cus_no = b.ptpye_cus_no AND a.ptivc_invc_no = b.ptpye_inc_ref 
-							AND a.ptivc_loc_no = b.ptpye_ivc_loc_no 
+					--LEFT OUTER JOIN ptpyemst b ON a.ptivc_cus_no = b.ptpye_cus_no AND a.ptivc_invc_no = b.ptpye_inc_ref 
+					--		AND a.ptivc_loc_no = b.ptpye_ivc_loc_no 
 					LEFT JOIN ptlocmst l ON l.ptloc_loc_no = a.ptivc_loc_no					
 					WHERE (a.ptivc_type IN ('I', 'C')) AND (a.ptivc_cus_no= @strCustomerNumber)
+					AND a.ptivc_invc_no not in (Select ptpye_inc_ref FROM ptpyemst)
 				) x WHERE x.dblAmount <> 0
 			END			
 		END
@@ -53,14 +56,15 @@ BEGIN
 			BEGIN
 				SELECT * FROM 
 				(
-					Select 0 [intInvoiceId]
+					Select DISTINCT CAST(ROW_NUMBER() 
+						OVER (ORDER BY a.agivc_ivc_no) AS Int)  [intInvoiceId]
 					, a.agivc_ivc_no [strInvoiceNumber]
-					, CAST(a.agivc_rev_dt as nvarchar )  [dtmDate]
+					, CONVERT(Date, CAST(a.agivc_rev_dt as nvarchar ))  [dtmDate]
 					, CASE WHEN a.agivc_type = 'I'  
-							THEN (isnull(a.agivc_bal_due,0) - isnull(b.agpye_amt,0)) 
-							ELSE (isnull(c.agcrd_amt,0) - isnull(c.agcrd_amt_used,0) - isnull(b.agpye_amt,0)) 
+							THEN (isnull(a.agivc_bal_due,0) ) --    - isnull(b.agpye_amt,0)) 
+							ELSE (isnull(c.agcrd_amt,0) - isnull(c.agcrd_amt_used,0) ) --  - isnull(b.agpye_amt,0)) 
 					  END  [dblAmount] 
-					, CAST(a.agivc_loc_no as int) AS intCompanyLocationId
+					, CAST(a.agivc_loc_no as int)  AS intCompanyLocationId
 					, l.agloc_name [strLocationName]
 					, CASE WHEN a.agivc_type = 'I' 
 							THEN 'Invoice' 
@@ -70,10 +74,11 @@ BEGIN
 					FROM  agivcmst a 
 					LEFT OUTER JOIN agcrdmst c ON a.agivc_bill_to_cus = c.agcrd_cus_no AND a.agivc_ivc_no = c.agcrd_ref_no 
 							AND a.agivc_loc_no = c.agcrd_loc_no   
-					LEFT OUTER JOIN agpyemst b ON a.agivc_bill_to_cus = b.agpye_cus_no AND a.agivc_ivc_no = b.agpye_inc_ref 
-							AND a.agivc_loc_no = b.agpye_ivc_loc_no 
+					--LEFT OUTER JOIN agpyemst b ON a.agivc_bill_to_cus = b.agpye_cus_no AND a.agivc_ivc_no = b.agpye_inc_ref 
+					--		AND a.agivc_loc_no = b.agpye_ivc_loc_no 
 					LEFT JOIN aglocmst l ON l.agloc_loc_no = a.agivc_loc_no					
 					WHERE (a.agivc_type IN ('I', 'C')) AND (a.agivc_bill_to_cus= @strCustomerNumber)
+					AND a.agivc_ivc_no not in (Select agpye_inc_ref From agpyemst)
 				)  x WHERE x.dblAmount <> 0
 			END			
 		END		

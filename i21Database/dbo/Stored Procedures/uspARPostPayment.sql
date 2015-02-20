@@ -45,6 +45,11 @@ CREATE TABLE #tmpARReceivableInvalidData (
 	intTransactionId INT
 );
 
+CREATE TABLE #tmpAROverpayment (
+	intPaymentId int PRIMARY KEY,
+	UNIQUE (intPaymentId)
+);
+
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
@@ -95,14 +100,14 @@ IF(@beginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO #tmpARReceivablePostData
 		SELECT intPaymentId FROM tblARPayment
-		WHERE dtmDatePaid BETWEEN @beginDate AND @endDate AND ysnPosted = @post
+		WHERE dtmDatePaid BETWEEN @beginDate AND @endDate AND ysnPosted = 0
 	END
 
 IF(@beginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO #tmpARReceivablePostData
 		SELECT intPaymentId FROM tblARPayment
-		WHERE intPaymentId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = @post
+		WHERE intPaymentId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
 	END
 
 --Removed excluded Invoices to post/unpost
@@ -185,7 +190,7 @@ IF (ISNULL(@recap, 0) = 0)
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
 					(A.dblAmountPaid) < 0
-					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId AND B.dblPayment > 0 AND strTransactionType <> 'Credit Memo')
+					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId AND B.dblPayment > 0 AND strTransactionType NOT IN ('Credit Memo', 'Overpayment'))
 
 				--Fiscal Year
 				INSERT INTO 
@@ -275,7 +280,7 @@ IF (ISNULL(@recap, 0) = 0)
 						 OR BA.ysnActive = 0)
 					
 
-				--NOT BALANCE +overpayment
+				--NOT BALANCE 
 				INSERT INTO
 					#tmpARReceivableInvalidData
 				SELECT
@@ -290,7 +295,20 @@ IF (ISNULL(@recap, 0) = 0)
 					#tmpARReceivablePostData P
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
-					(A.dblAmountPaid) <> (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
+					(A.dblAmountPaid) < (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
+					
+				--+overpayment
+				INSERT INTO
+					#tmpAROverpayment
+				SELECT
+					A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId				
+				WHERE
+					(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)					
 
 				--ALREADY POSTED
 				INSERT INTO
@@ -377,6 +395,23 @@ IF (ISNULL(@recap, 0) = 0)
 					tblCMBankTransaction B 
 						ON A.strRecordNumber = B.strTransactionId
 				WHERE B.ysnClr = 1
+				
+				---overpayment
+				INSERT INTO
+					#tmpAROverpayment
+				SELECT
+					A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblARInvoice I
+						ON A.strRecordNumber = I.strComments 				
+				WHERE
+					I.strTransactionType = 'Overpayment'
+					
 			END
 		
 	--Get all invalid
@@ -407,6 +442,15 @@ IF (ISNULL(@recap, 0) = 0)
 				INNER JOIN 
 					#tmpARReceivableInvalidData
 						ON A.intPaymentId = #tmpARReceivableInvalidData.intTransactionId
+												
+						
+				DELETE 
+					#tmpAROverpayment
+				FROM
+					#tmpAROverpayment A
+				INNER JOIN 
+					#tmpARReceivableInvalidData
+						ON A.intPaymentId = #tmpARReceivableInvalidData.intTransactionId						
 
 			END
 
@@ -777,6 +821,17 @@ BEGIN
 							  A.intAccountId = B.intAccountId AND B.strCode = 'AR'
 					)
 			GROUP BY ISNULL(CONVERT(DATE, A.dtmDate), ''), A.intAccountId;
+			
+			--CREATE Overpayment
+			WHILE EXISTS(SELECT TOP 1 NULL FROM #tmpAROverpayment)
+				BEGIN
+					DECLARE @PaymentIdToAdd int
+					SELECT TOP 1 @PaymentIdToAdd = intPaymentId FROM #tmpAROverpayment
+					
+					EXEC [dbo].[uspARCreateOverPayment] @PaymentIdToAdd, 1, @batchId ,@UserEntityID 
+					
+					DELETE FROM #tmpAROverpayment WHERE intPaymentId = @PaymentIdToAdd
+				END
 
 		END
 	ELSE
@@ -899,17 +954,17 @@ BEGIN
 			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData) 
 			AND tblSMPaymentMethod.strPaymentMethod != 'Check' 
 			OR (ISNULL(tblARPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
-		)
+			)
 
-		--VOID IF CHECK PAYMENT
-		UPDATE tblCMBankTransaction
-		SET ysnCheckVoid = 1,
-			ysnPosted = 0
-		WHERE strTransactionId IN (
-			SELECT strRecordNumber 
-			FROM tblARPayment
-			 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData) 
-		)
+			--VOID IF CHECK PAYMENT
+			UPDATE tblCMBankTransaction
+			SET ysnCheckVoid = 1,
+				ysnPosted = 0
+			WHERE strTransactionId IN (
+				SELECT strRecordNumber 
+				FROM tblARPayment
+				 WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData) 
+			)
 
 			--Insert Successfully unposted transactions.
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -921,6 +976,17 @@ BEGIN
 				A.intPaymentId
 			FROM tblARPayment A
 			WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+			
+			--DELETE Overpayment
+			WHILE EXISTS(SELECT TOP 1 NULL FROM #tmpAROverpayment)
+				BEGIN			
+					DECLARE @PaymentIdToDelete int		
+					SELECT TOP 1 @PaymentIdToDelete = intPaymentId FROM #tmpAROverpayment
+					
+					EXEC [dbo].[uspARDeleteOverPayment] @PaymentIdToDelete, 1, @batchId ,@UserEntityID 
+					
+					DELETE FROM #tmpAROverpayment WHERE intPaymentId = @PaymentIdToDelete
+				END			
 
 			IF @@ERROR <> 0 OR @success = 0 GOTO Post_Rollback;
 
@@ -1333,7 +1399,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
-	SET @recapId = (SELECT TOP 1 intPaymentId FROM #tmpARReceivablePostData) --only support recAR per record
+	SET @recapId = ISNULL((SELECT TOP 1 intPaymentId FROM #tmpARReceivablePostData),0) --only support recAR per record
 	SET @successfulCount = @totalRecords
 	GOTO Post_Cleanup
 	GOTO Post_Exit

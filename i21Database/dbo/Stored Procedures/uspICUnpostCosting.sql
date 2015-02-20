@@ -15,7 +15,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the temp table 
-CREATE TABLE #tmpInventoryTranactionStockToReverse (
+CREATE TABLE #tmpInventoryTransactionStockToReverse (
 	intInventoryTransactionId INT NOT NULL 
 	,intTransactionId INT NULL 
 	,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -63,19 +63,18 @@ BEGIN
 	EXEC dbo.uspICValidateCostingOnUnpost @ItemsToUnpost
 END 
 
+-- Get the transaction type 
+DECLARE @TransactionType AS INT 
+SELECT TOP 1 
+		@TransactionType = intTransactionTypeId
+FROM	dbo.tblICInventoryTransaction
+WHERE	intTransactionId = @intTransactionId
+		AND strTransactionId = @strTransactionId
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Call the FIFO unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	DECLARE @TransactionType AS INT 
-
-	-- Get the transaction type 
-	SELECT TOP 1 
-			@TransactionType = intTransactionTypeId
-	FROM	dbo.tblICInventoryTransaction
-	WHERE	intTransactionId = @intTransactionId
-			AND strTransactionId = @strTransactionId
-
 	-- Reverse the "IN" qty 
 	IF @TransactionType IN (@InventoryReceipt)
 	BEGIN 
@@ -93,7 +92,50 @@ BEGIN
 	END
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTranactionStockToReverse) 
+-----------------------------------------------------------------------------------------------------------------------------
+-- Call the LIFO unpost stored procedures 
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	-- Reverse the "IN" qty 
+	IF @TransactionType IN (@InventoryReceipt)
+	BEGIN 
+		EXEC dbo.uspICUnpostLIFOIn 
+			@strTransactionId
+			,@intTransactionId
+	END
+
+	-- Reverse the "OUT" qty 
+	IF @TransactionType IN (@InventoryShipment)
+	BEGIN 
+		EXEC dbo.uspICUnpostLIFOOut
+			@strTransactionId
+			,@intTransactionId
+	END
+END
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Call the LOT unpost stored procedures 
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	-- Reverse the "IN" qty 
+	IF @TransactionType IN (@InventoryReceipt)
+	BEGIN 
+		EXEC dbo.uspICUnpostLotIn 
+			@strTransactionId
+			,@intTransactionId
+	END
+
+	-- Reverse the "OUT" qty 
+	IF @TransactionType IN (@InventoryShipment)
+	BEGIN 
+		EXEC dbo.uspICUnpostLotOut
+			@strTransactionId
+			,@intTransactionId
+	END
+END
+
+IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 
 BEGIN 
 	-------------------------------------------------
 	-- Create reversal of the inventory transactions
@@ -140,7 +182,7 @@ BEGIN
 			,[dtmCreated]			= GETDATE()
 			,[intCreatedUserId]		= @intUserId
 			,[intConcurrencyId]		= 1
-	FROM	#tmpInventoryTranactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
+	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 
 	--------------------------------------------------------------
@@ -157,19 +199,32 @@ BEGIN
 	-- Calculate the new average cost (if applicable)
 	---------------------------------------------------
 	BEGIN 
-		UPDATE	Stock
-		SET		Stock.dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) + ItemToUnpost.dblTotalQty > 0 THEN 
+		-- Update the avearge cost at the Item Pricing table
+		UPDATE	ItemPricing
+		SET		dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) + ItemToUnpost.dblTotalQty > 0 THEN 
 													-- Recalculate the average cost
-													dbo.fnRecalculateAverageCost(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) 
+													dbo.fnRecalculateAverageCost(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId, ItemPricing.dblAverageCost) 
 												ELSE 
 													-- Use the same average cost. 
-													Stock.dblAverageCost
-										END 
-				,Stock.dblUnitOnHand = Stock.dblUnitOnHand + ItemToUnpost.dblTotalQty
-				-- ,Stock.intConcurrencyId = ISNULL(Stock.intConcurrencyId, 0) + 1 
-		FROM	dbo.tblICItemStock AS Stock INNER JOIN @ItemsToUnpost ItemToUnpost
+													ItemPricing.dblAverageCost
+										END
+		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
+					ON ItemPricing.intItemId = Stock.intItemId
+					AND ItemPricing.intItemLocationId = Stock.intItemLocationId		
+				INNER JOIN @ItemsToUnpost ItemToUnpost
 					ON Stock.intItemId = ItemToUnpost.intItemId
 					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
+
+		-- Update the Unit On Hand at the Item Stock table
+		UPDATE	Stock
+		SET		Stock.dblUnitOnHand = Stock.dblUnitOnHand + ItemToUnpost.dblTotalQty
+		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
+					ON ItemPricing.intItemId = Stock.intItemId
+					AND ItemPricing.intItemLocationId = Stock.intItemLocationId		
+				INNER JOIN @ItemsToUnpost ItemToUnpost
+					ON Stock.intItemId = ItemToUnpost.intItemId
+					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
+
 	END
 
 	---------------------------------------------------------------------------------------
@@ -201,7 +256,7 @@ BEGIN
 				,[dtmDate] = TransactionToReverse.dtmDate
 				,[dblUnitQty] = 0
 				,[dblCost] = 0
-				,[dblValue] = (Stock.dblUnitOnHand * Stock.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)
+				,[dblValue] = (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)
 				,[dblSalesPrice] = 0
 				,[intCurrencyId] = TransactionToReverse.intCurrencyId
 				,[dblExchangeRate] = TransactionToReverse.dblExchangeRate
@@ -214,7 +269,10 @@ BEGIN
 				,[intCreatedUserId] = @intUserId
 				,[intConcurrencyId] = 1
 				,[ysnIsUnposted] = 0
-		FROM	dbo.tblICItemStock AS Stock INNER JOIN @ItemsToUnpost ItemToUnpost
+		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
+					ON ItemPricing.intItemId = Stock.intItemId
+					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
+				INNER JOIN @ItemsToUnpost ItemToUnpost
 						ON Stock.intItemId = ItemToUnpost.intItemId
 						AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
 						AND dbo.fnGetCostingMethod(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) = @AVERAGECOST
@@ -226,12 +284,12 @@ BEGIN
 							,ItemTransaction.intTransactionId
 							,ItemTransaction.strTransactionId
 							,ItemTransaction.strTransactionForm
-					FROM	#tmpInventoryTranactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ItemTransaction
+					FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ItemTransaction
 								ON ItemTransactionsToReverse.intInventoryTransactionId = ItemTransaction.intInventoryTransactionId
 					WHERE	ItemTransaction.intTransactionId = @intTransactionId
 							AND ItemTransaction.strTransactionId = @strTransactionId
 				) TransactionToReverse 
-		WHERE	(Stock.dblUnitOnHand * Stock.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) <> 0
+		WHERE	(Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) <> 0
 	END
 END
 
@@ -245,5 +303,5 @@ EXEC dbo.uspICCreateReversalGLEntries
 	,@intUserId
 ;
 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTranactionStockToReverse')) 
-	DROP TABLE #tmpInventoryTranactionStockToReverse
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+	DROP TABLE #tmpInventoryTransactionStockToReverse

@@ -3,6 +3,7 @@ AS
 BEGIN
 		DROP VIEW vyuAPRptPurchase
 		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICItemPricing', @Identity = 1;
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -26,7 +27,6 @@ BEGIN
 				[intItemId]
 				,[intItemLocationId]
 				,[intSubLocationId]
-				,[dblAverageCost]
 				,[dblUnitOnHand]
 				,[dblOrderCommitted]
 				,[dblOnOrder]
@@ -38,7 +38,6 @@ BEGIN
 		SELECT	[intItemId] = @WetGrains
 				,[intItemLocationId] = @Default_Location
 				,[intSubLocationId] = NULL
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -49,7 +48,6 @@ BEGIN
 		SELECT	[intItemId] = @WetGrains
 				,[intItemLocationId] = @NewHaven
 				,[intSubLocationId] = NULL
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -60,7 +58,6 @@ BEGIN
 		SELECT	[intItemId] = @WetGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -73,7 +70,6 @@ BEGIN
 		SELECT	[intItemId] = @StickyGrains
 				,[intItemLocationId] = @Default_Location
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -84,7 +80,6 @@ BEGIN
 		SELECT	[intItemId] = @StickyGrains
 				,[intItemLocationId] = @NewHaven
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -95,7 +90,6 @@ BEGIN
 		SELECT	[intItemId] = @StickyGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -108,7 +102,6 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @Default_Location
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -119,7 +112,6 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @NewHaven
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -130,7 +122,6 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -143,7 +134,6 @@ BEGIN
 		SELECT	[intItemId] = @ColdGrains
 				,[intItemLocationId] = @Default_Location
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -154,7 +144,6 @@ BEGIN
 		SELECT	[intItemId] = @ColdGrains
 				,[intItemLocationId] = @NewHaven
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -165,7 +154,6 @@ BEGIN
 		SELECT	[intItemId] = @ColdGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -178,7 +166,6 @@ BEGIN
 		SELECT	[intItemId] = @HotGrains
 				,[intItemLocationId] = @Default_Location
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -189,7 +176,6 @@ BEGIN
 		SELECT	[intItemId] = @HotGrains
 				,[intItemLocationId] = @NewHaven
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
@@ -200,11 +186,86 @@ BEGIN
 		SELECT	[intItemId] = @HotGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intSubLocationId] = NULL				
-				,[dblAverageCost] = 0
 				,[dblUnitOnHand] = 0 
 				,[dblOrderCommitted] = 0
 				,[dblOnOrder] = 0
 				,[dblLastCountRetail] = 0
 				,[intSort] = 1
 				,[intConcurrencyId] = 1
+
+		-- Add data to the pricing table
+		INSERT INTO dbo.tblICItemPricing (
+			intItemId
+			,intItemLocationId
+			,dblAverageCost
+		)
+		-- Add Item Pricing for Wet Grains
+		SELECT	[intItemId] = @WetGrains
+				,[intItemLocationId] = @Default_Location
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @WetGrains
+				,[intItemLocationId] = @NewHaven
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @WetGrains
+				,[intItemLocationId] = @BetterHaven
+				,[dblAverageCost] = 0
+
+		-- Add Item Pricing for Sticky Grains
+		UNION ALL 
+		SELECT	[intItemId] = @StickyGrains
+				,[intItemLocationId] = @Default_Location
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @StickyGrains
+				,[intItemLocationId] = @NewHaven
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @StickyGrains
+				,[intItemLocationId] = @BetterHaven
+				,[dblAverageCost] = 0
+
+		-- Add Item Pricing for Premium Grains
+		UNION ALL 
+		SELECT	[intItemId] = @PremiumGrains
+				,[intItemLocationId] = @Default_Location
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @PremiumGrains
+				,[intItemLocationId] = @NewHaven
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @PremiumGrains
+				,[intItemLocationId] = @BetterHaven
+				,[dblAverageCost] = 0
+
+		-- Add Item Pricing for Cold Grains
+		UNION ALL 
+		SELECT	[intItemId] = @ColdGrains
+				,[intItemLocationId] = @Default_Location
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @ColdGrains
+				,[intItemLocationId] = @NewHaven
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @ColdGrains
+				,[intItemLocationId] = @BetterHaven
+				,[dblAverageCost] = 0
+
+		-- Add Item Pricing for Hot Grains
+		UNION ALL 
+		SELECT	[intItemId] = @HotGrains
+				,[intItemLocationId] = @Default_Location
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @HotGrains
+				,[intItemLocationId] = @NewHaven
+				,[dblAverageCost] = 0
+		UNION ALL 
+		SELECT	[intItemId] = @HotGrains
+				,[intItemLocationId] = @BetterHaven
+				,[dblAverageCost] = 0
+
 END 
