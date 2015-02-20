@@ -1617,6 +1617,13 @@ GO
 		BEGIN 
 			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
 		END
+
+		SET @tmMenuName = 'Lease Billing'
+		SET @tmCommand ='TankManagement.view.LeaseBilling'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
+		END
 	/*---------------------------------*/
 	/*-- END Update TM Activities Menu */
 	/*---------------------------------*/
