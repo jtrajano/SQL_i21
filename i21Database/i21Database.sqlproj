@@ -1060,6 +1060,15 @@
     <Build Include="dbo\Tables\tblMFRecipeSubstituteItem.sql" />
     <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
     <Build Include="dbo\Views\vyuHDProjectSearch.sql" />
+    <Build Include="dbo\Tables\tblLGForwardingAgent.sql" />
+    <Build Include="dbo\Tables\tblHDProjectKeyStoneAttendee.sql" />
+    <Build Include="dbo\Tables\tblHDProjectCustomerChampion.sql" />
+    <Build Include="dbo\Tables\tblLGShippingLine.sql" />
+    <Build Include="dbo\Tables\tblLGTrucker.sql" />
+    <Build Include="dbo\Tables\tblRKCommodityMarketMapping.sql" />
+    <Build Include="dbo\Tables\tblLGTerminal.sql" />
+    <Build Include="dbo\Tables\tblHDProjectTask.sql" />
+    <Build Include="dbo\Views\vyuHDProjectTickets.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
