@@ -285,6 +285,7 @@ Ext.define('Inventory.view.ItemPricing', {
                                     width: 115,
                                     fieldLabel: 'Amount',
                                     labelWidth: 110,
+                                    checkChangeBuffer: 3000,
                                     hideTrigger: true
                                 }
                             ]

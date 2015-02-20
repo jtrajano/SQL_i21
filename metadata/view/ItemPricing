@@ -482,6 +482,7 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "checkChangeBuffer": 3000,
                                         "designer|createAlias": "moneynumber",
                                         "fieldLabel": "Amount",
                                         "fieldStyle": null,
