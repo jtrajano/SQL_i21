@@ -1467,8 +1467,10 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Import GL from Subledger' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.ImportFromSubledger'
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Segment Accounts' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.SegmentAccounts'
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Build Accounts' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.BuildAccounts'
-		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.BatchPosting' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.GLBatchPosting'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.BatchPosting' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'General Ledger' AND strMenuName = 'Batch Posting'
 		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.AccountGroups' WHERE strMenuName = 'Account Groups' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountGroups'
+
+
 
 	/* ---------------------------------------- */
 	/* --   End General Ledger Module Menu   -- */
