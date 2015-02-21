@@ -225,6 +225,7 @@ BEGIN
 				dtmDate
 				,intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dblStockIn
 				,dblStockOut
 				,dblCost
@@ -234,6 +235,7 @@ BEGIN
 		SELECT	dtmDate = '01/01/2014'
 				,intItemId = @WetGrains 
 				,intItemLocationId = 1
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dblStockIn = 100
 				,dblStockOut = 0 
 				,dblCost = 2.00
@@ -243,6 +245,7 @@ BEGIN
 		SELECT	dtmDate = '01/01/2014'
 				,intItemId = @StickyGrains 
 				,intItemLocationId = 2
+				,intItemUOMId = @StickyGrains_BushelUOMId
 				,dblStockIn = 100
 				,dblStockOut = 0 
 				,dblCost = 2.00
@@ -250,8 +253,9 @@ BEGIN
 				,strTransactionId = 'InvRcpt-0001'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,intItemId = @PremiumGrains 
+				,intItemId = @PremiumGrains 				
 				,intItemLocationId = 3
+				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,dblStockIn = 100
 				,dblStockOut = 0 
 				,dblCost = 2.00
@@ -261,6 +265,7 @@ BEGIN
 		SELECT	dtmDate = '01/01/2014'
 				,intItemId = @ColdGrains 
 				,intItemLocationId = 4
+				,intItemUOMId = @ColdGrains_BushelUOMId
 				,dblStockIn = 100
 				,dblStockOut = 0 
 				,dblCost = 2.00
@@ -270,6 +275,7 @@ BEGIN
 		SELECT	dtmDate = '01/01/2014'
 				,intItemId = @HotGrains 
 				,intItemLocationId = 5
+				,intItemUOMId = @HotGrains_BushelUOMId
 				,dblStockIn = 100
 				,dblStockOut = 0 
 				,dblCost = 2.00
@@ -300,6 +306,7 @@ BEGIN
 			,ysnIsUnposted
 			,intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,strBatchId
 			,dblExchangeRate
 			,intCurrencyId
@@ -317,6 +324,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
 				,intItemLocationId = 1
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD
@@ -334,6 +342,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @StickyGrains
 				,intItemLocationId = 2
+				,intItemUOMId = @StickyGrains_BushelUOMId
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD
@@ -351,6 +360,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @PremiumGrains
 				,intItemLocationId = 3
+				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD
@@ -368,6 +378,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @ColdGrains
 				,intItemLocationId = 4
+				,intItemUOMId = @ColdGrains_BushelUOMId
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD
@@ -385,6 +396,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @HotGrains
 				,intItemLocationId = 5
+				,intItemUOMId = @HotGrains_BushelUOMId
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD

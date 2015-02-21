@@ -10,10 +10,18 @@ BEGIN
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryFIFO]
 			ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOId] ASC);
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Create the expected and actual tables 
 		CREATE TABLE expected (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -25,6 +33,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -44,6 +53,7 @@ BEGIN
 		-- Create the variables used by uspICReduceStockInFIFO
 		DECLARE @intItemId AS INT = 1
 				,@intItemLocationId AS INT = 1
+				,@intItemUOMId AS INT = 1
 				,@dtmDate AS DATETIME = 'January 3, 2014'
 				,@dblSoldQty NUMERIC(18,6) = -10
 				,@dblCost AS NUMERIC(18,6) = 33.19
@@ -61,6 +71,7 @@ BEGIN
 		INSERT INTO expected (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -70,6 +81,7 @@ BEGIN
 		)
 		SELECT	[intItemId] = @intItemId
 				,[intItemLocationId] = @intItemLocationId
+				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = @dtmDate
 				,[dblStockIn] = 0
 				,[dblStockOut] = ABS(@dblSoldQty)
@@ -95,6 +107,7 @@ BEGIN
 			EXEC [dbo].[uspICReduceStockInFIFO]
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
@@ -121,6 +134,7 @@ BEGIN
 		INSERT INTO actual (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -131,6 +145,7 @@ BEGIN
 		SELECT
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]

@@ -23,6 +23,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		DECLARE @LotId AS INT = 12345
 
 		-- Create a fake data for tblICInventoryLot
@@ -36,6 +43,7 @@ BEGIN
 		INSERT INTO dbo.tblICInventoryLot (
 			[intItemId]
 			,[intItemLocationId]
+			,[intItemUOMId]
 			,[intLotId]
 			,[dblStockIn]
 			,[dblStockOut]
@@ -45,6 +53,7 @@ BEGIN
 		)
 		SELECT	[intItemId]				= @WetGrains
 				,[intItemLocationId]	= @Default_Location
+				,[intItemUOMId]			= @WetGrains_BushelUOMId
 				,[intLotId]				= @LotId
 				,[dblStockIn]			= 100
 				,[dblStockOut]			= 0
@@ -56,6 +65,7 @@ BEGIN
 		CREATE TABLE expected (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -67,6 +77,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -78,6 +89,7 @@ BEGIN
 		-- Create the variables used by uspICReduceStockInLot
 		DECLARE @intItemId AS INT						= @WetGrains
 				,@intItemLocationId AS INT				= @Default_Location
+				,@intItemUOMId AS INT					= @WetGrains_BushelUOMId
 				,@intLotId AS INT						= @LotId
 				,@dblSoldQty NUMERIC(18,6)				= -100
 				,@dblCost AS NUMERIC(18,6) 
@@ -95,6 +107,7 @@ BEGIN
 		INSERT INTO expected (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -104,6 +117,7 @@ BEGIN
 		)
 		SELECT	[intItemId]					= @WetGrains
 				,[intItemLocationId]		= @Default_Location
+				,[intItemUOMId]				= @intItemUOMId
 				,[intLotId]					= @LotId
 				,[dblStockIn]				= 100
 				,[dblStockOut]				= 100
@@ -129,6 +143,7 @@ BEGIN
 			EXEC [dbo].[uspICReduceStockInLot]
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId
 				,@intLotId
 				,@dblReduceQty
 				,@dblCost
@@ -155,6 +170,7 @@ BEGIN
 		INSERT INTO actual (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -165,6 +181,7 @@ BEGIN
 		SELECT
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]

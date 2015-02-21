@@ -1,85 +1,126 @@
-﻿CREATE PROCEDURE [dbo].[uspICPostInventoryTransaction]
-	@intItemId INT
-	,@intItemLocationId INT
-	,@intItemUOMId INT 
-	,@dtmDate DATETIME
-	,@dblQty NUMERIC(18, 6)
-	,@dblUOMQty NUMERIC(18, 6)
-	,@dblCost NUMERIC(18, 6)
-	,@dblValue NUMERIC(18, 6)
-	,@dblSalesPrice NUMERIC(18, 6)	
-	,@intCurrencyId INT
-	,@dblExchangeRate NUMERIC (38, 20)
-	,@intTransactionId INT
-	,@strTransactionId NVARCHAR(40)
-	,@strBatchId NVARCHAR(20)
-	,@intTransactionTypeId INT
-	,@intLotId INT
-	,@ysnIsUnposted BIT
-	,@intRelatedInventoryTransactionId INT
-	,@intRelatedTransactionId INT
-	,@strRelatedTransactionId NVARCHAR(40)
-	,@strTransactionForm NVARCHAR (255)
-	,@intUserId INT
-	,@InventoryTransactionIdentityId INT OUTPUT 
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryTransaction for the basics]
 AS
+BEGIN
+	-- Arrange 
+	BEGIN 
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+		DECLARE	@intItemId AS INT
+				,@intItemLocationId AS INT
+				,@intItemUOMId AS INT
+				,@dtmDate AS DATETIME
+				,@dblQty AS NUMERIC(18, 6)
+				,@dblUOMQty AS NUMERIC(18, 6)
+				,@dblCost AS NUMERIC(18, 6)
+				,@dblValue AS NUMERIC(18, 6)
+				,@dblSalesPrice AS NUMERIC(18, 6)
+				,@intCurrencyId AS INT
+				,@dblExchangeRate AS NUMERIC (38, 20)
+				,@intTransactionId AS INT
+				,@strTransactionId AS NVARCHAR(40)
+				,@strBatchId AS NVARCHAR(20)
+				,@intTransactionTypeId AS INT
+				,@intLotId AS INT
+				,@ysnIsUnposted AS BIT
+				,@intRelatedInventoryTransactionId AS INT
+				,@intRelatedTransactionId AS INT
+				,@strRelatedTransactionId AS NVARCHAR(40)
+				,@strTransactionForm AS NVARCHAR (255)
+				,@intUserId AS INT
+				,@InventoryTransactionIdentityId AS INT
 
-SET @InventoryTransactionIdentityId = NULL
+		CREATE TABLE expected (
+			intInventoryTransactionId INT
+			,intItemId INT
+			,intItemLocationId INT
+			,intItemUOMId INT
+			,dtmDate DATETIME
+			,dblQty NUMERIC(18, 6)
+			,dblUOMQty NUMERIC(18, 6)
+			,dblCost NUMERIC(18, 6)
+			,dblValue NUMERIC(18, 6)
+			,dblSalesPrice NUMERIC(18, 6)
+			,intCurrencyId INT
+			,dblExchangeRate NUMERIC (38, 20)
+			,intTransactionId INT
+			,strTransactionId NVARCHAR(40)
+			,strBatchId NVARCHAR(20)
+			,intTransactionTypeId INT
+			,intLotId INT
+			,ysnIsUnposted BIT
+			,intRelatedInventoryTransactionId INT
+			,intRelatedTransactionId INT
+			,strRelatedTransactionId NVARCHAR(40)
+			,strTransactionForm NVARCHAR (255)
+			,intUserId INT
+		)
 
-INSERT INTO dbo.tblICInventoryTransaction (
-		[intItemId] 
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[intLotId]
-		,[dtmDate] 
-		,[dblQty] 
-		,[dblUOMQty]
-		,[dblCost] 
-		,[dblValue]
-		,[dblSalesPrice] 		
-		,[intCurrencyId] 
-		,[dblExchangeRate] 
-		,[intTransactionId] 
-		,[strTransactionId] 
-		,[strBatchId] 
-		,[intTransactionTypeId] 
-		,[strRelatedTransactionId]
-		,[intRelatedTransactionId]
-		,[strTransactionForm]
-		,[dtmCreated] 
-		,[intCreatedUserId] 
-		,[intConcurrencyId] 
-)
-SELECT	[intItemId]						= @intItemId
-		,[intItemLocationId]			= @intItemLocationId
-		,[intItemUOMId]					= @intItemUOMId
-		,[intLotId]						= @intLotId
-		,[dtmDate]						= @dtmDate
-		,[dblQty]						= ISNULL(@dblQty, 0)
-		,[dblUOMQty]					= ISNULL(@dblUOMQty, 0)
-		,[dblCost]						= ISNULL(@dblCost, 0)
-		,[dblValue]						= ISNULL(@dblValue, 0)
-		,[dblSalesPrice]				= ISNULL(@dblSalesPrice, 0)
-		,[intCurrencyId]				= @intCurrencyId
-		,[dblExchangeRate]				= ISNULL(@dblExchangeRate, 1)
-		,[intTransactionId]				= @intTransactionId
-		,[strTransactionId]				= @strTransactionId
-		,[strBatchId]					= @strBatchId
-		,[intTransactionTypeId]			= @intTransactionTypeId
-		,[strRelatedTransactionId]		= @strRelatedTransactionId
-		,[intRelatedTransactionId]		= @intRelatedTransactionId
-		,[strTransactionForm]			= @strTransactionForm
-		,[dtmCreated]					= GETDATE()
-		,[intCreatedUserId]				= @intUserId
-		,[intConcurrencyId]				= 1
-WHERE	@intItemId IS NOT NULL
-		AND @intItemLocationId IS NOT NULL
-		AND @intItemUOMId IS NOT NULL 
+		CREATE TABLE actual (
+			intInventoryTransactionId INT
+			,intItemId INT
+			,intItemLocationId INT
+			,intItemUOMId INT
+			,dtmDate DATETIME
+			,dblQty NUMERIC(18, 6)
+			,dblUOMQty NUMERIC(18, 6)
+			,dblCost NUMERIC(18, 6)
+			,dblValue NUMERIC(18, 6)
+			,dblSalesPrice NUMERIC(18, 6)
+			,intCurrencyId INT
+			,dblExchangeRate NUMERIC (38, 20)
+			,intTransactionId INT
+			,strTransactionId NVARCHAR(40)
+			,strBatchId NVARCHAR(20)
+			,intTransactionTypeId INT
+			,intLotId INT
+			,ysnIsUnposted BIT
+			,intRelatedInventoryTransactionId INT
+			,intRelatedTransactionId INT
+			,strRelatedTransactionId NVARCHAR(40)
+			,strTransactionForm NVARCHAR (255)
+			,intUserId INT
+		)
+	END 
+	
+	-- Act 
+	-- Try to use the SP with NULL arguments on all parameters
+	BEGIN 
+		EXEC dbo.uspICPostInventoryTransaction
+				@intItemId
+				,@intItemLocationId
+				,@intItemUOMId
+				,@dtmDate
+				,@dblQty
+				,@dblUOMQty
+				,@dblCost
+				,@dblValue
+				,@dblSalesPrice
+				,@intCurrencyId
+				,@dblExchangeRate
+				,@intTransactionId
+				,@strTransactionId
+				,@strBatchId
+				,@intTransactionTypeId
+				,@intLotId
+				,@ysnIsUnposted
+				,@intRelatedInventoryTransactionId
+				,@intRelatedTransactionId
+				,@strRelatedTransactionId
+				,@strTransactionForm
+				,@intUserId
+				,@InventoryTransactionIdentityId OUTPUT 
+	END 
 
-SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+	-- Assert
+	BEGIN
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		EXEC tSQLt.AssertEmptyTable 'tblICInventoryTransaction';
+	END 
+
+	-- Clean-up: remove the tables used in the unit test
+	IF OBJECT_ID('actual') IS NOT NULL 
+		DROP TABLE actual
+
+	IF OBJECT_ID('expected') IS NOT NULL 
+		DROP TABLE dbo.expected
+END
