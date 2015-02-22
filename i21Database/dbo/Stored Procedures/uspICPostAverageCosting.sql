@@ -5,12 +5,14 @@
 	@intItemId - The item to process
 
 	@intLocationId - The location where the item is being process. 
+
+	@intItemUOMId - The UOM used for the item in a transaction. Each transaction can use different kinds of UOM on its items. 
 	
 	@dtmDate - The date used in the transaction and posting. 
 
-	@dblUnitQty - A positive qty indicates an increase of stock. A negative qty indicates a decrease in stock. 
+	@dblQty - A positive qty indicates an increase of stock. A negative qty indicates a decrease in stock. 
 
-	@dblUOMQty - The base qty associated with a UOM. For example, a box may have 10 pieces of an item. In this case, UOM qty will be 10. 
+	@dblUOMQty - The stock unit qty associated with the UOM. For example, a box may have 10 pieces of an item. In this case, UOM qty will be 10. 
 
 	@dblCost - The cost per base qty of the item. 
 
@@ -32,10 +34,11 @@
 CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
+	,@intItemUOMId AS INT
 	,@dtmDate AS DATETIME
-	,@dblUnitQty AS NUMERIC(18,6)
+	,@dblQty AS NUMERIC(18,6)
 	,@dblUOMQty AS NUMERIC(18,6)
-	,@dblCost AS NUMERIC(18,6)
+	,@dblCost AS NUMERIC(18,6)	
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	,@dblExchangeRate AS NUMERIC(18,6)
@@ -86,9 +89,9 @@ WHERE	intTransactionTypeId = @intTransactionTypeId
 -------------------------------------------------
 BEGIN 
 	-- Reduce stock 
-	IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) < 0)
+	IF (ISNULL(@dblQty, 0) < 0)
 	BEGIN 
-		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+		SET @dblReduceQty = ISNULL(@dblQty, 0)
 
 		SELECT @dblCost = AverageCost
 		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId)
@@ -96,8 +99,10 @@ BEGIN
 		EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
+				,@intItemUOMId = @intItemUOMId
 				,@dtmDate = @dtmDate
-				,@dblUnitQty = @dblReduceQty
+				,@dblQty  = @dblQty
+				,@dblUOMQty = @dblUOMQty
 				,@dblCost = @dblCost
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
@@ -123,6 +128,7 @@ BEGIN
 			EXEC dbo.uspICReduceStockInFIFO
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
@@ -153,18 +159,20 @@ BEGIN
 	END
 
 	-- Add stock 
-	ELSE IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) > 0)
+	ELSE IF (ISNULL(@dblQty, 0) > 0)
 	BEGIN 
 
-		SET @dblAddQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+		SET @dblAddQty = ISNULL(@dblQty, 0)
 		SET @FullQty = @dblAddQty
 		SET @TotalQtyOffset = 0;
 		
 		EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
+				,@intItemUOMId = @intItemUOMId
 				,@dtmDate = @dtmDate
-				,@dblUnitQty = @FullQty
+				,@dblQty = @dblQty
+				,@dblUOMQty = @dblUOMQty
 				,@dblCost = @dblCost
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
@@ -189,6 +197,7 @@ BEGIN
 			EXEC dbo.uspICIncreaseStockInFIFO
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId 
 				,@dtmDate
 				,@dblAddQty
 				,@dblCost
@@ -216,8 +225,10 @@ BEGIN
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
+						,@intItemUOMId = @intItemUOMId
 						,@dtmDate = @dtmDate
-						,@dblUnitQty = 0
+						,@dblQty = 0
+						,@dblUOMQty = 0
 						,@dblCost = 0
 						,@dblValue = @dblValue
 						,@dblSalesPrice = @dblSalesPrice
@@ -241,8 +252,10 @@ BEGIN
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
+						,@intItemUOMId = @intItemUOMId
 						,@dtmDate = @dtmDate
-						,@dblUnitQty = 0
+						,@dblQty = 0
+						,@dblUOMQty = 0
 						,@dblCost = 0
 						,@dblValue = @dblValue
 						,@dblSalesPrice = @dblSalesPrice
@@ -293,21 +306,23 @@ BEGIN
 					AND @NewFifoId IS NOT NULL  	
 
 		SET @dblValue = 0
-		SELECT	@dblValue = (((@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand) * @dblCost) 
+		SELECT	@dblValue = (((@dblQty * @dblUOMQty) + Stock.dblUnitOnHand) * (@dblCost / @dblUOMQty)) 
 							- [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intItemLocationId)
 		FROM	[dbo].[tblICItemStock] Stock
-		WHERE	(@dblUnitQty * @dblUOMQty) + Stock.dblUnitOnHand < 0 
-				AND (@dblUnitQty * @dblUOMQty) > 0 
+		WHERE	(@dblQty * @dblUOMQty) + Stock.dblUnitOnHand < 0 
+				AND (@dblQty * @dblUOMQty) > 0 
 				AND Stock.intItemId = @intItemId
-				AND Stock.intItemLocationId = @intItemLocationId	
+				AND Stock.intItemLocationId = @intItemLocationId				
 
 		IF ISNULL(@dblValue, 0) <> 0
 		BEGIN 
 			EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
 					,@intItemLocationId = @intItemLocationId
+					,@intItemUOMId = @intItemUOMId
 					,@dtmDate = @dtmDate
-					,@dblUnitQty = 0
+					,@dblQty = 0
+					,@dblUOMQty = 0
 					,@dblCost = 0
 					,@dblValue = @dblValue
 					,@dblSalesPrice = @dblSalesPrice

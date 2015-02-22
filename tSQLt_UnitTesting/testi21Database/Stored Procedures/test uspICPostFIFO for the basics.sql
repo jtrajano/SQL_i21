@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [testi21Database].[test uspICPostFIFO for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostFIFO for the basics]
 AS
 BEGIN
 	-- Arrange 
@@ -11,8 +10,9 @@ BEGIN
 		DECLARE 
 			@intItemId AS INT
 			,@intItemLocationId AS INT
+			,@intItemUOMId AS INT
 			,@dtmDate AS DATETIME
-			,@dblUnitQty AS NUMERIC(18,6)
+			,@dblQty AS NUMERIC(18,6)
 			,@dblUOMQty AS NUMERIC(18,6)
 			,@dblCost AS NUMERIC(18,6)
 			,@dblSalesPrice AS NUMERIC(18,6)
@@ -28,8 +28,10 @@ BEGIN
 			[intInventoryTransactionId] INT NOT NULL, 
 			[intItemId] INT NOT NULL,
 			[intItemLocationId] INT NOT NULL,
+			[intItemUOMId] INT NOT NULL,
 			[dtmDate] DATETIME NOT NULL, 
-			[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblValue] NUMERIC(18, 6) NULL, 
 			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -49,8 +51,10 @@ BEGIN
 			[intInventoryTransactionId] INT NOT NULL, 
 			[intItemId] INT NOT NULL,
 			[intItemLocationId] INT NOT NULL,
+			[intItemUOMId] INT NOT NULL,
 			[dtmDate] DATETIME NOT NULL, 
-			[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblValue] NUMERIC(18, 6) NULL, 
 			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -73,8 +77,9 @@ BEGIN
 		EXEC dbo.uspICPostFIFO
 			@intItemId
 			,@intItemLocationId
+			,@intItemUOMId
 			,@dtmDate
-			,@dblUnitQty
+			,@dblQty
 			,@dblUOMQty
 			,@dblCost
 			,@dblSalesPrice
@@ -90,8 +95,10 @@ BEGIN
 				[intInventoryTransactionId]
 				,[intItemId]
 				,[intItemLocationId]
+				,[intItemUOMId]
 				,[dtmDate]
-				,[dblUnitQty]
+				,[dblQty]
+				,[dblUOMQty]
 				,[dblCost]
 				,[dblValue]
 				,[dblSalesPrice]
@@ -109,8 +116,10 @@ BEGIN
 		SELECT	[intInventoryTransactionId]
 				,[intItemId]
 				,[intItemLocationId]
+				,[intItemUOMId]
 				,[dtmDate]
-				,[dblUnitQty]
+				,[dblQty]
+				,[dblUOMQty]
 				,[dblCost]
 				,[dblValue]
 				,[dblSalesPrice]

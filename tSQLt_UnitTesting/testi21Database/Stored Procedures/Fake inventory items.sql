@@ -14,6 +14,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICCategory';
 	EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;		
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICItemStockUOM', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemPricing', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure';
 	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;	
@@ -31,6 +32,13 @@ BEGIN
 			,@NewHaven AS INT = 2
 			,@BetterHaven AS INT = 3
 			,@InvalidLocation AS INT = -1
+
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
 
 	-- Declare the account ids
 	DECLARE @Inventory_Default AS INT = 1000

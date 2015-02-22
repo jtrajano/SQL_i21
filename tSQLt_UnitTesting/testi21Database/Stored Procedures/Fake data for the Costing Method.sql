@@ -30,6 +30,13 @@ BEGIN
 			,@ManualLotGrains AS INT = 6
 			,@SerialLotGrains AS INT = 7
 
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
+
 	-- Declare the variables for location
 	DECLARE @Default_Location AS INT = 1
 			,@NewHaven AS INT = 2

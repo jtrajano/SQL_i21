@@ -25,6 +25,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Declare the variables for the currencies and unit of measure
 		DECLARE @USD AS INT = 1;		
 		DECLARE @Each AS INT = 1;
@@ -52,8 +59,8 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002;
 
 		-- Create the expected and actual tables. 
-		SELECT intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO expected FROM dbo.tblICInventoryFIFO WHERE 1 = 0;
-		SELECT intItemId, intItemLocationId, dtmDate, dblStockIn, dblStockOut, dblCost INTO actual FROM dbo.tblICInventoryFIFO WHERE 1 = 0;
+		SELECT intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost INTO expected FROM dbo.tblICInventoryFIFO WHERE 1 = 0;
+		SELECT intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost INTO actual FROM dbo.tblICInventoryFIFO WHERE 1 = 0;
 
 		-- Declare the variables used by uspICPostCosting
 		DECLARE @ItemsToPost AS ItemCostingTableType;
@@ -66,10 +73,12 @@ BEGIN
 		-- in (Stock goes up to 200)
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = 100
+				,dblQty = 100
 				,dblUOMQty = 1
 				,dblCost = 14.00
+				,dblValue = 0
 				,dblSalesPrice = 0
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -81,10 +90,12 @@ BEGIN
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -30
+				,dblQty = -30
 				,dblUOMQty = 1
 				,dblCost = 14.00
+				,dblValue = 0
 				,dblSalesPrice = 25.00
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -96,10 +107,12 @@ BEGIN
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -35
+				,dblQty = -35
 				,dblUOMQty = 1
 				,dblCost = 14.00
+				,dblValue = 0
 				,dblSalesPrice = 25.00
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -111,10 +124,12 @@ BEGIN
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -45
+				,dblQty = -45
 				,dblUOMQty = 1
 				,dblCost = 14.00
+				,dblValue = 0
 				,dblSalesPrice = 25.00
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -126,10 +141,12 @@ BEGIN
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -132
+				,dblQty = -132
 				,dblUOMQty = 1
 				,dblCost = 14.00
+				,dblValue = 0
 				,dblSalesPrice = 27.00
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -141,10 +158,12 @@ BEGIN
 		UNION ALL		
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = 20
+				,dblQty = 20
 				,dblUOMQty = 1
 				,dblCost = 15.50
+				,dblValue = 0
 				,dblSalesPrice = 0
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -156,10 +175,12 @@ BEGIN
 		UNION ALL				
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = 22
+				,dblQty = 22
 				,dblUOMQty = 1
 				,dblCost = 16.50
+				,dblValue = 0
 				,dblSalesPrice = 0
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -171,10 +192,12 @@ BEGIN
 		UNION ALL				
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = 100
+				,dblQty = 100
 				,dblUOMQty = 1
 				,dblCost = 18.00
+				,dblValue = 0
 				,dblSalesPrice = 0
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -183,10 +206,11 @@ BEGIN
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
 
-		-- Setup the expected tblICInventoryFIFO
+		-- Setup the expected (for tblICInventoryFIFO)
 		INSERT INTO expected (
 				intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
@@ -194,6 +218,7 @@ BEGIN
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'January 1, 2014'
 				,dblStockIn = 100
 				,dblStockOut = 100
@@ -201,6 +226,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblStockIn = 100
 				,dblStockOut = 100
@@ -208,6 +234,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblStockIn = 42
 				,dblStockOut = 42
@@ -215,6 +242,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblStockIn = 20
 				,dblStockOut = 20
@@ -222,6 +250,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblStockIn = 22
 				,dblStockOut = 22
@@ -229,6 +258,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -247,6 +277,7 @@ BEGIN
 		INSERT INTO actual (
 				intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
@@ -254,6 +285,7 @@ BEGIN
 		)
 		SELECT	intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut

@@ -26,6 +26,13 @@ BEGIN
 				,@PremiumGrains_DefaultLocation AS INT = 3
 				,@ColdGrains_DefaultLocation AS INT = 4
 				,@HotGrains_DefaultLocation AS INT = 5
+
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
 				
 		DECLARE @UOMBushel AS INT = 1
 		DECLARE @UOMPound AS INT = 2			
@@ -49,11 +56,11 @@ BEGIN
 		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightTermId, dblShipping, dblTotal, intVendorId, dtmDate) VALUES (@intPurchaseId, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish, @dtmDate)
 
 		-- Fake PO Detail data
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 1, @WetGrains, 10, 0, @UOMBushel, 50.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 2, @PremiumGrains, 5, 0, @UOMBushel, 100.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 3, @HotGrains, 2, 0, @UOMBushel, 200.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 4, @ColdGrains, 4, 0, @UOMBushel, 125.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 5, @WetGrains, 10, 0, @UOMBushel, 53.25)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 1, @WetGrains, 10, 0, @WetGrains_BushelUOMId, 50.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 2, @PremiumGrains, 5, 0, @PremiumGrains_BushelUOMId, 100.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 3, @HotGrains, 2, 0, @HotGrains_BushelUOMId, 200.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 4, @ColdGrains, 4, 0, @ColdGrains_BushelUOMId, 125.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 5, @WetGrains, 10, 0, @WetGrains_BushelUOMId, 53.25)
 
 		-- Fake Inventory Receipt header
 		INSERT INTO dbo.tblICInventoryReceipt (
@@ -72,24 +79,29 @@ BEGIN
 			intInventoryReceiptId
 			,intItemId
 			,intSourceId
+			,intUnitMeasureId
 		)
 		SELECT 
 			intInventoryReceiptId = @intInventoryReceiptId
 			,intItemId = @WetGrains
 			,intSourceId = @intPurchaseId
+			,intUnitMeasureId = @WetGrains_BushelUOMId
 		UNION ALL 
 		SELECT 
 			intInventoryReceiptId = @intInventoryReceiptId
 			,intItemId = @PremiumGrains
-			,intSourceId = @intPurchaseId				
+			,intSourceId = @intPurchaseId
+			,intUnitMeasureId = @PremiumGrains_BushelUOMId
 
 		-- Setup the expected and actual tables. 
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL IDENTITY, 
 			[intItemId] INT NOT NULL,
 			[intItemLocationId] INT NOT NULL,
+			[intItemUOMId] INT NULL,
 			[dtmDate] DATETIME NOT NULL, 
-			[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblValue] NUMERIC(18, 6) NULL, 
 			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -112,8 +124,10 @@ BEGIN
 			[intInventoryTransactionId] INT NULL, 
 			[intItemId] INT NOT NULL,
 			[intItemLocationId] INT NOT NULL,
+			[intItemUOMId] INT NULL,
 			[dtmDate] DATETIME NOT NULL, 
-			[dblUnitQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblValue] NUMERIC(18, 6) NULL, 
 			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -146,8 +160,10 @@ BEGIN
 		INSERT INTO expected (
 				intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dtmDate
-				,dblUnitQty
+				,dblQty
+				,dblUOMQty
 				,dblCost
 				,dblValue
 				,dblSalesPrice
@@ -167,8 +183,10 @@ BEGIN
 		)
 		SELECT	intItemId					= @WetGrains
 				,intItemLocationId			= @WetGrains_DefaultLocation
+				,intItemUOMId				= @WetGrains_BushelUOMId
 				,dtmDate					= @dtmDate
-				,dblUnitQty					= (10 + 10)
+				,dblQty						= (10 + 10)
+				,dblUOMQty					= 1
 				,dblCost					= 0
 				,dblValue					= (10 * 50.00) + (10 * 53.25)
 				,dblSalesPrice				= 0
@@ -188,8 +206,10 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId					= @PremiumGrains
 				,intItemLocationId			= @PremiumGrains_DefaultLocation
+				,intItemUOMId				= @PremiumGrains_BushelUOMId
 				,dtmDate					= @dtmDate
-				,dblUnitQty					= 5
+				,dblQty						= 5
+				,dblUOMQty					= 1
 				,dblCost					= 0
 				,dblValue					= (5 * 100.00)
 				,dblSalesPrice				= 0
@@ -219,8 +239,10 @@ BEGIN
 				intInventoryTransactionId
 				,intItemId
 				,intItemLocationId
+				,intItemUOMId 
 				,dtmDate
-				,dblUnitQty
+				,dblQty
+				,dblUOMQty
 				,dblCost
 				,dblValue
 				,dblSalesPrice
@@ -241,8 +263,10 @@ BEGIN
 		SELECT	intInventoryTransactionId
 				,intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dtmDate
-				,dblUnitQty
+				,dblQty
+				,dblUOMQty
 				,dblCost
 				,dblValue
 				,dblSalesPrice

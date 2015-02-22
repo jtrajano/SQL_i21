@@ -86,6 +86,7 @@ INSERT INTO dbo.tblICInventoryLot (
 		,dblStockIn
 		,dblStockOut
 		,dblCost
+		,intItemUOMId
 		,strTransactionId
 		,intTransactionId
 		,dtmCreated
@@ -96,8 +97,9 @@ SELECT	intItemId = OutTransactions.intItemId
 		,intItemLocationId = OutTransactions.intItemLocationId
 		,intLotId = OutTransactions.intLotId
 		,dblStockIn = 0 
-		,dblStockOut = ABS(OutTransactions.dblUnitQty)
+		,dblStockOut = ABS(ISNULL(OutTransactions.dblQty, 0))
 		,dblCost = OutTransactions.dblCost
+		,intItemUOMId = OutTransactions.intItemUOMId
 		,strTransactionId = OutTransactions.strTransactionId
 		,intTransactionId = OutTransactions.intTransactionId
 		,dtmCreated = GETDATE()
@@ -107,7 +109,7 @@ FROM	dbo.tblICInventoryLot Lot INNER JOIN dbo.tblICInventoryLotOut LotOut
 			ON Lot.intInventoryLotId = LotOut.intInventoryLotId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
 			ON OutTransactions.intInventoryTransactionId = LotOut.intInventoryTransactionId
-			AND OutTransactions.dblUnitQty < 0 
+			AND ISNULL(OutTransactions.dblQty, 0) < 0 
 WHERE	Lot.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND Lot.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0

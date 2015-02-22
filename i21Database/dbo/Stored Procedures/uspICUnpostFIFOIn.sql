@@ -81,6 +81,7 @@ FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
 INSERT INTO dbo.tblICInventoryFIFO (
 		intItemId
 		,intItemLocationId
+		,intItemUOMId
 		,dtmDate
 		,dblStockIn
 		,dblStockOut
@@ -93,10 +94,11 @@ INSERT INTO dbo.tblICInventoryFIFO (
 )
 SELECT	intItemId = OutTransactions.intItemId
 		,intItemLocationId = OutTransactions.intItemLocationId
+		,intItemUOMId = OutTransactions.intItemUOMId
 		,dtmDate = OutTransactions.dtmDate
 		,dblStockIn = 0 
-		,dblStockOut = ABS(OutTransactions.dblUnitQty)
-		,dblCost = OutTransactions.dblCost
+		,dblStockOut = ABS(ISNULL(OutTransactions.dblQty, 0))
+		,dblCost = OutTransactions.dblCost		
 		,strTransactionId = OutTransactions.strTransactionId
 		,intTransactionId = OutTransactions.intTransactionId
 		,dtmCreated = GETDATE()
@@ -106,7 +108,7 @@ FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICInventoryFIFOOut fifoOut
 			ON fifo.intInventoryFIFOId = fifoOut.intInventoryFIFOId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
 			ON OutTransactions.intInventoryTransactionId = fifoOut.intInventoryTransactionId
-			AND OutTransactions.dblUnitQty < 0 
+			AND ISNULL(OutTransactions.dblQty, 0) < 0 
 WHERE	fifo.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND fifo.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0

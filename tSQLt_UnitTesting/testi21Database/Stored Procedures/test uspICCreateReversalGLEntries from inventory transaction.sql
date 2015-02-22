@@ -35,6 +35,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
+
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
 				
 		-- Declare the account ids
 		DECLARE @Inventory_Default AS INT = 1000
@@ -62,9 +69,9 @@ BEGIN
 		DECLARE @USD AS INT = 1;
 		
 		-- Add fake data that reverses the inventory transactions	
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, ysnIsUnposted, intRelatedInventoryTransactionId) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 100, 20.00, NULL, 0, 1, 1, 1, 'SALE-100000', 'BATCH-100001', @SaleType, NULL, 1, 1, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, intRelatedInventoryTransactionId, ysnIsUnposted) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, (100 * 20.00), 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100001', @WRITE_OFF_SOLD, NULL, 1, 1, 'SALE-100000', 3, 1)
-		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, dtmDate, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, intRelatedInventoryTransactionId, ysnIsUnposted) VALUES (@WetGrains, @Default_Location, 'January 1, 2014', 0, 0.00, (-100 * 22.00), 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100001', @REVALUE_SOLD, NULL, 1, 1, 'SALE-100000', 4, 1)	
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, ysnIsUnposted, intRelatedInventoryTransactionId) VALUES (@WetGrains, @Default_Location, @WetGrains_BushelUOMId, 'January 1, 2014', 100, 1, 20.00, NULL, 0, 1, 1, 1, 'SALE-100000', 'BATCH-100001', @SaleType, NULL, 1, 1, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, intRelatedInventoryTransactionId, ysnIsUnposted) VALUES (@WetGrains, @Default_Location, NULL, 'January 1, 2014', 0, 1, 0.00, (100 * 20.00), 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100001', @WRITE_OFF_SOLD, NULL, 1, 1, 'SALE-100000', 3, 1)
+		INSERT INTO dbo.tblICInventoryTransaction (intItemId, intItemLocationId, intItemUOMId, dtmDate, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionId, strTransactionId, strBatchId, intTransactionTypeId, intLotId, intConcurrencyId, intRelatedTransactionId, strRelatedTransactionId, intRelatedInventoryTransactionId, ysnIsUnposted) VALUES (@WetGrains, @Default_Location, NULL, 'January 1, 2014', 0, 1, 0.00, (-100 * 22.00), 0, 1, 1, 1, 'PURCHASE-100000', 'BATCH-100001', @REVALUE_SOLD, NULL, 1, 1, 'SALE-100000', 4, 1)	
 
 		-- Create the expected and actual tables. 
 		DECLARE @recap AS dbo.RecapTableType		

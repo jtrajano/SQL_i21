@@ -16,6 +16,13 @@ BEGIN
 			,@NewHaven AS INT = 2
 			,@BetterHaven AS INT = 3	
 
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
+
 	DECLARE @strBatchId AS NVARCHAR(20)
 	DECLARE @intTransactionId AS INT = 1
 	DECLARE @strTransactionId AS NVARCHAR(40)
@@ -60,8 +67,10 @@ BEGIN
 	CREATE TABLE expectedInventoryTransaction (
 		intItemId INT
 		,intItemLocationId INT
+		,intItemUOMId INT
 		,dtmDate DATETIME
-		,dblUnitQty NUMERIC(18,6)
+		,dblQty NUMERIC(18,6)
+		,dblUOMQty NUMERIC(18,6)
 		,dblCost NUMERIC(18,6)
 		,dblValue NUMERIC(18,6)
 		,dblSalesPrice NUMERIC(18,6)
@@ -79,8 +88,10 @@ BEGIN
 	CREATE TABLE actualInventoryTransaction (
 		intItemId INT
 		,intItemLocationId INT
+		,intItemUOMId INT
 		,dtmDate DATETIME
-		,dblUnitQty NUMERIC(18,6)
+		,dblQty NUMERIC(18,6)
+		,dblUOMQty NUMERIC(18,6)
 		,dblCost NUMERIC(18,6)
 		,dblValue NUMERIC(18,6)
 		,dblSalesPrice NUMERIC(18,6)
@@ -113,6 +124,7 @@ BEGIN
 		intInventoryFIFOId INT
 		,intItemId INT
 		,intItemLocationId INT
+		,intItemUOMId INT
 		,dtmDate DATETIME
 		,dblStockIn NUMERIC(18,6)
 		,dblStockOut NUMERIC(18,6)
@@ -126,6 +138,7 @@ BEGIN
 		intInventoryFIFOId INT
 		,intItemId INT
 		,intItemLocationId INT
+		,intItemUOMId INT
 		,dtmDate DATETIME
 		,dblStockIn NUMERIC(18,6)
 		,dblStockOut NUMERIC(18,6)
@@ -188,8 +201,10 @@ BEGIN
 		INSERT INTO expectedInventoryTransaction (
 				intItemId 
 				,intItemLocationId 
+				,intItemUOMId 
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
+				,dblUOMQty 
 				,dblCost 
 				,dblValue
 				,dblSalesPrice 
@@ -205,8 +220,10 @@ BEGIN
 		)
 		SELECT	intItemId 
 				,intItemLocationId 
+				,intItemUOMId
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
+				,dblUOMQty 
 				,dblCost 
 				,dblValue
 				,dblSalesPrice 
@@ -225,11 +242,13 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId 
 				,intItemLocationId 
+				,intItemUOMId
 				,dtmDate 
 				-- Reverse the unit qty
 				--{
-					,dblUnitQty = dblUnitQty * -1
+					,dblQty = dblQty * -1
 				--}
+				,dblUOMQty
 				,dblCost 
 				,dblValue
 				,dblSalesPrice 
@@ -284,6 +303,7 @@ BEGIN
 				intInventoryFIFOId
 				,intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dtmDate
 				,dblStockIn
 				,dblStockOut
@@ -296,6 +316,7 @@ BEGIN
 		SELECT	intInventoryFIFOId = 1
 				,intItemId = @WetGrains
 				,intItemLocationId = 1
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -307,6 +328,7 @@ BEGIN
 		SELECT	intInventoryFIFOId = 2
 				,intItemId = @StickyGrains
 				,intItemLocationId = 2
+				,intItemUOMId = @StickyGrains_BushelUOMId
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -318,6 +340,7 @@ BEGIN
 		SELECT	intInventoryFIFOId = 3
 				,intItemId = @PremiumGrains
 				,intItemLocationId = 3
+				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -329,6 +352,7 @@ BEGIN
 		SELECT	intInventoryFIFOId = 4
 				,intItemId = @ColdGrains
 				,intItemLocationId = 4
+				,intItemUOMId = @ColdGrains_BushelUOMId
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -340,6 +364,7 @@ BEGIN
 		SELECT	intInventoryFIFOId = 5
 				,intItemId = @HotGrains
 				,intItemLocationId = 5
+				,intItemUOMId = @HotGrains_BushelUOMId
 				,dtmDate = '01/01/2014'
 				,dblStockIn = 100
 				,dblStockOut = 0
@@ -434,8 +459,10 @@ BEGIN
 		INSERT INTO expectedInventoryTransaction (
 				intItemId 
 				,intItemLocationId 
+				,intItemUOMId 
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
+				,dblUOMQty 
 				,dblCost 
 				,dblValue
 				,dblSalesPrice 
@@ -451,8 +478,10 @@ BEGIN
 		)
 		SELECT	intItemId 
 				,intItemLocationId 
+				,intItemUOMId
 				,dtmDate 
-				,dblUnitQty 
+				,dblQty 
+				,dblUOMQty
 				,dblCost 
 				,dblValue
 				,dblSalesPrice 
@@ -471,11 +500,13 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId 
 				,intItemLocationId 
+				,intItemUOMId
 				,dtmDate 
 				-- Reverse the unit qty
 				--{
-					,dblUnitQty = dblUnitQty * -1
+					,dblQty = dblQty * -1
 				--}
+				,dblUOMQty
 				,dblCost 
 				,dblValue
 				,dblSalesPrice 
@@ -590,8 +621,10 @@ BEGIN
 	INSERT INTO actualInventoryTransaction (
 			intItemId 
 			,intItemLocationId 
+			,intItemUOMId 
 			,dtmDate 
-			,dblUnitQty 
+			,dblQty 
+			,dblUOMQty 
 			,dblCost 
 			,dblValue
 			,dblSalesPrice 
@@ -607,8 +640,10 @@ BEGIN
 	)
 	SELECT	intItemId 
 			,intItemLocationId 
+			,intItemUOMId 
 			,dtmDate 
-			,dblUnitQty 
+			,dblQty 
+			,dblUOMQty 
 			,dblCost 
 			,dblValue
 			,dblSalesPrice 
@@ -645,6 +680,7 @@ BEGIN
 			intInventoryFIFOId
 			,intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,dtmDate
 			,dblStockIn
 			,dblStockOut
@@ -656,6 +692,7 @@ BEGIN
 	SELECT	intInventoryFIFOId
 			,fifo.intItemId
 			,fifo.intItemLocationId
+			,fifo.intItemUOMId
 			,dtmDate
 			,dblStockIn
 			,dblStockOut
@@ -699,3 +736,4 @@ IF OBJECT_ID('expectedFIFO') IS NOT NULL
 
 IF OBJECT_ID('actualFIFO') IS NOT NULL 
 	DROP TABLE dbo.actualFIFO
+

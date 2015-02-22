@@ -16,8 +16,10 @@ AS
 RETURN 
 	SELECT	intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,dtmDate
-			,dblUnitQty
+			,dblQty
+			,dblUOMQty
 			,dblCost
 			,dblValue 
 			,dblSalesPrice

@@ -5,8 +5,9 @@
 CREATE PROCEDURE [dbo].[uspICPostLIFO]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
+	,@intItemUOMId AS INT
 	,@dtmDate AS DATETIME
-	,@dblUnitQty AS NUMERIC(18,6)
+	,@dblQty AS NUMERIC(18,6)
 	,@dblUOMQty AS NUMERIC(18,6)
 	,@dblCost AS NUMERIC(18,6)
 	,@dblSalesPrice AS NUMERIC(18,6)
@@ -59,9 +60,9 @@ WHERE	intTransactionTypeId = @intTransactionTypeId
 -------------------------------------------------
 BEGIN 
 	-- Reduce stock 
-	IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) < 0)
+	IF (ISNULL(@dblQty, 0) < 0)
 	BEGIN 
-		SET @dblReduceQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+		SET @dblReduceQty = ISNULL(@dblQty, 0) 
 
 		-- Repeat call on uspICReduceStockInLIFO until @dblReduceQty is completely distributed to all available LIFO buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
@@ -69,6 +70,7 @@ BEGIN
 			EXEC dbo.uspICReduceStockInLIFO
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
@@ -87,8 +89,10 @@ BEGIN
 			EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId
 					,@intItemLocationId = @intItemLocationId
+					,@intItemUOMId = @intItemUOMId
 					,@dtmDate = @dtmDate
-					,@dblUnitQty = @dblComputedUnitQty
+					,@dblQty = @dblComputedUnitQty
+					,@dblUOMQty = @dblUOMQty
 					,@dblCost = @dblCostToUse
 					,@dblValue = NULL
 					,@dblSalesPrice = @dblSalesPrice
@@ -126,10 +130,10 @@ BEGIN
 	END
 
 	-- Add stock 
-	ELSE IF (ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0) > 0)
+	ELSE IF (ISNULL(@dblQty, 0) > 0)
 	BEGIN 
 
-		SET @dblAddQty = ISNULL(@dblUnitQty, 0) * ISNULL(@dblUOMQty, 0)
+		SET @dblAddQty = ISNULL(@dblQty, 0) 
 		SET @FullQty = @dblAddQty
 		SET @TotalQtyOffset = 0;
 
@@ -137,8 +141,10 @@ BEGIN
 		EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
+				,@intItemUOMId = @intItemUOMId
 				,@dtmDate = @dtmDate
-				,@dblUnitQty = @FullQty
+				,@dblQty = @FullQty
+				,@dblUOMQty = @dblUOMQty
 				,@dblCost = @dblCost
 				,@dblValue = NULL
 				,@dblSalesPrice = @dblSalesPrice
@@ -163,6 +169,7 @@ BEGIN
 			EXEC dbo.uspICIncreaseStockInLIFO
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId
 				,@dtmDate
 				,@dblAddQty
 				,@dblCost
@@ -190,8 +197,10 @@ BEGIN
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
+						,@intItemUOMId = @intItemUOMId
 						,@dtmDate = @dtmDate
-						,@dblUnitQty = 0
+						,@dblQty = 0
+						,@dblUOMQty = 0
 						,@dblCost = 0
 						,@dblValue = @dblValue
 						,@dblSalesPrice = @dblSalesPrice
@@ -215,8 +224,10 @@ BEGIN
 				EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
+						,@intItemUOMId = @intItemUOMId
 						,@dtmDate = @dtmDate
-						,@dblUnitQty = 0
+						,@dblQty = 0
+						,@dblUOMQty = 0
 						,@dblCost = 0
 						,@dblValue = @dblValue
 						,@dblSalesPrice = @dblSalesPrice
@@ -262,6 +273,7 @@ BEGIN
 					AND LIFOOut.intInventoryLIFOId IS NULL 
 					AND TRANS.intItemId = @intItemId
 					AND TRANS.intItemLocationId = @intItemLocationId
+					AND TRANS.intItemUOMId = @intItemUOMId
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
 		WHERE	@NewLIFOId IS NOT NULL 

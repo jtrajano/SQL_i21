@@ -41,19 +41,29 @@ DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
 -- Get the list of items to unpost
 BEGIN 
+	-- Insert the items per location and UOM
 	INSERT INTO @ItemsToUnpost (
 			intItemId
 			,intItemLocationId
-			,dblTotalQty
+			,intItemUOMId
+			,dblQty
+			
 	)
 	SELECT	ItemTrans.intItemId
 			,ItemTrans.intItemLocationId
-			,SUM(ISNULL(ItemTrans.dblUnitQty, 0) * -1)
+			,ItemTrans.intItemUOMId
+			,SUM(ISNULL(ItemTrans.dblQty, 0) * -1)			
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
-	GROUP BY ItemTrans.intItemId, ItemTrans.intItemLocationId
+	GROUP BY ItemTrans.intItemId, ItemTrans.intItemLocationId, ItemTrans.intItemUOMId
+
+	-- Fill-in the Unit qty from the UOM
+	UPDATE	ItemToUnpost
+	SET		dblUOMQty = ItemUOM.dblUnitQty
+	FROM	@ItemsToUnpost ItemToUnpost INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON ItemToUnpost.intItemUOMId = ItemUOM.intItemUOMId
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -143,10 +153,12 @@ BEGIN
 	INSERT INTO dbo.tblICInventoryTransaction (
 			[intItemId]
 			,[intItemLocationId] 
+			,[intItemUOMId]
 			,[dtmDate] 
-			,[dblUnitQty] 
+			,[dblQty] 
+			,[dblUOMQty]
 			,[dblCost] 
-			,[dblValue]
+			,[dblValue]			
 			,[dblSalesPrice] 
 			,[intCurrencyId] 
 			,[dblExchangeRate] 
@@ -164,10 +176,12 @@ BEGIN
 	)			
 	SELECT	[intItemId]				= ActualTransaction.intItemId
 			,[intItemLocationId]	= ActualTransaction.intItemLocationId
+			,[intItemUOMId]			= ActualTransaction.intItemUOMId
 			,[dtmDate]				= ActualTransaction.dtmDate
-			,[dblUnitQty]			= ActualTransaction.dblUnitQty * -1
+			,[dblQty]				= ActualTransaction.dblQty * -1
+			,[dblUOMQty]			= ActualTransaction.dblUOMQty
 			,[dblCost]				= ActualTransaction.dblCost 
-			,[dblValue]				= ActualTransaction.dblValue * -1
+			,[dblValue]				= ActualTransaction.dblValue * -1			
 			,[dblSalesPrice]		= ActualTransaction.dblSalesPrice
 			,[intCurrencyId]		= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]		= ActualTransaction.dblExchangeRate
@@ -201,7 +215,7 @@ BEGIN
 	BEGIN 
 		-- Update the avearge cost at the Item Pricing table
 		UPDATE	ItemPricing
-		SET		dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) + ItemToUnpost.dblTotalQty > 0 THEN 
+		SET		dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) + (ISNULL(ItemToUnpost.dblQty, 0) * ISNULL(ItemToUnpost.dblUOMQty, 0)) > 0 THEN 
 													-- Recalculate the average cost
 													dbo.fnRecalculateAverageCost(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId, ItemPricing.dblAverageCost) 
 												ELSE 
@@ -217,7 +231,7 @@ BEGIN
 
 		-- Update the Unit On Hand at the Item Stock table
 		UPDATE	Stock
-		SET		Stock.dblUnitOnHand = Stock.dblUnitOnHand + ItemToUnpost.dblTotalQty
+		SET		Stock.dblUnitOnHand = Stock.dblUnitOnHand + (ISNULL(ItemToUnpost.dblQty, 0) * ISNULL(ItemToUnpost.dblUOMQty, 0))
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId		
@@ -234,10 +248,12 @@ BEGIN
 		INSERT INTO dbo.tblICInventoryTransaction (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
-				,[dblUnitQty] 
+				,[dblQty] 
+				,[dblUOMQty]
 				,[dblCost] 
-				,[dblValue]
+				,[dblValue]				
 				,[dblSalesPrice] 
 				,[intCurrencyId] 
 				,[dblExchangeRate] 
@@ -253,10 +269,12 @@ BEGIN
 		)
 		SELECT	[intItemId] = ItemToUnpost.intItemId
 				,[intItemLocationId] = ItemToUnpost.intItemLocationId
+				,[intItemUOMId] = ItemToUnpost.intItemUOMId 
 				,[dtmDate] = TransactionToReverse.dtmDate
-				,[dblUnitQty] = 0
+				,[dblQty] = 0
+				,[dblUOMQty] = 0
 				,[dblCost] = 0
-				,[dblValue] = (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)
+				,[dblValue] = (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)				
 				,[dblSalesPrice] = 0
 				,[intCurrencyId] = TransactionToReverse.intCurrencyId
 				,[dblExchangeRate] = TransactionToReverse.dblExchangeRate

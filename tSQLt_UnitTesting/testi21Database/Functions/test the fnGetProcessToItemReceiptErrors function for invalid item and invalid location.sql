@@ -57,7 +57,7 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual	
 		-- Invalid item and invalid location
-		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@InvalidItem, @InvalidLocation, NULL)		
+		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@InvalidItem, @InvalidLocation, NULL, NULL)		
 	END
 
 	-- Assert

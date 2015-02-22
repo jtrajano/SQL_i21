@@ -28,6 +28,13 @@ BEGIN
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
 		
@@ -60,8 +67,10 @@ BEGIN
 		INSERT INTO tblICInventoryTransaction (
 				intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dtmDate
-				,dblUnitQty
+				,dblQty
+				,dblUOMQty
 				,dblCost
 				,dblValue
 				,dblSalesPrice
@@ -79,8 +88,10 @@ BEGIN
 		)
 		SELECT 	intItemId = @StickyGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @StickyGrains_BushelUOMId
 				,dtmDate = 'January 12, 2014'
-				,dblUnitQty = 1
+				,dblQty = 1
+				,dblUOMQty = 1
 				,dblCost = 12.00
 				,dblValue = 0
 				,dblSalesPrice = 0
@@ -188,7 +199,6 @@ BEGIN
 	
 	-- Act
 	BEGIN 
-
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
 				,@UseGLAccount_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
 				,@intUserId AS INT = 1

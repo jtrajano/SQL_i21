@@ -23,8 +23,9 @@ IF @strSourceType = @ReceiptType_PurchaseOrder
 BEGIN 
 	SELECT	intItemId = PODetail.intItemId
 			,intLocationId = PO.intShipToId -- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-			,dblUnitQty = PODetail.dblQtyOrdered 
+			,dblQty = PODetail.dblQtyOrdered 
 			,dblUOMQty = ItemUOM.dblUnitQty
 			,dblCost = PODetail.dblCost
 			,dblSalesPrice = 0
@@ -38,8 +39,6 @@ BEGIN
 				ON PO.intPurchaseId = PODetail.intPurchaseId
 			INNER JOIN dbo.tblICItemUOM ItemUOM
 				ON PODetail.intItemId = ItemUOM.intItemId
-				AND PODetail.intUnitOfMeasureId = ItemUOM.intUnitMeasureId
-			INNER JOIN dbo.tblICUnitMeasure UOM
-				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+				AND PODetail.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	WHERE	PODetail.intPurchaseId = @intSourceTransactionId
 END
