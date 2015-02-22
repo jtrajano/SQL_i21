@@ -269,7 +269,7 @@ BEGIN
 		)
 		SELECT	[intItemId] = ItemToUnpost.intItemId
 				,[intItemLocationId] = ItemToUnpost.intItemLocationId
-				,[intItemUOMId] = NULL 
+				,[intItemUOMId] = ItemToUnpost.intItemUOMId 
 				,[dtmDate] = TransactionToReverse.dtmDate
 				,[dblQty] = 0
 				,[dblUOMQty] = 0
