@@ -286,13 +286,10 @@ BEGIN
 
 		BEGIN CATCH
 			ROLLBACK TRANSACTION
-			IF @importLogId = 0
-					EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version,@importLogId OUTPUT
+				EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version,@importLogId OUTPUT
 				DECLARE @errorMsg VARCHAR(MAX)
 				SELECT @errorMsg = ERROR_MESSAGE()
 				UPDATE tblGLCOAImportLog SET strEvent = @errorMsg WHERE intImportLogId = @importLogId
-			
-		
 		END CATCH
 	
 	
