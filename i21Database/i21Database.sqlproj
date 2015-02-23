@@ -1104,6 +1104,8 @@
     <Build Include="dbo\Functions\fnIsStockTrackingItem.sql" />
     <Build Include="dbo\Views\vyuPODetails.sql" />
     <Build Include="dbo\Tables\tblGLAccountCategoryGroup.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePO.sql" />
+    <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
