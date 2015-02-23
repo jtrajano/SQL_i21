@@ -5,15 +5,16 @@
 * Sample usage: 
 *
 *	SELECT	B.*
-*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnPostErrors(A.intItemId, A.intLocationId, A.dblQty, A.dblUOMQty) B
+*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnPostErrors(A.intItemId, A.intLocationId, A.intItemUOMId, A.dblQty) B
 * 
 */
-CREATE FUNCTION fnGetItemCostingOnPostErrors (@intItemId AS INT, @intItemLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0, @dblUOMQty AS NUMERIC(18,6) = 0)
+CREATE FUNCTION fnGetItemCostingOnPostErrors (@intItemId AS INT, @intItemLocationId AS INT, @intItemUOMId AS INT, @dblQty AS NUMERIC(18,6) = 0)
 RETURNS TABLE 
 AS
 RETURN (
 	
 	SELECT * FROM (
+
 		-- Check for any invalid item.
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
@@ -25,38 +26,25 @@ RETURN (
 					WHERE	intItemId = @intItemId
 				)	
 
-		---- Check for any invalid item-location
-		--UNION ALL 
-		--SELECT	intItemId = @intItemId
-		--		,intLocationId = @intLocationId
-		--		,strText = FORMATMESSAGE(50028)
-		--		,intErrorCode = 50028
-		--WHERE	NOT EXISTS (
-		--			SELECT TOP 1 1 
-		--			FROM	tblICItemStock Stock INNER JOIN tblICItemLocation Location
-		--						ON Stock.intItemId = Location.intItemId
-		--						AND	Stock.intLocationId = Location.intLocationId
-		--			WHERE	Stock.intItemId = @intItemId 
-		--					AND Stock.intLocationId = @intLocationId
-		--		)	
-
 		-- Check for negative stock and if negative stock is NOT allowed. 
-		UNION ALL 
+		 UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText = FORMATMESSAGE(50029)
 				,intErrorCode = 50029
 		WHERE	EXISTS (
 					SELECT	TOP 1 1 
-					FROM	tblICItemStock Stock INNER JOIN tblICItemLocation Location
-								ON Stock.intItemId = Location.intItemId
-								AND	Stock.intItemLocationId = Location.intItemLocationId
-					WHERE	Stock.intItemId = @intItemId 
-							AND Stock.intItemLocationId = @intItemLocationId 
-							AND ISNULL(@dblQty, 0) *  ISNULL(@dblUOMQty, 0) + ISNULL(Stock.dblUnitOnHand, 0) < 0 -- Check if the incoming or outgoing stock is going to be negative. 							
-							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
+					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
+								ON Item.intItemId = Location.intItemId
+							INNER JOIN dbo.tblICItemStockUOM StockUOM
+								ON StockUOM.intItemId = Item.intItemId
+								AND StockUOM.intItemLocationId = Location.intItemLocationId
+					WHERE	Item.intItemId = @intItemId
+							AND Location.intItemLocationId = @intItemLocationId
+							AND StockUOM.intItemUOMId = @intItemUOMId
+							AND ISNULL(@dblQty, 0) + StockUOM.dblOnHand  < 0
+							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 					
 				)
-
 	) AS Query		
 )
 
