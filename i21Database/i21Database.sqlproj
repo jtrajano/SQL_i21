@@ -1102,6 +1102,7 @@
     <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
     <Build Include="dbo\Functions\fnGetItemLotType.sql" />
     <Build Include="dbo\Functions\fnIsStockTrackingItem.sql" />
+    <Build Include="dbo\Views\vyuPODetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
