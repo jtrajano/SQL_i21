@@ -1100,6 +1100,7 @@
     <Build Include="dbo\Tables\tblMFBlendRequirementStatus.sql" />
     <Build Include="dbo\Tables\tblMFBlendRequirement.sql" />
     <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
+	<Build Include="dbo\Functions\fnGetItemLotType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

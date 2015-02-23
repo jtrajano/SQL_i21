@@ -799,6 +799,20 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for the basics.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for non-lot items.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake data for inventory receipt table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for lot items.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for mix of lot and non-lot items.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Functions\test fnGetItemLotType for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemLotType for No Lot Items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemLotType for Yes Manual.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemLotType for Yes Serial.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

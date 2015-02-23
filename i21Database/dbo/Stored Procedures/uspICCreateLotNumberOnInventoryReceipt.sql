@@ -12,7 +12,11 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 24 -- Lot Number batch number in the sta
 DECLARE @SerializedLotNumber AS NVARCHAR(40) 
 DECLARE @intLotId AS INT 
 DECLARE @id AS INT
+DECLARE @intItemLocationId AS INT 
 DECLARE @GeneratedLotNumbers AS dbo.ItemLotTableType
+
+DECLARE @LotType_Manual AS INT = 1
+		,@LotType_Serial AS INT = 2
 
 INSERT INTO @GeneratedLotNumbers (
 	intItemId
@@ -30,11 +34,15 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 		INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLot 			
 			ON ReceiptItems.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
 WHERE	Receipt.strReceiptNumber = @strTransactionId
-		AND ISNULL(intLotId, '') = ''
+		AND ISNULL(intLotId, 0) = 0
+		AND dbo.fnGetItemLotType(ReceiptItems.intItemId) = @LotType_Serial
 
 -- Update the table variable and get all the items in the Item Lot table that does not have a lot number
-SELECT	TOP 1 @id = intId 
-FROM	@GeneratedLotNumbers WHERE ISNULL(intLotId, '') = ''
+SELECT	TOP 1 
+		@id = intId 
+		,@intItemLocationId = intItemLocationId
+FROM	@GeneratedLotNumbers 
+WHERE	ISNULL(intLotId, 0) = 0
 
 WHILE @id IS NOT NULL 
 BEGIN 
@@ -45,7 +53,13 @@ BEGIN
 	IF	ISNULL(@SerializedLotNumber, '') <> '' 
 		AND NOT EXISTS (SELECT TOP 1 1 FROM tblICLot WHERE strLotNumber = @SerializedLotNumber)
 	BEGIN
-		INSERT INTO tblICLot (strLotNumber) VALUES (@SerializedLotNumber)
+		INSERT INTO tblICLot (
+			strLotNumber
+			,intItemLocationId
+		) VALUES (
+			@SerializedLotNumber
+			,@intItemLocationId
+		)
 		SET @intLotId = SCOPE_IDENTITY();
 	END 
 
@@ -57,8 +71,11 @@ BEGIN
 			AND intId = @id
 
 	SET @id = NULL 
-	SELECT	TOP 1 @id = intId
-	FROM	@GeneratedLotNumbers WHERE ISNULL(intLotId, '') = ''
+	SELECT	TOP 1 
+			@id = intId
+			,@intItemLocationId = intItemLocationId
+	FROM	@GeneratedLotNumbers 
+	WHERE	ISNULL(intLotId, 0) = 0
 END
 
 -- Give the generated lot numbers back to the inventory receipt. 
