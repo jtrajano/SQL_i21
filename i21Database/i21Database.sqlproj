@@ -141,6 +141,7 @@
     <Folder Include="Scripts\Post-Deployment\CT" />
     <Folder Include="Scripts\Post-Deployment\NR" />
     <Folder Include="Scripts\Post-Deployment\GR" />
+    <Folder Include="Scripts\Post-Deployment\MF" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1089,6 +1090,16 @@
     <Build Include="dbo\Tables\tblICItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryReceipt.sql" />
     <Build Include="dbo\User Defined Types\ItemLotTableType.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeItemType.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeSubstituteItem.sql" />
+    <Build Include="dbo\Tables\tblMFRecipe.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeItem.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingProcess.sql" />
+    <Build Include="dbo\Tables\tblMFConsumptionMethod.sql" />
+    <Build Include="dbo\Tables\tblMFCostDistributionMethod.sql" />
+    <Build Include="dbo\Tables\tblMFBlendRequirementStatus.sql" />
+    <Build Include="dbo\Tables\tblMFBlendRequirement.sql" />
+    <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
