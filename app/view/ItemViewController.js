@@ -2189,6 +2189,31 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
+    onSpecialKeyTab: function(component, e, eOpts) {
+        var win = component.up('window');
+        if(win) {
+            if (e.getKey() === Ext.event.Event.TAB) {
+                var gridObj = win.query('#grdInventoryReceipt')[0],
+                    sel = gridObj.getStore().getAt(0);
+
+                if(sel && gridObj){
+                    gridObj.setSelection(sel);
+
+                    var task = new Ext.util.DelayedTask(function(){
+                        gridObj.plugins[0].startEditByPosition({
+                            row: 0,
+                            column: 1
+                        });
+                        var txtNotes = gridObj.query('#txtNotes')[0];
+                        txtNotes.focus();
+                    });
+
+                    task.delay(10);
+                }
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2322,6 +2347,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#grdLocationStore": {
                 itemdblclick: this.onLocationDoubleClick
+            },
+            "#cboTracking": {
+                specialKey: this.onSpecialKeyTab
             }
         });
     }
