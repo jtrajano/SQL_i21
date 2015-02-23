@@ -24,7 +24,8 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
 
 -- Get the Inventory Receipt batch number
-DECLARE @strBatchId AS NVARCHAR(40)  
+DECLARE @strBatchId AS NVARCHAR(40) 
+DECLARE @strItemNo AS NVARCHAR(50)
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
@@ -111,6 +112,51 @@ BEGIN
 	END  
 END   
 
+-- Check if lot items are assigned with at least one lot id. 
+-- Get the top record and tell the user about it. 
+SET @strItemNo = NULL 
+SELECT	TOP 1 
+		@strItemNo = Item.strItemNo		
+FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		INNER JOIN dbo.tblICItem Item
+			ON Item.intItemId = ReceiptItem.intItemId
+		INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLot
+			ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId	
+WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (1, 2)		
+		AND ISNULL(ItemLot.intLotId, 0) = 0
+		AND Receipt.strReceiptNumber = @strTransactionId
+GROUP BY  ReceiptItem.intInventoryReceiptItemId, Item.strItemNo
+
+IF @strItemNo IS NOT NULL AND @ysnPost = 1
+BEGIN 
+	RAISERROR(51037, 11, 1, @strItemNo)  
+	GOTO Post_Exit  
+END 
+
+-- Check if all lot items and their quantities are valid. 
+-- Get the top record and tell the user about it. 
+SET @strItemNo = NULL 
+SELECT	TOP 1 
+		@strItemNo = Item.strItemNo
+		-- ,SUM(ISNULL(ItemLot.dblQuantity, 0))
+FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		INNER JOIN dbo.tblICItem Item
+			ON Item.intItemId = ReceiptItem.intItemId
+		LEFT JOIN dbo.tblICInventoryReceiptItemLot ItemLot
+			ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId	
+WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (1, 2)	
+		AND Receipt.strReceiptNumber = @strTransactionId
+GROUP BY  ReceiptItem.intInventoryReceiptItemId, Item.strItemNo, ReceiptItem.dblOpenReceive
+HAVING SUM(ISNULL(ItemLot.dblQuantity, 0)) <> ReceiptItem.dblOpenReceive
+
+IF @strItemNo IS NOT NULL AND @ysnPost = 1
+BEGIN 
+	RAISERROR(51038, 11, 1, @strItemNo)  
+	GOTO Post_Exit  
+END 
+
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
@@ -124,7 +170,10 @@ EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1  
-BEGIN   
+BEGIN  
+	-- Generate the lot numbers 
+	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt @strTransactionId
+ 
 	-- Get the items to post  
 	DECLARE @ItemsToPost AS ItemCostingTableType  
 	INSERT INTO @ItemsToPost (  

@@ -203,13 +203,13 @@ BEGIN
 		
 	-- Fake data for Items 
 	BEGIN 
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@WetGrains, 'WET GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@StickyGrains, 'STICKY GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@ColdGrains, 'COLD GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@HotGrains, 'HOT GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS', 'Yes, Manual')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription, strLotTracking) VALUES (@SerializedLotGrains, 'SERIALIZED LOT GRAINS', 'Yes, Serial Number')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@WetGrains, 'WET GRAINS DESCRIPTION', 'WET GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@StickyGrains, 'STICKY GRAINS DESCRIPTION', 'STICKY GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@PremiumGrains, 'PREMIUM GRAINS DESCRIPTION', 'PREMIUM GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@ColdGrains, 'COLD GRAINS DESCRIPTION', 'COLD GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@HotGrains, 'HOT GRAINS DESCRIPTION', 'HOT GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS DESCRIPTION', 'MANUAL LOT GRAINS', 'Yes, Manual')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@SerializedLotGrains, 'SERIALIZED LOT GRAINS DESCRIPTION', 'SERIALIZED LOT GRAINS', 'Yes, Serial Number')
 	END
 
 	-- Fake data for Item-Location

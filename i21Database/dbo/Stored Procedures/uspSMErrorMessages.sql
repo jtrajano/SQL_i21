@@ -147,3 +147,11 @@ EXEC sp_addmessage 51035,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51036) EXEC sp_dropmessage 51036, 'us_english'	
 SET @strmessage = 'Purchase Order already closed.'
 EXEC sp_addmessage 51036,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51037) EXEC sp_dropmessage 51037, 'us_english'	
+SET @strmessage = 'Please specify the lot numbers for %s.'
+EXEC sp_addmessage 51037,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51038) EXEC sp_dropmessage 51038, 'us_english'	
+SET @strmessage = 'The lot Quantity(ies) on %s must match its Open Receive Quantity.'
+EXEC sp_addmessage 51038,11,@strmessage,'us_english','False'

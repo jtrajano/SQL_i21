@@ -813,6 +813,18 @@
     <Build Include="testi21Database\Functions\test fnGetItemLotType for No Lot Items.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemLotType for Yes Manual.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemLotType for Yes Serial.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt and expect error 51037.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt and expect error 51038.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt and expect no exceptions.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspICCreateLotNumberOnInventoryReceipt.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
