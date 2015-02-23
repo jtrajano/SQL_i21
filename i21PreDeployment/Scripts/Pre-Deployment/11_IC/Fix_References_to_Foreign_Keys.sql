@@ -149,7 +149,7 @@ BEGIN
 	DROP TABLE #tmpCategoryLocations')
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intItemPricingId' AND object_id = object_id('tblICItemPricing'))
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intItemLocationId' AND object_id = object_id('tblICItemPricing'))
 BEGIN
 	EXEC ('
 	SELECT intItemId, intItemLocationId INTO #tmpItemPricing FROM tblICItemPricing GROUP BY intItemId, intItemLocationId HAVING COUNT(*) > 1
