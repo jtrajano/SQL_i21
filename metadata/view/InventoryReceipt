@@ -1482,7 +1482,7 @@
                                             "userConfig": {
                                                 "dataIndex": "strSourceNumber",
                                                 "itemId": "colSourceNumber",
-                                                "text": "Source No.",
+                                                "text": "Order Number",
                                                 "width": 100
                                             },
                                             "name": "MyColumn9",
@@ -1631,94 +1631,6 @@
                                             },
                                             "name": "MyColumn",
                                             "designerId": "98fb0e70-0811-4919-bb71-b6def7e9a918"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strDescription",
-                                                "itemId": "colSubLocation",
-                                                "text": "Sub Location",
-                                                "width": 90
-                                            },
-                                            "name": "MyColumn1",
-                                            "designerId": "0f567d0c-1633-4ddc-91b4-509cf9ccd1a7",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Sub Location Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intCompanyLocationId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Location Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strSubLocationName',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Sub Location Name',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strSubLocationDescription',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strSubLocationName",
-                                                        "itemId": "cboSubLocation",
-                                                        "valueField": "strSubLocationName"
-                                                    },
-                                                    "name": "MyComboBox4",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "fba48e02-b92d-4bec-8ad9-1aa798883515",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strDescription",
-                                                "itemId": "colLotTracking",
-                                                "text": "Lot Tracking",
-                                                "width": 100
-                                            },
-                                            "name": "MyColumn7",
-                                            "designerId": "668bcfec-389d-4c2f-b424-0bea283da0f3"
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",
@@ -2040,6 +1952,94 @@
                                                     "type": "string"
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strDescription",
+                                                "itemId": "colSubLocation",
+                                                "text": "Sub Location",
+                                                "width": 90
+                                            },
+                                            "name": "MyColumn1",
+                                            "designerId": "0f567d0c-1633-4ddc-91b4-509cf9ccd1a7",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Sub Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Sub Location Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubLocationDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strSubLocationName",
+                                                        "itemId": "cboSubLocation",
+                                                        "valueField": "strSubLocationName"
+                                                    },
+                                                    "name": "MyComboBox4",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "fba48e02-b92d-4bec-8ad9-1aa798883515",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strDescription",
+                                                "itemId": "colLotTracking",
+                                                "text": "Lot Tracking",
+                                                "width": 100
+                                            },
+                                            "name": "MyColumn7",
+                                            "designerId": "668bcfec-389d-4c2f-b424-0bea283da0f3"
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",

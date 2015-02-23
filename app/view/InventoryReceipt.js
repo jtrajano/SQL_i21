@@ -715,7 +715,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         itemId: 'colSourceNumber',
                                                         width: 100,
                                                         dataIndex: 'strSourceNumber',
-                                                        text: 'Source No.',
+                                                        text: 'Order Number',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -794,52 +794,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         width: 175,
                                                         dataIndex: 'strDescription',
                                                         text: 'Description'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colSubLocation',
-                                                        width: 90,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'Sub Location',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intCompanyLocationSubLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Sub Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intCompanyLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strSubLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Sub Location Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strSubLocationDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboSubLocation',
-                                                            displayField: 'strSubLocationName',
-                                                            valueField: 'strSubLocationName'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colLotTracking',
-                                                        width: 100,
-                                                        dataIndex: 'strDescription',
-                                                        text: 'Lot Tracking'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -964,12 +918,58 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         text: 'Gross Margin'
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'strDescription',
+                                                        itemId: 'colSubLocation',
+                                                        width: 90,
+                                                        text: 'Sub Location',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationSubLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Sub Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Sub Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboSubLocation',
+                                                            displayField: 'strSubLocationName',
+                                                            valueField: 'strSubLocationName'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colLotTracking',
+                                                        width: 100,
+                                                        dataIndex: 'strDescription',
+                                                        text: 'Lot Tracking'
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
+                                                        dataIndex: 'dblQtyOrdered',
                                                         itemId: 'colPackages',
                                                         width: 72,
                                                         align: 'right',
-                                                        dataIndex: 'dblQtyOrdered',
                                                         text: 'Packages',
                                                         format: '0,000.##',
                                                         editor: {

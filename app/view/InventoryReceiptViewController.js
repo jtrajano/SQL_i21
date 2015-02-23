@@ -425,12 +425,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
 
-        var colReceived = grdInventoryReceipt.columns[7];
+        var colReceived = grdInventoryReceipt.columns[5];
         var txtReceived = colReceived.getEditor();
         if (txtReceived){
             txtReceived.on('change', me.onCalculateTotalAmount);
         }
-        var colUnitCost = grdInventoryReceipt.columns[9];
+        var colUnitCost = grdInventoryReceipt.columns[7];
         var txtUnitCost = colUnitCost.getEditor();
         if (txtUnitCost){
             txtUnitCost.on('change', me.onCalculateTotalAmount);
@@ -617,7 +617,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));
                 current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
 
-                var colUOM = grid.columns[8];
+                var colUOM = grid.columns[6];
                 var cboUOM = colUOM.getEditor();
                 var index = cboUOM.store.findExact('intItemUnitMeasureId', records[0].get('intReceiveUOMId'));
                 var uom = cboUOM.store.getAt(index);
