@@ -10,7 +10,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 read: '../Inventory/api/Receipt/SearchReceipts'
             },
             columns: [
-                {dataIndex: 'intInventoryReceiptId',text: "Receipt Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'intInventoryReceiptId',text: "Receipt Id", flex: 1, defaultSort:true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1,  dataType: 'string'},
                 {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1,  dataType: 'date', xtype: 'datecolumn'},
                 {dataIndex: 'strReceiptType',text: 'Receipt Type', flex: 1,  dataType: 'string'},
