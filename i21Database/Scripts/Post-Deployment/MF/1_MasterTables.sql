@@ -1,5 +1,4 @@
-﻿﻿GO
-IF NOT EXISTS(SELECT * FROM tblMFRecipeItemType WHERE intRecipeItemTypeId = 1)
+﻿IF NOT EXISTS(SELECT * FROM tblMFRecipeItemType WHERE intRecipeItemTypeId = 1)
 BEGIN
     INSERT INTO tblMFRecipeItemType(intRecipeItemTypeId,strName)
     VALUES(1,'INPUT')
