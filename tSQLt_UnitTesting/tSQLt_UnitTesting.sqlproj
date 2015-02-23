@@ -825,6 +825,13 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspICCreateLotNumberOnInventoryReceipt.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Inventory type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Assembly or Blend type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Manufacturing type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Raw Material type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Commodity type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for non-stock keeping type.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -41,4 +41,6 @@ BEGIN
 				ON PODetail.intItemId = ItemUOM.intItemId
 				AND PODetail.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	WHERE	PODetail.intPurchaseId = @intSourceTransactionId
+			AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+			
 END
