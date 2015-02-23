@@ -585,6 +585,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             current.set('intShipFromId', null);
             current.set('intShipViaId', null);
+
+            current.set('intShipFromId', records[0].get('intShipFromId'));
+            current.set('intShipViaId', records[0].getDefaultLocation().get('intShipViaId'));
         }
     },
 
@@ -928,6 +931,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var proxy = obj.combo.store.proxy;
                 proxy.setExtraParams({include:'poDetails.item,poDetails.uom'});
             }
+            else if (obj.combo.itemId === 'cboVendor') {
+                var proxy = obj.combo.store.proxy;
+                proxy.setExtraParams({include:'tblEntityLocations'});
+            }
         }
     },
 
@@ -1190,6 +1197,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     init: function(application) {
         this.control({
             "#cboVendor": {
+                beforequery: this.onShipFromBeforeQuery,
                 select: this.onVendorSelect
             },
             "#cboFreightTerms": {
