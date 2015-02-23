@@ -469,7 +469,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     createRecord: function(config, action) {
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
-        record.set('strReceiptType', 'Direct');
+        record.set('strReceiptType', 'Purchase Order');
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         if (app.UserId > 0)
@@ -929,7 +929,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             if (obj.combo.itemId === 'cboSource') {
                 var proxy = obj.combo.store.proxy;
-                proxy.setExtraParams({include:'poDetails.item,poDetails.uom'});
+                proxy.setExtraParams({search:true});
             }
             else if (obj.combo.itemId === 'cboVendor') {
                 var proxy = obj.combo.store.proxy;
@@ -958,57 +958,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = plugin.getActiveRecord();
         var po = records[0];
 
+        var cboReceiptType = win.down('#cboReceiptType');
+        var cboVendor = win.down('#cboVendor');
 
-        var receiptItems = win.viewModel.data.current.tblICInventoryReceiptItems();
-        if (po.poDetails()) {
-            var poDetails = po.poDetails().data.items;
-            Ext.Array.each(poDetails, function(row) {
 
-                if (iRely.Functions.isEmpty(current.get('intPurchaseId'))) {
-                    current.set('intLineNo', row.get('intLineNo'));
-                    current.set('intSourceId', po.get('intPurchaseId'));
-                    current.set('strSourceId', po.get('strPurchaseOrderNumber'));
-                    current.set('dtmSourceDate', po.get('dtmDate'));
-                    current.set('intItemId', row.get('intItemId'));
-                    current.set('strItemNo', row.get('item').strItemNo);
-                    current.set('dblOrderQty', row.get('dblQtyOrdered'));
-                    current.set('dblOpenReceive', row.get('dblQtyOrdered') - row.get('dblQtyReceived'));
-                    current.set('dblReceived', row.get('dblQtyReceived'));
-                    current.set('intUnitMeasureId', row.get('intUnitOfMeasureId'));
-                    current.set('strUnitMeasure', row.get('strUOM'));
-                    current.set('intNoPackages', 0); // None found from Purchase Order
-                    current.set('intPackTypeId', 0); // None found from Purchase Order
-                    current.set('dblExpPackageWeight', 0); // None found from Purchase Order
-                    current.set('dblUnitCost', row.get('dblCost'));
-                    current.set('dblUnitRetail', row.get('dblCost'));
-                    current.set('dblLineTotal', (row.get('dblQtyOrdered') - row.get('dblQtyReceived')) * row.get('dblCost'));
-                    current.set('intSort', row.get('intLineNo'));
-                }
-                else {
-                    var newRecord = Ext.create('Inventory.model.ReceiptItem', {
-                        intLineNo				: row.get('intLineNo')
-                        ,intSourceId			: po.get('intPurchaseId')
-                        ,strSourceId			: po.get('strPurchaseOrderNumber')
-                        ,dtmSourceDate          : po.get('dtmDate')
-                        ,intItemId				: row.get('intItemId')
-                        ,strItemNo              : row.get('item').strItemNo
-                        ,dblOrderQty			: row.get('dblQtyOrdered')
-                        ,dblOpenReceive			: row.get('dblQtyOrdered') - row.get('dblQtyReceived')
-                        ,dblReceived			: row.get('dblQtyReceived')
-                        ,intUnitMeasureId		: row.get('intUnitOfMeasureId')
-                        ,strUnitMeasure         : row.get('strUOM')
-                        ,intNoPackages			: 0 // None found from Purchase Order
-                        ,intPackTypeId			: 0 // None found from Purchase Order
-                        ,dblExpPackageWeight	: 0 // None found from Purchase Order
-                        ,dblUnitCost			: row.get('dblCost')
-                        ,dblUnitRetail			: row.get('dblCost')
-                        ,dblLineTotal			: (row.get('dblQtyOrdered') - row.get('dblQtyReceived')) * row.get('dblCost')
-                        ,intSort				: row.get('intLineNo')
-                    });
-                    receiptItems.add(newRecord);
-                }
-            });
-        }
     },
 
     onItemGridColumnBeforeRender: function(column) {

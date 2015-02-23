@@ -1237,15 +1237,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
+                                                        dataIndex: 'string',
                                                         itemId: 'colLotCost',
                                                         width: 65,
                                                         align: 'right',
-                                                        dataIndex: 'string',
                                                         text: 'Cost',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -1415,7 +1412,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         dataIndex: 'string',
                                                         text: 'Parent Lot ID',
                                                         editor: {
-                                                            xtype: 'combobox',
+                                                            xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
                                                                     dataIndex: 'intLotId',

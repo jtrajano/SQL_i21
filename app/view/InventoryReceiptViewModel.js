@@ -13,7 +13,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedLot',
         'Inventory.store.BufferedStorageLocation',
         'AccountsPayable.store.VendorBuffered',
-        'AccountsPayable.store.PurchaseOrder',
+        'AccountsPayable.store.PurchaseOrderDetail',
         'AccountsPayable.store.VendorLocation',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CurrencyBuffered',
@@ -124,7 +124,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         poSource: {
             autoLoad: true,
-            type: 'purchaseorder'
+            type: 'purchaseorderdetail'
         },
         shipFrom: {
             type: 'apentitylocation'

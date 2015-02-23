@@ -60,7 +60,7 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         {type: 'presence', field: 'strWeightUOM'},
         {type: 'presence', field: 'dblQuantity'},
         {type: 'presence', field: 'dblGrossWeight'},
-        {type: 'presence', field: 'dblGrossWeight'},
-        {type: 'presence', field: 'dblGrossWeight'}
+        {type: 'presence', field: 'intUnits'},
+        {type: 'presence', field: 'intUnitPallet'}
     ]
 });
