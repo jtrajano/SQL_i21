@@ -3204,49 +3204,11 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        itemId: 'colPricingRetailPrice',
-                                                        width: 80,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Retail Price'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colPricingWholesalePrice',
-                                                        width: 100,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Wholesale Price'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colPricingLargeVolumePrice',
-                                                        width: 115,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Large Volume Price'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
                                                         itemId: 'colPricingMSRP',
                                                         width: 80,
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'MSRP'
-                                                    },
-                                                    {
-                                                        xtype: 'datecolumn',
-                                                        itemId: 'colPricingBeginDate',
-                                                        width: 80,
-                                                        dataIndex: 'string',
-                                                        text: 'Begin Date'
-                                                    },
-                                                    {
-                                                        xtype: 'datecolumn',
-                                                        itemId: 'colPricingEndDate',
-                                                        width: 80,
-                                                        dataIndex: 'string',
-                                                        text: 'End Date'
                                                     }
                                                 ],
                                                 viewConfig: {

@@ -238,31 +238,30 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("vyuICGetItemPricing");
-            this.Property(t => t.dblAmountPercent).HasColumnName("dblAmountPercent");
-            this.Property(t => t.dblEndMonthCost).HasColumnName("dblEndMonthCost");
-            this.Property(t => t.dblLargeVolumePrice).HasColumnName("dblLargeVolumePrice");
-            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost");
-            this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost");
-            this.Property(t => t.dblMSRPPrice).HasColumnName("dblMSRPPrice");
-            this.Property(t => t.dblRetailPrice).HasColumnName("dblRetailPrice");
-            this.Property(t => t.dblSalePrice).HasColumnName("dblSalePrice");
-            this.Property(t => t.dblStandardCost).HasColumnName("dblStandardCost");
-            this.Property(t => t.dblWholesalePrice).HasColumnName("dblWholesalePrice");
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
-            this.Property(t => t.intItemPricingId).HasColumnName("intItemPricingId");
-            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.intPricingKey).HasColumnName("intPricingKey");
             this.Property(t => t.intKey).HasColumnName("intKey");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strUpcCode).HasColumnName("strUpcCode");
+            this.Property(t => t.intItemPricingId).HasColumnName("intItemPricingId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.strLocationName).HasColumnName("strLocationName");
             this.Property(t => t.strLocationType).HasColumnName("strLocationType");
-            this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
+            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
+            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
             this.Property(t => t.strUnitType).HasColumnName("strUnitType");
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+            this.Property(t => t.dblAmountPercent).HasColumnName("dblAmountPercent");
+            this.Property(t => t.dblSalePrice).HasColumnName("dblSalePrice");
+            this.Property(t => t.dblMSRPPrice).HasColumnName("dblMSRPPrice");
+            this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
+            this.Property(t => t.dblLastCost).HasColumnName("dblLastCost");
+            this.Property(t => t.dblStandardCost).HasColumnName("dblStandardCost");
+            this.Property(t => t.dblAverageCost).HasColumnName("dblAverageCost");
+            this.Property(t => t.dblEndMonthCost).HasColumnName("dblEndMonthCost");
+            this.Property(t => t.intSort).HasColumnName("intSort");
         }
     }
 

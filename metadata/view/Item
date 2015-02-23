@@ -6956,100 +6956,12 @@
                                                 "align": "right",
                                                 "dataIndex": "string",
                                                 "flex": null,
-                                                "itemId": "colPricingRetailPrice",
-                                                "text": "Retail Price",
-                                                "width": 80
-                                            },
-                                            "name": "MyNumberColumn19",
-                                            "designerId": "b6cd64ea-8606-4ed5-9754-dd37cd0bb41b"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "string",
-                                                "flex": null,
-                                                "itemId": "colPricingWholesalePrice",
-                                                "text": "Wholesale Price",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn20",
-                                            "designerId": "c578ac2b-1167-4ccc-8d10-645416fac096"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "string",
-                                                "flex": null,
-                                                "itemId": "colPricingLargeVolumePrice",
-                                                "text": "Large Volume Price",
-                                                "width": 115
-                                            },
-                                            "name": "MyNumberColumn24",
-                                            "designerId": "ee7faf06-b546-4888-beb6-6eae38e50e4f"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "string",
-                                                "flex": null,
                                                 "itemId": "colPricingMSRP",
                                                 "text": "MSRP",
                                                 "width": 80
                                             },
                                             "name": "MyNumberColumn25",
                                             "designerId": "ff739ab3-f97e-4f1c-bba1-7bd6d5a79dd1"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Date",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": null,
-                                                "itemId": "colPricingBeginDate",
-                                                "text": "Begin Date",
-                                                "width": 80
-                                            },
-                                            "name": "MyDateColumn4",
-                                            "designerId": "f178f6e5-ddeb-416d-8b7a-49ae00057d2c"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Date",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": null,
-                                                "itemId": "colPricingEndDate",
-                                                "text": "End Date",
-                                                "width": 80
-                                            },
-                                            "name": "MyDateColumn5",
-                                            "designerId": "0c093eea-c313-42ec-83dd-376a1a204561"
                                         },
                                         {
                                             "type": "Ext.grid.View",

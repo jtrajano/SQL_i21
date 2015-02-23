@@ -40,9 +40,6 @@ Ext.define('Inventory.model.ItemPricing', {
             }
         },
         { name: 'intItemLocationId', type: 'int', allowNull: true },
-        { name: 'dblRetailPrice', type: 'float' },
-        { name: 'dblWholesalePrice', type: 'float' },
-        { name: 'dblLargeVolumePrice', type: 'float' },
         { name: 'dblAmountPercent', type: 'float' },
         { name: 'dblSalePrice', type: 'float' },
         { name: 'dblMSRPPrice', type: 'float' },
@@ -59,6 +56,6 @@ Ext.define('Inventory.model.ItemPricing', {
         {type: 'presence', field: 'intItemLocationId'},
         {type: 'presence', field: 'dblStandardCost'},
         {type: 'presence', field: 'strPricingMethod'},
-        {type: 'presence', field: 'dblRetailPrice'}
+        {type: 'presence', field: 'dblSalePrice'}
     ]
 });

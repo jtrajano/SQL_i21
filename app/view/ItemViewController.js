@@ -420,19 +420,18 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPricingMethod: 'strPricingMethod',
                 colPricingAmount: 'dblAmountPercent',
                 colPricingSalePrice: 'dblSalePrice',
-                colPricingRetailPrice: 'dblRetailPrice',
-                colPricingWholesalePrice: 'dblWholesalePrice',
-                colPricingLargeVolumePrice: 'dblLargeVolumePrice',
-                colPricingMSRP: 'dblMSRPPrice',
-                colPricingBeginDate: 'dtmBeginDate',
-                colPricingEndDate: 'dtmEndDate'
+                colPricingMSRP: 'dblMSRPPrice'
             },
 
             grdPricingLevel: {
                 colPricingLevelLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        store: '{pricingLevelLocation}'
+                        store: '{pricingLevelLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colPricingLevelPriceLevel: {
@@ -482,7 +481,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colSpecialPricingLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        store: '{specialPricingLocation}'
+                        store: '{specialPricingLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colSpecialPricingPromotionType: {

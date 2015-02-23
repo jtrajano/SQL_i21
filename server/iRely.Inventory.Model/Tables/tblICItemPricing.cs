@@ -14,9 +14,6 @@ namespace iRely.Inventory.Model
         public int intItemPricingId { get; set; }
         public int intItemId { get; set; }
         public int? intItemLocationId { get; set; }
-        public decimal? dblRetailPrice { get; set; }
-        public decimal? dblWholesalePrice { get; set; }
-        public decimal? dblLargeVolumePrice { get; set; }
         public decimal? dblAmountPercent { get; set; }
         public decimal? dblSalePrice { get; set; }
         public decimal? dblMSRPPrice { get; set; }

@@ -98,13 +98,22 @@ namespace iRely.Invetory.WebAPI.Controllers
             var result = _ItemPricingBRL.Save(continueOnConflict);
             _ItemPricingBRL.Dispose();
 
+            var errMessage = result.Exception.Message;
+            if (result.BaseException != null)
+            {
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemPricing'"))
+                {
+                    errMessage = "Pricing already exist for this Item under this Location.";
+                }
+            }
+
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
                 data = pricings,
                 success = !result.HasError,
                 message = new
                 {
-                    statusText = result.Exception.Message,
+                    statusText = errMessage,
                     status = result.Exception.Error,
                     button = result.Exception.Button.ToString()
                 }
