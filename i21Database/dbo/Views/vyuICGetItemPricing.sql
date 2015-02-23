@@ -6,7 +6,6 @@ intPricingKey = CAST(ROW_NUMBER() OVER(ORDER BY Item.intKey, ItemPricing.intItem
 Item.intKey,
 Item.strDescription,
 ItemUOM.strUpcCode,
-ItemUOM.strDescription as strUPCDescription,
 ItemPricing.intItemPricingId,
 ItemPricing.intItemId,
 Item.intLocationId,

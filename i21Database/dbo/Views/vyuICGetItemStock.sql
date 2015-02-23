@@ -35,7 +35,6 @@ SELECT
 							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
 							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END),
 	ItemStock.dblUnitOnHand,
-	--ItemPricing.dblAverageCost,
 	ItemStock.dblOnOrder,
 	ItemStock.dblOrderCommitted,
 	ItemStock.dblBackOrder
@@ -45,4 +44,3 @@ LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intIte
 LEFT JOIN tblICStorageLocation StorageLocation ON ItemLocation.intStorageLocationId = StorageLocation.intStorageLocationId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblICItemStock ItemStock ON ItemStock.intItemId = Item.intItemId AND ItemLocation.intLocationId = ItemStock.intItemLocationId
---LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Item.intItemId AND ItemLocation.intLocationId = ItemPricing.intItemLocationId
