@@ -10,16 +10,16 @@ Ext.define('Inventory.view.ItemViewController', {
                 read: '../Inventory/api/Item/SearchItems'
             },
             columns: [
-                {dataIndex: 'intItemId', text: "Item Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'intItemId', text: "Item Id", flex: 1, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strItemNo', text: 'Item No', flex: 1, defaultSort: true, sortOrder: 'ASC', dataType: 'string', minWidth: 150},
                 {dataIndex: 'strType', text: 'Type', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', minWidth: 250},
                 {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strTracking', text: 'Inv Valuation', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strLotTracking', text: 'Lot Tracking', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strManufacturer', text: 'Manufacturer', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strBrand', text: 'Brand', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strTracking', text: 'Tracking', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strLotTracking', text: 'Lot Tracking', flex: 1, dataType: 'string', minWidth: 150}
+                {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150}
             ]
         },
         binding: {

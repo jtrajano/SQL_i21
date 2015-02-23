@@ -13,9 +13,6 @@ Ext.define('Inventory.view.ItemPricingViewController', {
                 }]
             },
             txtSalePrice: '{current.dblSalePrice}',
-            txtRetailPrice: '{current.dblRetailPrice}',
-            txtWholesalePrice: '{current.dblWholesalePrice}',
-            txtLargeVolumePrice: '{current.dblLargeVolumePrice}',
             txtMsrp: '{current.dblMSRPPrice}',
             cboPricingMethod: {
                 value: '{current.strPricingMethod}',

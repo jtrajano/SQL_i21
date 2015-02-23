@@ -27,9 +27,9 @@ Ext.define('Inventory.view.ItemPricing', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 330,
+    height: 280,
     hidden: false,
-    minHeight: 330,
+    minHeight: 280,
     minWidth: 594,
     width: 594,
     layout: 'fit',
@@ -303,87 +303,25 @@ Ext.define('Inventory.view.ItemPricing', {
                                     flex: 1,
                                     tabIndex: 9,
                                     itemId: 'txtSalePrice',
-                                    fieldLabel: 'Sale Price',
+                                    fieldLabel: 'Sales Price',
                                     labelWidth: 110,
                                     checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
                                     hideTrigger: true,
                                     allowExponential: false
                                 },
-                                {
-                                    xtype: 'moneynumber',
-                                    flex: 1,
-                                    tabIndex: 10,
-                                    itemId: 'txtRetailPrice',
-                                    margin: '0 0 0 5',
-                                    fieldLabel: 'Retail Price',
-                                    labelWidth: 110,
-                                    checkChangeBuffer: 3000,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true,
-                                    allowExponential: false
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'stretch'
-                            },
-                            items: [
-                                {
-                                    xtype: 'moneynumber',
-                                    flex: 1,
-                                    tabIndex: 11,
-                                    itemId: 'txtWholesalePrice',
-                                    fieldLabel: 'Wholesale Price',
-                                    labelWidth: 110,
-                                    checkChangeBuffer: 3000,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true,
-                                    allowExponential: false
-                                },
-                                {
-                                    xtype: 'moneynumber',
-                                    flex: 1,
-                                    tabIndex: 12,
-                                    itemId: 'txtLargeVolumePrice',
-                                    margin: '0 0 0 5',
-                                    fieldLabel: 'Large Volume Price',
-                                    labelWidth: 110,
-                                    checkChangeBuffer: 3000,
-                                    fieldStyle: 'text-align:right',
-                                    hideTrigger: true,
-                                    allowExponential: false
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'stretch'
-                            },
-                            items: [
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
                                     tabIndex: 13,
                                     itemId: 'txtMsrp',
+                                    margin: '0 0 0 5',
                                     fieldLabel: 'MSRP',
                                     labelWidth: 110,
                                     checkChangeBuffer: 3000,
                                     fieldStyle: 'text-align:right',
                                     hideTrigger: true,
                                     allowExponential: false
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    margin: '0 0 0 5'
                                 }
                             ]
                         }

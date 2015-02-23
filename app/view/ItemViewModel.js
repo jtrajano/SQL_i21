@@ -40,16 +40,16 @@ Ext.define('Inventory.view.ItemViewModel', {
             autoLoad: true,
             data: [
                 {
-                    strType: 'Inventory'
-                },
-                {
-                    strType: 'Non-Inventory'
-                },
-                {
                     strType: 'Assembly/Blend'
                 },
                 {
                     strType: 'Bundle'
+                },
+                {
+                    strType: 'Commodity'
+                },
+                {
+                    strType: 'Inventory'
                 },
                 {
                     strType: 'Kit'
@@ -58,16 +58,16 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strType: 'Manufacturing'
                 },
                 {
-                    strType: 'Raw Material'
+                    strType: 'Non-Inventory'
                 },
                 {
                     strType: 'Other Charge'
                 },
                 {
-                    strType: 'Service'
+                    strType: 'Raw Material'
                 },
                 {
-                    strType: 'Commodity'
+                    strType: 'Service'
                 }
             ],
             fields: [

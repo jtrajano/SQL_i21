@@ -21,6 +21,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         'i21.store.CompanyLocationBuffered',
         'i21.store.FreightTermsBuffered',
         'i21.store.ShipViaBuffered',
+        'i21.store.CompanyLocationSubLocationBuffered',
         'AccountsPayable.store.VendorBuffered',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedCategory',
@@ -36,6 +37,9 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
 
         location: {
             type: 'companylocationbuffered'
+        },
+        subLocation: {
+            type: 'smcompanylocationsublocationbuffered'
         },
         vendor: {
             type: 'vendorbuffered'

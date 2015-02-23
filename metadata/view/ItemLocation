@@ -599,14 +599,54 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "disabled": true,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Sub Location Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intCompanyLocationId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Location Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strSubLocationName',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Sub Location Name',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strSubLocationDescription',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Description',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strSubLocationName",
                                                 "fieldLabel": "Sub Location",
                                                 "itemId": "cboSubLocation",
                                                 "labelWidth": 80,
-                                                "layout|flex": 1
+                                                "layout|flex": 1,
+                                                "valueField": "intCompanyLocationSubLocationId"
                                             },
                                             "name": "MyComboBox18",
-                                            "designerId": "0c45d94d-c5f5-4e10-b8ca-07b5bf30fdb7"
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "0c45d94d-c5f5-4e10-b8ca-07b5bf30fdb7",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.form.field.ComboBox",
@@ -1939,7 +1979,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging18",
+                    "name": "statusbarpaging14",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
