@@ -15,10 +15,8 @@ namespace iRely.Inventory.Model
         public int intItemId { get; set; }
         public int? intUnitMeasureId { get; set; }
         public decimal? dblUnitQty { get; set; }
-        public decimal? dblSellQty { get; set; }
         public decimal? dblWeight { get; set; }
         public int? intWeightUOMId { get; set; }
-        public string strDescription { get; set; }
         public string strUpcCode { get; set; }
         public bool ysnStockUnit { get; set; }
         public bool ysnAllowPurchase { get; set; }

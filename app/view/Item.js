@@ -482,21 +482,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        itemId: 'colDetailSellQty',
-                                                        width: 62,
-                                                        align: 'right',
-                                                        dataIndex: 'number',
-                                                        text: 'Sell Qty',
-                                                        format: '0.00',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true,
-                                                            minValue: 0
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
                                                         itemId: 'colDetailWeight',
                                                         width: 62,
                                                         align: 'right',
@@ -554,17 +539,6 @@ Ext.define('Inventory.view.Item', {
                                                             itemId: 'cboDetailWeightUOM',
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'strUnitMeasure'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colDetailDescription',
-                                                        minWidth: 120,
-                                                        dataIndex: 'string',
-                                                        text: 'Package Description',
-                                                        flex: 2,
-                                                        editor: {
-                                                            xtype: 'textfield'
                                                         }
                                                     },
                                                     {

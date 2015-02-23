@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsbb97294c6ac8e82b1a3cbea2142d2e01721f278243a319f3f178f77e1bcb8e05))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets69d6275c49c800cb2e7d72ae4b4c7e7512078e7ee4740aee7d7a5f60787aa3ee))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsbb97294c6ac8e82b1a3cbea2142d2e01721f278243a319f3f178f77e1bcb8e05 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets69d6275c49c800cb2e7d72ae4b4c7e7512078e7ee4740aee7d7a5f60787aa3ee : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "bb97294c6ac8e82b1a3cbea2142d2e01721f278243a319f3f178f77e1bcb8e05"; }
+            get { return "69d6275c49c800cb2e7d72ae4b4c7e7512078e7ee4740aee7d7a5f60787aa3ee"; }
         }
 
         /// <summary>
@@ -1396,17 +1396,15 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemUOM
-        [CodeFirstDatabaseSchema.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblSellQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_intWeightUOMId, T1.tblICItemUOM_strDescription, T1.tblICItemUOM_strUpcCode, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_intDimensionUOMId, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_intVolumeUOMId, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intSort, T1.tblICItemUOM_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_intWeightUOMId, T1.tblICItemUOM_strUpcCode, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_intDimensionUOMId, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_intVolumeUOMId, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intSort, T1.tblICItemUOM_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemUOMId AS tblICItemUOM_intItemUOMId, 
             T.intItemId AS tblICItemUOM_intItemId, 
             T.intUnitMeasureId AS tblICItemUOM_intUnitMeasureId, 
             T.dblUnitQty AS tblICItemUOM_dblUnitQty, 
-            T.dblSellQty AS tblICItemUOM_dblSellQty, 
             T.dblWeight AS tblICItemUOM_dblWeight, 
             T.intWeightUOMId AS tblICItemUOM_intWeightUOMId, 
-            T.strDescription AS tblICItemUOM_strDescription, 
             T.strUpcCode AS tblICItemUOM_strUpcCode, 
             T.ysnStockUnit AS tblICItemUOM_ysnStockUnit, 
             T.ysnAllowPurchase AS tblICItemUOM_ysnAllowPurchase, 
@@ -2672,16 +2670,15 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemStock
-        [CodeFirstDatabaseSchema.tblICItemStock](T3.tblICItemStock_intItemStockId, T3.tblICItemStock_intItemId, T3.tblICItemStock_intItemLocationId, T3.tblICItemStock_intSubLocationId, T3.tblICItemStock_dblAverageCost, T3.tblICItemStock_dblUnitOnHand, T3.tblICItemStock_dblOrderCommitted, T3.tblICItemStock_dblOnOrder, T3.tblICItemStock_dblBackOrder, T3.tblICItemStock_dblLastCountRetail, T3.tblICItemStock_intSort, T3.tblICItemStock_intConcurrencyId, T3.[tblICItemStock.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId])
+        [CodeFirstDatabaseSchema.tblICItemStock](T3.tblICItemStock_intItemStockId, T3.tblICItemStock_intItemId, T3.tblICItemStock_intItemLocationId, T3.tblICItemStock_intSubLocationId, T3.tblICItemStock_dblUnitOnHand, T3.tblICItemStock_dblOrderCommitted, T3.tblICItemStock_dblOnOrder, T3.tblICItemStock_dblBackOrder, T3.tblICItemStock_dblLastCountRetail, T3.tblICItemStock_intSort, T3.tblICItemStock_intConcurrencyId, T3.[tblICItemStock.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId])
     FROM (
-        SELECT T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_intSubLocationId, T1.tblICItemStock_dblAverageCost, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId, T2.[tblICItemStock.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId], T1._from0, (T2._from1 AND T2._from1 IS NOT NULL) AS _from1
+        SELECT T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_intSubLocationId, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId, T2.[tblICItemStock.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId], T1._from0, (T2._from1 AND T2._from1 IS NOT NULL) AS _from1
         FROM  (
             SELECT 
                 T.intItemStockId AS tblICItemStock_intItemStockId, 
                 T.intItemId AS tblICItemStock_intItemId, 
                 T.intItemLocationId AS tblICItemStock_intItemLocationId, 
                 T.intSubLocationId AS tblICItemStock_intSubLocationId, 
-                T.dblAverageCost AS tblICItemStock_dblAverageCost, 
                 T.dblUnitOnHand AS tblICItemStock_dblUnitOnHand, 
                 T.dblOrderCommitted AS tblICItemStock_dblOrderCommitted, 
                 T.dblOnOrder AS tblICItemStock_dblOnOrder, 
@@ -3920,17 +3917,15 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemUOMs
-        [iRely.Inventory.Model.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblSellQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_intWeightUOMId, T1.tblICItemUOM_strDescription, T1.tblICItemUOM_strUpcCode, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_intDimensionUOMId, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_intVolumeUOMId, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intSort, T1.tblICItemUOM_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemUOM](T1.tblICItemUOM_intItemUOMId, T1.tblICItemUOM_intItemId, T1.tblICItemUOM_intUnitMeasureId, T1.tblICItemUOM_dblUnitQty, T1.tblICItemUOM_dblWeight, T1.tblICItemUOM_intWeightUOMId, T1.tblICItemUOM_strUpcCode, T1.tblICItemUOM_ysnStockUnit, T1.tblICItemUOM_ysnAllowPurchase, T1.tblICItemUOM_ysnAllowSale, T1.tblICItemUOM_dblLength, T1.tblICItemUOM_dblWidth, T1.tblICItemUOM_dblHeight, T1.tblICItemUOM_intDimensionUOMId, T1.tblICItemUOM_dblVolume, T1.tblICItemUOM_intVolumeUOMId, T1.tblICItemUOM_dblMaxQty, T1.tblICItemUOM_intSort, T1.tblICItemUOM_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemUOMId AS tblICItemUOM_intItemUOMId, 
             T.intItemId AS tblICItemUOM_intItemId, 
             T.intUnitMeasureId AS tblICItemUOM_intUnitMeasureId, 
             T.dblUnitQty AS tblICItemUOM_dblUnitQty, 
-            T.dblSellQty AS tblICItemUOM_dblSellQty, 
             T.dblWeight AS tblICItemUOM_dblWeight, 
             T.intWeightUOMId AS tblICItemUOM_intWeightUOMId, 
-            T.strDescription AS tblICItemUOM_strDescription, 
             T.strUpcCode AS tblICItemUOM_strUpcCode, 
             T.ysnStockUnit AS tblICItemUOM_ysnStockUnit, 
             T.ysnAllowPurchase AS tblICItemUOM_ysnAllowPurchase, 
@@ -5240,7 +5235,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemStocks
-        [iRely.Inventory.Model.tblICItemStock](T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_intSubLocationId, T1.tblICItemStock_dblAverageCost, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId) WITH 
+        [iRely.Inventory.Model.tblICItemStock](T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_intSubLocationId, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId) WITH 
         RELATIONSHIP(CREATEREF(InventoryEntities.tblSMCompanyLocationSubLocations, ROW(T1.[tblSMCompanyLocationSubLocation_tblICItemStocks.tblSMCompanyLocationSubLocation_tblICItemStocks_Source.intCompanyLocationSubLocationId]),[iRely.Inventory.Model.tblSMCompanyLocationSubLocation]),[iRely.Inventory.Model.tblSMCompanyLocationSubLocation_tblICItemStocks],tblSMCompanyLocationSubLocation_tblICItemStocks_Target,tblSMCompanyLocationSubLocation_tblICItemStocks_Source) 
     FROM (
         SELECT 
@@ -5248,7 +5243,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.intItemId AS tblICItemStock_intItemId, 
             T.intItemLocationId AS tblICItemStock_intItemLocationId, 
             T.intSubLocationId AS tblICItemStock_intSubLocationId, 
-            T.dblAverageCost AS tblICItemStock_dblAverageCost, 
             T.dblUnitOnHand AS tblICItemStock_dblUnitOnHand, 
             T.dblOrderCommitted AS tblICItemStock_dblOrderCommitted, 
             T.dblOnOrder AS tblICItemStock_dblOnOrder, 

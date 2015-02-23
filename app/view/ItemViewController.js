@@ -69,9 +69,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colDetailUnitQty: {
                     dataIndex: 'dblUnitQty'
                 },
-                colDetailSellQty: {
-                    dataIndex: 'dblSellQty'
-                },
                 colDetailWeight: {
                     dataIndex: 'dblWeight'
                 },
@@ -86,7 +83,6 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colDetailDescription: 'strDescription',
                 colDetailUpcCode: 'strUpcCode',
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',

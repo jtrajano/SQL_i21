@@ -202,8 +202,8 @@ namespace iRely.Inventory.Model
     public class vyuICGetItemStock
     {
         [Key]
-        public int intKey { get; set; }
-        public int intItemId { get; set; }
+        public int? intKey { get; set; }
+        public int? intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strType { get; set; }
         public string strDescription { get; set; }
