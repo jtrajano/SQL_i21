@@ -121,6 +121,8 @@ namespace iRely.Inventory.Model
         
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICItemFactory> tblICItemFactories { get; set; }
+        public ICollection<tblICInventoryReceipt> tblICInventoryReceipts { get; set; } 
+
     }
 
     public class tblGLAccount

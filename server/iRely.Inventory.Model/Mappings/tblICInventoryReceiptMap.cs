@@ -56,6 +56,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblSMFreightTerm)
                 .WithMany(p => p.tblICInventoryReceipts)
                 .HasForeignKey(p => p.intFreightTermId);
+            this.HasOptional(p => p.tblSMCompanyLocation)
+                .WithMany(p => p.tblICInventoryReceipts)
+                .HasForeignKey(p => p.intLocationId);
         }
     }
 

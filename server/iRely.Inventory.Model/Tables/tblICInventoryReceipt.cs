@@ -110,12 +110,44 @@ namespace iRely.Inventory.Model
                 _fobPoint = value;
             }
         }
+        private string _locationName;
+        [NotMapped]
+        public string strLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_locationName))
+                    if (tblSMFreightTerm != null)
+                        return tblSMCompanyLocation.strLocationName;
+                    else
+                        return null;
+                else
+                    return _locationName;
+            }
+            set
+            {
+                _locationName = value;
+            }
+        }
 
         public ICollection<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
 
         public vyuAPVendor vyuAPVendor { get; set; }
         public tblSMFreightTerm tblSMFreightTerm { get; set; }
+        public tblSMCompanyLocation tblSMCompanyLocation { get; set; } 
+    }
+
+    public class vyuReciepts : BaseEntity
+    {
+        [Key]
+        public int intInventoryReceiptId { get; set; }
+        public string strReceiptNumber { get; set; }
+        public DateTime? dtmReceiptDate { get; set; }
+        public string strReceiptType { get; set; }
+        public string strVendorName { get; set; }
+        public string strLocationName { get; set; }
+        public bool ysnPosted { get; set; }
     }
 
     public class tblICInventoryReceiptItem : BaseEntity
