@@ -15,9 +15,6 @@ Type the overview for the table here.
 		[intItemPricingId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL, 
-		[dblRetailPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblWholesalePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblLargeVolumePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblAmountPercent] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblSalePrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMSRPPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -30,7 +27,8 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemPricing] PRIMARY KEY ([intItemPricingId]), 
 		CONSTRAINT [FK_tblICItemPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemPricing_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])
+		CONSTRAINT [FK_tblICItemPricing_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]), 
+		CONSTRAINT [AK_tblICItemPricing] UNIQUE ([intItemId], [intItemLocationId])
 	)
 
 	GO
@@ -63,32 +61,11 @@ Type the overview for the table here.
 	GO
 
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Retail Price',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemPricing',
-		@level2type = N'COLUMN',
-		@level2name = N'dblRetailPrice'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Wholesale Price',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemPricing',
-		@level2type = N'COLUMN',
-		@level2name = N'dblWholesalePrice'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Large Volume Price',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemPricing',
-		@level2type = N'COLUMN',
-		@level2name = N'dblLargeVolumePrice'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Sale Price',
