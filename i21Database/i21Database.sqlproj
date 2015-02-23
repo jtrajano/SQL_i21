@@ -1086,6 +1086,8 @@
     <Build Include="dbo\Tables\tblSMTaxGroupCode.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
     <Build Include="dbo\Views\vyuPODetails.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePO.sql" />
+    <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
