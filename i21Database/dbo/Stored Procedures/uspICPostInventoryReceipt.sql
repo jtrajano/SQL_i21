@@ -156,7 +156,7 @@ BEGIN
 			,intTransactionId = Header.intInventoryReceiptId  
 			,strTransactionId = Header.strReceiptNumber  
 			,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
-			,intLotId = NULL   
+			,intLotId = DetailItemsLot.intLotId   
 	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON Header.intLocationId = ItemLocation.intLocationId
 			INNER JOIN dbo.tblICInventoryReceiptItem DetailItems  
@@ -165,6 +165,8 @@ BEGIN
 			INNER JOIN dbo.tblICItemUOM ItemUOM
 				ON DetailItems.intItemId = ItemUOM.intItemId
 				AND DetailItems.intUnitMeasureId = ItemUOM.intItemUOMId
+			LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemsLot
+				ON DetailItems.intInventoryReceiptItemId = DetailItemsLot.intInventoryReceiptItemId
 	WHERE	Header.intInventoryReceiptId = @intTransactionId   
   
 	-- Call the post routine 
