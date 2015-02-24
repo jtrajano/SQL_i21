@@ -122,8 +122,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{current.ysnPosted}'
             },
 
-
-
             grdInventoryReceipt: {
                 colSourceNumber : {
                     dataIndex: 'strSourceId',
@@ -187,7 +185,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colUnitCost: 'dblUnitCost',
                 colUnitRetail: 'dblUnitRetail',
-//                colTax: 'dblUnitCost',
                 colLineTotal: 'dblLineTotal',
                 colGrossMargin: 'dblGrossMargin',
                 colPackages: 'intNoPackages',
@@ -414,7 +411,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var cepItemLots = grdLotTracking.getPlugin('cepItemLots');
         if (cepItemLots){
             cepItemLots.on({
-                validateedit: me.onEditItem,
+                validateedit: me.onEditLots,
                 scope: me
             });
         }
@@ -1003,9 +1000,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = plugin.getActiveRecord();
         var po = records[0];
 
-        var cboReceiptType = win.down('#cboReceiptType');
-        var cboVendor = win.down('#cboVendor');
+//        var cboReceiptType = win.down('#cboReceiptType');
+//        var cboVendor = win.down('#cboVendor');
+//
+//        cboReceiptType.setReadOnly(true);
+//        cboVendor.setReadOnly(true);
 
+        current.set('intLineNo', po.get('intPurchaseDetailId'));
+        current.set('intSourceId', po.get('intPurchaseId'));
+        current.set('dblOpenReceive', po.get('dblQtyOrdered'));
+        current.set('intItemNo', po.get('intItemNo'));
+        current.set('strItemNo', po.get('strItemNo'));
+        current.set('intUnitMeasureId', po.get('intUnitOfMeasureId'));
+        current.set('strUnitMeasure', po.get('strUOM'));
+        current.set('dblCost', po.get('dblCost'));
+        current.set('dblLineTotal', po.get('dblTotal'));
 
     },
 

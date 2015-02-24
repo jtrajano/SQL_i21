@@ -721,21 +721,27 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intPurchaseId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Purchase Order Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
                                                                     dataIndex: 'strPurchaseOrderNumber',
                                                                     dataType: 'string',
                                                                     text: 'PO Number',
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strVendorOrderNumber',
+                                                                    dataIndex: 'strItemNo',
                                                                     dataType: 'string',
-                                                                    text: 'Vendor Order Number',
+                                                                    text: 'Item No',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblQtyOrdered',
+                                                                    dataType: 'float',
+                                                                    text: 'Ordered Qty',
                                                                     flex: 1
                                                                 }
                                                             ],
