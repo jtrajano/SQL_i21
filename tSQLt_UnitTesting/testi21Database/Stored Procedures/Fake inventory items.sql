@@ -13,10 +13,10 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICItemAccount', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICCategory';
 	EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;		
-	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;		
+	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICItemPricing', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure';
-	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;
-	
+	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;	
 		
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -199,23 +199,23 @@ BEGIN
 
 	-- Fake data for Item-Location
 	/*
-		intItemLocationId		intItemId		intLocationId
-		------------------		-------------	---------------------------
-		1						Wet Grains		Default Location
-		2						Sticky Grains	Default Location
-		3						Premium Grains	Default Location
-		4						Cold Grains		Default Location
-		5						Hot Grains		Default Location
-		6						Wet Grains		New Haven
-		7						Sticky Grains	New Haven
-		8						Premium Grains	New Haven
-		9						Cold Grains		New Haven
-		10						Hot Grains		New Haven
-		11						Wet Grains		Better Haven
-		12						Sticky Grains	Better Haven
-		13						Premium Grains	Better Haven
-		14						Cold Grains		Better Haven
-		15						Hot Grains		Better Haven	
+		intItemLocationId		intItemId		intLocationId		Costing Method
+		------------------		-------------	------------------	--------------
+		1						Wet Grains		Default Location	Average Cost
+		2						Sticky Grains	Default Location	Average Cost
+		3						Premium Grains	Default Location	Average Cost
+		4						Cold Grains		Default Location	Average Cost
+		5						Hot Grains		Default Location	Average Cost
+		6						Wet Grains		New Haven			FIFO
+		7						Sticky Grains	New Haven			FIFO
+		8						Premium Grains	New Haven			FIFO
+		9						Cold Grains		New Haven			FIFO
+		10						Hot Grains		New Haven			FIFO
+		11						Wet Grains		Better Haven		LIFO
+		12						Sticky Grains	Better Haven		LIFO
+		13						Premium Grains	Better Haven		LIFO
+		14						Cold Grains		Better Haven		LIFO
+		15						Hot Grains		Better Haven		LIFO
 	*/
 
 	BEGIN 

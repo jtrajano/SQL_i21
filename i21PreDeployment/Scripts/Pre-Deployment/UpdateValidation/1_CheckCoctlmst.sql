@@ -1,9 +1,11 @@
 ﻿
 GO
+	IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[coctlmst]') AND type IN (N'U')) GOTO Check_Exit;
+
 	PRINT N'BEGIN CHECK coctlmst'
-GO
+
 	SET NOCOUNT ON
-GO
+
 	declare @strDBName nvarchar(max), @intCount int
 	select @strDBName = db_name()
 	select @intCount = count(*) from coctlmst
@@ -17,9 +19,12 @@ GO
 		RAISERROR(@strMessage, 16, 1)
 	END
 
-GO
+
 	SET NOCOUNT OFF
 
-GO
+
 	PRINT N'END CHECK coctlmst'
+
+Check_Exit:
+
 GO

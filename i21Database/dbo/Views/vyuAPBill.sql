@@ -20,4 +20,13 @@ FROM
 	ON A.intVendorId = B.intVendorId
 	INNER JOIN tblGLAccount C
 		ON A.intAccountId = C.intAccountId
-	LEFT JOIN vyuAPBillLatestPayment AS Payment ON A.intBillId = Payment.intBillId AND Id = 1 --get only the latest payment info
+	OUTER APPLY
+	(
+		SELECT TOP 1
+			D.intBillId
+			,E.strPaymentInfo
+		FROM tblAPPaymentDetail D
+			INNER JOIN tblAPPayment E ON D.intPaymentId = E.intPaymentId
+		WHERE E.ysnPosted = 1 AND A.intBillId = D.intBillId
+		ORDER BY intBillId, E.dtmDatePaid DESC --get only the latest payment
+	) Payment

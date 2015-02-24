@@ -4,7 +4,7 @@
     [intPurchaseId] INT NOT NULL, 
     [intItemId] INT NULL, 
     [intUnitOfMeasureId] INT NOT NULL, 
-    [intAccountId] INT NOT NULL, 
+    [intAccountId] INT NULL, 
 	[intStorageLocationId] INT NULL,
 	[intLocationId] INT NOT NULL,
 	[intTaxId] INT NOT NULL DEFAULT 0,

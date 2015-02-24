@@ -37,33 +37,25 @@ BEGIN
 		-- Fake data for item stock table
 		BEGIN 
 			EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+			EXEC tSQLt.FakeTable 'dbo.tblICItemPricing', @Identity = 1;
 
 			-- Add stock information for items under location 1 ('Default')
 			DECLARE @intItemLocationId_1 AS INT 
 			SELECT @intItemLocationId_1 = intItemLocationId FROM dbo.tblICItemLocation WHERE intItemId = @WetGrains AND intLocationId = @Default_Location
-			INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@WetGrains, @intItemLocationId_1, 100, 22)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@StickyGrains, @Default_Location, 150, 33)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@PremiumGrains, @Default_Location, 200, 44)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@ColdGrains, @Default_Location, 250, 55)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@HotGrains, @Default_Location, 300, 66)
+			INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@WetGrains, @intItemLocationId_1, 100)
+			INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@WetGrains, @intItemLocationId_1, 22)
 
 			-- Add stock information for items under location 2 ('NEW HAVEN')
 			DECLARE @intItemLocationId_2 AS INT 
 			SELECT @intItemLocationId_2 = intItemLocationId FROM dbo.tblICItemLocation WHERE intItemId = @WetGrains AND intLocationId = @NewHaven
-			INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@WetGrains, @intItemLocationId_2, 0, 0)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@StickyGrains, @NewHaven, 0, 0)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@PremiumGrains, @NewHaven, 0, 0)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@ColdGrains, @NewHaven, 0, 0)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@HotGrains, @NewHaven, 0, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@WetGrains, @intItemLocationId_2, 0)
+			INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@WetGrains, @intItemLocationId_2, 0)
 
 			-- Add stock information for items under location 3 ('BETTER HAVEN')
 			DECLARE @intItemLocationId_3 AS INT 
 			SELECT @intItemLocationId_3 = intItemLocationId FROM dbo.tblICItemLocation WHERE intItemId = @WetGrains AND intLocationId = @BetterHaven
-			INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@WetGrains, @intItemLocationId_3, 0, 0)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@StickyGrains, @BetterHaven, 0, 0)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@PremiumGrains, @BetterHaven, 0, 0)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@ColdGrains, @BetterHaven, 0, 0)
-			--INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand, dblAverageCost) VALUES (@HotGrains, @BetterHaven, 0, 0)
+			INSERT INTO dbo.tblICItemStock (intItemId, intItemLocationId, dblUnitOnHand) VALUES (@WetGrains, @intItemLocationId_3, 0)
+			INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@WetGrains, @intItemLocationId_3, 0)
 		END
 
 		-- Setup the expected data

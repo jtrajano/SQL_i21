@@ -8,7 +8,9 @@ BEGIN
 	-- Setup the fake data
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFO', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation';
+	EXEC tSQLt.FakeTable 'dbo.tblICItem';
 
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -28,6 +30,14 @@ BEGIN
 	DECLARE @AverageCosting AS INT = 1
 	DECLARE @FIFO AS INT = 2
 	DECLARE @LIFO AS INT = 3			
+
+	-- Add fake data for the items
+	INSERT INTO dbo.tblICItem (intItemId) 
+	SELECT	@WetGrains
+	UNION ALL SELECT @StickyGrains
+	UNION ALL SELECT @PremiumGrains
+	UNION ALL SELECT @ColdGrains
+	UNION ALL SELECT @HotGrains			
 			
 	-- Add fake data to the item location table
 	INSERT INTO dbo.tblICItemLocation (
@@ -106,7 +116,7 @@ BEGIN
 
 	-- Act
 	SET @expected = ( ((20 - 10) * 2.50) + (50 * 2.25) ) / (20 - 10 + 50)
-	SELECT @result = dbo.fnRecalculateAverageCost(@WetGrains, @Default_Location);
+	SELECT @result = dbo.fnRecalculateAverageCost(@WetGrains, @Default_Location, 0);
 
 	-- Assert the null dates are not equal dates
 	EXEC tSQLt.AssertEquals @expected, @result 

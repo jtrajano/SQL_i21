@@ -18,6 +18,7 @@ Type the overview for the table here.
 		[intSourceId] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[dblOrderQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblBillQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOpenReceive] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblReceived] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intUnitMeasureId] INT NOT NULL, 
@@ -30,7 +31,8 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICUnitMeasure] FOREIGN KEY ([intPackageTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 	)
 
 	GO
@@ -71,7 +73,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intSourceId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Package Type Unit of Measure Id',
+    @value = N'Package Type Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -89,7 +91,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intItemId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Order Quantity',
+    @value = N'Order Qauantity',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -116,7 +118,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblReceived'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Unit of Measure Id',
+    @value = N'Item Unit of Measure Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -134,7 +136,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intNoPackages'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Expected Package Weight',
+    @value = N'Exp Package Weight',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',

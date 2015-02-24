@@ -16,7 +16,11 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal decimal(18,6)
+		,@DateOnly DATETIME
+
 SET @ZeroDecimal = 0.000000
+		
+SELECT @DateOnly = CAST(GETDATE() as date)
 
 INSERT INTO [tblARInvoice]
 	([strInvoiceOriginId]
@@ -61,13 +65,13 @@ INSERT INTO [tblARInvoice]
 SELECT
 	[strInvoiceOriginId]	= NULL
 	,[intCustomerId]		= A.[intCustomerId] 
-	,[dtmDate]				= GETDATE()
-	,[dtmDueDate]			= GETDATE()
-	,[intCurrencyId]		= A.[intCurrencyId] 
-	,[intCompanyLocationId]	= A.[intLocationId] 
-	,[intSalespersonId]		= C.[intSalespersonId] 
+	,[dtmDate]				= @DateOnly
+	,[dtmDueDate]			= @DateOnly
+	,[intCurrencyId]		= ISNULL(A.[intCurrencyId], 0)
+	,[intCompanyLocationId]	= ISNULL(A.[intLocationId], 0)
+	,[intSalespersonId]		= ISNULL(C.[intSalespersonId], 0) 
 	,[dtmShipDate]			= GETDATE()
-	,[intShipViaId]			= ISNULL(EL.[intShipViaId] , 0)
+	,[intShipViaId]			= ISNULL(EL.[intShipViaId], 0)
 	,[strPONumber]			= ''
 	,[intTermId]			= ISNULL(EL.[intTermsId], 0)
 	,[dblInvoiceSubtotal]	= A.[dblOverpayment] 
@@ -80,7 +84,7 @@ SELECT
 	,[strTransactionType]	= 'Overpayment'
 	,[intPaymentMethodId]	= ISNULL(A.[intPaymentMethodId], 0)
 	,[strComments]			= A.strRecordNumber 
-	,[intAccountId]			= CL.[intARAccount] 
+	,[intAccountId]			= ISNULL(CL.[intARAccount], 0) 
 	,[dtmPostDate]			= NULL
 	,[ysnPosted]			= 0
 	,[ysnPaid]				= 0
@@ -140,7 +144,7 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intConcurrencyId])
 SELECT
 	intInvoiceId			= @NewId 
-	,intCompanyLocationId	= A.[intLocationId] 
+	,intCompanyLocationId	= ISNULL(A.[intLocationId], 0)
 	,intItemId				= NULL
 	,strItemDescription		= 'Overpayment for '+ A.strRecordNumber 
 	,intItemUOMId			= NULL
@@ -148,7 +152,7 @@ SELECT
 	,dblQtyShipped			= 1
 	,dblPrice				= A.[dblOverpayment]
 	,dblTotal				= A.[dblOverpayment]
-	,intAccountId			= CL.[intServiceCharges] 
+	,intAccountId			= ISNULL(CL.[intServiceCharges], 0)
 	,intCOGSAccountId		= NULL
 	,intSalesAccountId		= NULL
 	,intInventoryAccountId	= NULL

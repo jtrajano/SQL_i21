@@ -1,5 +1,6 @@
 ﻿PRINT N'BEGIN COMPANY SETUP '
 GO
+	IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[coctlmst]') AND type IN (N'U')) GOTO Check_Exit;
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblSMCompanySetup)
 	BEGIN
@@ -16,6 +17,7 @@ GO
 		PRINT N'END INSERTING COMPANY SETUP FROM ORIGIN'
 	END
 	
+	Check_Exit:
 GO
 PRINT N'END COMPANY SETUP '
 

@@ -9,6 +9,8 @@ BEGIN
 				,@PremiumGrains AS INT = 3
 				,@ColdGrains AS INT = 4
 				,@HotGrains AS INT = 5
+				,@ManualLotGrains AS INT = 6
+				,@SerialLotGrains AS INT = 7
 
 		-- Declare the variables for location
 		DECLARE @Default_Location AS INT = 1
@@ -19,7 +21,8 @@ BEGIN
 		DECLARE @AverageCost AS INT = 1
 				,@FIFO AS INT = 2
 				,@LIFO AS INT = 3
-
+				,@StandardCost AS INT = 4
+				,@LotCost AS INT = 5
 
 		CREATE TABLE expected(
 			CostingMethod INT NULL

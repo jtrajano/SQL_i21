@@ -10,7 +10,7 @@ BEGIN TRY
 	INSERT  into @tbl 
 	SELECT efeft_eft_no FROM efeftmst 
 	  WHERE efeft_eft_type_cv = 'C' 
-	  --AND efeft_src_sys = 'NR' 
+	  AND efeft_src_sys = 'NR' 
 	  AND efeft_active_yn = 'Y' 
 	  order by efeft_eft_no
 
@@ -42,7 +42,7 @@ BEGIN TRY
 		SELECT N.intCustomerId, N.intNoteId, strNoteNumber, ST.intScheduleTransId, 'GenerateInvoice'
 		FROM dbo.tblNRNote N
 		JOIN dbo.tblNRScheduleTransaction ST ON ST.intNoteId = N.intNoteId
-		WHERE CAST(CONVERT(nvarchar(10), Dateadd(D, ISNULL(@PriorDaysNoteGenerated,1) * (-1), ST.dtmExpectedPayDate),101) AS DATETIME) = CAST(CONVERT(nvarchar(10), GETDATE(),101) AS DATETIME)
+		WHERE CAST(CONVERT(nvarchar(10), Dateadd(D, ISNULL(@PriorDaysNoteGenerated,1) * (-1), ST.dtmExpectedPayDate),101) AS DATETIME) <= CAST(CONVERT(nvarchar(10), GETDATE(),101) AS DATETIME)
 		AND ISNULL(ST.dtmPayGeneratedOn,'') = ''
 		
 		
@@ -71,6 +71,8 @@ BEGIN TRY
 	END
 
 	Select * from @GenerateSchedule
+	
+	BEGIN TRANSACTION	
 	
 	DECLARE @intCustmerId Int, @intNoteId Int, @NoteNumber nvarchar(10), @intScheduleTransId Int, @GenerateType varchar(50)
 			,@dblTransAmount numeric(18,6), @strSchdLateAppliedOn nvarchar(50)
@@ -101,7 +103,9 @@ BEGIN TRY
 				UPDATE dbo.tblNRScheduleTransaction SET dtmPayGeneratedOn = GETDATE() WHERE intScheduleTransId = @intScheduleTransId
 			END
 			SET @GenerateType = 'GeneratePayment'
-			EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
+			
+			SELECT @dblTransAmount = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction WHere intScheduleTransId = @intScheduleTransId
+			
 			
 			DECLARE @strCbkno nvarchar(20), @strEftrxRefNo nvarchar(50), @eftrx_effect_date int, @CusNo nvarchar(50), @strLocNo nvarchar(10)
 					, @eftrx_ivc_rev_dt int, @intLocationId int, @intEntityId int
@@ -117,8 +121,6 @@ BEGIN TRY
 			SET @eftrx_effect_date = CONVERT(nvarchar(10), Getdate(), 112)
 			
 			SELECT @eftrx_ivc_rev_dt = CONVERT(nvarchar(10), dtmCreated, 112) FROM dbo.tblNRNote Where intNoteId = @intNoteId
-			
-			SELECT @dblTransAmount = dblBalance FROM dbo.tblNRScheduleTransaction WHere intScheduleTransId = @intScheduleTransId
 			
 			-- INSERT into eft transaction table
 			INSERT INTO [dbo].[eftrxmst]
@@ -164,7 +166,7 @@ BEGIN TRY
 			SET @strSQL = @strSQL + '<UserId>' + CAST(@intEntityId as nvarchar(20)) + '</UserId>'
 			SET @strSQL = @strSQL + '<LastUpdateDate>' + CAST(GETDATE() as nvarchar(20)) + '</LastUpdateDate>'
 			SET @strSQL = @strSQL + '<InterestToDate></InterestToDate>'
-			SET @strSQL = @strSQL + '<Comments>' + 'AutoSchedule' + '</Comments>'
+			SET @strSQL = @strSQL + '<Comments>' + CAST(@intScheduleTransId as nvarchar(20)) + '</Comments>'
 
 			SET @strSQL = @strSQL + '</NoteHistoryDetail>'
 
@@ -173,6 +175,19 @@ BEGIN TRY
 			SET @strSQL = '<root>' + @strSQL + '</root> '
 			
 			EXEC dbo.uspNRCreateNoteTransaction @strSQL
+			
+			DECLARE @intNoteTransId Int
+			
+			SELECT @intNoteTransId = intNoteTransId FROM dbo.tblNRNoteTransaction Where RTRIM(strTransComments) =  CAST(@intScheduleTransId as nvarchar(20))
+			
+			--EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
+			DECLARE @intGLReceivableAccountId int, @intCMTransactionId int
+			SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+		   --EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
+ 
+		    EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT
+			--EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount
+			
 			
 			UPDATE dbo.tblNRScheduleTransaction 
 			SET dtmPaidOn = GETDATE(), dblPayAmt = @dblTransAmount
