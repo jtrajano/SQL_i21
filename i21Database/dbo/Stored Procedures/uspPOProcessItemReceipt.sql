@@ -23,7 +23,7 @@ END
 
 IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND dblTotal = 0)
 BEGIN
-	RAISERROR(51037, 11, 1)
+	RAISERROR(51039, 11, 1)
 	RETURN;
 END
 
