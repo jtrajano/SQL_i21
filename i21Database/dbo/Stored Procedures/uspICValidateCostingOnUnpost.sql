@@ -34,7 +34,7 @@ SELECT	Errors.intItemId
 		,Errors.intItemLocationId
 		,Errors.strText
 		,Errors.intErrorCode
-FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnUnpostErrors(Item.intItemId, Item.intItemLocationId, Item.dblQty, Item.dblUOMQty) Errors
+FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnUnpostErrors(Item.intItemId, Item.intItemLocationId, Item.intItemUOMId, Item.dblQty) Errors
 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 -- Check for negative stock qty 

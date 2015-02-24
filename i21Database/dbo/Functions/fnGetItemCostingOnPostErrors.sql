@@ -27,7 +27,7 @@ RETURN (
 				)	
 
 		-- Check for negative stock and if negative stock is NOT allowed. 
-		 UNION ALL 
+		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText = FORMATMESSAGE(50029)

@@ -3,7 +3,6 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-
 		-- Create the assert tables 
 		-- Assert table for the expected
 		SELECT	intItemId				= PODetail.intItemId
@@ -44,11 +43,15 @@ BEGIN
 				,@PremiumGrains AS INT = 3
 				,@ColdGrains AS INT = 4
 				,@HotGrains AS INT = 5
+				,@ManualLotGrains AS INT = 6
+				,@SerializedLotGrains AS INT = 7
+				,@InvalidItem AS INT = -1
 
 		-- Declare the variables for location
 		DECLARE @Default_Location AS INT = 1
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
+				,@InvalidLocation AS INT = -1
 
 		-- Declare the variables for the Item UOM Ids
 		DECLARE @WetGrains_BushelUOMId AS INT = 1
@@ -56,6 +59,8 @@ BEGIN
 				,@PremiumGrains_BushelUOMId AS INT = 3
 				,@ColdGrains_BushelUOMId AS INT = 4
 				,@HotGrains_BushelUOMId AS INT = 5
+				,@ManualLotGrains_BushelUOMId AS INT = 6
+				,@SerializedLotGrains_BushelUOMId AS INT = 7
 				
 		DECLARE @UOMBushel AS INT = 1
 		DECLARE @UOMPound AS INT = 2			
@@ -70,6 +75,10 @@ BEGIN
 
 		-- Create the fake data
 		EXEC testi21Database.[Fake inventory items]
+
+		-- Mark all items as stock-keeping items. 
+		UPDATE dbo.tblICItem
+		SET strType = 'Inventory'
 
 		-- Create the fake PO tables 
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchase';
@@ -154,7 +163,7 @@ BEGIN
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
 	END 
-	
+		
 	-- Act 
 	BEGIN 
 		INSERT INTO actual (
