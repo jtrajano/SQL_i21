@@ -141,8 +141,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 colGLAccountCategory: {
                     dataIndex: 'strAccountCategory',
                     editor: {
-                        store: '{accountCategory}',
-                        defaultFilters: i21.ModuleMgr.Inventory.getICAccountCategories()
+                        store: '{accountCategory}'
                     }
                 },
                 colGLAccountId: {
