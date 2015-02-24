@@ -17,7 +17,7 @@ Type the overview for the table here.
 		[intLineNo] INT NOT NULL, 
 		[intSourceId] INT NULL,
 		[intItemId] INT NOT NULL, 
-		[intSubLocationId] INT NULL, 
+		[intSubLocationId] INT NOT NULL,
 		[dblOrderQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOpenReceive] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblReceived] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -33,7 +33,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICUnitMeasure] FOREIGN KEY ([intPackageTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-		CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId])
+		CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) ON DELETE NO ACTION
 	)
 
 	GO
