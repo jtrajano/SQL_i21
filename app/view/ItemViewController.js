@@ -51,7 +51,8 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboLotTracking: {
                 value: '{current.strLotTracking}',
-                store: '{lotTracking}'
+                store: '{lotTracking}',
+                readOnly: '{checkStockTracking}'
             },
             cboTracking: {
                 value: '{current.strInventoryTracking}',
@@ -455,7 +456,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelUPC: 'strUPC',
-                colPricingLevelUnits: 'dblUnit',
+                colPricingLevelUnits: 'cboPricingLevelLocation',
                 colPricingLevelMin: 'dblMin',
                 colPricingLevelMax: 'dblMax',
                 colPricingLevelMethod: {
@@ -514,6 +515,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colSpecialPricingDiscountRate: 'dblDiscount',
                 colSpecialPricingUnitPrice: 'dblUnitAfterDiscount',
+                colSpecialPricingDiscountedPrice: 'dblDiscountedPrice',
                 colSpecialPricingBeginDate: 'dtmBeginDate',
                 colSpecialPricingEndDate: 'dtmEndDate',
                 colSpecialPricingAccumQty: 'dblAccumulatedQty',
@@ -936,23 +938,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             ]
         });
-
-        var colSpecialPricingDiscountedPrice = grdSpecialPricing.columns[8];
-        if (colSpecialPricingDiscountedPrice) {
-            colSpecialPricingDiscountedPrice.renderer = function (value, metadata, record) {
-                if (record.get('strDiscountBy') === 'Percent') {
-                    var discount = record.get('dblUnitAfterDiscount') * record.get('dblDiscount') / 100;
-                    var discPrice = record.get('dblUnitAfterDiscount') - discount;
-                    return i21.ModuleMgr.Inventory.roundDecimalFormat(discPrice, 2);
-                }
-                else if (record.get('strDiscountBy') === 'Amount') {
-                    var discount = record.get('dblDiscount');
-                    var discPrice = record.get('dblUnitAfterDiscount') - discount;
-                    return i21.ModuleMgr.Inventory.roundDecimalFormat(discPrice, 2);
-                }
-                else { return i21.ModuleMgr.Inventory.roundDecimalFormat(0, 2); }
-            }
-        }
 
         me.subscribeLocationEvents(grdLocationStore, me);
 
@@ -1795,13 +1780,21 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        var win = combo.up('window');
         var grid = combo.up('grid');
+        var grdPricing = win.down('#grdPricing');
         var plugin = grid.getPlugin('cepPricingLevel');
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
+            if (grdPricing.store){
+                var record = grdPricing.store.findRecord('intItemLocationId', records[0].get('intItemLocationId'));
+                if (record){
+                    current.set('dblUnitPrice', record.get('dblSalePrice'));
+                }
+            }
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
@@ -1835,6 +1828,19 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
             current.set('dblUnit', records[0].get('dblUnitQty'));
+        }
+        else if (combo.column.itemId === 'colSpecialPricingDiscountBy') {
+            if (records[0].get('strDescription') === 'Percent') {
+                var discount = current.get('dblUnitAfterDiscount') * current.get('dblDiscount') / 100;
+                var discPrice = current.get('dblUnitAfterDiscount') - discount;
+                current.set('dblDiscountedPrice', discPrice);
+            }
+            else if (records[0].get('strDescription') === 'Amount') {
+                var discount = current.get('dblDiscount');
+                var discPrice = current.get('dblUnitAfterDiscount') - discount;
+                current.set('dblDiscountedPrice', discPrice);
+            }
+            else { current.set('dblDiscountedPrice', 0.00); }
         }
     },
 
@@ -2214,6 +2220,39 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onSpecialPricingDiscountChange: function(obj, newValue, oldValue, eOpts){
+        var grid = obj.up('grid');
+        var plugin = grid.getPlugin('cepSpecialPricing');
+        var record = plugin.getActiveRecord();
+
+        if (obj.itemId === 'txtSpecialPricingDiscount') {
+            if (record.get('strDiscountBy') === 'Percent') {
+                var discount = record.get('dblUnitAfterDiscount') * newValue / 100;
+                var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else if (record.get('strDiscountBy') === 'Amount') {
+                var discount = newValue;
+                var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else { record.set('dblDiscountedPrice', 0.00); }
+        }
+        else if (obj.itemId === 'txtSpecialPricingUnitPrice') {
+            if (record.get('strDiscountBy') === 'Percent') {
+                var discount = newValue * record.get('dblDiscount') / 100;
+                var discPrice = newValue - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else if (record.get('strDiscountBy') === 'Amount') {
+                var discount = record.get('dblDiscount');
+                var discPrice = newValue - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else { record.set('dblDiscountedPrice', 0.00); }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2264,9 +2303,6 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboPricingLevelLocation": {
                 select: this.onPricingLevelSelect
             },
-//            "#cboPricingLevelLevel": {
-//                select: this.onPricingLevelSelect
-//            },
             "#cboPricingLevelUOM": {
                 select: this.onPricingLevelSelect
             },
@@ -2350,6 +2386,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboTracking": {
                 specialKey: this.onSpecialKeyTab
+            },
+            "#txtSpecialPricingDiscount": {
+                change: this.onSpecialPricingDiscountChange
+            },
+            "#txtSpecialPricingUnitPrice": {
+                change: this.onSpecialPricingDiscountChange
             }
         });
     }

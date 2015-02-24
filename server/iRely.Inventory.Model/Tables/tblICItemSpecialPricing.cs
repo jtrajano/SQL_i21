@@ -83,6 +83,27 @@ namespace iRely.Inventory.Model
                 _upc = value;
             }
         }
+        [NotMapped]
+        public decimal? dblDiscountedPrice
+        {
+            get
+            {
+                if (strDiscountBy == "Percent")
+                {
+                    var discount = dblUnitAfterDiscount * dblDiscount / 100;
+                    var discPrice = dblUnitAfterDiscount - discount;
+                    return discPrice;
+                }
+                else if (strDiscountBy == "Amount")
+                {
+                    var discount = dblDiscount;
+                    var discPrice = dblUnitAfterDiscount - discount;
+                    return discPrice;
+                }
+                else
+                    return 0;
+            }
+        }
 
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }

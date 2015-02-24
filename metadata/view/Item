@@ -6787,40 +6787,6 @@
                                             "designerId": "99b8c407-e755-4e9c-b3f2-7ace0b0a7f46"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": null,
-                                                "itemId": "colPricingUOM",
-                                                "text": "UOM",
-                                                "width": 116
-                                            },
-                                            "name": "MyColumn25",
-                                            "designerId": "da658f6f-c000-461b-93ea-d89da20784db"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": null,
-                                                "itemId": "colPricingUPC",
-                                                "text": "UPC",
-                                                "width": 116
-                                            },
-                                            "name": "MyColumn7",
-                                            "designerId": "9a4b220f-2193-4e6d-b62c-7794131cf5c0"
-                                        },
-                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -7366,7 +7332,7 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Column",
+                                                            "type": "Ext.grid.column.Number",
                                                             "reference": {
                                                                 "name": "columns",
                                                                 "type": "array"
@@ -7380,7 +7346,7 @@
                                                                 "text": "Min",
                                                                 "width": 50
                                                             },
-                                                            "name": "MyColumn37",
+                                                            "name": "MyNumberColumn24",
                                                             "designerId": "43a87946-07f0-4f9e-97c7-cd65dc1abcba",
                                                             "cn": [
                                                                 {
@@ -7400,7 +7366,7 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Column",
+                                                            "type": "Ext.grid.column.Number",
                                                             "reference": {
                                                                 "name": "columns",
                                                                 "type": "array"
@@ -7414,7 +7380,7 @@
                                                                 "text": "Max",
                                                                 "width": 50
                                                             },
-                                                            "name": "MyColumn38",
+                                                            "name": "MyNumberColumn39",
                                                             "designerId": "be51367e-69dd-4528-9227-b3e5a4ce8c94",
                                                             "cn": [
                                                                 {
@@ -7502,7 +7468,7 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Column",
+                                                            "type": "Ext.grid.column.Number",
                                                             "reference": {
                                                                 "name": "columns",
                                                                 "type": "array"
@@ -7516,7 +7482,7 @@
                                                                 "text": "Commision Rate",
                                                                 "width": 104
                                                             },
-                                                            "name": "MyColumn41",
+                                                            "name": "MyNumberColumn40",
                                                             "designerId": "09c5964d-efa0-4ad3-a5bc-37cb88410e9f",
                                                             "cn": [
                                                                 {
@@ -7536,7 +7502,7 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Column",
+                                                            "type": "Ext.grid.column.Number",
                                                             "reference": {
                                                                 "name": "columns",
                                                                 "type": "array"
@@ -7550,7 +7516,7 @@
                                                                 "text": "Amount",
                                                                 "width": 68
                                                             },
-                                                            "name": "MyColumn31",
+                                                            "name": "MyNumberColumn41",
                                                             "designerId": "ee0d1236-0756-4b87-bf73-51c0a5f28784",
                                                             "cn": [
                                                                 {
@@ -7570,7 +7536,7 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Column",
+                                                            "type": "Ext.grid.column.Number",
                                                             "reference": {
                                                                 "name": "columns",
                                                                 "type": "array"
@@ -7583,7 +7549,7 @@
                                                                 "itemId": "colPricingLevelUnitPrice",
                                                                 "text": "Unit Price"
                                                             },
-                                                            "name": "MyColumn42",
+                                                            "name": "MyNumberColumn42",
                                                             "designerId": "1ad0e5a5-0246-44b9-a119-1da2f60a5bf5",
                                                             "cn": [
                                                                 {
@@ -8110,7 +8076,8 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldStyle": "text-align:right",
-                                                                        "hideTrigger": true
+                                                                        "hideTrigger": true,
+                                                                        "itemId": "txtSpecialPricingDiscount"
                                                                     },
                                                                     "name": "MyNumberField30",
                                                                     "designerId": "f65915ba-2414-46bc-9ad5-69b7eba996b2"
@@ -8144,7 +8111,8 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "fieldStyle": "text-align:right",
-                                                                        "hideTrigger": true
+                                                                        "hideTrigger": true,
+                                                                        "itemId": "txtSpecialPricingUnitPrice"
                                                                     },
                                                                     "name": "MyNumberField31",
                                                                     "designerId": "9ebdfaa5-372d-41c0-a817-3e49a5c1a1f6"
@@ -8160,6 +8128,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "align": "right",
+                                                                "autoRender": true,
                                                                 "dataIndex": "strFieldName",
                                                                 "flex": null,
                                                                 "itemId": "colSpecialPricingDiscountedPrice",

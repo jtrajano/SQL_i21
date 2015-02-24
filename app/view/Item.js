@@ -3134,20 +3134,6 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Location'
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colPricingUOM',
-                                                        width: 116,
-                                                        dataIndex: 'string',
-                                                        text: 'UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colPricingUPC',
-                                                        width: 116,
-                                                        dataIndex: 'string',
-                                                        text: 'UPC'
-                                                    },
-                                                    {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colPricingLastCost',
                                                         width: 80,
@@ -3396,7 +3382,7 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelMin',
                                                                         width: 50,
                                                                         align: 'right',
@@ -3409,7 +3395,7 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelMax',
                                                                         width: 50,
                                                                         align: 'right',
@@ -3448,7 +3434,7 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelCommissionRate',
                                                                         width: 104,
                                                                         align: 'right',
@@ -3461,7 +3447,7 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelAmount',
                                                                         width: 68,
                                                                         align: 'right',
@@ -3474,7 +3460,7 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelUnitPrice',
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
@@ -3699,6 +3685,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Discount Amount/Percent',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            itemId: 'txtSpecialPricingDiscount',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -3712,12 +3699,14 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Unit Price',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            itemId: 'txtSpecialPricingUnitPrice',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
+                                                                        autoRender: true,
                                                                         itemId: 'colSpecialPricingDiscountedPrice',
                                                                         width: 110,
                                                                         align: 'right',

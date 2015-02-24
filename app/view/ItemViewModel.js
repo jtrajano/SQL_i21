@@ -600,7 +600,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         formatUOMCalculationDecimal: function (get) {
             return i21.ModuleMgr.Inventory.createNumberFormat(get('current.intDecimalCalculation'));
         },
-        checkLotTracking: function(get) {
+        checkLotTracking: function (get) {
             if (get('current.strLotTracking') === 'No') {
                 this.data.current.set('strInventoryTracking', 'Item Level');
                 return false;
@@ -609,6 +609,48 @@ Ext.define('Inventory.view.ItemViewModel', {
                 this.data.current.set('strInventoryTracking', 'Lot Level');
                 return true;
             }
+        },
+        checkStockTracking: function (get) {
+            var isNotStockTracked = false;
+
+            switch (get('strType')) {
+                case 'Assembly/Blend':
+                    isNotStockTracked = false;
+                    break;
+                case 'Bundle':
+                    isNotStockTracked = true;
+                    break;
+                case 'Inventory':
+                    isNotStockTracked = false;
+                    break;
+                case 'Kit':
+                    isNotStockTracked = true;
+                    break;
+                case 'Manufacturing':
+                    isNotStockTracked = false;
+                    break;
+                case 'Non-Inventory':
+                    isNotStockTracked = true;
+                    break;
+                case 'Other Charge':
+                    isNotStockTracked = true;
+                    break;
+                case 'Service':
+                    isNotStockTracked = true;
+                    break;
+                case 'Commodity':
+                    isNotStockTracked = false;
+                    break;
+                case 'Raw Material':
+                    isNotStockTracked = false;
+                    break;
+            };
+
+            if (isNotStockTracked) {
+                this.data.current.set('strLotTracking', 'No');
+            }
+
+            return isNotStockTracked;
         }
     }
 
