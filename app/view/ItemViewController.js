@@ -1183,14 +1183,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(true);
                 pgeAssembly.tab.setHidden(false);
                 pgeBundle.tab.setHidden(true);
@@ -1198,7 +1191,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(false);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(false);
@@ -1217,7 +1209,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(true);
@@ -1229,14 +1220,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(true);
                 pgeAssembly.tab.setHidden(true);
                 pgeBundle.tab.setHidden(true);
@@ -1244,7 +1228,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(true);
@@ -1263,7 +1246,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(true);
@@ -1275,14 +1257,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(true);
                 pgeAssembly.tab.setHidden(true);
                 pgeBundle.tab.setHidden(true);
@@ -1290,7 +1265,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(false);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(false);
@@ -1310,7 +1284,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
@@ -1329,7 +1302,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
@@ -1348,7 +1320,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
@@ -1359,14 +1330,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(false);
                 pgeAssembly.tab.setHidden(true);
                 pgeBundle.tab.setHidden(true);
@@ -1374,7 +1338,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
@@ -1386,14 +1349,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(true);
                 pgeAssembly.tab.setHidden(true);
                 pgeBundle.tab.setHidden(true);
@@ -1401,14 +1357,12 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(false);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(false);
 //                pgeUPC.tab.setHidden(true);
                 pgeContract.tab.setHidden(true);
                 break;
-
         }
 
     },
