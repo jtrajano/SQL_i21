@@ -1480,6 +1480,7 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.BatchPosting' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.GLBatchPosting'
 		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.AccountGroups' WHERE strMenuName = 'Account Groups' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountGroups'
 
+
 	/* ---------------------------------------- */
 	/* --   End General Ledger Module Menu   -- */
 	/* ---------------------------------------- */
