@@ -1103,6 +1103,7 @@
     <Build Include="dbo\Functions\fnGetItemLotType.sql" />
     <Build Include="dbo\Functions\fnIsStockTrackingItem.sql" />
     <Build Include="dbo\Views\vyuPODetails.sql" />
+    <Build Include="dbo\Tables\tblGLAccountCategoryGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
