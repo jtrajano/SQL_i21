@@ -635,7 +635,14 @@ BEGIN
 	SELECT	
 		strTransactionId = A.strInvoiceNumber, 
 		intTransactionId = A.intInvoiceId, 
-		intAccountId = B.intAccountId,
+		intAccountId = (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
+									AND B.intSalesAccountId IS NOT NULL
+									AND B.intSalesAccountId <> 0
+									THEN
+										B.intSalesAccountId
+									ELSE
+										B.intAccountId
+						END),							
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
@@ -1270,7 +1277,14 @@ ELSE
 		SELECT	
 			strTransactionId = A.strInvoiceNumber, 
 			intTransactionId = A.intInvoiceId,
-			intAccountId = B.intAccountId,
+			intAccountId = (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
+							AND B.intSalesAccountId IS NOT NULL
+							AND B.intSalesAccountId <> 0
+							THEN
+								B.intSalesAccountId
+							ELSE
+								B.intAccountId
+				END),
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,									
