@@ -208,6 +208,27 @@ BEGIN
 					WHERE B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 							AND (B.intAccountId IS NULL AND B.intAccountId = 0))
 
+		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT
+			'The item "' + C.strItemNo + '" on this transaction was already billed.',
+			'Bill',
+			A.strBillId,
+			@batchId,
+			A.intBillId
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN
+			(
+				SELECT
+					D.strReceiptNumber
+					,F.strItemNo
+					,intInventoryReceiptItemId
+				FROM tblICInventoryReceipt D
+					INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
+					INNER JOIN tblICItem F ON E.intItemId = F.intItemId
+				WHERE E.dblOpenReceive = E.dblBillQty
+			) C ON C.intInventoryReceiptItemId = B.intItemReceiptId
+			WHERE A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 	END 
 
 	--UNPOSTING VALIDATIONS
@@ -563,6 +584,13 @@ END
 			SET ysnIsUnposted = 1
 		WHERE intTransactionId IN (SELECT intBillId FROM #tmpPostBillData)
 
+		--Update Inventory Item Receipt
+		UPDATE A
+			SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived
+		FROM tblICInventoryReceiptItem A
+			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intInventoryReceiptItemId
+		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
@@ -582,6 +610,13 @@ END
 		UPDATE tblAPBill
 			SET ysnPosted = 1
 		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+
+		--Update Inventory Item Receipt
+		UPDATE A
+			SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived
+		FROM tblICInventoryReceiptItem A
+			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intInventoryReceiptItemId
+		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)

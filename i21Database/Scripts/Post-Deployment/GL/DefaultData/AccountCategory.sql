@@ -99,3 +99,15 @@ IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCate
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Purchase Tax Account')
 	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Purchase Tax Account', 'PurchaseTax',1)
 
+
+
+IF NOT EXISTS(SELECT TOP 1 1 from tblGLAccountCategoryGroup WHERE strAccountCategoryGroupCode = 'INV')
+BEGIN
+	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+	SELECT intAccountCategoryId ,'Inventories','INV' from tblGLAccountCategory where strAccountCategory in
+	('Begin Inventory','Broker Expense','Contract Equity','Contract Purchase Gain/Loss','Contract Sales Gain/Loss','Cost of Goods','Currency Equity',
+	'Currency Purchase Gain/Loss','Currency Sales Gain/Loss','Discount Receivable','DP Income','DP Liability','End Inventory','Fee Expense','Fee Income',
+	'Freight Expenses','Interest Expense','Interest Income','Inventory','Options Expense','Options Income','Purchase Account','Rail Freight','Sales Account',
+	'Storage Expense','Storage Income','Storage Receivable','Variance Account')
+END
+
