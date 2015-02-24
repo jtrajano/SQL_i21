@@ -124,9 +124,9 @@ else
 	Update [dbo].[tblARCustomerPortalMenu] set [strCustomerPortalMenuName] = N'Business Summary', [intCustomerPortalParentMenuId] = 3, [strType] = N'Screen', [strCommand] = N'CustomerPortal.controller.GABusinessSummary' where intCustomerPortalMenuId = 23
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblARCustomerPortalMenu WHERE intCustomerPortalMenuId = 24)
-	INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (24, N'Customer Contact List', 4, N'Screen', N'AccountsReceivable.controller.CustomerContactList')
+	INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (24, N'Customer Contact List', 4, N'Screen', N'AccountsReceivable.view.CustomerContactList')
 else
-	Update [dbo].[tblARCustomerPortalMenu] set [strCustomerPortalMenuName] = N'Customer Contact List', [intCustomerPortalParentMenuId] = 4, [strType] = N'Screen', [strCommand] = N'AccountsReceivable.controller.CustomerContactList' where intCustomerPortalMenuId = 24
+	Update [dbo].[tblARCustomerPortalMenu] set [strCustomerPortalMenuName] = N'Customer Contact List', [intCustomerPortalParentMenuId] = 4, [strType] = N'Screen', [strCommand] = N'AccountsReceivable.view.CustomerContactList' where intCustomerPortalMenuId = 24
 --INSERT [dbo].[tblARCustomerPortalMenu] ([intCustomerPortalMenuId], [strCustomerPortalMenuName], [intCustomerPortalParentMenuId], [strType], [strCommand]) VALUES (25, N'Export Hours Worked', 1, N'Screen', N'HelpDesk.controller.ExportHoursWorked')
 SET IDENTITY_INSERT [dbo].[tblARCustomerPortalMenu] OFF
 
