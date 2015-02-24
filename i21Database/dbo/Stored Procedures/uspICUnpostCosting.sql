@@ -46,8 +46,7 @@ BEGIN
 			intItemId
 			,intItemLocationId
 			,intItemUOMId
-			,dblQty
-			
+			,dblQty			
 	)
 	SELECT	ItemTrans.intItemId
 			,ItemTrans.intItemLocationId
@@ -215,7 +214,7 @@ BEGIN
 	BEGIN 
 		-- Update the avearge cost at the Item Pricing table
 		UPDATE	ItemPricing
-		SET		dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) + (ISNULL(ItemToUnpost.dblQty, 0) * ISNULL(ItemToUnpost.dblUOMQty, 0)) > 0 THEN 
+		SET		dblAverageCost = CASE		WHEN ISNULL(Stock.dblUnitOnHand, 0) +  dbo.fnCalculateStockUnitQty(ItemToUnpost.dblQty, ItemToUnpost.dblUOMQty) > 0 THEN 
 													-- Recalculate the average cost
 													dbo.fnRecalculateAverageCost(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId, ItemPricing.dblAverageCost) 
 												ELSE 
@@ -231,7 +230,7 @@ BEGIN
 
 		-- Update the Unit On Hand at the Item Stock table
 		UPDATE	Stock
-		SET		Stock.dblUnitOnHand = Stock.dblUnitOnHand + (ISNULL(ItemToUnpost.dblQty, 0) * ISNULL(ItemToUnpost.dblUOMQty, 0))
+		SET		Stock.dblUnitOnHand = Stock.dblUnitOnHand + dbo.fnCalculateStockUnitQty(ItemToUnpost.dblQty, ItemToUnpost.dblUOMQty)  
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId		

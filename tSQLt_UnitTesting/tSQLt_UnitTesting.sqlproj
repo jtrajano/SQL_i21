@@ -832,6 +832,12 @@
     <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Raw Material type.sql" />
     <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Commodity type.sql" />
     <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for non-stock keeping type.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateUnitCost for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateUnitCost for the zero unit qty.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateUnitCost for the non-zero unit qty.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateStockUnitQty for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateStockUnitQty for the non-zero unit qty.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateStockUnitQty for the zero unit qty.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

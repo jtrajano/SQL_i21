@@ -224,8 +224,7 @@ BEGIN
 		USING (
 				SELECT	intItemId = @intItemId
 						,intItemLocationId = @intItemLocationId
-						,Qty = ISNULL(@dblQty, 0)  * ISNULL(@dblUOMQty, 0)
-						,Cost = @dblCost
+						,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
 		) AS StockToUpdate
 			ON ItemStock.intItemId = StockToUpdate.intItemId
 			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -310,8 +309,8 @@ BEGIN
 		USING (
 				SELECT	intItemId = @intItemId
 						,intItemLocationId = @intItemLocationId
-						,Qty = ISNULL(@dblQty, 0)  * ISNULL(@dblUOMQty, 0)
-						,Cost = @dblCost
+						,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
+						,Cost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
 		) AS StockToUpdate
 			ON ItemPricing.intItemId = StockToUpdate.intItemId
 			AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId

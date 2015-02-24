@@ -10,10 +10,8 @@ BEGIN
 
 	-- Get the total transaction value of an item per location. 
 	SELECT	@Value = SUM(
-				ISNULL(A.dblQty, 0) * 
-				CASE	WHEN ISNULL(A.dblUOMQty, 0) = 0 THEN 0
-						ELSE ISNULL(A.dblCost, 0) / ISNULL(A.dblUOMQty, 0)
-				END 
+				dbo.fnCalculateStockUnitQty(A.dblQty, A.dblUOMQty) 
+				* dbo.fnCalculateUnitCost(A.dblCost, A.dblUOMQty)
 				+ ISNULL(A.dblValue, 0)
 			) 
 	FROM	[dbo].[tblICInventoryTransaction] A

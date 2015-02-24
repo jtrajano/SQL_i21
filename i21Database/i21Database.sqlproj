@@ -1106,6 +1106,8 @@
     <Build Include="dbo\Tables\tblGLAccountCategoryGroup.sql" />
     <Build Include="dbo\Functions\fnAPValidatePO.sql" />
     <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
+    <Build Include="dbo\Functions\fnCalculateUnitCost.sql" />
+    <Build Include="dbo\Functions\fnCalculateStockUnitQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
