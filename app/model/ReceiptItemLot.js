@@ -39,8 +39,8 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'dblCost', type: 'float' },
         { name: 'intStorageLocationId', type: 'int', allowNull: true },
         { name: 'intUnitUOMId', type: 'int', allowNull: true },
-        { name: 'intUnits', type: 'int', allowNull: true },
-        { name: 'intUnitPallet', type: 'int', allowNull: true },
+        { name: 'intUnits', type: 'int'},
+        { name: 'intUnitPallet', type: 'int'},
         { name: 'dblStatedGrossPerUnit', type: 'float' },
         { name: 'dblStatedTarePerUnit', type: 'float' },
         { name: 'strContainerNo', type: 'string' },
@@ -58,8 +58,6 @@ Ext.define('Inventory.model.ReceiptItemLot', {
 
     validators: [
         {type: 'presence', field: 'strWeightUOM'},
-        {type: 'presence', field: 'dblQuantity'},
-        {type: 'presence', field: 'dblGrossWeight'},
         {type: 'presence', field: 'intUnits'},
         {type: 'presence', field: 'intUnitPallet'}
     ]

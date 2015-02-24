@@ -1469,6 +1469,9 @@
                                                 "type": "object"
                                             },
                                             "codeClass": "Ext.selection.CheckboxModel",
+                                            "userConfig": {
+                                                "mode": "SINGLE"
+                                            },
                                             "name": "MyCheckboxSelectionModel2",
                                             "designerId": "ce852480-76ec-459e-abce-97f5745b94ac"
                                         },
@@ -1733,13 +1736,11 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "dataIndex": "strUnitMeasure",
                                                 "itemId": "colUOM",
-                                                "text": "UOM",
-                                                "width": 76
+                                                "text": "UOM"
                                             },
-                                            "name": "MyColumn2",
-                                            "designerId": "e09f0278-7d35-45e3-9f51-8b23928f82a3",
+                                            "name": "MyColumn54",
+                                            "designerId": "a8805c3f-5f97-4ac3-8830-0e32c8effefb",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1752,33 +1753,28 @@
                                                         "columns": [
                                                             "[",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'intItemId',",
+                                                            "\t\tdataIndex: 'intUnitMeasureId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Item Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intLocationId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Location Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intItemUnitMeasureId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Item UOM Id',",
+                                                            "\t\ttext: 'Unit Of Measure ID',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strUnitMeasure',",
                                                             "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'UOM',",
+                                                            "\t\ttext: 'Unit Measure',",
                                                             "\t\tflex: 1",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strUnitType',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Unit Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "        xtype: 'checkcolumn',",
+                                                            "\t\tdataIndex: 'ysnStockUnit',",
+                                                            "\t\tdataType: 'boolean',",
+                                                            "\t\ttext: 'Stock Unit',",
                                                             "\t\tflex: 1",
                                                             "\t}",
                                                             "]"
@@ -1788,11 +1784,11 @@
                                                         "itemId": "cboItemUOM",
                                                         "valueField": "strUnitMeasure"
                                                     },
-                                                    "name": "MyComboBox",
+                                                    "name": "MyComboBox77",
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "c34d5356-73d7-4f1d-a082-817a1dd0813a",
+                                                    "designerId": "1f2a8c26-bb50-4190-b573-3a9ac43d4081",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -2526,23 +2522,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "itemId": "colLotUOM",
-                                                "text": "UOM",
-                                                "width": 75
-                                            },
-                                            "name": "MyColumn5",
-                                            "designerId": "54032e0e-74a0-4a31-a47d-4f14b3bda845"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
                                                 "itemId": "colLotWeightUOM",
+                                                "modelValidation": true,
                                                 "text": "Weight UOM",
                                                 "width": 75
                                             },
@@ -2592,9 +2573,9 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strWeightUOM",
+                                                        "displayField": "strUnitMeasure",
                                                         "itemId": "cboLotWeightUOM",
-                                                        "valueField": "strWeightUOM"
+                                                        "valueField": "strUnitMeasure"
                                                     },
                                                     "name": "MyComboBox71",
                                                     "configAlternates": {
@@ -2705,32 +2686,6 @@
                                             },
                                             "name": "MyNumberColumn9",
                                             "designerId": "7adc840f-aa41-4a1a-9237-c4f874acfb30",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "string",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colLotCost",
-                                                "text": "Cost",
-                                                "width": 65
-                                            },
-                                            "name": "MyNumberColumn5",
-                                            "designerId": "81023fa4-2555-415b-ac93-0682988cef95",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -3507,7 +3462,9 @@
                                             },
                                             "codeClass": "Ext.grid.plugin.CellEditing",
                                             "userConfig": {
-                                                "clicksToEdit": 1
+                                                "clicksToEdit": 1,
+                                                "designer|displayName": "cepItemLots",
+                                                "pluginId": "cepItemLots"
                                             },
                                             "name": "MyCellEditingPlugin",
                                             "designerId": "bd9245b5-fda9-463c-8f48-4a57c555b4dc"
@@ -3524,6 +3481,147 @@
                                             },
                                             "name": "MyGridView2",
                                             "designerId": "f4736074-0062-4428-8639-5e60ca814597"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "layout": "hbox",
+                                        "layout|flex": null,
+                                        "layout|margins": "",
+                                        "margin": 5
+                                    },
+                                    "name": "MyContainer36",
+                                    "designerId": "47e5aa2a-1661-44c0-8781-d6aaa088b99c",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "layout|flex": null,
+                                                "layout|margins": "",
+                                                "margin": 5
+                                            },
+                                            "name": "MyContainer37",
+                                            "designerId": "50a99e15-7544-4b98-a1c4-8b331c681bbe",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Item Id",
+                                                        "itemId": "txtLotItemId",
+                                                        "readOnly": true
+                                                    },
+                                                    "name": "MyTextField49",
+                                                    "designerId": "fe685b24-793e-4cda-8be2-f776bd1c2dcd"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Description",
+                                                        "itemId": "txtLotItemDescription",
+                                                        "readOnly": true
+                                                    },
+                                                    "name": "MyTextField52",
+                                                    "designerId": "a857137f-f83d-4555-8265-f876db215359"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "UOM",
+                                                        "itemId": "txtLotUOM",
+                                                        "readOnly": true
+                                                    },
+                                                    "name": "MyTextField53",
+                                                    "designerId": "f88a149c-3f5a-4ee9-aef9-1d6948141adf"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "margin": 5
+                                            },
+                                            "name": "MyContainer38",
+                                            "designerId": "8d5302d6-03c6-406f-a9a0-782443669877",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Qty to Receive",
+                                                        "itemId": "txtLotItemQty",
+                                                        "readOnly": true
+                                                    },
+                                                    "name": "MyNumberField55",
+                                                    "designerId": "1a43976d-9a5a-40f6-8e8a-a7110f9a4e95"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Cost",
+                                                        "itemId": "txtLotCost",
+                                                        "readOnly": true
+                                                    },
+                                                    "name": "MyNumberField57",
+                                                    "designerId": "194e86f1-790f-4a9a-b9f8-59055d68652c"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Lots Total Qty",
+                                                        "itemId": "txtLotTotalQty",
+                                                        "readOnly": true
+                                                    },
+                                                    "name": "MyNumberField56",
+                                                    "designerId": "c20c6e2a-8a6a-40b5-a40a-bda558d0066a"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }

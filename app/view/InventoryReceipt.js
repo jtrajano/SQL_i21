@@ -707,7 +707,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     }
                                                 ],
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
+                                                    selType: 'checkboxmodel',
+                                                    mode: 'SINGLE'
                                                 }),
                                                 columns: [
                                                     {
@@ -832,40 +833,33 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colUOM',
-                                                        width: 76,
-                                                        dataIndex: 'strUnitMeasure',
                                                         text: 'UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intItemId',
+                                                                    dataIndex: 'intUnitMeasureId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Item Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intItemUnitMeasureId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item UOM Id',
+                                                                    text: 'Unit Of Measure ID',
                                                                     hidden: true
                                                                 },
                                                                 {
                                                                     dataIndex: 'strUnitMeasure',
                                                                     dataType: 'string',
-                                                                    text: 'UOM',
+                                                                    text: 'Unit Measure',
                                                                     flex: 1
                                                                 },
                                                                 {
                                                                     dataIndex: 'strUnitType',
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnStockUnit',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Stock Unit',
                                                                     flex: 1
                                                                 }
                                                             ],
@@ -1148,14 +1142,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colLotUOM',
-                                                        width: 75,
-                                                        dataIndex: 'string',
-                                                        text: 'UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
                                                         itemId: 'colLotWeightUOM',
+                                                        modelValidation: true,
                                                         width: 75,
                                                         dataIndex: 'string',
                                                         text: 'Weight UOM',
@@ -1194,8 +1182,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 }
                                                             ],
                                                             itemId: 'cboLotWeightUOM',
-                                                            displayField: 'strWeightUOM',
-                                                            valueField: 'strWeightUOM'
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
                                                         }
                                                     },
                                                     {
@@ -1232,16 +1220,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'Net',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        dataIndex: 'string',
-                                                        itemId: 'colLotCost',
-                                                        width: 65,
-                                                        align: 'right',
-                                                        text: 'Cost',
                                                         format: '0,000.##'
                                                     },
                                                     {
@@ -1554,12 +1532,73 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 ],
                                                 plugins: [
                                                     Ext.create('Ext.grid.plugin.CellEditing', {
+                                                        pluginId: 'cepItemLots',
                                                         clicksToEdit: 1
                                                     })
                                                 ],
                                                 viewConfig: {
                                                     itemId: 'grvLotTracking'
                                                 }
+                                            },
+                                            {
+                                                xtype: 'container',
+                                                margins: '',
+                                                margin: 5,
+                                                layout: {
+                                                    type: 'hbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'container',
+                                                        margins: '',
+                                                        margin: 5,
+                                                        items: [
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtLotItemId',
+                                                                fieldLabel: 'Item Id',
+                                                                readOnly: true
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtLotItemDescription',
+                                                                fieldLabel: 'Description',
+                                                                readOnly: true
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtLotUOM',
+                                                                fieldLabel: 'UOM',
+                                                                readOnly: true
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        margin: 5,
+                                                        items: [
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                itemId: 'txtLotItemQty',
+                                                                fieldLabel: 'Qty to Receive',
+                                                                readOnly: true
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                itemId: 'txtLotCost',
+                                                                fieldLabel: 'Cost',
+                                                                readOnly: true
+                                                            },
+                                                            {
+                                                                xtype: 'numberfield',
+                                                                itemId: 'txtLotTotalQty',
+                                                                fieldLabel: 'Lots Total Qty',
+                                                                readOnly: true
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         ]
                                     },

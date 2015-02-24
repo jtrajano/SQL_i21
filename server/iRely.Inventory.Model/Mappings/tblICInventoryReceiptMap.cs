@@ -91,11 +91,11 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICItem)
                 .WithMany(p => p.tblICInventoryReceiptItems)
                 .HasForeignKey(p => p.intItemId);
-            this.HasOptional(p => p.tblICUnitMeasure)
-                .WithMany(p => p.tblICInventoryReceiptItemPacks)
+            this.HasOptional(p => p.tblICItemUOM)
+                .WithMany(p => p.tblICInventoryReceiptItems)
                 .HasForeignKey(p => p.intUnitMeasureId);
             this.HasOptional(p => p.PackageType)
-                .WithMany(p => p.tblICInventoryReceiptItems)
+                .WithMany(p => p.tblICInventoryReceiptItemPacks)
                 .HasForeignKey(p => p.intPackageTypeId);
             this.HasOptional(p => p.vyuICGetReceiptItemSource)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
