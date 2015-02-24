@@ -33,12 +33,14 @@ BEGIN
 		CREATE TABLE expectedICLot(
 			intLotId INT NOT NULL
 			,intItemLocationId INT NOT NULL
+			,intItemUOMId INT NULL
 			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		)
 
 		CREATE TABLE actualICLot(
 			intLotId INT NOT NULL
 			,intItemLocationId INT NOT NULL
+			,intItemUOMId INT NULL
 			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		)
 
@@ -66,10 +68,12 @@ BEGIN
 		INSERT INTO actualICLot (
 				intLotId
 				,intItemLocationId
+				,intItemUOMId
 				,strLotNumber
 		)
 		SELECT	intLotId
 				,intItemLocationId
+				,intItemUOMId 
 				,strLotNumber
 		FROM	dbo.tblICLot
 

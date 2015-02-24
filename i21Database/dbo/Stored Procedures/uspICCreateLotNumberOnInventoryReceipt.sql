@@ -13,6 +13,7 @@ DECLARE @SerializedLotNumber AS NVARCHAR(40)
 DECLARE @intLotId AS INT 
 DECLARE @id AS INT
 DECLARE @intItemLocationId AS INT 
+DECLARE @intItemUOMId AS INT
 DECLARE @GeneratedLotNumbers AS dbo.ItemLotTableType
 
 DECLARE @LotType_Manual AS INT = 1
@@ -21,10 +22,12 @@ DECLARE @LotType_Manual AS INT = 1
 INSERT INTO @GeneratedLotNumbers (
 	intItemId
 	,intItemLocationId
+	,intItemUOMId 
 	,intDetailId
 )
 SELECT	ReceiptItems.intItemId
 		,ItemLocation.intItemLocationId
+		,ReceiptItems.intUnitMeasureId
 		,ItemLot.intInventoryReceiptItemLotId
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItems 
 			ON Receipt.intInventoryReceiptId = ReceiptItems.intInventoryReceiptId
@@ -41,6 +44,7 @@ WHERE	Receipt.strReceiptNumber = @strTransactionId
 SELECT	TOP 1 
 		@id = intId 
 		,@intItemLocationId = intItemLocationId
+		,@intItemUOMId = intItemUOMId
 FROM	@GeneratedLotNumbers 
 WHERE	ISNULL(intLotId, 0) = 0
 
@@ -56,9 +60,11 @@ BEGIN
 		INSERT INTO tblICLot (
 			strLotNumber
 			,intItemLocationId
+			,intItemUOMId
 		) VALUES (
 			@SerializedLotNumber
 			,@intItemLocationId
+			,@intItemUOMId
 		)
 		SET @intLotId = SCOPE_IDENTITY();
 	END 
@@ -72,8 +78,9 @@ BEGIN
 
 	SET @id = NULL 
 	SELECT	TOP 1 
-			@id = intId
+			@id = intId 
 			,@intItemLocationId = intItemLocationId
+			,@intItemUOMId = intItemUOMId
 	FROM	@GeneratedLotNumbers 
 	WHERE	ISNULL(intLotId, 0) = 0
 END
@@ -81,6 +88,7 @@ END
 -- Give the generated lot numbers back to the inventory receipt. 
 UPDATE	dbo.tblICInventoryReceiptItemLot
 SET		intLotId = LotNumbers.intLotId
-		,strLotId = LotNumbers.strLotNumber
+		,strLotId = LotNumbers.strLotNumber		
 FROM	dbo.tblICInventoryReceiptItemLot ItemLot INNER JOIN @GeneratedLotNumbers LotNumbers
 			ON ItemLot.intInventoryReceiptItemLotId = LotNumbers.intDetailId
+			

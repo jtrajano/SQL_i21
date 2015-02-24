@@ -30,11 +30,14 @@ Lot numbers are unique per item-location.
 	(
 		[intLotId] INT NOT NULL IDENTITY, 		
 		[intItemLocationId] INT NOT NULL,
+		[intItemUOMId] INT NOT NULL,
 		[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[dblOnHand] NUMERIC(18,6) DEFAULT ((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		CONSTRAINT [PK_tblICLot] PRIMARY KEY CLUSTERED ([intLotId] ASC),
 		CONSTRAINT [UN_tblICLot] UNIQUE NONCLUSTERED ([intItemLocationId] ASC, [strLotNumber] ASC),
-		CONSTRAINT [FK_tblICInventoryLot_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) 
+		CONSTRAINT [FK_tblICLot_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
+		CONSTRAINT [FK_tblICLot_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
 	)
 	GO
 

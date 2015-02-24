@@ -41,22 +41,24 @@ DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
 -- Get the list of items to unpost
 BEGIN 
-	-- Insert the items per location and UOM
+	-- Insert the items per location, UOM, and if it exists, Lot
 	INSERT INTO @ItemsToUnpost (
 			intItemId
 			,intItemLocationId
 			,intItemUOMId
+			,intLotId
 			,dblQty			
 	)
 	SELECT	ItemTrans.intItemId
 			,ItemTrans.intItemLocationId
 			,ItemTrans.intItemUOMId
+			,ItemTrans.intLotId
 			,SUM(ISNULL(ItemTrans.dblQty, 0) * -1)			
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
-	GROUP BY ItemTrans.intItemId, ItemTrans.intItemLocationId, ItemTrans.intItemUOMId
+	GROUP BY ItemTrans.intItemId, ItemTrans.intItemLocationId, ItemTrans.intItemUOMId, ItemTrans.intLotId
 
 	-- Fill-in the Unit qty from the UOM
 	UPDATE	ItemToUnpost
@@ -238,6 +240,12 @@ BEGIN
 					ON Stock.intItemId = ItemToUnpost.intItemId
 					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
 
+		-- Update the stock quantity at the Lot table
+		UPDATE	Lot
+		SET		Lot.dblOnHand = ISNULL(Lot.dblOnHand, 0) + ItemToUnpost.dblQty
+		FROM	dbo.tblICLot Lot INNER JOIN @ItemsToUnpost ItemToUnpost
+					ON Lot.intItemLocationId = ItemToUnpost.intItemLocationId
+					AND Lot.intLotId = ItemToUnpost.intLotId
 	END
 
 	---------------------------------------------------------------------------------------

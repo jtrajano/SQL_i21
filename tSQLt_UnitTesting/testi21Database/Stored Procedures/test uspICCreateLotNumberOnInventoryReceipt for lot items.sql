@@ -50,12 +50,14 @@ BEGIN
 		CREATE TABLE expectedICLot(
 			intLotId INT NOT NULL
 			,intItemLocationId INT NOT NULL
+			,intItemUOMId INT NULL
 			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		)
 
 		CREATE TABLE actualICLot(
 			intLotId INT NOT NULL
 			,intItemLocationId INT NOT NULL
+			,intItemUOMId INT NULL
 			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		)
 
@@ -75,14 +77,17 @@ BEGIN
 		INSERT INTO expectedICLot (
 				intLotId
 				,intItemLocationId
+				,intItemUOMId
 				,strLotNumber
 		)
 		SELECT	intLotId = 1
 				,intItemLocationId  = @SerializedLotGrains_DefaultLocation
+				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,strLotNumber = 'LOT-10000'
 		UNION ALL 
 		SELECT	intLotId = 2
 				,intItemLocationId  = @SerializedLotGrains_DefaultLocation
+				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,strLotNumber = 'LOT-10001'
 
 		-- Setup expected data for Receipt Item Lot
@@ -120,10 +125,12 @@ BEGIN
 		INSERT INTO actualICLot (
 				intLotId
 				,intItemLocationId
+				,intItemUOMId 
 				,strLotNumber
 		)
 		SELECT	intLotId
 				,intItemLocationId
+				,intItemUOMId 
 				,strLotNumber
 		FROM	dbo.tblICLot
 

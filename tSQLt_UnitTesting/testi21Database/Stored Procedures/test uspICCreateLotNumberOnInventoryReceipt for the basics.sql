@@ -8,11 +8,13 @@ BEGIN
 		CREATE TABLE expected(
 			intItemId INT
 			,intItemLocationId INT
+			,intItemUOMId INT
 		)
 
 		CREATE TABLE actual(
 			intItemId INT
 			,intItemLocationId INT		
+			,intItemUOMId INT
 		)
 	END 
 	
