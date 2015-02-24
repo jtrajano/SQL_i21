@@ -10,6 +10,7 @@ SELECT
 	,B.intTaxId
 	,B.intStorageLocationId
 	,B.intLocationId
+	,B.intSubLocationId
 	,B.dblQtyOrdered
 	,B.dblQtyReceived
 	,B.dblQtyContract
