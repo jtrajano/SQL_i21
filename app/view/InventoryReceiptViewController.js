@@ -141,11 +141,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colItemNo: {
                     dataIndex: 'strItemNo',
                     editor: {
-                        store: '{items}',
-                        defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{current.intLocationId}'
-                        }]
+                        store: '{items}'
                     }
                 },
                 colDescription: 'strItemDescription',
@@ -1124,10 +1120,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         displayField: 'strItemNo',
                                         valueField: 'strItemNo',
                                         store: win.viewModel.storeInfo.items,
-                                        defaultFilters: [{
-                                            column: 'intLocationId',
-                                            value: current.get('intLocationId')
-                                        }]
+                                        defaultFilters: [
+                                            {
+                                                column: 'intLocationId',
+                                                value: current.get('intLocationId'),
+                                                conjunction: 'and'
+                                            },
+                                            {
+                                                column: 'strType',
+                                                value: 'Non-Inventory',
+                                                condition: 'noteq',
+                                                conjunction: 'and'
+                                            },
+                                            {
+                                                column: 'strType',
+                                                value: 'Other Charge',
+                                                condition: 'noteq',
+                                                conjunction: 'and'
+                                            },
+                                            {
+                                                column: 'strType',
+                                                value: 'Service',
+                                                condition: 'noteq',
+                                                conjunction: 'and'
+                                            }
+                                        ]
                                     })
                                 });
                                 break;
@@ -1188,10 +1205,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     displayField: 'strItemNo',
                                     valueField: 'strItemNo',
                                     store: win.viewModel.storeInfo.items,
-                                    defaultFilters: [{
-                                        column: 'intLocationId',
-                                        value: current.get('intLocationId')
-                                    }]
+                                    defaultFilters: [
+                                        {
+                                            column: 'intLocationId',
+                                            value: current.get('intLocationId'),
+                                            conjunction: 'and'
+                                        },
+                                        {
+                                            column: 'strType',
+                                            value: 'Non-Inventory',
+                                            condition: 'noteq',
+                                            conjunction: 'and'
+                                        },
+                                        {
+                                            column: 'strType',
+                                            value: 'Other Charge',
+                                            condition: 'noteq',
+                                            conjunction: 'and'
+                                        },
+                                        {
+                                            column: 'strType',
+                                            value: 'Service',
+                                            condition: 'noteq',
+                                            conjunction: 'and'
+                                        }
+                                    ]
                                 })
                             });
                             break;
