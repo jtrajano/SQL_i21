@@ -34,6 +34,14 @@ SELECT
 	strCostingMethod = (CASE WHEN ItemLocation.intCostingMethod = 1 THEN 'AVG'
 							 WHEN ItemLocation.intCostingMethod = 2 THEN 'FIFO'
 							 WHEN ItemLocation.intCostingMethod = 3 THEN 'LIFO' END),
+	ItemPricing.dblAmountPercent,
+	ItemPricing.dblSalePrice ,
+	ItemPricing.dblMSRPPrice ,
+	ItemPricing.strPricingMethod,
+	ItemPricing.dblLastCost,
+	ItemPricing.dblStandardCost,
+	ItemPricing.dblAverageCost,
+	ItemPricing.dblEndMonthCost,
 	ItemStock.dblUnitOnHand,
 	ItemStock.dblOnOrder,
 	ItemStock.dblOrderCommitted,
@@ -41,6 +49,7 @@ SELECT
 	
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
+LEFT JOIN tblICItemPricing ItemPricing ON ItemLocation.intItemId = ItemPricing.intItemId AND ItemLocation.intItemLocationId = ItemPricing.intItemLocationId
 LEFT JOIN tblICStorageLocation StorageLocation ON ItemLocation.intStorageLocationId = StorageLocation.intStorageLocationId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblICItemStock ItemStock ON ItemStock.intItemId = Item.intItemId AND ItemLocation.intLocationId = ItemStock.intItemLocationId
