@@ -42,3 +42,55 @@ UPDATE tblFRColumnDesignSegment
 GO
 	PRINT N'END UPDATE NEW FORIEGN KEYS'
 GO
+
+
+--=====================================================================================================================================
+-- 	RENAME COLUMN HEADER AND COLUMN DESCRIPTION TO COLUMN NAME
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN RENAME'
+GO
+
+UPDATE tblFRRowDesign SET strRowType = 'Column Name' WHERE strRowType = 'Description Title'
+UPDATE tblFRRowDesign SET strRowType = 'Row Name - Center Align' WHERE strRowType = 'Center Title'
+UPDATE tblFRRowDesign SET strRowType = 'Row Name - Left Align' WHERE strRowType = 'Left Title'
+UPDATE tblFRRowDesign SET strRowType = 'Row Name - Right Align' WHERE strRowType = 'Right Title'
+UPDATE tblFRColumnDesign SET strColumnType = 'Row Name' WHERE strColumnType = 'Row Description'
+UPDATE tblFRColumnDesign SET strColumnCaption = 'Column Name' WHERE strColumnCaption = 'Column Header'
+
+GO
+	PRINT N'END RENAME'
+GO
+
+
+--=====================================================================================================================================
+-- 	REMOVE BALANCE SIDE FOR NON-CALCULATION TYPES
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN REMOVE'
+GO
+
+UPDATE tblFRRowDesign SET strBalanceSide = '' 
+	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts') AND strBalanceSide <> ''
+
+GO
+	PRINT N'END REMOVE'
+GO
+
+
+--=====================================================================================================================================
+-- 	RENAME ROW TYPES
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN RENAME ROW TYPES'
+GO
+
+UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Calculation'
+UPDATE tblFRRowDesign SET strRowType = 'Row Calculation' WHERE strRowType like '%Total Calculation%'
+
+GO
+	PRINT N'END RENAME ROW TYPES'
+GO
