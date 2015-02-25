@@ -108,6 +108,10 @@ BEGIN
 	   
 		
 	--if @isSuccessful = 0
+		DECLARE @ysnPost Bit, @ysnRecap Bit, @isSuccessful Bit, @message_id int
+		SET @ysnPost = 1 --Post, 0 for Unpost
+		SET @ysnRecap = 0 -- Recap
+		EXEC dbo.uspCMPostBankDeposit @ysnPost, @ysnRecap, @intNoteTransId, @intCreatedUserId, @intEntityId, @isSuccessful, @message_id
 	
 
 		
@@ -118,10 +122,6 @@ BEGIN
 	 RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 	END CATCH
 	
-		--DECLARE @ysnPost Bit, @ysnRecap Bit, @isSuccessful Bit, @message_id int
-		--SET @ysnPost = 1 --Post, 0 for Unpost
-		--SET @ysnRecap = 0 -- Recap
-		--EXEC dbo.uspCMPostBankDeposit @ysnPost, @ysnRecap, @intTransactionId, @intCreatedUserId, @intEntityId, @isSuccessful, @message_id
-	
+		
 	
 END

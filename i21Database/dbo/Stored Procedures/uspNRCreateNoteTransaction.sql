@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspNRCreateNoteTransaction]
 @XML varchar(max)
+, @intNoteTransId Int = 0 OUTPUT
 AS
 BEGIN TRY  
 	DECLARE 
@@ -7,7 +8,7 @@ BEGIN TRY
 	,@ErrMsg nvarchar(max)
 	,@intNoteId Int
 	,@isWriteOff bit
-	, @intNoteTransId Int
+	--, @intNoteTransId Int
 	,@NoteTransID Int
 	,@TransDate DateTime
 	,@TransTypeID Int
@@ -22,7 +23,7 @@ BEGIN TRY
 	,@AmountAppliesToInterest Decimal(18,2)
 	,@AsOf DateTime
 	,@Principal Decimal(18,2)
-	,@CheckNumber nvarchar(10)
+	,@CheckNumber nvarchar(50)
 	,@UserId nvarchar(10)
 	,@LastUpdateDate DateTime
 	,@Comments nvarchar(200)
@@ -117,7 +118,7 @@ BEGIN TRY
       ,AmountAppliesToInterest Decimal(18,2)
       ,AsOf DateTime
 	  ,Principal Decimal(18,2)
-	  ,CheckNumber nvarchar(10)
+	  ,CheckNumber nvarchar(50)
 	  ,UserId nvarchar(10)
 	  ,LastUpdateDate datetime
 	  ,Comments nvarchar(200)
@@ -227,7 +228,8 @@ BEGIN TRY
 		--,@dtmPrevAsOfDate 
 		--,@ReferenceNumber
 		
-		SET @intNoteTransId = @@IDENTITY
+		SET @intNoteTransId = @@IDENTITY -- SCOPE_IDENTITY() 
+		
 		
 		IF(@TransTypeID = 1)
 		BEGIN
@@ -236,6 +238,7 @@ BEGIN TRY
 		IF(@TransTypeID = 4)
 		BEGIN
 			DECLARE @intCMTransactionId Int, @intGLReceivableAccountId Int
+			
 			IF(@NoteType = 'Scheduled Invoice' AND @CheckNumber <> 'AutoSchedule')
 			BEGIN
 				DECLARE @ExpectedPayAmount numeric(18,6), @LateFee numeric(18,6)
@@ -285,7 +288,7 @@ BEGIN TRY
 				UPDATE dbo.tblNRNoteTransaction Set strTransComments = @Comments Where intNoteTransId = @intNoteTransId
 				
 			END
-			ELSE
+			ELSE IF(@NoteType <> 'Scheduled Invoice' AND @CheckNumber <> 'AutoSchedule')
 			BEGIN
 				--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
 				SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
@@ -452,6 +455,7 @@ BEGIN TRY
 	--RETURN @intNoteTransId
 
 	  	--COMMIT TRANSACTION	
+	 --SET @intTransactionId = @intNoteTransId
 	  	
 	 END TRY   
 	   
