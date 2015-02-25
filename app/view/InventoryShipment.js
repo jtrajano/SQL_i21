@@ -647,20 +647,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnAddItem',
-                                                                iconCls: 'small-add',
-                                                                text: 'Add'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnEditItem',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
                                                                 itemId: 'btnRemoveItem',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
@@ -930,14 +916,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
-                                                                                itemId: 'btnAddLot',
-                                                                                margin: '0 0 0 5',
-                                                                                iconCls: 'small-add',
-                                                                                text: 'Add'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
                                                                                 itemId: 'btnRemoveLot',
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Remove'
@@ -1061,14 +1039,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
-                                                                                itemId: 'btnAddSplit',
-                                                                                margin: '0 0 0 5',
-                                                                                iconCls: 'small-add',
-                                                                                text: 'Add'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
                                                                                 itemId: 'btnRemoveSplit',
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Remove'
@@ -1170,13 +1140,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             padding: '0 0 0 1'
                                                         },
                                                         items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnAddNotes',
-                                                                iconCls: 'small-add',
-                                                                text: 'Add'
-                                                            },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,

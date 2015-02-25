@@ -686,13 +686,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnEditInventoryReceipt',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
                                                                 itemId: 'btnRemoveInventoryReceipt',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
@@ -1113,22 +1106,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnAddLot',
-                                                                margin: '0 0 0 5',
-                                                                iconCls: 'small-add',
-                                                                text: 'Add'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnEditLot',
-                                                                margin: '0 0 0 5',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
                                                             },
                                                             {
                                                                 xtype: 'button',

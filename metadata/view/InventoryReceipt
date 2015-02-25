@@ -1405,24 +1405,6 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-edit",
-                                                        "itemId": "btnEditInventoryReceipt",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Edit"
-                                                    },
-                                                    "name": "MyButton21",
-                                                    "designerId": "34554a30-7849-4686-bdfd-2b387d535dd3"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
                                                         "iconCls": "small-delete",
                                                         "itemId": "btnRemoveInventoryReceipt",
                                                         "layout|flex": null,
@@ -2367,44 +2349,6 @@
                                                     },
                                                     "name": "MySeparator1",
                                                     "designerId": "b271bcbe-2681-41fc-8199-de44c2dc25c8"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-add",
-                                                        "itemId": "btnAddLot",
-                                                        "layout|flex": null,
-                                                        "margin": "0 0 0 5",
-                                                        "tabIndex": -1,
-                                                        "text": "Add"
-                                                    },
-                                                    "name": "MyButton7",
-                                                    "designerId": "077614b0-0ebe-4bf9-9b83-e429b636be61"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-edit",
-                                                        "itemId": "btnEditLot",
-                                                        "layout|flex": null,
-                                                        "margin": "0 0 0 5",
-                                                        "tabIndex": -1,
-                                                        "text": "Edit"
-                                                    },
-                                                    "name": "MyButton21",
-                                                    "designerId": "f81bd760-2680-4968-ae82-e20618310140"
                                                 },
                                                 {
                                                     "type": "Ext.button.Button",

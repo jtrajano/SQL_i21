@@ -1449,42 +1449,6 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-add",
-                                                        "itemId": "btnAddItem",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Add"
-                                                    },
-                                                    "name": "MyButton3",
-                                                    "designerId": "d56c6475-4479-4c80-8afb-ce566715e3c9"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-edit",
-                                                        "itemId": "btnEditItem",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Edit"
-                                                    },
-                                                    "name": "MyButton21",
-                                                    "designerId": "2cf7963d-9be0-4447-a0e4-db42ec235571"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
                                                         "iconCls": "small-delete",
                                                         "itemId": "btnRemoveItem",
                                                         "layout|flex": null,
@@ -2156,25 +2120,6 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
-                                                                        "itemId": "btnAddLot",
-                                                                        "layout|flex": null,
-                                                                        "margin": "0 0 0 5",
-                                                                        "tabIndex": -1,
-                                                                        "text": "Add"
-                                                                    },
-                                                                    "name": "MyButton4",
-                                                                    "designerId": "40af11c6-231c-40ec-995c-73024278ee2c"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.button.Button",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "itemId": "btnRemoveLot",
                                                                         "layout|flex": null,
@@ -2497,25 +2442,6 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
-                                                                        "iconCls": "small-add",
-                                                                        "itemId": "btnAddSplit",
-                                                                        "layout|flex": null,
-                                                                        "margin": "0 0 0 5",
-                                                                        "tabIndex": -1,
-                                                                        "text": "Add"
-                                                                    },
-                                                                    "name": "MyButton4",
-                                                                    "designerId": "2bb3bf21-3401-4120-82f3-94c362b0746a"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.button.Button",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "itemId": "btnRemoveSplit",
                                                                         "layout|flex": null,
@@ -2761,24 +2687,6 @@
                                             "name": "MyToolbar11",
                                             "designerId": "2de4a5dc-6c5c-4b51-b738-417fd421fa5b",
                                             "cn": [
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-add",
-                                                        "itemId": "btnAddNotes",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Add"
-                                                    },
-                                                    "name": "MyButton6",
-                                                    "designerId": "4c1e0a3a-ea2d-484e-a20e-7fcabf20d97b"
-                                                },
                                                 {
                                                     "type": "Ext.button.Button",
                                                     "reference": {
