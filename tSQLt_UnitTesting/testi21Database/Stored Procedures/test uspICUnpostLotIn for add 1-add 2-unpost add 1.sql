@@ -82,7 +82,7 @@ BEGIN
 
 		-- Mark all item as lot items
 		UPDATE dbo.tblICItem
-		SET strLotTracking = 'Yes, Manual'
+		SET strLotTracking = 'Yes - Manual'
 
 		-- Add fake data for tblICInventoryLot
 		INSERT INTO dbo.tblICInventoryLot (

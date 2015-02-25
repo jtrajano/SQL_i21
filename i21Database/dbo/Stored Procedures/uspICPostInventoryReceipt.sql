@@ -33,6 +33,10 @@ DECLARE @GLEntries AS RecapTableType
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
  
+-- Create the type of lot numbers
+DECLARE @LotType_Manual AS INT = 1
+	,@LotType_Serial AS INT = 2
+
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
@@ -114,6 +118,7 @@ END
 
 -- Check if lot items are assigned with at least one lot id. 
 -- Get the top record and tell the user about it. 
+-- Msg: Please specify the lot numbers for %s.
 SET @strItemNo = NULL 
 SELECT	TOP 1 
 		@strItemNo = Item.strItemNo		
@@ -123,7 +128,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON Item.intItemId = ReceiptItem.intItemId
 		INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLot
 			ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId	
-WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (1, 2)		
+WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual)		
 		AND ISNULL(ItemLot.intLotId, 0) = 0
 		AND Receipt.strReceiptNumber = @strTransactionId
 GROUP BY  ReceiptItem.intInventoryReceiptItemId, Item.strItemNo
@@ -136,17 +141,17 @@ END
 
 -- Check if all lot items and their quantities are valid. 
 -- Get the top record and tell the user about it. 
+-- Msg: The lot Quantity(ies) on %s must match its Open Receive Quantity.
 SET @strItemNo = NULL 
 SELECT	TOP 1 
 		@strItemNo = Item.strItemNo
-		-- ,SUM(ISNULL(ItemLot.dblQuantity, 0))
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		INNER JOIN dbo.tblICItem Item
 			ON Item.intItemId = ReceiptItem.intItemId
 		LEFT JOIN dbo.tblICInventoryReceiptItemLot ItemLot
 			ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId	
-WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (1, 2)	
+WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 		AND Receipt.strReceiptNumber = @strTransactionId
 GROUP BY  ReceiptItem.intInventoryReceiptItemId, Item.strItemNo, ReceiptItem.dblOpenReceive
 HAVING SUM(ISNULL(ItemLot.dblQuantity, 0)) <> ReceiptItem.dblOpenReceive

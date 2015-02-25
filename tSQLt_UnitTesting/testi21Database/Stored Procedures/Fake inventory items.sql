@@ -208,8 +208,8 @@ BEGIN
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@PremiumGrains, 'PREMIUM GRAINS DESCRIPTION', 'PREMIUM GRAINS')
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@ColdGrains, 'COLD GRAINS DESCRIPTION', 'COLD GRAINS')
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@HotGrains, 'HOT GRAINS DESCRIPTION', 'HOT GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS DESCRIPTION', 'MANUAL LOT GRAINS', 'Yes, Manual')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@SerializedLotGrains, 'SERIALIZED LOT GRAINS DESCRIPTION', 'SERIALIZED LOT GRAINS', 'Yes, Serial Number')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS DESCRIPTION', 'MANUAL LOT GRAINS', 'Yes - Manual')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@SerializedLotGrains, 'SERIALIZED LOT GRAINS DESCRIPTION', 'SERIALIZED LOT GRAINS', 'Yes - Serial Number')
 	END
 
 	-- Fake data for Item-Location

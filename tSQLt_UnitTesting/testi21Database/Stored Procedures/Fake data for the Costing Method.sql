@@ -133,8 +133,8 @@ BEGIN
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@ColdGrains, 'COLD GRAINS')
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@HotGrains, 'HOT GRAINS')
-	INSERT INTO tblICItem (intItemId, strDescription, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS', 'Yes, Manual')
-	INSERT INTO tblICItem (intItemId, strDescription, strLotTracking) VALUES (@SerialLotGrains, 'SERIAL LOT GRAINS', 'Yes, Serial Number')
+	INSERT INTO tblICItem (intItemId, strDescription, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS', 'Yes - Manual')
+	INSERT INTO tblICItem (intItemId, strDescription, strLotTracking) VALUES (@SerialLotGrains, 'SERIAL LOT GRAINS', 'Yes - Serial Number')
 
 	-- Add items for DEFAULT LOCATION 
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @Default_Location, @AllowNegativeStock, @AverageCost)

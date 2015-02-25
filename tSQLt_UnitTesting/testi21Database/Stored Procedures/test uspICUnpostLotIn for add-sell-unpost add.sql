@@ -82,7 +82,7 @@ BEGIN
 
 		-- Mark all item as lot items
 		UPDATE dbo.tblICItem
-		SET strLotTracking = 'Yes, Serial Number'
+		SET strLotTracking = 'Yes - Serial Number'
 
 		-- Add fake data for tblICInventoryLot
 		INSERT INTO dbo.tblICInventoryLot (
