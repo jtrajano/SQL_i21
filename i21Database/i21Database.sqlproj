@@ -184,7 +184,7 @@
     <Build Include="dbo\Tables\tblFRColumnDesignCalculation.sql" />
     <Build Include="dbo\Tables\tblFRColumnDesignSegment.sql" />
     <Build Include="dbo\Tables\tblFRConnection.sql" />
-    <Build Include="dbo\Tables\tblFRGroupsDetail.sql" />
+    <Build Include="dbo\Tables\tblFRReportGroupDetail.sql" />
     <Build Include="dbo\Tables\tblFRHeader.sql" />
     <Build Include="dbo\Tables\tblFRHeaderDesign.sql" />
     <Build Include="dbo\Tables\tblFRMapping.sql" />

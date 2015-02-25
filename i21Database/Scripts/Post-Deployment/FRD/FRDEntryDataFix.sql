@@ -94,3 +94,21 @@ UPDATE tblFRRowDesign SET strRowType = 'Row Calculation' WHERE strRowType like '
 GO
 	PRINT N'END RENAME ROW TYPES'
 GO
+
+
+--=====================================================================================================================================
+-- 	DROP TABLE tblFRGroupsDetail
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN DROP TABLE tblFRGroupsDetail'
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblFRGroupsDetail]') AND type in (N'U')) 
+BEGIN
+	DROP TABLE tblFRGroupsDetail
+END
+
+GO
+	PRINT N'END DROP TABLE tblFRGroupsDetail'
+GO
