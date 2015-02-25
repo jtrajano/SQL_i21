@@ -37,7 +37,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblScheduleQty] NUMERIC(12, 4) NULL, 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractOptHeader_intContractOptHeaderId] FOREIGN KEY ([intContractOptHeaderId]) REFERENCES [tblCTContractOptHeader]([intContractOptHeaderId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTFreightRate_intFreightRateId] FOREIGN KEY ([intFreightRateId]) REFERENCES [tblCTFreightRate]([intFreightRateId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTPricingType_intPricingType] FOREIGN KEY ([intPricingType]) REFERENCES [tblCTPricingType]([Value]),

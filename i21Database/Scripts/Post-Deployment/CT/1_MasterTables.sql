@@ -115,12 +115,16 @@ BEGIN
 END
 GO
 
+--GO
+--IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE Name = 'Canadian Basis')
+--BEGIN
+--	INSERT INTO tblCTPricingType
+--	SELECT 5,'Canadian Basis',1	
+--END
+--GO
+
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE Name = 'Canadian Basis')
-BEGIN
-	INSERT INTO tblCTPricingType
-	SELECT 5,'Canadian Basis',1	
-END
+	DELETE FROM tblCTPricingType WHERE Name = 'Canadian Basis'
 GO
 
 --tblCTPutCall

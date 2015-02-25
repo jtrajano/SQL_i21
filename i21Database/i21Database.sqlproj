@@ -1076,6 +1076,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDIncomeStatementDetail.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementDisplay.sql" />
     <Build Include="dbo\Tables\tblHDProjectModule.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
