@@ -61,6 +61,7 @@ namespace iRely.Inventory.BRL
                 .Include(p => p.tblICInventoryReceiptInspections)
                 .Include(p => p.vyuAPVendor)
                 .Include(p=> p.tblSMFreightTerm)
+                .Include(p => p.tblSMCompanyLocation)
                 .Include("tblICInventoryReceiptItems.tblICItem")
                 .Include("tblICInventoryReceiptItems.tblICItemUOM.tblICUnitMeasure")
                 .Include("tblICInventoryReceiptItems.PackageType")

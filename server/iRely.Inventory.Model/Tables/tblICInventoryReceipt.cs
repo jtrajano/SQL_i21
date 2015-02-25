@@ -117,7 +117,7 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_locationName))
-                    if (tblSMFreightTerm != null)
+                    if (tblSMCompanyLocation != null)
                         return tblSMCompanyLocation.strLocationName;
                     else
                         return null;

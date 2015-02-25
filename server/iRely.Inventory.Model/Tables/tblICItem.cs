@@ -205,8 +205,8 @@ namespace iRely.Inventory.Model
     public class vyuICGetItemStock
     {
         [Key]
-        public int? intKey { get; set; }
-        public int? intItemId { get; set; }
+        public int intKey { get; set; }
+        public int intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strType { get; set; }
         public string strDescription { get; set; }
@@ -232,6 +232,14 @@ namespace iRely.Inventory.Model
         public string strAllowNegativeInventory { get; set; }
         public int? intCostingMethod { get; set; }
         public string strCostingMethod { get; set; }
+        public decimal? dblAmountPercent { get; set; }
+        public decimal? dblSalePrice { get; set; }
+        public decimal? dblMSRPPrice { get; set; }
+        public string strPricingMethod { get; set; }
+        public decimal? dblLastCost { get; set; }
+        public decimal? dblStandardCost { get; set; }
+        public decimal? dblAverageCost { get; set; }
+        public decimal? dblEndMonthCost { get; set; }
         public decimal? dblUnitOnHand { get; set; }
         public decimal? dblOnOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
