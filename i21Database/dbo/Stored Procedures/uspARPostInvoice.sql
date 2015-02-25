@@ -521,7 +521,7 @@ BEGIN
 			ON B.intItemId = I.intItemId 
 	WHERE 
 		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-		AND I.strType NOT IN ('Non-Inventory','Service')
+		AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
 		
 	--CREDIT INVENTORY
 	UNION ALL 
@@ -592,7 +592,7 @@ BEGIN
 			ON B.intItemId = I.intItemId 
 	WHERE 
 		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-		AND I.strType NOT IN ('Non-Inventory','Service')
+		AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
 	
 	--DEBIT AR
 	UNION ALL 
@@ -635,7 +635,14 @@ BEGIN
 	SELECT	
 		strTransactionId = A.strInvoiceNumber, 
 		intTransactionId = A.intInvoiceId, 
-		intAccountId = B.intAccountId,
+		intAccountId = (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
+									AND B.intSalesAccountId IS NOT NULL
+									AND B.intSalesAccountId <> 0
+									THEN
+										B.intSalesAccountId
+									ELSE
+										B.intAccountId
+						END),							
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
@@ -670,7 +677,7 @@ BEGIN
 			ON A.intInvoiceId = P.intInvoiceId
 	WHERE 
 		(B.intItemId IS NULL OR B.intItemId = 0)
-		OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service')))
+		OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge')))
 
 	--CREDIT SALES
 	UNION ALL 
@@ -715,7 +722,7 @@ BEGIN
 			ON B.intItemId = I.intItemId 
 	WHERE 
 		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-		AND I.strType NOT IN ('Non-Inventory','Service')
+		AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
 
 	UNION ALL 
 	SELECT	
@@ -1154,7 +1161,7 @@ ELSE
 			ON B.intItemId = I.intItemId 
 	WHERE 
 		(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-		AND I.strType NOT IN ('Non-Inventory','Service')
+		AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
 
 		--CREDIT INVENTORY
 		UNION ALL 
@@ -1226,7 +1233,7 @@ ELSE
 				ON B.intItemId = I.intItemId 
 		WHERE 
 			(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-			AND I.strType NOT IN ('Non-Inventory','Service')
+			AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
 		
 		--DEBIT AR
 		UNION ALL
@@ -1270,7 +1277,14 @@ ELSE
 		SELECT	
 			strTransactionId = A.strInvoiceNumber, 
 			intTransactionId = A.intInvoiceId,
-			intAccountId = B.intAccountId,
+			intAccountId = (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
+							AND B.intSalesAccountId IS NOT NULL
+							AND B.intSalesAccountId <> 0
+							THEN
+								B.intSalesAccountId
+							ELSE
+								B.intAccountId
+				END),
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,									
@@ -1306,7 +1320,7 @@ ELSE
 				ON A.intInvoiceId = P.intInvoiceId 
 		WHERE 
 			(B.intItemId IS NULL OR B.intItemId = 0)
-			OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service')))
+			OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge')))
 
 		--CREDIT SALES
 		UNION ALL 
@@ -1352,7 +1366,7 @@ ELSE
 				ON B.intItemId = I.intItemId 
 		WHERE 
 			(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-			AND I.strType NOT IN ('Non-Inventory','Service')
+			AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
 		
 				
 		UNION ALL 
