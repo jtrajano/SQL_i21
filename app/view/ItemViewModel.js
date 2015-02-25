@@ -27,6 +27,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedProductLineAttribute',
         'Inventory.store.BufferedProductTypeAttribute',
         'Inventory.store.BufferedSeasonAttribute',
+        'Inventory.store.BufferedCategory',
         'AccountsPayable.store.VendorBuffered',
         'AccountsReceivable.store.CustomerBuffered',
         'i21.store.CompanyLocationBuffered',
@@ -100,6 +101,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                     name: 'strStatus'
                 }
             ]
+        },
+        itemCategory: {
+            type: 'icbufferedcategory'
         },
         lotTracking: {
             autoLoad: true,
@@ -613,7 +617,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         checkStockTracking: function (get) {
             var isNotStockTracked = false;
 
-            switch (get('strType')) {
+            switch (get('current.strType')) {
                 case 'Assembly/Blend':
                     isNotStockTracked = false;
                     break;
@@ -651,6 +655,18 @@ Ext.define('Inventory.view.ItemViewModel', {
             }
 
             return isNotStockTracked;
+        },
+        checkCommodityType: function (get) {
+            if (get('current.strType') === 'Commodity')
+                return true;
+            else
+                return false;
+        },
+        checkNotCommodityType: function (get) {
+            if (get('current.strType') !== 'Commodity')
+                return true;
+            else
+                return false;
         }
     }
 

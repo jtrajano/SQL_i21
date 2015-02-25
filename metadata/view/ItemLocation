@@ -538,6 +538,7 @@
                                                 "labelAlign": null,
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
+                                                "readOnly": true,
                                                 "valueField": "intCategoryId"
                                             },
                                             "name": "MyComboBox2",
@@ -1979,7 +1980,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging16",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

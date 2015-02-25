@@ -40,6 +40,12 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICInventoryShipmentItems)
                 .WithRequired(p => p.tblICInventoryShipment)
                 .HasForeignKey(p => p.intInventoryShipmentId);
+            this.HasOptional(p => p.ShipFromLocation)
+                .WithMany(p => p.ShipFromLocations)
+                .HasForeignKey(p => p.intShipFromLocationId);
+            this.HasOptional(p => p.ShipToLocation)
+                .WithMany(p => p.ShipToLocations)
+                .HasForeignKey(p => p.intShipToLocationId);
         }
     }
 

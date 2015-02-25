@@ -101,6 +101,7 @@ namespace iRely.Inventory.Model
         public int? intClassVarietyId { get; set; }
         public int? intProductLineId { get; set; }
         public string strMarketValuation { get; set; }
+        public int? intCategoryId { get; set; }
 
         private string _manufacturer;
         [NotMapped]
@@ -143,6 +144,7 @@ namespace iRely.Inventory.Model
 
         public tblICManufacturer tblICManufacturer { get; set; }
         public tblICBrand tblICBrand { get; set; }
+        public tblICCategory tblICCategory { get; set; } 
 
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
@@ -173,6 +175,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
+
 
         //public tblICCommodity tblICCommodity { get; set; }
         //public tblICCommodityAttribute CommodityOrigin { get; set; }

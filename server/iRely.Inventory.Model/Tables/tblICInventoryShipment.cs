@@ -83,7 +83,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public tblSMCompanyLocation ShipFromLocation { get; set; }
         public tblSMCompanyLocation ShipToLocation { get; set; }
-        //public tblARCustomer tblARCustomer { get; set; } 
+        ////public tblARCustomer tblARCustomer { get; set; } 
     }
 
     public class InventoryShipmentView

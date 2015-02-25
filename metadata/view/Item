@@ -377,6 +377,7 @@
                                                                 "margin": null,
                                                                 "name": null,
                                                                 "readOnly": null,
+                                                                "tabIndex": 1,
                                                                 "validateOnBlur": null,
                                                                 "validateOnChange": null,
                                                                 "width": null
@@ -403,7 +404,7 @@
                                                                 "margin": "0 1 0 5",
                                                                 "modelValidation": true,
                                                                 "name": null,
-                                                                "tabIndex": null,
+                                                                "tabIndex": 2,
                                                                 "valueField": "strType",
                                                                 "width": 170
                                                             },
@@ -426,7 +427,8 @@
                                                         "labelWidth": 80,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
-                                                        "padding": null
+                                                        "padding": null,
+                                                        "tabIndex": 3
                                                     },
                                                     "name": "MyTextArea",
                                                     "designerId": "e489b9ca-7d25-4827-89ca-f713f80148ad"
@@ -505,6 +507,7 @@
                                                                 "itemId": "cboManufacturer",
                                                                 "labelWidth": 80,
                                                                 "layout|flex": 1,
+                                                                "tabIndex": 4,
                                                                 "valueField": "intManufacturerId"
                                                             },
                                                             "name": "MyComboBox3",
@@ -558,6 +561,7 @@
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
                                                                 "margin": "0 0 0 5",
+                                                                "tabIndex": 5,
                                                                 "valueField": "intBrandId"
                                                             },
                                                             "name": "MyComboBox4",
@@ -576,38 +580,183 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.ComboBox",
+                                                    "type": "Ext.container.Container",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "displayField": "strStatus",
-                                                        "fieldLabel": "Status",
-                                                        "itemId": "cboStatus",
-                                                        "labelWidth": 80,
-                                                        "layout|flex": null,
-                                                        "valueField": "strStatus"
+                                                        "container|align": "stretch",
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1,
+                                                        "margin": "0 0 5 0"
                                                     },
-                                                    "name": "MyComboBox5",
-                                                    "designerId": "b047e1a1-e9d3-4e6c-a2cb-65904a7aa1d9"
+                                                    "name": "MyContainer31",
+                                                    "designerId": "d968cec6-c419-43aa-9900-7900e900b7b6",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "displayField": "strStatus",
+                                                                "fieldLabel": "Status",
+                                                                "itemId": "cboStatus",
+                                                                "labelWidth": 80,
+                                                                "layout|flex": 1,
+                                                                "tabIndex": 6,
+                                                                "valueField": "strStatus"
+                                                            },
+                                                            "name": "MyComboBox5",
+                                                            "designerId": "b047e1a1-e9d3-4e6c-a2cb-65904a7aa1d9"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "fieldLabel": "Model No",
+                                                                "itemId": "txtModelNo",
+                                                                "labelWidth": 80,
+                                                                "layout|flex": 1,
+                                                                "margin": "0 0 0 5",
+                                                                "tabIndex": 7
+                                                            },
+                                                            "name": "MyTextField1",
+                                                            "designerId": "752a5c36-9e0a-45f3-b8e3-ca85fdd54ea6"
+                                                        }
+                                                    ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.container.Container",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "Model No",
-                                                        "itemId": "txtModelNo",
-                                                        "labelWidth": 80,
-                                                        "layout|flex": null
+                                                        "container|align": "stretch",
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1,
+                                                        "margin": "0 0 5 0"
                                                     },
-                                                    "name": "MyTextField1",
-                                                    "designerId": "752a5c36-9e0a-45f3-b8e3-ca85fdd54ea6"
+                                                    "name": "MyContainer32",
+                                                    "designerId": "ef52289c-581c-48ee-b7a1-b7b49b4623d7",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intCommodityId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Commodity Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strCommodityCode',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Commodity Code',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strCommodityCode",
+                                                                "fieldLabel": "Commodity",
+                                                                "itemId": "cboCommodity",
+                                                                "labelWidth": 80,
+                                                                "layout|flex": 1,
+                                                                "tabIndex": 8,
+                                                                "valueField": "intCommodityId"
+                                                            },
+                                                            "name": "MyComboBox37",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "80d14e45-593b-4314-9c9d-36c51d6a7e9f",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intCategoryId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Category ID',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strCategoryCode',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Category Code',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strCategoryCode",
+                                                                "fieldLabel": "Category",
+                                                                "itemId": "cboCategory",
+                                                                "labelAlign": null,
+                                                                "labelWidth": 80,
+                                                                "layout|flex": 1,
+                                                                "margin": "0 0 0 5",
+                                                                "tabIndex": 9,
+                                                                "valueField": "intCategoryId"
+                                                            },
+                                                            "name": "MyComboBox2",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "0be85a42-0f81-4938-9bee-c8098f645684",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.container.Container",
@@ -640,6 +789,7 @@
                                                                 "itemId": "cboLotTracking",
                                                                 "labelWidth": 80,
                                                                 "layout|flex": 1,
+                                                                "tabIndex": 10,
                                                                 "valueField": "strLotTracking"
                                                             },
                                                             "name": "MyComboBox6",
@@ -682,6 +832,7 @@
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
                                                                 "margin": "0 0 0 5",
+                                                                "tabIndex": 11,
                                                                 "valueField": "strDescription"
                                                             },
                                                             "name": "MyComboBox7",
@@ -8681,56 +8832,6 @@
                                     "name": "MyContainer22",
                                     "designerId": "1ad37f36-f354-4565-ad40-b190693dee14",
                                     "cn": [
-                                        {
-                                            "type": "Ext.form.field.ComboBox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "columns": [
-                                                    "[",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'intCommodityId',",
-                                                    "\t\tdataType: 'numeric',",
-                                                    "\t\ttext: 'Commodity Id',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strCommodityCode',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Commodity Code',",
-                                                    "\t\tflex: 1",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strDescription',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Description',",
-                                                    "\t\tflex: 1",
-                                                    "\t}",
-                                                    "]"
-                                                ],
-                                                "designer|createAlias": "gridcombobox",
-                                                "displayField": "strCommodityCode",
-                                                "fieldLabel": "Commodity",
-                                                "itemId": "cboCommodity",
-                                                "layout|flex": null,
-                                                "valueField": "intCommodityId"
-                                            },
-                                            "name": "MyComboBox37",
-                                            "configAlternates": {
-                                                "columns": "array"
-                                            },
-                                            "designerId": "80d14e45-593b-4314-9c9d-36c51d6a7e9f",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "columns",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
                                         {
                                             "type": "Ext.form.field.Number",
                                             "reference": {

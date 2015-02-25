@@ -49,6 +49,16 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.strStatus}',
                 store: '{itemStatuses}'
             },
+            cboCategory: {
+                value: '{current.intCategoryId}',
+                store: '{itemCategory}',
+                readOnly: '{checkCommodityType}'
+            },
+            cboCommodity: {
+                value: '{current.intCommodityId}',
+                store: '{commodity}',
+                readOnly: '{checkNotCommodityType}'
+            },
             cboLotTracking: {
                 value: '{current.strLotTracking}',
                 store: '{lotTracking}',
@@ -547,10 +557,6 @@ Ext.define('Inventory.view.ItemViewController', {
             //-------------//
             //Commodity Tab//
             //-------------//
-            cboCommodity: {
-                value: '{current.intCommodityId}',
-                store: '{commodity}'
-            },
             txtGaShrinkFactor: '{current.dblGAShrinkFactor}',
             cboOrigin: {
                 value: '{current.intOriginId}',
@@ -1005,7 +1011,11 @@ Ext.define('Inventory.view.ItemViewController', {
             case 'pgeLocation':
                 var pgeLocation = tabPanel.down('#pgeLocation');
                 var grdLocationStore = pgeLocation.down('#grdLocationStore');
-                grdLocationStore.store.load();
+
+                var win = tabPanel.up('window');
+                var controller = win.getController();
+                if (controller.isLoadedLocation !== true)
+                    grdLocationStore.store.load();
                 break;
 
             case 'pgeGLAccounts':
@@ -2152,7 +2162,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = component.up('window');
         if(win) {
             if (e.getKey() === Ext.event.Event.TAB) {
-                var gridObj = win.query('#grdInventoryReceipt')[0],
+                var gridObj = win.query('#grdUnitOfMeasure')[0],
                     sel = gridObj.getStore().getAt(0);
 
                 if(sel && gridObj){
@@ -2163,8 +2173,8 @@ Ext.define('Inventory.view.ItemViewController', {
                             row: 0,
                             column: 1
                         });
-                        var txtNotes = gridObj.query('#txtNotes')[0];
-                        txtNotes.focus();
+                        var cboTracking = gridObj.query('#cboTracking')[0];
+                        cboTracking.focus();
                     });
 
                     task.delay(10);
@@ -2204,6 +2214,25 @@ Ext.define('Inventory.view.ItemViewController', {
             }
             else { record.set('dblDiscountedPrice', 0.00); }
         }
+    },
+
+    onCategorySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var controller = win.getController();
+        var vm = win.viewModel;
+        var current = vm.data.current;
+
+        controller.isLoadedLocation = false;
+        Ext.Array.each(current.tblICItemLocations().data.items, function (location) {
+            if (location.get('intCategoryId') !== records[0].get('intCategoryId')) {
+                location.set('intCategoryId', records[0].get('intCategoryId'));
+                location.set('strCategory', records[0].get('strCategoryCode'));
+                controller.isLoadedLocation = true;
+            }
+        });
     },
 
     init: function(application) {
@@ -2345,6 +2374,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#txtSpecialPricingUnitPrice": {
                 change: this.onSpecialPricingDiscountChange
+            },
+            "#cboCategory": {
+                select: this.onCategorySelect
             }
         });
     }

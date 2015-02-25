@@ -101,6 +101,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intClassVarietyId).HasColumnName("intClassVarietyId");
             this.Property(t => t.intProductLineId).HasColumnName("intProductLineId");
             this.Property(t => t.strMarketValuation).HasColumnName("strMarketValuation");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)
@@ -108,6 +109,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICManufacturer)
                 .WithMany(p => p.tblICItems)
                 .HasForeignKey(p => p.intManufacturerId);
+            this.HasOptional(p => p.tblICCategory)
+                .WithMany(p => p.tblICItems)
+                .HasForeignKey(p => p.intCategoryId);
 
             this.HasMany(p => p.tblICItemUOMs)
                 .WithRequired(p => p.tblICItem)

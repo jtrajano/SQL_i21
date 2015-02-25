@@ -213,6 +213,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'textfield',
                                                                         flex: 1.2,
+                                                                        tabIndex: 1,
                                                                         itemId: 'txtItemNo',
                                                                         fieldLabel: 'Item No',
                                                                         labelWidth: 80
@@ -220,6 +221,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1,
+                                                                        tabIndex: 2,
                                                                         itemId: 'cboType',
                                                                         margin: '0 1 0 5',
                                                                         modelValidation: true,
@@ -234,6 +236,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'textareafield',
                                                                 flex: 1,
+                                                                tabIndex: 3,
                                                                 height: 62,
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
@@ -281,6 +284,7 @@ Ext.define('Inventory.view.Item', {
                                                                             }
                                                                         ],
                                                                         flex: 1,
+                                                                        tabIndex: 4,
                                                                         itemId: 'cboManufacturer',
                                                                         fieldLabel: 'Manufacturer',
                                                                         labelWidth: 80,
@@ -310,6 +314,7 @@ Ext.define('Inventory.view.Item', {
                                                                             }
                                                                         ],
                                                                         flex: 1,
+                                                                        tabIndex: 5,
                                                                         itemId: 'cboBrand',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Brand',
@@ -320,18 +325,106 @@ Ext.define('Inventory.view.Item', {
                                                                 ]
                                                             },
                                                             {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboStatus',
-                                                                fieldLabel: 'Status',
-                                                                labelWidth: 80,
-                                                                displayField: 'strStatus',
-                                                                valueField: 'strStatus'
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 0 5 0',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        flex: 1,
+                                                                        tabIndex: 6,
+                                                                        itemId: 'cboStatus',
+                                                                        fieldLabel: 'Status',
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strStatus',
+                                                                        valueField: 'strStatus'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        flex: 1,
+                                                                        tabIndex: 7,
+                                                                        itemId: 'txtModelNo',
+                                                                        margin: '0 0 0 5',
+                                                                        fieldLabel: 'Model No',
+                                                                        labelWidth: 80
+                                                                    }
+                                                                ]
                                                             },
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtModelNo',
-                                                                fieldLabel: 'Model No',
-                                                                labelWidth: 80
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 0 5 0',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCommodityId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strCommodityCode',
+                                                                                dataType: 'string',
+                                                                                text: 'Commodity Code',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        flex: 1,
+                                                                        tabIndex: 8,
+                                                                        itemId: 'cboCommodity',
+                                                                        fieldLabel: 'Commodity',
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strCommodityCode',
+                                                                        valueField: 'intCommodityId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCategoryId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Category ID',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strCategoryCode',
+                                                                                dataType: 'string',
+                                                                                text: 'Category Code',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        flex: 1,
+                                                                        tabIndex: 9,
+                                                                        itemId: 'cboCategory',
+                                                                        margin: '0 0 0 5',
+                                                                        fieldLabel: 'Category',
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strCategoryCode',
+                                                                        valueField: 'intCategoryId'
+                                                                    }
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'container',
@@ -344,6 +437,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1,
+                                                                        tabIndex: 10,
                                                                         itemId: 'cboLotTracking',
                                                                         fieldLabel: 'Lot Tracking',
                                                                         labelWidth: 80,
@@ -373,6 +467,7 @@ Ext.define('Inventory.view.Item', {
                                                                             }
                                                                         ],
                                                                         flex: 1,
+                                                                        tabIndex: 11,
                                                                         itemId: 'cboTracking',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Inv. Valuation',
@@ -3926,33 +4021,6 @@ Ext.define('Inventory.view.Item', {
                                                     align: 'stretch'
                                                 },
                                                 items: [
-                                                    {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
-                                                            {
-                                                                dataIndex: 'intCommodityId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strCommodityCode',
-                                                                dataType: 'string',
-                                                                text: 'Commodity Code',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strDescription',
-                                                                dataType: 'string',
-                                                                text: 'Description',
-                                                                flex: 1
-                                                            }
-                                                        ],
-                                                        itemId: 'cboCommodity',
-                                                        fieldLabel: 'Commodity',
-                                                        displayField: 'strCommodityCode',
-                                                        valueField: 'intCommodityId'
-                                                    },
                                                     {
                                                         xtype: 'numberfield',
                                                         itemId: 'txtGaShrinkFactor',
