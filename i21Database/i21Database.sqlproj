@@ -777,7 +777,7 @@
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
     <Build Include="dbo\Views\vyuSMOriginTable.sql" />
     <Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
-    <Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDAccountMonitor.sql" />
     <Build Include="dbo\Views\vyuSMOriginColumn.sql" />
     <Build Include="dbo\Views\vyuAPRecapTransaction.sql" />
     <Build Include="dbo\Functions\fnGetItemAverageCost.sql" />
@@ -913,7 +913,7 @@
     <Build Include="dbo\Views\vyuICGetItemStock.sql" />
     <Build Include="dbo\Tables\tblSMRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
-    <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDValidateDesign.sql" />
     <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
     <Build Include="dbo\Tables\tblGLImportError.sql" />
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
@@ -1069,6 +1069,11 @@
     <Build Include="dbo\Tables\tblLGTerminal.sql" />
     <Build Include="dbo\Tables\tblHDProjectTask.sql" />
     <Build Include="dbo\Views\vyuHDProjectTickets.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBalanceSheetDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDCreateRowCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDCreateRowDesign.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDCreateRowFilter.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDIncomeStatementDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

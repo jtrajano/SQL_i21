@@ -1,4 +1,4 @@
-CREATE PROCEDURE  [dbo].[uspFRAccountMonitor]
+CREATE PROCEDURE  [dbo].[uspFRDAccountMonitor]
 @intRowId			AS INT,
 @successfulCount	AS INT = 0 OUTPUT
 AS
@@ -71,7 +71,7 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 --DECLARE @intCount AS INT
 
---EXEC [dbo].[uspFRAccountMonitor]
+--EXEC [dbo].[uspFRDAccountMonitor]
 --			@intRowId	 = 15,						-- ROW Id			
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS ROW Id
 				
