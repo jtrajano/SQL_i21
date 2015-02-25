@@ -221,5 +221,22 @@ Ext.define('Inventory.controller.Inventory', {
         ];
 
         return accounts;
+    },
+
+    checkEmptyStore: function(arrayItems) {
+        if (arrayItems.length > 0) {
+            if (arrayItems.length === 1) {
+                if (arrayItems[0].dummy) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else
+                return false;
+        }
+        else
+            return true;
     }
 });

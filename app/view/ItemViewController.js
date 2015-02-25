@@ -765,6 +765,7 @@ Ext.define('Inventory.view.ItemViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
+            validateRecord: me.validateRecord,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
@@ -989,6 +990,33 @@ Ext.define('Inventory.view.ItemViewController', {
                 });
             }
         }
+    },
+
+    validateRecord: function(config, action) {
+        var me = this;
+        var buttonAction = function(button) {
+            if (button === 'yes') {
+                me.validateRecord(config, function(result) {
+                    if (result) { action(true); }
+                });
+            }
+        };
+        var current = config.viewModel.data.current;
+        var accounts = current.tblICItemAccounts().data.items;
+
+        if (i21.ModuleMgr.Inventory.checkEmptyStore(accounts) && current.get('intCategoryId') !== null){
+            iRely.Functions.showCustomDialog('warning', 'yesno', 'GL Accounts are not setup for this Item. System will take the GL Accounts from the Category during Posting if you choose to continue.', buttonAction);
+        }
+        else if (i21.ModuleMgr.Inventory.checkEmptyStore(accounts) && current.get('intCategoryId') === null){
+//            iRely.Functions.showCustomDialog('warning', 'yesno', 'GL Accounts has to be setup for the item. Continue<br>without setting up your GL Accounts?', buttonAction);
+            iRely.Functions.showCustomDialog('warning', 'yesno', 'GL Accounts has to be setup for the item. Continue without setting up your GL Accounts?', buttonAction);
+        }
+        else {
+            this.validateRecord(config, function(result) {
+                if (result) { action(true); }
+            });
+        }
+
     },
 
     // <editor-fold desc="Details Tab Methods and Event Handlers">
