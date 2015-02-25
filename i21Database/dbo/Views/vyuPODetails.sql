@@ -27,8 +27,10 @@ SELECT
 	,C.strVendorId
 	,C.intVendorId
 	,D.strItemNo
+	,E.strUnitMeasure AS strUOM
 FROM tblPOPurchase A
 	INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN tblAPVendor C ON A.intVendorId = C.intVendorId
 	LEFT JOIN tblICItem D ON B.intItemId = D.intItemId
+	LEFT JOIN tblICUnitMeasure E ON B.intUnitOfMeasureId = E.intUnitMeasureId
 	
