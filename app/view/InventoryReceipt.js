@@ -743,7 +743,50 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     dataType: 'float',
                                                                     text: 'Ordered Qty',
                                                                     flex: 1
-                                                                }
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblCost',
+                                                                    dataType: 'float',
+                                                                    text: 'Cost',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblTotal',
+                                                                    dataType: 'float',
+                                                                    text: 'Line Total',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intPurchaseDetailId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Purchase Detail Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intPurchaseId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Purchase Detail Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemNo',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Purchase Detail Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intUnitOfMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Purchase Detail Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUOM',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit of Measure',
+                                                                    hidden: true
+                                                                },
+                                                                
                                                             ],
                                                             itemId: 'cboSource',
                                                             displayField: 'strPurchaseOrderNumber',
