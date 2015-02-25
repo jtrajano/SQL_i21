@@ -22,6 +22,8 @@ SELECT
 	,B.strDescription
 	,B.strPONumber
 	,B.intLineNo
+	,C.strItemNo
 FROM tblPOPurchase A
 	LEFT JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
+	LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
 	
