@@ -112,3 +112,22 @@ END
 GO
 	PRINT N'END DROP TABLE tblFRGroupsDetail'
 GO
+
+
+--=====================================================================================================================================
+-- 	SET DEFAULT VALUE FOR NEW FIELD
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN SET VALUE'
+GO
+
+UPDATE tblFRRowDesign SET strSource = '' 
+	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts') AND strSource IS NULL
+
+UPDATE tblFRRowDesign SET strSource = 'Column' 
+	WHERE strRowType IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts') AND strSource IS NULL
+
+GO
+	PRINT N'END SET VALUE'
+GO
