@@ -33,7 +33,7 @@ BEGIN
 		
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType  = N'Segment' and strStructureName = N'Location')
 			BEGIN
-				UPDATE tblGLAccountStructure SET strStructureName = 'Location' WHERE strStructureName LIKE 'Profit Center%' and strType = 'Segment'
+				UPDATE tblGLAccountStructure SET strStructureName = 'Location' WHERE  intAccountStructureId = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Segment')
 				PRINT 'Updated Profit Center Segment to Location'
 			END
 			ELSE
