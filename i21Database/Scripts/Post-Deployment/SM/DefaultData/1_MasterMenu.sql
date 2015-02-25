@@ -1797,4 +1797,99 @@ GO
 	/* -- End Update AR Menu Commands for MVVM -- */
 	/* ------------------------------------------------- */
 	
+
+GO
+
+	/* --------------------------------------------------- */
+	/* --    Create Store Module Menu     -- */
+	/* --------------------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Store' AND strModuleName = 'Store' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Store', 'Store', 0, 'Store', 'Folder', '', 'small-folder', 1, 0, 0, 0, null, 0)
+
+	DECLARE @StoreModuleId INT
+	SELECT @StoreModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Store' AND strModuleName = 'Store' AND intParentMenuID = 0
+
+		/* ------------------------------------------------ */
+		/* -- Create Store Activities Menu -- */
+		/* ------------------------------------------------ */
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Store' AND intParentMenuID = @StoreModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Activities', 'Store', @StoreModuleId, 'Activities', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+
+		DECLARE @StoreActivityId INT
+		SELECT @StoreActivityId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Store' AND intParentMenuID = @StoreModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Online Price/Cost' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Update Online Price/Cost', 'Store', @StoreActivityId, 'Update Online Price/Cost', 'Screen', 'Store.view.UpdateOnlinePrice', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.UpdateOnlinePrice', intSort = 0
+			WHERE strMenuName = 'Update Online Price/Cost' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId
+
+        IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Rebate/Discount' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Update Rebate/Discount', 'Store', @StoreActivityId, 'Update Rebate/Discount', 'Screen', 'Store.view.UpdateRebateDiscount', 'small-screen', 0, 0, 0, 1, 0, 1)
+	    ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.UpdateRebateDiscount', intSort = 0
+			WHERE strMenuName = 'Update Rebate/Discount' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId
+		
+
+	/* ------------------------------------------------- */
+	/* -- Create Store Maintenance Menu -- */
+	/* ------------------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreModuleId)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Maintenance', 'Store', @StoreModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+
+	DECLARE @StoreMaintenanceId INT
+	SELECT @StoreMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Store Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Store Maintenance', 'Store', @StoreMaintenanceId, 'Store Maintenance', 'Screen', 'Store.view.Store', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.Store', intSort = 0
+			WHERE strMenuName = 'Store Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId
+
+       IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Register Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Register Maintenance', 'Store', @StoreMaintenanceId, 'Register Maintenance', 'Screen', 'Store.view.Register', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.Register', intSort = 0
+			WHERE strMenuName = 'Register Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId
+
+       IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'SubCategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('SubCategory', 'Store', @StoreMaintenanceId, 'SubCategory', 'Screen', 'Store.view.SubCategory', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.SubCategory', intSort = 0
+			WHERE strMenuName = 'SubCategory' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId
+
+
+      IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Promotion ItemList Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Promotion ItemList Maintenance', 'Store', @StoreMaintenanceId, 'Promotion ItemList Maintenance', 'Screen', 'Store.view.PromotionItemList', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.PromotionItemList', intSort = 0
+			WHERE strMenuName = 'Promotion ItemList Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId
+
+      IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Promotion Sales Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Promotion Sales Maintenance', 'Store', @StoreMaintenanceId, 'Promotion Sales Maintenance', 'Screen', 'Store.view.PromotionSales', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.PromotionSales', intSort = 0
+			WHERE strMenuName = 'Promotion Sales Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId
+
+	/* --------------------------------------------------- */
+	/* -- End of Create Store Module Menu -- */
+	/* --------------------------------------------------- */
+	
 GO
