@@ -30,8 +30,14 @@ namespace iRely.Inventory.BRL
             try
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
-                db.PostInventoryReceipt(isRecap, receipt.strTransactionId, iRely.Common.Security.GetUserId(), 1);
-
+                if (receipt.isPost)
+                {
+                    db.PostInventoryReceipt(isRecap, receipt.strTransactionId, iRely.Common.Security.GetUserId(), 1);
+                }
+                else
+                {
+                    db.UnpostInventoryReceipt(isRecap, receipt.strTransactionId, iRely.Common.Security.GetUserId(), 1);
+                }
                 postResult.HasError = false;
             }
             catch (Exception ex)
