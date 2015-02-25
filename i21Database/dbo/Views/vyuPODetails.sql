@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuPODetails]
 AS
 SELECT
-	B.intPurchaseDetailId
+	A.intOrderStatusId
+	,B.intPurchaseDetailId
 	,B.intPurchaseId
 	,A.strPurchaseOrderNumber
 	,B.intItemId
@@ -23,6 +24,11 @@ SELECT
 	,B.strDescription
 	,B.strPONumber
 	,B.intLineNo
+	,C.strVendorId
+	,C.intVendorId
+	,D.strItemNo
 FROM tblPOPurchase A
-	LEFT JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
+	INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
+	INNER JOIN tblAPVendor C ON A.intVendorId = C.intVendorId
+	LEFT JOIN tblICItem D ON B.intItemId = D.intItemId
 	
