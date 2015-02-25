@@ -1074,6 +1074,8 @@
     <Build Include="dbo\Stored Procedures\uspFRDCreateRowDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDCreateRowFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDIncomeStatementDetail.sql" />
+    <Build Include="dbo\Tables\tblHDAnnouncementDisplay.sql" />
+    <Build Include="dbo\Tables\tblHDProjectModule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
