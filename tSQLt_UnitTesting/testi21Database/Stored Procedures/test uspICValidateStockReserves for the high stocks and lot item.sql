@@ -24,6 +24,14 @@ BEGIN
 			,@HotGrains_BushelUOMId AS INT = 5
 			,@ManualLotGrains_BushelUOMId AS INT = 6
 			,@SerializedLotGrains_BushelUOMId AS INT = 7
+			
+			,@WetGrains_PoundUOMId AS INT = 8
+			,@StickyGrains_PoundUOMId AS INT = 9
+			,@PremiumGrains_PoundUOMId AS INT = 10
+			,@ColdGrains_PoundUOMId AS INT = 11
+			,@HotGrains_PoundUOMId AS INT = 12
+			,@ManualLotGrains_PoundUOMId AS INT = 13
+			,@SerializedLotGrains_PoundUOMId AS INT = 14
 
 	-- Declare Item-Locations
 	DECLARE @WetGrains_DefaultLocation AS INT = 1
@@ -149,6 +157,27 @@ BEGIN
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 2
 				,dblOnHand = 108
+
+		-- Add existing data into tblICStockReservation
+		INSERT INTO dbo.tblICStockReservation (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intLotId
+				,dblQuantity
+				,intTransactionId
+				,strTransactionId
+				,intInventoryTransactionType
+		)
+		SELECT 	intItemId = @ManualLotGrains
+				,intItemLocationId = @ManualLotGrains_DefaultLocation
+				,intItemUOMId = @ManualLotGrains_PoundUOMId
+				,intLotId = 3
+				,dblQuantity = 1000
+				,intTransactionId = 3
+				,strTransactionId = 'TRANS-11111'
+				,intInventoryTransactionType = 1
+
 	END 
 	
 	-- Act

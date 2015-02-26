@@ -25,6 +25,14 @@ BEGIN
 			,@ManualLotGrains_BushelUOMId AS INT = 6
 			,@SerializedLotGrains_BushelUOMId AS INT = 7
 
+			,@WetGrains_PoundUOMId AS INT = 8
+			,@StickyGrains_PoundUOMId AS INT = 9
+			,@PremiumGrains_PoundUOMId AS INT = 10
+			,@ColdGrains_PoundUOMId AS INT = 11
+			,@HotGrains_PoundUOMId AS INT = 12
+			,@ManualLotGrains_PoundUOMId AS INT = 13
+			,@SerializedLotGrains_PoundUOMId AS INT = 14
+
 	-- Declare Item-Locations
 	DECLARE @WetGrains_DefaultLocation AS INT = 1
 			,@StickyGrains_DefaultLocation AS INT = 2
@@ -114,23 +122,6 @@ BEGIN
 				,strTransactionId = 'test transaction'
 				,intTransactionTypeId = @InventoryReceipt
 
-		-- Add Fake Stock UOM
-		--INSERT INTO dbo.tblICItemStockUOM (
-		--		intItemId
-		--		,intItemLocationId
-		--		,intItemUOMId
-		--		,dblOnHand
-		--)
-		--SELECT	intItemId = @ManualLotGrains
-		--		,intItemLocationId = @ManualLotGrains_DefaultLocation
-		--		,intItemUOMId = @ManualLotGrains_BushelUOMId
-		--		,dblOnHand = 100000
-		--UNION ALL 
-		--SELECT	intItemId = @SerializedLotGrains
-		--		,intItemLocationId = @SerializedLotGrains_DefaultLocation
-		--		,intItemUOMId = @SerializedLotGrains_BushelUOMId
-		--		,dblOnHand = 100000
-
 		-- Add Fake stock quantities on Lot master table. 
 		EXEC tSQLt.FakeTable 'dbo.tblICLot';	
 		INSERT INTO dbo.tblICLot (
@@ -142,11 +133,31 @@ BEGIN
 		SELECT	intItemLocationId = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_BushelUOMId
 				,intLotId = 1
-				,dblOnHand = 100
-		--SELECT	intItemLocationId = @SerializedLotGrains_DefaultLocation
-		--		,intItemUOMId = @SerializedLotGrains_BushelUOMId
-		--		,intLotId = 2
-		--		,dblOnHand = 100
+				,dblOnHand = 20
+		UNION ALL 
+		SELECT	intItemLocationId = @ManualLotGrains_DefaultLocation
+				,intItemUOMId = @ManualLotGrains_BushelUOMId
+				,intLotId = 1
+				,dblOnHand = 99
+
+		-- Add existing data into tblICStockReservation. 
+		-- This should be ignored by the stored procedure
+		INSERT INTO dbo.tblICStockReservation (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dblQuantity
+				,intTransactionId
+				,strTransactionId
+				,intInventoryTransactionType
+		)
+		SELECT 	intItemId = @WetGrains
+				,intItemLocationId = @WetGrains_DefaultLocation
+				,intItemUOMId = @WetGrains_PoundUOMId
+				,dblQuantity = 1000
+				,intTransactionId = 3
+				,strTransactionId = 'TRANS-11111'
+				,intInventoryTransactionType = 1
 	END 
 	
 	-- Act

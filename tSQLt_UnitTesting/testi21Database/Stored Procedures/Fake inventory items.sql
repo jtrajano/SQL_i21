@@ -46,6 +46,14 @@ BEGIN
 			,@ManualLotGrains_BushelUOMId AS INT = 6
 			,@SerializedLotGrains_BushelUOMId AS INT = 7
 
+			,@WetGrains_PoundUOMId AS INT = 8
+			,@StickyGrains_PoundUOMId AS INT = 9
+			,@PremiumGrains_PoundUOMId AS INT = 10
+			,@ColdGrains_PoundUOMId AS INT = 11
+			,@HotGrains_PoundUOMId AS INT = 12
+			,@ManualLotGrains_PoundUOMId AS INT = 13
+			,@SerializedLotGrains_PoundUOMId AS INT = 14
+
 	-- Declare Item-Locations
 	DECLARE @WetGrains_DefaultLocation AS INT = 1
 			,@StickyGrains_DefaultLocation AS INT = 2
@@ -347,5 +355,13 @@ BEGIN
 		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@HotGrains, @UOMBushel, 1) -- 5
 		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ManualLotGrains, @UOMBushel, 1) -- 6
 		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SerializedLotGrains, @UOMBushel, 1)	-- 7
+
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@WetGrains, @UOMPound, 1) -- 8
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@StickyGrains, @UOMPound, 1) -- 9
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@PremiumGrains, @UOMPound, 1) -- 10
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ColdGrains, @UOMPound, 1) -- 11
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@HotGrains, @UOMPound, 1) -- 12
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ManualLotGrains, @UOMPound, 1) -- 13
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SerializedLotGrains, @UOMPound, 1)	-- 14
 	END 
 END 

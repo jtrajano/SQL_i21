@@ -35,9 +35,21 @@ FROM	(
 			ON ValidateItems.intItemId = Item.intItemId
 		LEFT JOIN dbo.tblICItemStockUOM StockUOM
 			ON ValidateItems.intItemUOMId = StockUOM.intItemUOMId
-		LEFT JOIN dbo.tblICStockReservation Reserves 
+		LEFT JOIN (
+			SELECT	tblICStockReservation.intItemId
+					,tblICStockReservation.intItemLocationId
+					,tblICStockReservation.intItemUOMId
+					,dblQuantity = SUM(tblICStockReservation.dblQuantity)
+			FROM	dbo.tblICStockReservation INNER JOIN @ItemsToValidate ValidateItems
+						ON tblICStockReservation.intItemId = ValidateItems.intItemId
+						AND tblICStockReservation.intItemLocationId = ValidateItems.intItemLocationId
+						AND tblICStockReservation.intItemUOMId = ValidateItems.intItemUOMId
+			WHERE	ISNULL(tblICStockReservation.intLotId, 0) = 0 
+			GROUP BY tblICStockReservation.intItemId, tblICStockReservation.intItemLocationId, tblICStockReservation.intItemUOMId
+		) Reserves 
 			ON ValidateItems.intItemId = Reserves.intItemId
 			AND ValidateItems.intItemLocationId = Reserves.intItemLocationId
+			AND ValidateItems.intItemUOMId = Reserves.intItemUOMId
 WHERE	ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0) - ValidateItems.dblQty < 0
 		AND ItemLocation.intAllowNegativeInventory = @AllowNegativeInventory_NoOption -- If No is selected, it does not allow negative stock
 
@@ -55,11 +67,12 @@ SELECT	TOP 1
 FROM	(
 			SELECT	intItemId
 					,intItemLocationId
+					,intItemUOMId
 					,intLotId
 					,dblQty = SUM(dblQty)
 			FROM	@ItemsToValidate	
 			WHERE	ISNULL(intLotId, 0) <> 0 
-			GROUP BY intItemId, intItemLocationId, intLotId
+			GROUP BY intItemId, intItemLocationId, intItemUOMId, intLotId
 		) ValidateItems
 		INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON ValidateItems.intItemId = ItemLocation.intItemId
@@ -69,8 +82,21 @@ FROM	(
 		LEFT JOIN dbo.tblICLot Lot
 			ON ValidateItems.intItemLocationId = Lot.intItemLocationId
 			AND ValidateItems.intLotId = Lot.intLotId
-		LEFT JOIN dbo.tblICStockReservation Reserves 
+		LEFT JOIN (
+			SELECT	tblICStockReservation.intItemId
+					,tblICStockReservation.intItemLocationId
+					,tblICStockReservation.intItemUOMId
+					,tblICStockReservation.intLotId
+					,dblQuantity = SUM(tblICStockReservation.dblQuantity)
+			FROM	dbo.tblICStockReservation INNER JOIN @ItemsToValidate ValidateItems
+						ON tblICStockReservation.intItemId = ValidateItems.intItemId
+						AND tblICStockReservation.intItemLocationId = ValidateItems.intItemLocationId
+						AND tblICStockReservation.intItemUOMId = ValidateItems.intItemUOMId
+			WHERE	ISNULL(tblICStockReservation.intLotId, 0) <> 0 
+			GROUP BY tblICStockReservation.intItemId, tblICStockReservation.intItemLocationId, tblICStockReservation.intItemUOMId, tblICStockReservation.intLotId
+		) Reserves 
 			ON ValidateItems.intItemId = Reserves.intItemId
 			AND ValidateItems.intItemLocationId = Reserves.intItemLocationId
+			AND ValidateItems.intItemUOMId = Reserves.intItemUOMId
 WHERE	ISNULL(Lot.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0) - ValidateItems.dblQty < 0
 		AND ItemLocation.intAllowNegativeInventory = @AllowNegativeInventory_NoOption -- If No is selected, it does not allow negative stock
