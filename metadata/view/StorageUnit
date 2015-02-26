@@ -468,8 +468,36 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "columns": null,
-                                                "designer|createAlias": null,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Sub Location Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intCompanyLocationId',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\ttext: 'Location Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strSubLocationName',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Sub Location Name',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strSubLocationDescription',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Description',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "displayField": "strSubLocationName",
                                                 "fieldLabel": "Sub Location",
                                                 "itemId": "cboSubLocation",
                                                 "labelWidth": 110,
@@ -477,7 +505,8 @@
                                                 "layout|margins": null,
                                                 "margin": null,
                                                 "name": null,
-                                                "readOnly": true
+                                                "readOnly": false,
+                                                "valueField": "intCompanyLocationSubLocationId"
                                             },
                                             "name": "MyComboBox21",
                                             "configAlternates": {
@@ -1252,7 +1281,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter143",
                                                     "designerId": "44f4490e-5a9c-40bb-beaf-26df2f659502",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1542,7 +1571,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter144",
                                                     "designerId": "22931607-4134-4630-a48a-1fe5916ccd67",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1752,7 +1781,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter145",
                                                     "designerId": "e4e6a664-7884-4ddd-8995-16e91bcb4363",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1951,7 +1980,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter146",
                                                     "designerId": "6e9571a9-d0ec-46b7-ab0d-11523cb26254",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2121,7 +2150,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging19",
                     "designerId": "007a0d4c-2515-4998-91ed-043de4f99d12",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
