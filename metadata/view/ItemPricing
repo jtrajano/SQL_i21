@@ -282,7 +282,7 @@
                                 "store": [
                                     "{Location}"
                                 ],
-                                "tabIndex": 0,
+                                "tabIndex": 1,
                                 "valueField": "intItemLocationId"
                             },
                             "name": "MyComboBox64",
@@ -334,7 +334,7 @@
                                         "itemId": "txtLastCost",
                                         "labelWidth": 110,
                                         "layout|flex": 1,
-                                        "tabIndex": 3
+                                        "tabIndex": 2
                                     },
                                     "name": "MyNumberField48",
                                     "designerId": "968f3f82-abdf-4bc9-9d5b-24627a7c1c8e"
@@ -357,7 +357,7 @@
                                         "labelWidth": 110,
                                         "layout|flex": 1,
                                         "margin": "0 0 0 5",
-                                        "tabIndex": 4
+                                        "tabIndex": 6
                                     },
                                     "name": "MyNumberField49",
                                     "designerId": "da85e908-4dbe-460a-9736-911b711029b3"
@@ -400,7 +400,7 @@
                                         "labelWidth": 110,
                                         "layout|flex": 1,
                                         "margin": "",
-                                        "tabIndex": 5
+                                        "tabIndex": 3
                                     },
                                     "name": "MyNumberField50",
                                     "designerId": "9c7aa544-87b2-4f8e-950a-b9c7f291d7f5"
@@ -423,7 +423,7 @@
                                         "labelWidth": 110,
                                         "layout|flex": 1,
                                         "margin": "0 0 0 5",
-                                        "tabIndex": 6
+                                        "tabIndex": 7
                                     },
                                     "name": "MyNumberField51",
                                     "designerId": "65129da8-fe40-45a9-b634-58915ede5a85"
@@ -464,7 +464,7 @@
                                         "store": [
                                             "{PricingMethods}"
                                         ],
-                                        "tabIndex": 7,
+                                        "tabIndex": 4,
                                         "valueField": "strDescription"
                                     },
                                     "name": "MyComboBox65",
@@ -534,7 +534,7 @@
                                         "itemId": "txtSalePrice",
                                         "labelWidth": 110,
                                         "layout|flex": 1,
-                                        "tabIndex": 9
+                                        "tabIndex": 5
                                     },
                                     "name": "MyNumberField43",
                                     "designerId": "887aa2b4-9b87-46bf-9231-4f1bcfaec4ab"
@@ -557,7 +557,7 @@
                                         "labelWidth": 110,
                                         "layout|flex": 1,
                                         "margin": "0 0 0 5",
-                                        "tabIndex": 13
+                                        "tabIndex": 9
                                     },
                                     "name": "MyNumberField47",
                                     "designerId": "a662b97c-8638-443d-b1e8-3b7ffd88cf0c"

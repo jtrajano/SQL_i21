@@ -746,7 +746,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter124",
+                                                    "name": "filter134",
                                                     "designerId": "53804780-f5bc-480e-aa2f-13d727814dbe",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -841,7 +841,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0",
                                                 "itemId": "colDetailUnitQty",
                                                 "text": "Unit Qty",
                                                 "width": 62
@@ -863,182 +862,6 @@
                                                     },
                                                     "name": "MyNumberField2",
                                                     "designerId": "4f8f149d-3f1b-4bb1-87d3-3dd6f487a321"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "number",
-                                                "format": "0",
-                                                "itemId": "colDetailSellQty",
-                                                "text": "Sell Qty",
-                                                "width": 62
-                                            },
-                                            "name": "MyNumberColumn1",
-                                            "designerId": "f8693414-7101-4ea9-a005-df903bb8e868",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldStyle": "text-align:right",
-                                                        "hideTrigger": true
-                                                    },
-                                                    "name": "MyNumberField3",
-                                                    "designerId": "4b35d46a-e60d-48bc-b2be-73e86967a896"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "number",
-                                                "format": "0",
-                                                "itemId": "colDetailWeight",
-                                                "text": "Weight",
-                                                "width": 62
-                                            },
-                                            "name": "MyNumberColumn2",
-                                            "designerId": "da56a28d-ea39-4a06-8a50-fba4d7f726ef",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldStyle": "text-align:right",
-                                                        "hideTrigger": true
-                                                    },
-                                                    "name": "MyNumberField4",
-                                                    "designerId": "efc8e497-b0cd-44bf-8089-1d5cc38e3592"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "intUnitMeasureId",
-                                                "flex": 1.3,
-                                                "itemId": "colDetailWeightUOM",
-                                                "minWidth": 95,
-                                                "text": "Weight UOM"
-                                            },
-                                            "name": "MyColumn35",
-                                            "designerId": "5fb14a9f-ccdd-4c4f-89b6-c3955130a4e5",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "    {",
-                                                            "        dataIndex: 'intUnitMeasureId',",
-                                                            "        dataType: 'numeric',",
-                                                            "        text: 'Unit Of Measure ID',",
-                                                            "        hidden: true",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'strUnitMeasure',",
-                                                            "        dataType: 'string',",
-                                                            "        text: 'Unit Measure',",
-                                                            "        flex: 1",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'strUnitType',",
-                                                            "        dataType: 'string',",
-                                                            "        text: 'Unit Type',",
-                                                            "        flex: 1",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'intDecimalCalculation',",
-                                                            "        dataType: 'numeric',",
-                                                            "        text: 'Decimal Places for Calculation',",
-                                                            "        hidden: true",
-                                                            "    },",
-                                                            "    {",
-                                                            "        dataIndex: 'intDecimalDisplay',",
-                                                            "        dataType: 'numeric',",
-                                                            "        text: 'Decimal Places for Display',",
-                                                            "        hidden: true",
-                                                            "    }",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strUnitMeasure",
-                                                        "itemId": "cboDetailWeightUOM",
-                                                        "valueField": "strUnitMeasure"
-                                                    },
-                                                    "name": "MyComboBox1",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "932702d4-3b56-49ca-9145-8e4462048090",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 2,
-                                                "itemId": "colDetailDescription",
-                                                "minWidth": 120,
-                                                "text": "Package Description"
-                                            },
-                                            "name": "MyColumn1",
-                                            "designerId": "7d083224-5572-49b0-913e-1345c9f5da62",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyTextField7",
-                                                    "designerId": "5890fdf0-a2b3-40cd-8b95-442781e3edbb"
                                                 }
                                             ]
                                         },
@@ -1143,7 +966,118 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0",
+                                                "itemId": "colDetailWeight",
+                                                "text": "Weight",
+                                                "width": 62
+                                            },
+                                            "name": "MyNumberColumn2",
+                                            "designerId": "da56a28d-ea39-4a06-8a50-fba4d7f726ef",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true
+                                                    },
+                                                    "name": "MyNumberField4",
+                                                    "designerId": "efc8e497-b0cd-44bf-8089-1d5cc38e3592"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "intUnitMeasureId",
+                                                "flex": 1.3,
+                                                "itemId": "colDetailWeightUOM",
+                                                "minWidth": 95,
+                                                "text": "Weight UOM"
+                                            },
+                                            "name": "MyColumn35",
+                                            "designerId": "5fb14a9f-ccdd-4c4f-89b6-c3955130a4e5",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "    {",
+                                                            "        dataIndex: 'intUnitMeasureId',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Unit Of Measure ID',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strUnitMeasure',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Unit Measure',",
+                                                            "        flex: 1",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'strUnitType',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Unit Type',",
+                                                            "        flex: 1",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'intDecimalCalculation',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Decimal Places for Calculation',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "    {",
+                                                            "        dataIndex: 'intDecimalDisplay',",
+                                                            "        dataType: 'numeric',",
+                                                            "        text: 'Decimal Places for Display',",
+                                                            "        hidden: true",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUnitMeasure",
+                                                        "itemId": "cboDetailWeightUOM",
+                                                        "valueField": "strUnitMeasure"
+                                                    },
+                                                    "name": "MyComboBox1",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "932702d4-3b56-49ca-9145-8e4462048090",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "number",
                                                 "itemId": "colDetailLength",
                                                 "text": "Length",
                                                 "width": 62
@@ -1177,7 +1111,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0",
                                                 "itemId": "colDetailWidth",
                                                 "text": "Width",
                                                 "width": 62
@@ -1211,7 +1144,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0",
                                                 "itemId": "colDetailHeight",
                                                 "text": "Height",
                                                 "width": 62
@@ -1324,7 +1256,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0",
                                                 "itemId": "colDetailVolume",
                                                 "text": "Volume",
                                                 "width": 62
@@ -1437,7 +1368,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0",
                                                 "itemId": "colDetailMaxQty",
                                                 "text": "Max Qty"
                                             },
@@ -1635,7 +1565,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter125",
+                                                    "name": "filter135",
                                                     "designerId": "15a1d931-71e4-4cbc-8963-0531112b0fe0",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1850,7 +1780,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter126",
+                                                    "name": "filter136",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2154,7 +2084,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter127",
+                                                    "name": "filter137",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2797,7 +2727,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter138",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3523,7 +3453,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging17",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
