@@ -1023,7 +1023,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0.00",
                                                 "itemId": "colDetailUnitQty",
                                                 "text": "Unit Qty",
                                                 "width": 62
@@ -1149,7 +1148,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0.00",
                                                 "itemId": "colDetailWeight",
                                                 "text": "Weight",
                                                 "width": 62
@@ -1263,7 +1261,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0.00",
                                                 "itemId": "colDetailLength",
                                                 "text": "Length",
                                                 "width": 62
@@ -1297,7 +1294,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0.00",
                                                 "itemId": "colDetailWidth",
                                                 "text": "Width",
                                                 "width": 62
@@ -1331,7 +1327,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0.00",
                                                 "itemId": "colDetailHeight",
                                                 "text": "Height",
                                                 "width": 62
@@ -1444,7 +1439,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0.00",
                                                 "itemId": "colDetailVolume",
                                                 "text": "Volume",
                                                 "width": 62
@@ -1557,7 +1551,6 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "number",
-                                                "format": "0.00",
                                                 "itemId": "colDetailMaxQty",
                                                 "text": "Max Qty"
                                             },
@@ -7450,7 +7443,7 @@
                                                             "designerId": "00c0c6eb-31c5-4844-a1d5-1cf8b5940d74"
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Column",
+                                                            "type": "Ext.grid.column.Number",
                                                             "reference": {
                                                                 "name": "columns",
                                                                 "type": "array"
@@ -7463,7 +7456,7 @@
                                                                 "text": "Qty",
                                                                 "width": 50
                                                             },
-                                                            "name": "MyColumn34",
+                                                            "name": "MyNumberColumn43",
                                                             "designerId": "4783d5cc-3af3-45f0-871b-4a0ab4e63b46",
                                                             "cn": [
                                                                 {
