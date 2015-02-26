@@ -27,6 +27,7 @@ SELECT
 	,C.strVendorId
 	,C.intVendorId
 	,D.strItemNo
+	,D.strLotTracking
 	,E.strUnitMeasure AS strUOM
 FROM tblPOPurchase A
 	INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
