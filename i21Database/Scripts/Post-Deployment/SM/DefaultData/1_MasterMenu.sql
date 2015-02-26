@@ -1419,6 +1419,10 @@ GO
 		SET strModuleName = 'Financial Reports'
 		WHERE strMenuName = 'Report Templates' AND strModuleName = 'General Ledger' AND intParentMenuID = @FinancialReportsMaintenanceId
 
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Financial Report Group' AND strModuleName = 'Financial Report Designer' AND intParentMenuID = @FinancialReportsMaintenanceId)
+        INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+        VALUES ('Financial Report Group', 'Financial Report Designer', @FinancialReportsMaintenanceId, 'Financial Report Group', 'Screen', 'FinancialReportDesigner.view.FinancialReportGroup', 'small-screen', 0, 0, 0, 1, null, 1)
+        
 	/* ----------------------------------------------- */
 	/* --   End of Financial Reports Module Menu    -- */
 	/* ----------------------------------------------- */
