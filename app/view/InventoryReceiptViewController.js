@@ -1121,7 +1121,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                 dataType: 'string',
                                                 text: 'Lot Tracking',
                                                 hidden: true
-                                            },
+                                            }
                                         ],
                                         itemId: 'cboSource',
                                         displayField: 'strPurchaseOrderNumber',

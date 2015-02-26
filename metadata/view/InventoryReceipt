@@ -2432,6 +2432,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "autoSelect": false,
                                                         "columns": [
                                                             "[",
                                                             "\t{",
@@ -2451,6 +2452,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLotNumber",
                                                         "itemId": "cboLotId",
+                                                        "matchFieldWidth": false,
                                                         "valueField": "strLotNumber"
                                                     },
                                                     "name": "MyComboBox70",

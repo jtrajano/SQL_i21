@@ -1150,6 +1150,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 }
                                                             ],
                                                             itemId: 'cboLotId',
+                                                            matchFieldWidth: false,
+                                                            autoSelect: false,
                                                             displayField: 'strLotNumber',
                                                             valueField: 'strLotNumber'
                                                         }
