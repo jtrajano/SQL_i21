@@ -1038,6 +1038,14 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'ContractManagement.view.Contract', intSort = 0
 			WHERE strMenuName = 'Contract' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Price Contracts' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Price Contracts', 'Contract Management', @ContractManagementActivityId, 'Price Contracts', 'Screen', 'ContractManagement.view.PriceContracts', 'small-screen', 0, 0, 0, 1, 1, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.PriceContracts', intSort = 1
+			WHERE strMenuName = 'Price Contracts' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId
 		
 
 	/* ------------------------------------------------- */
@@ -1105,6 +1113,14 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'ContractManagement.view.WeightGradeNew', intSort = 0
 			WHERE strMenuName = 'Weight/Grades' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Associations' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Associations', 'Contract Management', @ContractManagementMaintenanceId, 'Associations', 'Screen', 'ContractManagement.view.Associations', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.Associations', intSort = 0
+			WHERE strMenuName = 'Associations' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
 
 	/* --------------------------------------------------- */
 	/* -- End of Create Contract Management Module Menu -- */
