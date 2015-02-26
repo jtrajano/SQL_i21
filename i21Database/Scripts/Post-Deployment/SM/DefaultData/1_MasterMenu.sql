@@ -1499,6 +1499,90 @@ GO
 
 GO
 
+	/* -------------------------------------- */
+	/* -- Create Manufacturing Module Menu -- */
+	/* -------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing' AND strModuleName = 'Manufacturing' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Manufacturing', 'Manufacturing', 0, 'Manufacturing', 'Folder', '', 'small-folder', 1, 0, 0, 0, null, 0)	
+	
+	DECLARE @ManufacturingModuleId INT
+	SELECT @ManufacturingModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing' AND strModuleName = 'Manufacturing' AND intParentMenuID = 0
+
+	/* --------------------------------------------- */
+	/* --  Create Manufacturing Activities Menu   -- */
+	/* --------------------------------------------- */	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Activities', 'Manufacturing', @ManufacturingModuleId, 'Activities', 'Folder', '', 'small-folder', 1, 0, 0, 0, 1, 1)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET intSort = 1
+		WHERE strMenuName = 'Activities' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingModuleId
+		
+	DECLARE @ManufacturingActivityId INT
+	SELECT @ManufacturingActivityId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingModuleId
+	
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Requirement' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Blend Requirement', 'Manufacturing', @ManufacturingActivityId, 'Blend Requirement', 'Screen', 'Manufacturing.view.BlendRequirement', 'small-screen', 0, 0, 0, 1, 1, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Manufacturing.view.BlendRequirement', intSort = 1
+			WHERE strMenuName = 'Blend Requirement' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Management' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Blend Management', 'Manufacturing', @ManufacturingActivityId, 'Blend Management', 'Screen', 'Manufacturing.view.BlendManagement', 'small-screen', 0, 0, 0, 1, 2, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Manufacturing.view.BlendManagement', intSort = 2
+			WHERE strMenuName = 'Blend Management' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId			
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Production' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Blend Production', 'Manufacturing', @ManufacturingActivityId, 'Blend Production', 'Screen', 'Manufacturing.view.BlendProduction', 'small-screen', 0, 0, 0, 1, 3, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Manufacturing.view.BlendProduction', intSort = 3
+			WHERE strMenuName = 'Blend Production' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId
+			
+	/* ---------------------------------------------- */
+	/* --  Create Manufacturing Maintenance Menu   -- */
+	/* ---------------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Maintenance', 'Manufacturing', @ManufacturingModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 1, 1)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET intSort = 1
+		WHERE strMenuName = 'Maintenance' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingModuleId
+		
+	DECLARE @ManufacturingMaintenanceId INT
+	SELECT @ManufacturingMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingModuleId
+	
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing Process' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Manufacturing Process', 'Manufacturing', @ManufacturingMaintenanceId, 'Manufacturing Process', 'Screen', 'Manufacturing.view.ManufacturingProcess', 'small-screen', 0, 0, 0, 1, 1, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Manufacturing.view.ManufacturingProcess', intSort = 1
+			WHERE strMenuName = 'Manufacturing Process' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Recipe' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Recipe', 'Manufacturing', @ManufacturingMaintenanceId, 'Recipe', 'Screen', 'Manufacturing.view.Recipe', 'small-screen', 0, 0, 0, 1, 2, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Manufacturing.view.Recipe', intSort = 2
+			WHERE strMenuName = 'Recipe' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId
+
+	/* ------------------------------------------ */
+	/* -- End Create Manufacturing Module Menu -- */
+	/* ------------------------------------------ */
+
+GO
+
 	/* ----------------------------------------------- */
 	/* --   Update Financial Reports Module Menu    -- */
 	/* ----------------------------------------------- */
