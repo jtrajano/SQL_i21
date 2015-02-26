@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets5f5949740bd5d43cf05d553a5e7407bc077ba05c09a138eeb934691368aed9d3))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets7fbbc15d880b8efa499c3182ebb749fa8fc943f93332db931eabd21cec1b1ab3))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets5f5949740bd5d43cf05d553a5e7407bc077ba05c09a138eeb934691368aed9d3 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets7fbbc15d880b8efa499c3182ebb749fa8fc943f93332db931eabd21cec1b1ab3 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "5f5949740bd5d43cf05d553a5e7407bc077ba05c09a138eeb934691368aed9d3"; }
+            get { return "7fbbc15d880b8efa499c3182ebb749fa8fc943f93332db931eabd21cec1b1ab3"; }
         }
 
         /// <summary>
@@ -7295,7 +7295,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemPricing
-        [CodeFirstDatabaseSchema.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort)
+        [CodeFirstDatabaseSchema.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort)
     FROM (
         SELECT 
             T.intPricingKey AS vyuICGetItemPricing_intPricingKey, 
@@ -7313,6 +7313,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strUnitMeasure AS vyuICGetItemPricing_strUnitMeasure, 
             T.strUnitType AS vyuICGetItemPricing_strUnitType, 
             T.ysnStockUnit AS vyuICGetItemPricing_ysnStockUnit, 
+            T.dblUnitQty AS vyuICGetItemPricing_dblUnitQty, 
             T.dblAmountPercent AS vyuICGetItemPricing_dblAmountPercent, 
             T.dblSalePrice AS vyuICGetItemPricing_dblSalePrice, 
             T.dblMSRPPrice AS vyuICGetItemPricing_dblMSRPPrice, 
@@ -7418,7 +7419,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemPricings
-        [iRely.Inventory.Model.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort)
+        [iRely.Inventory.Model.vyuICGetItemPricing](T1.vyuICGetItemPricing_intPricingKey, T1.vyuICGetItemPricing_intKey, T1.vyuICGetItemPricing_strDescription, T1.vyuICGetItemPricing_strUpcCode, T1.vyuICGetItemPricing_intItemPricingId, T1.vyuICGetItemPricing_intItemId, T1.vyuICGetItemPricing_intLocationId, T1.vyuICGetItemPricing_intItemLocationId, T1.vyuICGetItemPricing_strLocationName, T1.vyuICGetItemPricing_strLocationType, T1.vyuICGetItemPricing_intItemUnitMeasureId, T1.vyuICGetItemPricing_intUnitMeasureId, T1.vyuICGetItemPricing_strUnitMeasure, T1.vyuICGetItemPricing_strUnitType, T1.vyuICGetItemPricing_ysnStockUnit, T1.vyuICGetItemPricing_dblUnitQty, T1.vyuICGetItemPricing_dblAmountPercent, T1.vyuICGetItemPricing_dblSalePrice, T1.vyuICGetItemPricing_dblMSRPPrice, T1.vyuICGetItemPricing_strPricingMethod, T1.vyuICGetItemPricing_dblLastCost, T1.vyuICGetItemPricing_dblStandardCost, T1.vyuICGetItemPricing_dblAverageCost, T1.vyuICGetItemPricing_dblEndMonthCost, T1.vyuICGetItemPricing_intSort)
     FROM (
         SELECT 
             T.intPricingKey AS vyuICGetItemPricing_intPricingKey, 
@@ -7436,6 +7437,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strUnitMeasure AS vyuICGetItemPricing_strUnitMeasure, 
             T.strUnitType AS vyuICGetItemPricing_strUnitType, 
             T.ysnStockUnit AS vyuICGetItemPricing_ysnStockUnit, 
+            T.dblUnitQty AS vyuICGetItemPricing_dblUnitQty, 
             T.dblAmountPercent AS vyuICGetItemPricing_dblAmountPercent, 
             T.dblSalePrice AS vyuICGetItemPricing_dblSalePrice, 
             T.dblMSRPPrice AS vyuICGetItemPricing_dblMSRPPrice, 

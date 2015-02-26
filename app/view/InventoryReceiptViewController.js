@@ -658,8 +658,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else if (combo.itemId === 'cboItemUOM')
         {
             current.set('intUnitMeasureId', records[0].get('intItemUOMId'));
-//            current.set('dblUnitCost', records[0].get('dblLastCost'));
-//            current.set('dblUnitRetail', records[0].get('dblLastCost'));
+            current.set('dblUnitCost', records[0].get('dblLastCost'));
+            current.set('dblUnitRetail', records[0].get('dblLastCost'));
         }
         else if (combo.itemId === 'cboPackageType')
         {

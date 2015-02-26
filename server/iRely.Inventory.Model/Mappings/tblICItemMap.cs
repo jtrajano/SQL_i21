@@ -266,6 +266,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
             this.Property(t => t.strUnitType).HasColumnName("strUnitType");
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+            this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty");
             this.Property(t => t.dblAmountPercent).HasColumnName("dblAmountPercent");
             this.Property(t => t.dblSalePrice).HasColumnName("dblSalePrice");
             this.Property(t => t.dblMSRPPrice).HasColumnName("dblMSRPPrice");
