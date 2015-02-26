@@ -40,7 +40,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 value: '{current.intSubLocationId}',
                 store: '{subLocation}',
                 defaultFilters: [{
-                    column: 'intLocationId',
+                    column: 'intCompanyLocationId',
                     value: '{current.intLocationId}'
                 }]
             },
