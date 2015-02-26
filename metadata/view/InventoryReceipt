@@ -1783,9 +1783,9 @@
                                                         "columns": [
                                                             "[",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'intUnitMeasureId',",
+                                                            "\t\tdataIndex: 'intItemUOMId',",
                                                             "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Unit Of Measure ID',",
+                                                            "\t\ttext: 'Unit Of Measure Id',",
                                                             "\t\thidden: true",
                                                             "\t},",
                                                             "\t{",

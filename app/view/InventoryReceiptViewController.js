@@ -617,26 +617,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (combo.itemId === 'cboItem')
         {
-            if (win.viewModel.data.current.get('strReceiptType') === 'Direct'){
-                current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));
-                current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
-
-                var colUOM = grid.columns[6];
-                var cboUOM = colUOM.getEditor();
-                var index = cboUOM.store.findExact('intItemUnitMeasureId', records[0].get('intReceiveUOMId'));
-                var uom = cboUOM.store.getAt(index);
-                if (uom){
-                    current.set('dblUnitCost', uom.get('dblLastCost'));
-                    current.set('dblUnitRetail', uom.get('dblLastCost'));
-                }
-            }
-
             current.set('tblICItemPricings', records[0].tblICItemPricings());
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('strLotTracking', records[0].get('strLotTracking'));
-            current.set('dblOpenReceive', 0);
-
+            current.set('intUnitMeasureId', records[0].get('intReceiveUOMId'));
+            current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
+            current.set('dblUnitCost', records[0].get('dblLastCost'));
+            current.set('dblUnitRetail', records[0].get('dblLastCost'));
 
             switch (records[0].get('strLotTracking')){
                 case 'Yes - Serial Number':
@@ -669,9 +657,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.itemId === 'cboItemUOM')
         {
-            current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
-            current.set('dblUnitCost', records[0].get('dblLastCost'));
-            current.set('dblUnitRetail', records[0].get('dblLastCost'));
+            current.set('intUnitMeasureId', records[0].get('intItemUOMId'));
+//            current.set('dblUnitCost', records[0].get('dblLastCost'));
+//            current.set('dblUnitRetail', records[0].get('dblLastCost'));
         }
         else if (combo.itemId === 'cboPackageType')
         {
@@ -697,7 +685,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 screenName + 'ViewController'
         ], function() {
             var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
+            var view = Ext.create(screenName, { controller: 'ic' + screen.toLowerCase(), viewModel: 'ic' + screen.toLowerCase() });
             var controller = view.getController();
             controller.show({ id: ReceiptItemId});
         });
@@ -890,8 +878,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     var win = context.grid.up('window');
                     var vw = win.viewModel;
-                    var tblICInventoryReceiptItemLots = vw.data.currentReceiptItem.tblICInventoryReceiptItemLots();
 
+                    if (!vw.data.currentReceiptItem) {
+                        vw.data.currentReceiptItem = context.record;
+                    }
+
+                    var tblICInventoryReceiptItemLots = vw.data.currentReceiptItem.tblICInventoryReceiptItemLots();
                     if (tblICInventoryReceiptItemLots.data.length > 0){
                         tblICInventoryReceiptItemLots.data.items[0].set('dblQuantity', context.value);
                     }

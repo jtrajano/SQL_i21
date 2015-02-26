@@ -880,9 +880,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataIndex: 'intItemUOMId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Unit Of Measure ID',
+                                                                    text: 'Unit Of Measure Id',
                                                                     hidden: true
                                                                 },
                                                                 {
