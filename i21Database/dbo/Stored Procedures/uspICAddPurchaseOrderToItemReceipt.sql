@@ -120,6 +120,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intLineNo
 	,intSourceId
     ,intItemId
+	,intSubLocationId
 	,dblOrderQty
 	,dblOpenReceive
 	,dblReceived
@@ -136,6 +137,7 @@ SELECT	intInventoryReceiptId = @InventoryReceiptId
 		,intLineNo				= PODetail.intPurchaseDetailId
 		,intSourceId			= @PurchaseOrderId
 		,intItemId				= PODetail.intItemId
+		,intSubLocationId		= PODetail.intSubLocationId
 		,dblOrderQty			= ISNULL(PODetail.dblQtyOrdered, 0)
 		,dblOpenReceive			= ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)
 		,dblReceived			= ISNULL(PODetail.dblQtyReceived, 0)
