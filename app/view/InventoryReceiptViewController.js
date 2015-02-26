@@ -1015,9 +1015,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('strItemNo', po.get('strItemNo'));
         current.set('intUnitMeasureId', po.get('intUnitOfMeasureId'));
         current.set('strUnitMeasure', po.get('strUOM'));
-        current.set('dblCost', po.get('dblCost'));
+        current.set('dblUnitCost', po.get('dblCost'));
         current.set('dblLineTotal', po.get('dblTotal'));
-
+        current.set('strLotTracking', po.get('strLotTracking'));
     },
 
     onItemGridColumnBeforeRender: function(column) {
@@ -1114,6 +1114,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                 dataIndex: 'strUOM',
                                                 dataType: 'string',
                                                 text: 'Unit of Measure',
+                                                hidden: true
+                                            },
+                                            {
+                                                dataIndex: 'strLotTracking',
+                                                dataType: 'string',
+                                                text: 'Lot Tracking',
                                                 hidden: true
                                             },
                                         ],
