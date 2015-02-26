@@ -1011,7 +1011,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('intLineNo', po.get('intPurchaseDetailId'));
         current.set('intSourceId', po.get('intPurchaseId'));
         current.set('dblOpenReceive', po.get('dblQtyOrdered'));
-        current.set('intItemNo', po.get('intItemNo'));
+        current.set('intItemId', po.get('intItemId'));
         current.set('strItemNo', po.get('strItemNo'));
         current.set('intUnitMeasureId', po.get('intUnitOfMeasureId'));
         current.set('strUnitMeasure', po.get('strUOM'));
@@ -1099,7 +1099,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                 hidden: true
                                             },
                                             {
-                                                dataIndex: 'intItemNo',
+                                                dataIndex: 'intItemId',
                                                 dataType: 'numeric',
                                                 text: 'Purchase Detail Id',
                                                 hidden: true

@@ -762,7 +762,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     hidden: true
                                                                 },
                                                                 {
-                                                                    dataIndex: 'intItemNo',
+                                                                    dataIndex: 'intItemId',
                                                                     dataType: 'numeric',
                                                                     text: 'Purchase Detail Id',
                                                                     hidden: true
@@ -955,9 +955,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strDescription',
                                                         itemId: 'colSubLocation',
                                                         width: 90,
+                                                        dataIndex: 'strDescription',
                                                         text: 'Sub Location',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -1002,10 +1002,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblQtyOrdered',
                                                         itemId: 'colPackages',
                                                         width: 72,
                                                         align: 'right',
+                                                        dataIndex: 'dblQtyOrdered',
                                                         text: 'Packages',
                                                         format: '0,000.##',
                                                         editor: {
