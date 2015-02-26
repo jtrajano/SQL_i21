@@ -22,7 +22,7 @@ DECLARE @intDirectType AS INT = 3
 IF @strSourceType = @ReceiptType_PurchaseOrder
 BEGIN 
 	SELECT	intItemId = PODetail.intItemId
-			,intLocationId = PO.intShipToId -- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+			,intLocationId = ItemLocation.intItemLocationId 
 			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 			,dblQty = PODetail.dblQtyOrdered 
@@ -40,6 +40,10 @@ BEGIN
 			INNER JOIN dbo.tblICItemUOM ItemUOM
 				ON PODetail.intItemId = ItemUOM.intItemId
 				AND PODetail.intUnitOfMeasureId = ItemUOM.intItemUOMId
+			INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON PODetail.intItemId = ItemLocation.intItemId
+				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+				AND PO.intShipToId = ItemLocation.intLocationId
 	WHERE	PODetail.intPurchaseId = @intSourceTransactionId
 			AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
 			

@@ -1,6 +1,61 @@
 ﻿CREATE PROCEDURE [testi21Database].[test uspICGetItemsForItemReceipt for getting the items from PO]
 AS
 BEGIN
+	-- Declare the variables for grains (item)
+	DECLARE @WetGrains AS INT = 1
+			,@StickyGrains AS INT = 2
+			,@PremiumGrains AS INT = 3
+			,@ColdGrains AS INT = 4
+			,@HotGrains AS INT = 5
+			,@ManualLotGrains AS INT = 6
+			,@SerializedLotGrains AS INT = 7
+			,@InvalidItem AS INT = -1
+
+	-- Declare the variables for location
+	DECLARE @Default_Location AS INT = 1
+			,@NewHaven AS INT = 2
+			,@BetterHaven AS INT = 3
+			,@InvalidLocation AS INT = -1
+
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
+			,@ManualLotGrains_BushelUOMId AS INT = 6
+			,@SerializedLotGrains_BushelUOMId AS INT = 7
+
+			,@WetGrains_PoundUOMId AS INT = 8
+			,@StickyGrains_PoundUOMId AS INT = 9
+			,@PremiumGrains_PoundUOMId AS INT = 10
+			,@ColdGrains_PoundUOMId AS INT = 11
+			,@HotGrains_PoundUOMId AS INT = 12
+			,@ManualLotGrains_PoundUOMId AS INT = 13
+			,@SerializedLotGrains_PoundUOMId AS INT = 14
+
+	-- Declare Item-Locations
+	DECLARE @WetGrains_DefaultLocation AS INT = 1
+			,@StickyGrains_DefaultLocation AS INT = 2
+			,@PremiumGrains_DefaultLocation AS INT = 3
+			,@ColdGrains_DefaultLocation AS INT = 4
+			,@HotGrains_DefaultLocation AS INT = 5
+
+			,@WetGrains_NewHaven AS INT = 6
+			,@StickyGrains_NewHaven AS INT = 7
+			,@PremiumGrains_NewHaven AS INT = 8
+			,@ColdGrains_NewHaven AS INT = 9
+			,@HotGrains_NewHaven AS INT = 10
+
+			,@WetGrains_BetterHaven AS INT = 11
+			,@StickyGrains_BetterHaven AS INT = 12
+			,@PremiumGrains_BetterHaven AS INT = 13
+			,@ColdGrains_BetterHaven AS INT = 14
+			,@HotGrains_BetterHaven AS INT = 15
+
+			,@ManualLotGrains_DefaultLocation AS INT = 16
+			,@SerializedLotGrains_DefaultLocation AS INT = 17
+
 	-- Arrange 
 	BEGIN 
 		-- Create the assert tables 
@@ -36,31 +91,6 @@ BEGIN
 		SELECT	* 
 		INTO	actual
 		FROM	expected
-
-		-- Declare the variables for grains (item)
-		DECLARE @WetGrains AS INT = 1
-				,@StickyGrains AS INT = 2
-				,@PremiumGrains AS INT = 3
-				,@ColdGrains AS INT = 4
-				,@HotGrains AS INT = 5
-				,@ManualLotGrains AS INT = 6
-				,@SerializedLotGrains AS INT = 7
-				,@InvalidItem AS INT = -1
-
-		-- Declare the variables for location
-		DECLARE @Default_Location AS INT = 1
-				,@NewHaven AS INT = 2
-				,@BetterHaven AS INT = 3
-				,@InvalidLocation AS INT = -1
-
-		-- Declare the variables for the Item UOM Ids
-		DECLARE @WetGrains_BushelUOMId AS INT = 1
-				,@StickyGrains_BushelUOMId AS INT = 2
-				,@PremiumGrains_BushelUOMId AS INT = 3
-				,@ColdGrains_BushelUOMId AS INT = 4
-				,@HotGrains_BushelUOMId AS INT = 5
-				,@ManualLotGrains_BushelUOMId AS INT = 6
-				,@SerializedLotGrains_BushelUOMId AS INT = 7
 				
 		DECLARE @UOMBushel AS INT = 1
 		DECLARE @UOMPound AS INT = 2			
@@ -104,7 +134,7 @@ BEGIN
 		-- Setup the expected data
 		INSERT INTO expected
 		SELECT	intItemId				= @WetGrains
-				,intItemLocationId		= @Default_Location
+				,intItemLocationId		= @WetGrains_DefaultLocation
 				,intItemUOMId			= @WetGrains_BushelUOMId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 				,dblQty					= 10
@@ -119,7 +149,7 @@ BEGIN
 				,intLotId				= NULL 
 		UNION ALL 
 		SELECT	intItemId				= @PremiumGrains
-				,intItemLocationId		= @Default_Location
+				,intItemLocationId		= @PremiumGrains_DefaultLocation
 				,intItemUOMId			= @PremiumGrains_BushelUOMId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 				,dblQty					= 5
@@ -134,7 +164,7 @@ BEGIN
 				,intLotId				= NULL 
 		UNION ALL 
 		SELECT	intItemId				= @HotGrains
-				,intItemLocationId		= @Default_Location
+				,intItemLocationId		= @HotGrains_DefaultLocation
 				,intItemUOMId			= @HotGrains_BushelUOMId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 				,dblQty					= 2
@@ -149,7 +179,7 @@ BEGIN
 				,intLotId				= NULL 
 		UNION ALL 
 		SELECT	intItemId				= @ColdGrains
-				,intItemLocationId		= @Default_Location
+				,intItemLocationId		= @ColdGrains_DefaultLocation
 				,intItemUOMId			= @ColdGrains_BushelUOMId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
 				,dblQty					= 4
