@@ -82,3 +82,13 @@ BEGIN
 	END
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intPackTypeId' AND object_id = object_id('tblICInventoryReceiptItem'))
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'strUnitType' AND object_id = object_id('tblICUnitMeasure'))
+	BEGIN
+		EXEC('
+		UPDATE tblICInventoryReceiptItem
+		SET intPackTypeId = (SELECT ISNULL(intUnitMeasureId,NULL) FROM tblICUnitMeasure WHERE strUnitType = ''Packed'' AND intUnitMeasureId = tblICInventoryReceiptItem.intPackTypeId)
+		')
+	END
+END

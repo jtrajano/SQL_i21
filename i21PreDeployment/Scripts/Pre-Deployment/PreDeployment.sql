@@ -66,5 +66,6 @@
 
 -- IC
 :r .\11_IC\Fix_References_to_Foreign_Keys.sql
+:r .\11_IC\Account_Category_Change_14_4.sql
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql

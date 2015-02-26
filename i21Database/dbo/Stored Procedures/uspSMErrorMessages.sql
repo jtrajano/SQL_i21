@@ -143,3 +143,7 @@ EXEC sp_addmessage 51034,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51035) EXEC sp_dropmessage 51035, 'us_english'	
 SET @strmessage = 'You cannot receive item more than to its ordered.'
 EXEC sp_addmessage 51035,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51036) EXEC sp_dropmessage 51036, 'us_english'	
+SET @strmessage = 'Purchase Order already closed.'
+EXEC sp_addmessage 51036,11,@strmessage,'us_english','False'

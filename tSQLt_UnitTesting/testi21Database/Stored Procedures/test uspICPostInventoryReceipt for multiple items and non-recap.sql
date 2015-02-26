@@ -77,7 +77,10 @@ BEGIN
 
 		SET @amount = 10 * 15.52;
 		INSERT INTO expected VALUES (@amount, 0)
-		INSERT INTO expected VALUES (0, @amount)		
+		INSERT INTO expected VALUES (0, @amount)
+		
+		-- Add a spy for uspPOReceived
+		EXEC tSQLt.SpyProcedure 'dbo.uspPOReceived';						
 	END 
 	
 	-- Act
@@ -97,6 +100,10 @@ BEGIN
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+
+		--Assert uspPOReceived is called 
+		IF @ysnRecap = 0 AND NOT EXISTS (SELECT 1 FROM dbo.uspPOReceived_SpyProcedureLog)
+			EXEC tSQLt.Fail 'uspPOReceived should been called when @ysnRecap = 0'
 	END
 
 	-- Clean-up: remove the tables used in the unit test
@@ -105,5 +112,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-
 END 

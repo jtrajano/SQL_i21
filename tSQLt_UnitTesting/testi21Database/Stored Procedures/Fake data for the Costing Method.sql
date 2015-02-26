@@ -27,6 +27,8 @@ BEGIN
 			,@PremiumGrains AS INT = 3
 			,@ColdGrains AS INT = 4
 			,@HotGrains AS INT = 5
+			,@ManualLotGrains AS INT = 6
+			,@SerialLotGrains AS INT = 7
 
 	-- Declare the variables for location
 	DECLARE @Default_Location AS INT = 1
@@ -124,6 +126,8 @@ BEGIN
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@ColdGrains, 'COLD GRAINS')
 	INSERT INTO tblICItem (intItemId, strDescription) VALUES (@HotGrains, 'HOT GRAINS')
+	INSERT INTO tblICItem (intItemId, strDescription, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS', 'Yes, Manual')
+	INSERT INTO tblICItem (intItemId, strDescription, strLotTracking) VALUES (@SerialLotGrains, 'SERIAL LOT GRAINS', 'Yes, Serial Number')
 
 	-- Add items for DEFAULT LOCATION 
 	INSERT INTO tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @Default_Location, @AllowNegativeStock, @AverageCost)

@@ -1,6 +1,7 @@
 ﻿GO
 	PRINT N'BEGIN INSERT DEFAULT TM PREFERENCE COMPANY'
 GO
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[coctlmst]') AND type IN (N'U')) GOTO Insert_Exit;
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMPreferenceCompany]') AND type in (N'U')) 
 BEGIN
@@ -16,6 +17,8 @@ BEGIN
 		END
 	END
 END
+
+Insert_Exit:
 
 GO
 	PRINT N'END INSERT DEFAULT TM PREFERENCE COMPANY'

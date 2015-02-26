@@ -25,15 +25,15 @@ BEGIN
 
 		IF (EXISTS(SELECT SegmentCode FROM (SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst GROUP BY glact_acct1_8,glact_type) tblX group by SegmentCode HAVING COUNT(*) > 1) and @ysnOverride = 0)
 		BEGIN
-			SET @result = ''There are accounts that are classified as an Income and Balance Sheet Type account. <br/> Kindly verify at Origin GL.''
+			SET @result = ''invalid-1''
 		END
 		ELSE IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCode FROM glactmst) tblSegment) > 1 and @ysnOverride = 0)
 		BEGIN
-			SET @result = ''There are accounts with different lengths. <br/> Kindly verify at Origin GL.''
+			SET @result = ''invalid-2''
 		END
 		ELSE IF (EXISTS(SELECT TOP 1 1 FROM glactmst WHERE glact_acct9_16 NOT IN (SELECT glprc_sub_acct FROM glprcmst)) and @ysnOverride = 0)
 		BEGIN	
-			SET @result = ''Some location does not exists at location master table. <br/> Kindly verify at Origin.''
+			SET @result = ''invalid-3''
 		END
 		ELSE
 		BEGIN

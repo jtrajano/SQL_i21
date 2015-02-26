@@ -50,8 +50,7 @@
     CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount_EFT] FOREIGN KEY ([intEFTBankFileFormatId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),
 	CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount_BankStatement] FOREIGN KEY ([intBankStatementImportId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),
     CONSTRAINT [FK_tblCMBanktblCMBankAccount] FOREIGN KEY ([intBankId]) REFERENCES [dbo].[tblCMBank] ([intBankId]),
-    CONSTRAINT [FK_tblGLAccounttblCMBankAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    UNIQUE NONCLUSTERED ([strCbkNo] ASC)
+    CONSTRAINT [FK_tblGLAccounttblCMBankAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
 
 
@@ -76,6 +75,7 @@ CREATE NONCLUSTERED INDEX [IX_tblCMBankAccount_intGLAccountId]
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblCMBankAccount_strCbkNo]
-    ON [dbo].[tblCMBankAccount]([strCbkNo] ASC);
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblCMBankAccount_strCbkNo]
+	ON tblCMBankAccount(strCbkNo)
+WHERE strCbkNo IS NOT NULL AND strCbkNo <> '';
 

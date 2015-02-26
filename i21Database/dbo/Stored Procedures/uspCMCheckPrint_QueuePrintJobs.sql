@@ -17,7 +17,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 --SET NOCOUNT ON // This is commented out. We need the number rows of affected by this stored procedure. 
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+--SET ANSI_WARNINGS OFF // Commented because it is causing CM-579
 
 BEGIN TRANSACTION 
 		
@@ -98,7 +98,7 @@ SELECT	intBankAccountId	= F.intBankAccountId
 FROM	dbo.tblCMBankTransaction F
 WHERE	F.intBankAccountId = @intBankAccountId
 		AND F.strTransactionId = ISNULL(@strTransactionId, F.strTransactionId)
-		AND F.strLink = ISNULL(@strBatchId, F.strLink)
+		AND ISNULL(F.strLink, '') = ISNULL(@strBatchId, ISNULL(F.strLink, ''))
 		AND F.intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT)
 		AND F.ysnPosted = 1
 		AND F.ysnClr = 0
@@ -120,6 +120,7 @@ SELECT TOP 1
 		@strNextCheckNumber = dbo.fnAddZeroPrefixes(intCheckNextNo)		
 FROM	dbo.tblCMBankAccount
 WHERE	intBankAccountId = @intBankAccountId
+
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
 -- Get the manually assigned check numbers 
@@ -127,6 +128,7 @@ SELECT	*
 INTO	#tmpManuallyAssignedCheckNumbers
 FROM	#tmpPrintJobSpoolTable
 WHERE	LTRIM(RTRIM(ISNULL(strCheckNo, ''))) <> ''
+
 IF @@ERROR <> 0 GOTO _ROLLBACK
 
 DECLARE @loop_CheckNumber AS NVARCHAR(20)
@@ -142,6 +144,7 @@ BEGIN
 			@strRecordNo = strTransactionId
 	FROM	#tmpPrintJobSpoolTable
 	WHERE	LTRIM(RTRIM(ISNULL(strCheckNo, ''))) = ''
+
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 
 	-- Get the next check number from the Check Number Audit table. 
@@ -162,6 +165,7 @@ BEGIN
 	IF (LTRIM(RTRIM(ISNULL(@loop_CheckNumber, ''))) = '')
 	BEGIN 
 		RAISERROR(50014, 11, 1)
+		
 		GOTO _ROLLBACK
 	END 
 	ELSE 
@@ -237,13 +241,9 @@ BEGIN
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 
 	-- Update the next check number to the checkbook in origin.
-	UPDATE	dbo.apcbkmst_origin
-	SET		apcbk_next_chk_no = CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT) + 1
-	FROM	dbo.apcbkmst_origin O INNER JOIN dbo.tblCMBankAccount f
-				ON f.strCbkNo = O.apcbk_no COLLATE Latin1_General_CI_AS
-	WHERE	f.intBankAccountId = @intBankAccountId
-			AND ISNULL(@strNextCheckNumber, '') <> ''
-			AND O.apcbk_next_chk_no <= CAST(dbo.fnAddZeroPrefixes(@strNextCheckNumber) AS INT)  
+	EXEC dbo.uspCMUpdateOriginNextCheckNo
+		@strNextCheckNumber
+		,@intBankAccountId
 	IF @@ERROR <> 0 GOTO _ROLLBACK
 END 
 

@@ -31,6 +31,7 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 
 		INSERT INTO tblICInventoryReceipt (
 			strReceiptNumber
@@ -71,6 +72,8 @@ BEGIN
 		INSERT INTO expected VALUES (125.000000, 0)
 		INSERT INTO expected VALUES (0, 125.000000)
 		
+		-- Add a spy for uspPOReceived
+		EXEC tSQLt.SpyProcedure 'dbo.uspPOReceived';		
 	END 
 	
 	-- Act
@@ -90,6 +93,10 @@ BEGIN
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+
+		--Assert uspPOReceived is NOT called 
+		IF @ysnRecap = 1 AND EXISTS (SELECT 1 FROM dbo.uspPOReceived_SpyProcedureLog)
+			EXEC tSQLt.Fail 'uspPOReceived should NOT been called when @ysnRecap = 1'
 	END
 
 	-- Clean-up: remove the tables used in the unit test

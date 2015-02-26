@@ -27,7 +27,7 @@ BEGIN
 	SELECT @intCustomerId = intCustomerId FROM dbo.tblNRNote WHERE intNoteId = @intNoteId
 	SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
 	SELECT @strAccountId = REPLACE(strAccountId, '-', '.0000') FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
-	SELECT @strInvoiceLocationNo = strLocationNumber FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = @strInvoiceLocation
+	SELECT @strInvoiceLocationNo = ISNULL(strLocationNumber, strLocationName) FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = @strInvoiceLocation
 	SELECT @strLocation = strLocationNumber FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = @strLocation
 				
 	
@@ -88,18 +88,18 @@ BEGIN
 		BEGIN
 			IF @strVersionNumber = '15.1'
 			BEGIN
-				SELECT @intSeqNo = MAX(ptpye_no)  FROM ptpyemst WHERE (ptpye_cus_no = @strCustomerNumber) 
-					AND (ptpye_inc_ref = @strInvoiceNumber) AND (ptpye_ivc_loc_no = @strInvoiceLocationNo)
-				SET @intSeqNo = @intSeqNo + 1
+				SELECT @intSeqNo = MAX(agpye_pay_seq_no)  FROM [agpyemst] WHERE (agpye_cus_no = @strCustomerNumber) 
+					AND (agpye_inc_ref = @strInvoiceNumber) AND (agpye_ivc_loc_no = @strInvoiceLocationNo)
+				SET @intSeqNo = ISNULL(@intSeqNo,0) + 1
 				SET @strRevTime = SUBSTRING(@strRevTime, 1, 6)			
 				
 				IF @dblAmount < 0
 				BEGIN
-					SELECT @strCrType = c.ptcrd_type, @strRefNo = c.ptcrd_invc_no, @strRevDate = c.ptcrd_rev_dt, @intcrdSeqNo = c.ptcrd_seq_no
-					FROM ptivcmst a 
-					LEFT OUTER JOIN ptcrdmst c ON a.ptivc_cus_no = c.ptcrd_cus_no AND a.ptivc_invc_no = c.ptcrd_invc_no 
-						AND a.ptivc_loc_no = c.ptcrd_loc_no 
-					WHERE a.ptivc_invc_no = @strInvoiceNumber AND a.ptivc_loc_no = @strInvoiceLocationNo
+					SELECT @strCrType = c.agcrd_type, @strRefNo = c.agcrd_ref_no, @strRevDate = c.agcrd_rev_dt, @intcrdSeqNo = c.agcrd_seq_no
+					FROM agivcmst a 
+					LEFT OUTER JOIN agcrdmst c ON a.agivc_bill_to_cus = c.agcrd_cus_no AND a.agivc_ivc_no = c.agcrd_ref_no 
+						AND a.agivc_loc_no = c.agcrd_loc_no 
+					WHERE a.agivc_ivc_no = @strInvoiceNumber AND a.agivc_loc_no = @strInvoiceLocationNo
 					
 					SET @strCheckNo = 'ADJUST'
 					SET @dblAmount = @dblAmount * (-1)

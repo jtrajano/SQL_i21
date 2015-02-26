@@ -155,10 +155,11 @@ BEGIN
 			,strTransactionId = Header.strReceiptNumber  
 			,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 			,intLotId = NULL   
-	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItems  
-				ON Header.intInventoryReceiptId = DetailItems.intInventoryReceiptId  
-			INNER JOIN dbo.tblICItemLocation ItemLocation
+	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON Header.intLocationId = ItemLocation.intLocationId
+			INNER JOIN dbo.tblICInventoryReceiptItem DetailItems  
+				ON Header.intInventoryReceiptId = DetailItems.intInventoryReceiptId 
+				AND ItemLocation.intItemId = DetailItems.intItemId
 	WHERE	Header.intInventoryReceiptId = @intTransactionId   
   
 	-- Call the post routine 
@@ -260,7 +261,8 @@ END
 -- If RECAP is FALSE,
 -- 1. Book the G/L entries
 -- 2. Update the ysnPosted flag in the transaction. Increase the concurrency. 
--- 3. Commit the save point 
+-- 3. Update the PO (if it exists)
+-- 4. Commit the save point 
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 
@@ -270,6 +272,10 @@ BEGIN
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 	WHERE	strReceiptNumber = @strTransactionId  
+
+	-- Update the received quantities from the Purchase Order
+	EXEC dbo.[uspPOReceived] @intTransactionId 
+		IF @@ERROR <> 0	GOTO Post_Exit
 
 	COMMIT TRAN @TransactionName
 END 

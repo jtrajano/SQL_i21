@@ -965,9 +965,6 @@
     </Build>
     <Build Include="dbo\User Defined Types\InventoryTranactionStockToReverse.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
-      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="dbo\Functions\fnCalculateInterestToDate.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCalculateInterest.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCreateGLJournalEntry.sql" />
@@ -1012,9 +1009,7 @@
     <Build Include="dbo\Tables\tblSMCompanyLocationSubLocation.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationSubLocationCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportSubLedger.sql" />
-    <Build Include="dbo\Tables\tblSMTaxComponent.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroup.sql" />
-    <Build Include="dbo\Tables\tblSMTaxGroupComponent.sql" />
     <Build Include="dbo\Views\vyuAPReceivedItems.sql" />
     <Build Include="dbo\Tables\tblSCTruckDriverReference.sql" />
     <Build Include="dbo\Tables\tblGRDiscountCrossReference.sql" />
@@ -1044,6 +1039,22 @@
     <Build Include="dbo\Stored Procedures\uspSODuplicateSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGenerateEFTSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspNRCreateEFTGLJournalEntry.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLot.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotOut.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOIn.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLotIn.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Tables\tblICCostingMethod.sql" />
+    <None Include="Scripts\Post-Deployment\IC\4_CostingMethods.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostLotOut.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
     <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
@@ -1077,6 +1088,36 @@
     <Build Include="dbo\Tables\tblHDAnnouncementDisplay.sql" />
     <Build Include="dbo\Tables\tblHDProjectModule.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOIn.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOOut.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Tables\tblICItemStockPath.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateStockPathRoot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateStockPathNode.sql" />
+    <Build Include="dbo\Functions\fnGetInventoryTransactionId.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreatePOInventoryTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogItemStockPath.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryTransaction.sql" />
+    <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateOverPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeleteOverPayment.sql" />
+    <Build Include="dbo\Tables\tblSMTaxClass.sql" />
+    <Build Include="dbo\Views\vyuICGetPackedUOM.sql" />
+    <Build Include="dbo\Tables\tblSMTaxCode.sql" />
+    <Build Include="dbo\Tables\tblSMTaxType.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateCashEntry.sql" />
+    <Build Include="dbo\Views\vyuARRecapTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRCreateCashRevarseEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRReport1098.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRReportAgedNotes.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRReportUCCTracking.sql" />
+    <Build Include="dbo\Tables\tblICCategoryUOM.sql" />
+    <Build Include="dbo\Views\vyuICGetUOMConversion.sql" />
+    <Build Include="dbo\Tables\tblSMTaxGroupCode.sql" />
+	<Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
