@@ -425,7 +425,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPricingUPC: 'strUPC',
                 colPricingLastCost: 'dblLastCost',
                 colPricingStandardCost: 'dblStandardCost',
-                colPricingAverageCost: 'dblMovingAverageCost',
+                colPricingAverageCost: 'dblAverageCost',
                 colPricingEOMCost: 'dblEndMonthCost',
                 colPricingMethod: 'strPricingMethod',
                 colPricingAmount: 'dblAmountPercent',
