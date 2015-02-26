@@ -1351,6 +1351,153 @@ GO
     /*------------------------  */
 
 GO
+	/* ---------------------------------------- */
+	/* -- Create Scale Interface Module Menu -- */
+	/* ---------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Grain' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Scale Interface', 'Grain', 0, 'Scale Interface', 'Folder', '', 'small-folder', 1, 0, 0, 0, null, 0)
+
+	DECLARE @GrainScaleInterfaceModuleId INT
+	SELECT @GrainScaleInterfaceModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scale Interface' AND strModuleName = 'Grain' AND intParentMenuID = 0
+	
+	/* ------------------------------------------ */
+	/* -- Create Scale Interface Activity Menu -- */
+	/* ------------------------------------------ */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activity' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Activity', 'Grain', @GrainScaleInterfaceModuleId, 'Activity', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET intSort = 0
+		WHERE strMenuName = 'Activity' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceModuleId
+
+	DECLARE @GrainScaleInterfaceActivityId INT
+	SELECT @GrainScaleInterfaceActivityId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activity' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceModuleId
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Ticket' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceActivityId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Scale Ticket', 'Grain', @GrainScaleInterfaceActivityId, 'Scale', 'Screen', 'Grain.view.ScaleStationSelection', 'small-screen', 0, 0, 0, 1, 0, 1)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET strCommand = 'Grain.view.ScaleStationSelection', intSort = 0
+		WHERE strMenuName = 'Scale Ticket' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceActivityId
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Maintenance', 'Grain', @GrainScaleInterfaceModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 1, 1)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET intSort = 1
+		WHERE strMenuName = 'Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceModuleId
+		
+	/* ------------------------------------------------ */
+	/* --  Create Scale Interface Maintenance Menu   -- */
+	/* ------------------------------------------------ */
+	DECLARE @GrainScaleInterfaceMaintenanceId INT
+	SELECT @GrainScaleInterfaceMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceModuleId
+	
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Pool Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Ticket Pool Maintenance', 'Grain', @GrainScaleInterfaceMaintenanceId, 'Ticket Pool', 'Screen', 'Grain.view.TicketPool', 'small-screen', 0, 0, 0, 1, 1, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Grain.view.TicketPool', intSort = 1
+			WHERE strMenuName = 'Ticket Pool Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Station Settings' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Scale Station Settings', 'Grain', @GrainScaleInterfaceMaintenanceId, 'Scale Station Settings', 'Screen', 'Grain.view.ScaleStationSettings', 'small-screen', 0, 0, 0, 1, 2, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Grain.view.ScaleStationSettings', intSort = 2
+			WHERE strMenuName = 'Scale Station Settings' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Storage Types', 'Grain', @GrainScaleInterfaceMaintenanceId, 'Storage Type', 'Screen', 'Grain.view.StorageType', 'small-screen', 0, 0, 0, 1, 3, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Grain.view.StorageType', intSort = 3
+			WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Formats' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Ticket Formats', 'Grain', @GrainScaleInterfaceMaintenanceId, 'Ticket Format', 'Screen', 'Grain.view.TicketFormats', 'small-screen', 0, 0, 0, 1, 4, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Grain.view.TicketFormats', intSort = 4
+			WHERE strMenuName = 'Ticket Formats' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Physical Scale Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Physical Scale Maintenance', 'Grain', @GrainScaleInterfaceMaintenanceId, 'Physical Scale', 'Screen', 'Grain.view.PhysicalScale', 'small-screen', 0, 0, 0, 1, 5, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Grain.view.PhysicalScale', intSort = 5
+			WHERE strMenuName = 'Physical Scale Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId	
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grading Equipment Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Grading Equipment Maintenance', 'Grain', @GrainScaleInterfaceMaintenanceId, 'Grading Equipment', 'Screen', 'Grain.view.GradingEquipment', 'small-screen', 0, 0, 0, 1, 6, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Grain.view.GradingEquipment', intSort = 6
+			WHERE strMenuName = 'Grading Equipment Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainScaleInterfaceMaintenanceId
+			
+	/* ---------------------------------------- */
+	/* --     Create Grain Module Menu       -- */
+	/* ---------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Grain' AND strModuleName = 'Grain' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Grain', 'Grain', 0, 'Grain', 'Folder', '', 'small-folder', 1, 0, 0, 0, null, 0)
+
+	DECLARE @GrainModuleId INT
+	SELECT @GrainModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Grain' AND strModuleName = 'Grain' AND intParentMenuID = 0
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Maintenance', 'Grain', @GrainModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 1, 1)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET intSort = 1
+		WHERE strMenuName = 'Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainModuleId
+			
+	/* -------------------------------------- */
+	/* --  Create Grain Maintenance Menu   -- */
+	/* -------------------------------------- */
+	DECLARE @GrainMaintenanceId INT
+	SELECT @GrainMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Grain' AND intParentMenuID = @GrainModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount Table' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Discount Table', 'Grain', @GrainMaintenanceId, 'Discount Table', 'Screen', 'Grain.view.DiscountTable', 'small-screen', 0, 0, 0, 1, 1, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Grain.view.DiscountTable', intSort = 1
+			WHERE strMenuName = 'Discount Table' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount Schedule' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Discount Schedule', 'Grain', @GrainMaintenanceId, 'Discount Schedule', 'Screen', 'Grain.view.DiscountSchedule', 'small-screen', 0, 0, 0, 1, 2, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Grain.view.DiscountSchedule', intSort = 2
+			WHERE strMenuName = 'Discount Schedule' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId
+		
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount Code' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Discount Code', 'Grain', @GrainMaintenanceId, 'Discount Code', 'Screen', 'Grain.view.DiscountCode', 'small-screen', 0, 0, 0, 1, 3, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Grain.view.DiscountCode', intSort = 3
+			WHERE strMenuName = 'Discount Code' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId
+	
+	/* ---------------------------------------- */
+	/* --  End of Create Grain Module Menu   -- */
+	/* ---------------------------------------- */
+
+GO
 
 	/* ----------------------------------------------- */
 	/* --   Update Financial Reports Module Menu    -- */
