@@ -1108,6 +1108,10 @@
     <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
     <Build Include="dbo\Functions\fnCalculateUnitCost.sql" />
     <Build Include="dbo\Functions\fnCalculateStockUnitQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateStockReserves.sql" />
+    <Build Include="dbo\User Defined Types\ItemReservationTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReserveStockForInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateStockReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

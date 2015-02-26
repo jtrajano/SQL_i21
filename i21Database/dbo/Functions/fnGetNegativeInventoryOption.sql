@@ -8,18 +8,17 @@
 --------------------------------------------------------------------------------------------------------------------------------------------------
 CREATE FUNCTION [dbo].[fnGetNegativeInventoryOption] (
 	@intItemId INT
-	,@intLocationId INT 
+	,@intItemLocationId INT 
 )
 RETURNS INT 
 AS
 BEGIN
 	DECLARE @AllowNegativeInventoryType AS INT
 
-
 	SELECT	@AllowNegativeInventoryType = intAllowNegativeInventory 
 	FROM	tblICItemLocation
 	WHERE	intItemId = @intItemId
-			AND intLocationId = @intLocationId
+			AND intItemLocationId = @intItemLocationId
 
 	RETURN @AllowNegativeInventoryType
 END

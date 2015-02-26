@@ -159,3 +159,7 @@ EXEC sp_addmessage 51038,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51039) EXEC sp_dropmessage 51039, 'us_english'	
 SET @strmessage = 'Cannot process Purchase Order with 0 amount.'
 EXEC sp_addmessage 51039,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51040) EXEC sp_dropmessage 51040, 'us_english'	
+SET @strmessage = 'There is not enough stocks for %s'
+EXEC sp_addmessage 51040,11,@strmessage,'us_english','False'
