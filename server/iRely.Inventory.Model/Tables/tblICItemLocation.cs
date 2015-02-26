@@ -90,6 +90,17 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
+        [NotMapped]
+        public int? intCompanyLocationId
+        {
+            get
+            {
+                if (tblSMCompanyLocation != null)
+                    return tblSMCompanyLocation.intCompanyLocationId;
+                else
+                    return null;
+            }
+        }
         private string _type;
         [NotMapped]
         public string strLocationType

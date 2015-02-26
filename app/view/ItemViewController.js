@@ -449,8 +449,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     editor: {
                         store: '{pricingLevel}',
                         defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{grdPricingLevel.selection.intLocationId}'
+                            column: 'intCompanyLocationId',
+                            value: '{grdPricingLevel.selection.intCompanyLocationId}'
                         }]
                     }
                 },
@@ -1784,6 +1784,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
+            current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
             current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
             if (grdPricing.store){
                 var record = grdPricing.store.findRecord('intItemLocationId', records[0].get('intItemLocationId'));
