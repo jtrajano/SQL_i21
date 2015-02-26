@@ -7056,7 +7056,7 @@
                                                 "dataIndex": "string",
                                                 "flex": null,
                                                 "itemId": "colPricingSalePrice",
-                                                "text": "Sale Price",
+                                                "text": "Sales Price",
                                                 "width": 80
                                             },
                                             "name": "MyNumberColumn13",

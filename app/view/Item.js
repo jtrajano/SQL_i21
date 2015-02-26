@@ -3281,7 +3281,7 @@ Ext.define('Inventory.view.Item', {
                                                         width: 80,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'Sale Price'
+                                                        text: 'Sales Price'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
