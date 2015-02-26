@@ -2206,8 +2206,8 @@ Ext.define('Inventory.view.ItemViewController', {
                             row: 0,
                             column: 1
                         });
-                        var cboTracking = gridObj.query('#cboTracking')[0];
-                        cboTracking.focus();
+                        var cboDetailUnitMeasure = gridObj.query('#cboDetailUnitMeasure')[0];
+                        cboDetailUnitMeasure.focus();
                     });
 
                     task.delay(10);
