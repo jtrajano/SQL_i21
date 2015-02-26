@@ -706,6 +706,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onVendorClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var current = win.viewModel.data.current;
+
+        iRely.Functions.openScreen('AccountsPayable.view.Vendor', {
+            filters: [
+                {
+                    column: 'intVendorId',
+                    value: current.get('intVendorId')
+                }
+            ]
+        });
+    },
+
     onReceiveClick: function(button, e, eOpts) {
         var me = this;
         var win = button.up('window');
@@ -1394,6 +1408,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnInventory": {
                 click: this.onInventoryClick
+            },
+            "#btnVendor": {
+                click: this.onVendorClick
             },
             "#cboShipFrom": {
                 beforequery: this.onShipFromBeforeQuery,
