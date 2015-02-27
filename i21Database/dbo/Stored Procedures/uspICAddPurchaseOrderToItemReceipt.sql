@@ -142,11 +142,11 @@ SELECT	intInventoryReceiptId = @InventoryReceiptId
 		,dblOpenReceive			= ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)
 		,dblReceived			= ISNULL(PODetail.dblQtyReceived, 0)
 		,intUnitMeasureId		= ItemUOM.intItemUOMId
-		,intNoPackages			= 0 -- None found from Purchase Order
-		,intPackageTypeId		= NULL -- None found from Purchase Order
-		,dblExpPackageWeight	= 0 -- None found from Purchase Order
+		,intNoPackages			= 0			-- None found from Purchase Order
+		,intPackageTypeId		= NULL		-- None found from Purchase Order
+		,dblExpPackageWeight	= 0			-- None found from Purchase Order
 		,dblUnitCost			= PODetail.dblCost
-		,dblLineTotal			= 0
+		,dblLineTotal			= (ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)) * PODetail.dblCost
 		,intSort				= PODetail.intLineNo
 		,intConcurrencyId		= 1
 FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
