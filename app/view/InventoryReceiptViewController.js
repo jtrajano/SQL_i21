@@ -195,10 +195,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             grdLotTracking: {
                 colLotId: {
-                    dataIndex: 'strLotId',
-                    editor: {
-                        store: '{lots}'
-                    }
+                    dataIndex: 'strLotId'
                 },
                 colLotQuantity: 'dblQuantity',
                 colLotWeightUOM: {

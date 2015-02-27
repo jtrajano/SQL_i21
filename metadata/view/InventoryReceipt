@@ -2426,14 +2426,13 @@
                                             "designerId": "162de61d-aae6-46b6-9166-ea2f1a8764ce",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.ComboBox",
+                                                    "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "editor",
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "autoSelect": false,
                                                         "columns": [
                                                             "[",
                                                             "\t{",
@@ -2450,13 +2449,9 @@
                                                             "\t}",
                                                             "]"
                                                         ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strLotNumber",
-                                                        "itemId": "cboLotId",
-                                                        "matchFieldWidth": false,
-                                                        "valueField": "strLotNumber"
+                                                        "itemId": "cboLotId"
                                                     },
-                                                    "name": "MyComboBox70",
+                                                    "name": "MyTextField4",
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },

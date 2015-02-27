@@ -1130,12 +1130,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
                                                         itemId: 'colLotId',
                                                         width: 100,
-                                                        dataIndex: 'string',
                                                         text: 'Lot ID',
                                                         editor: {
-                                                            xtype: 'gridcombobox',
+                                                            xtype: 'textfield',
                                                             columns: [
                                                                 {
                                                                     dataIndex: 'intLotId',
@@ -1150,11 +1150,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboLotId',
-                                                            matchFieldWidth: false,
-                                                            autoSelect: false,
-                                                            displayField: 'strLotNumber',
-                                                            valueField: 'strLotNumber'
+                                                            itemId: 'cboLotId'
                                                         }
                                                     },
                                                     {
