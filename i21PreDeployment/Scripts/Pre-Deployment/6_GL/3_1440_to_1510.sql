@@ -4,8 +4,12 @@ EXEC('IF EXISTS(SELECT  *  FROM  sys.objects WHERE    object_id = OBJECT_ID(N''[
 	  BEGIN
 		 IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure)	
 			BEGIN
-				IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = ''Segment'' and (LOWER(strStructureName) like ''profit center%'' OR strStructureName = ''Location''))
-				RAISERROR(N''Missing valid structure (i.e. location/profit center) in tblGLAccountStructure, Deployment Terminated.'', 16,1)
+				IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = ''Segment'') RAISERROR(N''Missing segment type structure in tblGLAccountStructure, Deployment Terminated.'', 16,1)
+				IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = ''Segment'' AND strStructureName = ''Location'')
+				BEGIN
+					UPDATE tblGLAccountStructure SET strStructureName = ''Location'' WHERE  intAccountStructureId = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N''Segment'')
+					PRINT ''Updated One Segment to Location''
+				END
 			END
 		ELSE
 			BEGIN
