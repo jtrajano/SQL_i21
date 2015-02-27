@@ -762,8 +762,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var context = win.context;
 
         var doRecap = function(recapButton, currentRecord, currency){
-            "use strict";
-            var me = this;
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
