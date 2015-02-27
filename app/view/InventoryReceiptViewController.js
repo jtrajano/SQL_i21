@@ -657,7 +657,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.itemId === 'cboItemUOM')
         {
-            current.set('intUnitMeasureId', records[0].get('intItemUOMId'));
+            current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
         }
@@ -700,7 +700,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (selected) {
             if (selected.length > 0){
                 var current = selected[0];
-                if (!current.phantom)
+                if (!current.dummy)
                     iRely.Functions.openScreen('Inventory.view.Item', current.get('intItemId'));
             }
         }
@@ -710,14 +710,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = button.up('window');
         var current = win.viewModel.data.current;
 
-        iRely.Functions.openScreen('AccountsPayable.view.Vendor', {
-            filters: [
-                {
-                    column: 'intVendorId',
-                    value: current.get('intVendorId')
-                }
-            ]
-        });
+        if (current.get('intVendorId') !== null) {
+            iRely.Functions.openScreen('AccountsPayable.view.Vendor', {
+                filters: [
+                    {
+                        column: 'intVendorId',
+                        value: current.get('intVendorId')
+                    }
+                ]
+            });
+        }
     },
 
     onReceiveClick: function(button, e, eOpts) {
@@ -864,14 +866,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var data = store.data;
             var calculatedTotal = 0;
             Ext.Array.each(data.items, function(row) {
-                var dblReceived = row.get('dblReceived');
-                var dblUnitCost = row.get('dblUnitCost');
-                if (obj.column.itemId === 'colReceived')
-                    dblReceived = newValue;
-                else if (obj.column.itemId === 'colUnitCost')
-                    dblUnitCost = newValue;
-                var rowTotal = dblReceived * dblUnitCost;
-                calculatedTotal += rowTotal;
+                if (!row.dummy) {
+                    var dblReceived = row.get('dblReceived');
+                    var dblUnitCost = row.get('dblUnitCost');
+                    if (obj.column.itemId === 'colReceived')
+                        dblReceived = newValue;
+                    else if (obj.column.itemId === 'colUnitCost')
+                        dblUnitCost = newValue;
+                    var rowTotal = dblReceived * dblUnitCost;
+                    calculatedTotal += rowTotal;
+                }
             });
             txtCalculatedAmount.setValue(calculatedTotal);
             var difference = calculatedTotal - (txtInvoiceAmount.getValue());
@@ -1008,7 +1012,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         current.set('intLineNo', po.get('intPurchaseDetailId'));
         current.set('intSourceId', po.get('intPurchaseId'));
+        current.set('colQtyOrdered', po.get('dblQtyOrdered'));
+        current.set('dblReceived', po.get('dblQtyReceived'));
         current.set('dblOpenReceive', po.get('dblQtyOrdered'));
+        current.set('strItemDescription', po.get('strDescription'));
         current.set('intItemId', po.get('intItemId'));
         current.set('strItemNo', po.get('strItemNo'));
         current.set('intUnitMeasureId', po.get('intUnitOfMeasureId'));

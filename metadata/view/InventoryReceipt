@@ -1554,6 +1554,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strPurchaseOrderNumber",
                                                         "itemId": "cboSource",
+                                                        "multiSelect": true,
                                                         "valueField": "strPurchaseOrderNumber"
                                                     },
                                                     "name": "MyComboBox23",

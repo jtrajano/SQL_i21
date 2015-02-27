@@ -110,7 +110,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'icbuffereditemstockdetailview'
         },
         itemUOM: {
-            autoLoad: true,
             type: 'icbuffereditempricingview'
         },
         packageType: {

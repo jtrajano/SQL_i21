@@ -783,6 +783,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             ],
                                                             itemId: 'cboSource',
                                                             displayField: 'strPurchaseOrderNumber',
+                                                            multiSelect: true,
                                                             valueField: 'strPurchaseOrderNumber'
                                                         }
                                                     },
