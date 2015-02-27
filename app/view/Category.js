@@ -448,7 +448,7 @@ Ext.define('Inventory.view.Category', {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true,
-                                                            minValue: 1
+                                                            minValue: 0
                                                         }
                                                     },
                                                     {

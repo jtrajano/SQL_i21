@@ -858,7 +858,7 @@
                                                     "userConfig": {
                                                         "fieldStyle": "text-align:right",
                                                         "hideTrigger": true,
-                                                        "minValue": 1
+                                                        "minValue": 0
                                                     },
                                                     "name": "MyNumberField2",
                                                     "designerId": "4f8f149d-3f1b-4bb1-87d3-3dd6f487a321"
