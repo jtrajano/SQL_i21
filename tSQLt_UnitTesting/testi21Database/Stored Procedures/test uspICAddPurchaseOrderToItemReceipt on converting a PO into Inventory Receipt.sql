@@ -3,27 +3,67 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
+		-- Create the fake data
+		EXEC testi21Database.[Fake inventory items]
+
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
 				,@StickyGrains AS INT = 2
 				,@PremiumGrains AS INT = 3
 				,@ColdGrains AS INT = 4
 				,@HotGrains AS INT = 5
+				,@ManualLotGrains AS INT = 6
+				,@SerializedLotGrains AS INT = 7
+				,@InvalidItem AS INT = -1
 
 		-- Declare the variables for location
 		DECLARE @Default_Location AS INT = 1
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
-				
-		DECLARE @UOMBushel AS INT = 1
-		DECLARE @UOMPound AS INT = 2				
+				,@InvalidLocation AS INT = -1
+
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+				,@ManualLotGrains_BushelUOMId AS INT = 6
+				,@SerializedLotGrains_BushelUOMId AS INT = 7
+
+				,@WetGrains_PoundUOMId AS INT = 8
+				,@StickyGrains_PoundUOMId AS INT = 9
+				,@PremiumGrains_PoundUOMId AS INT = 10
+				,@ColdGrains_PoundUOMId AS INT = 11
+				,@HotGrains_PoundUOMId AS INT = 12
+				,@ManualLotGrains_PoundUOMId AS INT = 13
+				,@SerializedLotGrains_PoundUOMId AS INT = 14
+
+		-- Declare Item-Locations
+		DECLARE @WetGrains_DefaultLocation AS INT = 1
+				,@StickyGrains_DefaultLocation AS INT = 2
+				,@PremiumGrains_DefaultLocation AS INT = 3
+				,@ColdGrains_DefaultLocation AS INT = 4
+				,@HotGrains_DefaultLocation AS INT = 5
+
+				,@WetGrains_NewHaven AS INT = 6
+				,@StickyGrains_NewHaven AS INT = 7
+				,@PremiumGrains_NewHaven AS INT = 8
+				,@ColdGrains_NewHaven AS INT = 9
+				,@HotGrains_NewHaven AS INT = 10
+
+				,@WetGrains_BetterHaven AS INT = 11
+				,@StickyGrains_BetterHaven AS INT = 12
+				,@PremiumGrains_BetterHaven AS INT = 13
+				,@ColdGrains_BetterHaven AS INT = 14
+				,@HotGrains_BetterHaven AS INT = 15
+
+				,@ManualLotGrains_DefaultLocation AS INT = 16
+				,@SerializedLotGrains_DefaultLocation AS INT = 17
 				
 		DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 		DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 		DECLARE @ReceiptType_Direct AS NVARCHAR(100) = 'Direct'				
-
-		-- Create the fake data
-		EXEC testi21Database.[Fake inventory items]
 
 		-- Creata fake data for security user
 		EXEC tSQLt.FakeTable 'dbo.tblSMUserSecurity';
@@ -51,10 +91,10 @@ BEGIN
 		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightTermId, dblShipping, dblTotal, intVendorId) VALUES (1, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish)
 
 		-- Fake PO Detail data
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 11, @WetGrains, 10, 0, @UOMBushel, 50.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 12, @PremiumGrains, 5, 0, @UOMBushel, 100.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 13, @HotGrains, 2, 0, @UOMBushel, 200.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 14, @ColdGrains, 4, 0, @UOMBushel, 125.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 11, @WetGrains, 10, 0, @WetGrains_BushelUOMId, 50.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 12, @PremiumGrains, 5, 0, @PremiumGrains_BushelUOMId, 100.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 13, @HotGrains, 2, 0, @HotGrains_BushelUOMId, 200.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 14, @ColdGrains, 4, 0, @ColdGrains_BushelUOMId, 125.00)
 
 		-- Fake starting numbers data
 		EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';
@@ -141,7 +181,7 @@ BEGIN
 				,dblOrderQty = 10
 				,dblOpenReceive = 10
 				,dblReceived = 0
-				,intUnitMeasureId = @UOMBushel
+				,intUnitMeasureId = @WetGrains_BushelUOMId
 				,intNoPackages = 0
 				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
@@ -157,7 +197,7 @@ BEGIN
 				,dblOrderQty = 5
 				,dblOpenReceive = 5
 				,dblReceived = 0
-				,intUnitMeasureId = @UOMBushel
+				,intUnitMeasureId = @PremiumGrains_BushelUOMId
 				,intNoPackages = 0
 				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
@@ -173,7 +213,7 @@ BEGIN
 				,dblOrderQty = 2
 				,dblOpenReceive = 2
 				,dblReceived = 0
-				,intUnitMeasureId = @UOMBushel
+				,intUnitMeasureId = @HotGrains_BushelUOMId
 				,intNoPackages = 0
 				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
@@ -189,7 +229,7 @@ BEGIN
 				,dblOrderQty = 4
 				,dblOpenReceive = 4
 				,dblReceived = 0
-				,intUnitMeasureId = @UOMBushel
+				,intUnitMeasureId = @ColdGrains_BushelUOMId
 				,intNoPackages = 0
 				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
