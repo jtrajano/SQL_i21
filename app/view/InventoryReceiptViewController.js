@@ -971,15 +971,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var proxy = obj.combo.store.proxy;
                 proxy.setExtraParams({include:'tblEntityLocations'});
             }
-//            else if (obj.combo.itemId === 'cboLotWeightUOM') {
-////                var win = obj.up('window');
-////                var vm = win.viewModel;
-////                var currentReceiptItem = vm.data.currentReceiptItem;
-////                obj.combo.store.defaultFilters = [{
-////                    column: 'intItemId',
-////                    value: currentReceiptItem.get('intItemId')
-////                }];
-//            }
         }
     },
 
@@ -1003,12 +994,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = plugin.getActiveRecord();
         var po = records[0];
 
-//        var cboReceiptType = win.down('#cboReceiptType');
-//        var cboVendor = win.down('#cboVendor');
-//
-//        cboReceiptType.setReadOnly(true);
-//        cboVendor.setReadOnly(true);
-
         current.set('intLineNo', po.get('intPurchaseDetailId'));
         current.set('intSourceId', po.get('intPurchaseId'));
         current.set('colQtyOrdered', po.get('dblQtyOrdered'));
@@ -1022,6 +1007,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('dblUnitCost', po.get('dblCost'));
         current.set('dblLineTotal', po.get('dblTotal'));
         current.set('strLotTracking', po.get('strLotTracking'));
+        current.set('intSubLocationId', po.get('intSubLocationId'));
+        current.set('intStorageLocationId', po.get('intStorageLocationId'));
+        current.set('strSubLocationName', po.get('strSubLocationName'));
+        current.set('strStorageLocationName', po.get('strStorageName'));
     },
 
     onItemGridColumnBeforeRender: function(column) {
@@ -1124,6 +1113,34 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                 dataIndex: 'strLotTracking',
                                                 dataType: 'string',
                                                 text: 'Lot Tracking',
+                                                hidden: true
+                                            }
+                                            ,
+                                            {
+                                                dataIndex: 'intStorageLocationId',
+                                                dataType: 'numeric',
+                                                text: 'Storage Location Id',
+                                                hidden: true
+                                            }
+                                            ,
+                                            {
+                                                dataIndex: 'intSubLocationId',
+                                                dataType: 'numeric',
+                                                text: 'Sub Location Id',
+                                                hidden: true
+                                            }
+                                            ,
+                                            {
+                                                dataIndex: 'strSubLocationName',
+                                                dataType: 'string',
+                                                text: 'Sub Location Name',
+                                                hidden: true
+                                            }
+                                            ,
+                                            {
+                                                dataIndex: 'strStorageName',
+                                                dataType: 'string',
+                                                text: 'Storage Location Name',
                                                 hidden: true
                                             }
                                         ],

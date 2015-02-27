@@ -215,6 +215,10 @@ namespace iRely.Inventory.Model
         public string strStatus { get; set; }
         public int? intLocationId { get; set; }
         public int? intItemLocationId { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
         public string strLocationName { get; set; }
         public string strLocationType { get; set; }
         public int? intVendorId { get; set; }
@@ -222,10 +226,19 @@ namespace iRely.Inventory.Model
         public int? intReceiveUOMId { get; set; }
         public int? intIssueUOMId { get; set; }
         public string strReceiveUOM { get; set; }
+        public decimal? dblReceiveSalePrice { get; set; }
+        public decimal? dblReceiveMSRPPrice { get; set; }
+        public decimal? dblReceiveLastCost { get; set; }
+        public decimal? dblReceiveStandardCost { get; set; }
+        public decimal? dblReceiveAverageCost { get; set; }
+        public decimal? dblReceiveEndMonthCost { get; set; }
         public string strIssueUOM { get; set; }
-        public int? intSubLocationId { get; set; }
-        public int? intStorageLocationId { get; set; }
-        public string strStorageLocationName { get; set; }
+        public decimal? dblIssueSalePrice { get; set; }
+        public decimal? dblIssueMSRPPrice { get; set; }
+        public decimal? dblIssueLastCost { get; set; }
+        public decimal? dblIssueStandardCost { get; set; }
+        public decimal? dblIssueAverageCost { get; set; }
+        public decimal? dblIssueEndMonthCost { get; set; }
         public decimal? dblMinOrder { get; set; }
         public decimal? dblReorderPoint { get; set; }
         public int? intAllowNegativeInventory { get; set; }
@@ -265,7 +278,7 @@ namespace iRely.Inventory.Model
         public int? intUnitMeasureId { get; set; }
         public string strUnitMeasure { get; set; }
         public string strUnitType { get; set; }
-        public bool? ysnStockUnit { get; set; }
+        public bool ysnStockUnit { get; set; }
         public decimal? dblUnitQty { get; set; }
         public decimal? dblAmountPercent { get; set; }
         public decimal? dblSalePrice { get; set; }
