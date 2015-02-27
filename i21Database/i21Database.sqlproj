@@ -1112,6 +1112,14 @@
     <Build Include="dbo\User Defined Types\ItemReservationTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICReserveStockForInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateStockReservation.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderInputLot.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderConsumedLot.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderInputParentLot.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderProducedLot.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrder.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderProductionType.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderStatus.sql" />
+    <Build Include="dbo\Tables\tblICParentLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

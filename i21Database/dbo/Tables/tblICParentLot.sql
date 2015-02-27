@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[tblICParentLot]
+(
+	[intParentLotId] INT NOT NULL IDENTITY(1,1), 
+    [strParentLotId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strParentLotAlias] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [dtmCreated] DATETIME NULL, 
+    [intCreatedUserId] INT NULL, 
+    [intItemId] INT NOT NULL, 
+    [dblQuantity] NUMERIC(18, 6) NOT NULL, 
+    [intItemUOMId] INT NOT NULL, 
+    [intLocationId] INT NOT NULL, 
+    [dtmExpiryDate] DATE NULL, 
+    [dblUnitCost] NUMERIC(18, 6) NULL, 
+    [intCostUOMId] INT NULL, 
+    [intCurrencyId] INT NULL, 
+    [dblExchangeRateToBaseCurrency] NUMERIC(18, 6) NULL,
+	[dtmLastModified] DATETIME NULL, 
+    [intLastModifiedUserId] INT NULL,
+	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblICParentLot_intConcurrencyId] DEFAULT 0,
+	CONSTRAINT [PK_tblICParentLot_intParentLotId] PRIMARY KEY ([intParentLotId]),
+	CONSTRAINT [UQ_tblICParentLot_strParentLotId] UNIQUE ([strParentLotId],[intLocationId]),
+	CONSTRAINT [FK_tblICParentLot_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblICParentLot_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+	CONSTRAINT [FK_tblICParentLot_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblICParentLot_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
+)
