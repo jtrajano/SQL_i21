@@ -37,6 +37,32 @@ Ext.define('Inventory.controller.Inventory', {
         this.superclass.constructor.call(this);
     },
 
+    ICTransactionDrillDown: function(params) {
+        var me = this,
+            form = params[0].strTransactionForm,
+            filterField,
+            viewName,
+            filter = [];
+
+        switch(form){
+            case 'Inventory Receipt':
+                filterField = 'intInventoryReceiptId';
+                viewName = 'Inventory.view.InventoryReceipt';
+                break;
+        }
+
+        Ext.each(params, function(param, index) {
+            filter.push({
+                column : filterField,
+                value : params[index].intTransactionId,
+                condition : 'eq',
+                conjunction : 'Or'
+            });
+        });
+
+        iRely.Functions.openScreen(viewName, { filters: filter });
+    },
+
     init: function() {
         Ext.Ajax.request({
             timeout: 120000,
