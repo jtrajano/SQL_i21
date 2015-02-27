@@ -996,7 +996,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         current.set('intLineNo', po.get('intPurchaseDetailId'));
         current.set('intSourceId', po.get('intPurchaseId'));
-        current.set('colQtyOrdered', po.get('dblQtyOrdered'));
+        current.set('dblQtyOrdered', po.get('dblQtyOrdered'));
         current.set('dblReceived', po.get('dblQtyReceived'));
         current.set('dblOpenReceive', po.get('dblQtyOrdered'));
         current.set('strItemDescription', po.get('strDescription'));
