@@ -180,8 +180,8 @@ BEGIN
 	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt @strTransactionId
  
 	-- Get the items to post  
-	DECLARE @ItemsToPost AS ItemCostingTableType  
-	INSERT INTO @ItemsToPost (  
+	DECLARE @ItemsForPost AS ItemCostingTableType  
+	INSERT INTO @ItemsForPost (  
 			intItemId  
 			,intItemLocationId 
 			,intItemUOMId  
@@ -195,7 +195,9 @@ BEGIN
 			,intTransactionId  
 			,strTransactionId  
 			,intTransactionTypeId  
-			,intLotId   
+			,intLotId 
+			,intSubLocationId
+			,intStorageLocationId
 	)  
 	SELECT	intItemId = DetailItems.intItemId  
 			,intItemLocationId = ItemLocation.intItemLocationId
@@ -210,7 +212,9 @@ BEGIN
 			,intTransactionId = Header.intInventoryReceiptId  
 			,strTransactionId = Header.strReceiptNumber  
 			,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
-			,intLotId = DetailItemsLot.intLotId   
+			,intLotId = DetailItemsLot.intLotId 
+			,intSubLocationId = DetailItems.intSubLocationId
+			,intStorageLocationId = DetailItemsLot.intStorageLocationId
 	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON Header.intLocationId = ItemLocation.intLocationId
 			INNER JOIN dbo.tblICInventoryReceiptItem DetailItems  
@@ -254,7 +258,7 @@ BEGIN
 				,[intConcurrencyId]
 		)
 		EXEC	dbo.uspICPostCosting  
-				@ItemsToPost  
+				@ItemsForPost  
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId

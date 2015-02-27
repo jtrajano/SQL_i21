@@ -20,11 +20,11 @@ DECLARE @SourceType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 DECLARE @SourceType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 DECLARE @SourceType_Direct AS NVARCHAR(100) = 'Direct'
 
-DECLARE @ItemsToReceive AS ItemCostingTableType 
+DECLARE @ItemsForItemReceipt AS ItemCostingTableType 
 
 BEGIN TRY
 	-- Get the items to process
-	INSERT INTO @ItemsToReceive (
+	INSERT INTO @ItemsForItemReceipt (
 		intItemId
 		,intItemLocationId
 		,intItemUOMId
@@ -39,19 +39,21 @@ BEGIN TRY
 		,strTransactionId
 		,intTransactionTypeId
 		,intLotId
+		,intSubLocationId
+		,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion. 
 	)
 	EXEC dbo.uspICGetItemsForItemReceipt 
 		@intSourceTransactionId
 		,@strSourceType
 
 	-- Validate the items to receive 
-	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsToReceive; 
+	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 
 	-- Add the items to the item receipt 
 	IF @strSourceType = @SourceType_PurchaseOrder
 	BEGIN 
 		EXEC dbo.uspICAddPurchaseOrderToItemReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
-		EXEC dbo.uspICIncreaseOnOrderQty @ItemsToReceive;
+		EXEC dbo.uspICIncreaseOnOrderQty @ItemsForItemReceipt;
 	END
 
 END TRY

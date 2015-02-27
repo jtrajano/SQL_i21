@@ -11,7 +11,7 @@
 */
 
 CREATE PROCEDURE [dbo].[uspICValidateProcessToItemReceipt]
-	@ItemsToValidate ItemCostingTableType READONLY
+	@Items ItemCostingTableType READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -34,7 +34,7 @@ SELECT	Errors.intItemId
 		,Errors.intItemLocationId
 		,Errors.strText
 		,Errors.intErrorCode
-FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetProcessToItemReceiptErrors(Item.intItemId, Item.intItemLocationId, Item.dblQty, Item.dblUOMQty) Errors
+FROM	@Items Item CROSS APPLY dbo.fnGetProcessToItemReceiptErrors(Item.intItemId, Item.intItemLocationId, Item.dblQty, Item.dblUOMQty) Errors
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 

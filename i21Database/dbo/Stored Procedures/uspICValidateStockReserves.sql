@@ -24,10 +24,17 @@ FROM	(
 			SELECT	intItemId
 					,intItemLocationId
 					,intItemUOMId
+					,intSubLocationId
+					,intStorageLocationId
 					,dblQty = SUM(dblQty)
 			FROM	@ItemsToValidate	
 			WHERE	ISNULL(intLotId, 0) = 0 
-			GROUP BY intItemId, intItemLocationId, intItemUOMId
+			GROUP BY 
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intSubLocationId
+				,intStorageLocationId
 		) ValidateItems INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON ValidateItems.intItemId = ItemLocation.intItemId
 			AND ValidateItems.intItemLocationId = ItemLocation.intItemLocationId
@@ -39,17 +46,28 @@ FROM	(
 			SELECT	tblICStockReservation.intItemId
 					,tblICStockReservation.intItemLocationId
 					,tblICStockReservation.intItemUOMId
+					,tblICStockReservation.intSubLocationId
+					,tblICStockReservation.intStorageLocationId
 					,dblQuantity = SUM(tblICStockReservation.dblQuantity)
 			FROM	dbo.tblICStockReservation INNER JOIN @ItemsToValidate ValidateItems
 						ON tblICStockReservation.intItemId = ValidateItems.intItemId
 						AND tblICStockReservation.intItemLocationId = ValidateItems.intItemLocationId
 						AND tblICStockReservation.intItemUOMId = ValidateItems.intItemUOMId
+						AND ISNULL(tblICStockReservation.intSubLocationId, 0) = ISNULL(ValidateItems.intSubLocationId, 0)
+						AND ISNULL(tblICStockReservation.intStorageLocationId, 0) = ISNULL(ValidateItems.intStorageLocationId, 0)
 			WHERE	ISNULL(tblICStockReservation.intLotId, 0) = 0 
-			GROUP BY tblICStockReservation.intItemId, tblICStockReservation.intItemLocationId, tblICStockReservation.intItemUOMId
+			GROUP BY 
+				tblICStockReservation.intItemId
+				,tblICStockReservation.intItemLocationId
+				,tblICStockReservation.intItemUOMId
+				,tblICStockReservation.intSubLocationId
+				,tblICStockReservation.intStorageLocationId
 		) Reserves 
 			ON ValidateItems.intItemId = Reserves.intItemId
 			AND ValidateItems.intItemLocationId = Reserves.intItemLocationId
 			AND ValidateItems.intItemUOMId = Reserves.intItemUOMId
+			AND ISNULL(ValidateItems.intSubLocationId, 0) = ISNULL(Reserves.intSubLocationId, 0)
+			AND ISNULL(ValidateItems.intStorageLocationId, 0) = ISNULL(Reserves.intStorageLocationId, 0)
 WHERE	ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0) - ValidateItems.dblQty < 0
 		AND ItemLocation.intAllowNegativeInventory = @AllowNegativeInventory_NoOption -- If No is selected, it does not allow negative stock
 
@@ -69,10 +87,18 @@ FROM	(
 					,intItemLocationId
 					,intItemUOMId
 					,intLotId
+					,intSubLocationId
+					,intStorageLocationId
 					,dblQty = SUM(dblQty)
 			FROM	@ItemsToValidate	
 			WHERE	ISNULL(intLotId, 0) <> 0 
-			GROUP BY intItemId, intItemLocationId, intItemUOMId, intLotId
+			GROUP BY 
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,intLotId
+				,intSubLocationId
+				,intStorageLocationId
 		) ValidateItems
 		INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON ValidateItems.intItemId = ItemLocation.intItemId
@@ -87,16 +113,30 @@ FROM	(
 					,tblICStockReservation.intItemLocationId
 					,tblICStockReservation.intItemUOMId
 					,tblICStockReservation.intLotId
+					,tblICStockReservation.intSubLocationId
+					,tblICStockReservation.intStorageLocationId
 					,dblQuantity = SUM(tblICStockReservation.dblQuantity)
 			FROM	dbo.tblICStockReservation INNER JOIN @ItemsToValidate ValidateItems
 						ON tblICStockReservation.intItemId = ValidateItems.intItemId
 						AND tblICStockReservation.intItemLocationId = ValidateItems.intItemLocationId
 						AND tblICStockReservation.intItemUOMId = ValidateItems.intItemUOMId
+						AND tblICStockReservation.intLotId = ValidateItems.intLotId
+						AND ISNULL(tblICStockReservation.intSubLocationId, 0) = ISNULL(ValidateItems.intSubLocationId, 0)
+						AND ISNULL(tblICStockReservation.intStorageLocationId, 0) = ISNULL(ValidateItems.intStorageLocationId, 0)
 			WHERE	ISNULL(tblICStockReservation.intLotId, 0) <> 0 
-			GROUP BY tblICStockReservation.intItemId, tblICStockReservation.intItemLocationId, tblICStockReservation.intItemUOMId, tblICStockReservation.intLotId
+			GROUP BY 
+				tblICStockReservation.intItemId
+				,tblICStockReservation.intItemLocationId
+				,tblICStockReservation.intItemUOMId
+				,tblICStockReservation.intLotId
+				,tblICStockReservation.intSubLocationId
+				,tblICStockReservation.intStorageLocationId
 		) Reserves 
 			ON ValidateItems.intItemId = Reserves.intItemId
 			AND ValidateItems.intItemLocationId = Reserves.intItemLocationId
 			AND ValidateItems.intItemUOMId = Reserves.intItemUOMId
+			AND ValidateItems.intLotId = Reserves.intLotId
+			AND ISNULL(ValidateItems.intSubLocationId, 0) = ISNULL(Reserves.intSubLocationId, 0)
+			AND ISNULL(ValidateItems.intStorageLocationId, 0) = ISNULL(Reserves.intStorageLocationId, 0)
 WHERE	ISNULL(Lot.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0) - ValidateItems.dblQty < 0
 		AND ItemLocation.intAllowNegativeInventory = @AllowNegativeInventory_NoOption -- If No is selected, it does not allow negative stock

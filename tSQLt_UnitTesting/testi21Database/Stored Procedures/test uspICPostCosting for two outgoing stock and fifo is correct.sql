@@ -86,6 +86,8 @@ BEGIN
 				,strTransactionId = 'SALE-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 		UNION ALL 
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
@@ -102,6 +104,8 @@ BEGIN
 				,strTransactionId = 'SALE-000002'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 
 		-- Setup the expected tblICInventoryFIFO
 		INSERT INTO expected (

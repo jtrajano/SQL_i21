@@ -8,7 +8,7 @@
 *	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnUnpostErrors(A.intItemId, A.intItemLocationId, A.intItemUOMId, A.dblQty) B
 * 
 */
-CREATE FUNCTION fnGetItemCostingOnUnpostErrors (@intItemId AS INT, @intItemLocationId AS INT, @intItemUOMId AS INT, @dblQty AS NUMERIC(18,6) = 0)
+CREATE FUNCTION fnGetItemCostingOnUnpostErrors (@intItemId AS INT, @intItemLocationId AS INT, @intItemUOMId AS INT, @intSubLocationId AS INT, @intStorageLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0)
 RETURNS TABLE 
 AS
 RETURN (
@@ -25,6 +25,8 @@ RETURN (
 							INNER JOIN dbo.tblICItemStockUOM StockUOM
 								ON StockUOM.intItemId = Item.intItemId
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
+								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 					WHERE	Item.intItemId = @intItemId
 							AND Location.intItemLocationId = @intItemLocationId
 							AND StockUOM.intItemUOMId = @intItemUOMId

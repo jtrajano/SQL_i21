@@ -95,6 +95,8 @@ BEGIN
 				,strTransactionId = 'PURCHASE-000001'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 		UNION ALL 
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
@@ -111,6 +113,8 @@ BEGIN
 				,strTransactionId = 'PURCHASE-000002'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 
 		-- Setup the expected g/l entries 
 		INSERT INTO expected (

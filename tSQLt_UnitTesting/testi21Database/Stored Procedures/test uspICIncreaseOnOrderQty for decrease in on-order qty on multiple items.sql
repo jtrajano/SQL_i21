@@ -85,6 +85,8 @@ BEGIN
 				,strTransactionId = 'PO-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId		= NULL
+				,intStorageLocationId   = NULL 
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
@@ -101,6 +103,8 @@ BEGIN
 				,strTransactionId = 'PO-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId		= NULL
+				,intStorageLocationId   = NULL 
 	END 
 	
 	-- Act

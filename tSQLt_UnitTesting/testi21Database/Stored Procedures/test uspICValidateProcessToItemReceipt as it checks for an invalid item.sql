@@ -65,6 +65,6 @@ BEGIN
 	-- Act and Assert
 	BEGIN 
 		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50027
-		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsToValidate = @Items;
+		EXEC dbo.uspICValidateProcessToItemReceipt @Items;
 	END 
 END 

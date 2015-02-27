@@ -95,6 +95,6 @@ BEGIN
 	-- Act and Assert
 	BEGIN 
 		EXEC tSQLt.ExpectNoException;
-		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsToValidate = @Items;		
+		EXEC dbo.uspICValidateProcessToItemReceipt @Items;		
 	END 
 END 

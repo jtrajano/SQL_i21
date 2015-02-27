@@ -57,7 +57,7 @@ This table holds stock information like quantity on hand and etc.
 		[intItemStockId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL, 
-		[intSubLocationId] INT NULL, 
+		[intSubLocationId] INT NULL, -- IMPORTANT NOTE: This field is transferred to tblICItemStockUOM. DO NOT USE this field. 
 		[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -103,7 +103,7 @@ This table holds stock information like quantity on hand and etc.
 		@level2name = N'intItemLocationId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Sub Location Id',
+		@value = N'Sub Location Id. IMPORTANT NOTE: This field is transferred to tblICItemStockUOM. DO NOT USE this field.',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',

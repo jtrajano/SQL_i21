@@ -90,6 +90,8 @@ BEGIN
 				,strTransactionId = 'SALE-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId = null 
+				,intStorageLocationId = null 
 
 		-- Setup the expected g/l entries 
 		INSERT INTO expected (

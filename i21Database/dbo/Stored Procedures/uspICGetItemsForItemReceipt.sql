@@ -34,7 +34,9 @@ BEGIN
 			,intTransactionId = PO.intPurchaseId
 			,strTransactionId = PO.strPurchaseOrderNumber
 			,intTransactionTypeId = @intPurchaseOrderType
-			,intLotId = null 
+			,intLotId = NULL 
+			,intSubLocationId = PODetail.intSubLocationId
+			,intStorageLocationId = PODetail.intStorageLocationId
 	FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 				ON PO.intPurchaseId = PODetail.intPurchaseId
 			INNER JOIN dbo.tblICItemUOM ItemUOM
@@ -48,3 +50,4 @@ BEGIN
 			AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
 			
 END
+

@@ -39,6 +39,8 @@ It only tracks the qty of those non-'Stock UOM's.
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL, 
 		[intItemUOMId] INT NOT NULL,
+		[intSubLocationId] INT NULL,
+		[intStorageLocationId] INT NULL,
 		[dblOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((1)), 

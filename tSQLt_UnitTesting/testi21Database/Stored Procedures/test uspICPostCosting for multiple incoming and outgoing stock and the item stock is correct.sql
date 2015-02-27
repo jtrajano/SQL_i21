@@ -98,6 +98,8 @@ BEGIN
 				,strTransactionId = 'PURCHASE-000001'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 		-- out (Stock goes down to 170)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
@@ -115,6 +117,8 @@ BEGIN
 				,strTransactionId = 'SALE-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 		-- out (Stock goes down to 135)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
@@ -132,6 +136,8 @@ BEGIN
 				,strTransactionId = 'SALE-000002'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 		-- out (Stock goes down to 90)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
@@ -149,6 +155,8 @@ BEGIN
 				,strTransactionId = 'SALE-000003'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 		-- out (Stock goes down to -42)
 		UNION ALL
 		SELECT 	intItemId = @WetGrains
@@ -166,6 +174,8 @@ BEGIN
 				,strTransactionId = 'SALE-000004'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 		-- in (Stock goes up to -22)
 		UNION ALL		
 		SELECT 	intItemId = @WetGrains
@@ -183,6 +193,8 @@ BEGIN
 				,strTransactionId = 'PURCHASE-000002'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 		-- in (Stock goes up to 0)
 		UNION ALL				
 		SELECT 	intItemId = @WetGrains
@@ -200,6 +212,8 @@ BEGIN
 				,strTransactionId = 'PURCHASE-000003'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 		-- in (Stock goes up to 100)
 		UNION ALL				
 		SELECT 	intItemId = @WetGrains
@@ -217,6 +231,8 @@ BEGIN
 				,strTransactionId = 'PURCHASE-000004'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 
 		-- Setup the expected item stock 
 		INSERT INTO expected (

@@ -42,6 +42,12 @@ BEGIN
 				,@ManualLotGrains_BushelUOMId AS INT = 6
 				,@SerializedLotGrains_BushelUOMId AS INT = 7
 
+		-- SubLocation 
+		DECLARE @WetGrains_DefaultLocation_SubLocation AS INT
+
+		-- Storage Location 
+		DECLARE @WetGrains_DefaultLocation_StorageLocation AS INT
+
 		-- Create the mock data 
 		EXEC testi21Database.[Fake inventory items]
 
@@ -177,32 +183,32 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual
 		-- 1: Valid item and valid location. 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_1, @WetGrains_BushelUOMId, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_1, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, NULL)
 		
 		-- 2: Invalid item and valid location
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@InvalidItem, @intItemLocationId_1, NULL, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@InvalidItem, @intItemLocationId_1, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, NULL)
 
 		-- 3: Valid item and invalid location
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@StickyGrains, @InvalidLocation, @StickyGrains_BushelUOMId, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@StickyGrains, @InvalidLocation, @StickyGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, NULL)
 
 		-- 4: Invalid item and invalid location
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@InvalidItem, @InvalidLocation, NULL, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@InvalidItem, @InvalidLocation, NULL, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, NULL)
 
 		-- 5: Postive stock 
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_6, @WetGrains_BushelUOMId, 10)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_6, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, 10)
 
 		-- 6: Negative stock is not allowed 
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_11, @WetGrains_BushelUOMId, -10)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_11, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10)
 
 
 		-- 7: Negative stock is allowed
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_6, @WetGrains_BushelUOMId, -10)		
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_6, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10)		
 	END
 
 	-- Assert

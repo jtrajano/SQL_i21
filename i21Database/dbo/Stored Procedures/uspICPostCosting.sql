@@ -50,6 +50,8 @@ DECLARE @intId AS INT
 		,@strTransactionId AS NVARCHAR(40) 
 		,@intTransactionTypeId AS INT 
 		,@intLotId AS INT
+		,@intSubLocationId AS INT
+		,@intStorageLocationId AS INT 
 
 DECLARE @CostingMethod AS INT 
 
@@ -91,12 +93,31 @@ SELECT  intId
 		,strTransactionId
 		,intTransactionTypeId
 		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
 FROM	@ItemsToPost
 
 OPEN loopItems;
 
 -- Initial fetch attempt
-FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intItemLocationId, @intItemUOMId, @dtmDate, @dblQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId;
+FETCH NEXT FROM loopItems INTO 
+	@intId
+	,@intItemId
+	,@intItemLocationId
+	,@intItemUOMId
+	,@dtmDate
+	,@dblQty
+	,@dblUOMQty
+	,@dblCost
+	,@dblSalesPrice
+	,@intCurrencyId
+	,@dblExchangeRate
+	,@intTransactionId
+	,@strTransactionId
+	,@intTransactionTypeId
+	,@intLotId
+	,@intSubLocationId
+	,@intStorageLocationId;
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -216,7 +237,9 @@ BEGIN
 		WHERE	ItemStock.intItemId = @intItemId
 				AND ItemStock.intItemLocationId = @intItemLocationId
 
+		-----------------------------------
 		-- Update the Item Stock table
+		-----------------------------------
 		MERGE	
 		INTO	dbo.tblICItemStock 
 		WITH	(HOLDLOCK) 
@@ -239,7 +262,6 @@ BEGIN
 			INSERT (
 				intItemId
 				,intItemLocationId
-				,intSubLocationId
 				,dblUnitOnHand
 				,dblOrderCommitted
 				,dblOnOrder
@@ -250,7 +272,6 @@ BEGIN
 			VALUES (
 				StockToUpdate.intItemId
 				,StockToUpdate.intItemLocationId
-				,NULL 
 				,StockToUpdate.Qty -- dblUnitOnHand
 				,0
 				,0
@@ -260,7 +281,9 @@ BEGIN
 			)
 		;
 
+		---------------------------------------
 		-- Update the Item Stock UOM table
+		---------------------------------------
 		MERGE	
 		INTO	dbo.tblICItemStockUOM 
 		WITH	(HOLDLOCK) 
@@ -269,12 +292,15 @@ BEGIN
 				SELECT	intItemId = @intItemId
 						,intItemLocationId = @intItemLocationId
 						,intItemUOMId = @intItemUOMId
+						,intSubLocationId = @intSubLocationId 
+						,intStorageLocationId = @intStorageLocationId
 						,Qty = ISNULL(@dblQty, 0)  
-						,Cost = @dblCost
 		) AS StockToUpdate
 			ON ItemStock.intItemId = StockToUpdate.intItemId
 			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
 			AND ItemStock.intItemUOMId = StockToUpdate.intItemUOMId
+			AND ISNULL(ItemStock.intSubLocationId, 0) = ISNULL(StockToUpdate.intSubLocationId, 0)
+			AND ISNULL(ItemStock.intStorageLocationId, 0) = ISNULL(StockToUpdate.intStorageLocationId, 0)
 
 		-- If matched, update the unit on hand qty. 
 		WHEN MATCHED THEN 
@@ -287,6 +313,8 @@ BEGIN
 				intItemId
 				,intItemLocationId
 				,intItemUOMId
+				,intSubLocationId
+				,intStorageLocationId
 				,dblOnHand
 				,dblOnOrder
 				,intConcurrencyId
@@ -294,7 +322,9 @@ BEGIN
 			VALUES (
 				StockToUpdate.intItemId
 				,StockToUpdate.intItemLocationId
-				,StockToUpdate.intItemUOMId				
+				,StockToUpdate.intItemUOMId
+				,StockToUpdate.intSubLocationId
+				,StockToUpdate.intStorageLocationId
 				,StockToUpdate.Qty 
 				,0
 				,1	
@@ -307,6 +337,8 @@ BEGIN
 		FROM	dbo.tblICLot Lot
 		WHERE	Lot.intItemLocationId = @intItemLocationId
 				AND Lot.intLotId = @intLotId
+				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 
 		-- Update the Item Pricing table
 		MERGE	
@@ -351,7 +383,24 @@ BEGIN
 	END 
 
 	-- Attempt to fetch the next row from cursor. 
-	FETCH NEXT FROM loopItems INTO @intId, @intItemId, @intItemLocationId, @intItemUOMId, @dtmDate, @dblQty, @dblUOMQty, @dblCost, @dblSalesPrice, @intCurrencyId, @dblExchangeRate, @intTransactionId, @strTransactionId, @intTransactionTypeId, @intLotId
+	FETCH NEXT FROM loopItems INTO 
+		@intId
+		,@intItemId
+		,@intItemLocationId
+		,@intItemUOMId
+		,@dtmDate
+		,@dblQty
+		,@dblUOMQty
+		,@dblCost
+		,@dblSalesPrice
+		,@intCurrencyId
+		,@dblExchangeRate
+		,@intTransactionId
+		,@strTransactionId
+		,@intTransactionTypeId
+		,@intLotId
+		,@intSubLocationId
+		,@intStorageLocationId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop

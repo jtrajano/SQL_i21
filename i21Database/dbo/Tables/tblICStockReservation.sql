@@ -1,20 +1,22 @@
 ﻿CREATE TABLE [dbo].[tblICStockReservation]
 (
-	[intStockReservationId] INT NOT NULL IDENTITY, 
-    [intItemId] INT NOT NULL, 
-    [intItemLocationId] INT NOT NULL, 
-    [intItemUOMId] INT NOT NULL, 
-	[intLotId] INT NULL, 
-    [dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
-    [intTransactionId] INT NULL, 
-    [strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [intSort] INT NULL, 
-	[intInventoryTransactionType] INT NULL, 
-    [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblICStockReservation] PRIMARY KEY ([intStockReservationId]), 
-    CONSTRAINT [FK_tblICStockReservation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
-    CONSTRAINT [FK_tblICStockReservation_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]), 
-    CONSTRAINT [FK_tblICStockReservation_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+	[intStockReservationId] INT NOT NULL IDENTITY 
+    ,[intItemId] INT NOT NULL 
+    ,[intItemLocationId] INT NOT NULL 
+    ,[intItemUOMId] INT NOT NULL
+	,[intLotId] INT NULL
+	,[intSubLocationId] INT NULL
+	,[intStorageLocationId] INT NULL
+    ,[dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0))
+    ,[intTransactionId] INT NULL
+    ,[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+    ,[intSort] INT NULL
+	,[intInventoryTransactionType] INT NULL
+    ,[intConcurrencyId] INT NULL DEFAULT ((0))
+    ,CONSTRAINT [PK_tblICStockReservation] PRIMARY KEY ([intStockReservationId])
+    ,CONSTRAINT [FK_tblICStockReservation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+    ,CONSTRAINT [FK_tblICStockReservation_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])
+    ,CONSTRAINT [FK_tblICStockReservation_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 )
 
 GO

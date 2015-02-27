@@ -85,6 +85,8 @@ BEGIN
 				,strTransactionId = 'PO-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId		= NULL
+				,intStorageLocationId   = NULL
 	END 
 	
 	-- Act

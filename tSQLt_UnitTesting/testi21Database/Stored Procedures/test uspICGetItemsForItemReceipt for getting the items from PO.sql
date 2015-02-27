@@ -74,6 +74,8 @@ BEGIN
 				,strTransactionId		= PO.strPurchaseOrderNumber
 				,intTransactionTypeId	= CAST(NULL AS INT) 
 				,intLotId				= CAST(NULL AS INT) 
+				,intSubLocationId		= CAST(NULL AS INT) 
+				,intStorageLocationId	= CAST(NULL AS INT) 
 		INTO	expected
 		FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 					ON PO.intPurchaseId = PODetail.intPurchaseId
@@ -147,6 +149,8 @@ BEGIN
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
+				,intSubLocationId		= NULL
+				,intStorageLocationId	= NULL
 		UNION ALL 
 		SELECT	intItemId				= @PremiumGrains
 				,intItemLocationId		= @PremiumGrains_DefaultLocation
@@ -162,6 +166,8 @@ BEGIN
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
+				,intSubLocationId		= NULL
+				,intStorageLocationId	= NULL
 		UNION ALL 
 		SELECT	intItemId				= @HotGrains
 				,intItemLocationId		= @HotGrains_DefaultLocation
@@ -177,6 +183,8 @@ BEGIN
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
+				,intSubLocationId		= NULL
+				,intStorageLocationId	= NULL
 		UNION ALL 
 		SELECT	intItemId				= @ColdGrains
 				,intItemLocationId		= @ColdGrains_DefaultLocation
@@ -192,6 +200,9 @@ BEGIN
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
+				,intSubLocationId		= NULL
+				,intStorageLocationId	= NULL
+
 	END 
 		
 	-- Act 
@@ -211,6 +222,8 @@ BEGIN
 			,strTransactionId
 			,intTransactionTypeId
 			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
 		)
 		EXEC dbo.uspICGetItemsForItemReceipt 
 			@intSourceTransactionId = 1

@@ -131,6 +131,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,dblUnitCost
 	,dblLineTotal
     ,intSort
+	,intSubLocationId
     ,intConcurrencyId
 )
 SELECT	intInventoryReceiptId = @InventoryReceiptId
@@ -148,6 +149,7 @@ SELECT	intInventoryReceiptId = @InventoryReceiptId
 		,dblUnitCost			= PODetail.dblCost
 		,dblLineTotal			= 0
 		,intSort				= PODetail.intLineNo
+		,intSubLocationId		= PODetail.intSubLocationId
 		,intConcurrencyId		= 1
 FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = PODetail.intItemId
