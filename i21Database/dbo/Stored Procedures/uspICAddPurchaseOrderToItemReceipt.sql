@@ -141,7 +141,7 @@ SELECT	intInventoryReceiptId = @InventoryReceiptId
 		,dblOrderQty			= ISNULL(PODetail.dblQtyOrdered, 0)
 		,dblOpenReceive			= ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)
 		,dblReceived			= ISNULL(PODetail.dblQtyReceived, 0)
-		,intUnitMeasureId		= PODetail.intUnitOfMeasureId
+		,intUnitMeasureId		= ItemUOM.intItemUOMId
 		,intNoPackages			= 0 -- None found from Purchase Order
 		,intPackageTypeId		= NULL -- None found from Purchase Order
 		,dblExpPackageWeight	= 0 -- None found from Purchase Order
@@ -151,7 +151,7 @@ SELECT	intInventoryReceiptId = @InventoryReceiptId
 		,intConcurrencyId		= 1
 FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = PODetail.intItemId
-			AND ItemUOM.intUnitMeasureId = PODetail.intUnitOfMeasureId
+			AND ItemUOM.intItemUOMId = PODetail.intUnitOfMeasureId
 		INNER JOIN dbo.tblICUnitMeasure UOM
 			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 WHERE	PODetail.intPurchaseId = @PurchaseOrderId
