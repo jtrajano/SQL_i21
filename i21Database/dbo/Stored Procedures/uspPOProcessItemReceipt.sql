@@ -39,6 +39,9 @@ EXEC dbo.uspICProcessToItemReceipt
 	,@intUserId = @icUserId
 	,@InventoryReceiptId = @itemReceiptId OUTPUT
 
+IF @@ERROR > 0 
+	RETURN;
+
 SELECT @itemReceiptNumber = strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @itemReceiptId
 
 UPDATE A
