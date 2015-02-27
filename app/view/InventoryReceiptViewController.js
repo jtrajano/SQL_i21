@@ -869,12 +869,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (!row.dummy) {
                     var dblReceived = row.get('dblReceived');
                     var dblUnitCost = row.get('dblUnitCost');
-                    if (obj.column.itemId === 'colReceived')
-                        dblReceived = newValue;
-                    else if (obj.column.itemId === 'colUnitCost')
-                        dblUnitCost = newValue;
-                    var rowTotal = dblReceived * dblUnitCost;
-                    calculatedTotal += rowTotal;
+                    if (obj.column) {
+                        if (obj.column.itemId === 'colReceived')
+                            dblReceived = newValue;
+                        else if (obj.column.itemId === 'colUnitCost')
+                            dblUnitCost = newValue;
+                        var rowTotal = dblReceived * dblUnitCost;
+                        calculatedTotal += rowTotal;
+                    }
                 }
             });
             txtCalculatedAmount.setValue(calculatedTotal);
