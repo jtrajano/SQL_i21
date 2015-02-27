@@ -14,6 +14,8 @@ SELECT
 	ItemLocation.intLocationId,
 	ItemLocation.intItemLocationId,
 	ItemLocation.intSubLocationId,
+	StorageLocation.strName AS strStorageLocationName,
+	SubLocation.strSubLocationName AS strSubLocationName,
 	ItemLocation.intStorageLocationId,
 	Location.strLocationName,
 	Location.strLocationType,
@@ -21,7 +23,6 @@ SELECT
 	strVendorId = (SELECT TOP 1 strVendorId FROM tblAPVendor WHERE intVendorId = ItemLocation.intVendorId),
 	ItemLocation.intReceiveUOMId,
 	ItemLocation.intIssueUOMId,
-
 	strReceiveUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId),
 	dblReceiveSalePrice = ItemPricing.dblSalePrice * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId),
 	dblReceiveMSRPPrice = ItemPricing.dblMSRPPrice * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId),
@@ -29,7 +30,6 @@ SELECT
 	dblReceiveStandardCost = ItemPricing.dblStandardCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId),
 	dblReceiveAverageCost = ItemPricing.dblAverageCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId),
 	dblReceiveEndMonthCost = ItemPricing.dblEndMonthCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId),
-
 	strIssueUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
 	dblIssueSalePrice = ItemPricing.dblSalePrice * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
 	dblIssueMSRPPrice = ItemPricing.dblMSRPPrice * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
@@ -37,8 +37,6 @@ SELECT
 	dblIssueStandardCost = ItemPricing.dblStandardCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
 	dblIssueAverageCost = ItemPricing.dblAverageCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
 	dblIssueEndMonthCost = ItemPricing.dblEndMonthCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
-
-	StorageLocation.strName AS strStorageLocationName,
 	ItemLocation.dblMinOrder,
 	ItemLocation.dblReorderPoint,
 	ItemLocation.intAllowNegativeInventory,
@@ -68,3 +66,4 @@ LEFT JOIN tblICItemPricing ItemPricing ON ItemLocation.intItemId = ItemPricing.i
 LEFT JOIN tblICStorageLocation StorageLocation ON ItemLocation.intStorageLocationId = StorageLocation.intStorageLocationId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblICItemStock ItemStock ON ItemStock.intItemId = Item.intItemId AND ItemLocation.intLocationId = ItemStock.intItemLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON ItemLocation.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
