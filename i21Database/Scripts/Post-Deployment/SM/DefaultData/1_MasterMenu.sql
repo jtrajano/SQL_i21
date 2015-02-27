@@ -1469,8 +1469,11 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Build Accounts' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.BuildAccounts'
 		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.BatchPosting' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'General Ledger' AND strMenuName = 'Batch Posting'
 		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.AccountGroups' WHERE strMenuName = 'Account Groups' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountGroups'
-
-
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.GLAccountAdjustment' WHERE strModuleName = 'General Ledger' AND  strCommand  = 'GeneralLedger.controller.GLAccountAdjustment'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.Reallocation' WHERE strMenuName = 'Reallocation' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.Reallocation'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.FiscalYear' WHERE strMenuName = 'Fiscal Year' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.FiscalYear'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.RecurringJournalHistory' WHERE strMenuName = 'Recurring Journal History' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.RecurringJournalHistory'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.RecurringJournal' WHERE strMenuName = 'Recurring Journal' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.RecurringJournal'
 
 	/* ---------------------------------------- */
 	/* --   End General Ledger Module Menu   -- */
@@ -1718,6 +1721,7 @@ GO
 	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.PanelSettings' WHERE strCommand = 'Dashboard.controller.PanelSettings'
 	UPDATE tblSMMasterMenu SET strCommand = 'Reports.view.Connection' WHERE strCommand = 'Dashboard.controller.DashboardConnection'
 	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.PanelList' WHERE strCommand = 'Dashboard.controller.PanelList'
+	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.PanelLayout' WHERE strCommand = 'Dashboard.controller.PanelLayout'
 
 	/* ------------------------------------------------- */
 	/* -- End Update Dashboard Menu Commands for MVVM -- */
