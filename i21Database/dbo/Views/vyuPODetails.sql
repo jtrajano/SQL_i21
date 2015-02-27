@@ -12,7 +12,6 @@ SELECT
 	,B.intStorageLocationId
 	,B.intSubLocationId
 	,B.intLocationId
-	,B.intSubLocationId
 	,B.dblQtyOrdered
 	,B.dblQtyReceived
 	,B.dblQtyContract
