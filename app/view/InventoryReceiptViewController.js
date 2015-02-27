@@ -1367,7 +1367,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
                 else {
                     vm.data.currentReceiptItem = current;
-                    txtLotItemId.setValue(current.get('intItemId'));
+                    txtLotItemId.setValue(current.get('strItemNo'));
                     txtLotItemDescription.setValue(current.get('strItemDescription'));
                     txtLotUOM.setValue(current.get('strUnitMeasure'));
                     txtLotItemQty.setValue(current.get('dblOpenReceive'));

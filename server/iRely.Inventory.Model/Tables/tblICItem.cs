@@ -278,7 +278,7 @@ namespace iRely.Inventory.Model
         public int? intUnitMeasureId { get; set; }
         public string strUnitMeasure { get; set; }
         public string strUnitType { get; set; }
-        public bool ysnStockUnit { get; set; }
+        public bool? ysnStockUnit { get; set; }
         public decimal? dblUnitQty { get; set; }
         public decimal? dblAmountPercent { get; set; }
         public decimal? dblSalePrice { get; set; }
