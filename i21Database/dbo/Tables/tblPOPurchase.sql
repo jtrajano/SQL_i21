@@ -2,7 +2,7 @@
 (
 	[intPurchaseId] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY, 
     [intVendorId] INT NOT NULL, 
-    [intAccountId] INT NOT NULL, 
+    [intAccountId] INT NULL, 
     [intFreightTermId] INT NULL, 
     [intCurrencyId] INT NOT NULL, 
     [intOrderById] INT NOT NULL, 
