@@ -6,6 +6,8 @@ CREATE PROCEDURE [dbo].[uspICPostLIFO]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT
+	,@intSubLocationId AS INT
+	,@intStorageLocationId AS INT
 	,@dtmDate AS DATETIME
 	,@dblQty AS NUMERIC(18,6)
 	,@dblUOMQty AS NUMERIC(18,6)
@@ -90,6 +92,8 @@ BEGIN
 					@intItemId = @intItemId
 					,@intItemLocationId = @intItemLocationId
 					,@intItemUOMId = @intItemUOMId
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId					 
 					,@dtmDate = @dtmDate
 					,@dblQty = @dblComputedUnitQty
 					,@dblUOMQty = @dblUOMQty
@@ -142,6 +146,8 @@ BEGIN
 				@intItemId = @intItemId
 				,@intItemLocationId = @intItemLocationId
 				,@intItemUOMId = @intItemUOMId
+				,@intSubLocationId = @intSubLocationId
+				,@intStorageLocationId = @intStorageLocationId
 				,@dtmDate = @dtmDate
 				,@dblQty = @FullQty
 				,@dblUOMQty = @dblUOMQty
@@ -198,6 +204,8 @@ BEGIN
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
 						,@intItemUOMId = @intItemUOMId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
 						,@dtmDate = @dtmDate
 						,@dblQty = 0
 						,@dblUOMQty = 0
@@ -225,6 +233,8 @@ BEGIN
 						@intItemId = @intItemId
 						,@intItemLocationId = @intItemLocationId
 						,@intItemUOMId = @intItemUOMId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
 						,@dtmDate = @dtmDate
 						,@dblQty = 0
 						,@dblUOMQty = 0

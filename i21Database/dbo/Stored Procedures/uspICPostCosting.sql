@@ -141,6 +141,8 @@ BEGIN
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
 			,@dtmDate
 			,@dblQty
 			,@dblUOMQty
@@ -162,6 +164,8 @@ BEGIN
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
 			,@dtmDate
 			,@dblQty
 			,@dblUOMQty
@@ -183,6 +187,8 @@ BEGIN
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
 			,@dtmDate
 			,@dblQty
 			,@dblUOMQty
@@ -204,6 +210,8 @@ BEGIN
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
 			,@dtmDate
 			,@intLotId
 			,@dblQty

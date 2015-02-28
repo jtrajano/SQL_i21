@@ -29,6 +29,8 @@ RETURN
 			,strTransactionId
 			,intTransactionTypeId
 			,intLotId 
+			,intSubLocationId
+			,intStorageLocationId
 	FROM	tblICInventoryTransaction
 	WHERE	intTransactionId = @intTransactionId
 			AND intTransactionTypeId = @intTransactionTypeId

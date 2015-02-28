@@ -11,6 +11,8 @@ BEGIN
 			@intItemId AS INT
 			,@intItemLocationId AS INT
 			,@intItemUOMId AS INT
+			,@intSubLocationId AS INT
+			,@intStorageLocationId AS INT 
 			,@dtmDate AS DATETIME
 			,@dblQty AS NUMERIC(18,6)
 			,@dblUOMQty AS NUMERIC(18,6)
@@ -29,6 +31,8 @@ BEGIN
 			[intItemId] INT NOT NULL,
 			[intItemLocationId] INT NOT NULL,
 			[intItemUOMId] INT NOT NULL,
+			[intSubLocationId] INT NULL,
+			[intStorageLocationId] INT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -52,6 +56,8 @@ BEGIN
 			[intItemId] INT NOT NULL,
 			[intItemLocationId] INT NOT NULL,
 			[intItemUOMId] INT NOT NULL,
+			[intSubLocationId] INT NULL,
+			[intStorageLocationId] INT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -78,6 +84,8 @@ BEGIN
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
 			,@dtmDate
 			,@dblQty
 			,@dblUOMQty
@@ -96,6 +104,8 @@ BEGIN
 				,[intItemId]
 				,[intItemLocationId]
 				,[intItemUOMId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
 				,[dtmDate]
 				,[dblQty]
 				,[dblUOMQty]
@@ -117,6 +127,8 @@ BEGIN
 				,[intItemId]
 				,[intItemLocationId]
 				,[intItemUOMId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
 				,[dtmDate]
 				,[dblQty]
 				,[dblUOMQty]

@@ -54,6 +54,8 @@ BEGIN
 			@intItemId AS INT
 			,@intItemLocationId AS INT
 			,@intItemUOMId AS INT
+			,@intSubLocationId AS INT
+			,@intStorageLocationId AS INT
 			,@dtmDate AS DATETIME
 			,@dblQty AS NUMERIC(18,6)
 			,@dblUOMQty AS NUMERIC(18,6)
@@ -72,6 +74,8 @@ BEGIN
 			[intItemId] INT NOT NULL,
 			[intItemLocationId] INT NOT NULL,
 			[intItemUOMId] INT NOT NULL,
+			[intSubLocationId] INT NULL,
+			[intStorageLocationId] INT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -94,6 +98,8 @@ BEGIN
 			[intItemId] INT NOT NULL,
 			[intItemLocationId] INT NOT NULL,
 			[intItemUOMId] INT NOT NULL,
+			[intSubLocationId] INT NULL,
+			[intStorageLocationId] INT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
@@ -141,6 +147,8 @@ BEGIN
 					,[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty]
@@ -161,6 +169,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
@@ -182,6 +192,8 @@ BEGIN
 					[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -201,6 +213,8 @@ BEGIN
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
@@ -277,6 +291,8 @@ BEGIN
 					,[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -297,6 +313,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
@@ -318,6 +336,8 @@ BEGIN
 					[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -337,6 +357,8 @@ BEGIN
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
@@ -413,6 +435,8 @@ BEGIN
 					,[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -433,6 +457,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
@@ -454,6 +480,8 @@ BEGIN
 					[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -473,6 +501,8 @@ BEGIN
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
@@ -549,6 +579,8 @@ BEGIN
 					,[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -569,6 +601,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -20
 					,[dblUOMQty] = @dblUOMQty
@@ -589,6 +623,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -20
 					,[dblUOMQty] = @dblUOMQty
@@ -610,6 +646,8 @@ BEGIN
 					[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -629,6 +667,8 @@ BEGIN
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -20
 					,[dblUOMQty] = @dblUOMQty
@@ -648,6 +688,8 @@ BEGIN
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -20
 					,[dblUOMQty] = @dblUOMQty
@@ -740,6 +782,8 @@ BEGIN
 					,[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -760,6 +804,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -20
 					,[dblUOMQty] = @dblUOMQty
@@ -780,6 +826,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -30
 					,[dblUOMQty] = @dblUOMQty
@@ -801,6 +849,8 @@ BEGIN
 					[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -820,6 +870,8 @@ BEGIN
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -20
 					,[dblUOMQty] = @dblUOMQty
@@ -839,6 +891,8 @@ BEGIN
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -30
 					,[dblUOMQty] = @dblUOMQty
@@ -940,6 +994,8 @@ BEGIN
 					,[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -960,6 +1016,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -60
 					,[dblUOMQty] = @dblUOMQty
@@ -981,6 +1039,8 @@ BEGIN
 					[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty] 
@@ -1000,6 +1060,8 @@ BEGIN
 			SELECT	[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = -60
 					,[dblUOMQty] = @dblUOMQty
@@ -1076,6 +1138,8 @@ BEGIN
 					,[intItemId]
 					,[intItemLocationId]
 					,[intItemUOMId] 
+					,[intSubLocationId] 
+					,[intStorageLocationId] 
 					,[dtmDate]
 					,[dblQty]
 					,[dblUOMQty]
@@ -1097,6 +1161,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
 					,[dblUOMQty] = @dblUOMQty
@@ -1118,6 +1184,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
 					,[dblUOMQty] = 0
@@ -1139,6 +1207,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
 					,[dblUOMQty] = 0
@@ -1160,6 +1230,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
 					,[dblUOMQty] = 0
@@ -1181,6 +1253,8 @@ BEGIN
 					,[intItemId] = @intItemId
 					,[intItemLocationId] = @NewHaven
 					,[intItemUOMId] = @intItemUOMId
+					,[intSubLocationId] = @intSubLocationId
+					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
 					,[dblUOMQty] = 0
@@ -1219,6 +1293,8 @@ BEGIN
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
 			,@dtmDate
 			,@dblQty
 			,@dblUOMQty
@@ -1241,6 +1317,8 @@ BEGIN
 				,[intItemId]
 				,[intItemLocationId]
 				,[intItemUOMId]
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
 				,[dtmDate]
 				,[dblQty]
 				,[dblUOMQty]
@@ -1261,6 +1339,8 @@ BEGIN
 				,[intItemId]
 				,[intItemLocationId]
 				,[intItemUOMId]
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
 				,[dtmDate]
 				,[dblQty]
 				,[dblUOMQty]

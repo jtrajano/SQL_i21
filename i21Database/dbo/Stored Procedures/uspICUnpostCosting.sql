@@ -47,18 +47,22 @@ BEGIN
 			,intItemLocationId
 			,intItemUOMId
 			,intLotId
-			,dblQty			
+			,dblQty
+			,intSubLocationId
+			,intStorageLocationId			
 	)
 	SELECT	ItemTrans.intItemId
 			,ItemTrans.intItemLocationId
 			,ItemTrans.intItemUOMId
 			,ItemTrans.intLotId
 			,SUM(ISNULL(ItemTrans.dblQty, 0) * -1)			
+			,intSubLocationId
+			,intStorageLocationId
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
-	GROUP BY ItemTrans.intItemId, ItemTrans.intItemLocationId, ItemTrans.intItemUOMId, ItemTrans.intLotId
+	GROUP BY ItemTrans.intItemId, ItemTrans.intItemLocationId, ItemTrans.intItemUOMId, ItemTrans.intLotId, ItemTrans.intSubLocationId, ItemTrans.intStorageLocationId
 
 	-- Fill-in the Unit qty from the UOM
 	UPDATE	ItemToUnpost
@@ -173,7 +177,9 @@ BEGIN
 			,[strRelatedTransactionId]
 			,[dtmCreated] 
 			,[intCreatedUserId] 
-			,[intConcurrencyId] 
+			,[intConcurrencyId]
+			,[intSubLocationId] 
+			,[intStorageLocationId]
 	)			
 	SELECT	[intItemId]				= ActualTransaction.intItemId
 			,[intItemLocationId]	= ActualTransaction.intItemLocationId
@@ -197,6 +203,8 @@ BEGIN
 			,[dtmCreated]			= GETDATE()
 			,[intCreatedUserId]		= @intUserId
 			,[intConcurrencyId]		= 1
+			,[intSubLocationId]		= ActualTransaction.intSubLocationId
+			,[intStorageLocationId]	= ActualTransaction.intStorageLocationId
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 
@@ -232,13 +240,35 @@ BEGIN
 
 		-- Update the Unit On Hand at the Item Stock table
 		UPDATE	Stock
-		SET		Stock.dblUnitOnHand = Stock.dblUnitOnHand + dbo.fnCalculateStockUnitQty(ItemToUnpost.dblQty, ItemToUnpost.dblUOMQty)  
-		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
-					ON ItemPricing.intItemId = Stock.intItemId
-					AND ItemPricing.intItemLocationId = Stock.intItemLocationId		
-				INNER JOIN @ItemsToUnpost ItemToUnpost
+		SET		Stock.dblUnitOnHand = Stock.dblUnitOnHand +  ItemToUnpost.dblUnpostQty
+		FROM	dbo.tblICItemStock AS Stock INNER JOIN (
+					SELECT	intItemId
+							,intItemLocationId
+							,dblUnpostQty = SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty))
+					FROM	@ItemsToUnpost 
+					GROUP BY intItemId, intItemLocationId				
+				) ItemToUnpost
 					ON Stock.intItemId = ItemToUnpost.intItemId
 					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
+
+		-- Update the Stock UOM
+		UPDATE	StockUOM
+		SET		StockUOM.dblOnHand = StockUOM.dblOnHand  +  ItemToUnpost.dblUnpostQty
+		FROM	dbo.tblICItemStockUOM AS StockUOM INNER JOIN (
+					SELECT	intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,intSubLocationId
+							,intStorageLocationId
+							,dblUnpostQty = SUM(ISNULL(dblQty, 0))
+					FROM	@ItemsToUnpost 
+					GROUP BY intItemId, intItemLocationId, intItemUOMId, intSubLocationId, intStorageLocationId
+				) ItemToUnpost
+					ON StockUOM.intItemId = ItemToUnpost.intItemId
+					AND StockUOM.intItemLocationId = ItemToUnpost.intItemLocationId
+					AND StockUOM.intItemUOMId = ItemToUnpost.intItemUOMId
+					AND ISNULL(StockUOM.intSubLocationId, 0) =  ISNULL(ItemToUnpost.intSubLocationId, 0)
+					AND ISNULL(StockUOM.intStorageLocationId, 0) =  ISNULL(ItemToUnpost.intStorageLocationId, 0)
 
 		-- Update the stock quantity at the Lot table
 		UPDATE	Lot
@@ -273,6 +303,8 @@ BEGIN
 				,[intCreatedUserId] 
 				,[intConcurrencyId]
 				,[ysnIsUnposted]
+				,[intSubLocationId]
+				,[intStorageLocationId]
 		)
 		SELECT	[intItemId] = ItemToUnpost.intItemId
 				,[intItemLocationId] = ItemToUnpost.intItemLocationId
@@ -294,6 +326,8 @@ BEGIN
 				,[intCreatedUserId] = @intUserId
 				,[intConcurrencyId] = 1
 				,[ysnIsUnposted] = 0
+				,[intSubLocationId] = ItemToUnpost.intSubLocationId
+				,[intStorageLocationId] = ItemToUnpost.intStorageLocationId
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
