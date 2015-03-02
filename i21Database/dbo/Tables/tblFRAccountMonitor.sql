@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblFRAccountMonitor](
 	[cntId]					INT             IDENTITY (1, 1) NOT NULL,
 	[intRowId]				INT             NULL,
+	[intRefNo]				INT             NULL,
 	[intAccountId]			INT             NULL,
 	[strAccountId]			NVARCHAR (70)	COLLATE Latin1_General_CI_AS NULL,
 	[strPrimary]			NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL,
