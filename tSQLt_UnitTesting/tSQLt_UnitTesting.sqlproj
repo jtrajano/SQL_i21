@@ -849,6 +849,18 @@
     <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert lot items reservations and replace existing data.sql" />
     <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert non-lot items and replace existing data.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReserveStockForInventoryShipment for calling the sub procedures.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple lot items and recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple lot items and non-recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one lot items and recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one lot items and non-recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -203,9 +203,14 @@ BEGIN
 			,intItemLocationId = ItemLocation.intItemLocationId
 			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = Header.dtmReceiptDate  
-			,dblQty = DetailItems.dblOpenReceive  
+			,dblQty =	CASE	WHEN ISNULL(DetailItemsLot.intLotId, 0) > 0 THEN DetailItemsLot.dblQuantity
+								ELSE DetailItems.dblOpenReceive
+						END 				
 			,dblUOMQty = ItemUOM.dblUnitQty
-			,dblCost = DetailItems.dblUnitCost  
+			,dblCost = -- DetailItems.dblUnitCost  
+						CASE	WHEN ISNULL(DetailItemsLot.intLotId, 0) > 0 THEN DetailItemsLot.dblCost
+								ELSE DetailItems.dblUnitCost
+						END
 			,dblSalesPrice = 0  
 			,intCurrencyId = Header.intCurrencyId  
 			,dblExchangeRate = 1  

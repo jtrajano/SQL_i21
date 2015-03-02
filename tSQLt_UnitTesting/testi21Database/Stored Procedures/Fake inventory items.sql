@@ -20,6 +20,8 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICLot', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICStockReservation', @Identity = 1;		
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotOut', @Identity = 1;
 		
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
