@@ -162,6 +162,12 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICLot)
                 .WithRequired(p => p.tblICInventoryReceiptItemLot)
                 .WillCascadeOnDelete(false);
+            this.HasOptional(p => p.WeightUOM)
+                .WithMany(p => p.WeightUOMs)
+                .HasForeignKey(p => p.intWeightUOMId);
+            this.HasOptional(p => p.UnitUOM)
+                .WithMany(p => p.UnitUOMs)
+                .HasForeignKey(p => p.intUnitUOMId);
         }
     }
 

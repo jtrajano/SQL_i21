@@ -1395,6 +1395,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         {
             current.set('intWeightUOMId', records[0].get('intItemUOMId'));
         }
+        else if (combo.itemId === 'cboLotUnitUOM')
+        {
+            current.set('intUnitUOMId', records[0].get('intItemUOMId'));
+        }
     },
 
     onReceiptTabChange: function(tabPanel, newCard, oldCard, eOpts) {
@@ -1477,6 +1481,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 selectionchange: this.onItemSelectionChange
             },
             "#cboLotWeightUOM": {
+                select: this.onLotSelect
+            },
+            "#cboLotUnitUOM": {
                 select: this.onLotSelect
             },
             "#tabInventoryReceipt": {

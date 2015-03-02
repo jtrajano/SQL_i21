@@ -378,27 +378,47 @@ namespace iRely.Inventory.Model
         public DateTime? dtmCertified { get; set; }
         public int? intSort { get; set; }
 
-        private string _uom;
+        string _weigthUOM;
         [NotMapped]
-        public string strUnitMeasure
+        public string strWeightUOM
         {
             get
             {
-                if (string.IsNullOrEmpty(_uom))
-                    if (tblICInventoryReceiptItem != null)
-                        return tblICInventoryReceiptItem.strUnitMeasure;
+                if (string.IsNullOrEmpty(_weigthUOM))
+                    if (WeightUOM != null)
+                        return WeightUOM.strUnitMeasure;
                     else
                         return null;
                 else
-                    return _uom;
+                    return _weigthUOM;
             }
             set
             {
-                _uom = value;
+                _weigthUOM = value;
+            }
+        }
+        string _unitUOM;
+        [NotMapped]
+        public string strUnitUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_unitUOM))
+                    if (UnitUOM != null)
+                        return UnitUOM.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _unitUOM;
+            }
+            set
+            {
+                _unitUOM = value;
             }
         }
 
-        public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
+        public tblICItemUOM WeightUOM { get; set; }
+        public tblICItemUOM UnitUOM { get; set; }
         public tblICLot tblICLot { get; set; }
     }
 

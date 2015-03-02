@@ -1325,7 +1325,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 }
                                                             ],
                                                             itemId: 'cboLotUnitUOM',
-                                                            displayField: 'strUnitUOM'
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
                                                         }
                                                     },
                                                     {

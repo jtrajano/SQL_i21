@@ -2820,8 +2820,9 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strUnitUOM",
-                                                        "itemId": "cboLotUnitUOM"
+                                                        "displayField": "strUnitMeasure",
+                                                        "itemId": "cboLotUnitUOM",
+                                                        "valueField": "strUnitMeasure"
                                                     },
                                                     "name": "MyComboBox73",
                                                     "configAlternates": {
