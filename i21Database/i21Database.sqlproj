@@ -141,6 +141,7 @@
     <Folder Include="Scripts\Post-Deployment\CT" />
     <Folder Include="Scripts\Post-Deployment\NR" />
     <Folder Include="Scripts\Post-Deployment\GR" />
+    <Folder Include="Scripts\Post-Deployment\MF" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1089,6 +1090,7 @@
     <Build Include="dbo\Tables\tblGLAccountCategoryGroup.sql" />
     <Build Include="dbo\Functions\fnAPValidatePO.sql" />
     <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspUpdateOnOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
