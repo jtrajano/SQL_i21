@@ -1365,13 +1365,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (current.dummy) {
                     vm.data.currentReceiptItem = null;
                 }
-                else {
+                else if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual'){
                     vm.data.currentReceiptItem = current;
                     txtLotItemId.setValue(current.get('strItemNo'));
                     txtLotItemDescription.setValue(current.get('strItemDescription'));
                     txtLotUOM.setValue(current.get('strUnitMeasure'));
                     txtLotItemQty.setValue(current.get('dblOpenReceive'));
                     txtLotCost.setValue(current.get('dblUnitCost'));
+                }
+                else {
+                    vm.data.currentReceiptItem = null;
                 }
             }
             else {
@@ -1391,6 +1394,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (combo.itemId === 'cboLotWeightUOM')
         {
             current.set('intWeightUOMId', records[0].get('intItemUOMId'));
+        }
+    },
+
+    onReceiptTabChange: function(tabPanel, newCard, oldCard, eOpts) {
+        switch(newCard.itemId) {
+            case 'pgeLots':
+                var win = tabPanel.up('window');
+                var vm = win.viewModel;
+                var currentItem = vm.data.currentReceiptItem;
+                if (currentItem === undefined || currentItem === null){
+                    iRely.Functions.showErrorDialog('Please select a valid Lot-able Item.');
+                    oldCard.show();
+                }
+                break;
         }
     },
 
@@ -1461,6 +1478,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboLotWeightUOM": {
                 select: this.onLotSelect
+            },
+            "#tabInventoryReceipt": {
+                tabchange: this.onReceiptTabChange
             }
         })
     }

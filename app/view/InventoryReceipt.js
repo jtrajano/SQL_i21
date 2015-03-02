@@ -241,6 +241,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                 items: [
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeDetails',
                                         bodyPadding: 5,
                                         title: 'Details',
                                         layout: {
@@ -1078,6 +1079,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeLots',
                                         title: 'Lots',
                                         layout: {
                                             type: 'vbox',
@@ -1629,6 +1631,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeIncomingInspection',
                                         layout: 'fit',
                                         title: 'Incoming Inspection',
                                         items: [
@@ -1700,6 +1703,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeFreightInvoice',
                                         bodyPadding: 10,
                                         title: 'Freight & Invoice',
                                         layout: {
@@ -1827,6 +1831,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeEDI',
                                         bodyPadding: 10,
                                         title: 'EDI',
                                         layout: {
@@ -1925,6 +1930,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     {
                                         xtype: 'panel',
                                         hidden: true,
+                                        itemId: 'pgePutAway',
                                         layout: 'fit',
                                         title: 'Put Away',
                                         items: [
@@ -2104,6 +2110,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeAttachments',
                                         layout: 'fit',
                                         title: 'Attachments',
                                         items: [

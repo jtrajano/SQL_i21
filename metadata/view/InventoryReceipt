@@ -433,6 +433,7 @@
                             "userConfig": {
                                 "bodyPadding": 5,
                                 "container|align": "stretch",
+                                "itemId": "pgeDetails",
                                 "layout": "vbox",
                                 "title": "Details"
                             },
@@ -2271,6 +2272,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "container|align": "stretch",
+                                "itemId": "pgeLots",
                                 "layout": "vbox",
                                 "title": "Lots"
                             },
@@ -3625,6 +3627,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "pgeIncomingInspection",
                                 "layout": "fit",
                                 "title": "Incoming Inspection"
                             },
@@ -3811,6 +3814,7 @@
                             "userConfig": {
                                 "bodyPadding": 10,
                                 "container|align": "stretch",
+                                "itemId": "pgeFreightInvoice",
                                 "layout": "hbox",
                                 "title": "Freight & Invoice"
                             },
@@ -4162,6 +4166,7 @@
                             "userConfig": {
                                 "bodyPadding": 10,
                                 "container|align": "stretch",
+                                "itemId": "pgeEDI",
                                 "layout": "hbox",
                                 "title": "EDI"
                             },
@@ -4420,6 +4425,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "hidden": true,
+                                "itemId": "pgePutAway",
                                 "layout": "fit",
                                 "title": "Put Away"
                             },
@@ -4932,6 +4938,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "itemId": "pgeAttachments",
                                 "layout": "fit",
                                 "title": "Attachments"
                             },
