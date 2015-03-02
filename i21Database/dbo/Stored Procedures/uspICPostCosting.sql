@@ -345,8 +345,6 @@ BEGIN
 		FROM	dbo.tblICLot Lot
 		WHERE	Lot.intItemLocationId = @intItemLocationId
 				AND Lot.intLotId = @intLotId
-				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
-				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 
 		-- Update the Item Pricing table
 		MERGE	

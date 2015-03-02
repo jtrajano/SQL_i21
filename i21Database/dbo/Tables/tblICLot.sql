@@ -31,8 +31,6 @@ Lot numbers are unique per item-location.
 		[intLotId] INT NOT NULL IDENTITY, 		
 		[intItemLocationId] INT NOT NULL,
 		[intItemUOMId] INT NOT NULL,
-		[intSubLocationId] INT NULL,
-		[intStorageLocationId] INT NULL,
 		[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[dblOnHand] NUMERIC(18,6) DEFAULT ((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((0)),

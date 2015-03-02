@@ -97,15 +97,15 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual
 		-- 1: Postive stock 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_2, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, 10)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_2, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, 10, NULL)
 
 		-- 2: Negative stock is not allowed 
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_3, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_3, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10, NULL)
 
 		-- 3: Negative stock is allowed
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_2, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_2, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10, NULL)
 		
 	END
 

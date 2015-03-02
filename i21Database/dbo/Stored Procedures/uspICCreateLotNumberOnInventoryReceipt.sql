@@ -11,6 +11,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @STARTING_NUMBER_BATCH AS INT = 24 -- Lot Number batch number in the starting numbers table. 
 DECLARE @SerializedLotNumber AS NVARCHAR(40) 
 DECLARE @intLotId AS INT 
+DECLARE @strUserSuppliedLotNumber AS NVARCHAR(50)
 DECLARE @id AS INT
 DECLARE @intItemLocationId AS INT 
 DECLARE @intItemUOMId AS INT
@@ -20,15 +21,17 @@ DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
 
 INSERT INTO @GeneratedLotNumbers (
-	intItemId
-	,intItemLocationId
-	,intItemUOMId 
-	,intDetailId
+		intItemId
+		,intItemLocationId
+		,intItemUOMId 
+		,intDetailId
+		,strLotNumber
 )
 SELECT	ReceiptItems.intItemId
 		,ItemLocation.intItemLocationId
 		,ReceiptItems.intUnitMeasureId
 		,ItemLot.intInventoryReceiptItemLotId
+		,ItemLot.strLotId
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItems 
 			ON Receipt.intInventoryReceiptId = ReceiptItems.intInventoryReceiptId
 		INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -45,28 +48,60 @@ SELECT	TOP 1
 		@id = intId 
 		,@intItemLocationId = intItemLocationId
 		,@intItemUOMId = intItemUOMId
+		,@strUserSuppliedLotNumber = strLotNumber
 FROM	@GeneratedLotNumbers 
 WHERE	ISNULL(intLotId, 0) = 0
 
 WHILE @id IS NOT NULL 
 BEGIN 
-	-- Generate the next lot number 
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @SerializedLotNumber OUTPUT   
+	-- Initialize the serial lot number field. 
+	SET @SerializedLotNumber = @strUserSuppliedLotNumber
 
-	SET @intLotId = NULL 
-	IF	ISNULL(@SerializedLotNumber, '') <> '' 
-		AND NOT EXISTS (SELECT TOP 1 1 FROM tblICLot WHERE strLotNumber = @SerializedLotNumber)
-	BEGIN
-		INSERT INTO tblICLot (
-			strLotNumber
-			,intItemLocationId
-			,intItemUOMId
-		) VALUES (
-			@SerializedLotNumber
-			,@intItemLocationId
-			,@intItemUOMId
-		)
-		SET @intLotId = SCOPE_IDENTITY();
+	-- Generate the next lot number if non is found. 
+	IF ISNULL(@SerializedLotNumber, '') = '' 
+	BEGIN 		
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @SerializedLotNumber OUTPUT 
+	END 
+		
+	IF	ISNULL(@SerializedLotNumber, '') <> ''
+	BEGIN  
+		SET @intLotId = NULL 
+
+		-- Get the Lot id or insert a new record on the Lot master table. 
+		MERGE	
+		INTO	dbo.tblICLot 
+		WITH	(HOLDLOCK) 
+		AS		LotMaster
+		USING (
+				SELECT	intItemLocationId = @intItemLocationId
+						,intItemUOMId = @intItemUOMId
+						,strLotNumber = @SerializedLotNumber
+		) AS LotToUpdate
+			ON LotMaster.intItemLocationId = LotToUpdate.intItemLocationId 
+			AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+			AND LotMaster.strLotNumber = LotToUpdate.strLotNumber 
+
+		-- If matched, get the Lot Id. 
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET		@intLotId = LotMaster.intLotId 
+
+		-- If none found, insert a new lot record. 
+		WHEN NOT MATCHED THEN 
+			INSERT (
+				strLotNumber
+				,intItemLocationId
+				,intItemUOMId
+			) VALUES (
+				@SerializedLotNumber
+				,@intItemLocationId
+				,@intItemUOMId
+			)
+		;
+		
+		-- Get the lot id of the newly inserted record
+		IF @intLotId IS NULL 
+			SELECT @intLotId = SCOPE_IDENTITY();
 	END 
 
 	-- Update the table variable 
@@ -76,11 +111,15 @@ BEGIN
 	WHERE	@intLotId IS NOT NULL 
 			AND intId = @id
 
+	-- Clean the values of the counter variables.
 	SET @id = NULL 
+	SET @strUserSuppliedLotNumber = NULL 
+
 	SELECT	TOP 1 
 			@id = intId 
 			,@intItemLocationId = intItemLocationId
 			,@intItemUOMId = intItemUOMId
+			,@strUserSuppliedLotNumber = strLotNumber
 	FROM	@GeneratedLotNumbers 
 	WHERE	ISNULL(intLotId, 0) = 0
 END
