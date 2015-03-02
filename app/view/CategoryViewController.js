@@ -396,7 +396,13 @@ Ext.define('Inventory.view.CategoryViewController', {
         var me = eOpts.window.getController();
         var win = eOpts.window;
         var grdLocation = win.down('#grdLocation');
+        var vm = win.getViewModel();
+        var categoryId = vm.data.current.get('intCategoryId');
+        var filterItem = grdLocation.store.filters.items[0];
 
+        filterItem.setValue(categoryId);
+        filterItem.config.value = categoryId;
+        filterItem.initialConfig.value = categoryId;
         grdLocation.store.load();
     },
 
