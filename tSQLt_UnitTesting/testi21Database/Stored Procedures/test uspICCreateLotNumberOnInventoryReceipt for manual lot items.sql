@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateLotNumberOnInventoryReceipt for mix of lot and non-lot items]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateLotNumberOnInventoryReceipt for manual lot items]
 AS
 BEGIN
 	-- Arrange 
@@ -47,6 +47,14 @@ BEGIN
 				,@ManualLotGrains_BushelUOMId AS INT = 6
 				,@SerializedLotGrains_BushelUOMId AS INT = 7
 
+				,@WetGrains_PoundUOMId AS INT = 8
+				,@StickyGrains_PoundUOMId AS INT = 9
+				,@PremiumGrains_PoundUOMId AS INT = 10
+				,@ColdGrains_PoundUOMId AS INT = 11
+				,@HotGrains_PoundUOMId AS INT = 12
+				,@ManualLotGrains_PoundUOMId AS INT = 13
+				,@SerializedLotGrains_PoundUOMId AS INT = 14
+
 		CREATE TABLE expectedICLot(
 			intLotId INT NOT NULL
 			,intItemLocationId INT NOT NULL
@@ -81,14 +89,14 @@ BEGIN
 				,strLotNumber
 		)
 		SELECT	intLotId = 1
-				,intItemLocationId  = @SerializedLotGrains_DefaultLocation
-				,intItemUOMId = @SerializedLotGrains_BushelUOMId
-				,strLotNumber = 'LOT-10000'
+				,intItemLocationId  = @ManualLotGrains_DefaultLocation
+				,intItemUOMId = @ManualLotGrains_BushelUOMId
+				,strLotNumber = 'MANUAL-22X-10000'
 		UNION ALL 
 		SELECT	intLotId = 2
-				,intItemLocationId  = @SerializedLotGrains_DefaultLocation
-				,intItemUOMId = @SerializedLotGrains_BushelUOMId
-				,strLotNumber = 'LOT-10001'
+				,intItemLocationId  = @ManualLotGrains_DefaultLocation
+				,intItemUOMId = @ManualLotGrains_PoundUOMId
+				,strLotNumber = 'LOT DE MANUAL X 113-133.108985'
 
 		-- Setup expected data for Receipt Item Lot
 		INSERT INTO expectedReceiptItemLot (
@@ -96,45 +104,36 @@ BEGIN
 				,intInventoryReceiptItemId
 				,strLotId
 		)
-		SELECT	intLotId = NULL 
-				,intInventoryReceiptItemId = 6
-				,strLotId = NULL 
+		SELECT	intLotId = 1 
+				,intInventoryReceiptItemId = 15
+				,strLotId = 'MANUAL-22X-10000' 
 		UNION ALL
-		SELECT	intLotId = NULL 
-				,intInventoryReceiptItemId = 6
-				,strLotId = NULL 
+		SELECT	intLotId = 2 
+				,intInventoryReceiptItemId = 15
+				,strLotId = 'MANUAL-22X-10000' 
 		UNION ALL 
-		SELECT	intLotId = 1
-				,intInventoryReceiptItemId = 7
-				,strLotId = 'LOT-10000'
-		UNION ALL
-		SELECT	intLotId = 2
-				,intInventoryReceiptItemId = 7
-				,strLotId = 'LOT-10001'
+		SELECT	intLotId = 3
+				,intInventoryReceiptItemId = 16
+				,strLotId = 'LOT DE MANUAL X 113-133.108985'
 	END 
-
-	-- Assert
-	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51041 
-	END
 
 	-- Act
 	BEGIN 
-		DECLARE @strTransactionId AS NVARCHAR(20) = 'INVRCPT-XXXXX1'
+		DECLARE @strTransactionId AS NVARCHAR(20) = 'INVRCPT-XXXXX5'
 
 		EXEC dbo.uspICCreateLotNumberOnInventoryReceipt
 			@strTransactionId
-		
+
 		-- Get the actual result from Lot master table
 		INSERT INTO actualICLot (
 				intLotId
 				,intItemLocationId
-				,intItemUOMId
+				,intItemUOMId 
 				,strLotNumber
 		)
 		SELECT	intLotId
 				,intItemLocationId
-				,intItemUOMId
+				,intItemUOMId 
 				,strLotNumber
 		FROM	dbo.tblICLot
 
@@ -153,6 +152,12 @@ BEGIN
 					ON ReceiptItems.intInventoryReceiptItemId = ItemLots.intInventoryReceiptItemId
 		WHERE	Receipt.strReceiptNumber = @strTransactionId
 	END 	
+
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.AssertEqualsTable 'expectedICLot', 'actualICLot';
+		--EXEC tSQLt.AssertEqualsTable 'expectedReceiptItemLot', 'actualReceiptItemLot';
+	END
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 

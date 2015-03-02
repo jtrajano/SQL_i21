@@ -163,3 +163,7 @@ EXEC sp_addmessage 51039,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51040) EXEC sp_dropmessage 51040, 'us_english'	
 SET @strmessage = 'There is not enough stocks for %s'
 EXEC sp_addmessage 51040,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51041) EXEC sp_dropmessage 51041, 'us_english'	
+SET @strmessage = 'Please specify a lot number for %s'
+EXEC sp_addmessage 51041,11,@strmessage,'us_english','False'

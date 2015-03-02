@@ -861,6 +861,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one lot items and non-recap.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for manual lot items.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for serial lot items.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

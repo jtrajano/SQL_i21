@@ -13,27 +13,34 @@ DECLARE @SerializedLotNumber AS NVARCHAR(40)
 DECLARE @intLotId AS INT 
 DECLARE @strUserSuppliedLotNumber AS NVARCHAR(50)
 DECLARE @id AS INT
+DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intItemLocationId AS INT 
 DECLARE @intItemUOMId AS INT
 DECLARE @GeneratedLotNumbers AS dbo.ItemLotTableType
+DECLARE @intLotTypeId AS INT
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
 
 INSERT INTO @GeneratedLotNumbers (
 		intItemId
+		,strItemNo
 		,intItemLocationId
 		,intItemUOMId 
 		,intDetailId
-		,strLotNumber
+		,strLotNumber		,intLotTypeId
 )
 SELECT	ReceiptItems.intItemId
+		,Item.strItemNo
 		,ItemLocation.intItemLocationId
 		,ReceiptItems.intUnitMeasureId
 		,ItemLot.intInventoryReceiptItemLotId
 		,ItemLot.strLotId
+		,dbo.fnGetItemLotType(ReceiptItems.intItemId)
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItems 
 			ON Receipt.intInventoryReceiptId = ReceiptItems.intInventoryReceiptId
+		INNER JOIN dbo.tblICItem Item
+			ON ReceiptItems.intItemId = Item.intItemId		
 		INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON ReceiptItems.intItemId = ItemLocation.intItemId
 			AND Receipt.intLocationId = ItemLocation.intLocationId
@@ -41,14 +48,15 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON ReceiptItems.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
 WHERE	Receipt.strReceiptNumber = @strTransactionId
 		AND ISNULL(intLotId, 0) = 0
-		AND dbo.fnGetItemLotType(ReceiptItems.intItemId) = @LotType_Serial
 
 -- Update the table variable and get all the items in the Item Lot table that does not have a lot number
 SELECT	TOP 1 
 		@id = intId 
+		,@strItemNo = strItemNo
 		,@intItemLocationId = intItemLocationId
 		,@intItemUOMId = intItemUOMId
 		,@strUserSuppliedLotNumber = strLotNumber
+		,@intLotTypeId = intLotTypeId
 FROM	@GeneratedLotNumbers 
 WHERE	ISNULL(intLotId, 0) = 0
 
@@ -57,11 +65,21 @@ BEGIN
 	-- Initialize the serial lot number field. 
 	SET @SerializedLotNumber = @strUserSuppliedLotNumber
 
-	-- Generate the next lot number if non is found. 
+	-- Validate if the Manual lot item does not have a lot number. 
+	IF ISNULL(@SerializedLotNumber, '') = '' AND @intLotTypeId = @LotType_Manual
+	BEGIN 
+		PRINT 'ERROR'
+		--Please specify a lot number for %s
+		RAISERROR(51041, 11, 1, @strItemNo);
+		RETURN;
+	END 
+
+	-- Generate the next lot number if non is found AND it is a serial lot item. 
 	IF ISNULL(@SerializedLotNumber, '') = '' 
 	BEGIN 		
 		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @SerializedLotNumber OUTPUT 
 	END 
+
 		
 	IF	ISNULL(@SerializedLotNumber, '') <> ''
 	BEGIN  
@@ -117,9 +135,11 @@ BEGIN
 
 	SELECT	TOP 1 
 			@id = intId 
+			,@strItemNo = strItemNo
 			,@intItemLocationId = intItemLocationId
 			,@intItemUOMId = intItemUOMId
 			,@strUserSuppliedLotNumber = strLotNumber
+			,@intLotTypeId = intLotTypeId
 	FROM	@GeneratedLotNumbers 
 	WHERE	ISNULL(intLotId, 0) = 0
 END

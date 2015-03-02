@@ -113,13 +113,17 @@ BEGIN
 				,strLotId = 'LOT-10001'
 	END 
 
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51041 
+	END
+
 	-- Act
 	BEGIN 
 		DECLARE @strTransactionId AS NVARCHAR(20) = 'INVRCPT-XXXXX3'
 
 		EXEC dbo.uspICCreateLotNumberOnInventoryReceipt
 			@strTransactionId
-
 		
 		-- Get the actual result from Lot master table
 		INSERT INTO actualICLot (
@@ -149,12 +153,6 @@ BEGIN
 					ON ReceiptItems.intInventoryReceiptItemId = ItemLots.intInventoryReceiptItemId
 		WHERE	Receipt.strReceiptNumber = @strTransactionId
 	END 	
-
-	-- Assert
-	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expectedICLot', 'actualICLot';
-		EXEC tSQLt.AssertEqualsTable 'expectedReceiptItemLot', 'actualReceiptItemLot';
-	END
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 

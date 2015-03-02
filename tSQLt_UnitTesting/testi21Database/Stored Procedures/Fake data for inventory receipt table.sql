@@ -6,7 +6,8 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemLot', @Identity = 1;	
-		
+
+	EXEC tSQLt.ApplyConstraint 'dbo.tblICLot', 'UN_tblICLot';		
 
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -32,6 +33,14 @@ BEGIN
 			,@HotGrains_BushelUOMId AS INT = 5
 			,@ManualLotGrains_BushelUOMId AS INT = 6
 			,@SerializedLotGrains_BushelUOMId AS INT = 7
+
+			,@WetGrains_PoundUOMId AS INT = 8
+			,@StickyGrains_PoundUOMId AS INT = 9
+			,@PremiumGrains_PoundUOMId AS INT = 10
+			,@ColdGrains_PoundUOMId AS INT = 11
+			,@HotGrains_PoundUOMId AS INT = 12
+			,@ManualLotGrains_PoundUOMId AS INT = 13
+			,@SerializedLotGrains_PoundUOMId AS INT = 14
 
 	-- Declare the variables for the transaction 
 	DECLARE @strReceiptNumber AS NVARCHAR(40);
@@ -592,5 +601,250 @@ BEGIN
 				,intCreatedUserId		= @intUserId
 				,ysnPosted				= 0
 		SET @intReceiptNumber = SCOPE_IDENTITY();
+	END
+
+	--------------------------------------------------------
+	-- Add the INVRCPT-XXXXX5
+	-- It has MANUAL lot items on it. 
+	--------------------------------------------------------
+	BEGIN
+		SET @strReceiptNumber = 'INVRCPT-XXXXX5'
+		SET @dtmDate = '01/15/2014'
+
+		-- Insert the Inventory Receipt header 
+		INSERT INTO dbo.tblICInventoryReceipt (
+				strReceiptNumber
+				,dtmReceiptDate
+				,strReceiptType
+				,intLocationId
+				,intShipViaId
+				,intShipFromId
+				,intReceiverId
+				,intCurrencyId
+				,strAllocateFreight
+				,intConcurrencyId
+				,intEntityId
+				,intCreatedUserId
+				,ysnPosted
+		)
+		SELECT 	strReceiptNumber		= @strReceiptNumber
+				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
+				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,intLocationId			= @Default_Location
+				,intShipViaId			= @Default_Location
+				,intShipFromId			= @Default_Location
+				,intReceiverId			= @Default_Location
+				,intCurrencyId			= @BaseCurrencyId
+				,strAllocateFreight		= 'No' -- Default is No
+				,intConcurrencyId		= 1
+				,intEntityId			= @intEntityId
+				,intCreatedUserId		= @intUserId
+				,ysnPosted				= 0
+		SET @intReceiptNumber = SCOPE_IDENTITY();
+
+		INSERT INTO dbo.tblICInventoryReceiptItem (
+			intInventoryReceiptId
+			,intLineNo
+			,intSourceId
+			,intItemId
+			,dblOrderQty
+			,dblOpenReceive
+			,dblReceived
+			,intUnitMeasureId
+			,intNoPackages
+			,intPackageTypeId
+			,dblExpPackageWeight
+			,dblUnitCost
+			,dblLineTotal
+			,intSort
+			,intConcurrencyId
+		)
+		-- intInventoryReceiptItemId: 15
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 1
+				,intSourceId			= ''
+				,intItemId				= @ManualLotGrains
+				,dblOrderQty			= 10
+				,dblOpenReceive			= 10
+				,dblReceived			= 0
+				,intUnitMeasureId		= @ManualLotGrains_BushelUOMId
+				,intNoPackages			= 0 -- None found from Purchase Order
+				,intPackageTypeId		= NULL -- None found from Purchase Order
+				,dblExpPackageWeight	= 0 -- None found from Purchase Order
+				,dblUnitCost			= 6.00
+				,dblLineTotal			= 60.00
+				,intSort				= 1
+				,intConcurrencyId		= 1
+		-- intInventoryReceiptItemId: 16
+		UNION ALL 
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 2
+				,intSourceId			= ''
+				,intItemId				= @ManualLotGrains
+				,dblOrderQty			= 20
+				,dblOpenReceive			= 20
+				,dblReceived			= 0
+				,intUnitMeasureId		= @ManualLotGrains_PoundUOMId
+				,intNoPackages			= 0 -- None found from Purchase Order
+				,intPackageTypeId		= NULL -- None found from Purchase Order
+				,dblExpPackageWeight	= 0 -- None found from Purchase Order
+				,dblUnitCost			= 7.00
+				,dblLineTotal			= 70.00
+				,intSort				= 2
+				,intConcurrencyId		= 1
+
+		INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				intInventoryReceiptItemId
+				,strLotId 
+				,dblQuantity
+				,dblCost
+				,intSort
+				,intConcurrencyId
+		)
+		-- Manual Lot Grains
+		-- intInventoryReceiptItemLotId: 1
+		SELECT	intInventoryReceiptItemId	= 15
+				,strLotId					= 'MANUAL-22X-10000'
+				,dblQuantity				= 7
+				,dblCost					= 6.10
+				,intSort					= 1
+				,intConcurrencyId			= 1
+		-- intInventoryReceiptItemLotId: 2
+		UNION ALL 
+		SELECT	intInventoryReceiptItemId	= 15
+				,strLotId					= 'MANUAL-22X-10000'
+				,dblQuantity				= 3
+				,dblCost					= 5.90
+				,intSort					= 2
+				,intConcurrencyId			= 1
+		-- intInventoryReceiptItemLotId: 3
+		UNION ALL 
+		SELECT	intInventoryReceiptItemId	= 16
+				,strLotId					= 'LOT DE MANUAL X 113-133.108985'
+				,dblQuantity				= 20
+				,dblCost					= 7.00
+				,intSort					= 1
+				,intConcurrencyId			= 1
+	
+	END
+	--------------------------------------------------------
+	-- Add the INVRCPT-XXXXX6
+	-- It has SERIAL lot items on it. 
+	--------------------------------------------------------
+	BEGIN
+		SET @strReceiptNumber = 'INVRCPT-XXXXX6'
+		SET @dtmDate = '01/15/2014'
+
+		-- Insert the Inventory Receipt header 
+		INSERT INTO dbo.tblICInventoryReceipt (
+				strReceiptNumber
+				,dtmReceiptDate
+				,strReceiptType
+				,intLocationId
+				,intShipViaId
+				,intShipFromId
+				,intReceiverId
+				,intCurrencyId
+				,strAllocateFreight
+				,intConcurrencyId
+				,intEntityId
+				,intCreatedUserId
+				,ysnPosted
+		)
+		SELECT 	strReceiptNumber		= @strReceiptNumber
+				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
+				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,intLocationId			= @Default_Location
+				,intShipViaId			= @Default_Location
+				,intShipFromId			= @Default_Location
+				,intReceiverId			= @Default_Location
+				,intCurrencyId			= @BaseCurrencyId
+				,strAllocateFreight		= 'No' -- Default is No
+				,intConcurrencyId		= 1
+				,intEntityId			= @intEntityId
+				,intCreatedUserId		= @intUserId
+				,ysnPosted				= 0
+		SET @intReceiptNumber = SCOPE_IDENTITY();
+
+		INSERT INTO dbo.tblICInventoryReceiptItem (
+			intInventoryReceiptId
+			,intLineNo
+			,intSourceId
+			,intItemId
+			,dblOrderQty
+			,dblOpenReceive
+			,dblReceived
+			,intUnitMeasureId
+			,intNoPackages
+			,intPackageTypeId
+			,dblExpPackageWeight
+			,dblUnitCost
+			,dblLineTotal
+			,intSort
+			,intConcurrencyId
+		)
+		-- intInventoryReceiptItemId: 17
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 1
+				,intSourceId			= ''
+				,intItemId				= @SerializedLotGrains
+				,dblOrderQty			= 10
+				,dblOpenReceive			= 10
+				,dblReceived			= 0
+				,intUnitMeasureId		= @SerializedLotGrains_BushelUOMId
+				,intNoPackages			= 0 -- None found from Purchase Order
+				,intPackageTypeId		= NULL -- None found from Purchase Order
+				,dblExpPackageWeight	= 0 -- None found from Purchase Order
+				,dblUnitCost			= 6.00
+				,dblLineTotal			= 60.00
+				,intSort				= 1
+				,intConcurrencyId		= 1
+		-- intInventoryReceiptItemId: 18
+		UNION ALL 
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 2
+				,intSourceId			= ''
+				,intItemId				= @SerializedLotGrains
+				,dblOrderQty			= 20
+				,dblOpenReceive			= 20
+				,dblReceived			= 0
+				,intUnitMeasureId		= @SerializedLotGrains_PoundUOMId
+				,intNoPackages			= 0 -- None found from Purchase Order
+				,intPackageTypeId		= NULL -- None found from Purchase Order
+				,dblExpPackageWeight	= 0 -- None found from Purchase Order
+				,dblUnitCost			= 7.00
+				,dblLineTotal			= 70.00
+				,intSort				= 2
+				,intConcurrencyId		= 1
+
+		INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				intInventoryReceiptItemId
+				,dblQuantity
+				,dblCost
+				,intSort
+				,intConcurrencyId
+		)
+		-- Manual Lot Grains
+		-- intInventoryReceiptItemLotId: 1
+		SELECT	intInventoryReceiptItemId	= 17
+				,dblQuantity				= 7
+				,dblCost					= 6.10
+				,intSort					= 1
+				,intConcurrencyId			= 1
+		-- intInventoryReceiptItemLotId: 2
+		UNION ALL 
+		SELECT	intInventoryReceiptItemId	= 17
+				,dblQuantity				= 3
+				,dblCost					= 5.90
+				,intSort					= 2
+				,intConcurrencyId			= 1
+		-- intInventoryReceiptItemLotId: 3
+		UNION ALL 
+		SELECT	intInventoryReceiptItemId	= 18
+				,dblQuantity				= 20
+				,dblCost					= 7.00
+				,intSort					= 1
+				,intConcurrencyId			= 1
+	
 	END
 END 
