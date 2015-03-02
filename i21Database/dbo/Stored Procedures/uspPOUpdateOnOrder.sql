@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspUpdateOnOrder]
+﻿CREATE PROCEDURE [dbo].[uspPOUpdateOnOrder]
 	@poId INT,
 	@negate BIT
 AS
@@ -8,11 +8,11 @@ BEGIN
 
 	INSERT INTO @items
 	SELECT
-		B.intItemId
-		,B.intLocationId
-		,B.intUnitOfMeasureId
-		,A.dtmDate
-		,CASE WHEN @negate = 1 THEN B.dblQtyOrdered * -1 ELSE B.dblQtyOrdered END
+		[intItemId]				=	B.intItemId
+		,[intItemLocationId]	=	B.intLocationId
+		,[intItemUOMId]			=	B.intUnitOfMeasureId
+		,[dtmDate]				=	A.dtmDate
+		,[dblQty]				=	CASE WHEN @negate = 1 THEN B.dblQtyOrdered * -1 ELSE B.dblQtyOrdered END
 		,1
 		,B.dblCost
 		,0
