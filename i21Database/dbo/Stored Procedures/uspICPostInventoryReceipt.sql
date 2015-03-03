@@ -116,6 +116,11 @@ BEGIN
 	END  
 END   
 
+-- Create and validate the lot numbers
+BEGIN 	
+	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt @strTransactionId
+	IF @@ERROR <> 0 GOTO Post_Exit
+END
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
@@ -130,10 +135,6 @@ EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1  
 BEGIN  
-	-- Generate the lot numbers 
-	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt @strTransactionId
-	IF @@ERROR <> 0 GOTO Post_Exit   
- 
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
 	INSERT INTO @ItemsForPost (  
