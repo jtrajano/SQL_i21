@@ -5,6 +5,7 @@
 SELECT 
 	 C.intCustomerId
 	,C.strCustomerNumber 
+	,C.ysnApplySalesTax
 	,L.intEntityLocationId
 	,L.strLocationName 
 	,G.intTaxGroupId
