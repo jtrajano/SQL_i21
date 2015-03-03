@@ -614,7 +614,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (combo.itemId === 'cboItem')
         {
-            current.set('tblICItemPricings', records[0].tblICItemPricings());
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('strLotTracking', records[0].get('strLotTracking'));
