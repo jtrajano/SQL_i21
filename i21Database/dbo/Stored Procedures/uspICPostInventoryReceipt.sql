@@ -300,7 +300,6 @@ BEGIN
 
 	-- Update the received quantities from the Purchase Order
 	EXEC dbo.[uspPOReceived] @intTransactionId 
-		IF @@ERROR <> 0	GOTO Post_Exit
 
 	COMMIT TRAN @TransactionName
 END 
