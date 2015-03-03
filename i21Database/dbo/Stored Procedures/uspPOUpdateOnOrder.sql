@@ -13,18 +13,18 @@ BEGIN
 		,[intItemUOMId]			=	B.intUnitOfMeasureId
 		,[dtmDate]				=	A.dtmDate
 		,[dblQty]				=	CASE WHEN @negate = 1 THEN B.dblQtyOrdered * -1 ELSE B.dblQtyOrdered END
-		,1
-		,B.dblCost
-		,0
-		,0
-		,A.intCurrencyId
-		,0
-		,A.intPurchaseId
-		,A.strPurchaseOrderNumber
-		,6
-		,0
-		,B.intSubLocationId
-		,B.intStorageLocationId
+		,[dblUOMQty]			=	1
+		,[dblCost]				=	B.dblCost
+		,[dblValue]				=	0
+		,[dblSalesPrice]		=	0
+		,[intCurrencyId]		=	A.intCurrencyId
+		,[dblExchangeRate]		=	0
+		,[intTransactionId]		=	A.intPurchaseId
+		,[strTransactionId]		=	A.strPurchaseOrderNumber
+		,[intTransactionTypeId]	=	6
+		,[intLotId]				=	0
+		,[intSubLocationId]		=	B.intSubLocationId
+		,[intStorageLocationId]	=	B.intStorageLocationId
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	WHERE A.intPurchaseId = @poId
