@@ -201,12 +201,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
-                        store: '{weightUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{currentReceiptItem.intItemId}',
-                            conjunction: 'and'
-                        }]
+                        store: '{weightUOM}'
                     }
                 },
                 colLotGrossWeight: 'dblGrossWeight',
@@ -221,12 +216,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotUnitUOM: {
                     dataIndex: 'strUnitUOM',
                     editor: {
-                        store: '{unitUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{currentReceiptItem.intItemId}',
-                            conjunction: 'and'
-                        }]
+                        store: '{unitUOM}'
                     }
                 },
                 colLotNoUnits: 'intUnits',
@@ -957,6 +947,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onShipFromBeforeQuery: function(obj) {
         if (obj.combo) {
             var store = obj.combo.store;
+            var win = obj.combo.up('window');
             if (store) {
                 store.remoteFilter = true;
                 store.remoteSort = true;
@@ -969,6 +960,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             else if (obj.combo.itemId === 'cboVendor') {
                 var proxy = obj.combo.store.proxy;
                 proxy.setExtraParams({include:'tblEntityLocations'});
+            }
+            else if (obj.combo.itemId === 'cboLotWeightUOM') {
+                obj.combo.defaultFilters = [{
+                    column: 'intItemId',
+                    value: win.viewModel.data.currentReceiptItem.get('intItemId')
+                }];
+            }
+            else if (obj.combo.itemId === 'cboLotUnitUOM') {
+                obj.combo.defaultFilters = [{
+                    column: 'intItemId',
+                    value: win.viewModel.data.currentReceiptItem.get('intItemId')
+                }];
             }
         }
     },
@@ -1480,9 +1483,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 selectionchange: this.onItemSelectionChange
             },
             "#cboLotWeightUOM": {
+                beforequery: this.onShipFromBeforeQuery,
                 select: this.onLotSelect
             },
             "#cboLotUnitUOM": {
+                beforequery: this.onShipFromBeforeQuery,
                 select: this.onLotSelect
             },
             "#tabInventoryReceipt": {
