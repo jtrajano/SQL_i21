@@ -22,6 +22,7 @@ select
 	,intContactEntityId = t.intCustomerContactId
 	,intContactId = con.intContactId
 	,intAssignedToEntityId = t.intAssignedToEntity
+	,t.intCustomerId
 	,ysnProjectCompleted = p.ysnCompleted
 from
 	tblHDProjectTask pt
