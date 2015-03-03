@@ -607,7 +607,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         checkLotTracking: function (get) {
             if (get('current.strLotTracking') === 'No') {
                 this.data.current.set('strInventoryTracking', 'Item Level');
-                return false;
+                return true;
             }
             else {
                 this.data.current.set('strInventoryTracking', 'Lot Level');
