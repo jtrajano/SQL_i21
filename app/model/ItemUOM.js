@@ -5,7 +5,8 @@ Ext.define('Inventory.model.ItemUOM', {
     extend: 'iRely.BaseEntity',
 
     requires: [
-        'Ext.data.Field'
+        'Ext.data.Field',
+        'AccountsPayable.common.validators.NotZero'
     ],
 
     idProperty: 'intItemUOMId',
@@ -64,6 +65,7 @@ Ext.define('Inventory.model.ItemUOM', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strUnitMeasure'}
+        {type: 'presence', field: 'strUnitMeasure'},
+        {type: 'notzero', field: 'dblUnitQty'}
     ]
 });

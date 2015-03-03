@@ -563,15 +563,17 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailUnitQty',
+                                                        modelValidation: true,
                                                         width: 62,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Unit Qty',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            modelValidation: true,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true,
-                                                            minValue: 0
+                                                            minValue: 0.000001
                                                         }
                                                     },
                                                     {

@@ -1418,10 +1418,31 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepDetailUOM');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colDetailUnitMeasure')
-        {
+        if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
             current.set('tblICUnitMeasure', records[0]);
+
+            var uoms = grid.store.data.items;
+            var exists = Ext.Array.findBy(uoms, function (row) {
+                if (row.get('ysnStockUnit') === true) {
+                    return true;
+                }
+            });
+            if (exists) {
+                var currUOM = exists.get('tblICUnitMeasure');
+                var conversions = currUOM.vyuICGetUOMConversions;
+                if (!conversions) {
+                    conversions = currUOM.data.vyuICGetUOMConversions;
+                }
+                var selectedUOM = Ext.Array.findBy(conversions, function (row) {
+                    if (row.intUnitMeasureId === records[0].get('intUnitMeasureId')) {
+                        return true;
+                    }
+                });
+                if (selectedUOM) {
+                    current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                }
+            }
         }
         else if (combo.column.itemId === 'colDetailWeightUOM')
         {
@@ -1463,7 +1484,6 @@ Ext.define('Inventory.view.ItemViewController', {
             if (checked === true){
                 var uoms = grid.store.data.items;
                 var currUOM = current.get('tblICUnitMeasure');
-                var conversions = currUOM.vyuICGetUOMConversions;
                 var conversions = currUOM.vyuICGetUOMConversions;
                 if (!conversions) {
                     conversions = currUOM.data.vyuICGetUOMConversions;
