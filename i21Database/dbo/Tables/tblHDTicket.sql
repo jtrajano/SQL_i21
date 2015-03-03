@@ -22,6 +22,7 @@
 	[dtmLastModified] [datetime] NULL,
 	[dblQuotedHours] [numeric](18, 6) NULL,
 	[dblActualHours] [numeric](18, 6) NULL,
+	[strJiraKey] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
