@@ -3511,7 +3511,6 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colPricingLevelCommissionOn',
-                                                                        width: 100,
                                                                         dataIndex: 'strFieldName',
                                                                         text: 'Commission On',
                                                                         editor: {
@@ -3524,10 +3523,10 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelCommissionRate',
-                                                                        width: 104,
+                                                                        minWidth: 125,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Commision Rate',
+                                                                        text: 'Comm Amount/Rate',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -3537,10 +3536,9 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelAmount',
-                                                                        width: 68,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Amount',
+                                                                        text: 'Amount/Rate',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
