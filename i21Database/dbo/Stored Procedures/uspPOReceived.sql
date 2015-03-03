@@ -57,7 +57,7 @@ BEGIN
 	IF(EXISTS(SELECT 1 FROM tblPOPurchaseDetail A 
 				INNER JOIN #tmpReceivedPOItems B 
 				ON A.intPurchaseDetailId = B.intLineNo AND A.intItemId = B.intItemId
-		AND intPurchaseId = intSourceId AND (dblQtyReceived + B.dblOpenReceive) > dblQtyOrdered))
+		AND intPurchaseId = intSourceId AND (dblQtyReceived + B.dblOpenReceive) > dblQtyOrdered) AND @posted = 1)
 	BEGIN
 		RAISERROR(51035, 11, 1); --received item exceeds
 		RETURN;
