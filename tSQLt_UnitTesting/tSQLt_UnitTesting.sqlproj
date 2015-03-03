@@ -452,9 +452,6 @@
     <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for an invalid item.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessToItemReceipt for errors thrown by uspICIncreaseOnOrderQty.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for increase in on-order qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for decrease in on-order qty.sql" />
@@ -813,12 +810,6 @@
     <Build Include="testi21Database\Functions\test fnGetItemLotType for No Lot Items.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemLotType for Yes Manual.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemLotType for Yes Serial.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt and expect error 51037.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt and expect error 51038.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt and expect no exceptions.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>

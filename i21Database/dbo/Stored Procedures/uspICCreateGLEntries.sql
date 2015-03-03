@@ -53,6 +53,27 @@ FROM	(
 		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_RevalueSold) RevalueSold
 		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_AutoNegative) AutoNegative;
 
+-- Validate the GL Accounts
+BEGIN 
+	DECLARE @strItemNo AS NVARCHAR(50)
+	DECLARE @intItemId AS INT 
+
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intInventoryId IS NULL 
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- G/L account setup is missing for {Item}
+		RAISERROR(51041, 11, 1, @strItemNo) 	
+		RETURN;
+	END 
+END 
+;
+
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
 	dtmDate

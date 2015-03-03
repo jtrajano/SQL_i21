@@ -57,12 +57,12 @@ BEGIN
 		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId, intItemId, dblOrderQty, dblOpenReceive, dblUnitCost, intUnitMeasureId) VALUES (1, @SerializedLotGrains,	30,	20,	13.50, @SerializedLotGrains_BushelUOMId);
 
 		-- @ManualLotGrains: 1
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity, dblCost) VALUES (1, 1, 'ManualLot-0001', 3,	12.60)
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity, dblCost) VALUES (1, 1, 'ManualLot-0001', 7,	12.40)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity) VALUES (1, 1, 'ManualLot-0001', 3)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity) VALUES (1, 1, 'ManualLot-0001', 7)
 		
 		-- @SerializedLotGrains: 2
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity, dblCost) VALUES (2, 2, 'SerialLot-0001', 12,	13.60)
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity, dblCost) VALUES (2, 3, 'SerialLot-0002', 8,	13.40)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity) VALUES (2, 2, 'SerialLot-0001', 12)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity) VALUES (2, 3, 'SerialLot-0002', 8)
 
 		-- Fake data for the lot numbers
 		INSERT INTO tblICLot (intItemLocationId, intItemUOMId, strLotNumber) VALUES (@ManualLotGrains_DefaultLocation, @ManualLotGrains_BushelUOMId, 'ManualLot-0001')
@@ -83,22 +83,22 @@ BEGIN
 		DECLARE @amount AS NUMERIC(18,6)
 
 		-- ManualLot-0001
-		SET @amount = 3 * 12.60;
+		SET @amount = 3 * 12.50;
 		INSERT INTO expected VALUES (@amount, 0)
 		INSERT INTO expected VALUES (0, @amount)
 
 		-- ManualLot-0001
-		SET @amount = 7 * 12.40
+		SET @amount = 7 * 12.50
 		INSERT INTO expected VALUES (@amount, 0)
 		INSERT INTO expected VALUES (0, @amount)
 
 		-- SerialLot-0001
-		SET @amount = 12 * 13.60
+		SET @amount = 12 * 13.50
 		INSERT INTO expected VALUES (@amount, 0)
 		INSERT INTO expected VALUES (0, @amount)
 
 		-- SerialLot-0002
-		SET @amount = 8 * 13.40
+		SET @amount = 8 * 13.50
 		INSERT INTO expected VALUES (@amount, 0)
 		INSERT INTO expected VALUES (0, @amount)
 		
