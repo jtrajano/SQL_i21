@@ -182,4 +182,39 @@ GO
 
 GO
 	PRINT N'End normalize Help Desk Group and User Configuration.'
+	PRINT N'Begin updating tblHDTicket strJiraIssue.'
+GO
+
+	exec
+		('
+			declare @getid CURSOR
+			declare @intTicketId INT
+			declare @jiraIssues  nvarchar(max)
+
+			SET @getid = CURSOR FOR
+			SELECT distinct tblHDTicketJIRAIssue.intTicketId
+			FROM   tblHDTicketJIRAIssue
+
+			OPEN @getid
+			FETCH NEXT
+			FROM @getid INTO @intTicketId
+			WHILE @@FETCH_STATUS = 0
+			BEGIN
+
+				set @jiraIssues = ''''
+				select  @jiraIssues = COALESCE(@jiraIssues + '','', '''')  + tblHDTicketJIRAIssue.strKey from tblHDTicketJIRAIssue where tblHDTicketJIRAIssue.intTicketId = @intTicketId
+				select  @jiraIssues
+
+				update tblHDTicket set tblHDTicket.strJiraKey = SUBSTRING(@jiraIssues,2,255) where tblHDTicket.intTicketId = @intTicketId
+				
+				FETCH NEXT
+				FROM @getid INTO @intTicketId
+			END
+
+			CLOSE @getid
+			DEALLOCATE @getid
+		')
+
+GO
+	PRINT N'End updating tblHDTicket strJiraIssue.'
 GO
