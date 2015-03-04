@@ -2142,4 +2142,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnSeparateOnInvoice" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="9d3eaf3c-0aaf-4642-99b1-b83557857fe2" ChangeDateTime="03/04/2015 13:38:08">
+    <Property Name="ElementName" Value="[dbo].[tblCTWeightGrade].[dblFrainchise]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTWeightGrade]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblFranchise" />
+  </Operation>
 </Operations>
