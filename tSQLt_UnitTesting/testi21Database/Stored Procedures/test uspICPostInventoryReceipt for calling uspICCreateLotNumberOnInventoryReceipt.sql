@@ -3,6 +3,9 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
+		EXEC testi21Database.[Fake open fiscal year and accounting periods];
+		EXEC testi21Database.[Fake data for inventory receipt table];
+
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
 				,@StickyGrains AS INT = 2
@@ -31,13 +34,12 @@ BEGIN
 		DECLARE @intEntityId AS INT = 1
 		DECLARE @dtmDate AS DATETIME = GETDATE()
 
-		EXEC testi21Database.[Fake open fiscal year and accounting periods];
-		EXEC testi21Database.[Fake data for inventory receipt table]
-
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
 		CREATE TABLE actual (
 			strTransactionId NVARCHAR(40)

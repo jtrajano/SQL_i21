@@ -3,13 +3,8 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		-- Declare the variables for grains (item)
-		DECLARE @WetGrains AS INT = 1
-				,@StickyGrains AS INT = 2
-				,@PremiumGrains AS INT = 3
-				,@ColdGrains AS INT = 4
-				,@HotGrains AS INT = 5
-				,@InvalidItem AS INT = -1
+		EXEC [testi21Database].[Fake inventory items];
+		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 
 		-- Declare the variables for location
 		DECLARE @Default_Location AS INT = 1
@@ -17,12 +12,53 @@ BEGIN
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
 
+		-- Declare the variables for grains (item)
+		DECLARE @WetGrains AS INT = 1
+				,@StickyGrains AS INT = 2
+				,@PremiumGrains AS INT = 3
+				,@ColdGrains AS INT = 4
+				,@HotGrains AS INT = 5
+				,@ManualLotGrains AS INT = 6
+				,@SerializedLotGrains AS INT = 7
+
 		-- Declare the variables for the Item UOM Ids
 		DECLARE @WetGrains_BushelUOMId AS INT = 1
 				,@StickyGrains_BushelUOMId AS INT = 2
 				,@PremiumGrains_BushelUOMId AS INT = 3
 				,@ColdGrains_BushelUOMId AS INT = 4
 				,@HotGrains_BushelUOMId AS INT = 5
+				,@ManualLotGrains_BushelUOMId AS INT = 6
+				,@SerializedLotGrains_BushelUOMId AS INT = 7
+
+				,@WetGrains_PoundUOMId AS INT = 8
+				,@StickyGrains_PoundUOMId AS INT = 9
+				,@PremiumGrains_PoundUOMId AS INT = 10
+				,@ColdGrains_PoundUOMId AS INT = 11
+				,@HotGrains_PoundUOMId AS INT = 12
+				,@ManualLotGrains_PoundUOMId AS INT = 13
+				,@SerializedLotGrains_PoundUOMId AS INT = 14
+
+		-- Declare Item-Locations
+		DECLARE @WetGrains_DefaultLocation AS INT = 1
+				,@StickyGrains_DefaultLocation AS INT = 2
+				,@PremiumGrains_DefaultLocation AS INT = 3
+				,@ColdGrains_DefaultLocation AS INT = 4
+				,@HotGrains_DefaultLocation AS INT = 5
+
+				,@WetGrains_NewHaven AS INT = 6
+				,@StickyGrains_NewHaven AS INT = 7
+				,@PremiumGrains_NewHaven AS INT = 8
+				,@ColdGrains_NewHaven AS INT = 9
+				,@HotGrains_NewHaven AS INT = 10
+
+				,@WetGrains_BetterHaven AS INT = 11
+				,@StickyGrains_BetterHaven AS INT = 12
+				,@PremiumGrains_BetterHaven AS INT = 13
+				,@ColdGrains_BetterHaven AS INT = 14
+				,@HotGrains_BetterHaven AS INT = 15
+
+				,@ManualLotGrains_DefaultLocation AS INT = 16
+				,@SerializedLotGrains_DefaultLocation AS INT = 17
 
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 0
@@ -31,17 +67,15 @@ BEGIN
 		DECLARE @intEntityId AS INT = 1
 		DECLARE @dtmDate AS DATETIME = GETDATE()
 
-		EXEC [testi21Database].[Fake inventory items];
-		EXEC testi21Database.[Fake open fiscal year and accounting periods];
-
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemLot', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
 		INSERT INTO tblICInventoryReceipt (
 			strReceiptNumber
