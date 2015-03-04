@@ -1120,6 +1120,7 @@
     <Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
     <Build Include="dbo\Views\vyuHDProjectList.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGenerateRows.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
