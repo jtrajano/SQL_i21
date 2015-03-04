@@ -1122,6 +1122,8 @@
     <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateRows.sql" />
     <Build Include="dbo\Tables\tblSMCity.sql" />
+    <Build Include="dbo\Tables\tblLGContainerTypeCommodityQty.sql" />
+    <Build Include="dbo\Tables\tblLGContainerType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
