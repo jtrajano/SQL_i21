@@ -1,18 +1,20 @@
-﻿CREATE TABLE [dbo].[tblPRTemplateTimeOff](
-	[intTemplateTimeOffId] INT NOT NULL,
-	[intTemplateId] [int] NOT NULL,
-	[intTypeTimeOffId] INT NOT NULL, 
-	[dblRate] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblPerPeriod] [numeric](18, 6) NULL DEFAULT ((0)),
-	[strPeriod] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL DEFAULT ((0)),
-	[strAwardPeriod] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL DEFAULT ((0)),
-	[dblMaxCarryover] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblMaxEarned] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dtmEligible] [datetime] NULL DEFAULT (getdate()),
-	[intSort] [int] NULL,
-	[intConcurrencyId] [int] NULL DEFAULT ((1))
-    CONSTRAINT [PK_tblPRTemplateTimeOff] PRIMARY KEY ([intTemplateTimeOffId])
-	)
+﻿CREATE TABLE [dbo].[tblPRTemplateTimeOff] (
+    [intTemplateTimeOffId] INT             IDENTITY (1, 1) NOT NULL,
+    [intTemplateId]        INT             NOT NULL,
+    [intTypeTimeOffId]     INT             NOT NULL,
+    [dblRate]              NUMERIC (18, 6) DEFAULT ((0)) NULL,
+    [dblPerPeriod]         NUMERIC (18, 6) DEFAULT ((0)) NULL,
+    [strPeriod]            NVARCHAR (30)   COLLATE Latin1_General_CI_AS DEFAULT ((0)) NULL,
+    [strAwardPeriod]       NVARCHAR (30)   COLLATE Latin1_General_CI_AS DEFAULT ((0)) NULL,
+    [dblMaxCarryover]      NUMERIC (18, 6) DEFAULT ((0)) NULL,
+    [dblMaxEarned]         NUMERIC (18, 6) DEFAULT ((0)) NULL,
+    [dtmEligible]          DATETIME        DEFAULT (getdate()) NULL,
+    [intSort]              INT             NULL,
+    [intConcurrencyId]     INT             DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblPRTemplateTimeOff] PRIMARY KEY CLUSTERED ([intTemplateTimeOffId] ASC)
+);
+
+
 GO
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPRTemplateTimeOff] ON [dbo].[tblPRTemplateTimeOff] ([intTemplateTimeOffId], [intTypeTimeOffId]) WITH (IGNORE_DUP_KEY = OFF)
