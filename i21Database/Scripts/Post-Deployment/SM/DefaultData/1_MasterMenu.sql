@@ -1005,6 +1005,12 @@ GO
 			VALUES (N'Tax Class', N'System Manager', 13, N'Tax Class', N'Screen', N'i21.view.TaxClass', N'small-screen', 0, 0, 0, 1, NULL, 1) 
 		END
 
+		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'City')
+        BEGIN
+            INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+            VALUES (N'City', N'System Manager', 13, N'City', N'Screen', N'i21.view.City', N'small-screen', 0, 0, 0, 1, NULL, 1) 
+        END
+
 	/* ------------------------------- */	
 	/* --   End Common Info Menus   -- */
 	/* ------------------------------- */	
