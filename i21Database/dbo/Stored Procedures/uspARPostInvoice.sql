@@ -990,7 +990,7 @@ END
 			,ysnPaid = 0
 			,dblAmountDue = ISNULL(ROUND(dblInvoiceTotal,2), 0.000000)
 			,dblDiscount = ISNULL(dblDiscount, 0.000000)
-			,dblPayment = ISNULL(dblPayment, 0.000000)
+			,dblPayment = 0.000000
 		FROM
 			tblARInvoice 
 		WHERE 
@@ -1033,7 +1033,7 @@ END
 			,dblInvoiceTotal = ROUND(dblInvoiceTotal,2)
 			,dblAmountDue = ISNULL(ROUND(dblInvoiceTotal,2), 0.000000)
 			,dblDiscount = ISNULL(dblDiscount, 0.000000)
-			,dblPayment = ISNULL(dblPayment, 0.000000)
+			,dblPayment = 0.000000
 		WHERE
 			tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
 
