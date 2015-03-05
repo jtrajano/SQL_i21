@@ -1,9 +1,10 @@
 ﻿CREATE TABLE [dbo].[tblEMFuturesBroker]
 (
 	[intEntityId] INT NOT NULL PRIMARY KEY, 
-    [strVendorId] NVARCHAR(50) NOT NULL,
-	[intContactId] INT NOT NULL, 
-    CONSTRAINT [FK_tblEMFutureBroker_tblEntityContact] FOREIGN KEY ([intContactId]) REFERENCES [tblEntityContact]([intContactId]),
-	CONSTRAINT [UQ_tblEMFuturesBroker_strVendorId] UNIQUE NONCLUSTERED ([strVendorId] ASC)
+    [intVendorNumber] INT NOT NULL,
+	[strShortName] NVARCHAR(50) NOT NULL,
+    [intConcurrencyId] INT             CONSTRAINT [DF_tblEMFuturesBroker_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+	CONSTRAINT [FK_tblFuturesBroker_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [UQ_tblEMFuturesBroker_intVendorNumber] UNIQUE NONCLUSTERED ([intVendorNumber] ASC)
 	
 )
