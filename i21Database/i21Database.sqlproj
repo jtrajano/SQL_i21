@@ -142,6 +142,7 @@
     <Folder Include="Scripts\Post-Deployment\NR" />
     <Folder Include="Scripts\Post-Deployment\GR" />
     <Folder Include="Scripts\Post-Deployment\MF" />
+    <Folder Include="dbo\Index" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1107,6 +1108,7 @@
     <Build Include="dbo\Functions\fnAPValidatePO.sql" />
     <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
     <Build Include="dbo\Views\vyuARCustomerTaxCode.sql" />
+    <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
     <Build Include="dbo\Functions\fnCalculateUnitCost.sql" />
     <Build Include="dbo\Functions\fnCalculateStockUnitQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateStockReserves.sql" />

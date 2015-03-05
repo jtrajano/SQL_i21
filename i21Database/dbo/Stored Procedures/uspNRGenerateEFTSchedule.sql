@@ -192,12 +192,12 @@ BEGIN TRY
 			--SELECT @intNoteTransId = SCOPE_IDENTITY() -- intNoteTransId FROM dbo.tblNRNoteTransaction Where RTRIM(strTransComments) =  CAST(@intScheduleTransId as nvarchar(20))
 			
 			--EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
-			DECLARE @intCMTransactionId Int, @intGLReceivableAccountId Int
+			DECLARE @strCMTransactionId nvarchar(50), @intGLReceivableAccountId Int
 			SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
-			EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
+			EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount, @intGLReceivableAccountId, @strCMTransactionId OUTPUT 
 			
 			UPDATE dbo.tblNRNoteTransaction
-			SET strTransComments = strTransComments + ', CM:' + CAST(@intCMTransactionId as nvarchar(30))
+			SET strTransComments = strTransComments + ', CM:' + @strCMTransactionId
 			WHERE intNoteTransId = @intNoteTransId
 					
 			

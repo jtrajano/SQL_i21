@@ -582,7 +582,8 @@ END
 
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
-		WHERE intTransactionId IN (SELECT intBillId FROM #tmpPostBillData)
+		WHERE tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN 
+				(SELECT intBillId FROM #tmpPostBillData))
 
 		--Update Inventory Item Receipt
 		UPDATE A
