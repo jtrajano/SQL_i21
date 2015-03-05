@@ -115,12 +115,16 @@ BEGIN
 END
 GO
 
+--GO
+--IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE Name = 'Canadian Basis')
+--BEGIN
+--	INSERT INTO tblCTPricingType
+--	SELECT 5,'Canadian Basis',1	
+--END
+--GO
+
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE Name = 'Canadian Basis')
-BEGIN
-	INSERT INTO tblCTPricingType
-	SELECT 5,'Canadian Basis',1	
-END
+	DELETE FROM tblCTPricingType WHERE Name = 'Canadian Basis'
 GO
 
 --tblCTPutCall
@@ -192,10 +196,14 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'Sell')
+IF EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'Sell')
+BEGIN
+	DELETE FROM tblCTContractType WHERE Name = 'Sell'
+END
+IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'Sale')
 BEGIN
 	INSERT INTO tblCTContractType
-	SELECT 2,'Sell',1	
+	SELECT 2,'Sale',1	
 END
 GO
 

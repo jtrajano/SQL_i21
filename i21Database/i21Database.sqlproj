@@ -20,7 +20,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <SqlServerVerification>True</SqlServerVerification>
+    <SqlServerVerification>False</SqlServerVerification>
     <IncludeCompositeObjects>True</IncludeCompositeObjects>
     <TargetDatabaseSet>True</TargetDatabaseSet>
     <Containment>None</Containment>
@@ -184,7 +184,7 @@
     <Build Include="dbo\Tables\tblFRColumnDesignCalculation.sql" />
     <Build Include="dbo\Tables\tblFRColumnDesignSegment.sql" />
     <Build Include="dbo\Tables\tblFRConnection.sql" />
-    <Build Include="dbo\Tables\tblFRGroupsDetail.sql" />
+    <Build Include="dbo\Tables\tblFRReportGroupDetail.sql" />
     <Build Include="dbo\Tables\tblFRHeader.sql" />
     <Build Include="dbo\Tables\tblFRHeaderDesign.sql" />
     <Build Include="dbo\Tables\tblFRMapping.sql" />
@@ -777,7 +777,7 @@
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
     <Build Include="dbo\Views\vyuSMOriginTable.sql" />
     <Build Include="dbo\User Defined Types\ItemGLAccount.sql" />
-    <Build Include="dbo\Stored Procedures\uspFRAccountMonitor.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDAccountMonitor.sql" />
     <Build Include="dbo\Views\vyuSMOriginColumn.sql" />
     <Build Include="dbo\Views\vyuAPRecapTransaction.sql" />
     <Build Include="dbo\Functions\fnGetItemAverageCost.sql" />
@@ -913,7 +913,7 @@
     <Build Include="dbo\Views\vyuICGetItemStock.sql" />
     <Build Include="dbo\Tables\tblSMRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblFRValidateDesign.sql" />
-    <Build Include="dbo\Stored Procedures\uspFRValidateDesign.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDValidateDesign.sql" />
     <Build Include="dbo\Views\vyuAPRptPurchase.sql" />
     <Build Include="dbo\Tables\tblGLImportError.sql" />
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
@@ -1056,6 +1056,38 @@
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
+    <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
+    <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
+    <Build Include="dbo\Tables\tblHDAnnouncement.sql" />
+    <Build Include="dbo\Tables\tblHDProject.sql" />
+    <Build Include="dbo\Tables\tblMFBlendRequirement.sql" />
+    <Build Include="dbo\Tables\tblMFBlendRequirementStatus.sql" />
+    <Build Include="dbo\Tables\tblMFConsumptionMethod.sql" />
+    <Build Include="dbo\Tables\tblMFCostDistributionMethod.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingProcess.sql" />
+    <Build Include="dbo\Tables\tblMFRecipe.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeItem.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeItemType.sql" />
+    <Build Include="dbo\Tables\tblMFRecipeSubstituteItem.sql" />
+    <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
+    <Build Include="dbo\Views\vyuHDProjectSearch.sql" />
+    <Build Include="dbo\Tables\tblLGForwardingAgent.sql" />
+    <Build Include="dbo\Tables\tblHDProjectKeyStoneAttendee.sql" />
+    <Build Include="dbo\Tables\tblHDProjectCustomerChampion.sql" />
+    <Build Include="dbo\Tables\tblLGShippingLine.sql" />
+    <Build Include="dbo\Tables\tblLGTrucker.sql" />
+    <Build Include="dbo\Tables\tblRKCommodityMarketMapping.sql" />
+    <Build Include="dbo\Tables\tblLGTerminal.sql" />
+    <Build Include="dbo\Tables\tblHDProjectTask.sql" />
+    <Build Include="dbo\Views\vyuHDProjectTickets.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBalanceSheetDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDCreateRowCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDCreateRowDesign.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDCreateRowFilter.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDIncomeStatementDetail.sql" />
+    <Build Include="dbo\Tables\tblHDAnnouncementDisplay.sql" />
+    <Build Include="dbo\Tables\tblHDProjectModule.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailView.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLIFOIn.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
@@ -1086,6 +1118,13 @@
     <Build Include="dbo\Views\vyuICGetUOMConversion.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupCode.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
+    <Build Include="dbo\Views\vyuHDProjectList.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDTrialBalanceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGenerateRows.sql" />
+    <Build Include="dbo\Tables\tblSMCity.sql" />
+    <Build Include="dbo\Tables\tblLGContainerTypeCommodityQty.sql" />
+    <Build Include="dbo\Tables\tblLGContainerType.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCreateJournalFromCommonRecurring.sql" />
     <Build Include="dbo\Tables\tblICStockReservation.sql" />
     <Build Include="dbo\Tables\tblICItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryReceipt.sql" />
@@ -1099,7 +1138,7 @@
     <Build Include="dbo\Tables\tblMFCostDistributionMethod.sql" />
     <Build Include="dbo\Tables\tblMFBlendRequirementStatus.sql" />
     <Build Include="dbo\Tables\tblMFBlendRequirement.sql" />
-    <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
+    <Build Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
     <Build Include="dbo\Functions\fnGetItemLotType.sql" />
     <Build Include="dbo\Functions\fnIsStockTrackingItem.sql" />
     <Build Include="dbo\Views\vyuPODetails.sql" />

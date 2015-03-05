@@ -1,4 +1,4 @@
-CREATE PROCEDURE  [dbo].[uspFRValidateDesign]
+CREATE PROCEDURE  [dbo].[uspFRDValidateDesign]
 @intUserId			AS INT,
 @successfulCount	AS INT = 0 OUTPUT
 AS
@@ -106,7 +106,7 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 --DECLARE @intUserId AS INT
 
---EXEC [dbo].[uspFRValidateDesign]
+--EXEC [dbo].[uspFRDValidateDesign]
 --			@intUserId	 = 1,						-- Entity Id			
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS INVALID DESIGN COUNT
 				
