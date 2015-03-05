@@ -22,8 +22,8 @@ CREATE TABLE #TempGLAccount (
 	[strAccountType]	[nvarchar](100)
 );
 
-SELECT @intRefNo = ISNULL(MAX(intRefNo), 1) FROM tblFRRowDesign WHERE intRowId = @intRowId
-SELECT @intSort = ISNULL(MAX(intSort), 1) FROM tblFRRowDesign WHERE intRowId = @intRowId
+SELECT @intRefNo = ISNULL(MAX(intRefNo), 0) + 1 FROM tblFRRowDesign WHERE intRowId = @intRowId
+SELECT @intSort = ISNULL(MAX(intSort), 0) + 1 FROM tblFRRowDesign WHERE intRowId = @intRowId
 
 INSERT INTO #TempGLAccount EXEC (@Param)
 
