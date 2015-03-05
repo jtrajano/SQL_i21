@@ -1124,6 +1124,7 @@
     <Build Include="dbo\Tables\tblSMCity.sql" />
     <Build Include="dbo\Tables\tblLGContainerTypeCommodityQty.sql" />
     <Build Include="dbo\Tables\tblLGContainerType.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCreateJournalFromCommonRecurring.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
