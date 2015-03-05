@@ -46,6 +46,9 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICStorageLocationMeasurements)
                 .WithRequired(p => p.tblICStorageLocation)
                 .HasForeignKey(p => p.intStorageLocationId);
+            this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
+                .WithMany(p => p.tblICStorageLocations)
+                .HasForeignKey(p => p.intSubLocationId);
         }
     }
 

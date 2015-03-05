@@ -27,11 +27,12 @@ Ext.define('Inventory.view.Category', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.Checkbox',
         'Ext.grid.Panel',
-        'Ext.grid.View',
-        'Ext.selection.CheckboxModel',
-        'Ext.grid.plugin.CellEditing',
-        'Ext.grid.column.Check',
+        'Ext.grid.column.Number',
         'Ext.form.field.Number',
+        'Ext.grid.column.Check',
+        'Ext.grid.View',
+        'Ext.grid.plugin.CellEditing',
+        'Ext.selection.CheckboxModel',
         'Ext.form.FieldSet',
         'Ext.form.Label',
         'Ext.toolbar.Paging'
@@ -355,6 +356,372 @@ Ext.define('Inventory.view.Category', {
                                     {
                                         xtype: 'panel',
                                         layout: 'fit',
+                                        title: 'UOM',
+                                        items: [
+                                            {
+                                                xtype: 'advancefiltergrid',
+                                                itemId: 'grdUnitOfMeasure',
+                                                header: false,
+                                                title: 'Unit of Measure',
+                                                forceFit: true,
+                                                dockedItems: [
+                                                    {
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnDeleteUom',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Remove'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
+                                                    }
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailUnitMeasure',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Unit',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailUnitMeasure',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colDetailUnitQty',
+                                                        width: 62,
+                                                        align: 'right',
+                                                        dataIndex: 'number',
+                                                        text: 'Unit Qty',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true,
+                                                            minValue: 0
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailUpcCode',
+                                                        minWidth: 80,
+                                                        dataIndex: 'string',
+                                                        text: 'UPC Code',
+                                                        flex: 2,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailShortUPC',
+                                                        width: 70,
+                                                        dataIndex: 'string',
+                                                        text: 'Short UPC'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colStockUnit',
+                                                        width: 80,
+                                                        text: 'Stock Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colAllowPurchase',
+                                                        width: 130,
+                                                        text: 'Purchase in Stock Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colAllowSale',
+                                                        width: 100,
+                                                        text: 'Sale in Stock Unit'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataIndex: 'number',
+                                                        itemId: 'colDetailWeight',
+                                                        width: 62,
+                                                        align: 'right',
+                                                        text: 'Weight',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailWeightUOM',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Weight UOM',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailWeightUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colDetailLength',
+                                                        width: 62,
+                                                        align: 'right',
+                                                        dataIndex: 'number',
+                                                        text: 'Length',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colDetailWidth',
+                                                        width: 62,
+                                                        align: 'right',
+                                                        dataIndex: 'number',
+                                                        text: 'Width',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colDetailHeight',
+                                                        width: 62,
+                                                        align: 'right',
+                                                        dataIndex: 'number',
+                                                        text: 'Height',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailDimensionUOM',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Dimension UOM',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailDimensionUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colDetailVolume',
+                                                        width: 62,
+                                                        align: 'right',
+                                                        dataIndex: 'number',
+                                                        text: 'Volume',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailVolumeUOM',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Volume UOM',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailVolumeUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colDetailMaxQty',
+                                                        align: 'right',
+                                                        dataIndex: 'number',
+                                                        text: 'Max Qty',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true
+                                                        }
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvUnitOfMeasure'
+                                                },
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepDetailUOM',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ],
+                                                selModel: {
+                                                    selType: 'checkboxmodel'
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'fit',
                                         title: 'Locations',
                                         items: [
                                             {
@@ -509,7 +876,7 @@ Ext.define('Inventory.view.Category', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboAccountDescription',
+                                                            itemId: 'cboAccountCategory',
                                                             displayField: 'strAccountCategory',
                                                             valueField: 'strAccountCategory'
                                                         }

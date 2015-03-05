@@ -55,6 +55,8 @@
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Mappings\tblICStockReservationMap.cs" />
+    <Compile Include="Mappings\tblICCategoryUOMMap.cs" />
     <Compile Include="Mappings\tblICInventoryShipmentMap.cs" />
     <Compile Include="Mappings\tblICLotMap.cs" />
     <Compile Include="Mappings\tblICEquipmentLengthMap.cs" />
@@ -126,6 +128,8 @@
     <Compile Include="Mappings\tblICStorageUnitTypeMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\Posting\PostInventoryReceipt.cs" />
+    <Compile Include="Tables\tblICStockReservation.cs" />
+    <Compile Include="Tables\tblICCategoryUOM.cs" />
     <Compile Include="Tables\tblICInventoryShipment.cs" />
     <Compile Include="Tables\tblICLot.cs" />
     <Compile Include="Tables\tblICEquipmentLength.cs" />

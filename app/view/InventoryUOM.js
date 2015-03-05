@@ -205,9 +205,9 @@ Ext.define('Inventory.view.InventoryUOM', {
                                     {
                                         xtype: 'numberfield',
                                         flex: 1.2,
-                                        itemId: 'txtDecimalPlacesForCalculatation',
+                                        itemId: 'txtDecimalPlacesForCalculation',
                                         margin: '0 0 0 5',
-                                        fieldLabel: 'Decimal Places for Calculatation',
+                                        fieldLabel: 'Decimal Places for Calculation',
                                         labelWidth: 180,
                                         hideTrigger: true,
                                         allowDecimals: false,

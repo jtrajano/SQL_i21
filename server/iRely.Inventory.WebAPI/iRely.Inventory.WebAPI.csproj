@@ -136,6 +136,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\Activities\Receipts\LotController.cs" />
     <Compile Include="Controllers\Activities\Shipments\ShipmentController.cs" />
     <Compile Include="Controllers\Common\PricingLevelController.cs" />
     <Compile Include="Controllers\Common\QAPropertyController.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="Controllers\Activities\Receipts\ReceiptItemTaxController.cs" />
     <Compile Include="Controllers\Maintenance\CategoryAccountController.cs" />
     <Compile Include="Controllers\Maintenance\CategoryVendorController.cs" />
+    <Compile Include="Controllers\Maintenance\StockReservationController.cs" />
     <Compile Include="Controllers\Maintenance\ItemStockController.cs" />
     <Compile Include="Controllers\Maintenance\ItemCertificationController.cs" />
     <Compile Include="Controllers\Maintenance\ItemContractController.cs" />

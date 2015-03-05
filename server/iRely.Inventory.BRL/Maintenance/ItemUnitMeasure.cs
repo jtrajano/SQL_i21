@@ -47,6 +47,10 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemUOM>()
                 .Include(p => p.tblICUnitMeasure)
+                .Include(p => p.WeightUOM)
+                .Include(p => p.DimensionUOM)
+                .Include(p => p.VolumeUOM)
+                .Include(p => p.tblICUnitMeasure.vyuICGetUOMConversions)
                 .Where(w => query.Where(predicate).Any(a => a.intItemUOMId == w.intItemUOMId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

@@ -27,6 +27,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedProductLineAttribute',
         'Inventory.store.BufferedProductTypeAttribute',
         'Inventory.store.BufferedSeasonAttribute',
+        'Inventory.store.BufferedCategory',
         'AccountsPayable.store.VendorBuffered',
         'AccountsReceivable.store.CustomerBuffered',
         'i21.store.CompanyLocationBuffered',
@@ -40,16 +41,16 @@ Ext.define('Inventory.view.ItemViewModel', {
             autoLoad: true,
             data: [
                 {
-                    strType: 'Inventory'
-                },
-                {
-                    strType: 'Non-Inventory'
-                },
-                {
                     strType: 'Assembly/Blend'
                 },
                 {
                     strType: 'Bundle'
+                },
+                {
+                    strType: 'Commodity'
+                },
+                {
+                    strType: 'Inventory'
                 },
                 {
                     strType: 'Kit'
@@ -58,16 +59,16 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strType: 'Manufacturing'
                 },
                 {
-                    strType: 'Raw Material'
+                    strType: 'Non-Inventory'
                 },
                 {
                     strType: 'Other Charge'
                 },
                 {
-                    strType: 'Service'
+                    strType: 'Raw Material'
                 },
                 {
-                    strType: 'Commodity'
+                    strType: 'Service'
                 }
             ],
             fields: [
@@ -101,7 +102,10 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        lotTrackings: {
+        itemCategory: {
+            type: 'icbufferedcategory'
+        },
+        lotTracking: {
             autoLoad: true,
             data: [
                 {
@@ -120,33 +124,32 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
-        tracking: {
+        invTracking: {
             autoLoad: true,
             data: [
                 {
-                    intTracking: '1',
                     strDescription: 'Item Level'
                 },
                 {
-                    intTracking: '2',
                     strDescription: 'Category Level'
-                },
-                {
-                    intTracking: '3',
-                    strDescription: 'Lot Level'
                 }
-
             ],
             fields: [
                 {
                     name: 'strDescription'
-                },
-                {
-                    name: 'intTrackingId'
                 }
             ]
         },
         uomUnitMeasure: {
+            type: 'icbuffereduom'
+        },
+        weightUOM: {
+            type: 'icbuffereduom'
+        },
+        dimensionUOM: {
+            type: 'icbuffereduom'
+        },
+        volumeUOM: {
             type: 'icbuffereduom'
         },
 
@@ -601,12 +604,69 @@ Ext.define('Inventory.view.ItemViewModel', {
         formatUOMCalculationDecimal: function (get) {
             return i21.ModuleMgr.Inventory.createNumberFormat(get('current.intDecimalCalculation'));
         },
-        checkLotTrackingVisibility: function(get) {
-            var isNotItemLevel = (get('current.strInventoryTracking') !== 'Item Level');
-            if (isNotItemLevel) {
+        checkLotTracking: function (get) {
+            if (get('current.strLotTracking') === 'No') {
+                this.data.current.set('strInventoryTracking', 'Item Level');
+                return true;
+            }
+            else {
+                this.data.current.set('strInventoryTracking', 'Lot Level');
+                return true;
+            }
+        },
+        checkStockTracking: function (get) {
+            var isNotStockTracked = false;
+
+            switch (get('current.strType')) {
+                case 'Assembly/Blend':
+                    isNotStockTracked = false;
+                    break;
+                case 'Bundle':
+                    isNotStockTracked = true;
+                    break;
+                case 'Inventory':
+                    isNotStockTracked = false;
+                    break;
+                case 'Kit':
+                    isNotStockTracked = true;
+                    break;
+                case 'Manufacturing':
+                    isNotStockTracked = false;
+                    break;
+                case 'Non-Inventory':
+                    isNotStockTracked = true;
+                    break;
+                case 'Other Charge':
+                    isNotStockTracked = true;
+                    break;
+                case 'Service':
+                    isNotStockTracked = true;
+                    break;
+                case 'Commodity':
+                    isNotStockTracked = false;
+                    break;
+                case 'Raw Material':
+                    isNotStockTracked = false;
+                    break;
+            };
+
+            if (isNotStockTracked) {
                 this.data.current.set('strLotTracking', 'No');
             }
-            return isNotItemLevel;
+
+            return isNotStockTracked;
+        },
+        checkCommodityType: function (get) {
+            if (get('current.strType') === 'Commodity')
+                return true;
+            else
+                return false;
+        },
+        checkNotCommodityType: function (get) {
+            if (get('current.strType') !== 'Commodity')
+                return true;
+            else
+                return false;
         }
     }
 

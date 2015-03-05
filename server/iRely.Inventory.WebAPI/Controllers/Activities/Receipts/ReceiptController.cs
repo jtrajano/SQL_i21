@@ -26,13 +26,13 @@ namespace iRely.Invetory.WebAPI.Controllers
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICInventoryReceipt>();
+            var predicate = ExpressionBuilder.True<vyuReciepts>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICInventoryReceipt>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<vyuReciepts>(searchFilters);
 
             var data = _ReceiptBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
@@ -52,11 +52,11 @@ namespace iRely.Invetory.WebAPI.Controllers
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICInventoryReceipt>();
+            var predicate = ExpressionBuilder.True<vyuReciepts>();
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intInventoryReceiptId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICInventoryReceipt>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<vyuReciepts>(searchFilters, true);
 
             var total = _ReceiptBRL.GetCount(predicate);
             var data = _ReceiptBRL.GetReceipts(page, start, page == 0 ? total : limit, sortSelector, predicate);

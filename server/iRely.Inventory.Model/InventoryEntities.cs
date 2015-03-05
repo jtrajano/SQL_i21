@@ -24,7 +24,7 @@ namespace iRely.Inventory.Model
         public InventoryEntities()
             : base(GetConnectionString())
         {
-
+            
         }
 
         //public InventoryEntities()
@@ -96,6 +96,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
         public DbSet<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         public DbSet<tblICCategoryVendor> tblICCategoryVendors { get; set; }
+        public DbSet<tblICCategoryUOM> tblICCategoryUOMs { get; set; }
         public DbSet<tblICCertification> tblICCertifications { get; set; }
         public DbSet<tblICCertificationCommodity> tblICCertificationCommoditys { get; set; }
         public DbSet<tblICCommodity> tblICCommoditys { get; set; }
@@ -179,7 +180,9 @@ namespace iRely.Inventory.Model
         public DbSet<tblICInventoryShipment> tblICInventoryShipments { get; set; }
         public DbSet<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public DbSet<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
-        
+
+        public DbSet<tblICStockReservation> tblICStockReservations { get; set; }
+
         public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
         public DbSet<tblGLAccount> tblGLAccounts { get; set; }
         public DbSet<tblGLAccountCategory> tblGLAccountCategories { get; set; }
@@ -202,10 +205,14 @@ namespace iRely.Inventory.Model
         public DbSet<vyuICGetItemPricing> vyuICGetItemPricings { get; set; }
         public DbSet<tblSMStartingNumber> tblSMStartingNumbers { get; set; }
         public DbSet<tblSMFreightTerm> tblSMFreightTerms { get; set; }
+        public DbSet<tblSMCompanyLocationSubLocation> tblSMCompanyLocationSubLocations { get; set; }
 
         public DbSet<tblMFQAProperty> tblMFQAProperties { get; set; }
         public DbSet<vyuSMGetLocationPricingLevel> vyuSMGetLocationPricingLevels { get; set; }
         public DbSet<vyuICGetReceiptItemSource> vyuICGetReceiptItemSources { get; set; }
+        public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
+        public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
+
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -215,6 +222,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICCategoryAccountMap());
             modelBuilder.Configurations.Add(new tblICCategoryLocationMap());
             modelBuilder.Configurations.Add(new tblICCategoryVendorMap());
+            modelBuilder.Configurations.Add(new tblICCategoryUOMMap());
             modelBuilder.Configurations.Add(new tblICCertificationMap());
             modelBuilder.Configurations.Add(new tblICCertificationCommodityMap());
             modelBuilder.Configurations.Add(new tblICCommodityMap());
@@ -315,6 +323,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemLotMap());
 
+            modelBuilder.Configurations.Add(new tblICStockReservationMap());
+
             modelBuilder.Configurations.Add(new tblSMCompanyLocationMap());
             modelBuilder.Configurations.Add(new tblGLAccountMap());
             modelBuilder.Configurations.Add(new tblGLAccountCategoryMap());
@@ -322,6 +332,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblARCustomerMap());
             modelBuilder.Configurations.Add(new tblSMCountryMap());
             modelBuilder.Configurations.Add(new tblSMCurrencyMap());
+            modelBuilder.Configurations.Add(new tblSMCompanyLocationSubLocationMap());
 
             modelBuilder.Configurations.Add(new tblSTPaidOutMap());
             modelBuilder.Configurations.Add(new tblSTStoreMap());
@@ -342,6 +353,8 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new vyuSMGetLocationPricingLevelMap());
             modelBuilder.Configurations.Add(new vyuICGetReceiptItemSourceMap());
+            modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
+            modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
         }
     }
 }

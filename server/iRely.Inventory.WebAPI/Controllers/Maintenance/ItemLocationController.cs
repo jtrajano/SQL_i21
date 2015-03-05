@@ -76,13 +76,22 @@ namespace iRely.Invetory.WebAPI.Controllers
             var result = _ItemLocationBRL.Save(continueOnConflict);
             _ItemLocationBRL.Dispose();
 
+            var errMessage = result.Exception.Message;
+            if (result.BaseException != null)
+            {
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemLocation'"))
+                {
+                    errMessage = "Location already exist for this Item.";
+                }
+            }
+
             return Request.CreateResponse(HttpStatusCode.Accepted, new
             {
                 data = locations,
                 success = !result.HasError,
                 message = new
                 {
-                    statusText = result.Exception.Message,
+                    statusText = errMessage,
                     status = result.Exception.Error,
                     button = result.Exception.Button.ToString()
                 }

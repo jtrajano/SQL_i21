@@ -10,16 +10,16 @@ Ext.define('Inventory.view.ItemViewController', {
                 read: '../Inventory/api/Item/SearchItems'
             },
             columns: [
-                {dataIndex: 'intItemId', text: "Item Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'intItemId', text: "Item Id", flex: 1, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strItemNo', text: 'Item No', flex: 1, defaultSort: true, sortOrder: 'ASC', dataType: 'string', minWidth: 150},
                 {dataIndex: 'strType', text: 'Type', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string', minWidth: 250},
                 {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strTracking', text: 'Inv Valuation', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strLotTracking', text: 'Lot Tracking', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strManufacturer', text: 'Manufacturer', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strBrand', text: 'Brand', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strTracking', text: 'Tracking', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strLotTracking', text: 'Lot Tracking', flex: 1, dataType: 'string', minWidth: 150}
+                {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150}
             ]
         },
         binding: {
@@ -49,14 +49,25 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.strStatus}',
                 store: '{itemStatuses}'
             },
+            cboCategory: {
+                value: '{current.intCategoryId}',
+                store: '{itemCategory}',
+                readOnly: '{checkCommodityType}'
+            },
+            cboCommodity: {
+                value: '{current.intCommodityId}',
+                store: '{commodity}',
+                readOnly: '{checkNotCommodityType}'
+            },
             cboLotTracking: {
                 value: '{current.strLotTracking}',
-                store: '{lotTrackings}',
-                readOnly: '{checkLotTrackingVisibility}'
+                store: '{lotTracking}',
+                readOnly: '{checkStockTracking}'
             },
             cboTracking: {
                 value: '{current.strInventoryTracking}',
-                store: '{tracking}'
+                store: '{invTracking}',
+                readOnly: '{checkLotTracking}'
             },
 
             grdUnitOfMeasure: {
@@ -69,24 +80,52 @@ Ext.define('Inventory.view.ItemViewController', {
                 colDetailUnitQty: {
                     dataIndex: 'dblUnitQty'
                 },
-                colDetailSellQty: {
-                    dataIndex: 'dblSellQty'
-                },
                 colDetailWeight: {
                     dataIndex: 'dblWeight'
                 },
-                colDetailDescription: 'strDescription',
+                colDetailWeightUOM: {
+                    dataIndex: 'strWeightUOM',
+                    editor: {
+                        store: '{weightUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: 'Weight',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colDetailUpcCode: 'strUpcCode',
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: 'ysnAllowPurchase',
                 colConvertToStock: 'dblConvertToStock',
                 colConvertFromStock: 'dblConvertFromStock',
-
                 colDetailLength: 'dblLength',
                 colDetailWidth: 'dblWidth',
                 colDetailHeight: 'dblHeight',
+                colDetailDimensionUOM: {
+                    dataIndex: 'strDimensionUOM',
+                    editor: {
+                        store: '{dimensionUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: '',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colDetailVolume: 'dblVolume',
+                colDetailVolumeUOM: {
+                    dataIndex: 'strVolumeUOM',
+                    editor: {
+                        store: '{volumeUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: 'Volume',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colDetailMaxQty: 'dblMaxQty'
             },
 
@@ -386,24 +425,23 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPricingUPC: 'strUPC',
                 colPricingLastCost: 'dblLastCost',
                 colPricingStandardCost: 'dblStandardCost',
-                colPricingAverageCost: 'dblMovingAverageCost',
+                colPricingAverageCost: 'dblAverageCost',
                 colPricingEOMCost: 'dblEndMonthCost',
                 colPricingMethod: 'strPricingMethod',
                 colPricingAmount: 'dblAmountPercent',
                 colPricingSalePrice: 'dblSalePrice',
-                colPricingRetailPrice: 'dblRetailPrice',
-                colPricingWholesalePrice: 'dblWholesalePrice',
-                colPricingLargeVolumePrice: 'dblLargeVolumePrice',
-                colPricingMSRP: 'dblMSRPPrice',
-                colPricingBeginDate: 'dtmBeginDate',
-                colPricingEndDate: 'dtmEndDate'
+                colPricingMSRP: 'dblMSRPPrice'
             },
 
             grdPricingLevel: {
                 colPricingLevelLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        store: '{pricingLevelLocation}'
+                        store: '{pricingLevelLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colPricingLevelPriceLevel: {
@@ -411,8 +449,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     editor: {
                         store: '{pricingLevel}',
                         defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{grdPricingLevel.selection.intLocationId}'
+                            column: 'intCompanyLocationId',
+                            value: '{grdPricingLevel.selection.intCompanyLocationId}'
                         }]
                     }
                 },
@@ -427,7 +465,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelUPC: 'strUPC',
-                colPricingLevelUnits: 'dblUnit',
+                colPricingLevelUnits: 'cboPricingLevelLocation',
                 colPricingLevelMin: 'dblMin',
                 colPricingLevelMax: 'dblMax',
                 colPricingLevelMethod: {
@@ -453,7 +491,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colSpecialPricingLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        store: '{specialPricingLocation}'
+                        store: '{specialPricingLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colSpecialPricingPromotionType: {
@@ -482,6 +524,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 },
                 colSpecialPricingDiscountRate: 'dblDiscount',
                 colSpecialPricingUnitPrice: 'dblUnitAfterDiscount',
+                colSpecialPricingDiscountedPrice: 'dblDiscountedPrice',
                 colSpecialPricingBeginDate: 'dtmBeginDate',
                 colSpecialPricingEndDate: 'dtmEndDate',
                 colSpecialPricingAccumQty: 'dblAccumulatedQty',
@@ -514,10 +557,6 @@ Ext.define('Inventory.view.ItemViewController', {
             //-------------//
             //Commodity Tab//
             //-------------//
-            cboCommodity: {
-                value: '{current.intCommodityId}',
-                store: '{commodity}'
-            },
             txtGaShrinkFactor: '{current.dblGAShrinkFactor}',
             cboOrigin: {
                 value: '{current.intOriginId}',
@@ -617,7 +656,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colKitItem: {
                     dataIndex: 'strItemNo',
                     editor: {
-                        store: '{kitItem}'
+                        store: '{kitItem}',
+                        defaultFilters: [{
+                            column: 'strType',
+                            value: 'Inventory'
+                        }]
                     }
                 },
                 colKitItemDescription: 'strDescription',
@@ -722,6 +765,7 @@ Ext.define('Inventory.view.ItemViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
+            validateRecord: me.validateRecord,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
@@ -901,23 +945,6 @@ Ext.define('Inventory.view.ItemViewController', {
             ]
         });
 
-        var colSpecialPricingDiscountedPrice = grdSpecialPricing.columns[8];
-        if (colSpecialPricingDiscountedPrice) {
-            colSpecialPricingDiscountedPrice.renderer = function (value, metadata, record) {
-                if (record.get('strDiscountBy') === 'Percent') {
-                    var discount = record.get('dblUnitAfterDiscount') * record.get('dblDiscount') / 100;
-                    var discPrice = record.get('dblUnitAfterDiscount') - discount;
-                    return i21.ModuleMgr.Inventory.roundDecimalFormat(discPrice, 2);
-                }
-                else if (record.get('strDiscountBy') === 'Amount') {
-                    var discount = record.get('dblDiscount');
-                    var discPrice = record.get('dblUnitAfterDiscount') - discount;
-                    return i21.ModuleMgr.Inventory.roundDecimalFormat(discPrice, 2);
-                }
-                else { return i21.ModuleMgr.Inventory.roundDecimalFormat(0, 2); }
-            }
-        }
-
         me.subscribeLocationEvents(grdLocationStore, me);
 
         var btnAddPricing = grdPricing.down('#btnAddPricing');
@@ -965,6 +992,38 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    validateRecord: function(config, action) {
+        var me = this;
+        if (config.viewModel.data.current.dirty && config.viewModel.data.current.phantom) {
+            var buttonAction = function(button) {
+                if (button === 'yes') {
+                    me.validateRecord(config, function(result) {
+                        if (result) { action(true); }
+                    });
+                }
+            };
+            var current = config.viewModel.data.current;
+            var accounts = current.tblICItemAccounts().data.items;
+
+            if (i21.ModuleMgr.Inventory.checkEmptyStore(accounts) && current.get('intCategoryId') !== null){
+                iRely.Functions.showCustomDialog('warning', 'yesno', 'GL Accounts are not setup for this Item. System will take the GL Accounts from the Category during Posting if you choose to continue.', buttonAction);
+            }
+            else if (i21.ModuleMgr.Inventory.checkEmptyStore(accounts) && current.get('intCategoryId') === null){
+                iRely.Functions.showCustomDialog('warning', 'yesno', 'GL Accounts has to be setup for the item. Continue without setting up your GL Accounts?', buttonAction);
+            }
+            else {
+                this.validateRecord(config, function(result) {
+                    if (result) { action(true); }
+                });
+            }
+        }
+        else {
+            this.validateRecord(config, function(result) {
+                if (result) { action(true); }
+            });
+        }
+    },
+
     // <editor-fold desc="Details Tab Methods and Event Handlers">
 
     onItemTabChange: function(tabPanel, newCard, oldCard, eOpts) {
@@ -985,7 +1044,11 @@ Ext.define('Inventory.view.ItemViewController', {
             case 'pgeLocation':
                 var pgeLocation = tabPanel.down('#pgeLocation');
                 var grdLocationStore = pgeLocation.down('#grdLocationStore');
-                grdLocationStore.store.load();
+
+                var win = tabPanel.up('window');
+                var controller = win.getController();
+                if (controller.isLoadedLocation !== true)
+                    grdLocationStore.store.load();
                 break;
 
             case 'pgeGLAccounts':
@@ -1158,18 +1221,12 @@ Ext.define('Inventory.view.ItemViewController', {
 
         switch (newValue) {
             case 'Assembly':
+            case 'Assembly/Blend':
             case 'Assembly/Formula/Blend':
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(true);
                 pgeAssembly.tab.setHidden(false);
                 pgeBundle.tab.setHidden(true);
@@ -1177,7 +1234,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(false);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(false);
@@ -1196,7 +1252,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(true);
@@ -1208,14 +1263,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(true);
                 pgeAssembly.tab.setHidden(true);
                 pgeBundle.tab.setHidden(true);
@@ -1223,7 +1271,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(true);
@@ -1242,7 +1289,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
                 pgeManufacturing.tab.setHidden(true);
@@ -1254,14 +1300,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(true);
                 pgeAssembly.tab.setHidden(true);
                 pgeBundle.tab.setHidden(true);
@@ -1269,7 +1308,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(false);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(false);
@@ -1289,7 +1327,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
@@ -1308,7 +1345,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
@@ -1327,7 +1363,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
@@ -1338,14 +1373,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(false);
                 pgeAssembly.tab.setHidden(true);
                 pgeBundle.tab.setHidden(true);
@@ -1353,7 +1381,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(true);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(true);
@@ -1365,14 +1392,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
-
-                if (current.get('strInventoryTracking') === 'Item Level') {
-                    pgeStock.tab.setHidden(false);
-                }
-                else {
-                    pgeStock.tab.setHidden(true);
-                }
-
+                pgeStock.tab.setHidden(false);
                 pgeCommodity.tab.setHidden(true);
                 pgeAssembly.tab.setHidden(true);
                 pgeBundle.tab.setHidden(true);
@@ -1380,14 +1400,12 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeFactory.tab.setHidden(false);
                 pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
-
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(true);
                 pgeManufacturing.tab.setHidden(false);
 //                pgeUPC.tab.setHidden(true);
                 pgeContract.tab.setHidden(true);
                 break;
-
         }
 
     },
@@ -1400,25 +1418,43 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepDetailUOM');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colDetailUnitMeasure')
-        {
+        if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
-            current.set('intDecimalDisplay', records[0].get('intDecimalDisplay'));
-            current.set('intDecimalCalculation', records[0].get('intDecimalCalculation'));
+            current.set('tblICUnitMeasure', records[0]);
 
-            var calculationDecimal = records[0].get('intDecimalCalculation');
-
-            var colConvertToStock = grid.columns[8];
-            if (colConvertToStock.getEditor()) {
-                colConvertToStock.format = '0.00';
-                colConvertToStock.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(calculationDecimal);
+            var uoms = grid.store.data.items;
+            var exists = Ext.Array.findBy(uoms, function (row) {
+                if (row.get('ysnStockUnit') === true) {
+                    return true;
+                }
+            });
+            if (exists) {
+                var currUOM = exists.get('tblICUnitMeasure');
+                var conversions = currUOM.vyuICGetUOMConversions;
+                if (!conversions) {
+                    conversions = currUOM.data.vyuICGetUOMConversions;
+                }
+                var selectedUOM = Ext.Array.findBy(conversions, function (row) {
+                    if (row.intUnitMeasureId === records[0].get('intUnitMeasureId')) {
+                        return true;
+                    }
+                });
+                if (selectedUOM) {
+                    current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                }
             }
-            var colConvertFromStock = grid.columns[9];
-            if (colConvertFromStock.getEditor()) {
-                colConvertFromStock.format = '0.00';
-                colConvertFromStock.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(calculationDecimal);
-            }
-
+        }
+        else if (combo.column.itemId === 'colDetailWeightUOM')
+        {
+            current.set('intWeightUOMId', records[0].get('intUnitMeasureId'));
+        }
+        else if (combo.column.itemId === 'colDetailDimensionUOM')
+        {
+            current.set('intDimensionUOMId', records[0].get('intUnitMeasureId'));
+        }
+        else if (combo.column.itemId === 'colDetailVolumeUOM')
+        {
+            current.set('intVolumeUOMId', records[0].get('intUnitMeasureId'));
         }
     },
 
@@ -1442,17 +1478,34 @@ Ext.define('Inventory.view.ItemViewController', {
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
-            var selModel = grid.getSelectionModel();
 
-            var current = selModel.getSelection()[0];
+            var current = grid.view.getRecord(rowIndex);
 
             if (checked === true){
                 var uoms = grid.store.data.items;
+                var currUOM = current.get('tblICUnitMeasure');
+                var conversions = currUOM.vyuICGetUOMConversions;
+                if (!conversions) {
+                    conversions = currUOM.data.vyuICGetUOMConversions;
+                }
                 uoms.forEach(function(uom){
-                    if (uom !== current && uom.dummy !== true){
+                    if (uom === current){
+                        current.set('dblUnitQty', 1);
+                    }
+                    if (uom !== current){
                         uom.set('ysnStockUnit', false);
                         uom.set('ysnAllowPurchase', false);
                         uom.set('ysnAllowSale', false);
+                    }
+                    if (conversions){
+                        var exists = Ext.Array.findBy(conversions, function(row) {
+                            if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
+                                return true;
+                            }
+                        });
+                        if (exists) {
+                            uom.set('dblUnitQty', exists.dblConversionToStock);
+                        }
                     }
                 });
             }
@@ -1460,6 +1513,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 if (current){
                     current.set('ysnAllowPurchase', false);
                     current.set('ysnAllowSale', false);
+                    current.set('dblUnitQty', 1);
                 }
             }
         }
@@ -1759,13 +1813,22 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        var win = combo.up('window');
         var grid = combo.up('grid');
+        var grdPricing = win.down('#grdPricing');
         var plugin = grid.getPlugin('cepPricingLevel');
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
+            current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
             current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
+            if (grdPricing.store){
+                var record = grdPricing.store.findRecord('intItemLocationId', records[0].get('intItemLocationId'));
+                if (record){
+                    current.set('dblUnitPrice', record.get('dblSalePrice'));
+                }
+            }
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
@@ -1799,6 +1862,19 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
             current.set('dblUnit', records[0].get('dblUnitQty'));
+        }
+        else if (combo.column.itemId === 'colSpecialPricingDiscountBy') {
+            if (records[0].get('strDescription') === 'Percent') {
+                var discount = current.get('dblUnitAfterDiscount') * current.get('dblDiscount') / 100;
+                var discPrice = current.get('dblUnitAfterDiscount') - discount;
+                current.set('dblDiscountedPrice', discPrice);
+            }
+            else if (records[0].get('strDescription') === 'Amount') {
+                var discount = current.get('dblDiscount');
+                var discPrice = current.get('dblUnitAfterDiscount') - discount;
+                current.set('dblDiscountedPrice', discPrice);
+            }
+            else { current.set('dblDiscountedPrice', 0.00); }
         }
     },
 
@@ -2153,6 +2229,83 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
+    onSpecialKeyTab: function(component, e, eOpts) {
+        var win = component.up('window');
+        if(win) {
+            if (e.getKey() === Ext.event.Event.TAB) {
+                var gridObj = win.query('#grdUnitOfMeasure')[0],
+                    sel = gridObj.getStore().getAt(0);
+
+                if(sel && gridObj){
+                    gridObj.setSelection(sel);
+
+                    var task = new Ext.util.DelayedTask(function(){
+                        gridObj.plugins[0].startEditByPosition({
+                            row: 0,
+                            column: 1
+                        });
+                        var cboDetailUnitMeasure = gridObj.query('#cboDetailUnitMeasure')[0];
+                        cboDetailUnitMeasure.focus();
+                    });
+
+                    task.delay(10);
+                }
+            }
+        }
+    },
+
+    onSpecialPricingDiscountChange: function(obj, newValue, oldValue, eOpts){
+        var grid = obj.up('grid');
+        var plugin = grid.getPlugin('cepSpecialPricing');
+        var record = plugin.getActiveRecord();
+
+        if (obj.itemId === 'txtSpecialPricingDiscount') {
+            if (record.get('strDiscountBy') === 'Percent') {
+                var discount = record.get('dblUnitAfterDiscount') * newValue / 100;
+                var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else if (record.get('strDiscountBy') === 'Amount') {
+                var discount = newValue;
+                var discPrice = record.get('dblUnitAfterDiscount') - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else { record.set('dblDiscountedPrice', 0.00); }
+        }
+        else if (obj.itemId === 'txtSpecialPricingUnitPrice') {
+            if (record.get('strDiscountBy') === 'Percent') {
+                var discount = newValue * record.get('dblDiscount') / 100;
+                var discPrice = newValue - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else if (record.get('strDiscountBy') === 'Amount') {
+                var discount = record.get('dblDiscount');
+                var discPrice = newValue - discount;
+                record.set('dblDiscountedPrice', discPrice);
+            }
+            else { record.set('dblDiscountedPrice', 0.00); }
+        }
+    },
+
+    onCategorySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var controller = win.getController();
+        var vm = win.viewModel;
+        var current = vm.data.current;
+
+        controller.isLoadedLocation = false;
+        Ext.Array.each(current.tblICItemLocations().data.items, function (location) {
+            if (location.get('intCategoryId') !== records[0].get('intCategoryId')) {
+                location.set('intCategoryId', records[0].get('intCategoryId'));
+                location.set('strCategory', records[0].get('strCategoryCode'));
+                controller.isLoadedLocation = true;
+            }
+        });
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2203,9 +2356,6 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboPricingLevelLocation": {
                 select: this.onPricingLevelSelect
             },
-//            "#cboPricingLevelLevel": {
-//                select: this.onPricingLevelSelect
-//            },
             "#cboPricingLevelUOM": {
                 select: this.onPricingLevelSelect
             },
@@ -2286,6 +2436,18 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#grdLocationStore": {
                 itemdblclick: this.onLocationDoubleClick
+            },
+            "#cboTracking": {
+                specialKey: this.onSpecialKeyTab
+            },
+            "#txtSpecialPricingDiscount": {
+                change: this.onSpecialPricingDiscountChange
+            },
+            "#txtSpecialPricingUnitPrice": {
+                change: this.onSpecialPricingDiscountChange
+            },
+            "#cboCategory": {
+                select: this.onCategorySelect
             }
         });
     }

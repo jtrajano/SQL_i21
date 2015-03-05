@@ -58,6 +58,7 @@ namespace iRely.Inventory.BRL
                 .Include("tblICInventoryShipmentItems.tblICItem")
                 .Include("tblICInventoryShipmentItems.tblICUnitMeasure")
                 .Include("tblICInventoryShipmentItems.WeightUnitMeasure")
+                .Include("tblICInventoryReceiptItems.tblSMCompanyLocationSubLocation")
                 .Where(w => query.Where(predicate).Any(a => a.intInventoryShipmentId == w.intInventoryShipmentId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

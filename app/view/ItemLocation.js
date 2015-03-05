@@ -323,6 +323,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                             itemId: 'cboCategory',
                                             fieldLabel: 'Category',
                                             labelWidth: 80,
+                                            readOnly: true,
                                             displayField: 'strCategoryCode',
                                             valueField: 'intCategoryId'
                                         },
@@ -347,12 +348,39 @@ Ext.define('Inventory.view.ItemLocation', {
                                     },
                                     items: [
                                         {
-                                            xtype: 'combobox',
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intCompanyLocationSubLocationId',
+                                                    dataType: 'numeric',
+                                                    text: 'Sub Location Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'intCompanyLocationId',
+                                                    dataType: 'numeric',
+                                                    text: 'Location Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strSubLocationName',
+                                                    dataType: 'string',
+                                                    text: 'Sub Location Name',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strSubLocationDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 1
+                                                }
+                                            ],
                                             flex: 1,
-                                            disabled: true,
                                             itemId: 'cboSubLocation',
                                             fieldLabel: 'Sub Location',
-                                            labelWidth: 80
+                                            labelWidth: 80,
+                                            displayField: 'strSubLocationName',
+                                            valueField: 'intCompanyLocationSubLocationId'
                                         },
                                         {
                                             xtype: 'gridcombobox',

@@ -57,6 +57,9 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICCategoryVendors)
                 .WithRequired(p => p.tblICCategory)
                 .HasForeignKey(p => p.intCategoryId);
+            this.HasMany(p => p.tblICCategoryUOMs)
+                .WithRequired(p => p.tblICCategory)
+                .HasForeignKey(p => p.intCategoryId);
 
             this.HasOptional(p => p.tblICCatalog)
                 .WithMany(p => p.tblICCategories)

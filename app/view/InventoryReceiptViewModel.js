@@ -8,15 +8,20 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedItemStockDetailView',
         'Inventory.store.BufferedItemPricingView',
         'Inventory.store.BufferedItemUnitMeasure',
-        'Inventory.store.BufferedPackType',
+        'Inventory.store.BufferedPackedUOM',
+        'Inventory.store.BufferedUnitMeasure',
+        'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedStorageLocation',
         'AccountsPayable.store.VendorBuffered',
-        'AccountsPayable.store.PurchaseOrder',
+        'AccountsPayable.store.PurchaseOrderDetail',
         'AccountsPayable.store.VendorLocation',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CurrencyBuffered',
         'i21.store.FreightTermsBuffered',
         'i21.store.ShipViaBuffered',
-        'i21.store.UserListBuffered'
+        'i21.store.UserListBuffered',
+        'i21.store.CompanyLocationSubLocationBuffered',
+        'i21.store.CountryBuffered'
     ],
 
     stores: {
@@ -24,14 +29,15 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             autoLoad: true,
             data: [
                 {
-                    strDescription: 'Contract'
-                },{
+                    strDescription: 'Purchase Contract'
+                },
+                {
                     strDescription: 'Purchase Order'
-                },{
-                    strDescription: 'Transfer Receipt'
-                },{
-                    strDescription: 'Direct Transfer'
-                },{
+                },
+                {
+                    strDescription: 'Transfer Order'
+                },
+                {
                     strDescription: 'Direct'
                 }
             ],
@@ -44,9 +50,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             data: [
                 {
                     strDescription: 'Weight'
-                },{
+                },
+                {
                     strDescription: 'Cost'
-                },{
+                },
+                {
                     strDescription: 'No'
                 }
             ],
@@ -59,11 +67,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             data: [
                 {
                     strDescription: 'Per Unit'
-                },{
+                },
+                {
                     strDescription: 'Per Ton'
-                },{
+                },
+                {
                     strDescription: 'Per Miles'
-                },{
+                },
+                {
                     strDescription: 'Flat Rate'
                 }
             ],
@@ -76,11 +87,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             data: [
                 {
                     strDescription: '01 - Intact'
-                },{
+                },
+                {
                     strDescription: '02 - Broken'
-                },{
+                },
+                {
                     strDescription: '03 - Missing'
-                },{
+                },
+                {
                     strDescription: '04 - Replaced'
                 }
             ],
@@ -89,14 +103,17 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
 
+        subLocation: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
         items: {
             type: 'icbuffereditemstockdetailview'
         },
         itemUOM: {
             type: 'icbuffereditempricingview'
         },
-        itemPackType: {
-            type: 'icbufferedpacktype'
+        packageType: {
+            type: 'icbufferedpackeduom'
         },
         vendor: {
             type: 'vendorbuffered'
@@ -106,7 +123,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         poSource: {
             autoLoad: true,
-            type: 'purchaseorder'
+            type: 'purchaseorderdetail'
         },
         shipFrom: {
             type: 'apentitylocation'
@@ -131,6 +148,42 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         qaProperty: {
             type: 'icbufferedqaproperty'
+        },
+
+        lots: {
+            type: 'icbufferedlot'
+        },
+        parentLots: {
+            type: 'icbufferedlot'
+        },
+        weightUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+        unitUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+        storageLocation: {
+            type: 'icbufferedstoragelocation'
+        },
+        origin: {
+            type: 'countrybuffered'
+        },
+        condition: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Sound/Full'
+                },
+                {
+                    strDescription: 'Slack'
+                },
+                {
+                    strDescription: 'Damaged'
+                }
+            ],
+            fields: {
+                name: 'strDescription'
+            }
         }
     },
 
@@ -173,8 +226,15 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return true
             }
             else {
-                if ((get('current.strReceiptType') !== 'Direct') && (get('current.intSourceId') !== null)) {
-                    return true;
+                if (get('current.strReceiptType') !== 'Direct') {
+                    if (get('current.tblICInventoryReceiptItems').data.items.length > 0){
+                        var current = get('current.tblICInventoryReceiptItems').data.items[0];
+                        if (current.get('intSourceId') !== null) {
+                            return true;
+                        }
+                        else { return false; }
+                    }
+                    else { return false; }
                 }
                 else { return false; }
             }

@@ -27,11 +27,15 @@ Ext.define('Inventory.view.StorageUnitViewModel', {
         'Inventory.store.BufferedMeasurement',
         'Inventory.store.BufferedReadingPoint',
         'i21.store.CompanyLocationBuffered',
+        'i21.store.CompanyLocationSubLocationBuffered'
     ],
 
     stores: {
         location: {
             type: 'companylocationbuffered'
+        },
+        subLocation: {
+            type: 'smcompanylocationsublocationbuffered'
         },
         parentUnit: {
             type: 'icbufferedstoragelocation'

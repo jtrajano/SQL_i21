@@ -344,9 +344,9 @@
                             "userConfig": {
                                 "allowDecimals": false,
                                 "allowExponential": false,
-                                "fieldLabel": "Decimal Places for Calculatation",
+                                "fieldLabel": "Decimal Places for Calculation",
                                 "hideTrigger": true,
-                                "itemId": "txtDecimalPlacesForCalculatation",
+                                "itemId": "txtDecimalPlacesForCalculation",
                                 "labelWidth": 180,
                                 "layout|flex": 1.2,
                                 "margin": "0 0 0 5",

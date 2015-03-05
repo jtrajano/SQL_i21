@@ -47,6 +47,27 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitPerFoot { get; set; }
         public decimal? dblResidualUnit { get; set; }
 
+        private string _subLocationName;
+        [NotMapped]
+        public string strSubLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocationName))
+                    if (tblSMCompanyLocationSubLocation != null)
+                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocationName;
+            }
+            set
+            {
+                _subLocationName = value;
+            }
+        }
+
+        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public ICollection<tblICStorageLocationCategory> tblICStorageLocationCategories { get; set; }
         public ICollection<tblICStorageLocationMeasurement> tblICStorageLocationMeasurements { get; set; }
         public ICollection<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }

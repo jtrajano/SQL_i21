@@ -12,30 +12,37 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemUOM");
-            this.Property(t => t.dblHeight).HasColumnName("dblHeight");
-            this.Property(t => t.dblLength).HasColumnName("dblLength");
-            this.Property(t => t.dblMaxQty).HasColumnName("dblMaxQty");
-            this.Property(t => t.dblSellQty).HasColumnName("dblSellQty");
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty");
-            this.Property(t => t.dblVolume).HasColumnName("dblVolume");
             this.Property(t => t.dblWeight).HasColumnName("dblWeight");
-            this.Property(t => t.dblWidth).HasColumnName("dblWidth");
-            
+            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
+            this.Property(t => t.strUpcCode).HasColumnName("strUpcCode");
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
             this.Property(t => t.ysnAllowPurchase).HasColumnName("ysnAllowPurchase");
             this.Property(t => t.ysnAllowSale).HasColumnName("ysnAllowSale");
-            this.Property(t => t.dblConvertToStock).HasColumnName("dblConvertToStock");
-            this.Property(t => t.dblConvertFromStock).HasColumnName("dblConvertFromStock");
-
-            this.Property(t => t.intItemId).HasColumnName("intItemId");
-            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
-            this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strUpcCode).HasColumnName("strUpcCode");
+            this.Property(t => t.dblLength).HasColumnName("dblLength");
+            this.Property(t => t.dblWidth).HasColumnName("dblWidth");
+            this.Property(t => t.dblHeight).HasColumnName("dblHeight");
+            this.Property(t => t.intDimensionUOMId).HasColumnName("intDimensionUOMId");
+            this.Property(t => t.dblVolume).HasColumnName("dblVolume");
+            this.Property(t => t.intVolumeUOMId).HasColumnName("intVolumeUOMId");
+            this.Property(t => t.dblMaxQty).HasColumnName("dblMaxQty");
+            this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasRequired(p => p.tblICUnitMeasure)
                 .WithMany(p => p.tblICItemUOMs)
                 .HasForeignKey(p => p.intUnitMeasureId);
+            this.HasOptional(p => p.WeightUOM)
+                .WithMany(p => p.WeightItemUOMs)
+                .HasForeignKey(p => p.intWeightUOMId);
+            this.HasOptional(p => p.DimensionUOM)
+                .WithMany(p => p.DimensionItemUOMs)
+                .HasForeignKey(p => p.intDimensionUOMId);
+            this.HasOptional(p => p.VolumeUOM)
+                .WithMany(p => p.VolumeItemUOMs)
+                .HasForeignKey(p => p.intVolumeUOMId);
         }
     }
 }

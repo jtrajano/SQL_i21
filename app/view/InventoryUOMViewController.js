@@ -42,7 +42,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                 store: '{unitTypes}'
             },
             txtDecimalPlacesToDisplay: '{current.intDecimalDisplay}',
-            txtDecimalPlacesForCalculatation: '{current.intDecimalCalculation}',
+            txtDecimalPlacesForCalculation: '{current.intDecimalCalculation}',
 
             grdConversion: {
                 colConversionStockUOM: {
@@ -51,8 +51,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                         store: '{unitMeasure}'
                     }
                 },
-                colConversionToStockUOM: 'dblConversionToStock',
-                colConversionFromStockUOM: 'dblConversionFromStock'
+                colConversionToStockUOM: 'dblConversionToStock'
             }
         }
     },
@@ -79,14 +78,6 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                 }
             ]
         });
-
-        var cepConversion = grdConversion.getPlugin('cepConversion');
-        if (cepConversion){
-            cepConversion.on({
-                validateedit: me.onEditConversion,
-                scope: me
-            });
-        }
 
         win.context.data.on({ currentrecordchanged: me.onCurrentRecordChanged, scope: me })
 
@@ -145,6 +136,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                         { dataIndex: 'strUnitType', value: 'Quantity', condition: 'eq'},
                         { dataIndex: 'strUnitType', value: 'Volume', condition: 'eq', conjunction: 'or'},
                         { dataIndex: 'strUnitType', value: 'Weight', condition: 'eq', conjunction: 'or'},
+                        { dataIndex: 'strUnitType', value: 'Packed', condition: 'eq', conjunction: 'or'},
                         { dataIndex: 'intUnitMeasureId', value: record.get('intUnitMeasureId'), condition: 'noteq', conjunction: 'and' }
                     ];
                 break;
@@ -156,8 +148,6 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
                     ];
                 break;
         };
-
-
     },
 
     onUOMSelect: function(combo, records, eOpts) {
@@ -174,34 +164,15 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
         }
     },
 
-    onEditConversion: function (editor, context, eOpts) {
-        if (context.field === 'dblConversionToStock')
-        {
-            var grd = context.grid;
-            var plugin = editor;
-            var toValue = context.value;
-            var fromValue = 1 / toValue;
-            var record = context.record;
-
-            if (record)
-                record.set('dblConversionFromStock', fromValue);
-        }
-    },
-
     onDecimalCalculationChange: function(obj, newValue, oldValue, eOpts) {
         var win = obj.up('window');
         var grdConversion = win.down('#grdConversion');
         var colConversionToStockUOM = grdConversion.columns[1];
-        var colConversionFromStockUOM = grdConversion.columns[2];
 
         colConversionToStockUOM.format = i21.ModuleMgr.Inventory.createNumberFormat(newValue);
-        colConversionFromStockUOM.format = i21.ModuleMgr.Inventory.createNumberFormat(newValue);
 
         if (colConversionToStockUOM.getEditor()){
             colConversionToStockUOM.getEditor().decimalPrecision = newValue;
-        }
-        if (colConversionFromStockUOM.getEditor()){
-            colConversionFromStockUOM.getEditor().decimalPrecision = newValue;
         }
     },
 
@@ -210,7 +181,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             "#cboStockUom": {
                 select: this.onUOMSelect
             },
-            "#txtDecimalPlacesForCalculatation": {
+            "#txtDecimalPlacesForCalculation": {
                 change: this.onDecimalCalculationChange
             }
         });

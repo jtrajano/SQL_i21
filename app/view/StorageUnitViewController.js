@@ -44,7 +44,14 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 value: '{current.intLocationId}',
                 store: '{location}'
             },
-            cboSubLocation: '{current.intSubLocationId}',
+            cboSubLocation: {
+                value: '{current.intSubLocationId}',
+                store: '{subLocation}',
+                defaultFilters: [{
+                    column: 'intCompanyLocationId',
+                    value: '{current.intLocationId}'
+                }]
+            },
             cboParentUnit: {
                 value: '{current.intParentStorageLocationId}',
                 store: '{parentUnit}',

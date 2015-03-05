@@ -8,6 +8,7 @@ Ext.define('Inventory.model.Category', {
         'Inventory.model.CategoryAccount',
         'Inventory.model.CategoryLocation',
         'Inventory.model.CategoryVendor',
+        'Inventory.model.CategoryUOM',
         'Ext.data.Field'
     ],
 

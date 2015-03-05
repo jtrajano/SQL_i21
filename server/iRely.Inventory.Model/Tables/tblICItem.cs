@@ -101,6 +101,7 @@ namespace iRely.Inventory.Model
         public int? intClassVarietyId { get; set; }
         public int? intProductLineId { get; set; }
         public string strMarketValuation { get; set; }
+        public int? intCategoryId { get; set; }
 
         private string _manufacturer;
         [NotMapped]
@@ -143,6 +144,7 @@ namespace iRely.Inventory.Model
 
         public tblICManufacturer tblICManufacturer { get; set; }
         public tblICBrand tblICBrand { get; set; }
+        public tblICCategory tblICCategory { get; set; } 
 
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
@@ -173,6 +175,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
+
 
         //public tblICCommodity tblICCommodity { get; set; }
         //public tblICCommodityAttribute CommodityOrigin { get; set; }
@@ -212,6 +215,10 @@ namespace iRely.Inventory.Model
         public string strStatus { get; set; }
         public int? intLocationId { get; set; }
         public int? intItemLocationId { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
         public string strLocationName { get; set; }
         public string strLocationType { get; set; }
         public int? intVendorId { get; set; }
@@ -219,18 +226,34 @@ namespace iRely.Inventory.Model
         public int? intReceiveUOMId { get; set; }
         public int? intIssueUOMId { get; set; }
         public string strReceiveUOM { get; set; }
+        public decimal? dblReceiveSalePrice { get; set; }
+        public decimal? dblReceiveMSRPPrice { get; set; }
+        public decimal? dblReceiveLastCost { get; set; }
+        public decimal? dblReceiveStandardCost { get; set; }
+        public decimal? dblReceiveAverageCost { get; set; }
+        public decimal? dblReceiveEndMonthCost { get; set; }
         public string strIssueUOM { get; set; }
-        public int? intSubLocationId { get; set; }
-        public int? intStorageLocationId { get; set; }
-        public string strStorageLocationName { get; set; }
+        public decimal? dblIssueSalePrice { get; set; }
+        public decimal? dblIssueMSRPPrice { get; set; }
+        public decimal? dblIssueLastCost { get; set; }
+        public decimal? dblIssueStandardCost { get; set; }
+        public decimal? dblIssueAverageCost { get; set; }
+        public decimal? dblIssueEndMonthCost { get; set; }
         public decimal? dblMinOrder { get; set; }
         public decimal? dblReorderPoint { get; set; }
         public int? intAllowNegativeInventory { get; set; }
         public string strAllowNegativeInventory { get; set; }
         public int? intCostingMethod { get; set; }
         public string strCostingMethod { get; set; }
-        public decimal? dblUnitOnHand { get; set; }
+        public decimal? dblAmountPercent { get; set; }
+        public decimal? dblSalePrice { get; set; }
+        public decimal? dblMSRPPrice { get; set; }
+        public string strPricingMethod { get; set; }
+        public decimal? dblLastCost { get; set; }
+        public decimal? dblStandardCost { get; set; }
         public decimal? dblAverageCost { get; set; }
+        public decimal? dblEndMonthCost { get; set; }
+        public decimal? dblUnitOnHand { get; set; }
         public decimal? dblOnOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
         public decimal? dblBackOrder { get; set; }
@@ -243,29 +266,28 @@ namespace iRely.Inventory.Model
     {
         public int intPricingKey { get; set; }
         public int intKey { get; set; }
-        public int intItemPricingId { get; set; }
+        public string strDescription { get; set; }
+        public string strUpcCode { get; set; }
+        public int? intItemPricingId { get; set; }
         public int? intItemId { get; set; }
         public int? intLocationId { get; set; }
         public int? intItemLocationId { get; set; }
         public string strLocationName { get; set; }
         public string strLocationType { get; set; }
         public int? intItemUnitMeasureId { get; set; }
+        public int? intUnitMeasureId { get; set; }
         public string strUnitMeasure { get; set; }
         public string strUnitType { get; set; }
-        public bool ysnStockUnit { get; set; }
-        public decimal? dblRetailPrice { get; set; }
-        public decimal? dblWholesalePrice { get; set; }
-        public decimal? dblLargeVolumePrice { get; set; }
+        public bool? ysnStockUnit { get; set; }
+        public decimal? dblUnitQty { get; set; }
         public decimal? dblAmountPercent { get; set; }
         public decimal? dblSalePrice { get; set; }
         public decimal? dblMSRPPrice { get; set; }
         public string strPricingMethod { get; set; }
         public decimal? dblLastCost { get; set; }
         public decimal? dblStandardCost { get; set; }
-        public decimal? dblMovingAverageCost { get; set; }
+        public decimal? dblAverageCost { get; set; }
         public decimal? dblEndMonthCost { get; set; }
-        public DateTime? dtmBeginDate { get; set; }
-        public DateTime? dtmEndDate { get; set; }
         public int? intSort { get; set; }
 
         public vyuICGetItemStock vyuICGetItemStock { get; set; }

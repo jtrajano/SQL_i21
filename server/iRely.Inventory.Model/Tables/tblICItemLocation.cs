@@ -90,6 +90,17 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
+        [NotMapped]
+        public int? intCompanyLocationId
+        {
+            get
+            {
+                if (tblSMCompanyLocation != null)
+                    return tblSMCompanyLocation.intCompanyLocationId;
+                else
+                    return null;
+            }
+        }
         private string _type;
         [NotMapped]
         public string strLocationType
@@ -166,12 +177,31 @@ namespace iRely.Inventory.Model
                 _category = value;
             }
         }
+        private string _subLocationName;
+        [NotMapped]
+        public string strSubLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocationName))
+                    if (tblSMCompanyLocationSubLocation != null)
+                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocationName;
+            }
+            set
+            {
+                _subLocationName = value;
+            }
+        }
         
         public tblICItem tblICItem { get; set; }
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public vyuAPVendor vyuAPVendor { get; set; }
         public tblICCategory tblICCategory { get; set; }
-        
+        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public tblICCountGroup tblICCountGroup { get; set; }
 
         public ICollection<tblICItemNote> tblICItemNotes { get; set; }
@@ -182,6 +212,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemPricing> tblICItemPricings { get; set; }
         public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
         public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
+        public ICollection<tblICLot> tblICLots { get; set; }
         
     }
 }

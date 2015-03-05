@@ -83,7 +83,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public tblSMCompanyLocation ShipFromLocation { get; set; }
         public tblSMCompanyLocation ShipToLocation { get; set; }
-        //public tblARCustomer tblARCustomer { get; set; } 
+        ////public tblARCustomer tblARCustomer { get; set; } 
     }
 
     public class InventoryShipmentView
@@ -218,9 +218,29 @@ namespace iRely.Inventory.Model
                 _weightUom = value;
             }
         }
+        private string _subLocationName;
+        [NotMapped]
+        public string strSubLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocationName))
+                    if (tblSMCompanyLocationSubLocation != null)
+                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocationName;
+            }
+            set
+            {
+                _subLocationName = value;
+            }
+        }
 
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
+        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public tblICItem tblICItem { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public tblICUnitMeasure WeightUnitMeasure { get; set; }
@@ -244,7 +264,7 @@ namespace iRely.Inventory.Model
             {
                 if (string.IsNullOrEmpty(_lotId))
                     if (tblICLot != null)
-                        return tblICLot.strLotId;
+                        return tblICLot.strLotNumber;
                     else
                         return null;
                 else

@@ -66,8 +66,7 @@ namespace iRely.Inventory.BRL
         public IQueryable<tblICItem> GetItems(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<ItemVM, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
-            var finalQuery = _db.GetQuery<tblICItem>()
-                    //.Include("tblICItemUOMs.tblICUnitMeasure")                    
+            var finalQuery = _db.GetQuery<tblICItem>()                
                     .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
                     .OrderBySelector(sortSelector)
                     .Skip(start)

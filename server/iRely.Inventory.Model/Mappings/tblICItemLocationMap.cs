@@ -83,6 +83,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICCountGroup)
                 .WithMany(p => p.tblICItemLocations)
                 .HasForeignKey(p => p.intCountGroupId);
+            this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
+                .WithMany(p => p.tblICItemLocations)
+                .HasForeignKey(p => p.intSubLocationId);
         }
     }
 }

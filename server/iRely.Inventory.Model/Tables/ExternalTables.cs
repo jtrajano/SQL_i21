@@ -121,6 +121,12 @@ namespace iRely.Inventory.Model
         
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICItemFactory> tblICItemFactories { get; set; }
+        public ICollection<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
+
+        public ICollection<tblICInventoryShipment> ShipFromLocations { get; set; }
+        public ICollection<tblICInventoryShipment> ShipToLocations { get; set; }
+        
+
     }
 
     public class tblGLAccount
@@ -179,7 +185,6 @@ namespace iRely.Inventory.Model
         public string strCountry { get; set; }
 
         public ICollection<tblICItemContract> tblICItemContracts { get; set; }
-        public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
     }
 
     public class tblSMCurrency : BaseEntity
@@ -300,5 +305,23 @@ namespace iRely.Inventory.Model
         public int intKey { get; set; }
         public int intCompanyLocationId { get; set; }
         public string strPriceLevel { get; set; }
+    }
+
+    public class tblSMCompanyLocationSubLocation : BaseEntity
+    {
+        public int intCompanyLocationSubLocationId { get; set; }
+        public int intCompanyLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public string strSubLocationDescription { get; set; }
+        public string strClassification { get; set; }
+        public int? intNewLotBin { get; set; }
+        public int? intAuditBin { get; set; }
+        public string strAddressKey { get; set; }
+
+        public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
+        public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
+        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
+        public ICollection<tblICStorageLocation> tblICStorageLocations { get; set; }
+        public ICollection<tblICItemStock> tblICItemStocks { get; set; }
     }
 }

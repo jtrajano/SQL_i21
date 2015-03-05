@@ -21,12 +21,24 @@ namespace iRely.Inventory.BRL
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICInventoryReceipt> GetSearchQuery()
+        public IQueryable<vyuReciepts> GetSearchQuery()
         {
-            return _db.GetQuery<tblICInventoryReceipt>();
+            return _db.GetQuery<tblICInventoryReceipt>()
+                .Include(p => p.vyuAPVendor)
+                .Include(p => p.tblSMCompanyLocation)
+                .Select(p => new vyuReciepts {
+                    intInventoryReceiptId = p.intInventoryReceiptId,
+                    strReceiptNumber = p.strReceiptNumber,
+                    strReceiptType = p.strReceiptType,
+                    strVendorName = p.vyuAPVendor.strName,
+                    strLocationName = p.tblSMCompanyLocation.strLocationName,
+                    dtmReceiptDate = p.dtmReceiptDate,
+                    ysnPosted = p.ysnPosted
+                });
+
         }
 
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICInventoryReceipt, bool>> predicate)
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<vyuReciepts, bool>> predicate)
         {
             return GetSearchQuery()
                 .Where(predicate)
@@ -37,24 +49,28 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICInventoryReceipt, bool>> predicate)
+        public int GetCount(Expression<Func<vyuReciepts, bool>> predicate)
         {
             return GetSearchQuery().Where(predicate).Count();
         }
 
-        public IQueryable<tblICInventoryReceipt> GetReceipts(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICInventoryReceipt, bool>> predicate)
+        public IQueryable<tblICInventoryReceipt> GetReceipts(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<vyuReciepts, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICInventoryReceipt>()
                 .Include(p => p.tblICInventoryReceiptInspections)
                 .Include(p => p.vyuAPVendor)
                 .Include(p=> p.tblSMFreightTerm)
+                .Include(p => p.tblSMCompanyLocation)
                 .Include("tblICInventoryReceiptItems.tblICItem")
-                .Include("tblICInventoryReceiptItems.tblICUnitMeasure")
-                .Include("tblICInventoryReceiptItems.tblICPackType")
+                .Include("tblICInventoryReceiptItems.tblICItemUOM.tblICUnitMeasure")
+                .Include("tblICInventoryReceiptItems.PackageType")
                 .Include("tblICInventoryReceiptItems.vyuICGetReceiptItemSource")
-                .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots")
+                .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICLot")
+                .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.WeightUOM.tblICUnitMeasure")
+                .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.UnitUOM.tblICUnitMeasure")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes")
+                .Include("tblICInventoryReceiptItems.tblSMCompanyLocationSubLocation")
                 .Include("tblICInventoryReceiptInspections.tblMFQAProperty")
                 .Where(w => query.Where(predicate).Any(a => a.intInventoryReceiptId == w.intInventoryReceiptId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
