@@ -79,7 +79,7 @@ BEGIN
 				,intItemLocationId = @Default_Location
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblQty = -100
+				,dblQty = 100
 				,dblUOMQty = 1
 				,dblCost = 14.00
 				,dblSalesPrice = 20.00
@@ -87,8 +87,8 @@ BEGIN
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
-				,strTransactionId = 'SALE-000001'
-				,intTransactionTypeId = @SalesType
+				,strTransactionId = 'INVRCT-000001'
+				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
 				,intSubLocationId = null 
 				,intStorageLocationId = null 
@@ -101,7 +101,7 @@ BEGIN
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
-				,dblUnitOnHand = (0 - 100)  -- Reduce stock by 100
+				,dblUnitOnHand = (0 + 100)  -- Reduce stock by 100
 	END 
 
 	-- Act
