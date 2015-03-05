@@ -37,31 +37,6 @@ Create TABLE #TempCannedPanelColumn
 
 print('/*******************  BEGIN INSERTING canned panels on temporary panel column table  *******************/')
 
-INSERT INTO #TempCannedPanelColumn VALUES (1404, 33, N'gacnt_pur_sls_ind', N'P/S', 107, N'Left', N'', N'', N'', 1, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1405, 33, N'gacnt_cus_no', N'Customer #', 107, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1406, 33, N'agcus_last_name', N'Last Name', 107, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1407, 33, N'agcus_first_name', N'First Name', 107, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1408, 33, N'gacnt_loc_no', N'Loc', 107, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1409, 33, N'gacnt_com_cd', N'Com', 107, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1410, 33, N'gacnt_cnt_no', N'Contact #', 106, N'Left', N'', N'', N'', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1411, 33, N'gacnt_seq_no', N'Seq', 107, N'Left', N'', N'', N'', 8, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1412, 33, N'gacnt_mkt_zone', N'Market Zone', 107, N'Left', N'', N'', N'', 9, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1413, 33, N'gacnt_beg_ship_rev_dt', N'Beg Ship Date', 106, N'Right', N'', N'', N'', 10, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1414, 33, N'gacnt_due_rev_dt', N'Due Date', 106, N'Right', N'', N'', N'', 11, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1415, 33, N'gacnt_pbhcu_ind', N'PBHU', 107, N'Left', N'', N'', N'', 12, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1416, 33, N'gacnt_un_bal', N'Unit Balance', 106, N'Right', N'', N'Sum', N'####.00', 13, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1417, 41, N'Month', N'Month', 0, N'Series1AxisX', N'', N'', N'Month', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 16)
 
@@ -173,16 +148,6 @@ INSERT INTO #TempCannedPanelColumn VALUES (1470, 44, N'gacnt_due_rev_dt', N'Due 
 
 INSERT INTO #TempCannedPanelColumn VALUES (1471, 44, N'gacnt_cnt_no', N'Contract #', 116, N'Right', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 18)
 
-INSERT INTO #TempCannedPanelColumn VALUES (1472, 3, N'gacom_desc', N'Com', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1473, 3, N'gapos_loc_no', N'Loc', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1474, 3, N'gapos_in_house', N'In House', 25, N'Right', N'', N'Sum', N'####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1475, 3, N'gapos_offsite', N'Offsite', 25, N'Right', N'', N'Sum', N'####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1476, 3, N'gapos_sls_in_transit', N'In Transit', 25, N'Right', N'', N'Sum', N'####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
-
 INSERT INTO #TempCannedPanelColumn VALUES (1477, 54, N'gacom_desc', N'Com', 25, N'Left', N'', N'', N'', 2, N'', N'', N'gacommst.gacom_desc', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 20)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1478, 54, N'totals', N'Totals', 25, N'Right', N'', N'Sum', N'####.00', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 20)
@@ -200,16 +165,6 @@ INSERT INTO #TempCannedPanelColumn VALUES (1483, 45, N'pttic_qty_orig', N'Quanti
 INSERT INTO #TempCannedPanelColumn VALUES (1484, 45, N'pttic_tic_no', N'Ticket #', 25, N'Left', N'', N'', N'', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 56)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1485, 45, N'pttic_rev_dt', N'Date', 25, N'Right', N'', N'', N'', 8, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 56)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1486, 46, N'Current', N'Current', 25, N'Center', N'', N'', N'$####.00', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1487, 46, N'31-60 Days', N'31-60 Days', 25, N'Center', N'', N'', N'$####.00', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1488, 46, N'61-90 Days', N'61-90 Days', 25, N'Center', N'', N'', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1489, 46, N'91-120 Days', N'91-120 Days', 25, N'Center', N'', N'', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1490, 46, N'Over 120 Days', N'Over 120 Days', 25, N'Center', N'', N'', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1491, 47, N'ptcus_cus_no', N'Customer Code', 347, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 68)
 
@@ -353,46 +308,6 @@ INSERT INTO #TempCannedPanelColumn VALUES (1560, 9, N'agcus_first_name', N'Custo
 
 INSERT INTO #TempCannedPanelColumn VALUES (1561, 9, N'agcus_key', N'Customer #', 347, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 44)
 
-INSERT INTO #TempCannedPanelColumn VALUES (1562, 10, N'Future', N'Future', 25, N'Left', N'', N'', N'$####.00', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1563, 10, N'Current', N'Current', 25, N'Left', N'', N'', N'$####.00', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1564, 10, N'30days', N'31-60 Days', 25, N'Left', N'', N'', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1565, 10, N'60days', N'61-90 Days', 25, N'Left', N'', N'', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1566, 10, N'90days', N'91-120 Days', 25, N'Left', N'', N'', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1567, 10, N'120days', N'Over 120 Days', 25, N'Left', N'', N'', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1574, 12, N'agcus_key', N'Customer #', 232, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1575, 12, N'agcus_last_name', N'Customer Last Name', 231, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1576, 12, N'agcus_first_name', N'First Name', 231, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1577, 12, N'agcus_cred_limit', N'Credit Limit', 231, N'Right', N'', N'Sum', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1578, 12, N'Total Balance', N'Total Balance', 231, N'Right', N'', N'Sum', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1579, 12, N'Overage', N'Overage', 231, N'Right', N'', N'Sum', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1580, 2, N'agitm_no', N'Item#', 174, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1581, 2, N'agitm_desc', N'Item/Product', 174, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1582, 2, N'agitm_pak_desc', N'Package', 174, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1583, 2, N'agitm_class', N'Class', 173, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1584, 2, N'agitm_loc_no', N'Loc', 173, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1585, 2, N'agitm_last_un_cost', N'Last Unit Cost', 173, N'Right', N'', N'', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1586, 2, N'agitm_avg_un_cost', N'Average Unit Cost', 173, N'Right', N'', N'', N'$####.00', 8, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1587, 2, N'agitm_un_on_hand', N'Units On Hand Qty', 173, N'Right', N'', N'Sum', N'####.00', 9, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
-
 INSERT INTO #TempCannedPanelColumn VALUES (1588, 58, N'agitm_no', N'Item#', 347, N'Left', N'', N'', N'', 2, N'', N'', N'agitm_no', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 51)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1589, 58, N'agitm_desc', N'Item/Product', 347, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 51)
@@ -418,24 +333,6 @@ INSERT INTO #TempCannedPanelColumn VALUES (1598, 20, N'agstm_key_loc_no', N'Loca
 INSERT INTO #TempCannedPanelColumn VALUES (1599, 20, N'Sales', N'Sales Amount', 0, N'Series1AxisY', N'', N'', N'Currency', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 46)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1600, 20, N'Costs', N'Costs', 0, N'Series2AxisY', N'', N'', N'Currency', 2, N'', N'', N'', 1, N'Chart', N'Series2AxisY', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 46)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1601, 19, N'agstm_itm_no', N'Item #', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 70)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1602, 19, N'agitm_desc', N'Item/Product', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 70)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1603, 19, N'Sales', N'Sales', 25, N'Right', N'', N'Sum', N'$###0.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 70)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1604, 19, N'Units', N'Units', 25, N'Right', N'', N'Sum', N'####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 70)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1605, 18, N'Customer Last Name', N'Customer Last Name', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1606, 18, N'First Name', N'First Name', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1607, 18, N'Customer Code', N'Customer Code', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1608, 18, N'Sales', N'Sales', 25, N'Right', N'', N'Sum', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1609, 18, N'Units', N'Units', 25, N'Right', N'', N'Sum', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1610, 21, N'agitm_no', N'Item #', 232, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 72)
 
@@ -743,12 +640,6 @@ INSERT INTO #TempCannedPanelColumn VALUES (1776, 25, N'strDescription', N'Descri
 
 INSERT INTO #TempCannedPanelColumn VALUES (1777, 25, N'Balance', N'Balance', 462, N'Left', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 76)
 
-INSERT INTO #TempCannedPanelColumn VALUES (1778, 26, N'strAccountId', N'Account ID', 463, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 77)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1779, 26, N'strDescription', N'GL Description', 462, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 77)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1780, 26, N'Amount', N'Amount', 462, N'Left', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 77)
-
 INSERT INTO #TempCannedPanelColumn VALUES (1781, 27, N'strAccountId', N'Account ID', 463, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 78)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1782, 27, N'strDescription', N'GL Description', 462, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 78)
@@ -786,94 +677,6 @@ INSERT INTO #TempCannedPanelColumn VALUES (1801, 29, N'Amount', N'Amount', 462, 
 INSERT INTO #TempCannedPanelColumn VALUES (1802, 39, N'Period', N'Month', 0, N'Series1AxisX', N'', N'', N'Month', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 84)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1803, 39, N'TotalBalance', N'Total Balance', 0, N'Series1AxisY', N'', N'', N'Currency', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 84)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1808, 23, N'intGLDetailId', N'GL Detail ID', 100, N'Left', N'Filter', N'', N'', 1, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1809, 23, N'dtmDate', N'Date', 100, N'Left', N'Filter', N'', N'Date', 2, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1810, 23, N'strBatchId', N'Batch ', 100, N'Left', N'Filter', N'', N'', 3, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1811, 23, N'intAccountId', N'Account ID', 100, N'Left', N'Filter', N'', N'', 4, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1812, 23, N'strAccountGroup', N'Account Group', 100, N'Left', N'Filter', N'', N'', 5, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1814, 23, N'dblCredit', N'Credit Amount', 100, N'Left', N'Filter', N'', N'$####.00', 7, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1815, 23, N'dblDebitUnit', N'Debit Unit', 100, N'Left', N'Filter', N'', N'', 8, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1817, 23, N'strDescription', N'GL Description', 100, N'Left', N'Filter', N'', N'', 10, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1818, 23, N'strCode', N'Code', 100, N'Left', N'Filter', N'', N'', 11, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1819, 23, N'strTransactionId', N'Trans ID', 100, N'Left', N'Filter', N'', N'', 12, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1820, 23, N'strReference', N'Reference', 100, N'Left', N'Filter', N'', N'', 13, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1821, 23, N'strJobId', N'Job ID', 100, N'Left', N'Filter', N'', N'', 14, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1822, 23, N'intCurrencyId', N'Currency ID', 100, N'Left', N'Filter', N'', N'', 15, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1823, 23, N'dblExchangeRate', N'Exchange Rate', 100, N'Left', N'Filter', N'', N'', 16, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1824, 23, N'dtmDateEntered', N'Date Entered', 100, N'Left', N'Filter', N'', N'', 17, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1825, 23, N'dtmTransactionDate', N'Trans Date', 100, N'Left', N'Filter', N'', N'', 18, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1826, 23, N'strProductId', N'Product ID', 100, N'Left', N'Filter', N'', N'', 19, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1827, 23, N'strWarehouseId', N'Warehouse ID', 100, N'Left', N'Filter', N'', N'', 20, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1828, 23, N'strNum', N'Num', 100, N'Left', N'Filter', N'', N'', 21, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1829, 23, N'strCompanyName', N'Company Name', 100, N'Left', N'Filter', N'', N'', 22, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1830, 23, N'strBillInvoiceNumber', N'Bill Invoice #', 100, N'Left', N'Filter', N'', N'', 23, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1831, 23, N'strJournalLineDescription', N'Journal Line Desc', 100, N'Left', N'Filter', N'', N'', 24, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1832, 23, N'ysnIsUnposted', N'Unposted?', 100, N'Left', N'Filter', N'', N'', 25, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1833, 23, N'intConcurrencyId', N'Concurrency ID', 100, N'Left', N'Filter', N'', N'', 26, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1834, 23, N'intUserID', N'User ID', 100, N'Left', N'Filter', N'', N'', 27, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1835, 23, N'strTransactionForm', N'Trans Form', 100, N'Left', N'Filter', N'', N'', 28, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1836, 23, N'strModuleName', N'Module Name', 100, N'Left', N'Filter', N'', N'', 29, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1837, 23, N'strUOMCode', N'UOM Code', 100, N'Left', N'Filter', N'', N'', 30, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1839, 23, N'strAccountId', N'Account ID', 100, N'Left', N'Filter', N'', N'', 32, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1841, 23, N'strNote', N'Note', 100, N'Left', N'Filter', N'', N'', 34, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1842, 23, N'intAccountGroupId', N'Account Group ID', 100, N'Left', N'Filter', N'', N'', 35, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1843, 23, N'dblOpeningBalance', N'Opening Balance', 100, N'Left', N'Filter', N'', N'', 36, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1844, 23, N'ysnIsUsed', N'Is Used?', 100, N'Left', N'Filter', N'', N'', 37, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1845, 23, N'strComments', N'Comments', 100, N'Left', N'Filter', N'', N'', 40, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1846, 23, N'ysnActive', N'Active', 100, N'Left', N'Filter', N'', N'', 41, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1847, 23, N'ysnSystem', N'System', 100, N'Left', N'Filter', N'', N'', 42, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1848, 23, N'strCashFlow', N'Cash Flow', 100, N'Left', N'Filter', N'', N'', 43, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1851, 23, N'strAccountType', N'Account Type', 100, N'Left', N'Filter', N'', N'', 46, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1852, 23, N'intParentGroupId', N'Parent Group ID', 100, N'Left', N'Filter', N'', N'', 47, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1853, 23, N'intGroup', N'Group', 100, N'Left', N'Filter', N'', N'', 48, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1854, 23, N'intSort', N'Sort', 100, N'Left', N'Filter', N'', N'', 49, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1856, 23, N'intAccountBegin', N'Account Begin', 100, N'Left', N'Filter', N'', N'', 51, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1857, 23, N'intAccountEnd', N'Account End', 100, N'Left', N'Filter', N'', N'', 52, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
-
-INSERT INTO #TempCannedPanelColumn VALUES (1858, 23, N'strAccountGroupNamespace', N'Account Group Name', 100, N'Left', N'Filter', N'', N'', 53, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
 INSERT INTO #TempCannedPanelColumn VALUES (1859, 56, N'cftrx_ar_cus_no', N'A/R Customer #', 100, N'Left', N'Filter', N'', N'', 1, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 85)
 
@@ -1011,277 +814,467 @@ INSERT INTO #TempCannedPanelColumn VALUES (1928, 59, N'agstm_ship_rev_dt', N'Shi
 
 INSERT INTO #TempCannedPanelColumn VALUES (1929, 59, N'Profit Percent', N'Profit Percent', 25, N'Right', N'', N'', N'##.###%', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 43)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3428, 30, N'glije_acct_no', N'GL Acct', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
+INSERT INTO #TempCannedPanelColumn VALUES (4091, 33, N'gacnt_pur_sls_ind', N'P/S', 107, N'Left', N'', N'', N'', 1, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3429, 30, N'glije_date', N'Date', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
+INSERT INTO #TempCannedPanelColumn VALUES (4092, 33, N'gacnt_cus_no', N'Customer #', 107, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3430, 30, N'glije_src_sys', N'Source System', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
+INSERT INTO #TempCannedPanelColumn VALUES (4093, 33, N'agcus_last_name', N'Last Name', 107, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3431, 30, N'glije_ref', N'Reference', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
+INSERT INTO #TempCannedPanelColumn VALUES (4094, 33, N'agcus_first_name', N'First Name', 107, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3432, 30, N'glije_doc', N'Document #', 25, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
+INSERT INTO #TempCannedPanelColumn VALUES (4095, 33, N'gacnt_loc_no', N'Loc', 107, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3433, 30, N'glije_amt', N'Amount', 25, N'Left', N'', N'Sum', N'$####.00', 8, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
+INSERT INTO #TempCannedPanelColumn VALUES (4096, 33, N'gacnt_com_cd', N'Com', 107, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3434, 31, N'glije_acct_no', N'GL Acct', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
+INSERT INTO #TempCannedPanelColumn VALUES (4097, 33, N'gacnt_cnt_no', N'Contact #', 106, N'Left', N'', N'', N'', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3435, 31, N'glije_date', N'Date', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
+INSERT INTO #TempCannedPanelColumn VALUES (4098, 33, N'gacnt_seq_no', N'Seq', 107, N'Left', N'', N'', N'', 8, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3436, 31, N'glije_src_sys', N'Source System', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
+INSERT INTO #TempCannedPanelColumn VALUES (4099, 33, N'gacnt_mkt_zone', N'Market Zone', 107, N'Left', N'', N'', N'', 9, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3437, 31, N'glije_ref', N'Reference', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
+INSERT INTO #TempCannedPanelColumn VALUES (4100, 33, N'gacnt_beg_ship_rev_dt', N'Beg Ship Date', 106, N'Right', N'', N'', N'', 10, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3438, 31, N'glije_doc', N'Document #', 25, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
+INSERT INTO #TempCannedPanelColumn VALUES (4101, 33, N'gacnt_due_rev_dt', N'Due Date', 106, N'Right', N'', N'', N'', 11, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3439, 31, N'glije_amt', N'Amount', 25, N'Left', N'', N'Sum', N'$####.00', 8, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
+INSERT INTO #TempCannedPanelColumn VALUES (4102, 33, N'gacnt_pbhcu_ind', N'PBHU', 107, N'Left', N'', N'', N'', 12, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3934, 234, N'TABLE_NAME', N'Table', 237, N'Left', N'', N'Count', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
+INSERT INTO #TempCannedPanelColumn VALUES (4103, 33, N'gacnt_un_bal', N'Unit Balance', 106, N'Right', N'', N'Sum', N'####.00', 13, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 17)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3935, 234, N'COLUMN_NAME', N'Column', 234, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
+INSERT INTO #TempCannedPanelColumn VALUES (4159, 3, N'gacom_desc', N'Com', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3936, 234, N'DATA_TYPE', N'Data Type', 156, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
+INSERT INTO #TempCannedPanelColumn VALUES (4160, 3, N'gapos_loc_no', N'Loc', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3937, 234, N'SIZE', N'Size', 155, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
+INSERT INTO #TempCannedPanelColumn VALUES (4161, 3, N'gapos_in_house', N'In House', 25, N'Right', N'', N'Sum', N'####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3938, 234, N'DESCRIPTION', N'Description', 622, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
+INSERT INTO #TempCannedPanelColumn VALUES (4162, 3, N'gapos_offsite', N'Offsite', 25, N'Right', N'', N'Sum', N'####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3939, 225, N'gaaudpay_pmt_audit_no', N'EOD Audit Number', 75, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4163, 3, N'gapos_sls_in_transit', N'In Transit', 25, N'Right', N'', N'Sum', N'####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 19)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3940, 225, N'gaaud_pur_sls_ind', N'Sales', 75, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4173, 46, N'Current', N'Current', 25, N'Center', N'', N'', N'$####.00', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3941, 225, N'gaaud_trans_type', N'Transaction Type', 75, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4174, 46, N'31-60 Days', N'31-60 Days', 25, N'Center', N'', N'', N'$####.00', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3942, 225, N'gaaud_in_type', N'', 75, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4175, 46, N'61-90 Days', N'61-90 Days', 25, N'Center', N'', N'', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3943, 225, N'gaaud_key_filler1', N'Key Info', 75, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4176, 46, N'91-120 Days', N'91-120 Days', 25, N'Center', N'', N'', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3944, 225, N'gaaudpay_pmt_rev_dt', N'Payment Date', 75, N'Left', N'', N'', N'', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4177, 46, N'Over 120 Days', N'Over 120 Days', 25, N'Center', N'', N'', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 67)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3945, 225, N'gaaudpay_chk_no', N'Check Number', 75, N'Left', N'', N'', N'', 8, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4249, 10, N'Future', N'Future', 25, N'Left', N'', N'', N'$####.00', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3946, 225, N'gaaudpay_stl_amt', N'Payment Amt', 75, N'Left', N'', N'', N'', 9, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4250, 10, N'Current', N'Current', 25, N'Left', N'', N'', N'$####.00', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3947, 225, N'gaaudstl_ivc_no', N'Advance Invoice Number', 75, N'Left', N'', N'', N'', 11, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4251, 10, N'30days', N'31-60 Days', 25, N'Left', N'', N'', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3948, 225, N'gaaudpay_cus_ref_no', N'', 74, N'Left', N'', N'', N'', 12, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4252, 10, N'60days', N'61-90 Days', 25, N'Left', N'', N'', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3949, 225, N'gaaudstl_stl_amt', N'Advance Payment Amt', 75, N'Left', N'', N'', N'', 10, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
+INSERT INTO #TempCannedPanelColumn VALUES (4253, 10, N'90days', N'91-120 Days', 25, N'Left', N'', N'', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3950, 226, N'sthss_store_name', N'Store Name', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 89)
+INSERT INTO #TempCannedPanelColumn VALUES (4254, 10, N'120days', N'Over 120 Days', 25, N'Left', N'', N'', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 47)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3951, 226, N'FormattedDate', N'Date', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 89)
+INSERT INTO #TempCannedPanelColumn VALUES (4255, 256, N'agcus_key', N'Customer #', 232, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3952, 226, N'sthss_tot_cash_overshort', N'Over / Short Amount', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 89)
+INSERT INTO #TempCannedPanelColumn VALUES (4256, 256, N'agcus_last_name', N'Customer Last Name', 231, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3953, 228, N'Store Name', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 91)
+INSERT INTO #TempCannedPanelColumn VALUES (4257, 256, N'agcus_first_name', N'First Name', 231, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3954, 228, N'Date', N'', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 91)
+INSERT INTO #TempCannedPanelColumn VALUES (4258, 256, N'agcus_cred_limit', N'Credit Limit', 231, N'Right', N'', N'Sum', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3955, 228, N'Total Customers', N'', 25, N'Right', N'', N'Sum', N'####', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 91)
+INSERT INTO #TempCannedPanelColumn VALUES (4259, 256, N'Total Balance', N'Total Balance', 231, N'Right', N'', N'Sum', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3956, 229, N'sthss_store_name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 92)
+INSERT INTO #TempCannedPanelColumn VALUES (4260, 256, N'Overage', N'Overage', 231, N'Right', N'', N'Sum', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 86)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3957, 229, N'sthss_rev_dt', N'Date', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 92)
+INSERT INTO #TempCannedPanelColumn VALUES (4261, 2, N'agitm_no', N'Item#', 174, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3958, 229, N'sthss_key_deptno', N'Dept. #', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 92)
+INSERT INTO #TempCannedPanelColumn VALUES (4262, 2, N'agitm_desc', N'Item/Product', 174, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3959, 229, N'sthss_key_desc', N'Description', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 92)
+INSERT INTO #TempCannedPanelColumn VALUES (4263, 2, N'agitm_pak_desc', N'Package', 174, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3960, 229, N'sthss_key_total_sales', N'Total Sales', 25, N'Right', N'', N'Sum', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 92)
+INSERT INTO #TempCannedPanelColumn VALUES (4264, 2, N'agitm_class', N'Class', 173, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3961, 237, N'Store #', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 93)
+INSERT INTO #TempCannedPanelColumn VALUES (4265, 2, N'agitm_loc_no', N'Loc', 173, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3962, 237, N'UPC #', N'', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+INSERT INTO #TempCannedPanelColumn VALUES (4266, 2, N'agitm_last_un_cost', N'Last Unit Cost', 173, N'Right', N'', N'', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3963, 237, N'Item Desc', N'', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+INSERT INTO #TempCannedPanelColumn VALUES (4267, 2, N'agitm_avg_un_cost', N'Average Unit Cost', 173, N'Right', N'', N'', N'$####.00', 8, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3964, 237, N'Retail Price', N'', 25, N'Right', N'', N'', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+INSERT INTO #TempCannedPanelColumn VALUES (4268, 2, N'agitm_un_on_hand', N'Units On Hand Qty', 173, N'Right', N'', N'Sum', N'####.00', 9, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 45)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3965, 237, N'Last Price', N'', 25, N'Right', N'', N'', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+INSERT INTO #TempCannedPanelColumn VALUES (4282, 19, N'agstm_itm_no', N'Item #', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 70)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3966, 237, N'On-Hand Qty', N'', 25, N'Right', N'', N'', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+INSERT INTO #TempCannedPanelColumn VALUES (4283, 19, N'agitm_desc', N'Item/Product', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 70)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3967, 237, N'On Order Qty', N'', 25, N'Right', N'', N'', N'$####.00', 8, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+INSERT INTO #TempCannedPanelColumn VALUES (4284, 19, N'Sales', N'Sales', 25, N'Right', N'', N'Sum', N'$###0.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 70)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3968, 230, N'sthss_store_name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 94)
+INSERT INTO #TempCannedPanelColumn VALUES (4285, 19, N'Units', N'Units', 25, N'Right', N'', N'Sum', N'####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 70)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3969, 230, N'sthss_pmp_id', N'Fuel Product', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 94)
+INSERT INTO #TempCannedPanelColumn VALUES (4286, 18, N'Customer Last Name', N'Customer Last Name', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3970, 230, N'c', N'Fuel Margins', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 94)
+INSERT INTO #TempCannedPanelColumn VALUES (4287, 18, N'First Name', N'First Name', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3971, 231, N'sthss_store_name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 95)
+INSERT INTO #TempCannedPanelColumn VALUES (4288, 18, N'Customer Code', N'Customer Code', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3972, 231, N'sthss_pmp_desc', N'Fuel Product', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 95)
+INSERT INTO #TempCannedPanelColumn VALUES (4289, 18, N'Sales', N'Sales', 25, N'Right', N'', N'Sum', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3973, 231, N'c', N'Sales Amount', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 95)
+INSERT INTO #TempCannedPanelColumn VALUES (4290, 18, N'Units', N'Units', 25, N'Right', N'', N'Sum', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 69)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3974, 232, N'sthss_store_name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 96)
+INSERT INTO #TempCannedPanelColumn VALUES (4444, 26, N'strAccountId', N'Account ID', 463, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 77)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3975, 232, N'sthss_pmp_id', N'Fuel Product', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 96)
+INSERT INTO #TempCannedPanelColumn VALUES (4445, 26, N'strDescription', N'GL Description', 462, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 77)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3976, 232, N'c', N'Gallons', 25, N'Right', N'', N'Sum', N'####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 96)
+INSERT INTO #TempCannedPanelColumn VALUES (4446, 26, N'Amount', N'Amount', 462, N'Left', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 77)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3977, 235, N'Store Name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 97)
+INSERT INTO #TempCannedPanelColumn VALUES (4466, 23, N'intGLDetailId', N'GL Detail ID', 100, N'Left', N'Filter', N'', N'', 1, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3978, 235, N'Dept #', N'Department', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 97)
+INSERT INTO #TempCannedPanelColumn VALUES (4467, 23, N'dtmDate', N'Date', 100, N'Left', N'Filter', N'', N'Date', 2, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3979, 235, N'Gross Profit', N'Gross Profit', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 97)
+INSERT INTO #TempCannedPanelColumn VALUES (4468, 23, N'strBatchId', N'Batch ', 100, N'Left', N'Filter', N'', N'', 3, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3980, 238, N'UPC #', N'', 100, N'Left', N'Filter', N'', N'', 2, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4469, 23, N'intAccountId', N'Account ID', 100, N'Left', N'Filter', N'', N'', 4, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3981, 238, N'Trans Dt', N'', 100, N'Left', N'Filter', N'', N'Date', 3, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4470, 23, N'strAccountGroup', N'Account Group', 100, N'Left', N'Filter', N'', N'', 5, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3982, 238, N'Purchase / Sale', N'', 100, N'Left', N'Filter', N'', N'', 4, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4471, 23, N'dblDebit', N'Debit Amount', 100, N'Left', N'Filter', N'', N'$####.00', 6, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3983, 238, N'Store', N'', 100, N'Left', N'Filter', N'', N'', 5, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4472, 23, N'dblCredit', N'Credit Amount', 100, N'Left', N'Filter', N'', N'$####.00', 7, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3984, 238, N'Inv #', N'', 100, N'Left', N'Filter', N'', N'', 6, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4473, 23, N'dblDebitUnit', N'Debit Unit', 100, N'Left', N'Filter', N'', N'', 8, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3985, 238, N'Department', N'', 100, N'Left', N'Filter', N'', N'', 7, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4474, 23, N'dblCreditUnit', N'Credit Unit', 100, N'Left', N'Filter', N'', N'', 9, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3986, 238, N'Purchase Qty', N'', 100, N'Left', N'Filter', N'', N'####.00', 8, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4475, 23, N'strDescription', N'GL Description', 100, N'Left', N'Filter', N'', N'', 10, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3987, 238, N'Units Cost', N'', 100, N'Left', N'Filter', N'', N'$####.00', 9, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4476, 23, N'strCode', N'Code', 100, N'Left', N'Filter', N'', N'', 11, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3988, 238, N'Retail Price', N'', 100, N'Left', N'Filter', N'', N'$####.00', 10, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4477, 23, N'strTransactionId', N'Trans ID', 100, N'Left', N'Filter', N'', N'', 12, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3989, 238, N'Qty Sold', N'', 100, N'Left', N'Filter', N'', N'####.00', 11, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4478, 23, N'strReference', N'Reference', 100, N'Left', N'Filter', N'', N'', 13, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3990, 238, N'Amount Sold', N'', 100, N'Left', N'Filter', N'', N'$####.00', 12, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4479, 23, N'strJobId', N'Job ID', 100, N'Left', N'Filter', N'', N'', 14, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3991, 238, N'Month', N'', 100, N'Left', N'Filter', N'', N'', 13, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4480, 23, N'intCurrencyId', N'Currency ID', 100, N'Left', N'Filter', N'', N'', 15, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3992, 238, N'UPC Desc', N'', 100, N'Left', N'Filter', N'', N'', 14, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4481, 23, N'dblExchangeRate', N'Exchange Rate', 100, N'Left', N'Filter', N'', N'', 16, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3993, 238, N'Family', N'', 100, N'Left', N'Filter', N'', N'', 15, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4482, 23, N'dtmDateEntered', N'Date Entered', 100, N'Left', N'Filter', N'', N'', 17, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3994, 238, N'Class', N'', 100, N'Left', N'Filter', N'', N'', 16, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+INSERT INTO #TempCannedPanelColumn VALUES (4483, 23, N'dtmTransactionDate', N'Trans Date', 100, N'Left', N'Filter', N'', N'', 18, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3995, 236, N'Store #', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 99)
+INSERT INTO #TempCannedPanelColumn VALUES (4484, 23, N'strProductId', N'Product ID', 100, N'Left', N'Filter', N'', N'', 19, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3996, 236, N'UPC #', N'', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 99)
+INSERT INTO #TempCannedPanelColumn VALUES (4485, 23, N'strWarehouseId', N'Warehouse ID', 100, N'Left', N'Filter', N'', N'', 20, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3997, 236, N'Item Desc', N'', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 99)
+INSERT INTO #TempCannedPanelColumn VALUES (4486, 23, N'strNum', N'Num', 100, N'Left', N'Filter', N'', N'', 21, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3998, 236, N'Min Qty', N'', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 99)
+INSERT INTO #TempCannedPanelColumn VALUES (4487, 23, N'strCompanyName', N'Company Name', 100, N'Left', N'Filter', N'', N'', 22, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (3999, 236, N'On-Hand Qty', N'', 25, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 99)
+INSERT INTO #TempCannedPanelColumn VALUES (4488, 23, N'strBillInvoiceNumber', N'Bill Invoice #', 100, N'Left', N'Filter', N'', N'', 23, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4000, 239, N'Store', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 100)
+INSERT INTO #TempCannedPanelColumn VALUES (4489, 23, N'strJournalLineDescription', N'Journal Line Desc', 100, N'Left', N'Filter', N'', N'', 24, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4001, 239, N'Date', N'', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 100)
+INSERT INTO #TempCannedPanelColumn VALUES (4490, 23, N'ysnIsUnposted', N'Unposted?', 100, N'Left', N'Filter', N'', N'', 25, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4002, 239, N'No Sale Transactions', N'', 25, N'Right', N'', N'Sum', N'####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 100)
+INSERT INTO #TempCannedPanelColumn VALUES (4491, 23, N'intConcurrencyId', N'Concurrency ID', 100, N'Left', N'Filter', N'', N'', 26, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4003, 240, N'Store #', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 101)
+INSERT INTO #TempCannedPanelColumn VALUES (4492, 23, N'intUserID', N'User ID', 100, N'Left', N'Filter', N'', N'', 27, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4004, 240, N'UPC #', N'', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+INSERT INTO #TempCannedPanelColumn VALUES (4493, 23, N'strTransactionForm', N'Trans Form', 100, N'Left', N'Filter', N'', N'', 28, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4005, 240, N'Item Desc', N'', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+INSERT INTO #TempCannedPanelColumn VALUES (4494, 23, N'strModuleName', N'Module Name', 100, N'Left', N'Filter', N'', N'', 29, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4006, 240, N'Start Date', N'', 25, N'Right', N'', N'', N'Date', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+INSERT INTO #TempCannedPanelColumn VALUES (4495, 23, N'strUOMCode', N'UOM Code', 100, N'Left', N'Filter', N'', N'', 30, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4007, 240, N'End Date', N'', 25, N'Right', N'', N'', N'Date', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+INSERT INTO #TempCannedPanelColumn VALUES (4496, 23, N'intAccountId1', N'Account ID 1', 100, N'Left', N'Filter', N'', N'', 31, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4008, 240, N'Sale Price', N'', 25, N'Right', N'', N'', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+INSERT INTO #TempCannedPanelColumn VALUES (4497, 23, N'strAccountId', N'Account ID', 100, N'Left', N'Filter', N'', N'', 32, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4009, 242, N'Store #', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4498, 23, N'strDescription1', N'Description 1', 100, N'Left', N'Filter', N'', N'', 33, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4010, 242, N'UPC #', N'', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4499, 23, N'strNote', N'Note', 100, N'Left', N'Filter', N'', N'', 34, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4011, 242, N'Item Desc', N'', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4500, 23, N'intAccountGroupId', N'Account Group ID', 100, N'Left', N'Filter', N'', N'', 35, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4012, 242, N'Vendor ID', N'', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4501, 23, N'dblOpeningBalance', N'Opening Balance', 100, N'Left', N'Filter', N'', N'', 36, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4013, 242, N'Dept #', N'', 25, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4502, 23, N'ysnIsUsed', N'Is Used?', 100, N'Left', N'Filter', N'', N'', 37, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4014, 242, N'Family', N'', 25, N'Left', N'', N'', N'', 7, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4503, 23, N'strComments', N'Comments', 100, N'Left', N'Filter', N'', N'', 40, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4015, 242, N'Class', N'', 25, N'Left', N'', N'', N'', 8, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4504, 23, N'ysnActive', N'Active', 100, N'Left', N'Filter', N'', N'', 41, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4016, 242, N'Case Cost', N'', 25, N'Right', N'', N'Sum', N'$####.00', 9, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4505, 23, N'ysnSystem', N'System', 100, N'Left', N'Filter', N'', N'', 42, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4017, 242, N'Retail Price', N'', 25, N'Right', N'', N'Sum', N'$####.00', 10, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4506, 23, N'strCashFlow', N'Cash Flow', 100, N'Left', N'Filter', N'', N'', 43, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4018, 242, N'Last Price', N'', 25, N'Right', N'', N'Sum', N'$####.00', 11, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4507, 23, N'intAccountGroupId1', N'Account Group ID 1', 100, N'Left', N'Filter', N'', N'', 44, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4019, 242, N'Min Qty', N'', 25, N'Right', N'', N'Sum', N'####', 12, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4508, 23, N'strAccountGroup1', N'Account Group 1', 100, N'Left', N'Filter', N'', N'', 45, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4020, 242, N'Sug Qty', N'', 25, N'Right', N'', N'Sum', N'####', 13, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4509, 23, N'strAccountType', N'Account Type', 100, N'Left', N'Filter', N'', N'', 46, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4021, 242, N'Min Order Qty', N'', 25, N'Right', N'', N'Sum', N'####', 14, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4510, 23, N'intParentGroupId', N'Parent Group ID', 100, N'Left', N'Filter', N'', N'', 47, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4022, 242, N'On-Hand Qty', N'', 25, N'Right', N'', N'Sum', N'####', 15, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4511, 23, N'intGroup', N'Group', 100, N'Left', N'Filter', N'', N'', 48, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4023, 242, N'On Order Qty', N'', 25, N'Right', N'', N'Sum', N'####', 16, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4512, 23, N'intSort', N'Sort', 100, N'Left', N'Filter', N'', N'', 49, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4024, 242, N'Qty Sold', N'', 25, N'Right', N'', N'Sum', N'####', 17, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+INSERT INTO #TempCannedPanelColumn VALUES (4513, 23, N'intConcurrencyId2', N'Concurrency ID 2', 100, N'Left', N'Filter', N'', N'', 50, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4025, 241, N'Store', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 103)
+INSERT INTO #TempCannedPanelColumn VALUES (4514, 23, N'intAccountBegin', N'Account Begin', 100, N'Left', N'Filter', N'', N'', 51, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4026, 241, N'Date', N'', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 103)
+INSERT INTO #TempCannedPanelColumn VALUES (4515, 23, N'intAccountEnd', N'Account End', 100, N'Left', N'Filter', N'', N'', 52, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4027, 241, N'Refund Amount', N'', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 103)
+INSERT INTO #TempCannedPanelColumn VALUES (4516, 23, N'strAccountGroupNamespace', N'Account Group Name', 100, N'Left', N'Filter', N'', N'', 53, N'', N'', N'', 0, N'Pivot Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 74)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4028, 243, N'store name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 104)
+INSERT INTO #TempCannedPanelColumn VALUES (4590, 30, N'glije_acct_no', N'GL Acct', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4029, 243, N'dept #', N'Dept. #', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 104)
+INSERT INTO #TempCannedPanelColumn VALUES (4591, 30, N'glije_date', N'Date', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4030, 243, N'total sales', N'Total Sales', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 104)
+INSERT INTO #TempCannedPanelColumn VALUES (4592, 30, N'glije_src_sys', N'Source System', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4031, 244, N'stphy_store_name', N'Store Name', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 105)
+INSERT INTO #TempCannedPanelColumn VALUES (4593, 30, N'glije_ref', N'Reference', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4032, 244, N'stphy_rev_dt', N'Date', 25, N'Left', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 105)
+INSERT INTO #TempCannedPanelColumn VALUES (4594, 30, N'glije_doc', N'Document #', 25, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4033, 244, N'stphy_shift_no', N'Shift #', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 105)
+INSERT INTO #TempCannedPanelColumn VALUES (4595, 30, N'glije_amt', N'Amount', 25, N'Left', N'', N'Sum', N'$####.00', 8, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 28)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4034, 244, N'stphy_itm_desc', N'Item', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 105)
+INSERT INTO #TempCannedPanelColumn VALUES (4596, 31, N'glije_acct_no', N'GL Acct', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4035, 244, N'stphy_diff_qty', N'Diff Qty', 25, N'Left', N'', N'Sum', N'####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 105)
+INSERT INTO #TempCannedPanelColumn VALUES (4597, 31, N'glije_date', N'Date', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4036, 227, N'Store', N'Store', 0, N'Series1AxisX', N'', N'', N'General', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 90)
+INSERT INTO #TempCannedPanelColumn VALUES (4598, 31, N'glije_src_sys', N'Source System', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4037, 227, N'Cash Over / Short Amount', N'Over / Short Amount', 0, N'Series1AxisY', N'', N'', N'Currency', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 90)
+INSERT INTO #TempCannedPanelColumn VALUES (4599, 31, N'glije_ref', N'Reference', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4038, 245, N'Trans Dt', N'Month', 0, N'Series1AxisX', N'', N'', N'Month', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 109)
+INSERT INTO #TempCannedPanelColumn VALUES (4600, 31, N'glije_doc', N'Document #', 25, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4039, 245, N'Purchase Qty', N'Purchase Qty', 0, N'Series1AxisY', N'', N'', N'Number', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 109)
+INSERT INTO #TempCannedPanelColumn VALUES (4601, 31, N'glije_amt', N'Amount', 25, N'Left', N'', N'Sum', N'$####.00', 8, N'', N'', N'', 0, N'Grid', N'', N'Nicholas', 0, 0, 0, 0, 0, N'', 0, 1, 29)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4040, 246, N'Trans Dt', N'Month', 0, N'Series1AxisX', N'', N'', N'Month', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 106)
+INSERT INTO #TempCannedPanelColumn VALUES (5096, 234, N'TABLE_NAME', N'Table', 237, N'Left', N'', N'Count', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4041, 246, N'Amount Sold', N'Amount Sold', 0, N'Series1AxisY', N'', N'', N'Number', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 106)
+INSERT INTO #TempCannedPanelColumn VALUES (5097, 234, N'COLUMN_NAME', N'Column', 234, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4042, 247, N'Month', N'Month', 0, N'Series1AxisX', N'', N'', N'Month', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 107)
+INSERT INTO #TempCannedPanelColumn VALUES (5098, 234, N'DATA_TYPE', N'Data Type', 156, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4043, 247, N'Total Sales', N'Total Sales', 0, N'Series1AxisY', N'', N'', N'Number', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 107)
+INSERT INTO #TempCannedPanelColumn VALUES (5099, 234, N'SIZE', N'Size', 155, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4044, 248, N'strPanelName', N'', 434, N'Left', N'', N'Count', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 108)
+INSERT INTO #TempCannedPanelColumn VALUES (5100, 234, N'DESCRIPTION', N'Description', 622, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 87)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4045, 248, N'strUserName', N'', 434, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 108)
+INSERT INTO #TempCannedPanelColumn VALUES (5101, 225, N'gaaudpay_pmt_audit_no', N'EOD Audit Number', 75, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4046, 248, N'strFullName', N'', 433, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 108)
+INSERT INTO #TempCannedPanelColumn VALUES (5102, 225, N'gaaud_pur_sls_ind', N'Sales', 75, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4080, 255, N'strTicketNumber', N'HD#', 97, N'Left', NULL, N'Count', NULL, 2, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5103, 225, N'gaaud_trans_type', N'Transaction Type', 75, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4081, 255, N'strDateCreated', N'Date', 90, N'Left', NULL, NULL, NULL, 3, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5104, 225, N'gaaud_in_type', N'', 75, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4082, 255, N'strCustomer', N'Cust Code', 69, N'Left', NULL, NULL, NULL, 4, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5105, 225, N'gaaud_key_filler1', N'Key Info', 75, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4083, 255, N'strName', N'Customer', 200, N'Left', NULL, NULL, NULL, 5, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5106, 225, N'gaaudpay_pmt_rev_dt', N'Payment Date', 75, N'Left', N'', N'', N'', 7, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4084, 255, N'strContactName', N'Contact', 124, N'Left', NULL, NULL, NULL, 6, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5107, 225, N'gaaudpay_chk_no', N'Check Number', 75, N'Left', N'', N'', N'', 8, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4085, 255, N'strSubject', N'Subject', 400, N'Left', NULL, NULL, NULL, 7, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5108, 225, N'gaaudpay_stl_amt', N'Payment Amt', 75, N'Left', N'', N'', N'', 9, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4086, 255, N'strStatus', N'Status', 120, N'Left', NULL, NULL, NULL, 8, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5109, 225, N'gaaudstl_ivc_no', N'Advance Invoice Number', 75, N'Left', N'', N'', N'', 11, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4087, 255, N'strPriority', N'Priority', 110, N'Left', NULL, NULL, NULL, 9, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5110, 225, N'gaaudpay_cus_ref_no', N'', 74, N'Left', N'', N'', N'', 12, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4088, 255, N'strProduct', N'DB Type', 65, N'Left', NULL, NULL, NULL, 10, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5111, 225, N'gaaudstl_stl_amt', N'Advance Payment Amt', 75, N'Left', N'', N'', N'', 10, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 88)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4089, 255, N'strVersionNo', N'Version', 65, N'Left', NULL, NULL, NULL, 11, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5112, 226, N'sthss_store_name', N'Store Name', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 89)
 
-INSERT INTO #TempCannedPanelColumn VALUES (4090, 255, N'strAssignedTo', N'Assigned To', 130, N'Left', NULL, NULL, NULL, 12, NULL, NULL, N'', 0, N'Grid', NULL, N'trenner', 0, 0, 0, 0, 0, NULL, 0, 0, 110)
+INSERT INTO #TempCannedPanelColumn VALUES (5113, 226, N'FormattedDate', N'Date', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 89)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5114, 226, N'sthss_tot_cash_overshort', N'Over / Short Amount', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 89)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5115, 228, N'Store Name', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 91)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5116, 228, N'Date', N'', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 91)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5117, 228, N'Total Customers', N'', 25, N'Right', N'', N'Sum', N'####', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 91)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5118, 229, N'sthss_store_name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 92)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5119, 229, N'sthss_rev_dt', N'Date', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 92)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5120, 229, N'sthss_key_deptno', N'Dept. #', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 92)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5121, 229, N'sthss_key_desc', N'Description', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 92)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5122, 229, N'sthss_key_total_sales', N'Total Sales', 25, N'Right', N'', N'Sum', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 92)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5123, 237, N'Store #', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 93)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5124, 237, N'UPC #', N'', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5125, 237, N'Item Desc', N'', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5126, 237, N'Retail Price', N'', 25, N'Right', N'', N'', N'$####.00', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5127, 237, N'Last Price', N'', 25, N'Right', N'', N'', N'$####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5128, 237, N'On-Hand Qty', N'', 25, N'Right', N'', N'', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5129, 237, N'On Order Qty', N'', 25, N'Right', N'', N'', N'$####.00', 8, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 93)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5130, 230, N'sthss_store_name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 94)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5131, 230, N'sthss_pmp_id', N'Fuel Product', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 94)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5132, 230, N'c', N'Fuel Margins', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 94)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5133, 231, N'sthss_store_name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 95)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5134, 231, N'sthss_pmp_desc', N'Fuel Product', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 95)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5135, 231, N'c', N'Sales Amount', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 95)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5136, 232, N'sthss_store_name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 96)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5137, 232, N'sthss_pmp_id', N'Fuel Product', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 96)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5138, 232, N'c', N'Gallons', 25, N'Right', N'', N'Sum', N'####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 96)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5139, 235, N'Store Name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 97)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5140, 235, N'Dept #', N'Department', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 97)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5141, 235, N'Gross Profit', N'Gross Profit', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 97)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5142, 238, N'UPC #', N'', 100, N'Left', N'Filter', N'', N'', 2, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5143, 238, N'Trans Dt', N'', 100, N'Left', N'Filter', N'', N'Date', 3, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5144, 238, N'Purchase / Sale', N'', 100, N'Left', N'Filter', N'', N'', 4, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5145, 238, N'Store', N'', 100, N'Left', N'Filter', N'', N'', 5, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5146, 238, N'Inv #', N'', 100, N'Left', N'Filter', N'', N'', 6, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5147, 238, N'Department', N'', 100, N'Left', N'Filter', N'', N'', 7, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5148, 238, N'Purchase Qty', N'', 100, N'Left', N'Filter', N'', N'####.00', 8, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5149, 238, N'Units Cost', N'', 100, N'Left', N'Filter', N'', N'$####.00', 9, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5150, 238, N'Retail Price', N'', 100, N'Left', N'Filter', N'', N'$####.00', 10, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5151, 238, N'Qty Sold', N'', 100, N'Left', N'Filter', N'', N'####.00', 11, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5152, 238, N'Amount Sold', N'', 100, N'Left', N'Filter', N'', N'$####.00', 12, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5153, 238, N'Month', N'', 100, N'Left', N'Filter', N'', N'', 13, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5154, 238, N'UPC Desc', N'', 100, N'Left', N'Filter', N'', N'', 14, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5155, 238, N'Family', N'', 100, N'Left', N'Filter', N'', N'', 15, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5156, 238, N'Class', N'', 100, N'Left', N'Filter', N'', N'', 16, N'', N'', N'', 0, N'Pivot Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 98)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5157, 236, N'Store #', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 99)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5158, 236, N'UPC #', N'', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 99)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5159, 236, N'Item Desc', N'', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 99)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5160, 236, N'Min Qty', N'', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 99)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5161, 236, N'On-Hand Qty', N'', 25, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 99)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5162, 239, N'Store', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 100)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5163, 239, N'Date', N'', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 100)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5164, 239, N'No Sale Transactions', N'', 25, N'Right', N'', N'Sum', N'####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 100)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5165, 240, N'Store #', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 101)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5166, 240, N'UPC #', N'', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5167, 240, N'Item Desc', N'', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5168, 240, N'Start Date', N'', 25, N'Right', N'', N'', N'Date', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5169, 240, N'End Date', N'', 25, N'Right', N'', N'', N'Date', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5170, 240, N'Sale Price', N'', 25, N'Right', N'', N'', N'$####.00', 7, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 101)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5171, 242, N'Store #', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5172, 242, N'UPC #', N'', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5173, 242, N'Item Desc', N'', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5174, 242, N'Vendor ID', N'', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5175, 242, N'Dept #', N'', 25, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5176, 242, N'Family', N'', 25, N'Left', N'', N'', N'', 7, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5177, 242, N'Class', N'', 25, N'Left', N'', N'', N'', 8, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5178, 242, N'Case Cost', N'', 25, N'Right', N'', N'Sum', N'$####.00', 9, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5179, 242, N'Retail Price', N'', 25, N'Right', N'', N'Sum', N'$####.00', 10, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5180, 242, N'Last Price', N'', 25, N'Right', N'', N'Sum', N'$####.00', 11, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5181, 242, N'Min Qty', N'', 25, N'Right', N'', N'Sum', N'####', 12, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5182, 242, N'Sug Qty', N'', 25, N'Right', N'', N'Sum', N'####', 13, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5183, 242, N'Min Order Qty', N'', 25, N'Right', N'', N'Sum', N'####', 14, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5184, 242, N'On-Hand Qty', N'', 25, N'Right', N'', N'Sum', N'####', 15, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5185, 242, N'On Order Qty', N'', 25, N'Right', N'', N'Sum', N'####', 16, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5186, 242, N'Qty Sold', N'', 25, N'Right', N'', N'Sum', N'####', 17, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 102)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5187, 241, N'Store', N'', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 103)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5188, 241, N'Date', N'', 25, N'Right', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 103)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5189, 241, N'Refund Amount', N'', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 103)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5190, 243, N'store name', N'Store', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 104)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5191, 243, N'dept #', N'Dept. #', 25, N'Left', N'', N'', N'', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 104)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5192, 243, N'total sales', N'Total Sales', 25, N'Right', N'', N'Sum', N'$####.00', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 104)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5193, 244, N'stphy_store_name', N'Store Name', 25, N'Left', N'', N'', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 105)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5194, 244, N'stphy_rev_dt', N'Date', 25, N'Left', N'', N'', N'Date', 3, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 105)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5195, 244, N'stphy_shift_no', N'Shift #', 25, N'Left', N'', N'', N'', 4, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 105)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5196, 244, N'stphy_itm_desc', N'Item', 25, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 105)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5197, 244, N'stphy_diff_qty', N'Diff Qty', 25, N'Left', N'', N'Sum', N'####.00', 6, N'', N'', N'', 0, N'Grid', N'', N'trenner', 6, 0, 0, 0, 0, N'', 0, 1, 105)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5198, 227, N'Store', N'Store', 0, N'Series1AxisX', N'', N'', N'General', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 90)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5199, 227, N'Cash Over / Short Amount', N'Over / Short Amount', 0, N'Series1AxisY', N'', N'', N'Currency', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 90)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5200, 245, N'Trans Dt', N'Month', 0, N'Series1AxisX', N'', N'', N'Month', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 109)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5201, 245, N'Purchase Qty', N'Purchase Qty', 0, N'Series1AxisY', N'', N'', N'Number', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 109)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5202, 246, N'Trans Dt', N'Month', 0, N'Series1AxisX', N'', N'', N'Month', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 106)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5203, 246, N'Amount Sold', N'Amount Sold', 0, N'Series1AxisY', N'', N'', N'Number', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 106)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5204, 247, N'Month', N'Month', 0, N'Series1AxisX', N'', N'', N'Month', 1, N'', N'', N'', 1, N'Chart', N'Series1AxisX', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 107)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5205, 247, N'Total Sales', N'Total Sales', 0, N'Series1AxisY', N'', N'', N'Number', 2, N'', N'', N'', 1, N'Chart', N'Series1AxisY', N'trenner', 0, 0, 0, 0, 0, N'', 0, 1, 107)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5206, 248, N'strPanelName', N'', 434, N'Left', N'', N'Count', N'', 2, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 108)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5207, 248, N'strUserName', N'', 434, N'Left', N'', N'', N'', 5, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 108)
+
+INSERT INTO #TempCannedPanelColumn VALUES (5208, 248, N'strFullName', N'', 433, N'Left', N'', N'', N'', 6, N'', N'', N'', 0, N'Grid', N'', N'CannedPanel', 0, 0, 0, 0, 0, N'', 0, 1, 108)
 
 
 print('/*******************  END INSERTING canned panels on temporary panel column table  *******************/')
