@@ -26,7 +26,7 @@ BEGIN
 		,[intSubLocationId]		=	B.intSubLocationId
 		,[intStorageLocationId]	=	B.intStorageLocationId
 	FROM tblPOPurchase A INNER JOIN tblICItemLocation ItemLocation
-			ON A.intLocationId = ItemLocation.intLocationId
+			ON A.intShipToId = ItemLocation.intLocationId
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	WHERE A.intPurchaseId = @poId
 
