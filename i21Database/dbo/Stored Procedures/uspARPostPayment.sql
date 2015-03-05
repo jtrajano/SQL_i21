@@ -605,6 +605,47 @@ BEGIN
 		
 		UNION ALL
 		
+		--CREDIT Overpayment
+		SELECT
+			 A.intPaymentId
+			,A.strRecordNumber
+			,A.intAccountId
+			,GLAccnt.strDescription
+			,C.strCustomerNumber
+			,A.dtmDatePaid
+			,dblDebit			= CASE WHEN @post = 1 THEN 0 ELSE (CASE WHEN A.dblOverpayment = 0 THEN A.dblAmountPaid - (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) ELSE A.dblOverpayment END) END
+			,dblCredit			= CASE WHEN @post = 1 THEN (CASE WHEN A.dblOverpayment = 0 THEN A.dblAmountPaid - (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) ELSE A.dblOverpayment END) ELSE 0 END
+			,dblDebitUnit		= CASE WHEN @post = 1 THEN 0 ELSE (CASE WHEN A.dblOverpayment = 0 THEN A.dblAmountPaid - (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) ELSE A.dblOverpayment END)  * ISNULL(U.dblLbsPerUnit, 0) END
+			,dblCreditUnit		= CASE WHEN @post = 1 THEN (CASE WHEN A.dblOverpayment = 0 THEN A.dblAmountPaid - (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) ELSE A.dblOverpayment END) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END
+			,DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
+			,1
+			,dblExchangeRate		= 1
+			,intUserId			= @userId
+			,intEntityId		= @UserEntityID
+			,dtmDateEntered		= GETDATE()
+			,strBatchId			= @batchId
+			,strCode				= 'AR'
+			,strModuleName		= @MODULE_NAME
+			,strTransactionForm	= @SCREEN_NAME
+			,strTransactionType	= @SCREEN_NAME
+		FROM
+			tblARPayment A 
+		INNER JOIN
+			tblGLAccount GLAccnt
+				ON A.intAccountId = GLAccnt.intAccountId
+		INNER JOIN
+			tblARCustomer C
+				ON A.intCustomerId = C.intCustomerId
+		LEFT JOIN 
+			Units U
+				ON A.intAccountId = U.intAccountId
+		INNER JOIN
+			#tmpAROverpayment P
+				ON A.intPaymentId = P.intPaymentId
+		
+		UNION ALL		
+		
 		--Discount
 		SELECT
 			A.intPaymentId
@@ -1211,7 +1252,42 @@ END
 ELSE
 	BEGIN
 
-		--RECAR
+		--RECAP
+		
+		IF @post = 1
+			BEGIN
+				--+overpayment
+				INSERT INTO
+					#tmpAROverpayment
+				SELECT
+					A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId				
+				WHERE
+					(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)				
+			END
+		ELSE
+			BEGIN
+				---overpayment
+				INSERT INTO
+					#tmpAROverpayment
+				SELECT
+					A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblARInvoice I
+						ON A.strRecordNumber = I.strComments 				
+				WHERE
+					I.strTransactionType = 'Overpayment'			
+			END
+		
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLDetailRecap
@@ -1291,7 +1367,47 @@ ELSE
 			,A.intAccountId
 			,GLAccnt.strDescription
 			,C.strCustomerNumber
-			,A.dtmDatePaid							
+			,A.dtmDatePaid	
+			
+		UNION ALL						
+			
+		--CREDIT - overpayment
+		SELECT
+			 strRecordNumber
+			,A.intPaymentId
+			,A.intAccountId
+			,GLAccnt.strDescription
+			,C.strCustomerNumber
+			,A.dtmDatePaid
+			,dblDebit			= CASE WHEN @post = 1 THEN 0 ELSE (CASE WHEN A.dblOverpayment = 0 THEN A.dblAmountPaid - (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) ELSE A.dblOverpayment END) END
+			,dblCredit			= CASE WHEN @post = 1 THEN (CASE WHEN A.dblOverpayment = 0 THEN A.dblAmountPaid - (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) ELSE A.dblOverpayment END) ELSE 0 END
+			,dblDebitUnit		= CASE WHEN @post = 1 THEN 0 ELSE (CASE WHEN A.dblOverpayment = 0 THEN A.dblAmountPaid - (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) ELSE A.dblOverpayment END)  * ISNULL(U.dblLbsPerUnit, 0) END
+			,dblCreditUnit		= CASE WHEN @post = 1 THEN (CASE WHEN A.dblOverpayment = 0 THEN A.dblAmountPaid - (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) ELSE A.dblOverpayment END) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END
+			,A.dtmDatePaid
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
+			,1
+			,dblExchangeRate		= 1
+			,intUserId			= @userId
+			,dtmDateEntered		= GETDATE()
+			,strBatchId			= @batchId
+			,strCode				= 'AR'
+			,strModuleName		= @MODULE_NAME
+			,strTransactionForm	= @SCREEN_NAME
+			,strTransactionType	= @SCREEN_NAME
+		FROM
+			tblARPayment A 
+		INNER JOIN
+			tblGLAccount GLAccnt
+				ON A.intAccountId = GLAccnt.intAccountId
+		INNER JOIN
+			tblARCustomer C
+				ON A.intCustomerId = C.intCustomerId
+		LEFT JOIN 
+			Units U
+				ON A.intAccountId = U.intAccountId
+		INNER JOIN
+			#tmpAROverpayment P
+				ON A.intPaymentId = P.intPaymentId							
 
 		--Discount
 		UNION ALL
