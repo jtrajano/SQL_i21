@@ -1356,6 +1356,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var txtLotUOM = win.down('#txtLotUOM');
             var txtLotItemQty = win.down('#txtLotItemQty');
             var txtLotCost = win.down('#txtLotCost');
+            var pgeLots = win.down('#pgeLots');
 
             txtLotItemId.setValue(null);
             txtLotItemDescription.setValue(null);
@@ -1490,7 +1491,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 beforequery: this.onShipFromBeforeQuery,
                 select: this.onLotSelect
             },
-            "#tabInventoryReceipt": {
+            "#tabInventoryItemsLots": {
                 tabchange: this.onReceiptTabChange
             }
         })
