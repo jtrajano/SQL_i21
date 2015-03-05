@@ -9,7 +9,7 @@ BEGIN
 	INSERT INTO @items
 	SELECT
 		[intItemId]				=	B.intItemId
-		,[intItemLocationId]	=	B.intLocationId
+		,[intItemLocationId]	=	ItemLocation.intItemLocationId
 		,[intItemUOMId]			=	B.intUnitOfMeasureId
 		,[dtmDate]				=	A.dtmDate
 		,[dblQty]				=	CASE WHEN @negate = 1 THEN B.dblQtyOrdered * -1 ELSE B.dblQtyOrdered END
@@ -25,7 +25,8 @@ BEGIN
 		,[intLotId]				=	0
 		,[intSubLocationId]		=	B.intSubLocationId
 		,[intStorageLocationId]	=	B.intStorageLocationId
-	FROM tblPOPurchase A
+	FROM tblPOPurchase A INNER JOIN tblICItemLocation ItemLocation
+			ON A.intLocationId = ItemLocation.intLocationId
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	WHERE A.intPurchaseId = @poId
 
