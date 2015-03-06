@@ -1475,8 +1475,6 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.RecurringJournalHistory' WHERE strMenuName = 'Recurring Journal History' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.RecurringJournalHistory'
 		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.RecurringJournal' WHERE strMenuName = 'Recurring Journal' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.RecurringJournal'
 
-
-
 	/* ---------------------------------------- */
 	/* --   End General Ledger Module Menu   -- */
 	/* ---------------------------------------- */
@@ -1669,6 +1667,10 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller', 'view') 
 		WHERE strMenuName = 'Starting Numbers' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.StartingNumbers'
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Company Preferences' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller', 'view') 
+		WHERE strMenuName = 'Company Preferences' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.CompanyPreferences'
+
 	
 	DECLARE @SystemManagerAdminUtilitiesMenuId INT
 	SELECT @SystemManagerAdminUtilitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
@@ -1683,6 +1685,10 @@ GO
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Origin Menus' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
         UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
         WHERE strMenuName = 'Import Origin Menus' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ImportLegacyMenus'
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Origin Conversions' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
+        UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller.OriginUtility','view.OriginConversions') 
+        WHERE strMenuName = 'Origin Conversions' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.OriginUtility'
 
 
 	DECLARE @SystemManagerModuleId INT
