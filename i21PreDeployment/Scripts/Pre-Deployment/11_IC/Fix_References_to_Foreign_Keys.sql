@@ -176,3 +176,15 @@ BEGIN
 	END
 	DROP TABLE #tmpItemPricing')
 END
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intSubLocation' AND object_id = object_id('tblSMCompanyLocationSubLocation'))
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intSubLocationId' AND object_id = object_id('tblICItemLocation'))
+	BEGIN
+		EXEC('
+		UPDATE tblICItemLocation
+		SET intSubLocationId = NULL
+		WHERE intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation)
+		')
+	END
+END
