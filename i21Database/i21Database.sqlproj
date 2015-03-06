@@ -1160,6 +1160,7 @@
     <Build Include="dbo\Tables\tblICParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateOnOrder.sql" />
     <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
+    <Build Include="dbo\Tables\tblHDMilestone.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
