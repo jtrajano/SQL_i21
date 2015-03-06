@@ -140,15 +140,18 @@ BEGIN TRY
            
            DECLARE @strSQL nvarchar(max)
            
-           SET @strSQL = '<NoteID>' + CAST(@intNoteId as nvarchar(20)) + '</NoteID>'
+           SET @strSQL = ''
+            
+			SET @strSQL = @strSQL + '<NoteID>' + CAST(@intNoteId as nvarchar(20)) + '</NoteID>'
 			SET @strSQL = @strSQL + '<WriteOff>False</WriteOff>'
 
-			SET @strSQL = @strSQL + '<NoteHistory>'
-
-			SET @strSQL = @strSQL + '<NoteHistoryDetail>'
-			SET @strSQL = @strSQL + '<NoteHistoryID>0</NoteHistoryID>'
-			SET @strSQL = @strSQL + '<HistoryDate>' + CAST(GETDATE() as nvarchar(20)) + '</HistoryDate>'
-			SET @strSQL = @strSQL + '<HistoryTypeID>4</HistoryTypeID>'
+			SET @strSQL = @strSQL + '<NoteTrans>' 
+			
+			SET @strSQL = @strSQL + '<NoteTransDetail>'
+			
+			--SET @strSQL = @strSQL + '<NoteHistoryID>0</NoteHistoryID>'
+			SET @strSQL = @strSQL + '<TransDate>' + CAST(GETDATE() as nvarchar(20)) + '</TransDate>'
+			SET @strSQL = @strSQL + '<TransTypeID>4</TransTypeID>'
 			SET @strSQL = @strSQL + '<Amount>' + CAST(@dblTransAmount as nvarchar(50)) + '</Amount>'
 			SET @strSQL = @strSQL + '<PayOffBalance>0</PayOffBalance>'
 			SET @strSQL = @strSQL + '<InvoiceNumber>0</InvoiceNumber>'
@@ -161,27 +164,42 @@ BEGIN TRY
 			SET @strSQL = @strSQL + '<AsOf>' + CONVERT(nvarchar(20), Getdate(), 101) + '</AsOf>'
 			SET @strSQL = @strSQL + '<Principal>0</Principal>'
 			SET @strSQL = @strSQL + '<CheckNumber>AutoSchedule</CheckNumber>'
-
-
 			SET @strSQL = @strSQL + '<UserId>' + CAST(@intEntityId as nvarchar(20)) + '</UserId>'
 			SET @strSQL = @strSQL + '<LastUpdateDate>' + CAST(GETDATE() as nvarchar(20)) + '</LastUpdateDate>'
-			SET @strSQL = @strSQL + '<InterestToDate></InterestToDate>'
 			SET @strSQL = @strSQL + '<Comments>' + CAST(@intScheduleTransId as nvarchar(20)) + '</Comments>'
+			SET @strSQL = @strSQL + '<OnPrincipalOrInterest></OnPrincipalOrInterest>'
+			SET @strSQL = @strSQL + '<AccountAffected></AccountAffected>'
+			SET @strSQL = @strSQL + '<InvoiceLocation></InvoiceLocation>'
+			SET @strSQL = @strSQL + '<ReferenceNumber></ReferenceNumber>'
+			SET @strSQL = @strSQL + '<PaymentType></PaymentType>'
+			SET @strSQL = @strSQL + '<AdjustmentType></AdjustmentType>'
+			SET @strSQL = @strSQL + '<ConcurrencyId>1</ConcurrencyId>'
+			
+			SET @strSQL = @strSQL + '</NoteTransDetail>'
 
-			SET @strSQL = @strSQL + '</NoteHistoryDetail>'
-
-			SET @strSQL = @strSQL + '</NoteHistory>'
+			SET @strSQL = @strSQL + '</NoteTrans>'
 
 			SET @strSQL = '<root>' + @strSQL + '</root> '
 			
-			EXEC dbo.uspNRCreateNoteTransaction @strSQL
-			
 			DECLARE @intNoteTransId Int
 			
-			SELECT @intNoteTransId = intNoteTransId FROM dbo.tblNRNoteTransaction Where RTRIM(strTransComments) =  CAST(@intScheduleTransId as nvarchar(20))
+			
+			EXEC dbo.uspNRCreateNoteTransaction @strSQL, @intNoteTransId OUTPUT
+			
+			--print 'test'
+			--print @intNoteTransId
+			
+			--SELECT @intNoteTransId = SCOPE_IDENTITY() -- intNoteTransId FROM dbo.tblNRNoteTransaction Where RTRIM(strTransComments) =  CAST(@intScheduleTransId as nvarchar(20))
 			
 			--EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
-			EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount
+			DECLARE @strCMTransactionId nvarchar(50), @intGLReceivableAccountId Int
+			SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+			EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount, @intGLReceivableAccountId, @strCMTransactionId OUTPUT 
+			
+			UPDATE dbo.tblNRNoteTransaction
+			SET strTransComments = strTransComments + ', CM:' + @strCMTransactionId
+			WHERE intNoteTransId = @intNoteTransId
+					
 			
 			
 			UPDATE dbo.tblNRScheduleTransaction 

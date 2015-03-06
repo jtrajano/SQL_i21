@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspNRCreateNoteTransaction]
 @XML varchar(max)
+, @intNoteTransId Int = 0 OUTPUT
 AS
 BEGIN TRY  
 	DECLARE 
@@ -7,7 +8,7 @@ BEGIN TRY
 	,@ErrMsg nvarchar(max)
 	,@intNoteId Int
 	,@isWriteOff bit
-	, @intNoteTransId Int
+	--, @intNoteTransId Int
 	,@NoteTransID Int
 	,@TransDate DateTime
 	,@TransTypeID Int
@@ -22,7 +23,7 @@ BEGIN TRY
 	,@AmountAppliesToInterest Decimal(18,2)
 	,@AsOf DateTime
 	,@Principal Decimal(18,2)
-	,@CheckNumber nvarchar(10)
+	,@CheckNumber nvarchar(50)
 	,@UserId nvarchar(10)
 	,@LastUpdateDate DateTime
 	,@Comments nvarchar(200)
@@ -117,7 +118,7 @@ BEGIN TRY
       ,AmountAppliesToInterest Decimal(18,2)
       ,AsOf DateTime
 	  ,Principal Decimal(18,2)
-	  ,CheckNumber nvarchar(10)
+	  ,CheckNumber nvarchar(50)
 	  ,UserId nvarchar(10)
 	  ,LastUpdateDate datetime
 	  ,Comments nvarchar(200)
@@ -227,18 +228,21 @@ BEGIN TRY
 		--,@dtmPrevAsOfDate 
 		--,@ReferenceNumber
 		
-		SET @intNoteTransId = @@IDENTITY
+		SET @intNoteTransId = @@IDENTITY -- SCOPE_IDENTITY() 
 		
-		--IF(@TransTypeID = 1)
-		--BEGIN
-		--	EXEC dbo.uspNRCreateAREntry @intNoteTransId
-		--END
+		
+		IF(@TransTypeID = 1)
+		BEGIN
+			EXEC dbo.uspNRCreateAREntry @intNoteTransId
+		END
 		IF(@TransTypeID = 4)
 		BEGIN
-			DECLARE @intCMTransactionId Int, @intGLReceivableAccountId Int
+			DECLARE @strCMTransactionId nvarchar(50), @intGLReceivableAccountId Int
+			
 			IF(@NoteType = 'Scheduled Invoice' AND @CheckNumber <> 'AutoSchedule')
 			BEGIN
-				DECLARE @ExpectedPayAmount numeric(18,6), @LateFee numeric(18,6)
+				DECLARE @ExpectedPayAmount numeric(18,6), @LateFee numeric(18,6), @strCMType nvarchar(3)
+				
 				SELECT TOP 1 @ExpectedPayAmount = dblExpectedPayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId
 				SELECT TOP 1 @LateFee = dblLateFeePayAmt FROM dbo.tblNRScheduleTransaction Where intNoteId = @intNoteId 
 				AND dblLateFeePayAmt > 0 
@@ -251,47 +255,52 @@ BEGIN TRY
 				BEGIN
 					DECLARE @ExtraAmount numeric(18,6)
 					SET @ExtraAmount = (@Amount - @ExpectedPayAmount)
+					SET @strCMType = 'X'
 					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, @ExtraAmount, 0, ''
 					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExtraAmount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
-					SET @Comments = @Comments + CAST(@intCMTransactionId as nvarchar(30))
-					SET @intCMTransactionId = 0
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExtraAmount, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
+					SET @Comments = @Comments + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
+					SET @strCMTransactionId = ''
 					
+					SET @strCMType = 'E'
 					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 1, 0, 0, ''
 					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
-					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExpectedPayAmount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
-					SET @Comments = @Comments + ',' + CAST(@intCMTransactionId as nvarchar(30))
-					SET @intCMTransactionId = 0
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @ExpectedPayAmount, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
+					SET @Comments = @Comments + ',' + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
+					SET @strCMTransactionId = ''
 					
 				END
 				ELSE
 				BEGIN
+					SET @strCMType = 'E'
 					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
 					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
-					SET @Comments = @Comments + CAST(@intCMTransactionId as nvarchar(30))
-					SET @intCMTransactionId = 0
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
+					SET @Comments = @Comments + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
+					SET @strCMTransactionId = ''
 				END
 				
 				IF(ISNULL(@LateFee,0) <> 0)
 				BEGIN
+					SET @strCMType = 'L'
 					--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, @LateFee, ''
 					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
-					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @LateFee, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
-					SET @Comments = @Comments + ',' + CAST(@intCMTransactionId as nvarchar(30))
-					SET @intCMTransactionId = 0
+					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @LateFee, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
+					SET @Comments = @Comments + ',' + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
+					SET @strCMTransactionId = ''
 				END
 				
 				UPDATE dbo.tblNRNoteTransaction Set strTransComments = @Comments Where intNoteTransId = @intNoteTransId
 				
 			END
-			ELSE
+			ELSE IF(@NoteType <> 'Scheduled Invoice' AND @CheckNumber <> 'AutoSchedule')
 			BEGIN
+				SET @strCMType = 'P'
 				--EXEC dbo.uspNRCreateGLJournalEntry @intNoteId, 4, @intNoteTransId, @UserId, 0, 0, 0, ''
 				SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
-				EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount, @intGLReceivableAccountId, @intCMTransactionId OUTPUT 
-				SET @Comments = @Comments + CAST(@intCMTransactionId as nvarchar(30))
-				SET @intCMTransactionId = 0
+				EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @Amount, @intGLReceivableAccountId, @strCMType, @strCMTransactionId OUTPUT 
+				SET @Comments = @Comments + CAST(@intNoteTransId as nvarchar(30)) --CAST(@strCMTransactionId as nvarchar(30))
+				SET @strCMTransactionId = ''
 				
 				UPDATE dbo.tblNRNoteTransaction Set strTransComments = @Comments Where intNoteTransId = @intNoteTransId
 				
@@ -357,7 +366,7 @@ BEGIN TRY
 		
 		-- ***** Interest since last creation *****
 		IF @TransTypeID = 6
-			SET @InterestToDate = NULL
+			SET @InterestToDate = 0
 		ELSE IF @Days = 0
 			SET @InterestToDate = 0
 		ELSE
@@ -452,6 +461,7 @@ BEGIN TRY
 	--RETURN @intNoteTransId
 
 	  	--COMMIT TRANSACTION	
+	 --SET @intTransactionId = @intNoteTransId
 	  	
 	 END TRY   
 	   

@@ -1469,6 +1469,11 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') WHERE strMenuName = 'Build Accounts' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.BuildAccounts'
 		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.BatchPosting' WHERE strMenuName = 'Batch Posting' AND strModuleName = 'General Ledger' AND strMenuName = 'Batch Posting'
 		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.AccountGroups' WHERE strMenuName = 'Account Groups' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.AccountGroups'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.GLAccountAdjustment' WHERE strModuleName = 'General Ledger' AND  strCommand  = 'GeneralLedger.controller.GLAccountAdjustment'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.Reallocation' WHERE strMenuName = 'Reallocation' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.Reallocation'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.FiscalYear' WHERE strMenuName = 'Fiscal Year' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.FiscalYear'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.RecurringJournalHistory' WHERE strMenuName = 'Recurring Journal History' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.RecurringJournalHistory'
+		UPDATE tblSMMasterMenu SET strCommand = 'GeneralLedger.view.RecurringJournal' WHERE strMenuName = 'Recurring Journal' AND strModuleName = 'General Ledger' AND strCommand = 'GeneralLedger.controller.RecurringJournal'
 
 
 
@@ -1577,6 +1582,13 @@ GO
 		BEGIN 
 			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId
 		END
+
+		SET @tmMenuName = 'Resolve Sync Conflict'
+		SET @tmCommand ='TankManagement.view.ResolveSyncConflict'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmMaintenanceId
+		END
 	
 	/*---------------------------------*/
 	/*-- END Update TM Maintenance Menu */
@@ -1615,6 +1627,13 @@ GO
 
 		SET @tmMenuName = 'Dispatch Deliveries'
 		SET @tmCommand ='TankManagement.view.DispatchDelivery'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
+		END
+
+		SET @tmMenuName = 'Lease Billing'
+		SET @tmCommand ='TankManagement.view.LeaseBilling'
 		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId)
 		BEGIN 
 			UPDATE tblSMMasterMenu SET strCommand = @tmCommand WHERE strMenuName = @tmMenuName AND strModuleName = 'Tank Management' AND intParentMenuID = @tmActivitiesId
@@ -1700,6 +1719,10 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
 		WHERE strMenuName = 'Company Location' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.CompanyLocation'
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Zip Code' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerModuleId)
+		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+		WHERE strMenuName = 'Zip Code' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ZipCode'
+
 	/*-------------------------------  */
 	/*-- End Update System Manager Menu */
 	/*-------------------------------  */
@@ -1714,6 +1737,7 @@ GO
 	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.PanelSettings' WHERE strCommand = 'Dashboard.controller.PanelSettings'
 	UPDATE tblSMMasterMenu SET strCommand = 'Reports.view.Connection' WHERE strCommand = 'Dashboard.controller.DashboardConnection'
 	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.PanelList' WHERE strCommand = 'Dashboard.controller.PanelList'
+	UPDATE tblSMMasterMenu SET strCommand = 'Dashboard.view.PanelLayout' WHERE strCommand = 'Dashboard.controller.PanelLayout'
 
 	/* ------------------------------------------------- */
 	/* -- End Update Dashboard Menu Commands for MVVM -- */

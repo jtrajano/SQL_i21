@@ -141,6 +141,7 @@
     <Folder Include="Scripts\Post-Deployment\CT" />
     <Folder Include="Scripts\Post-Deployment\NR" />
     <Folder Include="Scripts\Post-Deployment\GR" />
+    <Folder Include="dbo\Index" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1084,7 +1085,13 @@
     <Build Include="dbo\Tables\tblICCategoryUOM.sql" />
     <Build Include="dbo\Views\vyuICGetUOMConversion.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupCode.sql" />
-	<Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
+    <Build Include="dbo\Views\vyuPODetails.sql" />
+    <Build Include="dbo\Tables\tblGLAccountCategoryGroup.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePO.sql" />
+    <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
+    <Build Include="dbo\Views\vyuARCustomerTaxCode.sql" />
+    <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

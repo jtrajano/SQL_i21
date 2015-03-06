@@ -5,6 +5,7 @@ SELECT
 	,B.intItemId
 	,B.intLineNo
 	,B.dblOrderQty
+	,B.dblBillQty
 	,B.dblOpenReceive
 	,B.dblReceived
 	,B.dblUnitCost
@@ -31,3 +32,4 @@ FROM tblICInventoryReceipt A
 	LEFT JOIN tblSMShipVia F ON D.intShipViaId = F.intShipViaID
 	LEFT JOIN tblSMTerm G ON D.intTermsId = G.intTermID
 WHERE strReceiptType = 'Purchase Order' AND ysnPosted = 1
+AND B.dblOpenReceive != B.dblBillQty

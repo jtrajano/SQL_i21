@@ -21,6 +21,12 @@ BEGIN
 	RETURN;
 END
 
+IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND dblTotal = 0)
+BEGIN
+	RAISERROR(51037, 11, 1)
+	RETURN;
+END
+
 -- Add code to lock-out editing of the purchase order after it has been processed.
   
 -- Call inventory stored procedure to process your transaction into "Item Receipt"
@@ -32,6 +38,9 @@ EXEC dbo.uspICProcessToItemReceipt
 	,@strSourceType = 'Purchase Order'
 	,@intUserId = @icUserId
 	,@InventoryReceiptId = @itemReceiptId OUTPUT
+
+IF @@ERROR > 0 
+	RETURN;
 
 SELECT @itemReceiptNumber = strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @itemReceiptId
 

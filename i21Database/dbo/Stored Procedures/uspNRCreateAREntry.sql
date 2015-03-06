@@ -20,6 +20,7 @@ BEGIN
 	, @strLocation = strLocation
 	, @strPayType = strPayType
 	, @strUserID = intLastModifiedUserId 
+	, @dblAmount = dblTransAmount
 	FROM dbo.tblNRNoteTransaction Where intNoteTransId = @intNoteTransId
 	SELECT @blnSwitchOrigini21 = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'nrSwitchOrigini21'
 	SELECT @strOriginSystem = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'nrOriginSystem'			
@@ -46,7 +47,7 @@ BEGIN
 			BEGIN
 				SELECT @intSeqNo = MAX(ptpye_no)  FROM ptpyemst WHERE (ptpye_cus_no = @strCustomerNumber) 
 					AND (ptpye_inc_ref = @strInvoiceNumber) AND (ptpye_ivc_loc_no = @strInvoiceLocationNo)
-				SET @intSeqNo = @intSeqNo + 1
+				SET @intSeqNo = ISNULL(@intSeqNo,0) + 1
 				SET @strRevTime = SUBSTRING(@strRevTime, 1, 6)			
 				
 				IF @dblAmount < 0

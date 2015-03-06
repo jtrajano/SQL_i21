@@ -18,6 +18,7 @@ Type the overview for the table here.
 		[intSourceId] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[dblOrderQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblBillQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOpenReceive] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblReceived] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intUnitMeasureId] INT NOT NULL, 

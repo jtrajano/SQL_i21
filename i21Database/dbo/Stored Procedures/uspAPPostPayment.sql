@@ -778,7 +778,8 @@ END
 		FROM tblAPPayment A
 			INNER JOIN tblGLDetail B
 				ON A.intPaymentId = B.intTransactionId
-		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		WHERE B.[strTransactionId] IN (SELECT strPaymentRecordNum FROM tblAPPayment 
+							WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData))
 
 		-- Creating the temp table:
 		DECLARE @isSuccessful BIT
