@@ -40,6 +40,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WIRE AS INT = 15
 		,@AP_PAYMENT AS INT = 16
 		,@AR_PAYMENT AS INT = 18
+		,@VOID_CHECK AS INT = 19
+		,@AP_ECHECK AS INT = 20
 		
 -- Constant variables for Check number status. 
 DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
@@ -76,6 +78,7 @@ FROM	tblCMCheckNumberAudit AUDIT INNER JOIN tblCMBankTransaction F
 			ON F.strTransactionId = TMP.strTransactionId
 WHERE	-- Condition #1:
 		F.strReferenceNo NOT IN (@CASH_PAYMENT)	
+		AND F.intBankTransactionTypeId NOT IN (@AP_ECHECK)
 		-- Condition #2:
 		AND F.dtmCheckPrinted IS NOT NULL 
 		-- Condition #3:
@@ -129,7 +132,8 @@ WHERE	NOT EXISTS (
 					AND AUDIT.intTransactionId = F.intTransactionId
 					AND AUDIT.intCheckNoStatus = @CHECK_NUMBER_STATUS_VOID
 		)
-		AND F.strReferenceNo NOT IN (@CASH_PAYMENT)		
+		AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
+		AND F.intBankTransactionTypeId NOT IN (@AP_ECHECK) 
 		AND ISNULL(F.strReferenceNo, '') <> ''
 		AND F.dtmCheckPrinted IS NOT NULL 
 IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
@@ -151,7 +155,7 @@ FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
 WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
 		-- Condition #1:
-		AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+		AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
 		-- Condition #2:		
 		AND F.dtmCheckPrinted IS NOT NULL 
 IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
@@ -172,7 +176,7 @@ IF @isSuccessful = 0 GOTO Exit_BankTransactionReversal_WithErrors
 DELETE tblCMBankTransaction
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT)		
+WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @AR_PAYMENT)		
 		AND (
 			-- Condition #1:
 			F.strReferenceNo IN (@CASH_PAYMENT)
