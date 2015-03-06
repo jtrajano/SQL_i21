@@ -1138,7 +1138,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colLotID',
                                                                                 width: 100,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Lot ID'
+                                                                                text: 'Lot ID',
+                                                                                editor: {
+                                                                                    xtype: 'textfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1148,21 +1151,20 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 align: 'right',
                                                                                 dataIndex: 'dblQuantity',
                                                                                 text: 'Quantity',
-                                                                                format: '0,000.##'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'gridcolumn',
-                                                                                itemId: 'colUOM',
-                                                                                width: 75,
-                                                                                dataIndex: 'string',
-                                                                                text: 'UOM'
+                                                                                format: '0,000.##',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colWeightUOM',
                                                                                 width: 75,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Weight UOM'
+                                                                                text: 'Weight UOM',
+                                                                                editor: {
+                                                                                    xtype: 'combobox'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1172,7 +1174,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 align: 'right',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Gross',
-                                                                                format: '0,000.##'
+                                                                                format: '0,000.##',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1182,7 +1187,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 align: 'right',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Tare',
-                                                                                format: '0,000.##'
+                                                                                format: '0,000.##',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1202,23 +1210,31 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 align: 'right',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Cost',
-                                                                                format: '0,000.##'
+                                                                                format: '0,000.##',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 width: 95,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Storage Location'
+                                                                                text: 'Storage Location',
+                                                                                editor: {
+                                                                                    xtype: 'combobox'
+                                                                                }
                                                                             },
                                                                             {
-                                                                                xtype: 'numbercolumn',
+                                                                                xtype: 'gridcolumn',
                                                                                 dataType: 'numeric',
                                                                                 itemId: 'colUnitUOM',
                                                                                 width: 81,
                                                                                 align: 'right',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Unit UOM',
-                                                                                format: '0,000.##'
+                                                                                editor: {
+                                                                                    xtype: 'combobox'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1227,7 +1243,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 align: 'right',
                                                                                 dataIndex: 'string',
                                                                                 text: 'No. of Units',
-                                                                                format: '0,000.##'
+                                                                                format: '0,000.##',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1237,7 +1256,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 align: 'right',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Units/Pallet',
-                                                                                format: '0,000.##'
+                                                                                format: '0,000.##',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1246,7 +1268,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 align: 'right',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Stated Gross Per Unit',
-                                                                                format: '0,000.##'
+                                                                                format: '0,000.##',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1255,7 +1280,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 align: 'right',
                                                                                 dataIndex: 'string',
                                                                                 text: 'Stated Tare Per Unit',
-                                                                                format: '0,000.##'
+                                                                                format: '0,000.##',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
@@ -1288,25 +1316,37 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 xtype: 'gridcolumn',
                                                                                 width: 100,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Parent Lot ID'
+                                                                                text: 'Parent Lot ID',
+                                                                                editor: {
+                                                                                    xtype: 'combobox'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 width: 100,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Container No'
+                                                                                text: 'Container No',
+                                                                                editor: {
+                                                                                    xtype: 'textfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 width: 75,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Garden'
+                                                                                text: 'Garden',
+                                                                                editor: {
+                                                                                    xtype: 'textfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 width: 75,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Grade'
+                                                                                text: 'Grade',
+                                                                                editor: {
+                                                                                    xtype: 'textfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
@@ -1324,30 +1364,45 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 xtype: 'gridcolumn',
                                                                                 width: 90,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Vendor Lot ID'
+                                                                                text: 'Vendor Lot ID',
+                                                                                editor: {
+                                                                                    xtype: 'textfield'
+                                                                                }
                                                                             },
                                                                             {
-                                                                                xtype: 'gridcolumn',
+                                                                                xtype: 'datecolumn',
                                                                                 width: 110,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Manufactured Date'
+                                                                                text: 'Manufactured Date',
+                                                                                editor: {
+                                                                                    xtype: 'datefield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
                                                                                 width: 200,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Remarks'
+                                                                                text: 'Remarks',
+                                                                                editor: {
+                                                                                    xtype: 'textfield'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                width: 65,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Condition'
+                                                                                width: 65,
+                                                                                text: 'Condition',
+                                                                                editor: {
+                                                                                    xtype: 'combobox'
+                                                                                }
                                                                             },
                                                                             {
                                                                                 xtype: 'datecolumn',
                                                                                 width: 60,
-                                                                                text: 'Certified'
+                                                                                text: 'Certified',
+                                                                                editor: {
+                                                                                    xtype: 'datefield'
+                                                                                }
                                                                             }
                                                                         ],
                                                                         plugins: [

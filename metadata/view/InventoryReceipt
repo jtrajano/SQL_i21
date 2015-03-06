@@ -2472,7 +2472,19 @@
                                                                         "width": 100
                                                                     },
                                                                     "name": "MyColumn1",
-                                                                    "designerId": "162de61d-aae6-46b6-9166-ea2f1a8764ce"
+                                                                    "designerId": "162de61d-aae6-46b6-9166-ea2f1a8764ce",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Text",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyTextField8",
+                                                                            "designerId": "9c172b09-ef4b-4163-aef2-6159348caedf"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Number",
@@ -2498,23 +2510,19 @@
                                                                             "name": "dataType",
                                                                             "type": "string"
                                                                         }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField18",
+                                                                            "designerId": "9fd51483-5ad7-4f54-98e1-41f7f64e54b9"
+                                                                        }
                                                                     ]
-                                                                },
-                                                                {
-                                                                    "type": "Ext.grid.column.Column",
-                                                                    "reference": {
-                                                                        "name": "columns",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "dataIndex": "string",
-                                                                        "itemId": "colUOM",
-                                                                        "text": "UOM",
-                                                                        "width": 75
-                                                                    },
-                                                                    "name": "MyColumn5",
-                                                                    "designerId": "54032e0e-74a0-4a31-a47d-4f14b3bda845"
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -2530,7 +2538,19 @@
                                                                         "width": 75
                                                                     },
                                                                     "name": "MyColumn4",
-                                                                    "designerId": "92e8af37-fa03-4f1d-a36f-fdd1d3567c56"
+                                                                    "designerId": "92e8af37-fa03-4f1d-a36f-fdd1d3567c56",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyComboBox4",
+                                                                            "designerId": "e1299c60-0e41-46c5-b9c8-8501923d839d"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Number",
@@ -2555,6 +2575,18 @@
                                                                             "group": "(Custom Properties)",
                                                                             "name": "dataType",
                                                                             "type": "string"
+                                                                        }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField20",
+                                                                            "designerId": "76bfdbf7-6135-471e-a5a6-97f4ad123c46"
                                                                         }
                                                                     ]
                                                                 },
@@ -2581,6 +2613,18 @@
                                                                             "group": "(Custom Properties)",
                                                                             "name": "dataType",
                                                                             "type": "string"
+                                                                        }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField21",
+                                                                            "designerId": "54925b36-dd93-4647-86bf-8161aa326707"
                                                                         }
                                                                     ]
                                                                 },
@@ -2634,6 +2678,18 @@
                                                                             "name": "dataType",
                                                                             "type": "string"
                                                                         }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField22",
+                                                                            "designerId": "c27d6507-3e4f-4070-b64c-513539440b49"
+                                                                        }
                                                                     ]
                                                                 },
                                                                 {
@@ -2650,10 +2706,22 @@
                                                                         "width": 95
                                                                     },
                                                                     "name": "MyColumn22",
-                                                                    "designerId": "883da5a4-fadd-4496-af20-1a9f8d2f7025"
+                                                                    "designerId": "883da5a4-fadd-4496-af20-1a9f8d2f7025",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyComboBox16",
+                                                                            "designerId": "bbe57013-ed58-469f-bd03-4e59efd73194"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.grid.column.Number",
+                                                                    "type": "Ext.grid.column.Column",
                                                                     "reference": {
                                                                         "name": "columns",
                                                                         "type": "array"
@@ -2663,18 +2731,29 @@
                                                                         "align": "right",
                                                                         "dataIndex": "string",
                                                                         "dataType": "numeric",
-                                                                        "format": "0,000.##",
                                                                         "itemId": "colUnitUOM",
                                                                         "text": "Unit UOM",
                                                                         "width": 81
                                                                     },
-                                                                    "name": "MyNumberColumn2",
+                                                                    "name": "MyColumn23",
                                                                     "designerId": "156d4ee5-9430-4399-91dd-5ed0492e50b5",
                                                                     "customConfigs": [
                                                                         {
                                                                             "group": "(Custom Properties)",
                                                                             "name": "dataType",
                                                                             "type": "string"
+                                                                        }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyComboBox17",
+                                                                            "designerId": "c5fcdd76-7036-4e14-82dd-5a938b72417a"
                                                                         }
                                                                     ]
                                                                 },
@@ -2702,6 +2781,18 @@
                                                                             "name": "dataType",
                                                                             "type": "string"
                                                                         }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField23",
+                                                                            "designerId": "8b2e920e-8b3d-47ad-93b3-b1898dae85bb"
+                                                                        }
                                                                     ]
                                                                 },
                                                                 {
@@ -2727,6 +2818,18 @@
                                                                             "group": "(Custom Properties)",
                                                                             "name": "dataType",
                                                                             "type": "string"
+                                                                        }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField24",
+                                                                            "designerId": "59ff03df-b468-42d0-b922-07b9684842e9"
                                                                         }
                                                                     ]
                                                                 },
@@ -2754,6 +2857,18 @@
                                                                             "name": "dataType",
                                                                             "type": "string"
                                                                         }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField25",
+                                                                            "designerId": "c7122a40-c837-40c9-a28b-403fbf2e189b"
+                                                                        }
                                                                     ]
                                                                 },
                                                                 {
@@ -2779,6 +2894,18 @@
                                                                             "group": "(Custom Properties)",
                                                                             "name": "dataType",
                                                                             "type": "string"
+                                                                        }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField26",
+                                                                            "designerId": "8dea3636-8977-40fe-80f7-b7acaf303e9f"
                                                                         }
                                                                     ]
                                                                 },
@@ -2874,7 +3001,19 @@
                                                                         "width": 100
                                                                     },
                                                                     "name": "MyColumn34",
-                                                                    "designerId": "88478352-00af-41f7-85d4-d041f9134c58"
+                                                                    "designerId": "88478352-00af-41f7-85d4-d041f9134c58",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyComboBox18",
+                                                                            "designerId": "a0892bef-b860-4d80-88fb-d10b81d5827b"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -2890,7 +3029,19 @@
                                                                         "width": 100
                                                                     },
                                                                     "name": "MyColumn36",
-                                                                    "designerId": "4b0f4571-f8a6-4676-9689-c86a4fc1481a"
+                                                                    "designerId": "4b0f4571-f8a6-4676-9689-c86a4fc1481a",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Text",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyTextField10",
+                                                                            "designerId": "40f75a54-953c-4a83-85c6-3260999cbd73"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -2906,7 +3057,19 @@
                                                                         "width": 75
                                                                     },
                                                                     "name": "MyColumn37",
-                                                                    "designerId": "60e52a8f-cceb-4a5d-b56e-973e9920ca05"
+                                                                    "designerId": "60e52a8f-cceb-4a5d-b56e-973e9920ca05",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Text",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyTextField11",
+                                                                            "designerId": "fc8f9d8f-f91e-400f-ab13-4b4953f83910"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -2922,7 +3085,19 @@
                                                                         "width": 75
                                                                     },
                                                                     "name": "MyColumn38",
-                                                                    "designerId": "542b86a3-ad3e-46c6-8ebd-46c0fb5e55e9"
+                                                                    "designerId": "542b86a3-ad3e-46c6-8ebd-46c0fb5e55e9",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Text",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyTextField12",
+                                                                            "designerId": "0fc9cbb9-bfe5-4df1-a176-819ffb4303b7"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -2970,10 +3145,22 @@
                                                                         "width": 90
                                                                     },
                                                                     "name": "MyColumn41",
-                                                                    "designerId": "8d51b97d-2e2f-4a76-a447-a4de67fb6ce1"
+                                                                    "designerId": "8d51b97d-2e2f-4a76-a447-a4de67fb6ce1",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Text",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyTextField13",
+                                                                            "designerId": "ad4957e1-c2e5-4636-b3d9-8714e6e33f8a"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.grid.column.Column",
+                                                                    "type": "Ext.grid.column.Date",
                                                                     "reference": {
                                                                         "name": "columns",
                                                                         "type": "array"
@@ -2985,8 +3172,20 @@
                                                                         "text": "Manufactured Date",
                                                                         "width": 110
                                                                     },
-                                                                    "name": "MyColumn42",
-                                                                    "designerId": "b8348687-a7c1-41dc-98a5-4f6475da4070"
+                                                                    "name": "MyDateColumn2",
+                                                                    "designerId": "b8348687-a7c1-41dc-98a5-4f6475da4070",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Date",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyDateField",
+                                                                            "designerId": "7bd6546a-5d78-4f5c-a607-76662a846e8e"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -3003,7 +3202,19 @@
                                                                         "width": 200
                                                                     },
                                                                     "name": "MyColumn43",
-                                                                    "designerId": "3409acd0-a5bc-45cd-9afb-0bc329f6b1de"
+                                                                    "designerId": "3409acd0-a5bc-45cd-9afb-0bc329f6b1de",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Text",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyTextField14",
+                                                                            "designerId": "2481204e-a079-4a5e-b6c4-db6b9294fc75"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Column",
@@ -3020,7 +3231,19 @@
                                                                         "width": 65
                                                                     },
                                                                     "name": "MyColumn44",
-                                                                    "designerId": "943bfcac-c344-4986-9d9d-b092141938ff"
+                                                                    "designerId": "943bfcac-c344-4986-9d9d-b092141938ff",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyComboBox19",
+                                                                            "designerId": "ca0a3bec-090e-44d6-92a9-3b8efc13dbcd"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.column.Date",
@@ -3034,7 +3257,19 @@
                                                                         "width": 60
                                                                     },
                                                                     "name": "MyDateColumn",
-                                                                    "designerId": "ec097491-02f5-4ef5-85db-f0edbb32d4c4"
+                                                                    "designerId": "ec097491-02f5-4ef5-85db-f0edbb32d4c4",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Date",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyDateField1",
+                                                                            "designerId": "a8503157-3c90-4581-8156-f86e01d55d29"
+                                                                        }
+                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.plugin.CellEditing",
