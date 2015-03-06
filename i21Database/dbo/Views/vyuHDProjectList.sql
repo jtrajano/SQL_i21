@@ -24,6 +24,8 @@ select
 	,intAssignedToEntityId = t.intAssignedToEntity
 	,t.intCustomerId
 	,ysnProjectCompleted = p.ysnCompleted
+	,strMilestone = ms.strDescription
+	,ms.intPriority
 from
 	tblHDProjectTask pt
 	left outer join tblHDProject p on p.intProjectId = pt.intProjectId
@@ -32,3 +34,4 @@ from
 	left outer join tblEntity conEntity on conEntity.intEntityId = t.intCustomerContactId
 	left outer join tblEntityContact con on con.intEntityId = conEntity.intEntityId
 	left outer join tblEntity assEntity on assEntity.intEntityId = t.intAssignedToEntity
+	left outer join tblHDMilestone ms on ms.intMilestoneId = t.intMilestoneId
