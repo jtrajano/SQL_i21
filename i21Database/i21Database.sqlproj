@@ -1146,7 +1146,6 @@
     <Build Include="dbo\Functions\fnAPValidatePO.sql" />
     <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
     <Build Include="dbo\Views\vyuARCustomerTaxCode.sql" />
-    <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
     <Build Include="dbo\Functions\fnCalculateUnitCost.sql" />
     <Build Include="dbo\Functions\fnCalculateStockUnitQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateStockReserves.sql" />
@@ -1162,9 +1161,7 @@
     <Build Include="dbo\Tables\tblMFWorkOrderStatus.sql" />
     <Build Include="dbo\Tables\tblICParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateOnOrder.sql" />
-    <Build Include="dbo\Tables\tblICInventoryAdjustment.sql" />
-    <Build Include="dbo\Tables\tblICInventoryAdjustmentItem.sql" />
-    <Build Include="dbo\Tables\tblICInventoryAdjustmentNote.sql" />
+    
 <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
     <Build Include="dbo\Tables\tblHDMilestone.sql" />
   </ItemGroup>
