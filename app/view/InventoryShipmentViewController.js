@@ -197,6 +197,18 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onCustomerSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current){
+//            current.set('strShipToAddress', records[0].get('strAddress'));
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -204,6 +216,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboShipToAddress": {
                 select: this.onShipLocationSelect
+            },
+            "#cboCustomer": {
+                select: this.onCustomerSelect
             }
         })
     }

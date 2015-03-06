@@ -330,7 +330,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 itemId: 'txtCustomerName',
                                                                 fieldLabel: 'Customer Name',
                                                                 labelAlign: 'top',
-                                                                labelWidth: 110
+                                                                labelWidth: 110,
+                                                                readOnly: true
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
@@ -537,9 +538,31 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intShipViaID',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Ship Via Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strShipVia',
+                                                                                dataType: 'string',
+                                                                                text: 'Ship Via',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strShippingService',
+                                                                                dataType: 'string',
+                                                                                text: 'Shipping Service',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
                                                                         itemId: 'cboCarrier',
                                                                         fieldLabel: 'Carrier',
-                                                                        labelWidth: 110
+                                                                        labelWidth: 110,
+                                                                        displayField: 'strShipVia',
+                                                                        valueField: 'strShipVia'
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
@@ -785,7 +808,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 xtype: 'advancefiltergrid',
                                                                 reference: 'grdLotTracking',
                                                                 itemId: 'grdLotTracking',
-                                                                margin: '-1 -1 0 -1',
+                                                                margin: '5 5 0 5',
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',

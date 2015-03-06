@@ -651,7 +651,7 @@
                                                         "layout|margins": null,
                                                         "margin": null,
                                                         "name": null,
-                                                        "readOnly": null,
+                                                        "readOnly": true,
                                                         "width": null
                                                     },
                                                     "name": "MyTextField47",
@@ -1047,9 +1047,30 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "alwaysDisplayDecimals": null,
-                                                                "columns": null,
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intShipViaID',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Ship Via Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strShipVia',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Ship Via',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strShippingService',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Shipping Service',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
                                                                 "designer|createAlias": "gridcombobox",
-                                                                "displayField": null,
+                                                                "displayField": "strShipVia",
                                                                 "fieldLabel": "Carrier",
                                                                 "hideTrigger": null,
                                                                 "itemId": "cboCarrier",
@@ -1058,7 +1079,7 @@
                                                                 "layout|margins": null,
                                                                 "margin": null,
                                                                 "name": null,
-                                                                "valueField": null,
+                                                                "valueField": "strShipVia",
                                                                 "width": null
                                                             },
                                                             "name": "MyComboBox10",
@@ -1492,7 +1513,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter1",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1806,7 +1827,7 @@
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "itemId": "grdLotTracking",
-                                                        "margin": "-1 -1 0 -1",
+                                                        "margin": "5 5 0 5",
                                                         "reference": "grdLotTracking",
                                                         "title": null
                                                     },
@@ -1870,7 +1891,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter11",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2187,7 +2208,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter12",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2441,7 +2462,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter13",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2618,7 +2639,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging1",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
