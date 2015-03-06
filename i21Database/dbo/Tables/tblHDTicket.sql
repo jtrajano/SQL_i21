@@ -6,6 +6,7 @@
 	[strCustomerNumber] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[intCustomerContactId] [int] NULL,
 	[intCustomerId] [int] NULL,
+	[intMilestoneId] [int] NULL,
 	[intTicketTypeId] [int] NOT NULL,
 	[intTicketStatusId] [int] NOT NULL,
 	[intTicketPriorityId] [int] NOT NULL,
@@ -27,6 +28,7 @@
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
 	--CONSTRAINT [UNQ_tblHDTicket] UNIQUE ([strSubject],[intCreatedUserId]),
+	CONSTRAINT [FK_Ticket_Milestone] FOREIGN KEY ([intMilestoneId]) REFERENCES [dbo].[tblHDMilestone] ([intMilestoneId]),
     CONSTRAINT [FK_Ticket_TicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId]),
     CONSTRAINT [FK_Ticket_TicketStatus] FOREIGN KEY ([intTicketStatusId]) REFERENCES [dbo].[tblHDTicketStatus] ([intTicketStatusId]),
     CONSTRAINT [FK_Ticket_TicketPriority] FOREIGN KEY ([intTicketPriorityId]) REFERENCES [dbo].[tblHDTicketPriority] ([intTicketPriorityId]),
@@ -450,3 +452,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDTicket',
     @level2type = N'COLUMN',
     @level2name = N'dblActualHours'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Milestone Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intMilestoneId'
