@@ -609,7 +609,7 @@ BEGIN
 		SELECT
 			 A.intPaymentId
 			,A.strRecordNumber
-			,A.intAccountId
+			,L.intARAccount 
 			,GLAccnt.strDescription
 			,C.strCustomerNumber
 			,A.dtmDatePaid
@@ -630,10 +630,13 @@ BEGIN
 			,strTransactionForm	= @SCREEN_NAME
 			,strTransactionType	= @SCREEN_NAME
 		FROM
-			tblARPayment A 
+			tblARPayment A
+		INNER JOIN
+			tblSMCompanyLocation L
+				ON A.intLocationId = L.intCompanyLocationId 
 		INNER JOIN
 			tblGLAccount GLAccnt
-				ON A.intAccountId = GLAccnt.intAccountId
+				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
 				ON A.intCustomerId = C.intCustomerId
@@ -1375,7 +1378,7 @@ ELSE
 		SELECT
 			 strRecordNumber
 			,A.intPaymentId
-			,A.intAccountId
+			,L.intARAccount 
 			,GLAccnt.strDescription
 			,C.strCustomerNumber
 			,A.dtmDatePaid
@@ -1397,8 +1400,11 @@ ELSE
 		FROM
 			tblARPayment A 
 		INNER JOIN
+			tblSMCompanyLocation L
+				ON A.intLocationId = L.intCompanyLocationId 
+		INNER JOIN
 			tblGLAccount GLAccnt
-				ON A.intAccountId = GLAccnt.intAccountId
+				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
 				ON A.intCustomerId = C.intCustomerId
