@@ -26,6 +26,10 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
 		,@AP_PAYMENT AS INT = 16
+		,@BANK_STMT_IMPORT AS INT = 17
+		,@AR_PAYMENT AS INT = 18
+		,@VOID_CHECK AS INT = 19
+		,@AP_ECHECK AS INT = 20
 		
 SELECT	totalCount = ISNULL(COUNT(1), 0)
 		,totalAmount = ISNULL(SUM(ISNULL(dblAmount, 0)), 0)
@@ -44,7 +48,7 @@ WHERE	ysnPosted = 1
 		)
 		AND (
 			-- Filter for all the bank deposits and credits:
-			intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
+			intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT)
 			OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
 		AND dbo.fnIsDepositEntry(strLink) = 0
