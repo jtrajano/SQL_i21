@@ -899,8 +899,7 @@ END
 		)
 		SELECT
 			[strTransactionId] = A.strPaymentRecordNum,
-			[intBankTransactionTypeID] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'echeck' THEN 20 ELSE 
-						(SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment') END,
+			[intBankTransactionTypeID] = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment'),
 			[intBankAccountID] = A.intBankAccountId,
 			[intCurrencyID] = A.intCurrencyId,
 			[dblExchangeRate] = 0,
