@@ -8,11 +8,12 @@ BEGIN
 	')
 
 	
-	EXEC('CREATE PROCEDURE uspGLImportSubLedger
+	EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 		( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
 	AS
 	BEGIN
 		SET NOCOUNT ON;
+	
 			
 	DECLARE @isCOAPresent BIT 
 	SELECT @isCOAPresent = 1,@importLogId = 0
@@ -32,6 +33,13 @@ BEGIN
 		UPDATE tblGLCOAImportLog SET strEvent = ''Unable to Post because there is no cross reference between iRelySuite and Origin.'' WHERE intImportLogId = @importLogId
 		SELECT @isCOAPresent = 0
 	END
+	ELSE
+	BEGIN
+		IF EXISTS(SELECT * FROM tblGLCOACrossReference WHERE stri21IdNumber IS NULL)
+			UPDATE tblGLCOACrossReference SET stri21IdNumber =
+				REPLACE(REPLACE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(strExternalId,'' '',''''),''-'',''''),''.'',''''),''_'',''''),'','',''''),'';'',''''),''+'',''''),''/'',''''),''|'','''')
+				WHERE stri21IdNumber is NULL
+	END
 						
 		BEGIN TRY
 		BEGIN TRANSACTION
@@ -40,26 +48,26 @@ BEGIN
 		INSERT INTO tblGLIjemst(glije_period,glije_acct_no,glije_src_sys,glije_src_no, glije_line_no,glije_date,glije_time,glije_ref,glije_doc,glije_comments,
 		glije_dr_cr_ind,glije_amt,glije_units,glije_correcting,glije_source_pgm,glije_work_area,glije_cbk_no,glije_user_id,glije_user_rev_dt,A4GLIdentity,glije_uid)
 		SELECT ISNULL(glije_period, ''0'') 
-									   ,ISNULL(glije_acct_no, ''0'')
-									   ,ISNULL(glije_src_sys, '''')
-									   ,ISNULL(glije_src_no, '''') 
-									   ,ISNULL(glije_line_no, '''')
-									   ,ISNULL(glije_date, CONVERT(INT,REPLACE(CONVERT(DATE,GETDATE()),''-'','''')))
-									   ,ISNULL(glije_time, ''0'') 
-									   ,ISNULL(glije_ref, '''') 
-									   ,ISNULL(glije_doc, '''') 
-									   ,ISNULL(glije_comments, '''') 
-									   ,ISNULL(glije_dr_cr_ind, '''')
-									   ,ISNULL(glije_amt, ''0'') 
-									   ,ISNULL(glije_units, ''0'')
-									   ,ISNULL(glije_correcting, '''')
-									   ,ISNULL(glije_source_pgm, '''')
-									   ,ISNULL(glije_work_area, '''') 
-									   ,ISNULL(glije_cbk_no, '''') 
-									   ,ISNULL(glije_user_id, '''')
-									   ,ISNULL(glije_user_rev_dt, ''0'')
-									   ,ISNULL(A4GLIdentity, ''0'') 
-									   ,@uid
+				   ,ISNULL(glije_acct_no, ''0'')
+				   ,ISNULL(glije_src_sys, '''')
+				   ,ISNULL(glije_src_no, '''') 
+				   ,ISNULL(glije_line_no, '''')
+				   ,ISNULL(glije_date, CONVERT(INT,REPLACE(CONVERT(DATE,GETDATE()),''-'','''')))
+				   ,ISNULL(glije_time, ''0'') 
+				   ,ISNULL(glije_ref, '''') 
+				   ,ISNULL(glije_doc, '''') 
+				   ,ISNULL(glije_comments, '''') 
+				   ,ISNULL(glije_dr_cr_ind, '''')
+				   ,ISNULL(glije_amt, ''0'') 
+				   ,ISNULL(glije_units, ''0'')
+				   ,ISNULL(glije_correcting, '''')
+				   ,ISNULL(glije_source_pgm, '''')
+				   ,ISNULL(glije_work_area, '''') 
+				   ,ISNULL(glije_cbk_no, '''') 
+				   ,ISNULL(glije_user_id, '''')
+				   ,ISNULL(glije_user_rev_dt, ''0'')
+				   ,ISNULL(A4GLIdentity, ''0'') 
+				   ,@uid
 								  FROM glijemst where glije_period between @startingPeriod and @endingPeriod
 	
 		DELETE FROM glijemst WHERE glije_period between @startingPeriod and @endingPeriod
@@ -73,15 +81,13 @@ BEGIN
 		UPDATE tblGLIjemst SET glije_postdate = glije_dte WHERE glije_uid=@uid
     
 		DECLARE @id INT, @dte DATETIME, @glije_period INT,@intFiscalYearId INT,@glije_acct_no DECIMAL(16,8)
-    
-    
 		DECLARE @year NVARCHAR(4) ,@period NVARCHAR(4),@intFiscalPeriodId INT,@dateStart DATETIME, @dateEnd DATETIME ,@ysnStatus BIT
     
 		--VALIDATES EVERY ROW AND SAVES THE ERROR IN tblGLIjemst glije_error_desc COLUMN FOR later use
 		--DETERMINES THE glije_postdate VALUE . IF glije_date is not within the period then glije_postdate value is enddate
-		DECLARE cursor_tbl CURSOR FOR SELECT glije_id,glije_dte,glije_period,glije_acct_no FROM tblGLIjemst WHERE glije_uid = @uid
+		DECLARE cursor_tbl CURSOR FOR SELECT glije_dte,glije_period FROM tblGLIjemst WHERE glije_uid = @uid GROUP BY glije_period,glije_dte
 		OPEN cursor_tbl
-		FETCH NEXT FROM cursor_tbl INTO @id, @dte,@glije_period,@glije_acct_no
+		FETCH NEXT FROM cursor_tbl INTO @dte,@glije_period
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 		
@@ -90,7 +96,8 @@ BEGIN
 			SELECT TOP 1 @intFiscalYearId= intFiscalYearId,@ysnStatus = ysnStatus FROM tblGLFiscalYear WHERE strFiscalYear = @year
 			--NO FISCAL YEAR MATCHED IN IRELY
 			IF @ysnStatus IS NULL
-					UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because origin fiscal year is not in the scope of iRely fiscal year'' WHERE glije_id=@id
+					UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because origin fiscal year is not in the scope of iRely fiscal year'' WHERE glije_uid=@uid
+					and glije_period = @glije_period
 			ELSE
 		
 			IF @ysnStatus = 1
@@ -105,24 +112,29 @@ BEGIN
 							BEGIN
 							-- CHANGES THE POST DATE TO PERIOD ENDDATE IF THE glije_date IS NOT WITHIN THE FISCAL PERIOD
 								IF  @dte < @dateStart OR @dte > @dateEnd
-									UPDATE tblGLIjemst SET glije_postdate = @dateEnd  WHERE glije_id=@id
+									UPDATE tblGLIjemst SET glije_postdate = @dateEnd  WHERE  
+									glije_uid=@uid and glije_period = @period and glije_dte = @dte
 							END
 						ELSE
-							UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because iRely fiscal period is closed.'' WHERE glije_id=@id
+							UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because iRely fiscal period is closed.'' WHERE 
+							glije_uid=@uid and glije_period = @period and glije_dte = @dte
 					END
 				-- NO MATCHED PERIOD WITHIN THE FISCAL YEAR
 				ELSE
-					UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because origin fiscal year is not in the scope of iRely fiscal year.'' WHERE glije_id=@id
+					UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because origin fiscal year is not in the scope of iRely fiscal year.'' WHERE
+					glije_uid=@uid and glije_period = @period and glije_dte = @dte
 			END
 			-- FISCAL YEAR IS NOT OPEN
 			ELSE 
-				UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because iRely fiscal year is closed.'' WHERE glije_id=@id
+				UPDATE tblGLIjemst set glije_error_desc = ''Unable to Post because iRely fiscal year is closed.'' WHERE 
+				glije_uid=@uid and glije_period = @period and glije_dte = @dte
 			Cont:
-			FETCH NEXT FROM cursor_tbl INTO @id, @dte,@glije_period,@glije_acct_no
+			FETCH NEXT FROM cursor_tbl INTO @dte,@glije_period
 		END
 		CLOSE cursor_tbl
 		DEALLOCATE cursor_tbl
-    
+		
+	
 		DECLARE @postdate DATE,@intJournalId INT,@strJournalId VARCHAR(10),
 				@glije_date VARCHAR(20),@intAccountId INT,@intAccountId1 INT, @strDescription VARCHAR(50),@strDescription1 VARCHAR(50),@dtmDate DATE,
 				@glije_amt DECIMAL(10,2) ,@glije_units DECIMAL(10,2),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(10,2),@credit DECIMAL(10,2),
@@ -155,8 +167,12 @@ BEGIN
 			@glije_correcting,@glije_error_desc,@glije_period,@glije_src_sys,@glije_src_no
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
+				
+				
+				
 				SELECT @debit = 0,@credit = 0,@debitUnit = 0,@creditUnit = 0, @creditUnitInLBS = 0 , @debitUnitInLBS = 0
-				IF NOT EXISTS (SELECT * FROM tblGLCOACrossReference WHERE REPLACE(CONVERT(VARCHAR(50),@glije_acct_no),''.'','''') = REPLACE(REPLACE (REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(strExternalId,'' '',''''),''-'',''''),''.'',''''),''_'',''''),'','',''''),'';'',''''),''+'',''''),''/'',''''),''|'',''''))
+				IF NOT EXISTS (
+					SELECT * FROM tblGLCOACrossReference WHERE REPLACE(CONVERT(VARCHAR(50),@glije_acct_no),''.'','''') = stri21IdNumber)
 				BEGIN
 					IF @importLogId = 0
 						EXEC uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
@@ -291,9 +307,6 @@ BEGIN
 				SELECT @errorMsg = ERROR_MESSAGE()
 				UPDATE tblGLCOAImportLog SET strEvent = @errorMsg WHERE intImportLogId = @importLogId
 		END CATCH
-	
-	
-	END
-	')
+	END')
 
 END

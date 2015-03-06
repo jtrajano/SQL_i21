@@ -190,11 +190,11 @@ BEGIN TRY
 			SET @Days = DATEDIFF(day,@dtmPrevAsOfDate,@AsOf)
 		END
 		
-		IF @TransTypeID = 1
-		BEGIN
-			SET @intInvDays = ISNULL(@intInvDays, @Days)
-			SET @intInvNoteTransId = ISNULL(@intInvNoteTransId, @intNoteTransId)
-		END
+		--IF @TransTypeID = 1
+		--BEGIN
+		--	SET @intInvDays = ISNULL(@intInvDays, @Days)
+		--	SET @intInvNoteTransId = ISNULL(@intInvNoteTransId, @intNoteTransId)
+		--END
 		
 				
 		INSERT INTO dbo.tblNRNoteTransaction
@@ -357,11 +357,11 @@ BEGIN TRY
 	Close CurTrans
 	Deallocate CurTrans
 		
-		IF @TransTypeID = 1
-		BEGIN
-			SET @Days = @intInvDays
-			SET @intNoteTransId = @intInvNoteTransId
-		END
+		--IF @TransTypeID = 1
+		--BEGIN
+		--	SET @Days = @intInvDays
+		--	SET @intNoteTransId = @intInvNoteTransId
+		--END
 		
 		
 		-- ***** Interest since last creation *****
@@ -409,7 +409,7 @@ BEGIN TRY
 		ELSE IF(@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Interest' AND @Amount < 0) 
 			SET @AmountAppliesToInterest = @Amount  * (-1)
 		ELSE IF(@TransTypeID= 1) 
-			SET @AmountAppliesToInterest = @Amount
+			SET @AmountAppliesToInterest = 0
 		ELSE IF(@TransTypeID= 4) 
 		BEGIN
 			IF (@NoteType = 'Pay Principal First')
