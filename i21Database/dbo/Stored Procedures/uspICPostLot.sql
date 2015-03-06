@@ -75,6 +75,8 @@ BEGIN
 				,@intItemLocationId
 				,@intItemUOMId
 				,@intLotId
+				,@intSubLocationId
+				,@intStorageLocationId
 				,@dblReduceQty
 				,@dblCost
 				,@strTransactionId
@@ -178,6 +180,8 @@ BEGIN
 				,@intItemLocationId
 				,@intItemUOMId
 				,@intLotId
+				,@intSubLocationId
+				,@intStorageLocationId
 				,@dblAddQty
 				,@dblCost
 				,@intUserId

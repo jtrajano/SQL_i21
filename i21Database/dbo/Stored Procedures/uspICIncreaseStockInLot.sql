@@ -11,6 +11,8 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLot
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
 	,@intLotId AS INT
+	,@intSubLocationId AS INT
+	,@intStorageLocationId AS INT
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
 	,@intUserId AS INT
@@ -55,11 +57,15 @@ USING (
 			,intItemLocationId = @intItemLocationId
 			,intItemUOMId = @intItemUOMId
 			,intLotId = @intLotId
+			,intSubLocationId = @intSubLocationId
+			,intStorageLocationId = @intStorageLocationId
 ) AS Source_Query  
 	ON Lot_bucket.intItemId = Source_Query.intItemId
 	AND Lot_bucket.intItemLocationId = Source_Query.intItemLocationId
 	AND Lot_bucket.intItemUOMId = Source_Query.intItemUOMId
-	AND Lot_bucket.intLotId = Source_Query.intLotId 	
+	AND Lot_bucket.intLotId = Source_Query.intLotId
+	AND ISNULL(Lot_bucket.intSubLocationId, 0) = ISNULL(Source_Query.intLotId, 0)
+	AND ISNULL(Lot_bucket.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
 	AND Lot_bucket.dblStockIn < Lot_bucket.dblStockOut -- Update an existing negative stock 
 
 -- Update an existing negative stock Lot bucket
@@ -96,6 +102,8 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
 		,[dblStockIn]
 		,[dblStockOut]
 		,[dblCost]
@@ -110,6 +118,8 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		,@intItemLocationId
 		,@intItemUOMId
 		,@intLotId
+		,@intSubLocationId
+		,@intStorageLocationId
 		,@FullQty
 		,@TotalQtyOffset
 		,@dblCost
@@ -134,6 +144,8 @@ BEGIN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
 		,[dblStockIn]
 		,[dblStockOut]
 		,[dblCost]
@@ -148,6 +160,8 @@ BEGIN
 		,@intItemLocationId
 		,@intItemUOMId
 		,@intLotId
+		,@intSubLocationId
+		,@intStorageLocationId
 		,@FullQty
 		,@FullQty
 		,@dblCost

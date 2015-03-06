@@ -82,7 +82,10 @@ FROM	dbo.tblICInventoryLot LotBucket INNER JOIN (
 INSERT INTO dbo.tblICInventoryLot (
 		intItemId
 		,intItemLocationId
+		,intItemUOMId
 		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
 		,dblStockIn
 		,dblStockOut
 		,dblCost
@@ -95,7 +98,10 @@ INSERT INTO dbo.tblICInventoryLot (
 )
 SELECT	intItemId = OutTransactions.intItemId
 		,intItemLocationId = OutTransactions.intItemLocationId
+		,intItemUOMId = OutTransactions.intItemUOMId
 		,intLotId = OutTransactions.intLotId
+		,intSubLocationId = OutTransactions.intSubLocationId
+		,intStorageLocationId = OutTransactions.intStorageLocationId
 		,dblStockIn = 0 
 		,dblStockOut = ABS(ISNULL(OutTransactions.dblQty, 0))
 		,dblCost = OutTransactions.dblCost
