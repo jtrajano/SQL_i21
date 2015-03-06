@@ -155,3 +155,4 @@ FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM
 		INNER JOIN dbo.tblICUnitMeasure UOM
 			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 WHERE	PODetail.intPurchaseId = @PurchaseOrderId
+		AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
