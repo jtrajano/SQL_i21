@@ -885,6 +885,9 @@
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on non-lot items from stock uom table.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on non-lot items.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors on multiple scenarios.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToItemReceipt on converting a PO into Inventory Receipt and it excludes non-stock types.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

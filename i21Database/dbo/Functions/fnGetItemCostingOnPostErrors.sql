@@ -61,7 +61,7 @@ RETURN (
 								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
 					WHERE	Item.intItemId = @intItemId
 							AND Location.intItemLocationId = @intItemLocationId							
-							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblOnHand, 0) < 0
+							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQuantity, 0) < 0
 							AND Location.intAllowNegativeInventory = 3			
 				)
 	) AS Query		

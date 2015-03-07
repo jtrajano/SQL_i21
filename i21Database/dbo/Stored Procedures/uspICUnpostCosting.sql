@@ -272,7 +272,7 @@ BEGIN
 
 		-- Update the stock quantity at the Lot table
 		UPDATE	Lot
-		SET		Lot.dblOnHand = ISNULL(Lot.dblOnHand, 0) + ItemToUnpost.dblQty
+		SET		Lot.dblQuantity = ISNULL(Lot.dblQuantity, 0) + ItemToUnpost.dblQty
 		FROM	dbo.tblICLot Lot INNER JOIN @ItemsToUnpost ItemToUnpost
 					ON Lot.intItemLocationId = ItemToUnpost.intItemLocationId
 					AND Lot.intLotId = ItemToUnpost.intLotId

@@ -138,5 +138,5 @@ FROM	(
 			AND ValidateItems.intLotId = Reserves.intLotId
 			AND ISNULL(ValidateItems.intSubLocationId, 0) = ISNULL(Reserves.intSubLocationId, 0)
 			AND ISNULL(ValidateItems.intStorageLocationId, 0) = ISNULL(Reserves.intStorageLocationId, 0)
-WHERE	ISNULL(Lot.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0) - ValidateItems.dblQty < 0
+WHERE	ISNULL(Lot.dblQuantity, 0) - ISNULL(Reserves.dblQuantity, 0) - ValidateItems.dblQty < 0
 		AND ItemLocation.intAllowNegativeInventory = @AllowNegativeInventory_NoOption -- If No is selected, it does not allow negative stock
