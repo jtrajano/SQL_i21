@@ -27,7 +27,6 @@ SELECT
 ,BillToLoc.strState as strBillToState
 ,BillToLoc.strZipCode as strBillToZipCode
 ,BillToLoc.strCountry as strBillToCountry
-,Cus.intTaxGroupId
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.intEntityId
 INNER JOIN tblARCustomerToContact as CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId

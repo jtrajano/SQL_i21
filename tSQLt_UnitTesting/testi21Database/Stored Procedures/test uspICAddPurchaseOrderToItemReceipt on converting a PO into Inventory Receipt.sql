@@ -5,6 +5,10 @@ BEGIN
 	BEGIN 
 		-- Create the fake data
 		EXEC testi21Database.[Fake inventory items]
+		
+		-- Set all items as stock-keeping
+		UPDATE dbo.tblICItem
+		SET strType = 'Inventory' 
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1

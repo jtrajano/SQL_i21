@@ -859,16 +859,23 @@ GO
 	/* -- End of Inventory Maintenance Menus -- */
 	/* ---------------------------------------- */
 
-	--/* ----------------------------------- */
-	--/* -- Create Inventory Reports Menu -- */
-	--/* ----------------------------------- */
-	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryModuleId)
-	--INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	--VALUES ('Reports', 'Inventory', @InventoryModuleId, 'Inventory Reports', 'Folder', '', 'small-folder', 1, 1, 0, 0, 3, 0)
+	/* ----------------------------------- */
+	/* -- Create Inventory Reports Menu -- */
+	/* ----------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryModuleId)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Reports', 'Inventory', @InventoryModuleId, 'Inventory Reports', 'Folder', '', 'small-folder', 1, 1, 0, 0, 3, 0)
 
-	--DECLARE @InventoryReportId INT
-	--SELECT @InventoryReportId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryModuleId
+	DECLARE @InventoryReportId INT
+	SELECT @InventoryReportId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryModuleId
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock Report' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Stock Report', 'Inventory', @InventoryReportId, 'Simple Stock Report', 'Report', 'Stock Report', 'small-report', 1, 1, 0, 1, 1, 0)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET strCommand = 'Stock Report', intSort = 1
+		WHERE strMenuName = 'Stock Report' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportId
 
 	--/* -------------------------------- */
 	--/* -- End Inventory Reports Menu -- */
@@ -1682,9 +1689,9 @@ GO
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
 		WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ImportLegacyUsers'
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
-		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
-		WHERE strMenuName = 'Import Origin Users' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ImportLegacyUsers'
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Origin Menus' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
+        UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller','view') 
+        WHERE strMenuName = 'Import Origin Menus' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.ImportLegacyMenus'
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Origin Conversions' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
         UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller.OriginUtility','view.OriginConversions') 
@@ -1830,6 +1837,20 @@ GO
 		
 		SET @ARMenuName = 'Customer Contact List'
 		SET @ARCommand ='AccountsReceivable.view.CustomerContactList'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
+		END	
+
+		SET @ARMenuName = 'Customers'
+		SET @ARCommand ='AccountsReceivable.controller.Customer'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
+		END	
+
+		SET @ARMenuName = 'Salesperson'
+		SET @ARCommand ='AccountsReceivable.controller.Salesperson'
 		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
 		BEGIN 
 			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
