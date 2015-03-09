@@ -20,11 +20,10 @@ namespace iRely.Inventory.Model
         public decimal? dblMin { get; set; }
         public decimal? dblMax { get; set; }
         public string strPricingMethod { get; set; }
+        public decimal? dblAmountRate { get; set; }
+        public decimal? dblUnitPrice { get; set; }
         public string strCommissionOn { get; set; }
         public decimal? dblCommissionRate { get; set; }
-        public decimal? dblUnitPrice { get; set; }
-        public DateTime? dtmBeginDate { get; set; }
-        public DateTime? dtmEndDate { get; set; }
         public int? intSort { get; set; }
 
         private string _location;

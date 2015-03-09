@@ -3460,16 +3460,10 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        itemId: 'colPricingLevelUnits',
-                                                                        width: 50,
-                                                                        align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Qty',
-                                                                        editor: {
-                                                                            xtype: 'numberfield',
-                                                                            fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true
-                                                                        }
+                                                                        itemId: 'colPricingLevelUnits',
+                                                                        align: 'right',
+                                                                        text: 'Unit Qty'
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
@@ -3511,31 +3505,6 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colPricingLevelCommissionOn',
-                                                                        dataIndex: 'strFieldName',
-                                                                        text: 'Commission On',
-                                                                        editor: {
-                                                                            xtype: 'combobox',
-                                                                            itemId: 'cboPricingLevelCommissionOn',
-                                                                            displayField: 'strDescription',
-                                                                            valueField: 'strDescription'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        itemId: 'colPricingLevelCommissionRate',
-                                                                        minWidth: 125,
-                                                                        align: 'right',
-                                                                        dataIndex: 'strFieldName',
-                                                                        text: 'Comm Amount/Rate',
-                                                                        editor: {
-                                                                            xtype: 'numberfield',
-                                                                            fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true
-                                                                        }
-                                                                    },
-                                                                    {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelAmount',
                                                                         align: 'right',
@@ -3560,23 +3529,26 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'datecolumn',
-                                                                        itemId: 'colPricingLevelBeginDate',
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelCommissionOn',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Begin Date',
+                                                                        text: 'Commission On',
                                                                         editor: {
-                                                                            xtype: 'datefield',
-                                                                            fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'cboPricingLevelCommissionOn',
+                                                                            displayField: 'strDescription',
+                                                                            valueField: 'strDescription'
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'datecolumn',
-                                                                        itemId: 'colPricingLevelEndDate',
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colPricingLevelCommissionRate',
+                                                                        minWidth: 125,
+                                                                        align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'End Date',
+                                                                        text: 'Comm Amount/Rate',
                                                                         editor: {
-                                                                            xtype: 'datefield',
+                                                                            xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }

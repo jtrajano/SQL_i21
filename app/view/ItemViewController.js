@@ -478,17 +478,15 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{pricingMethods}'
                     }
                 },
+                colPricingLevelAmount: 'dblAmountRate',
+                colPricingLevelUnitPrice: 'dblUnitPrice',
                 colPricingLevelCommissionOn: {
                     dataIndex: 'strCommissionOn',
                     editor: {
                         store: '{commissionsOn}'
                     }
                 },
-                colPricingLevelCommissionRate: 'dblCommissionRate',
-                colPricingLevelAmount: 'dblAmountRate',
-                colPricingLevelUnitPrice: 'dblUnitPrice',
-                colPricingLevelBeginDate: 'dtmBeginDate',
-                colPricingLevelEndDate: 'dtmEndDate'
+                colPricingLevelCommissionRate: 'dblCommissionRate'
             },
 
             grdSpecialPricing: {
@@ -1828,17 +1826,24 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = combo.up('window');
         var grid = combo.up('grid');
         var grdPricing = win.down('#grdPricing');
+        var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
         var plugin = grid.getPlugin('cepPricingLevel');
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
-            current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
+
+            if (grdUnitOfMeasure.store){
+                var record = grdUnitOfMeasure.store.findRecord('intItemUOMId', records[0].get('intItemUOMId'));
+                if (record){
+                    current.set('dblUnit', record.get('dblUnitQty'));
+                }
+            }
         }
     },
 
@@ -2033,22 +2038,18 @@ Ext.define('Inventory.view.ItemViewController', {
     },
 
     onEditPricingLevel: function (editor, context, eOpts) {
-        if (context.field === 'dblUnit' || context.field === 'strPricingMethod' || context.field === 'dblCommissionRate') {
+        if (context.field === 'strPricingMethod' || context.field === 'dblAmountRate') {
             if (context.record) {
                 var win = context.grid.up('window');
                 var grdPricing = win.down('#grdPricing');
                 var pricingItems = grdPricing.store.data.items;
-                var qty = context.record.get('dblUnit');
                 var pricingMethod = context.record.get('strPricingMethod');
                 var amount = context.record.get('dblCommissionRate');
 
-                if (context.field === 'dblUnit') {
-                    qty = context.value;
-                }
-                else if (context.field === 'strPricingMethod') {
+                if (context.field === 'strPricingMethod') {
                     pricingMethod = context.value;
                 }
-                else if (context.field === 'dblCommissionRate') {
+                else if (context.field === 'dblAmountRate') {
                     amount = context.value;
                 }
 
@@ -2061,7 +2062,7 @@ Ext.define('Inventory.view.ItemViewController', {
                             }
                         });
                         if (selectedLoc) {
-                            var dblSalePrice = selectedLoc.get('dblSalePrice') * (qty);
+                            var dblSalePrice = selectedLoc.get('dblSalePrice') * (context.record.get('dblUnit'));
                             var amountRate = 0;
                             switch (pricingMethod) {
                                 case 'Fixed Dollar Amount':
