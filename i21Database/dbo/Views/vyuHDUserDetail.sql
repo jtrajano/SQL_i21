@@ -42,11 +42,11 @@
 			,strLocation = el.strLocationName
 			,strSLAPlan = ''
 			,strReplyDue = ''
-			,intUserId = ec.intEntityId
-			,intEntityId = ec.intEntityId
+			,intUserId = ec.intEntityContactId
+			,intEntityId = ec.intEntityContactId
 			,strName = en.strEmail
 			--,strUserName = (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId)
-			,strUserName = case when (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId) is null then 'Contact_'+convert(nvarchar(50),ec.intContactId) else (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId) end
+			,strUserName = case when (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityContactId) is null then 'Contact_'+convert(nvarchar(50),ec.intEntityContactId) else (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityContactId) end
 			,strFirstName = en.strEmail
 			,strMiddleName = en.strEmail
 			,strLastName = en.strEmail
@@ -57,9 +57,9 @@
 			,strFullName2 = en.strName
 		from
 			tblEntityContact ec
-			left outer join tblARCustomer cus on cus.intCustomerId = (select top 1 et.intCustomerId from tblARCustomerToContact et where et.intContactId = ec.intContactId)
-			left outer join tblEntity en on en.intEntityId = ec.intEntityId
-			left outer join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblARCustomerToContact et where et.intContactId = ec.intContactId)
+			left outer join tblARCustomer cus on cus.intCustomerId = (select top 1 et.intEntityCustomerId from tblARCustomerToContact et where et.intEntityContactId = ec.intEntityContactId)
+			left outer join tblEntity en on en.intEntityId = ec.intEntityContactId
+			left outer join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblARCustomerToContact et where et.intEntityContactId = ec.intEntityContactId)
 	--select
 	--		strCustomer = 'i21 User'
 	--		,strCompanyName = 'iRely'

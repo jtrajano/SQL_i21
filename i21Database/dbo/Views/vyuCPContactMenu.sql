@@ -2,14 +2,14 @@
 AS  
 SELECT  
 intUserSecurityMenuId = Permission.intCustomerPortalPermissionId,  
-intUserSecurityId = Contact.intEntityId,  
+intUserSecurityId = Contact.intEntityContactId,  
 intMenuId = Menu.intCustomerPortalMenuId,  
 intParentMenuId = (CASE WHEN Menu.intCustomerPortalParentMenuId = 0 THEN 0 ELSE (
 					SELECT intCustomerPortalPermissionId
 					FROM tblARCustomerPortalPermission
 					LEFT JOIN tblARCustomerToContact  ON tblARCustomerPortalPermission.intARCustomerToContactId = tblARCustomerToContact.intARCustomerToContactId
-					LEFT JOIN tblEntityContact  ON tblARCustomerToContact.intContactId = tblEntityContact.intContactId
-					WHERE tblEntityContact.intContactId = Contact.intContactId
+					LEFT JOIN tblEntityContact  ON tblARCustomerToContact.intEntityContactId = tblEntityContact.intEntityContactId
+					WHERE tblEntityContact.intEntityContactId = Contact.intEntityContactId
 					
 					AND	tblARCustomerPortalPermission.intCustomerPortalMenuId = Menu.intCustomerPortalParentMenuId
 					) END),
@@ -29,4 +29,4 @@ intSort = Menu.intCustomerPortalMenuId
 FROM tblARCustomerPortalMenu Menu  
 LEFT JOIN tblARCustomerPortalPermission Permission ON Menu.intCustomerPortalMenuId = Permission.intCustomerPortalMenuId
 LEFT JOIN tblARCustomerToContact CustomerToContact ON Permission.intARCustomerToContactId = CustomerToContact.intARCustomerToContactId
-LEFT JOIN tblEntityContact Contact ON CustomerToContact.intContactId = Contact.intContactId
+LEFT JOIN tblEntityContact Contact ON CustomerToContact.intEntityContactId = Contact.intEntityContactId
