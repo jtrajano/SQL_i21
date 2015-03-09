@@ -41,10 +41,13 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 store: '{subLocation}',
                 defaultFilters: [{
                     column: 'intCompanyLocationId',
-                    value: '{current.intLocationId}'
+                    value: '{current.intLocationId}',
+                    conjunction: 'and'
+
                 },{
                     column: 'strClassification',
-                    value: 'Inventory'
+                    value: 'Inventory',
+                    conjunction: 'and'
                 }]
             },
             cboStorageLocation: {
