@@ -1410,7 +1410,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var vm = win.viewModel;
                 var currentItem = vm.data.currentReceiptItem;
                 if (currentItem === undefined || currentItem === null){
-                    iRely.Functions.showErrorDialog('Please select a lot-tracked Item.');
+                    iRely.Functions.showErrorDialog('Please select a lot tracked Item.');
                     oldCard.show();
                 }
                 break;
