@@ -934,12 +934,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var store = context.grid.store;
 
                 Ext.Array.each(store.data.items, function(record) {
-                    totalValue += record.get('dblQuantity');
+                    if (record.get('intInventoryReceiptItemLotId') === context.record.get('intInventoryReceiptItemLotId')){
+                        totalValue += context.value;
+                    }
+                    else{
+                        totalValue += record.get('dblQuantity');
+                    }
                 });
 
 
                 var txtLotTotalQty = win.down('#txtLotTotalQty');
-                txtLotTotalQty.setValue(totalValue);
+                txtLotTotalQty.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(totalValue, 2));
             }
         }
     },
@@ -1372,8 +1377,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     txtLotItemId.setValue(current.get('strItemNo'));
                     txtLotItemDescription.setValue(current.get('strItemDescription'));
                     txtLotUOM.setValue(current.get('strUnitMeasure'));
-                    txtLotItemQty.setValue(current.get('dblOpenReceive'));
-                    txtLotCost.setValue(current.get('dblUnitCost'));
+                    txtLotItemQty.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblOpenReceive'), 2));
+                    txtLotCost.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblUnitCost'), 2));
                 }
                 else {
                     vm.data.currentReceiptItem = null;
