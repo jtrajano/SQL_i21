@@ -469,7 +469,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelUPC: 'strUPC',
-                colPricingLevelUnits: 'cboPricingLevelLocation',
+                colPricingLevelUnits: 'dblUnit',
                 colPricingLevelMin: 'dblMin',
                 colPricingLevelMax: 'dblMax',
                 colPricingLevelMethod: {
@@ -485,7 +485,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelCommissionRate: 'dblCommissionRate',
-                colPricingLevelAmount: '',
+                colPricingLevelAmount: 'dblAmountRate',
                 colPricingLevelUnitPrice: 'dblUnitPrice',
                 colPricingLevelBeginDate: 'dtmBeginDate',
                 colPricingLevelEndDate: 'dtmEndDate'
@@ -955,6 +955,14 @@ Ext.define('Inventory.view.ItemViewController', {
         btnAddPricing.on('click', me.onAddPricingClick);
         var btnEditPricing = grdPricing.down('#btnEditPricing');
         btnEditPricing.on('click', me.onEditPricingClick);
+
+        var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
+        if (cepPricingLevel){
+            cepPricingLevel.on({
+                validateedit: me.onEditPricingLevel,
+                scope: me
+            });
+        }
 
         return win.context;
     },
@@ -1827,17 +1835,10 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
             current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
-            if (grdPricing.store){
-                var record = grdPricing.store.findRecord('intItemLocationId', records[0].get('intItemLocationId'));
-                if (record){
-                    current.set('dblUnitPrice', record.get('dblSalePrice'));
-                }
-            }
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
-            current.set('dblUnit', records[0].get('dblUnitQty'));
         }
     },
 
@@ -2029,6 +2030,63 @@ Ext.define('Inventory.view.ItemViewController', {
         filterItem.config.value = itemId;
         filterItem.initialConfig.value = itemId;
         grdPricing.store.load();
+    },
+
+    onEditPricingLevel: function (editor, context, eOpts) {
+        if (context.field === 'dblUnit' || context.field === 'strPricingMethod' || context.field === 'dblCommissionRate') {
+            if (context.record) {
+                var win = context.grid.up('window');
+                var grdPricing = win.down('#grdPricing');
+                var pricingItems = grdPricing.store.data.items;
+                var qty = context.record.get('dblUnit');
+                var pricingMethod = context.record.get('strPricingMethod');
+                var amount = context.record.get('dblCommissionRate');
+
+                if (context.field === 'dblUnit') {
+                    qty = context.value;
+                }
+                else if (context.field === 'strPricingMethod') {
+                    pricingMethod = context.value;
+                }
+                else if (context.field === 'dblCommissionRate') {
+                    amount = context.value;
+                }
+
+                if (pricingItems) {
+                    var locationId = context.record.get('intItemLocationId');
+                    if (locationId > 0) {
+                        var selectedLoc = Ext.Array.findBy(pricingItems, function (row) {
+                            if (row.get('intItemLocationId') === locationId) {
+                                return true;
+                            }
+                        });
+                        if (selectedLoc) {
+                            var dblSalePrice = selectedLoc.get('dblSalePrice') * (qty);
+                            var amountRate = 0;
+                            switch (pricingMethod) {
+                                case 'Fixed Dollar Amount':
+                                case 'Markup Standard Cost':
+                                case 'Discount Sales Price':
+                                case 'MSRP Discount':
+                                    amountRate = amount;
+                                    break;
+                                case 'Percent of Margin':
+                                case 'Percent of Margin (MSRP)':
+                                    var percent = amount / 100;
+                                    amountRate = dblSalePrice * percent;
+                                    break;
+                                case 'None':
+                                default:
+                                    amountRate = 0;
+                                    break;
+                            }
+                            context.record.set('dblAmountRate', amountRate);
+                            context.record.set('dblUnitPrice', dblSalePrice - amountRate);
+                        }
+                    }
+                }
+            }
+        }
     },
 
     // </editor-fold>
