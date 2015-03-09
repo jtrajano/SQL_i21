@@ -91,14 +91,14 @@ BEGIN
 			SELECT intInvoiceId 
 			, strInvoiceNumber	-- Invoice Number
 			,dtmDate			-- Invoice Date
-			,(CASE WHEN strTransactionType = 'I' THEN ISNULL((dblAmountDue - dblPayment),0) ELSE 0 END) [dblAmount]
+			,(CASE WHEN (strTransactionType = 'I' OR strTransactionType = 'Invoice') THEN ISNULL((dblAmountDue - dblPayment),0) ELSE 0 END) [dblAmount]
 			, I.intCompanyLocationId 
 			, CL.strLocationName
-			, (CASE WHEN strTransactionType = 'I' THEN 'Invoice' ELSE 'CREDIT MEMO' END) [strType]
+			, (CASE WHEN (strTransactionType = 'I' OR strTransactionType = 'Invoice') THEN 'Invoice' ELSE 'CREDIT MEMO' END) [strType]
 			, CAST(0 as bit) [blnChk]
 			FROM dbo.tblARInvoice I
-			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = I.intCompanyLocationId
-			WHERE I.intCustomerId = @intCustomerId AND strTransactionType in ('I', 'C')
+			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = I.intCompanyLocationId			
+			WHERE I.intCustomerId = @intCustomerId AND strTransactionType in ('I', 'C', 'Invoice')
 		) x WHERE x.dblAmount <> 0
 	END
 	
