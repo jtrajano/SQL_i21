@@ -36,7 +36,9 @@ BEGIN TRY
 		
 		-- Iterate through all affected user roles and apply Master Menus
 		INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
-		SELECT @UserRoleID, intMenuID, @IsAdmin, intSort = intMenuID FROM tblSMMasterMenu
+		SELECT @UserRoleID, intMenuID, ISNULL((CASE @IsAdmin WHEN 1 THEN
+		(SELECT ysnVisible from tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @UserRoleID)
+		ELSE 0 END),0), intSort = intMenuID FROM tblSMMasterMenu Menu
 		WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
 		
 		IF (@IsAdmin = 0)
