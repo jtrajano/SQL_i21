@@ -43,7 +43,7 @@ Lot numbers are unique per item-location.
 		[intParentLotId]			INT NULL,
 		[intSplitFromLotId]			INT NULL,
 		[dblWeightQty]				NUMERIC(18,6) NULL DEFAULT ((0)) ,
-		[dblWeightUOMId]			INT NULL,
+		[intWeightUOMId]			INT NULL,
 		[dblWeightPerQty]			NUMERIC(18,6) NULL DEFAULT ((0)),
 		[intOriginId]				INT NULL,
 		[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
