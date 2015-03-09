@@ -5,7 +5,10 @@ BEGIN
 	BEGIN 
 		-- Create the fake data
 		EXEC testi21Database.[Fake inventory items]
-		
+
+		-- Mark all items as stock tracking units 
+		UPDATE dbo.tblICItem
+		SET strType = 'Inventory'		
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -262,7 +265,7 @@ BEGIN
 		INTO	actual_tblICInventoryReceiptItem
 		FROM	dbo.tblICInventoryReceiptItem	
 	END 
-
+		
 	-- Assert
 	BEGIN 
 		-- Check if the output parameter value returned is correct. 

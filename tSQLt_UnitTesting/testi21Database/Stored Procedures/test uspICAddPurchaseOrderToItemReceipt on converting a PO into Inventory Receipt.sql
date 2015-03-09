@@ -168,7 +168,10 @@ BEGIN
 				,dblUnitWeightMile = 0
 				,dblFreightRate = 100.00
 				,dblFuelSurcharge = 0 
-				,dblInvoiceAmount = 2000.00
+				,dblInvoiceAmount = ((10 - 0) * 50.00)
+									+ ((5-0) * 100.00)
+									+ ((2-0) * 200.00)
+									+ ((4-0) * 125.00)
 				,ysnInvoicePaid = 0
 				,intConcurrencyId = 1
 				,intCreatedUserId = @intUserId
@@ -238,7 +241,7 @@ BEGIN
 				--,intPackTypeId = 0 
 				,dblExpPackageWeight = 0
 				,dblUnitCost = 125.00
-				,dblLineTotal = (4 * 125.00)
+				,dblLineTotal = ((4-0) * 125.00)
 				,intSort = 14
 				,intConcurrencyId = 1					
 	END

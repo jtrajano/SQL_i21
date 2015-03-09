@@ -67,7 +67,7 @@ BEGIN
 			,intItemLocationId INT 
 			,intItemUOMId INT 
 			,intLotId INT 
-			,dblQuantity NUMERIC(18,6)
+			,dblQty NUMERIC(18,6)
 			,intTransactionId INT
 			,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,intInventoryTransactionType INT
@@ -79,7 +79,7 @@ BEGIN
 			,intItemLocationId INT 
 			,intItemUOMId INT 
 			,intLotId INT 
-			,dblQuantity NUMERIC(18,6)
+			,dblQty NUMERIC(18,6)
 			,intTransactionId INT
 			,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,intInventoryTransactionType INT
@@ -111,7 +111,7 @@ BEGIN
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_PoundUOMId
 				,intLotId = 2
-				,dblQuantity = 100
+				,dblQty = 100
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1
@@ -120,7 +120,7 @@ BEGIN
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1
-				,dblQuantity = 15
+				,dblQty = 15
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1
@@ -131,7 +131,7 @@ BEGIN
 				,intItemLocationId 
 				,intItemUOMId 
 				,intLotId 
-				,dblQuantity 
+				,dblQty 
 				,intTransactionId 
 				,strTransactionId 
 				,intInventoryTransactionType 		
@@ -140,7 +140,7 @@ BEGIN
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1 
-				,dblQuantity = 20
+				,dblQty = 20
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1 
@@ -149,7 +149,7 @@ BEGIN
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_PoundUOMId
 				,intLotId = 2
-				,dblQuantity = 30
+				,dblQty = 30
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1 
@@ -158,7 +158,7 @@ BEGIN
 				,intItemLocationId = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_PoundUOMId
 				,intLotId = 3
-				,dblQuantity = 300
+				,dblQty = 300
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000011'
 				,intInventoryTransactionType = 1 
@@ -169,7 +169,7 @@ BEGIN
 				,intItemLocationId 
 				,intItemUOMId 
 				,intLotId 
-				,dblQuantity 
+				,dblQty 
 				,intTransactionId 
 				,strTransactionId 
 				,intInventoryTransactionType 
@@ -178,7 +178,7 @@ BEGIN
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1 
-				,dblQuantity = 115
+				,dblQty = 115
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1 
@@ -187,7 +187,7 @@ BEGIN
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_PoundUOMId
 				,intLotId = 2
-				,dblQuantity = 100
+				,dblQty = 100
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1 
@@ -196,7 +196,7 @@ BEGIN
 				,intItemLocationId = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_PoundUOMId
 				,intLotId = 3
-				,dblQuantity = 300
+				,dblQty = 300
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000011'
 				,intInventoryTransactionType = 1 
@@ -216,7 +216,7 @@ BEGIN
 				,intItemLocationId 
 				,intItemUOMId 
 				,intLotId 
-				,dblQuantity 
+				,dblQty 
 				,intTransactionId 
 				,strTransactionId 
 				,intInventoryTransactionType 		
@@ -225,7 +225,7 @@ BEGIN
 				,intItemLocationId 
 				,intItemUOMId 
 				,intLotId 
-				,dblQuantity 
+				,dblQty 
 				,intTransactionId 
 				,strTransactionId 
 				,intInventoryTransactionType 

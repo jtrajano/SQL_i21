@@ -92,6 +92,8 @@ BEGIN
 				,@intItemLocationId AS INT			= @Default_Location
 				,@intItemUOMId AS INT				= @WetGrains_BushelUOMId
 				,@intLotId AS INT					= @LotId
+				,@intSubLocationId AS INT
+				,@intStorageLocationId AS INT
 				,@dblSoldQty NUMERIC(18,6)			= -10
 				,@dblCost AS NUMERIC(18,6)			= 33.19
 				,@strTransactionId AS NVARCHAR(40)	= 'NewStock-00001'
@@ -157,6 +159,8 @@ BEGIN
 				,@intItemLocationId
 				,@intItemUOMId
 				,@intLotId
+				,@intSubLocationId 
+				,@intStorageLocationId 
 				,@dblReduceQty
 				,@dblCost
 				,@strTransactionId

@@ -54,7 +54,7 @@ USING (
 	AND Lot_bucket.intItemLocationId = Source_Query.intItemLocationId
 	AND Lot_bucket.intItemUOMId = Source_Query.intItemUOMId
 	AND Lot_bucket.intLotId = Source_Query.intLotId	
-	AND ISNULL(Lot_bucket.intSubLocationId, 0) = ISNULL(Source_Query.intLotId, 0)
+	AND ISNULL(Lot_bucket.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
 	AND ISNULL(Lot_bucket.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
 	AND (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) > 0 
 

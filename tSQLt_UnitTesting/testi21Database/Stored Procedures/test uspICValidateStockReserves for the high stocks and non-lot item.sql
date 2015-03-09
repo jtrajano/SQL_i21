@@ -123,7 +123,7 @@ BEGIN
 				intItemId
 				,intItemLocationId
 				,intItemUOMId
-				,dblQuantity
+				,dblQty
 				,intTransactionId
 				,strTransactionId
 				,intInventoryTransactionType
@@ -131,7 +131,7 @@ BEGIN
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_PoundUOMId
-				,dblQuantity = 1000
+				,dblQty = 1000
 				,intTransactionId = 3
 				,strTransactionId = 'TRANS-11111'
 				,intInventoryTransactionType = 1

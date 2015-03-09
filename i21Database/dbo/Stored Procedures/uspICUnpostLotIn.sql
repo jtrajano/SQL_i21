@@ -89,7 +89,6 @@ INSERT INTO dbo.tblICInventoryLot (
 		,dblStockIn
 		,dblStockOut
 		,dblCost
-		,intItemUOMId
 		,strTransactionId
 		,intTransactionId
 		,dtmCreated
@@ -105,7 +104,6 @@ SELECT	intItemId = OutTransactions.intItemId
 		,dblStockIn = 0 
 		,dblStockOut = ABS(ISNULL(OutTransactions.dblQty, 0))
 		,dblCost = OutTransactions.dblCost
-		,intItemUOMId = OutTransactions.intItemUOMId
 		,strTransactionId = OutTransactions.strTransactionId
 		,intTransactionId = OutTransactions.intTransactionId
 		,dtmCreated = GETDATE()

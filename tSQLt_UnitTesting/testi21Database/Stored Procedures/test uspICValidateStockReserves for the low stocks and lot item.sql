@@ -128,17 +128,17 @@ BEGIN
 				intItemLocationId
 				,intItemUOMId
 				,intLotId
-				,dblOnHand
+				,dblQty
 		)
 		SELECT	intItemLocationId = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_BushelUOMId
 				,intLotId = 1
-				,dblOnHand = 20
+				,dblQty = 20
 		UNION ALL 
 		SELECT	intItemLocationId = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_BushelUOMId
 				,intLotId = 1
-				,dblOnHand = 99
+				,dblQty = 99
 
 		-- Add existing data into tblICStockReservation. 
 		-- This should be ignored by the stored procedure
@@ -146,7 +146,7 @@ BEGIN
 				intItemId
 				,intItemLocationId
 				,intItemUOMId
-				,dblQuantity
+				,dblQty
 				,intTransactionId
 				,strTransactionId
 				,intInventoryTransactionType
@@ -154,7 +154,7 @@ BEGIN
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_PoundUOMId
-				,dblQuantity = 1000
+				,dblQty = 1000
 				,intTransactionId = 3
 				,strTransactionId = 'TRANS-11111'
 				,intInventoryTransactionType = 1

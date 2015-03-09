@@ -133,7 +133,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intSort
     ,intConcurrencyId
 )
-SELECT	intInventoryReceiptId = @InventoryReceiptId
+SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,intLineNo				= PODetail.intPurchaseDetailId
 		,intSourceId			= @PurchaseOrderId
 		,intItemId				= PODetail.intItemId
@@ -156,3 +156,13 @@ FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM
 			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 WHERE	PODetail.intPurchaseId = @PurchaseOrderId
 		AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+
+-- Re-update the total cost 
+UPDATE	Receipt
+SET		dblInvoiceAmount = (
+			SELECT	ISNULL(SUM(ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0)) , 0)
+			FROM	dbo.tblICInventoryReceiptItem ReceiptItem
+			WHERE	ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+		)
+FROM	dbo.tblICInventoryReceipt Receipt 
+WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId

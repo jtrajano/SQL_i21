@@ -57,6 +57,8 @@ BEGIN
 				,@intItemLocationId AS INT			= 1
 				,@intItemUOMId AS INT				= @WetGrains_BushelUOMId
 				,@intLotId AS INT					= @LotId
+				,@intSubLocationId AS INT
+				,@intStorageLocationId AS INT
 				,@dblSoldQty NUMERIC(18,6)			= -10
 				,@dblCost AS NUMERIC(18,6)			= 33.19
 				,@strTransactionId AS NVARCHAR(40)	= 'NEWSTOCK-00001'
@@ -111,6 +113,8 @@ BEGIN
 				,@intItemLocationId
 				,@intItemUOMId
 				,@intLotId
+				,@intSubLocationId 
+				,@intStorageLocationId 
 				,@dblReduceQty
 				,@dblCost
 				,@strTransactionId

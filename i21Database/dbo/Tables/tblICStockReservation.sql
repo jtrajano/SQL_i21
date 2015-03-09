@@ -7,7 +7,7 @@
 	,[intLotId] INT NULL
 	,[intSubLocationId] INT NULL
 	,[intStorageLocationId] INT NULL
-    ,[dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0))
+    ,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT ((0))
     ,[intTransactionId] INT NULL
     ,[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     ,[intSort] INT NULL
@@ -63,7 +63,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICStockReservation',
     @level2type = N'COLUMN',
-    @level2name = N'dblQuantity'
+    @level2name = N'dblQty'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Transaction Id',

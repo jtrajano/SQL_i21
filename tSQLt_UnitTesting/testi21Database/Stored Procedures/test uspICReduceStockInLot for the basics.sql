@@ -36,6 +36,8 @@ BEGIN
 				,@intItemLocationId AS INT
 				,@intItemUOMId AS INT
 				,@intLotId AS INT
+				,@intSubLocationId AS INT
+				,@intStorageLocationId AS INT
 				,@dblSoldQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
@@ -54,6 +56,8 @@ BEGIN
 			,@intItemLocationId 
 			,@intItemUOMId 
 			,@intLotId 
+			,@intSubLocationId 
+			,@intStorageLocationId 
 			,@dblSoldQty 
 			,@dblCost
 			,@strTransactionId

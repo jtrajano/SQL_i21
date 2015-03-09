@@ -341,7 +341,7 @@ BEGIN
 
 		-- Update the stock quantity at the Lot table
 		UPDATE	Lot
-		SET		Lot.dblQuantity = ISNULL(Lot.dblQuantity, 0) + @dblQty
+		SET		Lot.dblQty = ISNULL(Lot.dblQty, 0) + @dblQty
 		FROM	dbo.tblICLot Lot
 		WHERE	Lot.intItemLocationId = @intItemLocationId
 				AND Lot.intLotId = @intLotId
