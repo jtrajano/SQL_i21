@@ -1164,6 +1164,8 @@
     <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
     <Build Include="dbo\Tables\tblHDMilestone.sql" />
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRateType.sql" />
+    <Build Include="dbo\Tables\tblSMCurrencyExchangeRate.sql" />
+    <Build Include="dbo\Tables\tblSMCurrencyExchangeRateDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
