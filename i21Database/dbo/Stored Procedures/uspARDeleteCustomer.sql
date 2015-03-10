@@ -7,17 +7,17 @@ BEGIN
 	
 	--Get the intEntityId of Customer's Contact
 	SELECT
-	Con.intEntityId as ContactEntityId 
+	Con.[intEntityContactId] as ContactEntityId 
 	INTO #tblCustomerContacts 
 	FROM tblARCustomer Cus 
-	INNER JOIN tblARCustomerToContact CusToCon ON Cus.intCustomerId = CusToCon.intCustomerId
-	INNER JOIN tblEntityContact Con ON CusToCon.intContactId = Con.intContactId
-	WHERE Cus.intEntityId =  @intEntityId
+	INNER JOIN tblARCustomerToContact CusToCon ON Cus.[intEntityCustomerId] = CusToCon.[intEntityCustomerId]
+	INNER JOIN tblEntityContact Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
+	WHERE Cus.[intEntityCustomerId] =  @intEntityId
 	
 	--Delete Customer
 	BEGIN TRY
 		BEGIN TRANSACTION
-			DELETE FROM tblARCustomer WHERE intEntityId = @intEntityId
+			DELETE FROM tblARCustomer WHERE [intEntityCustomerId] = @intEntityId
 			DELETE FROM tblEntity WHERE intEntityId = @intEntityId
 		--If the DELETE statement succeeds, commit the transaction	
 		COMMIT TRANSACTION

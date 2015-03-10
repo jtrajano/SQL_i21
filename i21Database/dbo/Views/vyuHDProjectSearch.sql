@@ -4,8 +4,8 @@
             proj.intProjectId
             ,proj.strProjectName
             ,proj.strDescription
-            ,strCustomerName = (select top 1 strName from tblEntity where intEntityId = cus.intEntityId)
-            ,strContactName = (select top 1 strName from tblEntity where intEntityId = con.intEntityId)
+            ,strCustomerName = (select top 1 strName from tblEntity where intEntityId = cus.[intEntityCustomerId])
+            ,strContactName = (select top 1 strName from tblEntity where intEntityId = con.[intEntityContactId])
             ,strType = (select top 1 strType from tblHDTicketType where intTicketTypeId = typ.intTicketTypeId)
             ,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101)
             ,proj.intPercentComplete
@@ -16,6 +16,6 @@
             tblEntityContact con,
             tblHDTicketType typ
         where
-            cus.intCustomerId = proj.intCustomerId
-            and con.intContactId = proj.intCustomerContactId
+            cus.[intEntityCustomerId] = proj.intCustomerId
+            and con.[intEntityContactId] = proj.intCustomerContactId
             and typ.intTicketTypeId = proj.intTicketTypeId

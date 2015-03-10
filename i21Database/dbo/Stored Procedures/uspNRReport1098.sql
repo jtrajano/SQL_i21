@@ -8,7 +8,7 @@ BEGIN
 							, strCountry nvarchar(100))
 							
 	INSERT INTO @tbl 
-	SELECT  Cus.intCustomerId
+	SELECT  Cus.[intEntityCustomerId]
 	,Cus.strCustomerNumber
 	,Entity.strName
 	,Loc.strAddress
@@ -18,9 +18,9 @@ BEGIN
 	,Loc.strZipCode 
 	,Loc.strCountry
 	FROM tblEntity as Entity
-	INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.intEntityId
+	INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 	INNER JOIN tblARCustomerToContact as CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
-	LEFT JOIN tblEntityContact as Con ON CusToCon.intContactId = Con.intContactId
+	LEFT JOIN tblEntityContact as Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
 	LEFT JOIN tblEntityLocation as Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 	
 	DECLARE @StartDate AS DateTime, @EndDate AS DateTime

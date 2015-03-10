@@ -366,7 +366,7 @@ BEGIN
 									ELSE 'NONE' END
 		FROM	[dbo].tblAPBill A
 				LEFT JOIN tblAPVendor C
-					ON A.intVendorId = C.intVendorId
+					ON A.intVendorId = C.[intEntityVendorId]
 		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 	
 		--DEBIT
@@ -402,7 +402,7 @@ BEGIN
 				LEFT JOIN [dbo].tblAPBillDetail B
 					ON A.intBillId = B.intBillId
 				LEFT JOIN tblAPVendor C
-					ON A.intVendorId = C.intVendorId
+					ON A.intVendorId = C.[intEntityVendorId]
 		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData);
 
 
@@ -662,7 +662,7 @@ ELSE
 									ELSE 'NONE' END
 		FROM	[dbo].tblAPBill A
 		LEFT JOIN tblAPVendor C
-					ON A.intVendorId = C.intVendorId
+					ON A.intVendorId = C.[intEntityVendorId]
 		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 	
 		--DEBIT
@@ -697,7 +697,7 @@ ELSE
 				LEFT JOIN [dbo].tblAPBillDetail B
 					ON A.intBillId = B.intBillId
 				LEFT JOIN tblAPVendor C
-					ON A.intVendorId = C.intVendorId
+					ON A.intVendorId = C.[intEntityVendorId]
 		WHERE	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;

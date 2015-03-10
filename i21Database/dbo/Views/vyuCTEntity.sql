@@ -6,7 +6,7 @@ AS
 			'Customer' AS strEntity,
 			C.strCustomerNumber strNumber 
 	FROM	tblEntity		E
-	JOIN	tblARCustomer	C	ON	C.intEntityId = E.intEntityId
+	JOIN	tblARCustomer	C	ON	C.[intEntityCustomerId] = E.intEntityId
 	
 	UNION ALL
 	
@@ -15,5 +15,5 @@ AS
 			'Vendor' AS strEntity,
 			V.strVendorId 
 	FROM	tblEntity		E
-	JOIN	tblAPVendor		V	ON	V.intEntityId = E.intEntityId
+	JOIN	tblAPVendor		V	ON	V.[intEntityVendorId] = E.intEntityId
 	

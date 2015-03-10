@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPVendor] (
-    [intEntityId]               INT            NOT NULL,
-	[intVendorId]				INT				IDENTITY (1, 1) NOT NULL, 
+    [intEntityVendorId]               INT            NOT NULL,
+	--[intEntityVendorId]				INT				IDENTITY (1, 1) NOT NULL, 
     [intDefaultLocationId]       INT            NULL,
     [intDefaultContactId]        INT            NULL,
     [intCurrencyId]             INT            NULL,
@@ -28,11 +28,11 @@
     [intShipFromId] INT NULL, 
 	[ysnDeleted] BIT NULL DEFAULT 0,
 	[dtmDateDeleted] DATETIME NULL,
-    CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
-    CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+    CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityVendorId] ASC),
+    CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [UK_strVendorId] UNIQUE NONCLUSTERED ([strVendorId] ASC),
-	CONSTRAINT [UK_intVendorId] UNIQUE NONCLUSTERED ([intVendorId] ASC),
-	CONSTRAINT [FK_tblAPVendor_tblEntityContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblEntityContact]([intContactId]),
+	CONSTRAINT [UK_intVendorId] UNIQUE NONCLUSTERED ([intEntityVendorId] ASC),
+	CONSTRAINT [FK_tblAPVendor_tblEntityContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblEntityContact]([intEntityContactId]),
 	CONSTRAINT [FK_tblAPVendor_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblAPVendor_tblGLAccount] FOREIGN KEY ([intGLAccountExpenseId]) REFERENCES [tblGLAccount]([intAccountId])
 );
@@ -42,7 +42,7 @@ GO
 ALTER TABLE [dbo].[tblAPVendor] CHECK CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId];
 GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
-    ON [dbo].[tblAPVendor]([intVendorId] ASC, [strVendorId] ASC)
+    ON [dbo].[tblAPVendor]([intEntityVendorId] ASC, [strVendorId] ASC)
 	WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 
 GO

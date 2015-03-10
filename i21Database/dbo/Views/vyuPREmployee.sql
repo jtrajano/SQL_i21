@@ -18,5 +18,5 @@ Loc.strState,
 Loc.strZipCode
 FROM dbo.tblPREmployee AS Emp
 INNER JOIN dbo.tblEntity AS Ent ON Ent.intEntityId = Emp.intEntityId
-LEFT JOIN dbo.tblEntityContact AS Con ON Con.intEntityId = Emp.intEntityId
+LEFT JOIN dbo.tblEntityContact AS Con ON Con.[intEntityContactId] = Emp.intEntityId
 LEFT JOIN dbo.tblEntityLocation AS Loc ON Loc.intEntityId = Emp.intEntityId

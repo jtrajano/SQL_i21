@@ -35,7 +35,7 @@ BEGIN
 
 	IF @blnSwitchOrigini21 = 1
 	BEGIN
-		SELECT @strCustomerNumber = strCustomerNumber FROM dbo.tblARCustomer Where intCustomerId = @intCustomerId
+		SELECT @strCustomerNumber = strCustomerNumber FROM dbo.tblARCustomer Where [intEntityCustomerId] = @intCustomerId
 		SELECT @strRevDate = CONVERT(varchar, GETDATE(), 112)
 		SELECT @strRevTime = CONVERT(varchar, GETDATE(), 114)
 		SET @strRevTime = REPLACE(@strRevTime,':','')

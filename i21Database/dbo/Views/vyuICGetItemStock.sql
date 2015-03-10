@@ -16,7 +16,7 @@ SELECT
 	Location.strLocationName,
 	Location.strLocationType,
 	ItemLocation.intVendorId,
-	strVendorId = (SELECT TOP 1 strVendorId FROM tblAPVendor WHERE intVendorId = ItemLocation.intVendorId),
+	strVendorId = (SELECT TOP 1 strVendorId FROM tblAPVendor WHERE [intEntityVendorId] = ItemLocation.intVendorId),
 	ItemLocation.intReceiveUOMId,
 	ItemLocation.intIssueUOMId,
 	strReceiveUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId),

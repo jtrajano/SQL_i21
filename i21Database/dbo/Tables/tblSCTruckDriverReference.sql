@@ -6,7 +6,7 @@
     [strData] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblSCTruckDriverReference_intTruckDriverReferenceId] PRIMARY KEY ([intTruckDriverReferenceId]), 
-    CONSTRAINT [FK_tblSCTruckDriverReference_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intCustomerId]), 
+    CONSTRAINT [FK_tblSCTruckDriverReference_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]), 
     CONSTRAINT [AK_tblSCTruckDriverReference_intCustomerId_strRecordType_strData] UNIQUE ([intCustomerId], [strRecordType], [strData])
 )
 

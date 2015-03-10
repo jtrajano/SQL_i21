@@ -40,7 +40,7 @@ A.intPurchaseId
  ,D.strItemNo
  ,D.strDescription
 FROM dbo.tblPOPurchase A
-	INNER JOIN dbo.tblAPVendor C ON A.intVendorId = C.intVendorId
+	INNER JOIN dbo.tblAPVendor C ON A.intVendorId = C.[intEntityVendorId]
 	LEFT JOIN dbo.tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN dbo.tblICItem D ON B.intItemId = D.intItemId
 	

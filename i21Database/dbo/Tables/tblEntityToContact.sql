@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblEntityToContact] (
     [intEntityToContactId] INT IDENTITY (1, 1) NOT NULL,
     [intEntityId]          INT NULL,
-    [intContactId]         INT NULL,
+    [intEntityContactId]         INT NULL,
     [intLocationId]        INT NULL,
     [intConcurrencyId]     INT DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblEntity2Contact1] PRIMARY KEY CLUSTERED ([intEntityToContactId] ASC)

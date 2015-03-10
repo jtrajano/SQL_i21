@@ -22,7 +22,7 @@ BEGIN
 			BEGIN -- DML EntityContact
 				insert into tblEntityContact
 				(
-					intEntityId
+					[intEntityContactId]
 					,strTitle
 					,strDepartment
 					,strMobile

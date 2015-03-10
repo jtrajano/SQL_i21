@@ -77,7 +77,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Issue] FOREIGN KEY ([intIssueUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Receive] FOREIGN KEY ([intReceiveUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [PK_tblICItemLocation] PRIMARY KEY ([intItemLocationId]), 
-		CONSTRAINT [FK_tblICItemLocation_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
+		CONSTRAINT [FK_tblICItemLocation_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
 		CONSTRAINT [FK_tblICItemLocation_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 

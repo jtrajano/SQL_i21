@@ -20,7 +20,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 GO
 
 ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblAPVendor_intVendorId] FOREIGN KEY([intVendorId])
-REFERENCES [dbo].[tblAPVendor] ([intVendorId])
+REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId])
 GO
 
 ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblAPVendor_intVendorId]

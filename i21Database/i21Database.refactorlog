@@ -2142,4 +2142,81 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnSeparateOnInvoice" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="120b1f15-1a08-47b9-9192-0a6b1750d652" ChangeDateTime="03/10/2015 03:04:58">
+    <Property Name="ElementName" Value="[dbo].[tblAPVendor].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPVendor]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c64b3c9a-ddf9-432c-b8e7-b9ef8909afc7" ChangeDateTime="03/10/2015 03:06:06">
+    <Property Name="ElementName" Value="[dbo].[tblAPVendorToContact].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPVendorToContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="be0f48a1-8293-4afd-bb69-2a63488ff740" ChangeDateTime="03/10/2015 03:06:57">
+    <Property Name="ElementName" Value="[dbo].[tblAPVendorToContact].[intContactId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPVendorToContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0eea3dfe-f60a-463c-95d4-44531f32414f" ChangeDateTime="03/10/2015 03:07:54">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomer].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityCustomerId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3b8a7993-8d9f-4c02-9825-07a073e1ad1a" ChangeDateTime="03/10/2015 03:08:56">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomerToContact].[intCustomerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerToContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityCustomerId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c272ff64-f6f1-4446-b640-787d28a74621" ChangeDateTime="03/10/2015 03:11:11">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomerToContact].[intContactId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerToContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3cf6186d-cfdc-40a1-9b49-01452bdfcb6f" ChangeDateTime="03/10/2015 03:13:39">
+    <Property Name="ElementName" Value="[dbo].[tblEntityContact].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblEntityContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9dd79e1e-1bf3-4c2a-a27e-993508742d89" ChangeDateTime="03/10/2015 03:32:41">
+    <Property Name="ElementName" Value="[dbo].[tblAPVendor].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPVendor]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8359df8c-d2ee-43a8-b11a-f238957566af" ChangeDateTime="03/10/2015 03:40:21">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomer].[intCustomerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityCustomerId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e4c5c4cf-6b51-4bc1-88bf-146b006dc1bd" ChangeDateTime="03/10/2015 04:01:50">
+    <Property Name="ElementName" Value="[dbo].[tblEntityContact].[intContactId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblEntityContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5e6e1c31-fbcc-4ab7-b06e-66820a310da1" ChangeDateTime="03/10/2015 04:03:14">
+    <Property Name="ElementName" Value="[dbo].[tblEntityToContact].[intContactId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblEntityToContact]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityContactId]" />
+  </Operation>
 </Operations>

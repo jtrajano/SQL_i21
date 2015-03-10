@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARCustomer] (
-    [intEntityId]                     INT             NOT NULL,
-    [intCustomerId]                   INT             IDENTITY (1, 1) NOT NULL,
+    [intEntityCustomerId]                     INT             NOT NULL,
+    --[intEntityCustomerId]                   INT             IDENTITY (1, 1) NOT NULL,
     [strCustomerNumber]               NVARCHAR (15)   COLLATE Latin1_General_CI_AS NOT NULL,
     [strType]                         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dblCreditLimit]                  NUMERIC (18, 6) NOT NULL,
@@ -67,14 +67,14 @@
     [dtmDeceasedDate]                 DATETIME        NULL,
     [ysnSubjectToFWT]                 BIT             DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
+    CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),
     CONSTRAINT [FK_tblARCustomer_tblARSalesperson_intSalespersonId] FOREIGN KEY ([intSalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intSalespersonId]),
     CONSTRAINT [FK_tblARCustomer_tblARServiceCharge] FOREIGN KEY ([intServiceChargeId]) REFERENCES [dbo].[tblARServiceCharge] ([intServiceChargeId]),
-    CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+    CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [FK_tblARCustomer_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
-    CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intCustomerId] ASC),
+    CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intEntityCustomerId] ASC),
     CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 

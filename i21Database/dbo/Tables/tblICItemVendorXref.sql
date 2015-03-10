@@ -25,7 +25,7 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICItemVendorXref] PRIMARY KEY ([intItemVendorXrefId]), 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
-		CONSTRAINT [FK_tblICItemVendorXref_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
+		CONSTRAINT [FK_tblICItemVendorXref_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 	)
 

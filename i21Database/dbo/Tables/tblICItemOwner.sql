@@ -20,7 +20,7 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemOwner] PRIMARY KEY ([intItemOwnerId]), 
 		CONSTRAINT [FK_tblICItemOwner_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemOwner_tblARCustomer] FOREIGN KEY ([intOwnerId]) REFERENCES [tblARCustomer]([intCustomerId])
+		CONSTRAINT [FK_tblICItemOwner_tblARCustomer] FOREIGN KEY ([intOwnerId]) REFERENCES [tblARCustomer]([intEntityCustomerId])
 	)
 
 	GO

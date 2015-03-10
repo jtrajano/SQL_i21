@@ -22,7 +22,7 @@ BEGIN TRY
 	INSERT INTO @SchTbl SELECT distinct ROW_NUMBER() Over (Order By N.intCustomerId), N.intCustomerId, N.intNoteId 
 	FROM @tbl C  
 	JOIN dbo.tblARCustomer Cus ON C.CUS_KEY COLLATE Latin1_General_CI_AS = Cus.strCustomerNumber COLLATE Latin1_General_CI_AS
-	JOIN dbo.tblNRNote N ON N.intCustomerId = Cus.intCustomerId AND N.strNoteType = 'Scheduled Invoice'
+	JOIN dbo.tblNRNote N ON N.intCustomerId = Cus.[intEntityCustomerId] AND N.strNoteType = 'Scheduled Invoice'
 
 	Select * from @SchTbl
 
@@ -111,7 +111,7 @@ BEGIN TRY
 					, @eftrx_ivc_rev_dt int, @intLocationId int, @intEntityId int
 			Select @strCbkno = efctl_cbk_no from efctlmst	
 			SELECT @strEftrxRefNo = apcbk_next_eft_no from apcbkmst Where apcbk_no = @strCbkno
-			SELECT @CusNo = strCustomerNumber From dbo.tblARCustomer WHere intCustomerId = @intCustmerId
+			SELECT @CusNo = strCustomerNumber From dbo.tblARCustomer WHere [intEntityCustomerId] = @intCustmerId
 			
 			SELECT @strLocNo = CL.strLocationNumber, @intLocationId = CL.intCompanyLocationId, @intEntityId = intEntityId 
 			FROM dbo.tblSMCompanyLocation CL

@@ -20,7 +20,7 @@ select
 	,pt.intProjectTaskId
 	,m.intModuleId
 	,intContactEntityId = t.intCustomerContactId
-	,intContactId = con.intContactId
+	,intContactId = con.intEntityContactId
 	,intAssignedToEntityId = t.intAssignedToEntity
 	,t.intCustomerId
 	,ysnProjectCompleted = p.ysnCompleted
@@ -30,5 +30,5 @@ from
 	left outer join tblHDTicket t on t.intTicketId = pt.intTicketId
 	left outer join tblHDModule m on m.intModuleId = t.intModuleId
 	left outer join tblEntity conEntity on conEntity.intEntityId = t.intCustomerContactId
-	left outer join tblEntityContact con on con.intEntityId = conEntity.intEntityId
+	left outer join tblEntityContact con on con.intEntityContactId = conEntity.intEntityId
 	left outer join tblEntity assEntity on assEntity.intEntityId = t.intAssignedToEntity

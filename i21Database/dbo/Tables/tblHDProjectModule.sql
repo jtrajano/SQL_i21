@@ -13,5 +13,5 @@
     CONSTRAINT [FK_Project_ProjectModule] FOREIGN KEY ([intProjectId]) REFERENCES [dbo].[tblHDProject] ([intProjectId]) on delete cascade,
     CONSTRAINT [FK_Module_ProjectModule] FOREIGN KEY ([intModuleId]) REFERENCES [dbo].[tblHDModule] ([intModuleId]),
 	CONSTRAINT [FK_UserEntity_ProjectModule] FOREIGN KEY ([intProjectManagerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-	CONSTRAINT [FK_EntityContact_ProjectModule] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntityContact] ([intContactId])
+	CONSTRAINT [FK_EntityContact_ProjectModule] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId])
 )
