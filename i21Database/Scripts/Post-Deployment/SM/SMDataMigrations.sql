@@ -43,13 +43,13 @@ GO
 	DECLARE @UserId INT
 
 	SELECT TOP 1 @AdminId = intUserRoleID FROM tblSMUserRole WHERE strName = 'ADMIN'
-	SELECT TOP 1 @UserId = intUserRoleID FROM tblSMUserRole WHERE strName = 'USER'
+	--SELECT TOP 1 @UserId = intUserRoleID FROM tblSMUserRole WHERE strName = 'USER'
 
 	UPDATE tblSMUserRoleMenu
 	SET ysnVisible = 1
-	WHERE intUserRoleId IN (@AdminId, @UserId)
+	WHERE intUserRoleId IN (@AdminId)--, @UserId)
 
 	EXEC uspSMUpdateUserRoleMenus @AdminId
-	EXEC uspSMUpdateUserRoleMenus @UserId
+	--EXEC uspSMUpdateUserRoleMenus @UserId
 
 GO
