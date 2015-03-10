@@ -1621,6 +1621,34 @@ GO
 	/* ------------------------------------------ */
 
 GO
+	/* ---------------------------------- */
+	/* -- Create Logistics Module Menu -- */
+	/* ---------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Logistics' AND strModuleName = 'Logistics' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Logistics', 'Logistics', 0, 'Logistics', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 2)
+	
+	DECLARE @LogisticsModuleId INT
+	SELECT @LogisticsModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Logistics' AND strModuleName = 'Logistics' AND intParentMenuID = 0
+	
+	/* --------------------------------------- */
+	/* -- Create Logistics Maintenance Menu -- */
+	/* --------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsModuleId)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Maintenance', 'Logistics', @LogisticsModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 2)
+
+	DECLARE @LogisticsMaintenanceId INT
+	SELECT @LogisticsMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Container Type' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Container Type', 'Logistics', @LogisticsMaintenanceId, 'Container Type', 'Screen', 'Logistics.view.ContainerType', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Logistics.view.ContainerType', intSort = 0
+			WHERE strMenuName = 'Container Type' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceId
+GO
 
 	/* ----------------------------------------------- */
 	/* --   Update Financial Reports Module Menu    -- */
