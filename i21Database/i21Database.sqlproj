@@ -1168,6 +1168,7 @@
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRateDetail.sql" />
     <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDoRoll.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
