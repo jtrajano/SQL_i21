@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuHDCustomerContact]
 	AS 
 	select
-		intContactId = ec.intEntityContactId
+		intContactId = ec.intEntityId
 		,intCustomerId = c.intCustomerId
 		,c.strCustomerNumber
 		,strCompanyName = e.strName
@@ -20,10 +20,10 @@
 		,eec.imgPhoto
 	  from
 		tblEntityContact ec
-		inner join tblARCustomerToContact etc on etc.intEntityContactId = ec.intEntityContactId
-		inner join tblARCustomer c on c.intCustomerId = etc.intEntityCustomerId
+		inner join tblARCustomerToContact etc on etc.intContactId = ec.intContactId
+		inner join tblARCustomer c on c.intCustomerId = etc.intCustomerId
 		inner join tblEntity e on e.intEntityId = c.intEntityId
-		inner join tblEntity eec on eec.intEntityId = ec.intEntityContactId
+		inner join tblEntity eec on eec.intEntityId = ec.intEntityId
 		left outer join tblEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
 	--select
 	--	intContactId = ec.intEntityId

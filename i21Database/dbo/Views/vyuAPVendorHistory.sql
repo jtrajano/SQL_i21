@@ -2,8 +2,8 @@
 WITH SCHEMABINDING
 AS
 SELECT 
-	tblAPVendor.intEntityVendorId
-	--,intVendorId = tblAPVendor.intVendorId
+	tblAPVendor.intEntityId
+	,intVendorId = tblAPVendor.intVendorId
 	,strVendorId = tblAPVendor.strVendorId
 	,A.dtmDate
 	,intTransactionId = A.intBillId 
@@ -21,7 +21,7 @@ FROM dbo.tblAPBill A
 		LEFT JOIN (dbo.tblAPPayment B1 INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId)
 		 ON A.intBillId = B.intBillId
 		LEFT JOIN dbo.tblAPVendor
-			ON tblAPVendor.intEntityVendorId = A.intVendorId
+			ON tblAPVendor.intVendorId = A.intVendorId
 WHERE 
 1 = CASE WHEN B1.intPaymentId IS NULL 
 		THEN 1
@@ -33,9 +33,10 @@ GROUP BY A.intBillId,
 	A.dblTotal,
 	A.dblDiscount,
 	A.dblWithheld,
-	tblAPVendor.intEntityVendorId,
-	tblAPVendor.strVendorId,	
-	tblAPVendor.intEntityVendorId,
+	tblAPVendor.intVendorId,
+	tblAPVendor.strVendorId,
+	tblAPVendor.intEntityId,
+	tblAPVendor.intVendorId,
     strVendorOrderNumber,
 	A.strBillId,
 	A.ysnPaid,

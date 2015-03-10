@@ -3,8 +3,8 @@ AS
 
 	SELECT 
 		strVendorId = tblAPVendor.strVendorId
-		,tblAPVendor.intEntityVendorId
-		--,tblAPVendor.intVendorId
+		,tblAPVendor.intEntityId
+		,tblAPVendor.intVendorId
 		,A.dtmDate
 		,A.dtmBillDate
 		,intTransactionId = A.intBillId 
@@ -27,7 +27,7 @@ AS
 			LEFT JOIN (dbo.tblAPPayment B1 INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId)
 			 ON A.intBillId = B.intBillId
 			LEFT JOIN dbo.tblAPVendor
-				ON tblAPVendor.intEntityVendorId = A.intVendorId
+				ON tblAPVendor.intVendorId = A.intVendorId
 	WHERE 
 	1 = CASE WHEN B1.intPaymentId IS NULL 
 		THEN 1
@@ -43,7 +43,8 @@ AS
 		A.strReference,
 		A.intTransactionType,
 		tblAPVendor.strVendorId,
-		tblAPVendor.intEntityVendorId,		
+		tblAPVendor.intEntityId,
+		tblAPVendor.intVendorId,
 		strVendorOrderNumber,
 		A.strBillId,
 		A.ysnPaid,

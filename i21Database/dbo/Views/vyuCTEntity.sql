@@ -15,5 +15,5 @@ AS
 			'Vendor' AS strEntity,
 			V.strVendorId 
 	FROM	tblEntity		E
-	JOIN	tblAPVendor		V	ON	V.intEntityVendorId = E.intEntityId
+	JOIN	tblAPVendor		V	ON	V.intEntityId = E.intEntityId
 	

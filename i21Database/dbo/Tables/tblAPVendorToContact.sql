@@ -1,14 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblAPVendorToContact] (
-    [intVendorToContactId] INT IDENTITY (1, 1) NOT NULL,    
-    [intEntityContactId]         INT NULL,
+    [intVendorToContactId] INT IDENTITY (1, 1) NOT NULL,
+    [intVendorId]          INT NULL,
+    [intContactId]         INT NULL,
     [intEntityLocationId]        INT NULL,
     [intConcurrencyId]     INT DEFAULT ((0)) NOT NULL,
-	[intEntityId]          INT NULL,
 	CONSTRAINT [PK_tblAPVendorToContact] PRIMARY KEY CLUSTERED ([intVendorToContactId] ASC),
-    --CONSTRAINT [FK_tblAPVendorToContact_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intVendorId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblAPVendorToContact_tblEntityContact] FOREIGN KEY ([intEntityContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId]),
-    CONSTRAINT [FK_tblAPVendorToContact_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
-	CONSTRAINT [FK_tblAPVendorToContact_tblAPVendor_entity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblAPVendorToContact_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intVendorId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblAPVendorToContact_tblEntityContact] FOREIGN KEY ([intContactId]) REFERENCES [dbo].[tblEntityContact] ([intContactId]),
+    CONSTRAINT [FK_tblAPVendorToContact_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId])
 );
 
 GO

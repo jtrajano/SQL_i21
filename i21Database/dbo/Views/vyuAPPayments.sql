@@ -32,6 +32,6 @@ SELECT
 		LEFT JOIN dbo.tblCMBank C
 			ON B.intBankId = C.intBankId
 		LEFT JOIN dbo.tblAPVendor D
-			ON A.intVendorId = D.intEntityVendorId
+			ON A.intVendorId = D.intVendorId
 		LEFT JOIN dbo.tblCMBankTransaction E
 			ON A.strPaymentRecordNum = E.strTransactionId

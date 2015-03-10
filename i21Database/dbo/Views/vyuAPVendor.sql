@@ -6,7 +6,7 @@ SELECT
 	A.strName, 
 	A.strWebsite,
 	A.strInternalNotes,
-	--B.intVendorId,
+	B.intVendorId,
 	B.intCurrencyId,
 	B.intGLAccountExpenseId,
 	B.intDefaultContactId,
@@ -48,16 +48,16 @@ SELECT
 	D.strPhone2,
 	D.strTitle,
 	E.strCurrency,
-	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 FROM dbo.tblAPBill G WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.intVendorId = B.intEntityVendorId) 
+	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 FROM dbo.tblAPBill G WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.intVendorId = B.intVendorId) 
 						THEN 1 ELSE 0 END) AS BIT)
 FROM
 		dbo.tblEntity A
 	INNER JOIN dbo.tblAPVendor B
-		ON A.intEntityId = B.intEntityVendorId
+		ON A.intEntityId = B.intEntityId
 	INNER JOIN dbo.tblEntityLocation C
 		ON B.intDefaultLocationId = C.intEntityLocationId
-	INNER JOIN (dbo.tblEntityContact D INNER JOIN dbo.tblEntity D2 ON D.intEntityContactId = D2.intEntityId)
-		ON B.intDefaultContactId = D.intEntityContactId
+	INNER JOIN (dbo.tblEntityContact D INNER JOIN dbo.tblEntity D2 ON D.intEntityId = D2.intEntityId)
+		ON B.intDefaultContactId = D.intContactId
 	LEFT JOIN dbo.tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN dbo.tblGLAccount F 
