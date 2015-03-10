@@ -66,6 +66,7 @@ This table holds stock information like quantity on hand and etc.
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemStock] PRIMARY KEY ([intItemStockId]), 
+		CONSTRAINT [UN_tblICItemStock] UNIQUE NONCLUSTERED ([intItemId] ASC, [intItemLocationId] ASC),
 		CONSTRAINT [FK_tblICItemStock_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemStock_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]), 
 		CONSTRAINT [FK_tblICItemStock_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) 
