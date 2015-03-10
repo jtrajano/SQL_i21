@@ -194,7 +194,7 @@ BEGIN TRY
 			--EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
 			DECLARE @strCMTransactionId nvarchar(50), @intGLReceivableAccountId Int
 			SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
-			EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount, @intGLReceivableAccountId, @strCMTransactionId OUTPUT 
+			EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount, @intGLReceivableAccountId, 'A', @strCMTransactionId OUTPUT 
 			
 			UPDATE dbo.tblNRNoteTransaction
 			SET strTransComments = strTransComments + ', CM:' + @strCMTransactionId
