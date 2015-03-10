@@ -689,6 +689,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (!current.dummy)
                     iRely.Functions.openScreen('Inventory.view.Item', current.get('intItemId'));
             }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Item to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
         }
     },
 
@@ -1003,7 +1009,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         current.set('intLineNo', po.get('intPurchaseDetailId'));
         current.set('intSourceId', po.get('intPurchaseId'));
-        current.set('dblQtyOrdered', po.get('dblQtyOrdered'));
+        current.set('dblOrderQty', po.get('dblQtyOrdered'));
         current.set('dblReceived', po.get('dblQtyReceived'));
         current.set('dblOpenReceive', po.get('dblQtyOrdered'));
         current.set('strItemDescription', po.get('strDescription'));
