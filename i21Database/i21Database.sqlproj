@@ -1124,6 +1124,7 @@
     <Build Include="dbo\Tables\tblMFWorkOrderStatus.sql" />
     <Build Include="dbo\Tables\tblICParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateOnOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOUpdateStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

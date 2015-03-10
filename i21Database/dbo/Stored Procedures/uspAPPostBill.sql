@@ -589,7 +589,7 @@ END
 		UPDATE A
 			SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
-			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intInventoryReceiptItemId
+			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intLineNo
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully unposted transactions.
@@ -616,7 +616,7 @@ END
 		UPDATE A
 			SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
-			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intInventoryReceiptItemId
+			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intLineNo
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully posted transactions.

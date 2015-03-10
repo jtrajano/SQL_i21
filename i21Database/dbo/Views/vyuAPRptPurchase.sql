@@ -47,6 +47,8 @@ FROM dbo.tblPOPurchase A
 			ON A.intVendorId = C.intVendorId
 	LEFT JOIN dbo.tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN dbo.tblICItem D ON B.intItemId = D.intItemId
-	INNER JOIN dbo.tblICUnitMeasure E ON B.intUnitOfMeasureId = E.intUnitMeasureId
+	INNER JOIN (dbo.tblICItemUOM E1 
+				INNER JOIN dbo.tblICUnitMeasure E ON E1.intUnitMeasureId = E.intUnitMeasureId)
+				ON B.intUnitOfMeasureId = E1.intItemUOMId
 	
 	

@@ -15,33 +15,23 @@ BEGIN
 		DECLARE @intAccountId INT = (SELECT TOP 1 intAccountId FROM #tempGLAccount)	
 		DECLARE @strAccountId VARCHAR(200) = (SELECT TOP 1 strAccountId FROM #tempGLAccount)	
 		DECLARE @segmentCODE VARCHAR(200)
-		Declare @segmentCount INT = 0
-		Declare @segmentId INT = NULL
-		Declare @intAccountStructureId INT = NULL
-		DECLARE @strType VARCHAR(200) 
+		DECLARE @segmentCount INT = 1
+		DECLARE @segmentLength INT = 0
+		DECLARE @segmentId INT = NULL
+		DECLARE @intAccountStructureId INT = NULL
+		DECLARE @strType VARCHAR(200)
 
 		WHILE EXISTS(SELECT 1 FROM #Structure)
 		BEGIN
-			SELECT TOP 1 @strType = strType, @intAccountStructureId = intAccountStructureId FROM #Structure ORDER BY intSort
-			IF @strType = 'Primary' 
-				BEGIN
-					SET @segmentCODE = SUBSTRING(@strAccountId, @segmentCount, PATINDEX('%' + @DIVIdER + '%',@strAccountId))			
-					SET @segmentId = (SELECT intAccountSegmentId FROM tblGLAccountSegment WHERE intAccountStructureId = @intAccountStructureId and strCode = @segmentCODE)
-					
-					INSERT INTO tblGLAccountSegmentMapping ([intAccountId], [intAccountSegmentId]) values (@intAccountId, @segmentId)
-					SET @segmentCount = @segmentCount + LEN(@segmentCODE)
-				END
-
-			ELSE IF @strType = 'Segment'
-				BEGIN
-					SET @segmentCODE = SUBSTRING(@strAccountId, @segmentCount + 2, PATINDEX('%' + @DIVIdER + '%',@strAccountId))			
-					SET @segmentId = (SELECT intAccountSegmentId FROM tblGLAccountSegment WHERE intAccountStructureId = @intAccountStructureId and strCode = @segmentCODE)
-					
-					INSERT INTO tblGLAccountSegmentMapping ([intAccountId], [intAccountSegmentId]) values (@intAccountId, @segmentId)
-					SET @segmentCount = @segmentCount + LEN(@segmentCODE)
-				END
+			SELECT TOP 1 @strType = strType, @intAccountStructureId = intAccountStructureId, @segmentLength = intLength FROM #Structure ORDER BY intSort
 			
-			DELETE FROM #Structure WHERE intAccountStructureId = @intAccountStructureId	
+			SET @segmentCODE = SUBSTRING(@strAccountId, @segmentCount, @segmentLength)			
+			SET @segmentId = (SELECT intAccountSegmentId FROM tblGLAccountSegment WHERE intAccountStructureId = @intAccountStructureId and strCode = @segmentCODE)
+			
+			INSERT INTO tblGLAccountSegmentMapping ([intAccountId], [intAccountSegmentId]) values (@intAccountId, @segmentId)
+			SET @segmentCount = @segmentCount + LEN(@segmentCODE) + 1
+			
+			DELETE FROM #Structure WHERE intAccountStructureId = @intAccountStructureId
 		END
 		
 		DROP TABLE #Structure

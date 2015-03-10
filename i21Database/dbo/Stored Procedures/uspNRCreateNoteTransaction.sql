@@ -44,6 +44,7 @@ BEGIN TRY
 	, @intInvDays Int
 	, @dblPrevUnpaidInterest Decimal(18,6) = NULL
 	, @intInvNoteTransId Int = NULL
+	, @dblTotInvAmount Decimal(18,6)
 	
 	DECLARE @dtmPrevAsOfDate DateTime
 			, @intLastTransTypeID Int
@@ -51,6 +52,7 @@ BEGIN TRY
 	
 	SET @dblPrevPrincipal = NULL
 	SET @intInvDays = NULL
+	SET @dblTotInvAmount = 0
 	
 	--BEGIN TRANSACTION
 	
@@ -190,11 +192,12 @@ BEGIN TRY
 			SET @Days = DATEDIFF(day,@dtmPrevAsOfDate,@AsOf)
 		END
 		
-		--IF @TransTypeID = 1
-		--BEGIN
-		--	SET @intInvDays = ISNULL(@intInvDays, @Days)
-		--	SET @intInvNoteTransId = ISNULL(@intInvNoteTransId, @intNoteTransId)
-		--END
+		IF @TransTypeID = 1
+		BEGIN
+			SET @dblTotInvAmount = @dblTotInvAmount + @Amount
+			--SET @intInvDays = ISNULL(@intInvDays, @Days)
+			--SET @intInvNoteTransId = ISNULL(@intInvNoteTransId, @intNoteTransId)
+		END
 		
 				
 		INSERT INTO dbo.tblNRNoteTransaction
@@ -377,9 +380,9 @@ BEGIN TRY
 		IF(@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Principal' AND @Amount > 0)
 			SET @AmountAppliedToPrincipal = @Amount 
 		ELSE IF(@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Principal' AND @Amount < 0)
-			SET @AmountAppliedToPrincipal = @Amount  * (-1) 
+			SET @AmountAppliedToPrincipal = @Amount  --* (-1) 
 		ELSE IF(@TransTypeID= 1) 
-			SET @AmountAppliedToPrincipal = @Amount
+			SET @AmountAppliedToPrincipal = @dblTotInvAmount
 		ELSE IF(@TransTypeID= 6) 
 			SET @AmountAppliedToPrincipal = @Amount  * (-1)  
 		ELSE IF(@TransTypeID = 4) 
@@ -407,7 +410,7 @@ BEGIN TRY
 		IF (@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Interest' AND @Amount > 0) 
 			SET @AmountAppliesToInterest = @Amount 
 		ELSE IF(@TransTypeID= 7 AND @OnPrincipalOrInterest = 'Interest' AND @Amount < 0) 
-			SET @AmountAppliesToInterest = @Amount  * (-1)
+			SET @AmountAppliesToInterest = @Amount  --* (-1)
 		ELSE IF(@TransTypeID= 1) 
 			SET @AmountAppliesToInterest = 0
 		ELSE IF(@TransTypeID= 4) 
