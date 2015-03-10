@@ -47,13 +47,13 @@ BEGIN
 		CREATE TABLE expectedReceiptItemLot(
 			intLotId INT NOT NULL
 			,intInventoryReceiptItemId INT NOT NULL
-			,strLotId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		)
 
 		CREATE TABLE actualReceiptItemLot(
 			intLotId INT NOT NULL
 			,intInventoryReceiptItemId INT NOT NULL
-			,strLotId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		)
 	END 
 	
@@ -63,6 +63,7 @@ BEGIN
 
 		EXEC dbo.uspICCreateLotNumberOnInventoryReceipt
 			@strTransactionId
+			,1
 
 		-- Get result and store it in the actual tables
 		INSERT INTO actualICLot (
@@ -80,11 +81,11 @@ BEGIN
 		INSERT INTO actualReceiptItemLot (
 				intLotId
 				,intInventoryReceiptItemId
-				,strLotId
+				,strLotNumber
 		)
 		SELECT	intLotId
 				,intInventoryReceiptItemId
-				,strLotId
+				,strLotNumber
 		FROM	dbo.actualReceiptItemLot
 	END 
 

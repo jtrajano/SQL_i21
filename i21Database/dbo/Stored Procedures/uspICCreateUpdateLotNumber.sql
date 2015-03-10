@@ -32,7 +32,7 @@ BEGIN
 	CREATE TABLE #GeneratedLotItems (
 		intLotId INT
 		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		,intDetailItemId INT 
+		,intDetailId INT 
 	);
 END
 
@@ -107,7 +107,7 @@ FROM	@ItemsForLot
 OPEN loopLotItems;
 
 -- Initial fetch attempt
-FETCH NEXT FROM loopItems INTO 
+FETCH NEXT FROM loopLotItems INTO 
 		@intId
 		,@intLotId
 		,@strLotNumber
@@ -310,7 +310,7 @@ BEGIN
 			INSERT INTO #GeneratedLotItems (
 				intLotId
 				,strLotNumber
-				,intDetailItemId
+				,intDetailId
 			)
 			SELECT	@intInsertedLotId
 					,@strLotNumber
@@ -331,7 +331,7 @@ BEGIN
 	END 	
 	
 	-- Fetch the next row from cursor. 
-	FETCH NEXT FROM loopItems INTO 
+	FETCH NEXT FROM loopLotItems INTO 
 		@intId
 		,@intLotId
 		,@strLotNumber
@@ -362,9 +362,8 @@ BEGIN
 		,@intDetailId;
 END
 
-CLOSE loopItems;
-DEALLOCATE loopItems;
+CLOSE loopLotItems;
+DEALLOCATE loopLotItems;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
-

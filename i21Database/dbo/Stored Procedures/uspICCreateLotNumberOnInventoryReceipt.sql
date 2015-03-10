@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateLotNumberOnInventoryReceipt]
 	@strTransactionId NVARCHAR(40) = NULL   
+	,@intUserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -17,7 +18,7 @@ DECLARE @LotType_Manual AS INT = 1
 CREATE TABLE #GeneratedLotItems (
 	intLotId INT
 	,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-	,intDetailItemId INT 
+	,intDetailId INT 
 )
 
 ------------------------------------------------------------------------------
@@ -114,6 +115,13 @@ BEGIN
 	WHERE	Receipt.strReceiptNumber = @strTransactionId
 			AND ISNULL(intLotId, 0) = 0
 END 
+
+-- Call the common stored procedure that will create or updat the lot master table
+BEGIN 
+	EXEC dbo.uspICCreateUpdateLotNumber 
+		@ItemsThatNeedLotId
+		,@intUserId
+END
 
 -- Assign the generated lot id's back to the inventory receipt item-lot table. 
 BEGIN 

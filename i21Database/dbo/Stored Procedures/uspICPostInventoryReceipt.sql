@@ -118,7 +118,10 @@ END
 
 -- Create and validate the lot numbers
 BEGIN 	
-	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt @strTransactionId
+	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt 
+		@strTransactionId
+		,@intUserId
+
 	IF @@ERROR <> 0 GOTO Post_Exit
 END
 --------------------------------------------------------------------------------------------  

@@ -695,7 +695,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
-				,strLotId 
+				,strLotNumber
 				,dblQuantity
 				,dblCost
 				,intSort
@@ -704,7 +704,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 1
 		SELECT	intInventoryReceiptItemId	= 15
-				,strLotId					= 'MANUAL-22X-10000'
+				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
 				,intSort					= 1
@@ -712,7 +712,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 2
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 15
-				,strLotId					= 'MANUAL-22X-10000'
+				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
 				,intSort					= 2
@@ -720,7 +720,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 3
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 16
-				,strLotId					= 'LOT DE MANUAL X 113-133.108985'
+				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
 				,intSort					= 1
