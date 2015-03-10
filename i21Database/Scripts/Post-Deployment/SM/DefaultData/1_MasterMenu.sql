@@ -1711,8 +1711,12 @@ GO
 		SELECT @HelpDeskActivitiesId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskModuleId
 
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskActivitiesId)
-        INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-        VALUES ('Project Lists', 'Help Desk', @HelpDeskActivitiesId, 'Project Lists', 'Screen', 'HelpDesk.view.ProjectList', 'small-screen', 0, 0, 0, 1, 7, 1)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Project Lists', 'Help Desk', @HelpDeskActivitiesId, 'Project Lists', 'Screen', 'HelpDesk.view.ProjectList', 'small-screen', 0, 0, 0, 1, 7, 1)
+        ELSE
+            UPDATE tblSMMasterMenu
+            SET strCommand = 'HelpDesk.view.ProjectList', intSort = 7
+            WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskActivitiesId
 GO
 
 	/* ------------------------------------------------- */
