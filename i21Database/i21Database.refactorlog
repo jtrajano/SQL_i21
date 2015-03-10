@@ -1981,4 +1981,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intStockReservationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="54a852e4-50bd-4f95-9d72-1fa1076fea24" ChangeDateTime="03/10/2015 18:59:59">
+    <Property Name="ElementName" Value="[dbo].[tblICLot].[dblWeightQty]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICLot]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblWeight" />
+  </Operation>
 </Operations>

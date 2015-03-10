@@ -8,22 +8,17 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
---DECLARE @STARTING_NUMBER_BATCH AS INT = 24 -- Lot Number batch number in the starting numbers table. 
---DECLARE @SerializedLotNumber AS NVARCHAR(40) 
---DECLARE @intLotId AS INT 
---DECLARE @strUserSuppliedLotNumber AS NVARCHAR(50)
---DECLARE @id AS INT
-
---DECLARE @intItemLocationId AS INT 
---DECLARE @intItemUOMId AS INT
---DECLARE @intLotTypeId AS INT
-
-DECLARE @GeneratedLotNumbers AS dbo.ItemLotTableType
+DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
 
-DECLARE @strItemNo AS NVARCHAR(50)
+-- Create the temp table 
+CREATE TABLE #GeneratedLotItems (
+	intLotId INT
+	,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+	,intDetailItemId INT 
+)
 
 ------------------------------------------------------------------------------
 -- Validation 
@@ -32,6 +27,7 @@ BEGIN
 	-- Check if all lot items and their quantities are valid. 
 	-- Get the top record and tell the user about it. 
 	-- Msg: The lot Quantity(ies) on %s must match its Open Receive Quantity.
+	DECLARE @strItemNo AS NVARCHAR(50)
 	SET @strItemNo = NULL 
 	SELECT	TOP 1 
 			@strItemNo = Item.strItemNo
@@ -56,132 +52,77 @@ END
 
 -- Get the list of item that needs lot numbers
 BEGIN 
-	INSERT INTO @GeneratedLotNumbers (
-			intItemId
+	INSERT INTO @ItemsThatNeedLotId (
+			intLotId
+			,strLotNumber
+			,strLotAlias
+			,intItemId
 			,intItemLocationId
-			,intItemUOMId 
-			,intDetailId
-			,strLotNumber		
+			,intSubLocationId
+			,intStorageLocationId
+			,dblQty
+			,intItemUOMId
+			,dblWeight
+			,intWeightUOMId
+			,dtmExpiryDate
+			,dtmManufacturedDate
+			,intOriginId
+			,strBOLNo
+			,strVessel
+			,strReceiptNumber
+			,strMarkings
+			,strNotes
+			,intVendorId
+			,strVendorLotNo
+			,intVendorLocationId
+			,strVendorLocation
+			,intDetailId		
 	)
-	SELECT	ReceiptItems.intItemId
-			,ItemLocation.intItemLocationId
-			,ReceiptItems.intUnitMeasureId
-			,ItemLot.intInventoryReceiptItemLotId
-			,ItemLot.strLotId
-			,dbo.fnGetItemLotType(ReceiptItems.intItemId)
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItems 
-				ON Receipt.intInventoryReceiptId = ReceiptItems.intInventoryReceiptId
+	SELECT	intLotId				= ItemLot.intLotId
+			,strLotNumber			= ItemLot.strLotNumber
+			,strLotAlias			= ItemLot.strLotAlias
+			,intItemId				= ReceiptItem.intItemId
+			,intItemLocationId		= ItemLocation.intItemLocationId
+			,intSubLocationId		= ItemLot.intSubLocationId
+			,intStorageLocationId	= ItemLot.intStorageLocationId
+			,dblQty					= ItemLot.dblQuantity
+			,intItemUOMId			= ReceiptItem.intUnitMeasureId
+			,dblWeight				= ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0)
+			,intWeightUOMId			= ItemLot.intWeightUOMId
+			,dtmExpiryDate			= ItemLot.dtmExpiryDate
+			,dtmManufacturedDate	= ItemLot.dtmManufacturedDate
+			,intOriginId			= ItemLot.intOriginId
+			,strBOLNo				= Receipt.strBillOfLading
+			,strVessel				= Receipt.strVessel
+			,strReceiptNumber		= Receipt.strReceiptNumber
+			,strMarkings			= ItemLot.strMarkings
+			,strNotes				= ItemLot.strRemarks
+			,intVendorId			= ISNULL(ItemLot.intVendorId, Receipt.intVendorId)  
+			,strVendorLotNo			= ItemLot.strVendorLotId
+			,intVendorLocationId	= ItemLot.intVendorLocationId
+			,strVendorLocation		= ItemLot.strVendorLocation
+			,intDetailId			= ItemLot.intInventoryReceiptItemLotId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
-				ON ReceiptItems.intItemId = Item.intItemId		
+				ON ReceiptItem.intItemId = Item.intItemId		
 			INNER JOIN dbo.tblICItemLocation ItemLocation
-				ON ReceiptItems.intItemId = ItemLocation.intItemId
+				ON ReceiptItem.intItemId = ItemLocation.intItemId
 				AND Receipt.intLocationId = ItemLocation.intLocationId
 			INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLot 			
-				ON ReceiptItems.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
+				ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
 	WHERE	Receipt.strReceiptNumber = @strTransactionId
 			AND ISNULL(intLotId, 0) = 0
 END 
 
----- Update the table variable and get all the items in the Item Lot table that does not have a lot number
---BEGIN 
---	SELECT	TOP 1 
---			@id = intId 
---			,@strItemNo = strItemNo
---			,@intItemLocationId = intItemLocationId
---			,@intItemUOMId = intItemUOMId
---			,@strUserSuppliedLotNumber = strLotNumber
---			,@intLotTypeId = intLotTypeId
---	FROM	@GeneratedLotNumbers 
---	WHERE	ISNULL(intLotId, 0) = 0
-
---	WHILE @id IS NOT NULL 
---	BEGIN 
---		-- Initialize the serial lot number field. 
---		SET @SerializedLotNumber = @strUserSuppliedLotNumber
-
---		-- Validate if the Manual lot item does not have a lot number. 
---		IF ISNULL(@SerializedLotNumber, '') = '' AND @intLotTypeId = @LotType_Manual
---		BEGIN 
---			--Please specify the lot numbers for %s.
---			RAISERROR(51037, 11, 1, @strItemNo);
---			RETURN;
---		END 
-
---		-- Generate the next lot number if non is found AND it is a serial lot item. 
---		IF ISNULL(@SerializedLotNumber, '') = '' 
---		BEGIN 		
---			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @SerializedLotNumber OUTPUT 
---		END 
-		
---		IF	ISNULL(@SerializedLotNumber, '') <> ''
---		BEGIN  
---			SET @intLotId = NULL 
-
---			-- Get the Lot id or insert a new record on the Lot master table. 
---			MERGE	
---			INTO	dbo.tblICLot 
---			WITH	(HOLDLOCK) 
---			AS		LotMaster
---			USING (
---					SELECT	intItemLocationId = @intItemLocationId
---							,intItemUOMId = @intItemUOMId
---							,strLotNumber = @SerializedLotNumber
---			) AS LotToUpdate
---				ON LotMaster.intItemLocationId = LotToUpdate.intItemLocationId 
---				AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
---				AND LotMaster.strLotNumber = LotToUpdate.strLotNumber 
-
---			-- If matched, get the Lot Id. 
---			WHEN MATCHED THEN 
---				UPDATE 
---				SET		@intLotId = LotMaster.intLotId 
-
---			-- If none found, insert a new lot record. 
---			WHEN NOT MATCHED THEN 
---				INSERT (
---					strLotNumber
---					,intItemLocationId
---					,intItemUOMId
---				) VALUES (
---					@SerializedLotNumber
---					,@intItemLocationId
---					,@intItemUOMId
---				)
---			;
-		
---			-- Get the lot id of the newly inserted record
---			IF @intLotId IS NULL 
---				SELECT @intLotId = SCOPE_IDENTITY();
---		END 
-
---		-- Update the table variable 
---		UPDATE	TOP (1) @GeneratedLotNumbers 
---		SET		intLotId = @intLotId
---				,strLotNumber = @SerializedLotNumber
---		WHERE	@intLotId IS NOT NULL 
---				AND intId = @id
-
---		-- Clean the values of the counter variables.
---		SET @id = NULL 
---		SET @strUserSuppliedLotNumber = NULL 
-
---		SELECT	TOP 1 
---				@id = intId 
---				,@strItemNo = strItemNo
---				,@intItemLocationId = intItemLocationId
---				,@intItemUOMId = intItemUOMId
---				,@strUserSuppliedLotNumber = strLotNumber
---				,@intLotTypeId = intLotTypeId
---		FROM	@GeneratedLotNumbers 
---		WHERE	ISNULL(intLotId, 0) = 0
---	END
---END 
-
--- Give the generated lot numbers back to the inventory receipt. 
+-- Assign the generated lot id's back to the inventory receipt item-lot table. 
 BEGIN 
 	UPDATE	dbo.tblICInventoryReceiptItemLot
 	SET		intLotId = LotNumbers.intLotId
-			,strLotId = LotNumbers.strLotNumber		
-	FROM	dbo.tblICInventoryReceiptItemLot ItemLot INNER JOIN @GeneratedLotNumbers LotNumbers
+			,strLotNumber = LotNumbers.strLotNumber		
+	FROM	dbo.tblICInventoryReceiptItemLot ItemLot INNER JOIN #GeneratedLotItems LotNumbers
 				ON ItemLot.intInventoryReceiptItemLotId = LotNumbers.intDetailId
 END 
+
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
+	DROP TABLE #GeneratedLotItems

@@ -72,7 +72,7 @@ This is a user-defined table type used in creating records to the lot master tab
 	Required
 
 
-*	[dblWeightQty] NUMERIC(18,6) NULL DEFAULT ((0))
+*	[dblWeight] NUMERIC(18,6) NULL DEFAULT ((0))
 	The actual weight of the lot in terms of intWeightUOMId. For example: intWeightUOMId is LBS and the weight-qty 
 	is 100 for four (4) 50-kg bags. This means the four bags are not really 200 kgs but 100 LBS. The system will
 	track the overall stock qty as 100 LBS but there are four bags of it, packed in 50-kg bags. 
@@ -80,8 +80,8 @@ This is a user-defined table type used in creating records to the lot master tab
 
 
 *	[intWeightUOMId] INT NULL	
-	The id of the weight uom id. It is related to the dblWeightQty. 
-	Optional but requried if dblWeightQty is not zero. 
+	The id of the weight uom id. It is related to the dblWeight. 
+	Optional but requried if dblWeight is not zero. 
 
 
 *	[dtmExpiryDate] DATETIME NULL
@@ -139,6 +139,11 @@ This is a user-defined table type used in creating records to the lot master tab
 	Optional 
 
 
+*	[strVendorLocation] COLLATE Latin1_General_CI_AS NULL
+	The string value of the vendor locatoin. 
+	Optional 
+
+
 *	[strContractNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	The contract number for the lot. 
 	Optional 
@@ -176,7 +181,7 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[intStorageLocationId]		INT NULL	
 	,[dblQty]					NUMERIC(18,6) DEFAULT ((0)) NOT NULL	
 	,[intItemUOMId]				INT NOT NULL
-	,[dblWeightQty]				NUMERIC(18,6) NULL DEFAULT ((0))
+	,[dblWeight]				NUMERIC(18,6) NULL DEFAULT ((0))
 	,[intWeightUOMId]			INT NULL	
 	,[dtmExpiryDate]			DATETIME NULL
 	,[dtmManufacturedDate]		DATETIME NULL
@@ -184,11 +189,12 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,[strMarkings]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	,[strNotes]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,[intVendorId]				INT NULL
 	,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[intVendorLocationId]		INT NULL
+	,[strVendorLocation]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[strContractNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[ysnReleasedToWarehouse]	BIT DEFAULT((0))
 	,[ysnProduced]				BIT DEFAULT((0))

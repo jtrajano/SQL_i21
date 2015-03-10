@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateUpdateLotNumber]
 	@ItemsForLot ItemLotTableType READONLY 
 	,@intUserId AS INT 
+	,@intLotStatusId AS INT = 1 -- (1: is Active, 2: is On Hold, 3: Quarantine) 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -9,23 +10,31 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
---DECLARE @id AS INT
-
---DECLARE @intItemLocationId AS INT 
---DECLARE @intItemUOMId AS INT
+DECLARE @Active AS INT = 1
+		,@OnHold AS INT = 2
+		,@Quarantine AS INT = 3
 
 DECLARE @intInsertedLotId AS INT 
-DECLARE @strItemNo AS NVARCHAR(50)
 DECLARE @intLotTypeId AS INT
+DECLARE @intLocationId AS INT 
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
 
+DECLARE @strItemNo AS NVARCHAR(50)
+
 -- Lot Number batch number in the starting numbers table. 
 DECLARE @STARTING_NUMBER_BATCH AS INT = 24 
 
-DECLARE @LotNumber AS NVARCHAR(40) 
-DECLARE @strUserSuppliedLotNumber AS NVARCHAR(50)
+-- If temp table does not exists, create a stub for it so that insert statement for the temp table will not fail. 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
+BEGIN 
+	CREATE TABLE #GeneratedLotItems (
+		intLotId INT
+		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+		,intDetailItemId INT 
+	);
+END
 
 DECLARE 
 	@intId						AS INT 
@@ -38,7 +47,7 @@ DECLARE
 	,@intStorageLocationId		AS INT
 	,@dblQty					AS NUMERIC(18,6) 
 	,@intItemUOMId				AS INT 
-	,@dblWeightQty				AS NUMERIC(18,6)
+	,@dblWeight					AS NUMERIC(18,6)
 	,@intWeightUOMId			AS INT
 	,@dtmExpiryDate				AS DATETIME
 	,@dtmManufacturedDate		AS DATETIME
@@ -46,11 +55,12 @@ DECLARE
 	,@strBOLNo					AS NVARCHAR(100)
 	,@strVessel					AS NVARCHAR(100)
 	,@strReceiptNumber			AS NVARCHAR(50)
-	,@strMarkings				AS NVARCHAR(100)
-	,@strNotes					AS NVARCHAR(100)
+	,@strMarkings				AS NVARCHAR(MAX)
+	,@strNotes					AS NVARCHAR(MAX)
 	,@intVendorId				AS INT 
 	,@strVendorLotNo			AS NVARCHAR(50)
 	,@intVendorLocationId		AS INT
+	,@strVendorLocation			AS NVARCHAR(100)
 	,@strContractNo				AS NVARCHAR(50)
 	,@ysnReleasedToWarehouse	AS BIT
 	,@ysnProduced				AS BIT 
@@ -74,7 +84,7 @@ SELECT  intId
 		,intStorageLocationId
 		,dblQty
 		,intItemUOMId
-		,dblWeightQty
+		,dblWeight
 		,intWeightUOMId
 		,dtmExpiryDate
 		,dtmManufacturedDate
@@ -87,6 +97,7 @@ SELECT  intId
 		,intVendorId
 		,strVendorLotNo
 		,intVendorLocationId
+		,strVendorLocation 
 		,strContractNo
 		,ysnReleasedToWarehouse
 		,ysnProduced
@@ -107,7 +118,7 @@ FETCH NEXT FROM loopItems INTO
 		,@intStorageLocationId
 		,@dblQty
 		,@intItemUOMId
-		,@dblWeightQty
+		,@dblWeight
 		,@intWeightUOMId
 		,@dtmExpiryDate
 		,@dtmManufacturedDate
@@ -120,6 +131,7 @@ FETCH NEXT FROM loopItems INTO
 		,@intVendorId
 		,@strVendorLotNo
 		,@intVendorLocationId
+		,@strVendorLocation
 		,@strContractNo
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
@@ -130,77 +142,195 @@ FETCH NEXT FROM loopItems INTO
 -----------------------------------------------------------------------------------------------------------------------------
 WHILE @@FETCH_STATUS = 0
 BEGIN 		
-		-- Get the type of lot (if manual or serialized)
-		SELECT @intLotTypeId = dbo.fnGetItemLotType(@intItemId);
+	-- Get the type of lot (if manual or serialized)
+	SELECT @intLotTypeId = dbo.fnGetItemLotType(@intItemId);
 
-		-- Validate if the Manual lot item does not have a lot number. 
-		IF ISNULL(@strLotNumber, '') = '' AND @intLotTypeId = @LotType_Manual
-		BEGIN 
-			SELECT	@strItemNo = strItemNo
-			FROM	dbo.tblICItem Item
-			WHERE	Item.intItemId = @intItemId
+	-- Get the company location id
+	SELECT	@intLocationId = intLocationId
+	FROM	dbo.tblICItemLocation 
+	WHERE	intItemLocationId = @intItemLocationId
 
-			--Please specify the lot numbers for %s.
-			RAISERROR(51037, 11, 1, @strItemNo);
-			RETURN;
-		END 
+	-- Validate if the Manual lot item does not have a lot number. 
+	IF ISNULL(@strLotNumber, '') = '' AND @intLotTypeId = @LotType_Manual
+	BEGIN 
+		SELECT	@strItemNo = strItemNo
+		FROM	dbo.tblICItem Item
+		WHERE	Item.intItemId = @intItemId
 
-		-- Generate the next lot number if non is found AND it is a serial lot item. 
-		IF @intLotTypeId = @LotType_Serial
-		BEGIN 		
-			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
-		END 
+		--Please specify the lot numbers for {Item}.
+		RAISERROR(51037, 11, 1, @strItemNo);
+		RETURN;
+	END 	
+	
+	-- Generate the next lot number - if it is blank AND it is a serial lot item. 
+	IF @intLotTypeId = @LotType_Serial
+	BEGIN 		
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
+	END 
+
+	-- Validate if the Serial lot item does not have a lot number. 
+	IF ISNULL(@strLotNumber, '') = '' AND @intLotTypeId = @LotType_Serial
+	BEGIN 
+		SELECT	@strItemNo = strItemNo
+		FROM	dbo.tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+
+		--Unable to generate the serial lot number for {Item}.
+		RAISERROR(51042, 11, 1, @strItemNo);
+		RETURN;
+	END 	
+
+	-- Upsert (update or insert) the record to the lot master table. 
+	BEGIN  
+		SET @intInsertedLotId = NULL 
+
+		-- Get the Lot id or insert a new record on the Lot master table. 
+		MERGE	
+		INTO	dbo.tblICLot 
+		WITH	(HOLDLOCK) 
+		AS		LotMaster
+		USING (
+				SELECT	intItemId = @intItemId
+						,intItemLocationId = @intItemLocationId
+						,intItemUOMId = @intItemUOMId
+						,intWeightUOMId = @intWeightUOMId
+						,strLotNumber = @strLotNumber
+						,intSubLocationId = @intSubLocationId
+						,intStorageLocationId = @intStorageLocationId
+		) AS LotToUpdate
+			ON LotMaster.intItemLocationId = LotToUpdate.intItemLocationId 
+			AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+			AND LotMaster.strLotNumber = LotToUpdate.strLotNumber 
+			AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+			AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+			AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+
+		-- If matched, get the Lot Id. 
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET		
+				dblQty					= @dblQty
+				,dtmExpiryDate			= @dtmExpiryDate
+				,strLotAlias			= @strLotAlias
+				,intLotStatusId			= @intLotStatusId
+				,dblWeight				= @dblWeight
+				,dblWeightPerQty		= dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight)
+				,intOriginId			= @intOriginId
+				,strBOLNo				= @strBOLNo
+				,strVessel				= @strVessel
+				,strReceiptNumber		= @strReceiptNumber
+				,strMarkings			= @strMarkings
+				,strNotes				= @strNotes
+				,intVendorId			= @intVendorId
+				,strVendorLotNo			= @strVendorLotNo
+				,intVendorLocationId	= @intVendorLocationId
+				,strVendorLocation		= @strVendorLocation
+				,strContractNo			= @strContractNo
+				,dtmManufacturedDate	= @dtmManufacturedDate
+				,ysnReleasedToWarehouse = @ysnReleasedToWarehouse
+				,ysnProduced			= @ysnProduced
+				,intConcurrencyId		= ISNULL(intConcurrencyId, 0) + 1
+				,@intInsertedLotId		= intLotId
+
+		-- If none found, insert a new lot record. 
+		WHEN NOT MATCHED THEN 
+			INSERT (
+				intItemId
+				,intLocationId
+				,intItemLocationId
+				,intItemUOMId
+				,strLotNumber
+				,intSubLocationId
+				,intStorageLocationId
+				,dblQty
+				,dtmExpiryDate
+				,strLotAlias
+				,intLotStatusId
+				,dblWeight
+				,intWeightUOMId
+				,dblWeightPerQty
+				,intOriginId
+				,strBOLNo
+				,strVessel
+				,strReceiptNumber
+				,strMarkings
+				,strNotes
+				,intVendorId
+				,strVendorLotNo
+				,intVendorLocationId
+				,strVendorLocation
+				,strContractNo
+				,dtmManufacturedDate
+				,ysnReleasedToWarehouse
+				,ysnProduced
+				,dtmDateCreated
+				,intCreatedUserId
+				,intConcurrencyId
+			) VALUES (
+				@intItemId
+				,@intLocationId
+				,@intItemLocationId
+				,@intItemUOMId
+				,@strLotNumber
+				,@intSubLocationId
+				,@intStorageLocationId
+				,@dblQty
+				,@dtmExpiryDate
+				,@strLotAlias
+				,@intLotStatusId
+				,@dblWeight
+				,@intWeightUOMId
+				,dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight)
+				,@intOriginId
+				,@strBOLNo
+				,@strVessel
+				,@strReceiptNumber
+				,@strMarkings
+				,@strNotes
+				,@intVendorId
+				,@strVendorLotNo
+				,@intVendorLocationId
+				,@strVendorLocation
+				,@strContractNo
+				,@dtmManufacturedDate
+				,@ysnReleasedToWarehouse
+				,@ysnProduced
+				,GETDATE()
+				,@intUserId
+				,1
+			)
+		;
 		
-		IF ISNULL(@strLotNumber, '') <> ''
-		BEGIN  
-			SET @intInsertedLotId = NULL 
-
-			-- Get the Lot id or insert a new record on the Lot master table. 
-			MERGE	
-			INTO	dbo.tblICLot 
-			WITH	(HOLDLOCK) 
-			AS		LotMaster
-			USING (
-					SELECT	intItemLocationId = @intItemLocationId
-							,intItemUOMId = @intItemUOMId
-							,strLotNumber = @LotNumber
-							,intSubLocationId = @intSubLocationId
-							,intStorageLocationId = @intStorageLocationId
-			) AS LotToUpdate
-				ON LotMaster.intItemLocationId = LotToUpdate.intItemLocationId 
-				AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
-				AND LotMaster.strLotNumber = LotToUpdate.strLotNumber 
-				AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
-				AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
-
-			-- If matched, get the Lot Id. 
-			WHEN MATCHED THEN 
-				UPDATE 
-				SET		@intLotId = LotMaster.intLotId 
-
-			-- If none found, insert a new lot record. 
-			WHEN NOT MATCHED THEN 
-				INSERT (
-					strLotNumber
-					,intItemLocationId
-					,intItemUOMId
-				) VALUES (
-					@LotNumber
-					,@intItemLocationId
-					,@intItemUOMId
-				)
-			;
-		
-			-- Get the lot id of the newly inserted record
-			IF @intInsertedLotId IS NULL 
-				SELECT @intInsertedLotId = SCOPE_IDENTITY();
-		END 
+		-- Get the lot id of the newly inserted record
+		IF @intInsertedLotId IS NULL 
+			SELECT @intInsertedLotId = SCOPE_IDENTITY();	 
 
 		-- Insert into a temp table 
-		-- 1. the @intInsertedLotId
-		-- 2. the intDetailItemId	
+		BEGIN 
+			INSERT INTO #GeneratedLotItems (
+				intLotId
+				,strLotNumber
+				,intDetailItemId
+			)
+			SELECT	@intInsertedLotId
+					,@strLotNumber
+					,@intDetailId
+		END 
+	END 
 
-	-- Attempt to fetch the next row from cursor. 
+	-- Validate if lot id is generated correctly. 
+	IF ISNULL(@intLotId, 0) = 0 AND ISNULL(@intInsertedLotId, 0) = 0 
+	BEGIN 
+		SELECT	@strItemNo = strItemNo
+		FROM	dbo.tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+
+		--Failed to process the lot number for {Item}.
+		RAISERROR(51043, 11, 1, @strItemNo);
+		RETURN;
+	END 	
+	
+	-- Fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO 
 		@intId
 		,@intLotId
@@ -212,7 +342,7 @@ BEGIN
 		,@intStorageLocationId
 		,@dblQty
 		,@intItemUOMId
-		,@dblWeightQty
+		,@dblWeight
 		,@intWeightUOMId
 		,@dtmExpiryDate
 		,@dtmManufacturedDate
@@ -225,14 +355,16 @@ BEGIN
 		,@intVendorId
 		,@strVendorLotNo
 		,@intVendorLocationId
+		,@strVendorLocation
 		,@strContractNo
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
 		,@intDetailId;
 END
+
+CLOSE loopItems;
+DEALLOCATE loopItems;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
 
-CLOSE loopItems;
-DEALLOCATE loopItems;

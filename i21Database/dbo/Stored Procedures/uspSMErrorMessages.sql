@@ -167,3 +167,12 @@ EXEC sp_addmessage 51040,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51041) EXEC sp_dropmessage 51041, 'us_english'	
 SET @strmessage = 'G/L account setup is missing for %s.'
 EXEC sp_addmessage 51041,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51042) EXEC sp_dropmessage 51042, 'us_english'	
+SET @strmessage = 'Unable to generate the serial lot number for %s.'
+EXEC sp_addmessage 51042,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51043) EXEC sp_dropmessage 51043, 'us_english'	
+SET @strmessage = 'Failed to process the lot number for %s.'
+EXEC sp_addmessage 51043,11,@strmessage,'us_english','False'
+
