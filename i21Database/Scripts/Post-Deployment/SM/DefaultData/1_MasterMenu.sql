@@ -2023,6 +2023,10 @@ GO
         UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller.OriginUtility','view.OriginConversions') 
         WHERE strMenuName = 'Origin Conversions' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.OriginUtility'
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Origin Conversions' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminUtilitiesMenuId)
+        UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller.OriginUtility','view.OriginConversions') 
+        WHERE strMenuName = 'Origin Conversions' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.OriginUtility'
+
 
 	DECLARE @SystemManagerModuleId INT
 	SELECT @SystemManagerModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Common Info' AND strModuleName = 'System Manager' AND intParentMenuID = 0
@@ -2163,6 +2167,20 @@ GO
 		
 		SET @ARMenuName = 'Customer Contact List'
 		SET @ARCommand ='AccountsReceivable.view.CustomerContactList'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
+		END	
+
+		SET @ARMenuName = 'Customers'
+		SET @ARCommand ='AccountsReceivable.view.Customer'
+		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
+		BEGIN 
+			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
+		END	
+
+		SET @ARMenuName = 'Salesperson'
+		SET @ARCommand ='AccountsReceivable.view.Salesperson'
 		IF EXISTS (SELECT TOP 1 1 FROM [tblSMMasterMenu] WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId)
 		BEGIN 
 			UPDATE tblSMMasterMenu SET strCommand = @ARCommand WHERE strMenuName = @ARMenuName AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @ARMaintenanceId
