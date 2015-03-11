@@ -1132,6 +1132,16 @@
     <Build Include="dbo\Functions\fnGetTotalStockValueFromTransactionBatch.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryLotTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFBlendSheetReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCompleteBlendsheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFConsumeWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetAvailableLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPostConsumption.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPostProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProduceWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReleaseBlendSheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveBlendSheet.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
