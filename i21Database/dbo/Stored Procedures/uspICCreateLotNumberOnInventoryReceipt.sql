@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateLotNumberOnInventoryReceipt]
 	@strTransactionId NVARCHAR(40) = NULL   
 	,@intUserId INT
+	,@ysnPost BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -86,9 +87,9 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= ItemLot.intSubLocationId
 			,intStorageLocationId	= ItemLot.intStorageLocationId
-			,dblQty					= ItemLot.dblQuantity
+			,dblQty					= ItemLot.dblQuantity * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
 			,intItemUOMId			= ReceiptItem.intUnitMeasureId
-			,dblWeight				= ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0)
+			,dblWeight				= ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0) * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
 			,intWeightUOMId			= ItemLot.intWeightUOMId
 			,dtmExpiryDate			= ItemLot.dtmExpiryDate
 			,dtmManufacturedDate	= ItemLot.dtmManufacturedDate

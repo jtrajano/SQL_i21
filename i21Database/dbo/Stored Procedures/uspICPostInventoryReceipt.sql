@@ -116,19 +116,20 @@ BEGIN
 	END  
 END   
 
--- Create and validate the lot numbers
-BEGIN 	
-	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt 
-		@strTransactionId
-		,@intUserId
-
-	IF @@ERROR <> 0 GOTO Post_Exit
-END
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
 BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
+
+-- Create and validate the lot numbers
+IF @ysnRecap = 0 
+BEGIN 	
+	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt 
+		@strTransactionId
+		,@intUserId
+		,@ysnPost
+END
 
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   

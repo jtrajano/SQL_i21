@@ -191,6 +191,7 @@ BEGIN
 		AS		LotMaster
 		USING (
 				SELECT	intItemId = @intItemId
+						,intLotId = @intLotId
 						,intLocationId = @intLocationId
 						,intItemUOMId = @intItemUOMId
 						,intWeightUOMId = @intWeightUOMId
@@ -198,23 +199,25 @@ BEGIN
 						,intSubLocationId = @intSubLocationId
 						,intStorageLocationId = @intStorageLocationId
 		) AS LotToUpdate
-			ON LotMaster.intLocationId = LotToUpdate.intLocationId 
+			ON LotMaster.intItemId = LotToUpdate.intItemId
+			AND LotMaster.intLotId = LotToUpdate.intLotId
+			AND LotMaster.intLocationId = LotToUpdate.intLocationId 
 			AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
 			AND LotMaster.strLotNumber = LotToUpdate.strLotNumber 
 			AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
 			AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 			AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 
-		-- If matched, get the Lot Id. 
+		-- If matched, update the lot record 
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET		
-				dblQty					= @dblQty
+				dblQty					= ISNULL(LotMaster.dblQty, 0) + @dblQty
 				,dtmExpiryDate			= @dtmExpiryDate
 				,strLotAlias			= @strLotAlias
 				,intLotStatusId			= @intLotStatusId
 				,dblWeight				= @dblWeight
-				,dblWeightPerQty		= dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight)
+				,dblWeightPerQty		= ISNULL(LotMaster.dblWeightPerQty, 0) + dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight)
 				,intOriginId			= @intOriginId
 				,strBOLNo				= @strBOLNo
 				,strVessel				= @strVessel
@@ -230,7 +233,7 @@ BEGIN
 				,ysnReleasedToWarehouse = @ysnReleasedToWarehouse
 				,ysnProduced			= @ysnProduced
 				,intConcurrencyId		= ISNULL(intConcurrencyId, 0) + 1
-				,@intInsertedLotId		= intLotId
+				,@intInsertedLotId		= @intLotId
 
 		-- If none found, insert a new lot record. 
 		WHEN NOT MATCHED THEN 
@@ -303,7 +306,10 @@ BEGIN
 		
 		-- Get the lot id of the newly inserted record
 		IF @intInsertedLotId IS NULL 
-			SELECT @intInsertedLotId = SCOPE_IDENTITY();	 
+		BEGIN 
+			SELECT @intLotId = SCOPE_IDENTITY();
+			SELECT @intInsertedLotId = SCOPE_IDENTITY();
+		END 
 
 		-- Insert into a temp table 
 		BEGIN 
@@ -312,7 +318,7 @@ BEGIN
 				,strLotNumber
 				,intDetailId
 			)
-			SELECT	@intInsertedLotId
+			SELECT	@intLotId
 					,@strLotNumber
 					,@intDetailId
 		END 
