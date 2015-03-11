@@ -918,7 +918,7 @@ GO
 
 			-- Payroll / Activities / Paychecks
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Paychecks' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollActivityId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Paychecks', 'Payroll', @PayrollActivityId, 'Paychecks', 'Screen', 'pr/paycheck', 'small-screen', 1, 1, 0, 1, 1, 0
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Paychecks', 'Payroll', @PayrollActivityId, 'Paychecks', 'Screen', 'Payroll.view.Paycheck', 'small-screen', 1, 1, 0, 1, 1, 0
 
 			/*
 			-- Payroll / Activities / Process Pay Groups
