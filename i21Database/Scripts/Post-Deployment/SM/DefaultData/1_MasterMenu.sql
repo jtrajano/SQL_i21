@@ -758,14 +758,7 @@ GO
 		SET strCommand = 'Inventory.view.InventoryUOM', intSort = 10
 		WHERE strMenuName = 'Inventory UOM' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing Cell' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
-		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Manufacturing Cell', 'Inventory', @InventoryMaintenanceId, 'Manufacturing Cell', 'Screen', 'Inventory.view.ManufacturingCell', 'small-screen', 1, 1, 0, 1, 11, 0)
-	ELSE
-		UPDATE tblSMMasterMenu
-		SET strCommand = 'Inventory.view.ManufacturingCell', intSort = 11
-		WHERE strMenuName = 'Manufacturing Cell' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId
-
+	
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reasons' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
 		VALUES ('Reasons', 'Inventory', @InventoryMaintenanceId, 'Reasons', 'Screen', 'Inventory.view.ReasonCode', 'small-screen', 1, 1, 0, 1, 12, 0)
@@ -887,7 +880,7 @@ GO
 		AND intParentMenuID = @InventoryMaintenanceId
 
 	DELETE FROM tblSMMasterMenu 
-	WHERE strMenuName = 'Pack Type' 
+	WHERE strMenuName = 'Manufacturing Cell' 
 		AND strModuleName = 'Inventory' 
 		AND intParentMenuID = @InventoryMaintenanceId
 
@@ -1921,19 +1914,35 @@ GO
 
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing Process' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES ('Manufacturing Process', 'Manufacturing', @ManufacturingMaintenanceId, 'Manufacturing Process', 'Screen', 'Manufacturing.view.ManufacturingProcess', 'small-screen', 0, 0, 0, 1, 0, 1)
+			VALUES ('Manufacturing Process', 'Manufacturing', @ManufacturingMaintenanceId, 'Manufacturing Process', 'Screen', 'Manufacturing.view.ManufacturingProcess', 'small-screen', 0, 0, 0, 1, 1, 1)
 		ELSE
 			UPDATE tblSMMasterMenu
-			SET strCommand = 'Manufacturing.view.ManufacturingProcess', intSort = 0
+			SET strCommand = 'Manufacturing.view.ManufacturingProcess', intSort = 1
 			WHERE strMenuName = 'Manufacturing Process' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId
 			
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Recipe' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES ('Recipe', 'Manufacturing', @ManufacturingMaintenanceId, 'Recipe', 'Screen', 'Manufacturing.view.Recipe', 'small-screen', 0, 0, 0, 1, 0, 1)
+			VALUES ('Recipe', 'Manufacturing', @ManufacturingMaintenanceId, 'Recipe', 'Screen', 'Manufacturing.view.Recipe', 'small-screen', 0, 0, 0, 1, 2, 1)
 		ELSE
 			UPDATE tblSMMasterMenu
-			SET strCommand = 'Manufacturing.view.Recipe', intSort = 0
+			SET strCommand = 'Manufacturing.view.Recipe', intSort = 2
 			WHERE strMenuName = 'Recipe' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing Cell' AND strModuleName = 'Inventory' AND intParentMenuID = @ManufacturingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Manufacturing Cell', 'Inventory', @ManufacturingMaintenanceId, 'Manufacturing Cell', 'Screen', 'Inventory.view.ManufacturingCell', 'small-screen', 1, 1, 0, 1, 3, 0)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Inventory.view.ManufacturingCell', intSort = 3
+			WHERE strMenuName = 'Manufacturing Cell' AND strModuleName = 'Inventory' AND intParentMenuID = @ManufacturingMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Pack Type' AND strModuleName = 'Inventory' AND intParentMenuID = @ManufacturingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Pack Type', 'Inventory', @ManufacturingMaintenanceId, 'Pack Type', 'Screen', 'Inventory.view.PackType', 'small-screen', 1, 1, 0, 1, 4, 0)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Inventory.view.PackType', intSort = 4
+			WHERE strMenuName = 'Pack Type' AND strModuleName = 'Inventory' AND intParentMenuID = @ManufacturingMaintenanceId
 
 	/* --------------------------------------------------- */
 	/* -- End of Create Manufacturing Module Menu -- */
