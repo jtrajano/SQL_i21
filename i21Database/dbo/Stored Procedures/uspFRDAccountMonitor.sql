@@ -1,4 +1,4 @@
-CREATE PROCEDURE  [dbo].[uspFRAccountMonitor]
+CREATE PROCEDURE  [dbo].[uspFRDAccountMonitor]
 @intRowId			AS INT,
 @successfulCount	AS INT = 0 OUTPUT
 AS
@@ -10,6 +10,7 @@ SET NOCOUNT ON
 	
 	DECLARE @ConcurrencyId AS INT = (SELECT TOP 1 intConcurrencyId FROM tblFRRow WHERE intRowId = @intRowId)
 	DECLARE @RowDetailId AS INT
+	DECLARE @RowRefNo AS INT
 	DECLARE @Filter AS NVARCHAR(MAX)
 	
 	DELETE tblFRAccountMonitor WHERE dtmEntered < DATEADD(day, -1, GETDATE());
@@ -20,18 +21,20 @@ SET NOCOUNT ON
 		CREATE TABLE #TempRowDesign
 		(
 			 intRowDetailId		INT
+			,intRefNo			INT
 			,strAccountsUsed	NVARCHAR(MAX)
 		)	
 		
 		INSERT INTO #TempRowDesign 
-			SELECT intRowDetailId, REPLACE(REPLACE(REPLACE(REPLACE(strAccountsUsed,'[ID]','[strAccountId]'),'[Description]','[strDescription]'),'[Group]','[strAccountGroup]'),'[Type]','[strAccountType]') FROM tblFRRowDesign WHERE intRowId = @intRowId and LEN(strAccountsUsed) > 1
-			
+			SELECT intRowDetailId, intRefNo, REPLACE(REPLACE(REPLACE(REPLACE(strAccountsUsed,'[ID]','[strAccountId]'),'[Description]','[strDescription]'),'[Group]','[strAccountGroup]'),'[Type]','[strAccountType]') FROM tblFRRowDesign WHERE intRowId = @intRowId and LEN(strAccountsUsed) > 1
+
 		WHILE EXISTS(SELECT 1 FROM #TempRowDesign)
 		BEGIN
-			SELECT TOP 1 @RowDetailId = intRowDetailId, @Filter = strAccountsUsed FROM #TempRowDesign
+			SELECT TOP 1 @RowDetailId = intRowDetailId, @RowRefNo = intRefNo, @Filter = strAccountsUsed FROM #TempRowDesign
 			
 			EXEC('INSERT INTO tblFRAccountMonitor (
 				  [intRowId]
+				 ,[intRefNo]
 				 ,[intAccountId]
 				 ,[strAccountId]
 				 ,[strPrimary]
@@ -42,6 +45,7 @@ SET NOCOUNT ON
 			)
 			SELECT 
 				 ' + @intRowId + '
+				 ,' + @RowRefNo + '
 				 ,[intAccountId]
 				 ,[strAccountId]
 				 ,[Primary Account]
@@ -71,7 +75,7 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 --DECLARE @intCount AS INT
 
---EXEC [dbo].[uspFRAccountMonitor]
+--EXEC [dbo].[uspFRDAccountMonitor]
 --			@intRowId	 = 15,						-- ROW Id			
 --			@successfulCount = @intCount OUTPUT		-- OUTPUT PARAMETER THAT RETURNS ROW Id
 				

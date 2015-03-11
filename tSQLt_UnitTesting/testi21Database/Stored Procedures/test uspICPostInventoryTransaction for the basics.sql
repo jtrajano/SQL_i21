@@ -7,8 +7,12 @@ BEGIN
 
 		DECLARE	@intItemId AS INT
 				,@intItemLocationId AS INT
+				,@intItemUOMId AS INT 
+				,@intSubLocationId AS INT
+				,@intStorageLocationId AS INT
 				,@dtmDate AS DATETIME
-				,@dblUnitQty AS NUMERIC(18, 6)
+				,@dblQty AS NUMERIC(18, 6)
+				,@dblUOMQty AS NUMERIC(18, 6)
 				,@dblCost AS NUMERIC(18, 6)
 				,@dblValue AS NUMERIC(18, 6)
 				,@dblSalesPrice AS NUMERIC(18, 6)
@@ -27,12 +31,22 @@ BEGIN
 				,@intUserId AS INT
 				,@InventoryTransactionIdentityId AS INT
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		CREATE TABLE expected (
 			intInventoryTransactionId INT
 			,intItemId INT
 			,intItemLocationId INT
+			,intItemUOMId INT
+			,intSubLocationId INT
+			,intStorageLocationId INT
 			,dtmDate DATETIME
-			,dblUnitQty NUMERIC(18, 6)
+			,dblQty NUMERIC(18, 6)
 			,dblCost NUMERIC(18, 6)
 			,dblValue NUMERIC(18, 6)
 			,dblSalesPrice NUMERIC(18, 6)
@@ -55,8 +69,11 @@ BEGIN
 			intInventoryTransactionId INT
 			,intItemId INT
 			,intItemLocationId INT
+			,intItemUOMId INT
+			,intSubLocationId INT
+			,intStorageLocationId INT
 			,dtmDate DATETIME
-			,dblUnitQty NUMERIC(18, 6)
+			,dblQty NUMERIC(18, 6)
 			,dblCost NUMERIC(18, 6)
 			,dblValue NUMERIC(18, 6)
 			,dblSalesPrice NUMERIC(18, 6)
@@ -82,8 +99,12 @@ BEGIN
 		EXEC dbo.uspICPostInventoryTransaction
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId 
+				,@intSubLocationId
+				,@intStorageLocationId 
 				,@dtmDate
-				,@dblUnitQty
+				,@dblQty
+				,@dblUOMQty
 				,@dblCost
 				,@dblValue
 				,@dblSalesPrice

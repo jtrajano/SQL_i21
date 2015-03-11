@@ -26,7 +26,11 @@ DECLARE @BANK_DEPOSIT INT = 1
   ,@ORIGIN_EFT AS INT = 13  
   ,@ORIGIN_WITHDRAWAL AS INT = 14  
   ,@ORIGIN_WIRE AS INT = 15  
-  ,@AP_PAYMENT AS INT = 16  
+  ,@AP_PAYMENT AS INT = 16
+  ,@BANK_STMT_IMPORT AS INT = 17
+  ,@AR_PAYMENT AS INT = 18
+  ,@VOID_CHECK AS INT = 19
+  ,@AP_ECHECK AS INT = 20
   
 -- Sample XML string structure:  
 --SET @xmlparam = '  
@@ -110,4 +114,4 @@ FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 		INNER JOIN [dbo].[tblAPBill] BILL
 			ON PYMTDetail.intBillId = BILL.intBillId
 WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
-		AND F.intBankTransactionTypeId = @AP_PAYMENT
+		AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)

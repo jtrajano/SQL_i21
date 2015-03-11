@@ -17,6 +17,13 @@ BEGIN
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 0
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'Dummy-000001'
@@ -28,7 +35,6 @@ BEGIN
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
@@ -48,10 +54,10 @@ BEGIN
 			,@dtmDate	
 		);	
 	
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost) VALUES (1, @WetGrains, 10, 10, 12.50);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost) VALUES (1, @StickyGrains, 20, 10, 13.50);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost) VALUES (1, @PremiumGrains, 30, 10, 9.10);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost) VALUES (1, @WetGrains, 40, 10, 15.52);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId) VALUES (1, @WetGrains, 10, 10, 12.50, @WetGrains_BushelUOMId);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId) VALUES (1, @StickyGrains, 20, 10, 13.50, @StickyGrains_BushelUOMId);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId) VALUES (1, @PremiumGrains, 30, 10, 9.10, @PremiumGrains_BushelUOMId);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId) VALUES (1, @WetGrains, 40, 10, 15.52, @WetGrains_BushelUOMId);
 		
 		CREATE TABLE actual (
 			dblDebit NUMERIC(18,6)
@@ -82,7 +88,7 @@ BEGIN
 		-- Add a spy for uspPOReceived
 		EXEC tSQLt.SpyProcedure 'dbo.uspPOReceived';						
 	END 
-	
+
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICPostInventoryReceipt
@@ -112,4 +118,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-END 
+END

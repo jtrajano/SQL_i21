@@ -1,24 +1,28 @@
-﻿CREATE TABLE [dbo].[tblPREmployeeTimeOff](
-	[intEmployeeTimeOffId] [int] NOT NULL IDENTITY,
-	[intEmployeeId] INT NOT NULL,
-	[intTypeTimeOffId] INT NOT NULL,
-	[dblRate] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblPerPeriod] [numeric](18, 6) NULL DEFAULT ((0)),
-	[strPeriod] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL DEFAULT ((0)),
-	[strAwardPeriod] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL DEFAULT ((0)),
-	[dblMaxCarryover] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblMaxEarned] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dtmLastAward] DATETIME NULL, 
-    [dblHoursAccrued] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [dblHoursEarned] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [dblHoursUsed] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	[dtmEligible] [datetime] NULL DEFAULT (getdate()),
-	[intSort] [int] NULL,
-	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPREmployeeTimeOff] PRIMARY KEY ([intEmployeeTimeOffId]), 
-    CONSTRAINT [FK_tblPREmployeeTimeOff_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]), 
-    CONSTRAINT [FK_tblPREmployeeTimeOff_tblPRTypeTimeOff] FOREIGN KEY ([intTypeTimeOffId]) REFERENCES [tblPRTypeTimeOff]([intTypeTimeOffId]),
-) ON [PRIMARY]
+﻿CREATE TABLE [dbo].[tblPREmployeeTimeOff] (
+    [intEmployeeTimeOffId] INT             IDENTITY (1, 1) NOT NULL,
+    [intEmployeeId]        INT             NOT NULL,
+    [intTypeTimeOffId]     INT             NOT NULL,
+    [dblRate]              NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblRa__73341951] DEFAULT ((0)) NULL,
+    [dblPerPeriod]         NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblPe__74283D8A] DEFAULT ((0)) NULL,
+    [strPeriod]            NVARCHAR (30)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tblPREmpl__strPe__751C61C3] DEFAULT ((0)) NULL,
+    [strAwardPeriod]       NVARCHAR (30)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tblPREmpl__strAw__761085FC] DEFAULT ((0)) NULL,
+    [dblMaxCarryover]      NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblMa__7704AA35] DEFAULT ((0)) NULL,
+    [dblMaxEarned]         NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblMa__77F8CE6E] DEFAULT ((0)) NULL,
+    [dtmLastAward]         DATETIME        NULL,
+    [dblHoursAccrued]      NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblHo__78ECF2A7] DEFAULT ((0)) NULL,
+    [dblHoursEarned]       NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblHo__79E116E0] DEFAULT ((0)) NULL,
+    [dblHoursUsed]         NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblHo__7AD53B19] DEFAULT ((0)) NULL,
+    [dtmEligible]          DATETIME        CONSTRAINT [DF__tblPREmpl__dtmEl__7BC95F52] DEFAULT (getdate()) NULL,
+    [intSort]              INT             NULL,
+    [intConcurrencyId]     INT             CONSTRAINT [DF__tblPREmpl__intCo__7CBD838B] DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblPREmployeeTimeOff] PRIMARY KEY CLUSTERED ([intEmployeeTimeOffId] ASC),
+    CONSTRAINT [FK_tblPREmployeeTimeOff_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeTimeOff_tblPRTypeTimeOff] FOREIGN KEY ([intTypeTimeOffId]) REFERENCES [dbo].[tblPRTypeTimeOff] ([intTypeTimeOffId])
+);
+
+
+
+
 GO
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeTimeOff] ON [dbo].[tblPREmployeeTimeOff] ([intEmployeeId], [intTypeTimeOffId]) WITH (IGNORE_DUP_KEY = OFF)

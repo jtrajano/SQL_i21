@@ -13,7 +13,7 @@ RETURN (
 			CostingMethod =  ISNULL(ItemLevel.intCostingMethod, ItemLocationCategoryLevel.intCostingMethod)
 	FROM	(
 				SELECT	intCostingMethod =  
-							CASE	WHEN Item.strLotTracking IN ('Yes, Manual', 'Yes, Serial Number') THEN (SELECT intCostingMethodId FROM	dbo.tblICCostingMethod WHERE strCostingMethod = 'LOT COST') 
+							CASE	WHEN Item.strLotTracking IN ('Yes - Manual', 'Yes - Serial Number') THEN (SELECT intCostingMethodId FROM	dbo.tblICCostingMethod WHERE strCostingMethod = 'LOT COST') 
 									ELSE NULL 
 							END 
 				FROM	dbo.tblICItem Item

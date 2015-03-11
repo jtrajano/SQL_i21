@@ -3,7 +3,8 @@ AS
 
 	SELECT	E.intEntityId,
 			E.strName,
-			'Customer' AS strEntity 
+			'Customer' AS strEntity,
+			C.strCustomerNumber strNumber 
 	FROM	tblEntity		E
 	JOIN	tblARCustomer	C	ON	C.intEntityId = E.intEntityId
 	
@@ -11,7 +12,8 @@ AS
 	
 	SELECT	E.intEntityId,
 			E.strName,
-			'Vendor' AS strEntity 
+			'Vendor' AS strEntity,
+			V.strVendorId 
 	FROM	tblEntity		E
 	JOIN	tblAPVendor		V	ON	V.intEntityId = E.intEntityId
 	

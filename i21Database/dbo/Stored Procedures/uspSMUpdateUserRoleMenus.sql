@@ -36,7 +36,12 @@ BEGIN TRY
 		
 		-- Iterate through all affected user roles and apply Master Menus
 		INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
-		SELECT @UserRoleID, intMenuID, @IsAdmin, intSort = intMenuID FROM tblSMMasterMenu
+		SELECT @UserRoleID, intMenuID, (CASE @IsAdmin WHEN 1
+										THEN (CASE @ForceVisibility WHEN 1
+											THEN 1
+											ELSE ISNULL((SELECT ysnVisible FROM tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @UserRoleID), 0) END)
+										ELSE 0 END),
+		intSort = intMenuID FROM tblSMMasterMenu Menu
 		WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
 		
 		IF (@IsAdmin = 0)

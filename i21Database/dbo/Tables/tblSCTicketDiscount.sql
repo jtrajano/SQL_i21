@@ -8,6 +8,7 @@
     [dblDiscountAmount] DECIMAL(9, 6) NOT NULL, 
     [strShrinkWhat] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
     [dblShrinkPercent] DECIMAL(7, 3) NOT NULL, 
+	[ysnGraderAutoEntry] BIT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicketDiscount_intTicketDiscountId] PRIMARY KEY ([intTicketDiscountId]), 
     CONSTRAINT [UK_tblSCTicketDiscount_intTicketId_strDiscountCode] UNIQUE ([intTicketId],[strDiscountCode]), 
@@ -95,3 +96,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicketDiscount',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Grader Auto Entry',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicketDiscount',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnGraderAutoEntry'

@@ -1,14 +1,15 @@
-﻿CREATE TABLE [dbo].[tblPRTemplateEarningTax]
-(
-	[intTemplateEarningTaxId] INT NOT NULL IDENTITY , 
-    [intTemplateEarningId] INT NOT NULL, 
-    [intTypeTaxId] INT NOT NULL, 
-    [intSort] INT NULL, 
-    [intConcurrencyId] INT NULL, 
-    CONSTRAINT [PK_tblPRTemplateEarningTax] PRIMARY KEY ([intTemplateEarningTaxId]), 
-    CONSTRAINT [FK_tblPRTemplateEarningTax_tblPRTemplateEarning] FOREIGN KEY ([intTemplateEarningId]) REFERENCES [tblPRTemplateEarning]([intTemplateEarningId]), 
-    CONSTRAINT [FK_tblPRTemplateEarningTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId])
-)
+﻿CREATE TABLE [dbo].[tblPRTemplateEarningTax] (
+    [intTemplateEarningTaxId] INT IDENTITY (1, 1) NOT NULL,
+    [intTemplateEarningId]    INT NOT NULL,
+    [intTypeTaxId]            INT NOT NULL,
+    [intSort]                 INT NULL,
+    [intConcurrencyId]        INT NULL,
+    CONSTRAINT [PK_tblPRTemplateEarningTax] PRIMARY KEY CLUSTERED ([intTemplateEarningTaxId] ASC),
+    CONSTRAINT [FK_tblPRTemplateEarningTax_tblPRTemplateEarning] FOREIGN KEY ([intTemplateEarningId]) REFERENCES [dbo].[tblPRTemplateEarning] ([intTemplateEarningId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPRTemplateEarningTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId])
+);
+
+
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

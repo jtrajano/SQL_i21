@@ -52,7 +52,7 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual	
 		-- valid item and invalid location
-		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@StickyGrains, @InvalidLocation, NULL)		
+		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@StickyGrains, @InvalidLocation, NULL, NULL)		
 	END
 
 	-- Assert

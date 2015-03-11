@@ -452,9 +452,6 @@
     <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for an invalid item.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICProcessToItemReceipt for errors thrown by uspICIncreaseOnOrderQty.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for increase in on-order qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for decrease in on-order qty.sql" />
@@ -794,6 +791,71 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspPOReceived.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for non-lot items.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake data for inventory receipt table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for lot items.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for mix of lot and non-lot items.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Functions\test fnGetItemLotType for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemLotType for No Lot Items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemLotType for Yes Manual.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemLotType for Yes Serial.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt and expect no exceptions.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspICCreateLotNumberOnInventoryReceipt.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Inventory type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Assembly or Blend type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Manufacturing type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Raw Material type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for Commodity type.sql" />
+    <Build Include="testi21Database\Functions\test fnIsStockTrackingItem for non-stock keeping type.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateUnitCost for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateUnitCost for the zero unit qty.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateUnitCost for the non-zero unit qty.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateStockUnitQty for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateStockUnitQty for the non-zero unit qty.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateStockUnitQty for the zero unit qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the low stocks and non-lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the low stocks and lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the high stocks and lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the high stocks and non-lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert non-lot items into tblICStockReservation.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert lot items into tblICStockReservation.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert lot items reservations and replace existing data.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert non-lot items and replace existing data.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReserveStockForInventoryShipment for calling the sub procedures.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple lot items and recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple lot items and non-recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one lot items and recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one lot items and non-recap.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for manual lot items.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for serial lot items.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
   </ItemGroup>

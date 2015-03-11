@@ -10,6 +10,7 @@ SELECT
 	,B.intAccountId
 	,B.intTaxId
 	,B.intStorageLocationId
+	,B.intSubLocationId
 	,B.intLocationId
 	,B.dblQtyOrdered
 	,B.dblQtyReceived
@@ -26,10 +27,15 @@ SELECT
 	,C.strVendorId
 	,C.intVendorId
 	,D.strItemNo
+	,D.strLotTracking
 	,E.strUnitMeasure AS strUOM
+	,F.strSubLocationName
+	,G.strName AS strStorageName
 FROM tblPOPurchase A
 	INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN tblAPVendor C ON A.intVendorId = C.intVendorId
 	LEFT JOIN tblICItem D ON B.intItemId = D.intItemId
 	LEFT JOIN tblICUnitMeasure E ON B.intUnitOfMeasureId = E.intUnitMeasureId
+	LEFT JOIN tblSMCompanyLocationSubLocation F ON B.intSubLocationId = F.intCompanyLocationSubLocationId
+	LEFT JOIN tblICStorageLocation G ON B.intStorageLocationId = G.intStorageLocationId
 	

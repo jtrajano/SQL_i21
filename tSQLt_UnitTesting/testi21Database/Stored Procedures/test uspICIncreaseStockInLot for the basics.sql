@@ -32,6 +32,7 @@ BEGIN
 		-- Create the variables 
 		DECLARE @intItemId AS INT
 				,@intItemLocationId AS INT
+				,@intItemUOMId AS INT
 				,@intLotId AS INT
 				,@dblQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
@@ -54,6 +55,7 @@ BEGIN
 		EXEC dbo.uspICIncreaseStockInLot
 			@intItemId
 			,@intItemLocationId
+			,@intItemUOMId
 			,@intLotId
 			,@dblQty
 			,@dblCost
@@ -107,5 +109,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-
 END 

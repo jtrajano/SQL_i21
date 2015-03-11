@@ -17,6 +17,7 @@ Type the overview for the table here.
 		[strDescription]             NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
 		[intManufacturerId]          INT             NULL,
 		[intBrandId]                 INT             NULL,
+		[intCategoryId]				INT				NULL,
 		[strStatus]                NVARCHAR(50)    COLLATE Latin1_General_CI_AS           NULL,
 		[strModelNo]                 NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
 		[strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -113,7 +114,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_tblICRinFuelCategory] FOREIGN KEY ([intRINFuelTypeId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]), 
 		CONSTRAINT [FK_tblICItem_MedicationTag] FOREIGN KEY ([intMedicationTag]) REFERENCES [tblICTag]([intTagId]),
 		CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
-		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])  
+		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
+		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId])  
 	);
 	GO
 

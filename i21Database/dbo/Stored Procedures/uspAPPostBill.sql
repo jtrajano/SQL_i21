@@ -582,13 +582,14 @@ END
 
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
-		WHERE intTransactionId IN (SELECT intBillId FROM #tmpPostBillData)
+		WHERE tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN 
+				(SELECT intBillId FROM #tmpPostBillData))
 
 		--Update Inventory Item Receipt
 		UPDATE A
 			SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
-			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intInventoryReceiptItemId
+			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intLineNo
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully unposted transactions.
@@ -615,7 +616,7 @@ END
 		UPDATE A
 			SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
-			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intInventoryReceiptItemId
+			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intLineNo
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully posted transactions.

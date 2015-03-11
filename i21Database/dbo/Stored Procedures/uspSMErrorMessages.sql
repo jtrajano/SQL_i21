@@ -149,5 +149,21 @@ SET @strmessage = 'Purchase Order already closed.'
 EXEC sp_addmessage 51036,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51037) EXEC sp_dropmessage 51037, 'us_english'	
-SET @strmessage = 'Cannot process Purchase Order with 0 amount.'
+SET @strmessage = 'Please specify the lot numbers for %s.'
 EXEC sp_addmessage 51037,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51038) EXEC sp_dropmessage 51038, 'us_english'	
+SET @strmessage = 'The lot Quantity(ies) on %s must match its Open Receive Quantity.'
+EXEC sp_addmessage 51038,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51039) EXEC sp_dropmessage 51039, 'us_english'	
+SET @strmessage = 'Cannot process Purchase Order with 0 amount.'
+EXEC sp_addmessage 51039,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51040) EXEC sp_dropmessage 51040, 'us_english'	
+SET @strmessage = 'There is not enough stocks for %s'
+EXEC sp_addmessage 51040,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51041) EXEC sp_dropmessage 51041, 'us_english'	
+SET @strmessage = 'G/L account setup is missing for %s.'
+EXEC sp_addmessage 51041,11,@strmessage,'us_english','False'

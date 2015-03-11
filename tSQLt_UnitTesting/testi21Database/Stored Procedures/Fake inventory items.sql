@@ -7,16 +7,21 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblSMCompanyLocation';
 	EXEC tSQLt.FakeTable 'dbo.tblSMCompanyLocationAccount', @Identity = 1;
 
-	DROP VIEW vyuAPRptPurchase	
+	--DROP VIEW vyuAPRptPurchase	
 	EXEC tSQLt.FakeTable 'dbo.tblICItem';
-	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation';
 	EXEC tSQLt.FakeTable 'dbo.tblICItemAccount', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICCategory';
 	EXEC tSQLt.FakeTable 'dbo.tblICCategoryAccount', @Identity = 1;		
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICItemStockUOM', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemPricing', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure';
 	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICLot', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICStockReservation', @Identity = 1;		
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotOut', @Identity = 1;
 		
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -24,6 +29,8 @@ BEGIN
 			,@PremiumGrains AS INT = 3
 			,@ColdGrains AS INT = 4
 			,@HotGrains AS INT = 5
+			,@ManualLotGrains AS INT = 6
+			,@SerializedLotGrains AS INT = 7
 			,@InvalidItem AS INT = -1
 
 	-- Declare the variables for location
@@ -31,6 +38,45 @@ BEGIN
 			,@NewHaven AS INT = 2
 			,@BetterHaven AS INT = 3
 			,@InvalidLocation AS INT = -1
+
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
+			,@ManualLotGrains_BushelUOMId AS INT = 6
+			,@SerializedLotGrains_BushelUOMId AS INT = 7
+
+			,@WetGrains_PoundUOMId AS INT = 8
+			,@StickyGrains_PoundUOMId AS INT = 9
+			,@PremiumGrains_PoundUOMId AS INT = 10
+			,@ColdGrains_PoundUOMId AS INT = 11
+			,@HotGrains_PoundUOMId AS INT = 12
+			,@ManualLotGrains_PoundUOMId AS INT = 13
+			,@SerializedLotGrains_PoundUOMId AS INT = 14
+
+	-- Declare Item-Locations
+	DECLARE @WetGrains_DefaultLocation AS INT = 1
+			,@StickyGrains_DefaultLocation AS INT = 2
+			,@PremiumGrains_DefaultLocation AS INT = 3
+			,@ColdGrains_DefaultLocation AS INT = 4
+			,@HotGrains_DefaultLocation AS INT = 5
+
+			,@WetGrains_NewHaven AS INT = 6
+			,@StickyGrains_NewHaven AS INT = 7
+			,@PremiumGrains_NewHaven AS INT = 8
+			,@ColdGrains_NewHaven AS INT = 9
+			,@HotGrains_NewHaven AS INT = 10
+
+			,@WetGrains_BetterHaven AS INT = 11
+			,@StickyGrains_BetterHaven AS INT = 12
+			,@PremiumGrains_BetterHaven AS INT = 13
+			,@ColdGrains_BetterHaven AS INT = 14
+			,@HotGrains_BetterHaven AS INT = 15
+
+			,@ManualLotGrains_DefaultLocation AS INT = 16
+			,@SerializedLotGrains_DefaultLocation AS INT = 17
 
 	-- Declare the account ids
 	DECLARE @Inventory_Default AS INT = 1000
@@ -190,55 +236,63 @@ BEGIN
 		
 	-- Fake data for Items 
 	BEGIN 
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@WetGrains, 'WET GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@StickyGrains, 'STICKY GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@PremiumGrains, 'PREMIUM GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@ColdGrains, 'COLD GRAINS')
-		INSERT INTO dbo.tblICItem (intItemId, strDescription) VALUES (@HotGrains, 'HOT GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@WetGrains, 'WET GRAINS DESCRIPTION', 'WET GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@StickyGrains, 'STICKY GRAINS DESCRIPTION', 'STICKY GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@PremiumGrains, 'PREMIUM GRAINS DESCRIPTION', 'PREMIUM GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@ColdGrains, 'COLD GRAINS DESCRIPTION', 'COLD GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@HotGrains, 'HOT GRAINS DESCRIPTION', 'HOT GRAINS')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS DESCRIPTION', 'MANUAL LOT GRAINS', 'Yes - Manual')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@SerializedLotGrains, 'SERIALIZED LOT GRAINS DESCRIPTION', 'SERIALIZED LOT GRAINS', 'Yes - Serial Number')
 	END
 
 	-- Fake data for Item-Location
 	/*
-		intItemLocationId		intItemId		intLocationId		Costing Method
-		------------------		-------------	------------------	--------------
-		1						Wet Grains		Default Location	Average Cost
-		2						Sticky Grains	Default Location	Average Cost
-		3						Premium Grains	Default Location	Average Cost
-		4						Cold Grains		Default Location	Average Cost
-		5						Hot Grains		Default Location	Average Cost
-		6						Wet Grains		New Haven			FIFO
-		7						Sticky Grains	New Haven			FIFO
-		8						Premium Grains	New Haven			FIFO
-		9						Cold Grains		New Haven			FIFO
-		10						Hot Grains		New Haven			FIFO
-		11						Wet Grains		Better Haven		LIFO
-		12						Sticky Grains	Better Haven		LIFO
-		13						Premium Grains	Better Haven		LIFO
-		14						Cold Grains		Better Haven		LIFO
-		15						Hot Grains		Better Haven		LIFO
+		intItemLocationId		intItemId				intLocationId		Costing Method
+		------------------		-------------			------------------	--------------
+		1						Wet Grains				Default Location	Average Cost
+		2						Sticky Grains			Default Location	Average Cost
+		3						Premium Grains			Default Location	Average Cost
+		4						Cold Grains				Default Location	Average Cost
+		5						Hot Grains				Default Location	Average Cost
+		6						Wet Grains				New Haven			FIFO
+		7						Sticky Grains			New Haven			FIFO
+		8						Premium Grains			New Haven			FIFO
+		9						Cold Grains				New Haven			FIFO
+		10						Hot Grains				New Haven			FIFO
+		11						Wet Grains				Better Haven		LIFO
+		12						Sticky Grains			Better Haven		LIFO
+		13						Premium Grains			Better Haven		LIFO
+		14						Cold Grains				Better Haven		LIFO
+		15						Hot Grains				Better Haven		LIFO
+		16						Manual Lot Grains		Default Location	LOT COST
+		17						Serialized Lot Grains	Default Location	LOT COST 
 	*/
 
 	BEGIN 
 		-- Add items for location 1 ('Default')
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod, intCategoryId) VALUES (@HotGrains, @Default_Location, @AllowNegativeStock, @AverageCosting, @HotItems)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains_DefaultLocation,  @WetGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains_DefaultLocation, @StickyGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains_DefaultLocation, @PremiumGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains_DefaultLocation, @ColdGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod, intCategoryId) VALUES (@HotGrains_DefaultLocation, @HotGrains, @Default_Location, @AllowNegativeStock, @AverageCosting, @HotItems)
 
 		-- Add items for location 2 ('NEW HAVEN')
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod, intCategoryId) VALUES (@HotGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO, @HotItems)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains_NewHaven, @WetGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains_NewHaven, @StickyGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains_NewHaven, @PremiumGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains_NewHaven, @ColdGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod, intCategoryId) VALUES (@HotGrains_NewHaven, @HotGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO, @HotItems)
 
 		-- Add items for location 3 ('BETTER HAVEN')
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
-		INSERT INTO dbo.tblICItemLocation (intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod, intCategoryId) VALUES (@HotGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO, @HotItems)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains_BetterHaven, @WetGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@StickyGrains_BetterHaven, @StickyGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains_BetterHaven, @PremiumGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains_BetterHaven, @ColdGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod, intCategoryId) VALUES (@HotGrains_BetterHaven, @HotGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO, @HotItems)
+
+		-- Add lot items for location 1 ('Default')
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ManualLotGrains_DefaultLocation, @ManualLotGrains , @Default_Location, @AllowNegativeStock, @AverageCosting) -- Since item is a lot, ignore average costing 
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod, intCategoryId) VALUES (@SerializedLotGrains_DefaultLocation, @SerializedLotGrains, @Default_Location, @AllowNegativeStock, @FIFO, @HotItems) -- Since item is a lot, ignore FIFO costing
 	END 
 
 	-- Fake data for Item-Account
@@ -275,6 +329,16 @@ BEGIN
 		
 		-- Add the G/L accounts for HOT GRAINS
 		-- No item level g/l account overrides for hot grains. Use g/l from category
+
+		-- Add the G/L accounts for Manual Lot Item 
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_Inventory, @Inventory_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_CostOfGoods, @CostOfGoods_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_APClearing, @APClearing_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_WriteOffSold, @WriteOffSold_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_RevalueSold, @RevalueSold_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_AutoNegative, @AutoNegative_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_InventoryInTransit, @InventoryInTransit_Default);
+
 	END
 	
 	-- Create the fake table and data for the unit of measure
@@ -286,10 +350,20 @@ BEGIN
 		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOMBushel, 'Bushel')
 		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOMPound, 'Pound')
 		
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@WetGrains, @UOMBushel, 1)
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@StickyGrains, @UOMBushel, 1)
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@PremiumGrains, @UOMBushel, 1)
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ColdGrains, @UOMBushel, 1)
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@HotGrains, @UOMBushel, 1)	
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@WetGrains, @UOMBushel, 1) -- 1
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@StickyGrains, @UOMBushel, 1) -- 2
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@PremiumGrains, @UOMBushel, 1) -- 3
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ColdGrains, @UOMBushel, 1) -- 4
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@HotGrains, @UOMBushel, 1) -- 5
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ManualLotGrains, @UOMBushel, 1) -- 6
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SerializedLotGrains, @UOMBushel, 1)	-- 7
+
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@WetGrains, @UOMPound, 1) -- 8
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@StickyGrains, @UOMPound, 1) -- 9
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@PremiumGrains, @UOMPound, 1) -- 10
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ColdGrains, @UOMPound, 1) -- 11
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@HotGrains, @UOMPound, 1) -- 12
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ManualLotGrains, @UOMPound, 1) -- 13
+		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SerializedLotGrains, @UOMPound, 1)	-- 14
 	END 
 END 

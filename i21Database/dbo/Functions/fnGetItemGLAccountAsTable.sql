@@ -98,7 +98,7 @@ RETURN (
 									, 1 -- We expect the divider used in COA setup is always one character. 
 									, '' 
 							)	
-			) AS RecreatedAccount INNER JOIN tblGLAccount 
+			) AS RecreatedAccount LEFT JOIN tblGLAccount 
 				-- To be sure, cross reference the re-created account id with the tblGLAccount table
 				ON RecreatedAccount.strAccountId = tblGLAccount.strAccountId COLLATE Latin1_General_CI_AS
 )

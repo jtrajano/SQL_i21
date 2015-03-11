@@ -28,7 +28,7 @@
     [intOutScaleDeviceId] INT NOT NULL, 
     [ysnDisableOutScale] BIT NULL, 
     [ysnShowOutScale] BIT NULL, 
-	[ysnAllowScaleSwap] BIT NULL,
+	[ysnAllowZeroWeights] BIT NULL,
     [strWeightDescription] NVARCHAR(5) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intGraderDeviceId] INT NULL, 
     [intAlternateGraderDeviceId] INT NULL, 
@@ -629,10 +629,10 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intLocationId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Scale Swap',
+    @value = N'Allow Zero Weights',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblSCScaleSetup',
     @level2type = N'COLUMN',
-    @level2name = N'ysnAllowScaleSwap'
+    @level2name = 'ysnAllowZeroWeights'

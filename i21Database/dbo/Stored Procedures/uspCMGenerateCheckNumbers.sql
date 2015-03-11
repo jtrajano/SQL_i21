@@ -42,51 +42,50 @@ DECLARE @intCheckNumber AS INT
 SET @intCheckNumber = @intStartNumber
 IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback
 
+-- Create temporary table to hold generated check numbers
+CREATE TABLE #tmpChecks (
+	strCheckNo NVARCHAR(20) COLLATE Latin1_General_CI_AS
+)
+
 WHILE (@intCheckNumber <= @intEndNumber)
 BEGIN
-
-	-- INSERT THE CHECK NUMBER TO THE AUDIT TABLE ONLY IF IT DOES NOT EXISTS. 
-	IF NOT EXISTS (
-		SELECT	TOP 1 1 
-		FROM	dbo.tblCMCheckNumberAudit 
-		WHERE	intBankAccountId = @intBankAccountId 
-				AND strCheckNo = dbo.fnAddZeroPrefixes(@intCheckNumber)	
-	)
-	BEGIN 
-		INSERT INTO dbo.tblCMCheckNumberAudit(
-				strCheckNo
-				,intBankAccountId
-				,intCheckNoStatus
-				,strRemarks
-				,intTransactionId
-				,strTransactionId
-				,intUserId
-				,dtmCreated
-				,dtmCheckPrinted
-				,intConcurrencyId
-		)
-		SELECT	strCheckNo			= dbo.fnAddZeroPrefixes(@intCheckNumber) 
-				,intBankAccountId	= @intBankAccountId
-				,intCheckNoStatus	= @CHECK_NUMBER_STATUS_UNUSED
-				,strRemarks			= NULL
-				,intTransactionId	= NULL
-				,strTransactionId	= NULL
-				,intUserId			= @intUserId
-				,dtmCreated			= GETDATE()
-				,dtmCheckPrinted	= NULL
-				,intConcurrencyId	= 1	
-		IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback				
-	END
-	ELSE 
-	BEGIN 
-		SET @isDuplicateFound = 1
-		IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback
-	END
-	
+	INSERT INTO #tmpChecks (strCheckNo) 
+	SELECT dbo.fnAddZeroPrefixes(@intCheckNumber)
 	SET @intCheckNumber = @intCheckNumber + 1
-	IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback	
 END
+IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback
 
+-- Determine if duplicates were found
+SELECT @isDuplicateFound = (SELECT TOP 1 1 FROM dbo.tblCMCheckNumberAudit 
+									WHERE intBankAccountId = @intBankAccountId 
+									AND strCheckNo IN (SELECT strCheckNo FROM #tmpChecks))
+IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback
+
+-- INSERT THE CHECK NUMBER TO THE AUDIT TABLE ONLY IF IT DOES NOT EXISTS. 
+INSERT INTO dbo.tblCMCheckNumberAudit(
+		strCheckNo
+		,intBankAccountId
+		,intCheckNoStatus
+		,strRemarks
+		,intTransactionId
+		,strTransactionId
+		,intUserId
+		,dtmCreated
+		,dtmCheckPrinted
+		,intConcurrencyId
+)
+SELECT	strCheckNo			= strCheckNo 
+		,intBankAccountId	= @intBankAccountId
+		,intCheckNoStatus	= @CHECK_NUMBER_STATUS_UNUSED
+		,strRemarks			= NULL
+		,intTransactionId	= NULL
+		,strTransactionId	= NULL
+		,intUserId			= @intUserId
+		,dtmCreated			= GETDATE()
+		,dtmCheckPrinted	= NULL
+		,intConcurrencyId	= 1
+FROM #tmpChecks WHERE strCheckNo NOT IN (SELECT strCheckNo FROM dbo.tblCMCheckNumberAudit WHERE intBankAccountId = @intBankAccountId)
+IF @@ERROR <> 0	GOTO uspCMGenerateCheckNumbers_Rollback	
 
 --=====================================================================================================================================
 -- 	EXIT ROUTINES
@@ -102,4 +101,9 @@ uspCMGenerateCheckNumbers_Rollback:
 	
 uspCMGenerateCheckNumbers_Exit:	
 	SET @isDuplicateFound = ISNULL(@isDuplicateFound, 0)
+
+	-- Clean-up routines:
+	-- Delete all temporary tables used. 
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpChecks')) DROP TABLE #tmpChecks
+
 	RETURN @returnValue

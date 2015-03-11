@@ -24,7 +24,8 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
 
 -- Get the Inventory Receipt batch number
-DECLARE @strBatchId AS NVARCHAR(40)  
+DECLARE @strBatchId AS NVARCHAR(40) 
+DECLARE @strItemNo AS NVARCHAR(50)
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
@@ -32,6 +33,10 @@ DECLARE @GLEntries AS RecapTableType
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
  
+-- Create the type of lot numbers
+DECLARE @LotType_Manual AS INT = 1
+	,@LotType_Serial AS INT = 2
+
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
@@ -111,6 +116,11 @@ BEGIN
 	END  
 END   
 
+-- Create and validate the lot numbers
+BEGIN 	
+	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt @strTransactionId
+	IF @@ERROR <> 0 GOTO Post_Exit
+END
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
@@ -124,14 +134,15 @@ EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1  
-BEGIN   
+BEGIN  
 	-- Get the items to post  
-	DECLARE @ItemsToPost AS ItemCostingTableType  
-	INSERT INTO @ItemsToPost (  
+	DECLARE @ItemsForPost AS ItemCostingTableType  
+	INSERT INTO @ItemsForPost (  
 			intItemId  
-			,intItemLocationId  
+			,intItemLocationId 
+			,intItemUOMId  
 			,dtmDate  
-			,dblUnitQty  
+			,dblQty  
 			,dblUOMQty  
 			,dblCost  
 			,dblSalesPrice  
@@ -140,26 +151,41 @@ BEGIN
 			,intTransactionId  
 			,strTransactionId  
 			,intTransactionTypeId  
-			,intLotId   
+			,intLotId 
+			,intSubLocationId
+			,intStorageLocationId
 	)  
 	SELECT	intItemId = DetailItems.intItemId  
 			,intItemLocationId = ItemLocation.intItemLocationId
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = Header.dtmReceiptDate  
-			,dblUnitQty = DetailItems.dblOpenReceive  
-			,dblUOMQty = 1  
+			,dblQty =	CASE	WHEN ISNULL(DetailItemsLot.intLotId, 0) > 0 THEN DetailItemsLot.dblQuantity
+								ELSE DetailItems.dblOpenReceive
+						END 				
+			,dblUOMQty = ItemUOM.dblUnitQty
 			,dblCost = DetailItems.dblUnitCost  
+						--CASE	WHEN ISNULL(DetailItemsLot.intLotId, 0) > 0 THEN DetailItemsLot.dblCost
+						--		ELSE DetailItems.dblUnitCost
+						--END
 			,dblSalesPrice = 0  
 			,intCurrencyId = Header.intCurrencyId  
 			,dblExchangeRate = 1  
 			,intTransactionId = Header.intInventoryReceiptId  
 			,strTransactionId = Header.strReceiptNumber  
 			,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
-			,intLotId = NULL   
+			,intLotId = DetailItemsLot.intLotId 
+			,intSubLocationId = DetailItems.intSubLocationId
+			,intStorageLocationId = DetailItemsLot.intStorageLocationId
 	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON Header.intLocationId = ItemLocation.intLocationId
 			INNER JOIN dbo.tblICInventoryReceiptItem DetailItems  
 				ON Header.intInventoryReceiptId = DetailItems.intInventoryReceiptId 
 				AND ItemLocation.intItemId = DetailItems.intItemId
+			INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON DetailItems.intItemId = ItemUOM.intItemId
+				AND DetailItems.intUnitMeasureId = ItemUOM.intItemUOMId
+			LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemsLot
+				ON DetailItems.intInventoryReceiptItemId = DetailItemsLot.intInventoryReceiptItemId
 	WHERE	Header.intInventoryReceiptId = @intTransactionId   
   
 	-- Call the post routine 
@@ -193,7 +219,7 @@ BEGIN
 				,[intConcurrencyId]
 		)
 		EXEC	dbo.uspICPostCosting  
-				@ItemsToPost  
+				@ItemsForPost  
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
@@ -275,7 +301,6 @@ BEGIN
 
 	-- Update the received quantities from the Purchase Order
 	EXEC dbo.[uspPOReceived] @intTransactionId 
-		IF @@ERROR <> 0	GOTO Post_Exit
 
 	COMMIT TRAN @TransactionName
 END 

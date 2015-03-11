@@ -1,14 +1,15 @@
-﻿CREATE TABLE [dbo].[tblPREmployeeEarningTax]
-(
-	[intEmployeeEarningTaxId] INT NOT NULL IDENTITY , 
-    [intEmployeeEarningId] INT NOT NULL, 
-    [intTypeTaxId] INT NOT NULL, 
-    [intSort] INT NULL, 
-    [intConcurrencyId] INT NULL, 
-    CONSTRAINT [PK_tblPREmployeeEarningTax] PRIMARY KEY ([intEmployeeEarningTaxId]), 
-    CONSTRAINT [FK_tblPREmployeeEarningTax_tblPREmployeeEarning] FOREIGN KEY ([intEmployeeEarningId]) REFERENCES [tblPREmployeeEarning]([intEmployeeEarningId]), 
-    CONSTRAINT [FK_tblPREmployeeEarningTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId])
-)
+﻿CREATE TABLE [dbo].[tblPREmployeeEarningTax] (
+    [intEmployeeEarningTaxId] INT IDENTITY (1, 1) NOT NULL,
+    [intEmployeeEarningId]    INT NOT NULL,
+    [intTypeTaxId]            INT NOT NULL,
+    [intSort]                 INT NULL,
+    [intConcurrencyId]        INT NULL,
+    CONSTRAINT [PK_tblPREmployeeEarningTax] PRIMARY KEY CLUSTERED ([intEmployeeEarningTaxId] ASC),
+    CONSTRAINT [FK_tblPREmployeeEarningTax_tblPREmployeeEarning] FOREIGN KEY ([intEmployeeEarningId]) REFERENCES [dbo].[tblPREmployeeEarning] ([intEmployeeEarningId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeEarningTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId])
+);
+
+
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

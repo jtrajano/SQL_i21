@@ -46,7 +46,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICStorageLocation_tblICRestriction] FOREIGN KEY ([intRestrictionId]) REFERENCES [tblICRestriction]([intRestrictionId]), 
 		CONSTRAINT [FK_tblICStorageLocation_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
 		CONSTRAINT [FK_tblICStorageLocation_tblICUnitMeasure] FOREIGN KEY ([intBatchSizeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-		CONSTRAINT [FK_tblICStorageLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 
+		CONSTRAINT [FK_tblICStorageLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
+		CONSTRAINT [FK_tblICStorageLocation_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) 
 	)
 
 	GO

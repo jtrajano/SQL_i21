@@ -1,11 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspICPostInventoryTransaction]
 	@intItemId INT
 	,@intItemLocationId INT
+	,@intItemUOMId INT 
+	,@intSubLocationId INT
+	,@intStorageLocationId INT
 	,@dtmDate DATETIME
-	,@dblUnitQty NUMERIC(18, 6)
+	,@dblQty NUMERIC(18, 6)
+	,@dblUOMQty NUMERIC(18, 6)
 	,@dblCost NUMERIC(18, 6)
 	,@dblValue NUMERIC(18, 6)
-	,@dblSalesPrice NUMERIC(18, 6)
+	,@dblSalesPrice NUMERIC(18, 6)	
 	,@intCurrencyId INT
 	,@dblExchangeRate NUMERIC (38, 20)
 	,@intTransactionId INT
@@ -33,12 +37,14 @@ SET @InventoryTransactionIdentityId = NULL
 INSERT INTO dbo.tblICInventoryTransaction (
 		[intItemId] 
 		,[intItemLocationId]
+		,[intItemUOMId]
 		,[intLotId]
 		,[dtmDate] 
-		,[dblUnitQty] 
+		,[dblQty] 
+		,[dblUOMQty]
 		,[dblCost] 
 		,[dblValue]
-		,[dblSalesPrice] 
+		,[dblSalesPrice] 		
 		,[intCurrencyId] 
 		,[dblExchangeRate] 
 		,[intTransactionId] 
@@ -54,14 +60,16 @@ INSERT INTO dbo.tblICInventoryTransaction (
 )
 SELECT	[intItemId]						= @intItemId
 		,[intItemLocationId]			= @intItemLocationId
+		,[intItemUOMId]					= @intItemUOMId
 		,[intLotId]						= @intLotId
 		,[dtmDate]						= @dtmDate
-		,[dblUnitQty]					= @dblUnitQty
-		,[dblCost]						= @dblCost
-		,[dblValue]						= @dblValue 
-		,[dblSalesPrice]				= @dblSalesPrice
+		,[dblQty]						= ISNULL(@dblQty, 0)
+		,[dblUOMQty]					= ISNULL(@dblUOMQty, 0)
+		,[dblCost]						= ISNULL(@dblCost, 0)
+		,[dblValue]						= ISNULL(@dblValue, 0)
+		,[dblSalesPrice]				= ISNULL(@dblSalesPrice, 0)
 		,[intCurrencyId]				= @intCurrencyId
-		,[dblExchangeRate]				= @dblExchangeRate
+		,[dblExchangeRate]				= ISNULL(@dblExchangeRate, 1)
 		,[intTransactionId]				= @intTransactionId
 		,[strTransactionId]				= @strTransactionId
 		,[strBatchId]					= @strBatchId
@@ -73,6 +81,8 @@ SELECT	[intItemId]						= @intItemId
 		,[intCreatedUserId]				= @intUserId
 		,[intConcurrencyId]				= 1
 WHERE	@intItemId IS NOT NULL
-		AND @intItemLocationId IS NOT NULL 
+		AND @intItemLocationId IS NOT NULL
+		AND @intItemUOMId IS NOT NULL 
 
 SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+

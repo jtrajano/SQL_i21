@@ -57,7 +57,7 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual	
 		-- Invalid item and valid location
-		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@InvalidItem, @Default_Location, NULL)		
+		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@InvalidItem, @Default_Location, NULL, NULL)
 	END
 
 	-- Assert
@@ -68,6 +68,5 @@ BEGIN
 		DROP TABLE actual
 
 	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE expected
-	
-END 
+		DROP TABLE expected	
+END

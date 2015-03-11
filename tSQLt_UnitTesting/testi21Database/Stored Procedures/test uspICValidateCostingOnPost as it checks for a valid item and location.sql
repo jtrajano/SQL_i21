@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [testi21Database].[test uspICValidateCostingOnPost as it checks for a valid item and location]
+﻿CREATE PROCEDURE [testi21Database].[test uspICValidateCostingOnPost as it checks for a valid item and location]
 AS
 BEGIN
 	-- Arrange 
@@ -18,29 +16,38 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Create the items to validate variable. 
 		DECLARE @Items AS ItemCostingTableType
 
 		-- Insert a record to process 
 		INSERT	@Items (
 				intItemId
-				, intItemLocationId
-				, dtmDate
-				, dblUnitQty
-				, dblUOMQty
-				, dblCost
-				, dblSalesPrice
-				, intCurrencyId
-				, dblExchangeRate
-				, intTransactionId
-				, strTransactionId
-				, intTransactionTypeId
-				, intLotId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = GETDATE()
-				,dblUnitQty = 10
+				,dblQty = 10
 				,dblUOMQty = 1
 				,dblCost = 1.00
 				,dblSalesPrice = 2.00
@@ -53,8 +60,9 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
 				,intItemLocationId = @NewHaven
+				,intItemUOMId = @StickyGrains_BushelUOMId
 				,dtmDate = GETDATE()
-				,dblUnitQty = 10
+				,dblQty = 10
 				,dblUOMQty = 1
 				,dblCost = 1.00
 				,dblSalesPrice = 2.00
@@ -67,8 +75,9 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @PremiumGrains
 				,intItemLocationId = @BetterHaven
+				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,dtmDate = GETDATE()
-				,dblUnitQty = 10
+				,dblQty = 10
 				,dblUOMQty = 1
 				,dblCost = 1.00
 				,dblSalesPrice = 2.00

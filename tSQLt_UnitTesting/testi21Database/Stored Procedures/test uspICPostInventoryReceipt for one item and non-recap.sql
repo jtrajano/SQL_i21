@@ -17,6 +17,13 @@ BEGIN
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 0
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'Dummy-000001'
@@ -51,6 +58,7 @@ BEGIN
 			,dblOrderQty
 			,dblOpenReceive
 			,dblUnitCost
+			,intUnitMeasureId
 		)
 		VALUES (
 			1
@@ -58,6 +66,7 @@ BEGIN
 			,10
 			,10
 			,12.50
+			,@WetGrains_BushelUOMId
 		);
 		
 		CREATE TABLE actual (

@@ -778,7 +778,8 @@ END
 		FROM tblAPPayment A
 			INNER JOIN tblGLDetail B
 				ON A.intPaymentId = B.intTransactionId
-		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		WHERE B.[strTransactionId] IN (SELECT strPaymentRecordNum FROM tblAPPayment 
+							WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData))
 
 		-- Creating the temp table:
 		DECLARE @isSuccessful BIT
@@ -898,7 +899,8 @@ END
 		)
 		SELECT
 			[strTransactionId] = A.strPaymentRecordNum,
-			[intBankTransactionTypeID] = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment'),
+			[intBankTransactionTypeID] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'echeck' THEN 20 ELSE 
+						(SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment') END,
 			[intBankAccountID] = A.intBankAccountId,
 			[intCurrencyID] = A.intCurrencyId,
 			[dblExchangeRate] = 0,

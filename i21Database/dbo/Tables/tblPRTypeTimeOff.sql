@@ -1,20 +1,22 @@
-﻿CREATE TABLE [dbo].[tblPRTypeTimeOff](
-	[intTypeTimeOffId] INT NOT NULL,
-	[strTimeOff] nvarchar(30) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[intTypeEarningId] INT NULL,
-	[dtmEligible] DATETIME NULL, 
-	[dblRate] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblPerPeriod] [numeric](18, 6) NULL DEFAULT ((0)),
-	[strPeriod] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL DEFAULT ((0)),
-	[strAwardPeriod] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL DEFAULT ((0)),
-	[dblMaxEarned] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblMaxCarryover] [numeric](18, 6) NULL DEFAULT ((0)),
-	[intAccountId] [int] NULL,
-	[intSort] INT NULL,
-	[intConcurrencyId] [int] NULL DEFAULT ((1))
-    CONSTRAINT [PK_tblPRTypeTimeOff] PRIMARY KEY ([intTypeTimeOffId])
-	)
+﻿CREATE TABLE [dbo].[tblPRTypeTimeOff] (
+    [intTypeTimeOffId] INT             IDENTITY (1, 1) NOT NULL,
+    [strTimeOff]       NVARCHAR (30)   COLLATE Latin1_General_CI_AS NOT NULL,
+    [strDescription]   NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [intTypeEarningId] INT             NULL,
+    [dtmEligible]      DATETIME        NULL,
+    [dblRate]          NUMERIC (18, 6) CONSTRAINT [DF__tblPRType__dblRa__4814B122] DEFAULT ((0)) NULL,
+    [dblPerPeriod]     NUMERIC (18, 6) CONSTRAINT [DF__tblPRType__dblPe__4908D55B] DEFAULT ((0)) NULL,
+    [strPeriod]        NVARCHAR (30)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tblPRType__strPe__49FCF994] DEFAULT ((0)) NULL,
+    [strAwardPeriod]   NVARCHAR (30)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tblPRType__strAw__4AF11DCD] DEFAULT ((0)) NULL,
+    [dblMaxEarned]     NUMERIC (18, 6) CONSTRAINT [DF__tblPRType__dblMa__4BE54206] DEFAULT ((0)) NULL,
+    [dblMaxCarryover]  NUMERIC (18, 6) CONSTRAINT [DF__tblPRType__dblMa__4CD9663F] DEFAULT ((0)) NULL,
+    [intAccountId]     INT             NULL,
+    [intSort]          INT             NULL,
+    [intConcurrencyId] INT             CONSTRAINT [DF__tblPRType__intCo__4DCD8A78] DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblPRTypeTimeOff] PRIMARY KEY CLUSTERED ([intTypeTimeOffId] ASC)
+);
+
+
 GO
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPRTypeTimeOff] ON [dbo].[tblPRTypeTimeOff] ([intTypeTimeOffId], [strTimeOff]) WITH (IGNORE_DUP_KEY = OFF)

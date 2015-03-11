@@ -91,9 +91,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\3_DefaultData.sql 
 :r .\IC\4_CostingMethods.sql 
 
--- Version Update
-:r .\VersionUpdate.sql
-
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
 :R .\HD\HDEntryDataFix.sql
@@ -106,5 +103,11 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Grain
 :R .\GR\1_MasterTables.sql
+
+--Manufacturing
+:R .\MF\1_MasterTables.sql
+
+-- Version Update
+:r .\VersionUpdate.sql
 
 print 'END POST DEPLOYMENT'
