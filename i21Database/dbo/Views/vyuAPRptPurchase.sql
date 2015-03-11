@@ -27,9 +27,9 @@ SELECT
  CASE WHEN LEN(A.strShipFromCountry) <> 0 THEN CHAR(32) + A.strShipFromCountry + CHAR(13) + CHAR (10) else '' end +    
  CASE WHEN LEN(A.strShipFromPhone) <> 0 THEN CHAR(32) + A.strShipFromPhone + CHAR(13) + CHAR (10) else '' end)
  ,intShipViaId
- ,strShipVia = (SELECT strShipVia FROM dbo.tblSMShipVia WHERE intShipViaID = intShipViaID)
+ ,strShipVia = (SELECT strShipVia FROM dbo.tblSMShipVia WHERE intShipViaID = A.intShipViaId)
  ,intTermsId
- ,strTerm = (SELECT strTerm FROM dbo.tblSMTerm WHERE intTermID = intTermsId)
+ ,strTerm = (SELECT strTerm FROM dbo.tblSMTerm WHERE intTermID = A.intTermsId)
  ,B.dblQtyOrdered
  ,B.dblCost
  ,B.dblDiscount / 100 AS dblDiscount
