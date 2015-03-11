@@ -899,7 +899,8 @@ END
 		)
 		SELECT
 			[strTransactionId] = A.strPaymentRecordNum,
-			[intBankTransactionTypeID] = (SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment'),
+			[intBankTransactionTypeID] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'echeck' THEN 20 ELSE 
+						(SELECT TOP 1 intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strBankTransactionTypeName = 'AP Payment') END,
 			[intBankAccountID] = A.intBankAccountId,
 			[intCurrencyID] = A.intCurrencyId,
 			[dblExchangeRate] = 0,
@@ -914,7 +915,7 @@ END
 			[dblAmount] = A.dblAmountPaid,
 			[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 			[strMemo] = '',
-			[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE '' END,
+			[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE A.strPaymentInfo END,
 			[ysnCheckToBePrinted] = 1,
 			[ysnCheckVoid] = 0,
 			[ysnPosted] = 1,
