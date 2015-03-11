@@ -1129,6 +1129,7 @@
     <Build Include="dbo\Functions\fnCalculateWeightUnitQty.sql" />
     <None Include="Scripts\Post-Deployment\IC\5_LotStatus.sql" />
     <Build Include="dbo\Functions\fnCalculateCostPerWeight.sql" />
+    <Build Include="dbo\Functions\fnGetTotalStockValueFromTransactionBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

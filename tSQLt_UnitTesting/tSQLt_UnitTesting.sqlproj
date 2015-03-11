@@ -897,6 +897,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for scenario 2.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnGetTotalStockValueFromTransactionBatch for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetTotalStockValueFromTransactionBatch for getting the actual total from the table.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
