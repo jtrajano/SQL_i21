@@ -3460,9 +3460,9 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        dataIndex: 'strFieldName',
                                                                         itemId: 'colPricingLevelUnits',
                                                                         align: 'right',
+                                                                        dataIndex: 'strFieldName',
                                                                         text: 'Unit Qty'
                                                                     },
                                                                     {

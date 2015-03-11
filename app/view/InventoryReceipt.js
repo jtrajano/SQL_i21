@@ -1135,7 +1135,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         itemId: 'colLotId',
                                                         width: 100,
                                                         dataIndex: 'string',
-                                                        text: 'Lot ID',
+                                                        text: 'Lot Number',
                                                         editor: {
                                                             xtype: 'textfield',
                                                             columns: [
@@ -1280,66 +1280,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             itemId: 'cboStorageLocation',
                                                             displayField: 'strName',
                                                             valueField: 'strName'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colLotUnitUOM',
-                                                        width: 81,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Unit UOM',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intItemUnitMeasureId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item UOM Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'UOM',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitType',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboLotUnitUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colLotNoUnits',
-                                                        width: 80,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'No. of Units',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
                                                         }
                                                     },
                                                     {

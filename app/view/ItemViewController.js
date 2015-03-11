@@ -962,6 +962,18 @@ Ext.define('Inventory.view.ItemViewController', {
             });
         }
 
+        var colDetailUnitQty = grdUOM.columns[1];
+        if (colDetailUnitQty) {
+            colDetailUnitQty.renderer = function (value, metadata, record) {
+                if (record) {
+                    if (record.get('intDecimalDisplay') > 0) {
+                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalDisplay'));
+                    }
+                }
+            }
+        }
+
+
         return win.context;
     },
 
@@ -1430,6 +1442,17 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('intDecimalDisplay', records[0].get('intDecimalDisplay'));
+            current.set('intDecimalCalculation', records[0].get('intDecimalCalculation'));
+
+            var displayDecimal = records[0].get('intDecimalDisplay');
+
+            var colDetailUnitQty = grid.columns[1];
+            if (colDetailUnitQty.getEditor()) {
+                colDetailUnitQty.format = '0,000.00';
+                colDetailUnitQty.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(displayDecimal);
+            }
+
             current.set('tblICUnitMeasure', records[0]);
 
             var uoms = grid.store.data.items;

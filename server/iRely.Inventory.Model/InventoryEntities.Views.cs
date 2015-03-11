@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets451db9a4b19cf7c1fbf63d2080aa59689c0402b58dacc4c6d90af3d47e987de9))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets0086d9c1f6acfdebf953ee1a6972f1966503272d39e6a0890760116af369ff52))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets451db9a4b19cf7c1fbf63d2080aa59689c0402b58dacc4c6d90af3d47e987de9 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets0086d9c1f6acfdebf953ee1a6972f1966503272d39e6a0890760116af369ff52 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "451db9a4b19cf7c1fbf63d2080aa59689c0402b58dacc4c6d90af3d47e987de9"; }
+            get { return "0086d9c1f6acfdebf953ee1a6972f1966503272d39e6a0890760116af369ff52"; }
         }
 
         /// <summary>
@@ -1675,28 +1675,29 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItemLot
-        [CodeFirstDatabaseSchema.tblICInventoryReceiptItemLot](T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemLot_intParentLotId, T1.tblICInventoryReceiptItemLot_intLotId, T1.tblICInventoryReceiptItemLot_strParentLotId, T1.tblICInventoryReceiptItemLot_strLotId, T1.tblICInventoryReceiptItemLot_dblQuantity, T1.tblICInventoryReceiptItemLot_intWeightUOMId, T1.tblICInventoryReceiptItemLot_dblGrossWeight, T1.tblICInventoryReceiptItemLot_dblTareWeight, T1.tblICInventoryReceiptItemLot_dblCost, T1.tblICInventoryReceiptItemLot_intStorageLocationId, T1.tblICInventoryReceiptItemLot_intUnitUOMId, T1.tblICInventoryReceiptItemLot_intUnits, T1.tblICInventoryReceiptItemLot_intUnitPallet, T1.tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, T1.tblICInventoryReceiptItemLot_dblStatedTarePerUnit, T1.tblICInventoryReceiptItemLot_strContainerNo, T1.tblICInventoryReceiptItemLot_intGarden, T1.tblICInventoryReceiptItemLot_strGrade, T1.tblICInventoryReceiptItemLot_intOriginId, T1.tblICInventoryReceiptItemLot_intSeasonCropYear, T1.tblICInventoryReceiptItemLot_strVendorLotId, T1.tblICInventoryReceiptItemLot_dtmManufacturedDate, T1.tblICInventoryReceiptItemLot_strRemarks, T1.tblICInventoryReceiptItemLot_strCondition, T1.tblICInventoryReceiptItemLot_dtmCertified, T1.tblICInventoryReceiptItemLot_intSort, T1.tblICInventoryReceiptItemLot_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryReceiptItemLot](T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemLot_intLotId, T1.tblICInventoryReceiptItemLot_strLotNumber, T1.tblICInventoryReceiptItemLot_strLotAlias, T1.tblICInventoryReceiptItemLot_intSubLocationId, T1.tblICInventoryReceiptItemLot_intStorageLocationId, T1.tblICInventoryReceiptItemLot_dblQuantity, T1.tblICInventoryReceiptItemLot_dblGrossWeight, T1.tblICInventoryReceiptItemLot_dblTareWeight, T1.tblICInventoryReceiptItemLot_intWeightUOMId, T1.tblICInventoryReceiptItemLot_dblCost, T1.tblICInventoryReceiptItemLot_intUnitPallet, T1.tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, T1.tblICInventoryReceiptItemLot_dblStatedTarePerUnit, T1.tblICInventoryReceiptItemLot_strContainerNo, T1.tblICInventoryReceiptItemLot_intVendorId, T1.tblICInventoryReceiptItemLot_intVendorLocationId, T1.tblICInventoryReceiptItemLot_strVendorLocation, T1.tblICInventoryReceiptItemLot_strMarkings, T1.tblICInventoryReceiptItemLot_strGrade, T1.tblICInventoryReceiptItemLot_intOriginId, T1.tblICInventoryReceiptItemLot_intSeasonCropYear, T1.tblICInventoryReceiptItemLot_strVendorLotId, T1.tblICInventoryReceiptItemLot_dtmManufacturedDate, T1.tblICInventoryReceiptItemLot_strRemarks, T1.tblICInventoryReceiptItemLot_strCondition, T1.tblICInventoryReceiptItemLot_dtmCertified, T1.tblICInventoryReceiptItemLot_dtmExpiryDate, T1.tblICInventoryReceiptItemLot_intSort, T1.tblICInventoryReceiptItemLot_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemLotId AS tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, 
             T.intInventoryReceiptItemId AS tblICInventoryReceiptItemLot_intInventoryReceiptItemId, 
-            T.intParentLotId AS tblICInventoryReceiptItemLot_intParentLotId, 
             T.intLotId AS tblICInventoryReceiptItemLot_intLotId, 
-            T.strParentLotId AS tblICInventoryReceiptItemLot_strParentLotId, 
-            T.strLotId AS tblICInventoryReceiptItemLot_strLotId, 
+            T.strLotNumber AS tblICInventoryReceiptItemLot_strLotNumber, 
+            T.strLotAlias AS tblICInventoryReceiptItemLot_strLotAlias, 
+            T.intSubLocationId AS tblICInventoryReceiptItemLot_intSubLocationId, 
+            T.intStorageLocationId AS tblICInventoryReceiptItemLot_intStorageLocationId, 
             T.dblQuantity AS tblICInventoryReceiptItemLot_dblQuantity, 
-            T.intWeightUOMId AS tblICInventoryReceiptItemLot_intWeightUOMId, 
             T.dblGrossWeight AS tblICInventoryReceiptItemLot_dblGrossWeight, 
             T.dblTareWeight AS tblICInventoryReceiptItemLot_dblTareWeight, 
+            T.intWeightUOMId AS tblICInventoryReceiptItemLot_intWeightUOMId, 
             T.dblCost AS tblICInventoryReceiptItemLot_dblCost, 
-            T.intStorageLocationId AS tblICInventoryReceiptItemLot_intStorageLocationId, 
-            T.intUnitUOMId AS tblICInventoryReceiptItemLot_intUnitUOMId, 
-            T.intUnits AS tblICInventoryReceiptItemLot_intUnits, 
             T.intUnitPallet AS tblICInventoryReceiptItemLot_intUnitPallet, 
             T.dblStatedGrossPerUnit AS tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, 
             T.dblStatedTarePerUnit AS tblICInventoryReceiptItemLot_dblStatedTarePerUnit, 
             T.strContainerNo AS tblICInventoryReceiptItemLot_strContainerNo, 
-            T.intGarden AS tblICInventoryReceiptItemLot_intGarden, 
+            T.intVendorId AS tblICInventoryReceiptItemLot_intVendorId, 
+            T.intVendorLocationId AS tblICInventoryReceiptItemLot_intVendorLocationId, 
+            T.strVendorLocation AS tblICInventoryReceiptItemLot_strVendorLocation, 
+            T.strMarkings AS tblICInventoryReceiptItemLot_strMarkings, 
             T.strGrade AS tblICInventoryReceiptItemLot_strGrade, 
             T.intOriginId AS tblICInventoryReceiptItemLot_intOriginId, 
             T.intSeasonCropYear AS tblICInventoryReceiptItemLot_intSeasonCropYear, 
@@ -1705,6 +1706,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strRemarks AS tblICInventoryReceiptItemLot_strRemarks, 
             T.strCondition AS tblICInventoryReceiptItemLot_strCondition, 
             T.dtmCertified AS tblICInventoryReceiptItemLot_dtmCertified, 
+            T.dtmExpiryDate AS tblICInventoryReceiptItemLot_dtmExpiryDate, 
             T.intSort AS tblICInventoryReceiptItemLot_intSort, 
             T.intConcurrencyId AS tblICInventoryReceiptItemLot_intConcurrencyId, 
             True AS _from0
@@ -4159,28 +4161,29 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItemLots
-        [iRely.Inventory.Model.tblICInventoryReceiptItemLot](T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemLot_intParentLotId, T1.tblICInventoryReceiptItemLot_intLotId, T1.tblICInventoryReceiptItemLot_strParentLotId, T1.tblICInventoryReceiptItemLot_strLotId, T1.tblICInventoryReceiptItemLot_dblQuantity, T1.tblICInventoryReceiptItemLot_intWeightUOMId, T1.tblICInventoryReceiptItemLot_dblGrossWeight, T1.tblICInventoryReceiptItemLot_dblTareWeight, T1.tblICInventoryReceiptItemLot_dblCost, T1.tblICInventoryReceiptItemLot_intStorageLocationId, T1.tblICInventoryReceiptItemLot_intUnitUOMId, T1.tblICInventoryReceiptItemLot_intUnits, T1.tblICInventoryReceiptItemLot_intUnitPallet, T1.tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, T1.tblICInventoryReceiptItemLot_dblStatedTarePerUnit, T1.tblICInventoryReceiptItemLot_strContainerNo, T1.tblICInventoryReceiptItemLot_intGarden, T1.tblICInventoryReceiptItemLot_strGrade, T1.tblICInventoryReceiptItemLot_intOriginId, T1.tblICInventoryReceiptItemLot_intSeasonCropYear, T1.tblICInventoryReceiptItemLot_strVendorLotId, T1.tblICInventoryReceiptItemLot_dtmManufacturedDate, T1.tblICInventoryReceiptItemLot_strRemarks, T1.tblICInventoryReceiptItemLot_strCondition, T1.tblICInventoryReceiptItemLot_dtmCertified, T1.tblICInventoryReceiptItemLot_intSort, T1.tblICInventoryReceiptItemLot_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryReceiptItemLot](T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemLot_intLotId, T1.tblICInventoryReceiptItemLot_strLotNumber, T1.tblICInventoryReceiptItemLot_strLotAlias, T1.tblICInventoryReceiptItemLot_intSubLocationId, T1.tblICInventoryReceiptItemLot_intStorageLocationId, T1.tblICInventoryReceiptItemLot_dblQuantity, T1.tblICInventoryReceiptItemLot_dblGrossWeight, T1.tblICInventoryReceiptItemLot_dblTareWeight, T1.tblICInventoryReceiptItemLot_intWeightUOMId, T1.tblICInventoryReceiptItemLot_dblCost, T1.tblICInventoryReceiptItemLot_intUnitPallet, T1.tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, T1.tblICInventoryReceiptItemLot_dblStatedTarePerUnit, T1.tblICInventoryReceiptItemLot_strContainerNo, T1.tblICInventoryReceiptItemLot_intVendorId, T1.tblICInventoryReceiptItemLot_intVendorLocationId, T1.tblICInventoryReceiptItemLot_strVendorLocation, T1.tblICInventoryReceiptItemLot_strMarkings, T1.tblICInventoryReceiptItemLot_strGrade, T1.tblICInventoryReceiptItemLot_intOriginId, T1.tblICInventoryReceiptItemLot_intSeasonCropYear, T1.tblICInventoryReceiptItemLot_strVendorLotId, T1.tblICInventoryReceiptItemLot_dtmManufacturedDate, T1.tblICInventoryReceiptItemLot_strRemarks, T1.tblICInventoryReceiptItemLot_strCondition, T1.tblICInventoryReceiptItemLot_dtmCertified, T1.tblICInventoryReceiptItemLot_dtmExpiryDate, T1.tblICInventoryReceiptItemLot_intSort, T1.tblICInventoryReceiptItemLot_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemLotId AS tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, 
             T.intInventoryReceiptItemId AS tblICInventoryReceiptItemLot_intInventoryReceiptItemId, 
-            T.intParentLotId AS tblICInventoryReceiptItemLot_intParentLotId, 
             T.intLotId AS tblICInventoryReceiptItemLot_intLotId, 
-            T.strParentLotId AS tblICInventoryReceiptItemLot_strParentLotId, 
-            T.strLotId AS tblICInventoryReceiptItemLot_strLotId, 
+            T.strLotNumber AS tblICInventoryReceiptItemLot_strLotNumber, 
+            T.strLotAlias AS tblICInventoryReceiptItemLot_strLotAlias, 
+            T.intSubLocationId AS tblICInventoryReceiptItemLot_intSubLocationId, 
+            T.intStorageLocationId AS tblICInventoryReceiptItemLot_intStorageLocationId, 
             T.dblQuantity AS tblICInventoryReceiptItemLot_dblQuantity, 
-            T.intWeightUOMId AS tblICInventoryReceiptItemLot_intWeightUOMId, 
             T.dblGrossWeight AS tblICInventoryReceiptItemLot_dblGrossWeight, 
             T.dblTareWeight AS tblICInventoryReceiptItemLot_dblTareWeight, 
+            T.intWeightUOMId AS tblICInventoryReceiptItemLot_intWeightUOMId, 
             T.dblCost AS tblICInventoryReceiptItemLot_dblCost, 
-            T.intStorageLocationId AS tblICInventoryReceiptItemLot_intStorageLocationId, 
-            T.intUnitUOMId AS tblICInventoryReceiptItemLot_intUnitUOMId, 
-            T.intUnits AS tblICInventoryReceiptItemLot_intUnits, 
             T.intUnitPallet AS tblICInventoryReceiptItemLot_intUnitPallet, 
             T.dblStatedGrossPerUnit AS tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, 
             T.dblStatedTarePerUnit AS tblICInventoryReceiptItemLot_dblStatedTarePerUnit, 
             T.strContainerNo AS tblICInventoryReceiptItemLot_strContainerNo, 
-            T.intGarden AS tblICInventoryReceiptItemLot_intGarden, 
+            T.intVendorId AS tblICInventoryReceiptItemLot_intVendorId, 
+            T.intVendorLocationId AS tblICInventoryReceiptItemLot_intVendorLocationId, 
+            T.strVendorLocation AS tblICInventoryReceiptItemLot_strVendorLocation, 
+            T.strMarkings AS tblICInventoryReceiptItemLot_strMarkings, 
             T.strGrade AS tblICInventoryReceiptItemLot_strGrade, 
             T.intOriginId AS tblICInventoryReceiptItemLot_intOriginId, 
             T.intSeasonCropYear AS tblICInventoryReceiptItemLot_intSeasonCropYear, 
@@ -4189,6 +4192,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strRemarks AS tblICInventoryReceiptItemLot_strRemarks, 
             T.strCondition AS tblICInventoryReceiptItemLot_strCondition, 
             T.dtmCertified AS tblICInventoryReceiptItemLot_dtmCertified, 
+            T.dtmExpiryDate AS tblICInventoryReceiptItemLot_dtmExpiryDate, 
             T.intSort AS tblICInventoryReceiptItemLot_intSort, 
             T.intConcurrencyId AS tblICInventoryReceiptItemLot_intConcurrencyId, 
             True AS _from0

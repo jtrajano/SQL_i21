@@ -195,7 +195,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             grdLotTracking: {
                 colLotId: {
-                    dataIndex: 'strLotId'
+                    dataIndex: 'strLotNumber'
                 },
                 colLotQuantity: 'dblQuantity',
                 colLotWeightUOM: {
@@ -213,13 +213,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{storageLocation}'
                     }
                 },
-                colLotUnitUOM: {
-                    dataIndex: 'strUnitUOM',
-                    editor: {
-                        store: '{unitUOM}'
-                    }
-                },
-                colLotNoUnits: 'intUnits',
                 colLotUnitsPallet: 'intUnitPallet',
                 colLotStatedGross: 'dblStatedGrossPerUnit',
                 colLotStatedTare: 'dblStatedTarePerUnit',
@@ -952,6 +945,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var txtLotTotalQty = win.down('#txtLotTotalQty');
                 txtLotTotalQty.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(totalValue, 2));
             }
+        }
+        else if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
+            var gross = context.record.get('dblGrossWeight');
+            var tare = context.record.get('dblTareWeight');
+
+            if (context.field === 'dblGrossWeight') { gross = context.value; }
+            else if (context.field === 'dblTareWeight') { tare = context.value; }
+
+            context.record.set('dblNetWeight', gross - tare);
         }
     },
 

@@ -351,23 +351,24 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryReceiptItemLotId { get; set; }
         public int intInventoryReceiptItemId { get; set; }
-        public int? intParentLotId { get; set; }
         public int? intLotId { get; set; }
-        public string strParentLotId { get; set; }
-        public string strLotId { get; set; }
+        public string strLotNumber { get; set; }
+        public string strLotAlias { get; set; }
+        public int? intSubLocationId { get; set; }
+        public int? intStorageLocationId { get; set; }
         public decimal? dblQuantity { get; set; }
-        public int? intWeightUOMId { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
+        public int? intWeightUOMId { get; set; }
         public decimal? dblCost { get; set; }
-        public int? intStorageLocationId { get; set; }
-        public int? intUnitUOMId { get; set; }
-        public int? intUnits { get; set; }
         public int? intUnitPallet { get; set; }
         public decimal? dblStatedGrossPerUnit { get; set; }
         public decimal? dblStatedTarePerUnit { get; set; }
         public string strContainerNo { get; set; }
-        public int? intGarden { get; set; }
+        public int? intVendorId { get; set; }
+        public int? intVendorLocationId { get; set; }
+        public string strVendorLocation { get; set; }
+        public string strMarkings { get; set; }
         public string strGrade { get; set; }
         public int? intOriginId { get; set; }
         public int? intSeasonCropYear { get; set; }
@@ -376,6 +377,7 @@ namespace iRely.Inventory.Model
         public string strRemarks { get; set; }
         public string strCondition { get; set; }
         public DateTime? dtmCertified { get; set; }
+        public DateTime? dtmExpiryDate { get; set; }
         public int? intSort { get; set; }
 
         string _weigthUOM;
@@ -397,28 +399,16 @@ namespace iRely.Inventory.Model
                 _weigthUOM = value;
             }
         }
-        string _unitUOM;
         [NotMapped]
-        public string strUnitUOM
+        public decimal dblNetWeight
         {
             get
             {
-                if (string.IsNullOrEmpty(_unitUOM))
-                    if (UnitUOM != null)
-                        return UnitUOM.strUnitMeasure;
-                    else
-                        return null;
-                else
-                    return _unitUOM;
-            }
-            set
-            {
-                _unitUOM = value;
+                return (this.dblGrossWeight ?? 0) - (this.dblTareWeight ?? 0);
             }
         }
 
         public tblICItemUOM WeightUOM { get; set; }
-        public tblICItemUOM UnitUOM { get; set; }
         public tblICLot tblICLot { get; set; }
     }
 
