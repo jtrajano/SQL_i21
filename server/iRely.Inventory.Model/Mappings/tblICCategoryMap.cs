@@ -19,7 +19,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCatalogGroupId).HasColumnName("intCatalogGroupId");
             this.Property(t => t.intCostingMethod).HasColumnName("intCostingMethod");
             this.Property(t => t.strInventoryTracking).HasColumnName("strInventoryTracking");
-            this.Property(t => t.dblStandardQty).HasColumnName("dblStandardQty");
+            this.Property(t => t.dblStandardQty).HasColumnName("dblStandardQty").HasPrecision(18, 6);
             this.Property(t => t.intUOMId).HasColumnName("intUOMId");
             this.Property(t => t.strGLDivisionNumber).HasColumnName("strGLDivisionNumber");
             this.Property(t => t.ysnSalesAnalysisByTon).HasColumnName("ysnSalesAnalysisByTon");
@@ -28,10 +28,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnAutoCalculateFreight).HasColumnName("ysnAutoCalculateFreight");
             this.Property(t => t.intFreightItemId).HasColumnName("intFreightItemId");
             this.Property(t => t.strERPItemClass).HasColumnName("strERPItemClass");
-            this.Property(t => t.dblLifeTime).HasColumnName("dblLifeTime");
-            this.Property(t => t.dblBOMItemShrinkage).HasColumnName("dblBOMItemShrinkage");
-            this.Property(t => t.dblBOMItemUpperTolerance).HasColumnName("dblBOMItemUpperTolerance");
-            this.Property(t => t.dblBOMItemLowerTolerance).HasColumnName("dblBOMItemLowerTolerance");
+            this.Property(t => t.dblLifeTime).HasColumnName("dblLifeTime").HasPrecision(18, 6);
+            this.Property(t => t.dblBOMItemShrinkage).HasColumnName("dblBOMItemShrinkage").HasPrecision(18, 6);
+            this.Property(t => t.dblBOMItemUpperTolerance).HasColumnName("dblBOMItemUpperTolerance").HasPrecision(18, 6);
+            this.Property(t => t.dblBOMItemLowerTolerance).HasColumnName("dblBOMItemLowerTolerance").HasPrecision(18, 6);
             this.Property(t => t.ysnScaled).HasColumnName("ysnScaled");
             this.Property(t => t.ysnOutputItemMandatory).HasColumnName("ysnOutputItemMandatory");
             this.Property(t => t.strConsumptionMethod).HasColumnName("strConsumptionMethod");
@@ -41,9 +41,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.imgWIPImage).HasColumnName("imgWIPImage");
             this.Property(t => t.imgFGImage).HasColumnName("imgFGImage");
             this.Property(t => t.imgShipImage).HasColumnName("imgShipImage");
-            this.Property(t => t.dblLaborCost).HasColumnName("dblLaborCost");
-            this.Property(t => t.dblOverHead).HasColumnName("dblOverHead");
-            this.Property(t => t.dblPercentage).HasColumnName("dblPercentage");
+            this.Property(t => t.dblLaborCost).HasColumnName("dblLaborCost").HasPrecision(18, 6);
+            this.Property(t => t.dblOverHead).HasColumnName("dblOverHead").HasPrecision(18, 6);
+            this.Property(t => t.dblPercentage).HasColumnName("dblPercentage").HasPrecision(18, 6);
             this.Property(t => t.strCostDistributionMethod).HasColumnName("strCostDistributionMethod");
             this.Property(t => t.ysnSellable).HasColumnName("ysnSellable");
             this.Property(t => t.ysnYieldAdjustment).HasColumnName("ysnYieldAdjustment");

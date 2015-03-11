@@ -29,8 +29,8 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemSubstitutionDetail");
-            this.Property(t => t.dblPercent).HasColumnName("dblPercent");
-            this.Property(t => t.dblRatio).HasColumnName("dblRatio");
+            this.Property(t => t.dblPercent).HasColumnName("dblPercent").HasPrecision(18, 6);
+            this.Property(t => t.dblRatio).HasColumnName("dblRatio").HasPrecision(18, 6);
             this.Property(t => t.dtmValidFrom).HasColumnName("dtmValidFrom");
             this.Property(t => t.dtmValidTo).HasColumnName("dtmValidTo");
             this.Property(t => t.intItemSubstitutionDetailId).HasColumnName("intItemSubstitutionDetailId");

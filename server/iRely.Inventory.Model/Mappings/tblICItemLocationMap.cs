@@ -12,11 +12,11 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICItemLocation");
-            this.Property(t => t.dblFreightRate).HasColumnName("dblFreightRate");
-            this.Property(t => t.dblLeadTime).HasColumnName("dblLeadTime");
-            this.Property(t => t.dblMinOrder).HasColumnName("dblMinOrder");
-            this.Property(t => t.dblReorderPoint).HasColumnName("dblReorderPoint");
-            this.Property(t => t.dblSuggestedQty).HasColumnName("dblSuggestedQty");
+            this.Property(t => t.dblFreightRate).HasColumnName("dblFreightRate").HasPrecision(18, 6);
+            this.Property(t => t.dblLeadTime).HasColumnName("dblLeadTime").HasPrecision(18, 6);
+            this.Property(t => t.dblMinOrder).HasColumnName("dblMinOrder").HasPrecision(18, 6);
+            this.Property(t => t.dblReorderPoint).HasColumnName("dblReorderPoint").HasPrecision(18, 6);
+            this.Property(t => t.dblSuggestedQty).HasColumnName("dblSuggestedQty").HasPrecision(18, 6);
             this.Property(t => t.intAllowNegativeInventory).HasColumnName("intAllowNegativeInventory");
             this.Property(t => t.intBottleDepositNo).HasColumnName("intBottleDepositNo");
             this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");

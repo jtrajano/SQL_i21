@@ -12,7 +12,7 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICCommodityUnitMeasure");
-            this.Property(t => t.dblWeightPerPack).HasColumnName("dblWeightPerPack");
+            this.Property(t => t.dblWeightPerPack).HasColumnName("dblWeightPerPack").HasPrecision(18, 6);
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
             this.Property(t => t.intCommodityUnitMeasureId).HasColumnName("intCommodityUnitMeasureId");
             this.Property(t => t.intSort).HasColumnName("intSort");

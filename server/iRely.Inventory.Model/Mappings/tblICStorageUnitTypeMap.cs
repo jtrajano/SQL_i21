@@ -12,10 +12,10 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICStorageUnitType");
-            this.Property(t => t.dblDepth).HasColumnName("dblDepth");
-            this.Property(t => t.dblHeight).HasColumnName("dblHeight");
-            this.Property(t => t.dblMaxWeight).HasColumnName("dblMaxWeight");
-            this.Property(t => t.dblWidth).HasColumnName("dblWidth");
+            this.Property(t => t.dblDepth).HasColumnName("dblDepth").HasPrecision(18, 6);
+            this.Property(t => t.dblHeight).HasColumnName("dblHeight").HasPrecision(18, 6);
+            this.Property(t => t.dblMaxWeight).HasColumnName("dblMaxWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblWidth).HasColumnName("dblWidth").HasPrecision(18, 6);
             this.Property(t => t.intCapacityUnitMeasureId).HasColumnName("intCapacityUnitMeasureId");
             this.Property(t => t.intDimensionUnitMeasureId).HasColumnName("intDimensionUnitMeasureId");
             this.Property(t => t.intPalletColumn).HasColumnName("intPalletColumn");

@@ -24,11 +24,11 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnBlueLaw1).HasColumnName("ysnBlueLaw1");
             this.Property(t => t.ysnBlueLaw2).HasColumnName("ysnBlueLaw2");
             this.Property(t => t.intNucleusGroupId).HasColumnName("intNucleusGroupId");
-            this.Property(t => t.dblTargetGrossProfit).HasColumnName("dblTargetGrossProfit");
-            this.Property(t => t.dblTargetInventoryCost).HasColumnName("dblTargetInventoryCost");
-            this.Property(t => t.dblCostInventoryBOM).HasColumnName("dblCostInventoryBOM");
-            this.Property(t => t.dblLowGrossMarginAlert).HasColumnName("dblLowGrossMarginAlert");
-            this.Property(t => t.dblHighGrossMarginAlert).HasColumnName("dblHighGrossMarginAlert");
+            this.Property(t => t.dblTargetGrossProfit).HasColumnName("dblTargetGrossProfit").HasPrecision(18, 6);
+            this.Property(t => t.dblTargetInventoryCost).HasColumnName("dblTargetInventoryCost").HasPrecision(18, 6);
+            this.Property(t => t.dblCostInventoryBOM).HasColumnName("dblCostInventoryBOM").HasPrecision(18, 6);
+            this.Property(t => t.dblLowGrossMarginAlert).HasColumnName("dblLowGrossMarginAlert").HasPrecision(18, 6);
+            this.Property(t => t.dblHighGrossMarginAlert).HasColumnName("dblHighGrossMarginAlert").HasPrecision(18, 6);
             this.Property(t => t.dtmLastInventoryLevelEntry).HasColumnName("dtmLastInventoryLevelEntry");
             this.Property(t => t.ysnNonRetailUseDepartment).HasColumnName("ysnNonRetailUseDepartment");
             this.Property(t => t.ysnReportNetGross).HasColumnName("ysnReportNetGross");

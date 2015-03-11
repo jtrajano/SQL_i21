@@ -31,7 +31,7 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICPackTypeDetail");
-            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor");
+            this.Property(t => t.dblConversionFactor).HasColumnName("dblConversionFactor").HasPrecision(18, 6);
             this.Property(t => t.intPackTypeDetailId).HasColumnName("intPackTypeDetailId");
             this.Property(t => t.intPackTypeId).HasColumnName("intPackTypeId");
             this.Property(t => t.intSort).HasColumnName("intSort");
