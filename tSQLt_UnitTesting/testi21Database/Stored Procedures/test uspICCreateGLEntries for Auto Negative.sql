@@ -6,6 +6,7 @@ BEGIN
 		EXEC [testi21Database].[Fake inventory items]; 
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 
 		-- Create the variables for the internal transaction types used by costing. 	
 		DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;

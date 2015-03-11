@@ -2,6 +2,7 @@
 AS
 BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction';
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1

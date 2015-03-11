@@ -899,6 +899,8 @@
     </Build>
     <Build Include="testi21Database\Functions\test fnGetTotalStockValueFromTransactionBatch for the basics.sql" />
     <Build Include="testi21Database\Functions\test fnGetTotalStockValueFromTransactionBatch for getting the actual total from the table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one incoming stock and lot is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake transactions for lot items and costing.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

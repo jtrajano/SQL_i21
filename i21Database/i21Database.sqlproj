@@ -1130,6 +1130,8 @@
     <None Include="Scripts\Post-Deployment\IC\5_LotStatus.sql" />
     <Build Include="dbo\Functions\fnCalculateCostPerWeight.sql" />
     <Build Include="dbo\Functions\fnGetTotalStockValueFromTransactionBatch.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

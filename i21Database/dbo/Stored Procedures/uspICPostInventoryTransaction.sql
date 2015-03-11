@@ -86,3 +86,26 @@ WHERE	@intItemId IS NOT NULL
 
 SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 
+IF @intLotId IS NOT NULL 
+BEGIN 
+	DECLARE @ActiveLotStatus AS INT = 1
+	EXEC dbo.uspICPostInventoryLotTransaction
+		@intItemId 
+		,@intLotId 
+		,@intItemLocationId 
+		,@intItemUOMId 
+		,@intSubLocationId 
+		,@intStorageLocationId 
+		,@dtmDate 
+		,@dblQty 
+		,@dblCost
+		,@intTransactionId 
+		,@strTransactionId 
+		,@strBatchId 
+		,@ActiveLotStatus 
+		,@intTransactionTypeId 
+		,@ysnIsUnposted 
+		,@strTransactionForm 
+		,@intUserId 
+		,NULL  
+END

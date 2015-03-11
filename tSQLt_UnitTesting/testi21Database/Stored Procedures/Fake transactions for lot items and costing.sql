@@ -4,6 +4,7 @@ BEGIN
 	EXEC testi21Database.[Fake inventory items];
 	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 
 	-- Re-create the index
 	CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLot]
