@@ -223,11 +223,12 @@ BEGIN
 					D.strReceiptNumber
 					,F.strItemNo
 					,intInventoryReceiptItemId
+					,intLineNo
 				FROM tblICInventoryReceipt D
 					INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
 					INNER JOIN tblICItem F ON E.intItemId = F.intItemId
 				WHERE E.dblOpenReceive = E.dblBillQty
-			) C ON C.intInventoryReceiptItemId = B.intItemReceiptId
+			) C ON C.intLineNo = B.intItemReceiptId
 			WHERE A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 	END 
 
