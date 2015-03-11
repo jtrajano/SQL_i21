@@ -115,6 +115,7 @@ BEGIN
 				INNER JOIN dbo.tblICItemUOM	ItemUOM
 					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 		WHERE	Receipt.intInventoryReceiptId = @receiptItemId
+				AND ReceiptItem.intSourceId IS NOT NULL 
 
 		-- Call the stored procedure that updates the on order qty. 
 		EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
