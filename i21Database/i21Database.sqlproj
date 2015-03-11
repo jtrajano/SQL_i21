@@ -1169,6 +1169,15 @@
     <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoRoll.sql" />
+    <Build Include="dbo\Tables\tblRKTradersbyBrokersAccountMapping.sql" />
+    <Build Include="dbo\Tables\tblRKOptSettlementPriceMarketMap.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMonth.sql" />
+    <Build Include="dbo\Tables\tblRKFuturesSettlementPrice.sql" />
+    <Build Include="dbo\Tables\tblRKFuturesMonth.sql" />
+    <Build Include="dbo\Tables\tblRKFutSettlementPriceMarketMap.sql" />
+    <Build Include="dbo\Tables\tblRKBrokersAccountMarketMapping.sql" />
+    <Build Include="dbo\Tables\tblRKBrokerageCommission.sql" />
+    <Build Include="dbo\Tables\tblRKBrokerageAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
