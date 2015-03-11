@@ -888,6 +888,15 @@
     <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToItemReceipt on converting a PO into Inventory Receipt and it excludes non-stock types.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for scenario 1.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for scenario 2.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

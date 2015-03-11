@@ -158,37 +158,60 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 	)  
-	SELECT	intItemId = DetailItems.intItemId  
+	SELECT	intItemId = DetailItem.intItemId  
 			,intItemLocationId = ItemLocation.intItemLocationId
-			,intItemUOMId = ItemUOM.intItemUOMId
+			,intItemUOMId = 
+						-- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
+						CASE	WHEN ISNULL(DetailItemLot.intWeightUOMId, 0) <> 0 THEN DetailItemLot.intWeightUOMId 
+								ELSE DetailItem.intUnitMeasureId 
+						END 
 			,dtmDate = Header.dtmReceiptDate  
-			,dblQty =	CASE	WHEN ISNULL(DetailItemsLot.intLotId, 0) > 0 THEN DetailItemsLot.dblQuantity
-								ELSE DetailItems.dblOpenReceive
+			,dblQty =	
+						CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) > 0 THEN DetailItemLot.dblQuantity
+								ELSE DetailItem.dblOpenReceive
 						END 				
-			,dblUOMQty = ItemUOM.dblUnitQty
-			,dblCost = DetailItems.dblUnitCost  
-						--CASE	WHEN ISNULL(DetailItemsLot.intLotId, 0) > 0 THEN DetailItemsLot.dblCost
-						--		ELSE DetailItems.dblUnitCost
-						--END
+			,dblUOMQty = 
+						-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId
+						CASE	WHEN ISNULL(DetailItemLot.intWeightUOMId, 0) <> 0 THEN 
+									(
+										SELECT	TOP 1 
+												dblUnitQty
+										FROM	dbo.tblICItemUOM
+										WHERE	intItemUOMId = DetailItemLot.intWeightUOMId									
+									)
+								ELSE 
+									(
+										SELECT	TOP 1 
+												dblUnitQty
+										FROM	dbo.tblICItemUOM
+										WHERE	intItemUOMId = DetailItem.intUnitMeasureId
+									)
+						END 
+
+			,dblCost =	-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
+						CASE	WHEN ISNULL(DetailItemLot.intWeightUOMId, 0) <> 0 THEN dbo.fnCalculateCostPerWeight(DetailItemLot.dblQuantity, DetailItem.dblUnitCost, ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)) 
+								ELSE DetailItem.dblUnitCost  
+						END 
+
 			,dblSalesPrice = 0  
 			,intCurrencyId = Header.intCurrencyId  
 			,dblExchangeRate = 1  
 			,intTransactionId = Header.intInventoryReceiptId  
 			,strTransactionId = Header.strReceiptNumber  
 			,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
-			,intLotId = DetailItemsLot.intLotId 
-			,intSubLocationId = DetailItems.intSubLocationId
-			,intStorageLocationId = DetailItemsLot.intStorageLocationId
+			,intLotId = DetailItemLot.intLotId 
+			,intSubLocationId = DetailItem.intSubLocationId
+			,intStorageLocationId = DetailItemLot.intStorageLocationId
 	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON Header.intLocationId = ItemLocation.intLocationId
-			INNER JOIN dbo.tblICInventoryReceiptItem DetailItems  
-				ON Header.intInventoryReceiptId = DetailItems.intInventoryReceiptId 
-				AND ItemLocation.intItemId = DetailItems.intItemId
-			INNER JOIN dbo.tblICItemUOM ItemUOM
-				ON DetailItems.intItemId = ItemUOM.intItemId
-				AND DetailItems.intUnitMeasureId = ItemUOM.intItemUOMId
-			LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemsLot
-				ON DetailItems.intInventoryReceiptItemId = DetailItemsLot.intInventoryReceiptItemId
+			INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
+				ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
+				AND ItemLocation.intItemId = DetailItem.intItemId
+			--INNER JOIN dbo.tblICItemUOM ItemUOM
+			--	ON DetailItem.intItemId = ItemUOM.intItemId
+			--	AND DetailItem.intUnitMeasureId = ItemUOM.intItemUOMId
+			LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
+				ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
 	WHERE	Header.intInventoryReceiptId = @intTransactionId   
   
 	-- Call the post routine 

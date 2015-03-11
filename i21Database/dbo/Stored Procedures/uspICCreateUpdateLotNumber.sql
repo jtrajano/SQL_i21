@@ -191,14 +191,14 @@ BEGIN
 		AS		LotMaster
 		USING (
 				SELECT	intItemId = @intItemId
-						,intItemLocationId = @intItemLocationId
+						,intLocationId = @intLocationId
 						,intItemUOMId = @intItemUOMId
 						,intWeightUOMId = @intWeightUOMId
 						,strLotNumber = @strLotNumber
 						,intSubLocationId = @intSubLocationId
 						,intStorageLocationId = @intStorageLocationId
 		) AS LotToUpdate
-			ON LotMaster.intItemLocationId = LotToUpdate.intItemLocationId 
+			ON LotMaster.intLocationId = LotToUpdate.intLocationId 
 			AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
 			AND LotMaster.strLotNumber = LotToUpdate.strLotNumber 
 			AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
