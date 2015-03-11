@@ -56,7 +56,7 @@ WHEN NOT MATCHED THEN
 MERGE	
 INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
-AS		ItemStock	
+AS		ItemStockUOM
 USING (
 		SELECT	intItemId
 				,intItemLocationId
@@ -67,16 +67,16 @@ USING (
 		FROM	@ItemsToIncreaseOnOrder
 		GROUP BY intItemId, intItemLocationId, intItemUOMId, intSubLocationId, intStorageLocationId
 ) AS Source_Query  
-	ON ItemStock.intItemId = Source_Query.intItemId
-	AND ItemStock.intItemLocationId = Source_Query.intItemLocationId
-	AND ItemStock.intItemUOMId = Source_Query.intItemUOMId
-	AND ISNULL(ItemStock.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
-	AND ISNULL(ItemStock.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
+	ON ItemStockUOM.intItemId = Source_Query.intItemId
+	AND ItemStockUOM.intItemLocationId = Source_Query.intItemLocationId
+	AND ItemStockUOM.intItemUOMId = Source_Query.intItemUOMId
+	AND ISNULL(ItemStockUOM.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
+	AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
 
 -- If matched, update the On-Order qty 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnOrder = ISNULL(ItemStock.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty
+	SET		dblOnOrder = ISNULL(ItemStockUOM.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 

@@ -207,9 +207,6 @@ BEGIN
 			INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 				ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				AND ItemLocation.intItemId = DetailItem.intItemId
-			--INNER JOIN dbo.tblICItemUOM ItemUOM
-			--	ON DetailItem.intItemId = ItemUOM.intItemId
-			--	AND DetailItem.intUnitMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 				ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
 	WHERE	Header.intInventoryReceiptId = @intTransactionId   
@@ -326,7 +323,9 @@ BEGIN
 	WHERE	strReceiptNumber = @strTransactionId  
 
 	-- Update the received quantities from the Purchase Order
-	EXEC dbo.[uspPOReceived] @intTransactionId 
+	EXEC dbo.[uspPOReceived] 
+		@intTransactionId 
+		,@ysnPost
 
 	COMMIT TRAN @TransactionName
 END 
