@@ -1,4 +1,4 @@
-﻿PRINT N'BEGIN CASH MANAGEMENT DELETE PATH: 15.10.x.x to 15.12.x.x'
+﻿PRINT N'BEGIN INVENTORY PATH from 15.10.x.x to 15.12.x.x'
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblICLot'))
 BEGIN
@@ -17,7 +17,23 @@ BEGIN
 						ON Lot.intItemLocationId = ItemLocation.intItemLocationId
 		')
 	END
-
 END
 
-PRINT N'END CASH MANAGEMENT DELETE PATH: 15.10.x.x to 15.12.x.x'
+IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblICInventoryReceiptItemLot'))
+BEGIN
+	IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICInventoryReceiptItemLot') AND name = 'strLotNumber')
+	BEGIN
+		-- Repopulate the missing strLotNumber value
+		EXEC('
+			UPDATE	ItemLot
+			SET		strLotNumber = Lot.strLotNumber
+			FROM	dbo.tblICInventoryReceiptItemLot ItemLot INNER JOIN tblICLot Lot
+						ON ItemLot.intLotId = Lot.intLotId
+			WHERE	ItemLot.intLotId IS NOT NULL 
+					AND ISNULL(ItemLot.strLotNumber, '''') = ''''
+		')
+	END
+END
+
+
+PRINT N'END INVENTORY PATH from 15.10.x.x to 15.12.x.x'
