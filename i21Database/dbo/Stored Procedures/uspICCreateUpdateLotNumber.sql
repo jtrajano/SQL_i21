@@ -212,12 +212,12 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET		
-				dblQty					= ISNULL(LotMaster.dblQty, 0) + @dblQty
+				dblQty					= 0 --ISNULL(LotMaster.dblQty, 0) + @dblQty
 				,dtmExpiryDate			= @dtmExpiryDate
 				,strLotAlias			= @strLotAlias
 				,intLotStatusId			= @intLotStatusId
-				,dblWeight				= @dblWeight
-				,dblWeightPerQty		= ISNULL(LotMaster.dblWeightPerQty, 0) + dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight)
+				,dblWeight				= 0 --@dblWeight
+				,dblWeightPerQty		= dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight)
 				,intOriginId			= @intOriginId
 				,strBOLNo				= @strBOLNo
 				,strVessel				= @strVessel
@@ -277,11 +277,11 @@ BEGIN
 				,@strLotNumber
 				,@intSubLocationId
 				,@intStorageLocationId
-				,@dblQty
+				,0 --@dblQty
 				,@dtmExpiryDate
 				,@strLotAlias
 				,@intLotStatusId
-				,@dblWeight
+				,0 --@dblWeight
 				,@intWeightUOMId
 				,dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight)
 				,@intOriginId

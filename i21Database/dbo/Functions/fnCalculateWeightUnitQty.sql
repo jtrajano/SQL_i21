@@ -4,10 +4,10 @@ CREATE FUNCTION [dbo].[fnCalculateWeightUnitQty] (
 	@dblQty AS NUMERIC(18,6)
 	,@dblTotalWeight AS NUMERIC(18,6)
 )
-RETURNS NUMERIC(18,6)
+RETURNS NUMERIC(38,20)
 AS
 BEGIN 
-	DECLARE @result AS NUMERIC(18,6)
+	DECLARE @result AS NUMERIC(38,20)
 
 	-- formula is Total Weight / Qty
 	-- If qty is zero, return zero. 

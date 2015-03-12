@@ -123,7 +123,7 @@ BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
 
 -- Create and validate the lot numbers
-IF @ysnRecap = 0 
+IF @ysnRecap = 0 AND @ysnPost = 1
 BEGIN 	
 	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt 
 		@strTransactionId
@@ -168,8 +168,12 @@ BEGIN
 						END 
 			,dtmDate = Header.dtmReceiptDate  
 			,dblQty =	
-						CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) > 0 THEN DetailItemLot.dblQuantity
-								ELSE DetailItem.dblOpenReceive
+						CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 THEN 
+									CASE	WHEN ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN DetailItemLot.dblQuantity
+											ELSE ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+									END 									
+								ELSE	
+									DetailItem.dblOpenReceive
 						END 				
 			,dblUOMQty = 
 						-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId

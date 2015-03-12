@@ -114,7 +114,7 @@ BEGIN
 			INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLot 			
 				ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
 	WHERE	Receipt.strReceiptNumber = @strTransactionId
-			AND ISNULL(intLotId, 0) = 0
+
 END 
 
 -- Call the common stored procedure that will create or updat the lot master table

@@ -341,24 +341,25 @@ BEGIN
 
 		-- Update the stock quantity and weight at the Lot table (Two parts)
 		-- 1 of 2: Calculate in favor of qty. 
-		--UPDATE	Lot
-		--SET		Lot.dblQty = ISNULL(Lot.dblQty, 0) + @dblQty
-		--		,Lot.dblWeight = ISNULL(Lot.dblWeight, 0) + (@dblQty * ISNULL(Lot.dblWeightPerQty, 0)) 
-		--		,dblLastCost = CASE WHEN @dblQty > 0 THEN @dblCost ELSE dblLastCost END 
-		--FROM	dbo.tblICLot Lot
-		--WHERE	Lot.intItemLocationId = @intItemLocationId
-		--		AND Lot.intLotId = @intLotId
-		--		AND Lot.intItemUOMId = @intItemUOMId
-		---- 2 of 2: Calculate in favor of weights. 
-		--UPDATE	Lot
-		--SET		Lot.dblWeight = ISNULL(Lot.dblWeight, 0) + @dblQty
-		--		,Lot.dblQty = ISNULL(Lot.dblQty, 0) + CASE WHEN ISNULL(Lot.dblWeightPerQty, 0) = 0 THEN 0 ELSE ISNULL(@dblQty, 0) / ISNULL(Lot.dblWeightPerQty, 0) END 
-		--		,dblLastCost = CASE WHEN @dblQty > 0 THEN @dblCost ELSE dblLastCost END 
-		--FROM	dbo.tblICLot Lot
-		--WHERE	Lot.intItemLocationId = @intItemLocationId
-		--		AND Lot.intLotId = @intLotId
-		--		AND ISNULL(Lot.intWeightUOMId, 0) = @intItemUOMId
-		--		AND Lot.intItemUOMId  <> @intItemUOMId
+		UPDATE	Lot
+		SET		Lot.dblQty = ISNULL(Lot.dblQty, 0) + @dblQty
+				,Lot.dblWeight = ISNULL(Lot.dblWeight, 0) + (@dblQty * ISNULL(Lot.dblWeightPerQty, 0)) 
+				,dblLastCost = CASE WHEN @dblQty > 0 THEN @dblCost ELSE dblLastCost END 
+		FROM	dbo.tblICLot Lot
+		WHERE	Lot.intItemLocationId = @intItemLocationId
+				AND Lot.intLotId = @intLotId
+				AND Lot.intItemUOMId = @intItemUOMId
+
+		-- 2 of 2: Calculate in favor of weights. 
+		UPDATE	Lot
+		SET		Lot.dblWeight = ISNULL(Lot.dblWeight, 0) + @dblQty
+				,Lot.dblQty = ISNULL(Lot.dblQty, 0) + CASE WHEN ISNULL(Lot.dblWeightPerQty, 0) = 0 THEN ISNULL(Lot.dblQty, 0) ELSE ISNULL(@dblQty, 0) / ISNULL(Lot.dblWeightPerQty, 0) END 
+				,dblLastCost = CASE WHEN @dblQty > 0 THEN @dblCost ELSE dblLastCost END 
+		FROM	dbo.tblICLot Lot
+		WHERE	Lot.intItemLocationId = @intItemLocationId
+				AND Lot.intLotId = @intLotId
+				AND ISNULL(Lot.intWeightUOMId, 0) = @intItemUOMId
+				AND Lot.intItemUOMId  <> @intItemUOMId
 
 		-- Update the Item Pricing table
 		MERGE	
