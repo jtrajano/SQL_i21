@@ -10,6 +10,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @TransactionName AS VARCHAR(500) = 'Create or Update a Lot Number' + CAST(NEWID() AS NVARCHAR(100));
+
 DECLARE @Active AS INT = 1
 		,@OnHold AS INT = 2
 		,@Quarantine AS INT = 3
@@ -136,6 +138,8 @@ FETCH NEXT FROM loopLotItems INTO
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
 		,@intDetailId
+
+BEGIN TRAN @TransactionName
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -334,7 +338,9 @@ BEGIN
 		--Failed to process the lot number for {Item}.
 		RAISERROR(51043, 11, 1, @strItemNo);
 		RETURN;
-	END 	
+	END
+	
+	SAVE TRAN @TransactionName 	
 	
 	-- Fetch the next row from cursor. 
 	FETCH NEXT FROM loopLotItems INTO 
@@ -373,3 +379,5 @@ DEALLOCATE loopLotItems;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
+
+COMMIT TRAN @TransactionName

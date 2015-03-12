@@ -129,6 +129,7 @@ BEGIN
 		EXEC dbo.uspICCreateLotNumberOnInventoryReceipt
 			@strTransactionId
 			,1
+			,1
 
 		-- Get the actual result from Lot master table
 		INSERT INTO actualICLot (

@@ -70,6 +70,7 @@ BEGIN
 				,@intItemUOMId				AS INT 
 				,@dblWeight					AS NUMERIC(18,6)
 				,@intWeightUOMId			AS INT
+				,@dblWeightPerQty			AS NUMERIC(38,20)
 				,@dtmExpiryDate				AS DATETIME
 				,@dtmManufacturedDate		AS DATETIME
 				,@intOriginId				AS INT
@@ -105,7 +106,7 @@ BEGIN
 			,[intSplitFromLotId]		INT 
 			,[dblWeight]				NUMERIC(18,6) 
 			,[intWeightUOMId]			INT 
-			,[dblWeightPerQty]			NUMERIC(18,6) 
+			,[dblWeightPerQty]			NUMERIC(38,20)
 			,[intOriginId]				INT 
 			,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS 
 			,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS 
@@ -140,6 +141,7 @@ BEGIN
 				,@intItemUOMId				= @SerializedLotGrains_BushelUOMId
 				,@dblWeight					= 250
 				,@intWeightUOMId			= @SerializedLotGrains_PoundUOMId
+				,@dblWeightPerQty			= @dblWeight / @dblQty
 				,@dtmExpiryDate				= '02/14/2024'
 				,@dtmManufacturedDate		= '02/14/2014'
 				,@intOriginId				= 1
@@ -247,9 +249,9 @@ BEGIN
 				,intItemLocationId		= @intItemLocationId
 				,intSubLocationId		= @intSubLocationId
 				,intStorageLocationId	= @intStorageLocationId
-				,dblQty					= @dblQty
+				,dblQty					= 0
 				,intItemUOMId			= @intItemUOMId
-				,dblWeight				= @dblWeight
+				,dblWeight				= 0
 				,intWeightUOMId			= @intWeightUOMId
 				,dblWeightPerQty		= @dblWeight / @dblQty
 				,dtmExpiryDate			= @dtmExpiryDate
