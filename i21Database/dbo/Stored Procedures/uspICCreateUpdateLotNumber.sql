@@ -308,7 +308,7 @@ BEGIN
 		IF @intInsertedLotId IS NULL 
 		BEGIN 
 			SELECT @intLotId = SCOPE_IDENTITY();
-			SELECT @intInsertedLotId = SCOPE_IDENTITY();
+			SELECT @intInsertedLotId = @intLotId;
 		END 
 
 		-- Insert into a temp table 
