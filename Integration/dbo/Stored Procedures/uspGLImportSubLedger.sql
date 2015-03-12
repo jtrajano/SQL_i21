@@ -198,7 +198,8 @@ BEGIN
 				IF @glije_amt < 0
 				BEGIN
 					SELECT @glije_amt *= -1
-					IF 	@glije_dr_cr_ind = ''D'' SELECT @glije_dr_cr_ind =''C'' ELSE SELECT @glije_dr_cr_ind =''C''
+					IF 	@glije_dr_cr_ind = ''D'' SELECT @glije_dr_cr_ind =''C''
+					IF 	@glije_dr_cr_ind = ''C'' SELECT @glije_dr_cr_ind =''D''
 				END
 				IF @glije_amt >= 0
 					IF @glije_dr_cr_ind = ''D'' SELECT @debit += @glije_amt ELSE SELECT @credit += @glije_amt
