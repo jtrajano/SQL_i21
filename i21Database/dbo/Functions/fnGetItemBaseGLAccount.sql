@@ -26,18 +26,26 @@ BEGIN
 						AND AccntCategory.strAccountCategory = @strAccountCategory 
 			) AS ItemLevel
 			FULL JOIN (
-				-- Get the base account at the Item-Location level and then at the Category. 
+				-- Get the base account at the Category level. 
 				SELECT	TOP 1 
 						CategoryAccounts.intAccountId
-				FROM	dbo.tblICItemLocation ItemLocation INNER JOIN dbo.tblICCategory Category
-							ON ItemLocation.intCategoryId = Category.intCategoryId
+				FROM	dbo.tblICItem Item INNER JOIN dbo.tblICCategory Category
+							ON Item.intCategoryId = Category.intCategoryId
 						INNER JOIN tblICCategoryAccount CategoryAccounts
 							ON Category.intCategoryId = CategoryAccounts.intCategoryId
 						INNER JOIN dbo.tblGLAccountCategory AccntCategory
 							ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
-				WHERE	ItemLocation.intItemId = @intItemId
-						AND ItemLocation.intItemLocationId = @intItemLocationId
-						AND AccntCategory.strAccountCategory = @strAccountCategory 			
+				WHERE	Item.intItemId = @intItemId
+						AND AccntCategory.strAccountCategory = @strAccountCategory 		
+				--FROM	dbo.tblICItemLocation ItemLocation INNER JOIN dbo.tblICCategory Category
+				--			ON ItemLocation.intCategoryId = Category.intCategoryId
+				--		INNER JOIN tblICCategoryAccount CategoryAccounts
+				--			ON Category.intCategoryId = CategoryAccounts.intCategoryId
+				--		INNER JOIN dbo.tblGLAccountCategory AccntCategory
+				--			ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
+				--WHERE	ItemLocation.intItemId = @intItemId
+				--		AND ItemLocation.intItemLocationId = @intItemLocationId
+				--		AND AccntCategory.strAccountCategory = @strAccountCategory 			
 			) AS CategoryLevel
 				ON 1 = 1
 			FULL JOIN (
