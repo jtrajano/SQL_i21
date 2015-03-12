@@ -52,7 +52,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intClockID'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Clock Number',
+    @value = N'Clock Location No',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -88,7 +88,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strDeliveryTicketPrinter'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Delivery Ticket Number',
+    @value = N'Delivery Ticket No',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -106,7 +106,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strDeliveryTicketFormat'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Reading Entry Method',
+    @value = N'Readings Method',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -124,7 +124,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intBaseTemperature'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Accumulated Degree Day on Winter Close',
+    @value = N'Accum DD Winter Close',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -133,7 +133,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblAccumulatedWinterClose'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'January Average Degree Day',
+    @value = N'Jan',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -142,7 +142,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblJanuaryDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'February Average Degree Day',
+    @value = N'Feb',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -151,7 +151,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblFebruaryDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'March Average Degree Day',
+    @value = N'Mar',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -160,7 +160,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblMarchDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'April Average Degree Day',
+    @value = N'Apr',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -169,7 +169,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblAprilDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'May Average Degree Day',
+    @value = N'May',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -178,7 +178,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblMayDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'June Average Degree Day',
+    @value = N'Jun',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -187,7 +187,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblJuneDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'July Average Degree Day',
+    @value = N'Jul',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -196,7 +196,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblJulyDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'August Average Degree Day',
+    @value = N'Aug',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -205,7 +205,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblAugustDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'September Average Degree Day',
+    @value = N'Sep',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -214,7 +214,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblSeptemberDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'October Average Degree Day ',
+    @value = N'Oct',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -223,7 +223,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblOctoberDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'November Average Degree Day',
+    @value = N'Nov',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -232,7 +232,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblNovemberDailyAverage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'December Average Degree Day',
+    @value = N'Dec',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -250,7 +250,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strAddress'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Zip Code',
+    @value = N'Zip/Postal Code',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -286,7 +286,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strCurrentSeason'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'State',
+    @value = N'State/Province',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',

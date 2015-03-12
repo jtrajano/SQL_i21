@@ -57,7 +57,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dtmDate'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Degree Day Reading',
+    @value = N'Degree Days',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -66,7 +66,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intDegreeDays'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Accumulated Degree Day Reading',
+    @value = N'Accum DD',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
