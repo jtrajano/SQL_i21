@@ -23,7 +23,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intDeliveryHistoryDetailID'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Invoice Number',
+    @value = N'Invoice No.',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -41,7 +41,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblQuantityDelivered'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Item Number',
+    @value = N'Item No.',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',

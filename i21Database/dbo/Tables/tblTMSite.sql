@@ -110,7 +110,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intSiteID'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Site Address',
+    @value = N'Address',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -146,7 +146,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblTotalCapacity'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Indicates if delivery in site is on hold',
+    @value = N'On Hold',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -155,7 +155,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'ysnOnHold'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Indicates if site is active',
+    @value = N'Active',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -182,7 +182,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strAcctStatus'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Price Adjustment',
+    @value = N'Price Reduction',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -200,7 +200,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intClockID'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Degree Day Between Delivery',
+    @value = N'DD Between Delivery',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -209,7 +209,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblDegreeDayBetweenDelivery'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Summary Daily Use',
+    @value = N'Summary Daily Rate',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -218,7 +218,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblSummerDailyUse'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Winter Daily Use',
+    @value = N'Winter Daily Rate',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -227,7 +227,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblWinterDailyUse'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Taxable Option',
+    @value = N'Sales Tax',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -308,7 +308,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblYTDGalsLastSeason'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Runout date',
+    @value = N'Run Out Date',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -407,7 +407,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dtmOnHoldEndDate'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Hold Degree Day Calculations',
+    @value = N'Hold DD Calc',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -452,7 +452,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblPreviousBurnRate'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Site Total Reserve',
+    @value = N'Total Reserve',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -542,7 +542,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intHoldReasonID'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'YTD Gallons Two Seasons Ago',
+    @value = N'YTD Gallons 2 Seasons Ago',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -587,7 +587,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intRecurringPONumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Print AR Balance Option',
+    @value = N'Print AR Balance',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -596,7 +596,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'ysnPrintARBalance'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Prompt For Percent Full Option',
+    @value = N'Prompt For % Full',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -659,7 +659,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intNextDeliveryDegreeDay'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Delivery Ticket Printed Option',
+    @value = N'Print Delivery Ticket',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -794,7 +794,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblYTDSalesLastSeason'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'YTD Sales Last two Season',
+    @value = N'YTD Sales Last 2 Season',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',

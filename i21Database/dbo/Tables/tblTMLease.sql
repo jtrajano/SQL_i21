@@ -21,7 +21,7 @@
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Indicates if Lease to Own',
+    @value = N'Lease to Own',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -57,7 +57,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intLeaseCodeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Lease Number',
+    @value = N'Lease No.',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',

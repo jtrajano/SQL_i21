@@ -101,7 +101,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strModelNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Bulk Plant',
+    @value = N'Bulk Plant Number',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -173,7 +173,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strComment'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Is Underground option',
+    @value = N'Underground',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -209,7 +209,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblTankReserve'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Estimated Gallons ',
+    @value = N'Est Gallons in Tank',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
