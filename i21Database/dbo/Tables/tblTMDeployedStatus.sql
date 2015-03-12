@@ -5,3 +5,31 @@
     CONSTRAINT [PK_tblTMDeployedStatus] PRIMARY KEY CLUSTERED ([intDeployedStatusID] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeployedStatus',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeployedStatus',
+    @level2type = N'COLUMN',
+    @level2name = N'intDeployedStatusID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Deployed Status',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeployedStatus',
+    @level2type = N'COLUMN',
+    @level2name = N'strDeployedStatus'

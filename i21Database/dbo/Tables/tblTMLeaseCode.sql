@@ -8,3 +8,49 @@
     CONSTRAINT [UQ_tblTMLeaseCode_strLeaseCode] UNIQUE NONCLUSTERED ([strLeaseCode] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMLeaseCode',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMLeaseCode',
+    @level2type = N'COLUMN',
+    @level2name = N'intLeaseCodeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Lease Code',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMLeaseCode',
+    @level2type = N'COLUMN',
+    @level2name = N'strLeaseCode'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Description',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMLeaseCode',
+    @level2type = N'COLUMN',
+    @level2name = N'strDescription'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Amount',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMLeaseCode',
+    @level2type = N'COLUMN',
+    @level2name = N'dblAmount'
