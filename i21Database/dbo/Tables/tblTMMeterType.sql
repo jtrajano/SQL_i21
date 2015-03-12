@@ -10,3 +10,49 @@
 
 
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMMeterType',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMMeterType',
+    @level2type = N'COLUMN',
+    @level2name = N'intMeterTypeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Meter Typed',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMMeterType',
+    @level2type = N'COLUMN',
+    @level2name = N'strMeterType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Conversion Factor',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMMeterType',
+    @level2type = N'COLUMN',
+    @level2name = N'dblConversionFactor'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicates if default data',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMMeterType',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnDefault'

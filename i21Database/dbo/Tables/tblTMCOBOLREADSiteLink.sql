@@ -6,3 +6,40 @@
     CONSTRAINT [PK_tblTMCOBOLREADSiteLink] PRIMARY KEY CLUSTERED ([ContractCustomerNumber] ASC, [ContractNumber] ASC, [CustomerNumber] ASC, [SiteNumber] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Customer Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMCOBOLREADSiteLink',
+    @level2type = N'COLUMN',
+    @level2name = N'CustomerNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMCOBOLREADSiteLink',
+    @level2type = N'COLUMN',
+    @level2name = N'SiteNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Customer Number of the contract number in Origin',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMCOBOLREADSiteLink',
+    @level2type = N'COLUMN',
+    @level2name = N'ContractCustomerNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Contract Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMCOBOLREADSiteLink',
+    @level2type = N'COLUMN',
+    @level2name = N'ContractNumber'

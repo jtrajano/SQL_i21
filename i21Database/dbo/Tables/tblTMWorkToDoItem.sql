@@ -7,3 +7,40 @@
 	CONSTRAINT [UQ_tblTMToDoItem_strToDoItem] UNIQUE NONCLUSTERED ([strToDoItem] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMWorkToDoItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intToDoItemID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'To Do Item',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMWorkToDoItem',
+    @level2type = N'COLUMN',
+    @level2name = N'strToDoItem'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicates if Default Data',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMWorkToDoItem',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnDefault'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMWorkToDoItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'

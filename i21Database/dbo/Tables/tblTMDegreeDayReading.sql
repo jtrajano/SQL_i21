@@ -18,3 +18,94 @@
     CONSTRAINT [FK_tblTMDDReading_tblTMClock] FOREIGN KEY ([intClockID]) REFERENCES [dbo].[tblTMClock] ([intClockID]) ON DELETE CASCADE
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'intDegreeDayReadingID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Obsolete /not used',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'intClockLocationID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Reading Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Degree Day Reading',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'intDegreeDays'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Accumulated Degree Day Reading',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'dblAccumulatedDegreeDay'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Obsolete /not used',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'strSeason'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Obsolete /not used',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'intUserID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Obsolete /not used',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmLastUpdated'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Clock ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDegreeDayReading',
+    @level2type = N'COLUMN',
+    @level2name = N'intClockID'
