@@ -12,7 +12,8 @@ RETURNS TABLE
 AS
 RETURN (
 	
-	SELECT * FROM (
+	SELECT DISTINCT * 
+	FROM (
 		-- Check for any invalid item.
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
@@ -31,18 +32,16 @@ RETURN (
 				,strText = FORMATMESSAGE(50029)
 				,intErrorCode = 50029
 		WHERE	EXISTS (
-					SELECT	TOP 1 1 
+					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
-								ON Item.intItemId = Location.intItemId
-							INNER JOIN dbo.tblICItemStockUOM StockUOM
+								ON Item.intItemId = @intItemId
+								AND Location.intItemLocationId = @intItemLocationId
+							LEFT JOIN dbo.tblICItemStockUOM StockUOM
 								ON StockUOM.intItemId = Item.intItemId
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					WHERE	Item.intItemId = @intItemId
-							AND Location.intItemLocationId = @intItemLocationId
-							AND StockUOM.intItemUOMId = @intItemUOMId
-							AND ISNULL(@dblQty, 0) + StockUOM.dblOnHand  < 0
+					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0)  < 0
 							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 					
 				)
 
@@ -53,16 +52,17 @@ RETURN (
 				,strText = FORMATMESSAGE(50029)
 				,intErrorCode = 50029
 		WHERE	EXISTS (
-					SELECT	TOP 1 1 
+					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
-								ON Item.intItemId = Location.intItemId
-							INNER JOIN dbo.tblICLot Lot
+								ON Item.intItemId = @intItemId
+								AND Location.intItemLocationId = @intItemLocationId
+							LEFT JOIN dbo.tblICLot Lot
 								ON Lot.intItemLocationId = Location.intItemLocationId 
+								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
 					WHERE	Item.intItemId = @intItemId
-							AND Location.intItemLocationId = @intItemLocationId
-							AND Lot.intLotId = @intLotId
-							AND ISNULL(@dblQty, 0) + Lot.dblOnHand < 0
-							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 					
+							AND Location.intItemLocationId = @intItemLocationId							
+							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
+							AND Location.intAllowNegativeInventory = 3			
 				)
 	) AS Query		
 )

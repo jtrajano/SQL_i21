@@ -3,6 +3,8 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
+		EXEC [testi21Database].[Fake inventory items];
+
 		-- Declare the variables for grains (item)
 		DECLARE @ManualLotGrains AS INT = 6
 				,@SerializedLotGrains AS INT = 7
@@ -28,18 +30,16 @@ BEGIN
 		DECLARE @intEntityId AS INT = 1
 		DECLARE @dtmDate AS DATETIME = GETDATE()
 
-		EXEC [testi21Database].[Fake inventory items];
-
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemLot';
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemLot', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
 		INSERT INTO tblICInventoryReceipt (
 			strReceiptNumber
@@ -56,10 +56,10 @@ BEGIN
 		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId, intItemId, dblOrderQty, dblOpenReceive, dblUnitCost, intUnitMeasureId) VALUES (1, @SerializedLotGrains,	30,	20,	13.50, @SerializedLotGrains_BushelUOMId);
 
 		-- @ManualLotGrains: 1
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity) VALUES (1, 1, 'ManualLot-0001', 10)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (1, 1, 'ManualLot-0001', 10)
 		
 		-- @SerializedLotGrains: 2
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotId, dblQuantity) VALUES (2, 2, 'SerialLot-0001', 20)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (2, 2, 'SerialLot-0001', 20)
 
 		-- Fake data for the lot numbers
 		INSERT INTO tblICLot (intItemLocationId, intItemUOMId, strLotNumber) VALUES (@ManualLotGrains_DefaultLocation, @ManualLotGrains_BushelUOMId, 'ManualLot-0001')

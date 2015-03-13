@@ -78,7 +78,7 @@ BEGIN
 	-- Get the base account in the category level 
 	-- Must return account id 12040-1001 (INVENTORY WHEAT-NEW HAVEN)
 	BEGIN                                                                                                                                                                                                                                                                                
-		SELECT @actual =[dbo].[fnGetItemBaseGLAccount](@HotGrains, 5, @InventoryDescription);
+		SELECT @actual = [dbo].[fnGetItemBaseGLAccount](@HotGrains, 5, @InventoryDescription);
 
 		-- Assert
 		SET @expected = @Inventory_NewHaven;

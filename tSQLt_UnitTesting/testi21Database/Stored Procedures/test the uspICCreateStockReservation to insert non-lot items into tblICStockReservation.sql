@@ -68,7 +68,7 @@ BEGIN
 			,intItemLocationId INT 
 			,intItemUOMId INT 
 			,intLotId INT 
-			,dblQuantity NUMERIC(18,6)
+			,dblQty NUMERIC(18,6)
 			,intTransactionId INT
 			,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,intInventoryTransactionType INT
@@ -80,7 +80,7 @@ BEGIN
 			,intItemLocationId INT 
 			,intItemUOMId INT 
 			,intLotId INT 
-			,dblQuantity NUMERIC(18,6)
+			,dblQty NUMERIC(18,6)
 			,intTransactionId INT
 			,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,intInventoryTransactionType INT
@@ -112,7 +112,7 @@ BEGIN
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_PoundUOMId
 				,intLotId = NULL 
-				,dblQuantity = 100
+				,dblQty = 100
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1
@@ -121,7 +121,7 @@ BEGIN
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,intLotId = NULL 
-				,dblQuantity = 15
+				,dblQty = 15
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1
@@ -132,7 +132,7 @@ BEGIN
 				,intItemLocationId 
 				,intItemUOMId 
 				,intLotId 
-				,dblQuantity 
+				,dblQty 
 				,intTransactionId 
 				,strTransactionId 
 				,intInventoryTransactionType 
@@ -141,7 +141,7 @@ BEGIN
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,intLotId = NULL 
-				,dblQuantity = 115
+				,dblQty = 115
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1 
@@ -150,7 +150,7 @@ BEGIN
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_PoundUOMId
 				,intLotId = NULL 
-				,dblQuantity = 100
+				,dblQty = 100
 				,intTransactionId = 1
 				,strTransactionId = 'TRANSACTION-000001'
 				,intInventoryTransactionType = 1 
@@ -170,7 +170,7 @@ BEGIN
 				,intItemLocationId 
 				,intItemUOMId 
 				,intLotId 
-				,dblQuantity 
+				,dblQty 
 				,intTransactionId 
 				,strTransactionId 
 				,intInventoryTransactionType 		
@@ -179,7 +179,7 @@ BEGIN
 				,intItemLocationId 
 				,intItemUOMId 
 				,intLotId 
-				,dblQuantity 
+				,dblQty 
 				,intTransactionId 
 				,strTransactionId 
 				,intInventoryTransactionType 

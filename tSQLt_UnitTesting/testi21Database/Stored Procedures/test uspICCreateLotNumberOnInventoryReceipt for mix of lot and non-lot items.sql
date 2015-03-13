@@ -64,13 +64,13 @@ BEGIN
 		CREATE TABLE expectedReceiptItemLot(
 			intLotId INT NULL
 			,intInventoryReceiptItemId INT NOT NULL
-			,strLotId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		)
 
 		CREATE TABLE actualReceiptItemLot(
 			intLotId INT NULL
 			,intInventoryReceiptItemId INT NOT NULL
-			,strLotId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		)
 
 		-- Setup the expected data for Lot master table 
@@ -94,23 +94,23 @@ BEGIN
 		INSERT INTO expectedReceiptItemLot (
 				intLotId
 				,intInventoryReceiptItemId
-				,strLotId
+				,strLotNumber
 		)
 		SELECT	intLotId = NULL 
 				,intInventoryReceiptItemId = 6
-				,strLotId = NULL 
+				,strLotNumber = NULL 
 		UNION ALL
 		SELECT	intLotId = NULL 
 				,intInventoryReceiptItemId = 6
-				,strLotId = NULL 
+				,strLotNumber = NULL 
 		UNION ALL 
 		SELECT	intLotId = 1
 				,intInventoryReceiptItemId = 7
-				,strLotId = 'LOT-10000'
+				,strLotNumber = 'LOT-10000'
 		UNION ALL
 		SELECT	intLotId = 2
 				,intInventoryReceiptItemId = 7
-				,strLotId = 'LOT-10001'
+				,strLotNumber = 'LOT-10001'
 	END 
 
 	-- Assert
@@ -124,6 +124,8 @@ BEGIN
 
 		EXEC dbo.uspICCreateLotNumberOnInventoryReceipt
 			@strTransactionId
+			,1
+			,1
 		
 		-- Get the actual result from Lot master table
 		INSERT INTO actualICLot (
@@ -142,11 +144,11 @@ BEGIN
 		INSERT INTO actualReceiptItemLot (
 				intLotId
 				,intInventoryReceiptItemId
-				,strLotId
+				,strLotNumber
 		)
 		SELECT	ItemLots.intLotId
 				,ItemLots.intInventoryReceiptItemId
-				,ItemLots.strLotId
+				,ItemLots.strLotNumber
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItems
 					ON Receipt.intInventoryReceiptId = ReceiptItems.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLots

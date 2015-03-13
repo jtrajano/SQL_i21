@@ -68,6 +68,8 @@ BEGIN
 		intItemId INT
 		,intItemLocationId INT
 		,intItemUOMId INT
+		,intSubLocationId INT
+		,intStorageLocationId INT
 		,dtmDate DATETIME
 		,dblQty NUMERIC(18,6)
 		,dblCost NUMERIC(18,6)
@@ -88,6 +90,8 @@ BEGIN
 		intItemId INT
 		,intItemLocationId INT
 		,intItemUOMId INT
+		,intSubLocationId INT
+		,intStorageLocationId INT
 		,dtmDate DATETIME
 		,dblQty NUMERIC(18,6)
 		,dblCost NUMERIC(18,6)
@@ -166,6 +170,8 @@ BEGIN
 			intItemId 
 			,intItemLocationId 
 			,intItemUOMId 
+			,intSubLocationId
+			,intStorageLocationId
 			,dtmDate 
 			,dblQty 
 			,dblCost 
@@ -184,6 +190,8 @@ BEGIN
 	SELECT	intItemId 
 			,intItemLocationId 
 			,intItemUOMId
+			,intSubLocationId
+			,intStorageLocationId
 			,dtmDate 
 			,dblQty 
 			,dblCost 
@@ -205,6 +213,8 @@ BEGIN
 	SELECT	intItemId 
 			,intItemLocationId 
 			,intItemUOMId
+			,intSubLocationId
+			,intStorageLocationId
 			,dtmDate 
 			-- Reverse the unit qty
 			--{
@@ -336,6 +346,8 @@ BEGIN
 			intItemId 
 			,intItemLocationId 
 			,intItemUOMId
+			,intSubLocationId
+			,intStorageLocationId
 			,dtmDate 
 			,dblQty 
 			,dblCost 
@@ -354,6 +366,8 @@ BEGIN
 	SELECT	intItemId 
 			,intItemLocationId 
 			,intItemUOMId
+			,intSubLocationId
+			,intStorageLocationId
 			,dtmDate 
 			,dblQty 
 			,dblCost 

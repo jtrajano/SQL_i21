@@ -3,6 +3,13 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
+		-- Use the simple item mock data
+		EXEC testi21Database.[Fake inventory items]; 
+
+		-- Flag all item to allow negative stock 
+		UPDATE dbo.tblICItemLocation
+		SET intAllowNegativeInventory = 1
+
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
 				,@StickyGrains AS INT = 2
@@ -72,10 +79,6 @@ BEGIN
 				,strTransactionId = 'TRANSACTION-XXXXX'
 				,intTransactionTypeId = 1
 				,intLotId = NULL 
-
-
-		-- Use the simple item mock data
-		EXEC testi21Database.[Fake inventory items]; 
 	END 
 	
 	-- Test case 1: 

@@ -1146,6 +1146,7 @@
     <Build Include="dbo\Functions\fnAPValidatePO.sql" />
     <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
     <Build Include="dbo\Views\vyuARCustomerTaxCode.sql" />
+<<<<<<< Temporary merge branch 1
     <Build Include="dbo\Functions\fnCalculateUnitCost.sql" />
     <Build Include="dbo\Functions\fnCalculateStockUnitQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateStockReserves.sql" />
@@ -1161,7 +1162,24 @@
     <Build Include="dbo\Tables\tblMFWorkOrderStatus.sql" />
     <Build Include="dbo\Tables\tblICParentLot.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateOnOrder.sql" />
-    <None Include="Scripts\Post-Deployment\MF\1_MasterTables.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOUpdateStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateUpdateLotNumber.sql" />
+    <Build Include="dbo\Functions\fnCalculateWeightUnitQty.sql" />
+    <None Include="Scripts\Post-Deployment\IC\5_LotStatus.sql" />
+    <Build Include="dbo\Functions\fnCalculateCostPerWeight.sql" />
+    <Build Include="dbo\Functions\fnGetTotalStockValueFromTransactionBatch.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFBlendSheetReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCompleteBlendsheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFConsumeWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetAvailableLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPostConsumption.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPostProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProduceWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFReleaseBlendSheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveBlendSheet.sql" />
     <Build Include="dbo\Tables\tblHDMilestone.sql" />
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRateType.sql" />
     <Build Include="dbo\Tables\tblSMCurrencyExchangeRate.sql" />

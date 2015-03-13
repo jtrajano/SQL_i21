@@ -6,6 +6,7 @@ BEGIN
 	-- Create the fake tables for the stock path
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStockPath', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 
 	-- Re-apply the constraints for the Item stock path table. 
 	EXEC tSQLt.ApplyConstraint 'dbo.tblICItemStockPath','UN_tblICItemStockPath';

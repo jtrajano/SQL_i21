@@ -7,6 +7,7 @@ BEGIN
 		EXEC [testi21Database].[Fake data for item stock table]
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		
@@ -21,13 +22,8 @@ BEGIN
 				,@PremiumGrains AS INT = 3
 				,@ColdGrains AS INT = 4
 				,@HotGrains AS INT = 5
-				,@InvalidItem AS INT = -1
-
-		-- Declare the variables for location
-		DECLARE @Default_Location AS INT = 1
-				,@NewHaven AS INT = 2
-				,@BetterHaven AS INT = 3
-				,@InvalidLocation AS INT = -1
+				,@ManualLotGrains AS INT = 6
+				,@SerializedLotGrains AS INT = 7
 
 		-- Declare the variables for the Item UOM Ids
 		DECLARE @WetGrains_BushelUOMId AS INT = 1
@@ -35,9 +31,38 @@ BEGIN
 				,@PremiumGrains_BushelUOMId AS INT = 3
 				,@ColdGrains_BushelUOMId AS INT = 4
 				,@HotGrains_BushelUOMId AS INT = 5
+				,@ManualLotGrains_BushelUOMId AS INT = 6
+				,@SerializedLotGrains_BushelUOMId AS INT = 7
 
-		-- Declare the variables for the Unit of Measure
-		DECLARE @EACH AS INT = 1;
+				,@WetGrains_PoundUOMId AS INT = 8
+				,@StickyGrains_PoundUOMId AS INT = 9
+				,@PremiumGrains_PoundUOMId AS INT = 10
+				,@ColdGrains_PoundUOMId AS INT = 11
+				,@HotGrains_PoundUOMId AS INT = 12
+				,@ManualLotGrains_PoundUOMId AS INT = 13
+				,@SerializedLotGrains_PoundUOMId AS INT = 14
+
+		-- Declare Item-Locations
+		DECLARE @WetGrains_DefaultLocation AS INT = 1
+				,@StickyGrains_DefaultLocation AS INT = 2
+				,@PremiumGrains_DefaultLocation AS INT = 3
+				,@ColdGrains_DefaultLocation AS INT = 4
+				,@HotGrains_DefaultLocation AS INT = 5
+
+				,@WetGrains_NewHaven AS INT = 6
+				,@StickyGrains_NewHaven AS INT = 7
+				,@PremiumGrains_NewHaven AS INT = 8
+				,@ColdGrains_NewHaven AS INT = 9
+				,@HotGrains_NewHaven AS INT = 10
+
+				,@WetGrains_BetterHaven AS INT = 11
+				,@StickyGrains_BetterHaven AS INT = 12
+				,@PremiumGrains_BetterHaven AS INT = 13
+				,@ColdGrains_BetterHaven AS INT = 14
+				,@HotGrains_BetterHaven AS INT = 15
+
+				,@ManualLotGrains_DefaultLocation AS INT = 16
+				,@SerializedLotGrains_DefaultLocation AS INT = 17
 
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
@@ -124,11 +149,11 @@ BEGIN
 		-- 1. Expected data from Jan 1. Purchase 20 stocks @ 20 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
-			SET @intItemLocationId = @NewHaven
+			SET @intItemLocationId = @WetGrains_NewHaven
 			SET @intItemUOMId = @WetGrains_BushelUOMId
 			SET @dtmDate = 'January 1, 2014'
 			SET @dblQty = 20
-			SET @dblUOMQty = @EACH 
+			SET @dblUOMQty = 1 
 			SET @dblCost = 20.00
 			SET @dblSalesPrice = 0
 			SET @intCurrencyId = @USD
@@ -163,7 +188,7 @@ BEGIN
 			)
 			SELECT	[intInventoryTransactionId] = 1
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = (@dblQty * @dblUOMQty)
@@ -202,7 +227,7 @@ BEGIN
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty
@@ -247,7 +272,7 @@ BEGIN
 					,intConcurrencyId
 			)
 			SELECT	intItemId = @WetGrains
-					,intItemLocationId = @NewHaven
+					,intItemLocationId = @WetGrains_NewHaven
 					,intItemUOMId = @intItemUOMId
 					,dtmDate = 'January 1, 2014'
 					,dblStockIn = 20
@@ -260,11 +285,11 @@ BEGIN
 		-- 2. Feb 10. Purchase 20 stocks at 21 dollars each
 		BEGIN 
 			SET	@intItemId = @WetGrains
-			SET @intItemLocationId = @NewHaven
+			SET @intItemLocationId = @WetGrains_NewHaven
 			SET @intItemUOMId = @WetGrains_BushelUOMId
 			SET @dtmDate = 'February 10, 2014'
 			SET @dblQty = 20
-			SET @dblUOMQty = @EACH 
+			SET @dblUOMQty = 1
 			SET @dblCost = 21.00
 			SET @dblSalesPrice = 0
 			SET @intCurrencyId = @USD
@@ -299,7 +324,7 @@ BEGIN
 			)
 			SELECT	[intInventoryTransactionId] = 2
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = (@dblQty * @dblUOMQty)
@@ -338,7 +363,7 @@ BEGIN
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
@@ -383,7 +408,7 @@ BEGIN
 					,intConcurrencyId
 			)
 			SELECT	intItemId = @WetGrains
-					,intItemLocationId = @NewHaven
+					,intItemLocationId = @WetGrains_NewHaven
 					,[intItemUOMId] = @WetGrains_BushelUOMId
 					,dtmDate = 'February 10, 2014'
 					,dblStockIn = 20
@@ -396,11 +421,11 @@ BEGIN
 		-- 3. Feb 15. Purchase 20 stocks at $21.75 each
 		BEGIN 
 			SET	@intItemId = @WetGrains
-			SET @intItemLocationId = @NewHaven
+			SET @intItemLocationId = @WetGrains_NewHaven
 			SET @intItemUOMId = @WetGrains_BushelUOMId
 			SET @dtmDate = 'February 15, 2014'
 			SET @dblQty = 20
-			SET @dblUOMQty = @EACH 
+			SET @dblUOMQty = 1
 			SET @dblCost = 21.75
 			SET @dblSalesPrice = 0
 			SET @intCurrencyId = @USD
@@ -435,7 +460,7 @@ BEGIN
 			)
 			SELECT	[intInventoryTransactionId] = 3
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = (@dblQty * @dblUOMQty)
@@ -474,7 +499,7 @@ BEGIN
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
@@ -519,7 +544,7 @@ BEGIN
 					,intConcurrencyId
 			)
 			SELECT	intItemId = @WetGrains
-					,intItemLocationId = @NewHaven
+					,intItemLocationId = @WetGrains_NewHaven
 					,intItemUOMId = @intItemUOMId
 					,dtmDate = 'February 15, 2014'
 					,dblStockIn = 20
@@ -532,11 +557,11 @@ BEGIN
 		-- 4. Mar 1. Sold 40 stocks. 
 		BEGIN 
 			SET	@intItemId = @WetGrains
-			SET @intItemLocationId = @NewHaven
+			SET @intItemLocationId = @WetGrains_NewHaven
 			SET @intItemUOMId = @WetGrains_BushelUOMId
 			SET @dtmDate = 'March 1, 2014'
 			SET @dblQty = -40
-			SET @dblUOMQty = @EACH 
+			SET @dblUOMQty = 1 
 			SET @dblCost = 0
 			SET @dblSalesPrice = 50.00
 			SET @intCurrencyId = @USD
@@ -571,7 +596,7 @@ BEGIN
 			)
 			SELECT	[intInventoryTransactionId] = 4
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = (@dblQty * @dblUOMQty)
@@ -610,7 +635,7 @@ BEGIN
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
@@ -682,11 +707,11 @@ BEGIN
 		-- 5. Mar 15. Sold 50 stocks. 
 		BEGIN 
 			SET	@intItemId = @WetGrains
-			SET @intItemLocationId = @NewHaven
+			SET @intItemLocationId = @WetGrains_NewHaven
 			SET @intItemUOMId = @WetGrains_BushelUOMId
 			SET @dtmDate = 'March 15, 2014'
 			SET @dblQty = -50
-			SET @dblUOMQty = @EACH 
+			SET @dblUOMQty = 1 
 			SET @dblCost = 0
 			SET @dblSalesPrice = 52.00
 			SET @intCurrencyId = @USD
@@ -721,7 +746,7 @@ BEGIN
 			)
 			SELECT	[intInventoryTransactionId] = 5
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = (@dblQty * @dblUOMQty)
@@ -760,7 +785,7 @@ BEGIN
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
@@ -813,7 +838,7 @@ BEGIN
 					,intConcurrencyId
 			)
 			SELECT	intItemId = @WetGrains
-					,intItemLocationId = @NewHaven
+					,intItemLocationId = @WetGrains_NewHaven
 					,intItemUOMId = @WetGrains_BushelUOMId
 					,dtmDate = 'March 15, 2014'
 					,dblStockIn = 0
@@ -846,11 +871,11 @@ BEGIN
 		-- 6. Apr 7. Sold 60 stocks
 		BEGIN 
 			SET	@intItemId = @WetGrains
-			SET @intItemLocationId = @NewHaven
+			SET @intItemLocationId = @WetGrains_NewHaven
 			SET @intItemUOMId = @WetGrains_BushelUOMId
 			SET @dtmDate = 'April 7, 2014'
 			SET @dblQty = -60
-			SET @dblUOMQty = @EACH 
+			SET @dblUOMQty = 1 
 			SET @dblCost = dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
 			SET @dblSalesPrice = 55.75
 			SET @intCurrencyId = @USD
@@ -885,7 +910,7 @@ BEGIN
 			)
 			SELECT	[intInventoryTransactionId] = 6
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = (@dblQty * @dblUOMQty)
@@ -925,7 +950,7 @@ BEGIN
 					,[intConcurrencyId]
 			)
 			SELECT	[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
@@ -970,7 +995,7 @@ BEGIN
 					,intConcurrencyId
 			)
 			SELECT	intItemId = @WetGrains
-					,intItemLocationId = @NewHaven
+					,intItemLocationId = @WetGrains_NewHaven
 					,intItemUOMId = @intItemUOMId
 					,dtmDate = 'April 7, 2014'
 					,dblStockIn = 0
@@ -984,11 +1009,11 @@ BEGIN
 		-- 7. Apr 12. Purchase 75 stocks at $19 each. 
 		BEGIN 
 			SET	@intItemId = @WetGrains
-			SET @intItemLocationId = @NewHaven
+			SET @intItemLocationId = @WetGrains_NewHaven
 			SET @intItemUOMId = @WetGrains_BushelUOMId
 			SET @dtmDate = 'April 12, 2014'
 			SET @dblQty = 75
-			SET @dblUOMQty = @EACH 
+			SET @dblUOMQty = 1 
 			SET @dblCost = 19.00
 			SET @dblSalesPrice = 0
 			SET @intCurrencyId = @USD
@@ -1025,7 +1050,7 @@ BEGIN
 			-- 1st Expected: The normal purchase record. 
 			SELECT	[intInventoryTransactionId] = 7
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = @dblQty 
@@ -1047,7 +1072,7 @@ BEGIN
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 8
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0 
@@ -1069,7 +1094,7 @@ BEGIN
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 9
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
@@ -1091,7 +1116,7 @@ BEGIN
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 10
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0 
@@ -1113,7 +1138,7 @@ BEGIN
 			UNION ALL 
 			SELECT	[intInventoryTransactionId] = 11
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
@@ -1155,7 +1180,7 @@ BEGIN
 			)
 			SELECT	[intInventoryTransactionId] = 12
 					,[intItemId] = @intItemId
-					,[intItemLocationId] = @NewHaven
+					,[intItemLocationId] = @WetGrains_NewHaven
 					,[intItemUOMId] = @intItemUOMId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0

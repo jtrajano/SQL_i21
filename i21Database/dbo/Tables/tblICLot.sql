@@ -23,51 +23,54 @@ Lot numbers are unique per item-location.
 	Concurrency field. 
 	Maps: None
 
-
 ## Source Code:
 */
 	CREATE TABLE [dbo].[tblICLot]
 	(
-		[intLotId] INT NOT NULL IDENTITY, 		
-		[intItemLocationId] INT NOT NULL,
-		[intItemUOMId] INT NOT NULL,
-		[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-		[dblOnHand] NUMERIC(18,6) DEFAULT ((0)),
-		[intConcurrencyId] INT NULL DEFAULT ((0)),
+		[intLotId]					INT NOT NULL IDENTITY, 		
+		[intItemId]					INT NOT NULL,
+		[intLocationId]				INT NOT NULL,
+		[intItemLocationId]			INT NOT NULL,
+		[intItemUOMId]				INT NOT NULL,			
+		[strLotNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[intSubLocationId]			INT NULL,
+		[intStorageLocationId]		INT NULL,
+		[dblQty]					NUMERIC(18,6) DEFAULT ((0)) NOT NULL,		
+		[dblLastCost]				NUMERIC(18,6) DEFAULT ((0)) NULL,		
+		[dtmExpiryDate]				DATETIME NULL,
+		[strLotAlias]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[intLotStatusId]			INT NOT NULL DEFAULT ((1)),
+		[intParentLotId]			INT NULL,
+		[intSplitFromLotId]			INT NULL,
+		[dblWeight]					NUMERIC(18,6) NULL DEFAULT ((0)) ,
+		[intWeightUOMId]			INT NULL,
+		[dblWeightPerQty]			NUMERIC(38,20) NULL DEFAULT ((0)),
+		[intOriginId]				INT NULL,
+		[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+		[strVessel]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 		
+		[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+		[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+		[intVendorId]				INT NULL,		
+		[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[intVendorLocationId]		INT NULL, 
+		[strVendorLocation]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+		[strContractNo]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[dtmManufacturedDate]		DATETIME NULL,
+		[ysnReleasedToWarehouse]	BIT DEFAULT((0)),
+		[ysnProduced]				BIT DEFAULT((0)),
+		[dtmDateCreated]			DATETIME NULL,
+		[intCreatedUserId]			INT NULL,
+		[intConcurrencyId]			INT NULL DEFAULT ((1)),
 		CONSTRAINT [PK_tblICLot] PRIMARY KEY CLUSTERED ([intLotId] ASC),
-		CONSTRAINT [UN_tblICLot] UNIQUE NONCLUSTERED ([intItemLocationId] ASC, [strLotNumber] ASC),
-		CONSTRAINT [FK_tblICLot_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
+		CONSTRAINT [UN_tblICLot] UNIQUE NONCLUSTERED ([strLotNumber] ASC, [intLocationId] ASC, [intSubLocationId] ASC, [intStorageLocationId] ASC),		
+		CONSTRAINT [FK_tblICLot_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),		
+		CONSTRAINT [FK_tblICLot_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
+		CONSTRAINT [FK_tblICLot_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
+		CONSTRAINT [FK_tblICLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 		CONSTRAINT [FK_tblICLot_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
 	)
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICLot_intItemLocationId_strLotNumber]
-		ON [dbo].[tblICLot]([intItemLocationId] ASC, [strLotNumber] ASC);
-
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Identity Field',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICLot',
-		@level2type = N'COLUMN',
-		@level2name = N'intLotId'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Lot Number for an Item',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICLot',
-		@level2type = N'COLUMN',
-		@level2name = N'strLotNumber'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Concurrency Field',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICLot',
-		@level2type = N'COLUMN',
-		@level2name = N'intConcurrencyId'
+	CREATE NONCLUSTERED INDEX [IX_tblICLot_strLotNumber_intLocationId_intSubLocationId_intStorageLocationId]
+		ON [dbo].[tblICLot](strLotNumber ASC, intLocationId ASC, intSubLocationId ASC, intStorageLocationId ASC);

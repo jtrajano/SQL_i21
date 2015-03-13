@@ -46,7 +46,7 @@ INSERT INTO dbo.tblICStockReservation (
 		,intItemLocationId
 		,intItemUOMId
 		,intLotId
-		,dblQuantity
+		,dblQty
 		,intTransactionId
 		,strTransactionId
 		,intSort
@@ -57,7 +57,7 @@ SELECT	intItemId						= Items.intItemId
 		,intItemLocationId				= Items.intItemLocationId
 		,intItemUOMId					= Items.intItemUOMId
 		,intLotId						= Items.intLotId
-		,dblQuantity					= Items.dblQty
+		,dblQty							= Items.dblQty
 		,intTransactionId				= Items.intTransactionId
 		,strTransactionId				= Items.strTransactionId
 		,intSort						= Items.intId

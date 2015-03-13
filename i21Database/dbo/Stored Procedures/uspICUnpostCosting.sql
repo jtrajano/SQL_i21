@@ -157,54 +157,59 @@ BEGIN
 	-------------------------------------------------
 	INSERT INTO dbo.tblICInventoryTransaction (
 			[intItemId]
-			,[intItemLocationId] 
+			,[intItemLocationId]
 			,[intItemUOMId]
-			,[dtmDate] 
-			,[dblQty] 
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dtmDate]
+			,[dblQty]
 			,[dblUOMQty]
-			,[dblCost] 
-			,[dblValue]			
-			,[dblSalesPrice] 
-			,[intCurrencyId] 
-			,[dblExchangeRate] 
-			,[intTransactionId] 
-			,[strTransactionId] 
-			,[strBatchId] 
-			,[intTransactionTypeId] 
+			,[dblCost]
+			,[dblValue]
+			,[dblSalesPrice]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[intTransactionId]
+			,[strTransactionId]
+			,[strBatchId]
+			,[intTransactionTypeId]
+			,[intLotId]
 			,[ysnIsUnposted]
 			,[intRelatedInventoryTransactionId]
 			,[intRelatedTransactionId]
 			,[strRelatedTransactionId]
-			,[dtmCreated] 
-			,[intCreatedUserId] 
+			,[strTransactionForm]
+			,[dtmCreated]
+			,[intCreatedUserId]
 			,[intConcurrencyId]
-			,[intSubLocationId] 
-			,[intStorageLocationId]
 	)			
-	SELECT	[intItemId]				= ActualTransaction.intItemId
-			,[intItemLocationId]	= ActualTransaction.intItemLocationId
-			,[intItemUOMId]			= ActualTransaction.intItemUOMId
-			,[dtmDate]				= ActualTransaction.dtmDate
-			,[dblQty]				= ActualTransaction.dblQty * -1
-			,[dblUOMQty]			= ActualTransaction.dblUOMQty
-			,[dblCost]				= ActualTransaction.dblCost 
-			,[dblValue]				= ActualTransaction.dblValue * -1			
-			,[dblSalesPrice]		= ActualTransaction.dblSalesPrice
-			,[intCurrencyId]		= ActualTransaction.intCurrencyId
-			,[dblExchangeRate]		= ActualTransaction.dblExchangeRate
-			,[intTransactionId]		= ActualTransaction.intTransactionId
-			,[strTransactionId]		= ActualTransaction.strTransactionId
-			,[strBatchId]			= @strBatchId
-			,[intTransactionTypeId] = ActualTransaction.intTransactionTypeId
-			,[ysnIsUnposted]		= 1
-			,[intRelatedInventoryTransactionId] = ItemTransactionsToReverse.intInventoryTransactionId
-			,[intRelatedTransactionId] = ActualTransaction.intRelatedTransactionId
-			,[strRelatedTransactionId] = ActualTransaction.strRelatedTransactionId
-			,[dtmCreated]			= GETDATE()
-			,[intCreatedUserId]		= @intUserId
-			,[intConcurrencyId]		= 1
-			,[intSubLocationId]		= ActualTransaction.intSubLocationId
-			,[intStorageLocationId]	= ActualTransaction.intStorageLocationId
+	SELECT	
+			[intItemId]								= ActualTransaction.intItemId
+			,[intItemLocationId]					= ActualTransaction.intItemLocationId
+			,[intItemUOMId]							= ActualTransaction.intItemUOMId
+			,[intSubLocationId]						= ActualTransaction.intSubLocationId
+			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
+			,[dtmDate]								= ActualTransaction.dtmDate
+			,[dblQty]								= ActualTransaction.dblQty * -1
+			,[dblUOMQty]							= ActualTransaction.dblUOMQty
+			,[dblCost]								= ActualTransaction.dblCost
+			,[dblValue]								= ActualTransaction.dblValue * -1
+			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
+			,[intCurrencyId]						= ActualTransaction.intCurrencyId
+			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
+			,[intTransactionId]						= ActualTransaction.intTransactionId
+			,[strTransactionId]						= ActualTransaction.strTransactionId
+			,[strBatchId]							= @strBatchId
+			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
+			,[intLotId]								= ActualTransaction.intLotId
+			,[ysnIsUnposted]						= 1
+			,[intRelatedInventoryTransactionId]		= ItemTransactionsToReverse.intInventoryTransactionId
+			,[intRelatedTransactionId]				= ActualTransaction.intRelatedTransactionId
+			,[strRelatedTransactionId]				= ActualTransaction.strRelatedTransactionId
+			,[strTransactionForm]					= ActualTransaction.strTransactionForm
+			,[dtmCreated]							= GETDATE()
+			,[intCreatedUserId]						= @intUserId
+			,[intConcurrencyId]						= 1
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 
@@ -270,12 +275,24 @@ BEGIN
 					AND ISNULL(StockUOM.intSubLocationId, 0) =  ISNULL(ItemToUnpost.intSubLocationId, 0)
 					AND ISNULL(StockUOM.intStorageLocationId, 0) =  ISNULL(ItemToUnpost.intStorageLocationId, 0)
 
-		-- Update the stock quantity at the Lot table
+		-- Update the stock quantity and weight at the Lot table (Two parts)
+		-- 1 of 2: Calculate in favor of qty. 
 		UPDATE	Lot
-		SET		Lot.dblOnHand = ISNULL(Lot.dblOnHand, 0) + ItemToUnpost.dblQty
+		SET		Lot.dblQty = ISNULL(Lot.dblQty, 0) + ItemToUnpost.dblQty
+				,Lot.dblWeight = ISNULL(Lot.dblWeight, 0) + (ItemToUnpost.dblQty * ISNULL(Lot.dblWeightPerQty, 0)) 
 		FROM	dbo.tblICLot Lot INNER JOIN @ItemsToUnpost ItemToUnpost
 					ON Lot.intItemLocationId = ItemToUnpost.intItemLocationId
 					AND Lot.intLotId = ItemToUnpost.intLotId
+					AND Lot.intItemUOMId = ItemToUnpost.intItemUOMId
+		-- 2 of 2: Calculate in favor of weights. 
+		UPDATE	Lot
+		SET		Lot.dblWeight = ISNULL(Lot.dblWeight, 0) + ItemToUnpost.dblQty
+				,Lot.dblQty = ISNULL(Lot.dblQty, 0) + CASE WHEN ISNULL(Lot.dblWeightPerQty, 0) = 0 THEN 0 ELSE ISNULL(ItemToUnpost.dblQty, 0) / ISNULL(Lot.dblWeightPerQty, 0) END 
+		FROM	dbo.tblICLot Lot INNER JOIN @ItemsToUnpost ItemToUnpost
+					ON Lot.intItemLocationId = ItemToUnpost.intItemLocationId
+					AND Lot.intLotId = ItemToUnpost.intLotId					
+					AND ISNULL(Lot.intWeightUOMId, 0) = ItemToUnpost.intItemUOMId
+					AND Lot.intItemUOMId <> ItemToUnpost.intItemUOMId
 	END
 
 	---------------------------------------------------------------------------------------
@@ -283,51 +300,60 @@ BEGIN
 	---------------------------------------------------------------------------------------
 	BEGIN 
 		INSERT INTO dbo.tblICInventoryTransaction (
-				[intItemId] 
-				,[intItemLocationId] 
-				,[intItemUOMId]
-				,[dtmDate] 
-				,[dblQty] 
-				,[dblUOMQty]
-				,[dblCost] 
-				,[dblValue]				
-				,[dblSalesPrice] 
-				,[intCurrencyId] 
-				,[dblExchangeRate] 
-				,[intTransactionId] 
-				,[strTransactionId] 
-				,[strTransactionForm] 
-				,[strBatchId] 
-				,[intTransactionTypeId] 
-				,[dtmCreated] 
-				,[intCreatedUserId] 
-				,[intConcurrencyId]
-				,[ysnIsUnposted]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-		)
-		SELECT	[intItemId] = ItemToUnpost.intItemId
-				,[intItemLocationId] = ItemToUnpost.intItemLocationId
-				,[intItemUOMId] = ItemToUnpost.intItemUOMId 
-				,[dtmDate] = TransactionToReverse.dtmDate
-				,[dblQty] = 0
-				,[dblUOMQty] = 0
-				,[dblCost] = 0
-				,[dblValue] = (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)				
-				,[dblSalesPrice] = 0
-				,[intCurrencyId] = TransactionToReverse.intCurrencyId
-				,[dblExchangeRate] = TransactionToReverse.dblExchangeRate
-				,[intTransactionId] = TransactionToReverse.intTransactionId
-				,[strTransactionId] = TransactionToReverse.strTransactionId
-				,[strTransactionForm] = TransactionToReverse.strTransactionForm
-				,[strBatchId] = @strBatchId
-				,[intTransactionTypeId] = @AUTO_NEGATIVE
-				,[dtmCreated] = GETDATE()
-				,[intCreatedUserId] = @intUserId
-				,[intConcurrencyId] = 1
-				,[ysnIsUnposted] = 0
-				,[intSubLocationId] = ItemToUnpost.intSubLocationId
-				,[intStorageLocationId] = ItemToUnpost.intStorageLocationId
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[dtmDate]
+					,[dblQty]
+					,[dblUOMQty]
+					,[dblCost]
+					,[dblValue]
+					,[dblSalesPrice]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[strBatchId]
+					,[intTransactionTypeId]
+					,[intLotId]
+					,[ysnIsUnposted]
+					,[intRelatedInventoryTransactionId]
+					,[intRelatedTransactionId]
+					,[strRelatedTransactionId]
+					,[strTransactionForm]
+					,[dtmCreated]
+					,[intCreatedUserId]
+					,[intConcurrencyId]
+			)			
+		SELECT	
+				[intItemId]								= ItemToUnpost.intItemId
+				,[intItemLocationId]					= ItemToUnpost.intItemLocationId
+				,[intItemUOMId]							= ItemToUnpost.intItemUOMId
+				,[intSubLocationId]						= ItemToUnpost.intSubLocationId
+				,[intStorageLocationId]					= ItemToUnpost.intStorageLocationId
+				,[dtmDate]								= TransactionToReverse.dtmDate
+				,[dblQty]								= 0
+				,[dblUOMQty]							= 0
+				,[dblCost]								= 0
+				,[dblValue]								= (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)
+				,[dblSalesPrice]						= 0
+				,[intCurrencyId]						= TransactionToReverse.intCurrencyId
+				,[dblExchangeRate]						= TransactionToReverse.dblExchangeRate
+				,[intTransactionId]						= TransactionToReverse.intTransactionId
+				,[strTransactionId]						= TransactionToReverse.strTransactionId
+				,[strBatchId]							= @strBatchId
+				,[intTransactionTypeId]					= @AUTO_NEGATIVE
+				,[intLotId]								= ItemToUnpost.intLotId
+				,[ysnIsUnposted]						= 0
+				,[intRelatedInventoryTransactionId]		= NULL 
+				,[intRelatedTransactionId]				= NULL 
+				,[strRelatedTransactionId]				= NULL 
+				,[strTransactionForm]					= TransactionToReverse.strTransactionForm
+				,[dtmCreated]							= GETDATE()
+				,[intCreatedUserId]						= @intUserId
+				,[intConcurrencyId]						= 1
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId

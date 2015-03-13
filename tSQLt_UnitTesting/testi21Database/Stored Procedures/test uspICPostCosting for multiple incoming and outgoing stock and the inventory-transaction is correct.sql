@@ -6,6 +6,10 @@ BEGIN
 		-- Create the fake data
 		EXEC testi21Database.[Fake transactions for item costing]
 
+		-- Flag all item to allow negative stock 
+		UPDATE dbo.tblICItemLocation
+		SET intAllowNegativeInventory = 1
+
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @AUTO_NEGATIVE AS INT = 1
 		DECLARE @WRITE_OFF_SOLD AS INT = 2

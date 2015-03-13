@@ -146,17 +146,17 @@ BEGIN
 				intItemLocationId
 				,intItemUOMId
 				,intLotId
-				,dblOnHand
+				,dblQty
 		)
 		SELECT	intItemLocationId = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_BushelUOMId
 				,intLotId = 1
-				,dblOnHand = 500
+				,dblQty = 500
 		UNION ALL 
 		SELECT	intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 2
-				,dblOnHand = 108
+				,dblQty = 108
 
 		-- Add existing data into tblICStockReservation
 		INSERT INTO dbo.tblICStockReservation (
@@ -164,7 +164,7 @@ BEGIN
 				,intItemLocationId
 				,intItemUOMId
 				,intLotId
-				,dblQuantity
+				,dblQty
 				,intTransactionId
 				,strTransactionId
 				,intInventoryTransactionType
@@ -173,7 +173,7 @@ BEGIN
 				,intItemLocationId = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_PoundUOMId
 				,intLotId = 3
-				,dblQuantity = 1000
+				,dblQty = 1000
 				,intTransactionId = 3
 				,strTransactionId = 'TRANS-11111'
 				,intInventoryTransactionType = 1

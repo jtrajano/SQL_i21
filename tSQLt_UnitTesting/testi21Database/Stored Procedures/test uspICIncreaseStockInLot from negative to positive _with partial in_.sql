@@ -127,6 +127,8 @@ BEGIN
 				,@intItemLocationId AS INT			= @BetterHaven
 				,@intItemUOMId AS INT				= @PremiumGrains_BushelUOMId
 				,@intLotId AS INT					= @LotId
+				,@intSubLocationId AS INT
+				,@intStorageLocationId AS INT
 				,@dblQty NUMERIC(18,6)				= 200
 				,@dblCost AS NUMERIC(18,6)			= 22
 				,@intUserId AS INT					= 1
@@ -234,6 +236,8 @@ BEGIN
 				,@intItemLocationId
 				,@intItemUOMId
 				,@intLotId
+				,@intSubLocationId
+				,@intStorageLocationId
 				,@dblQty
 				,@dblCost
 				,@intUserId

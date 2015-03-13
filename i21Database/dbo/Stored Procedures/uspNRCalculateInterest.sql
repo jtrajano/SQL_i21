@@ -48,6 +48,7 @@ BEGIN
                   , ISNULL(dblUnpaidInterest,0) [dblInterest]
                   , ISNULL(dblPayOffBalance,0) [dblBalance]
                   FROM dbo.tblNRNoteTransaction Where intNoteTransTypeId = 1 AND dblPrincipal <> 0
+				  AND intNoteId = @intNoteId
                   AND (CONVERT(nvarchar(10), dtmAsOfDate, 101) = CONVERT(nvarchar(10), @dtmCurrentDate, 101))
                   ORDER BY intNoteTransId DESC
 
@@ -61,6 +62,7 @@ BEGIN
 			, ISNULL(dblUnpaidInterest,0) [dblInterest]
 			, ISNULL(dblPayOffBalance,0) [dblBalance]
 			FROM dbo.tblNRNoteTransaction 
+			WHERE intNoteId = @intNoteId
 			ORDER BY intNoteTransId DESC
 		END
 		

@@ -9,7 +9,7 @@ BEGIN
 			,intItemLocationId INT 
 			,intItemUOMId INT 
 			,intLotId INT 
-			,dblQuantity NUMERIC(18,6)
+			,dblQty NUMERIC(18,6)
 			,intTransactionId INT
 			,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,intInventoryTransactionType INT
@@ -21,7 +21,7 @@ BEGIN
 			,intItemLocationId INT 
 			,intItemUOMId INT 
 			,intLotId INT 
-			,dblQuantity NUMERIC(18,6)
+			,dblQty NUMERIC(18,6)
 			,intTransactionId INT
 			,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,intInventoryTransactionType INT

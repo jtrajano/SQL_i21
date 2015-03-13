@@ -27,9 +27,9 @@ SELECT
  CASE WHEN LEN(A.strShipFromCountry) <> 0 THEN CHAR(32) + A.strShipFromCountry + CHAR(13) + CHAR (10) else '' end +    
  CASE WHEN LEN(A.strShipFromPhone) <> 0 THEN CHAR(32) + A.strShipFromPhone + CHAR(13) + CHAR (10) else '' end)
  ,intShipViaId
- ,strShipVia = (SELECT strShipVia FROM dbo.tblSMShipVia WHERE intShipViaID = intShipViaID)
+ ,strShipVia = (SELECT strShipVia FROM dbo.tblSMShipVia WHERE intShipViaID = A.intShipViaId)
  ,intTermsId
- ,strTerm = (SELECT strTerm FROM dbo.tblSMTerm WHERE intTermID = intTermsId)
+ ,strTerm = (SELECT strTerm FROM dbo.tblSMTerm WHERE intTermID = A.intTermsId)
  ,B.dblQtyOrdered
  ,B.dblCost
  ,B.dblDiscount / 100 AS dblDiscount
@@ -47,6 +47,8 @@ FROM dbo.tblPOPurchase A
 			ON A.intVendorId = C.intVendorId
 	LEFT JOIN dbo.tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN dbo.tblICItem D ON B.intItemId = D.intItemId
-	INNER JOIN dbo.tblICUnitMeasure E ON B.intUnitOfMeasureId = E.intUnitMeasureId
+	INNER JOIN (dbo.tblICItemUOM E1 
+				INNER JOIN dbo.tblICUnitMeasure E ON E1.intUnitMeasureId = E.intUnitMeasureId)
+				ON B.intUnitOfMeasureId = E1.intItemUOMId
 	
 	

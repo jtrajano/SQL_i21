@@ -235,7 +235,7 @@
       <SuppressTSqlWarnings>
       </SuppressTSqlWarnings>
     </Build>
-    <Build Include="testi21Database\Functions\test the fnGetItemCostingOnPostErrors function.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors on multiple scenarios.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for inventory transaction table.sql" />
     <Build Include="testi21Database\Functions\test the fnGetItemsToUnpost function.sql" />
     <Build Include="testi21Database\Functions\test the fnGetItemCostingOnUnpostErrors function.sql" />
@@ -858,6 +858,49 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for serial lot items.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it allows negative stock on non-lot items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it allows negative stock on lot items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on lot items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it allows negative stock on lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it allows negative stock on non-lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it allows negative stock on lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it allows negative stock on non-lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it allows negative stock on lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it allows negative stock on lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it allows negative stock on lot items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it allows negative stock on non-lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it allows negative stock on non-lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it allows negative stock on non-lot items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on lot items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on non-lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on non-lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on non-lot items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnUnpostErrors on multiple scenarios.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToItemReceipt on converting a PO into Inventory Receipt and it excludes non-stock types.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for scenario 1.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for scenario 2.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Functions\test fnGetTotalStockValueFromTransactionBatch for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnGetTotalStockValueFromTransactionBatch for getting the actual total from the table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one incoming stock and lot is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake transactions for lot items and costing.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -4,6 +4,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotOut', @Identity = 1;
 		

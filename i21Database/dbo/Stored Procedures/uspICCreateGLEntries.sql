@@ -37,21 +37,43 @@ INSERT INTO @GLAccounts (
 )
 SELECT	Query.intItemId
 		,Query.intItemLocationId
-		,intInventoryId = Inventory.intAccountId
-		,intContraInventoryId = ContraInventory.intAccountId
-		,intWriteOffSoldId = WriteOffSold.intAccountId
-		,intRevalueSoldId = RevalueSold.intAccountId
-		,intAutoNegativeId = AutoNegative.intAccountId
+		,intInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) 
+		,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) 
+		,intWriteOffSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_WriteOffSold) 
+		,intRevalueSoldId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_RevalueSold) 
+		,intAutoNegativeId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_AutoNegative) 
 FROM	(
-			SELECT DISTINCT intItemId, intItemLocationId 
+			SELECT	DISTINCT 
+					intItemId, intItemLocationId 
 			FROM	dbo.tblICInventoryTransaction TRANS 
 			WHERE	TRANS.strBatchId = @strBatchId
 		) Query
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) Inventory
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) ContraInventory
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_WriteOffSold) WriteOffSold
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_RevalueSold) RevalueSold
-		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_AutoNegative) AutoNegative;
+--INSERT INTO @GLAccounts (
+--	intItemId 
+--	,intItemLocationId 
+--	,intInventoryId 
+--	,intContraInventoryId 
+--	,intWriteOffSoldId 
+--	,intRevalueSoldId 
+--	,intAutoNegativeId 
+--)
+--SELECT	Query.intItemId
+--		,Query.intItemLocationId
+--		,intInventoryId = Inventory.intAccountId
+--		,intContraInventoryId = ContraInventory.intAccountId
+--		,intWriteOffSoldId = WriteOffSold.intAccountId
+--		,intRevalueSoldId = RevalueSold.intAccountId
+--		,intAutoNegativeId = AutoNegative.intAccountId
+--FROM	(
+--			SELECT DISTINCT intItemId, intItemLocationId 
+--			FROM	dbo.tblICInventoryTransaction TRANS 
+--			WHERE	TRANS.strBatchId = @strBatchId
+--		) Query
+--		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) Inventory
+--		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) ContraInventory
+--		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_WriteOffSold) WriteOffSold
+--		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_RevalueSold) RevalueSold
+--		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_AutoNegative) AutoNegative;
 
 -- Validate the GL Accounts
 BEGIN 

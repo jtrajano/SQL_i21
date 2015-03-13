@@ -78,6 +78,8 @@ Records must be maintained in this table even if the costing method for an item 
 		[intItemLocationId] INT NOT NULL,
 		[intItemUOMId] INT NOT NULL,
 		[intLotId] INT NOT NULL, 
+		[intSubLocationId] INT NULL,
+		[intStorageLocationId] INT NULL,
 		[dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 

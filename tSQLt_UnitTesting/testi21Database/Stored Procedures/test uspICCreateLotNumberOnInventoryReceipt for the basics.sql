@@ -24,6 +24,8 @@ BEGIN
 
 		EXEC dbo.uspICCreateLotNumberOnInventoryReceipt
 			@strTransactionId
+			,1
+			,1
 	END 
 
 	-- Assert
