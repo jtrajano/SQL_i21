@@ -32,9 +32,10 @@
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [UK_strVendorId] UNIQUE NONCLUSTERED ([strVendorId] ASC),
 	CONSTRAINT [UK_intVendorId] UNIQUE NONCLUSTERED ([intEntityVendorId] ASC),
-	CONSTRAINT [FK_tblAPVendor_tblEntityContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblEntityContact]([intEntityContactId]),
+	--CONSTRAINT [FK_tblAPVendor_tblEntityContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblEntityContact]([intEntityContactId]),
 	CONSTRAINT [FK_tblAPVendor_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
-	CONSTRAINT [FK_tblAPVendor_tblGLAccount] FOREIGN KEY ([intGLAccountExpenseId]) REFERENCES [tblGLAccount]([intAccountId])
+	CONSTRAINT [FK_tblAPVendor_tblGLAccount] FOREIGN KEY ([intGLAccountExpenseId]) REFERENCES [tblGLAccount]([intAccountId])--,
+	--CONSTRAINT [FK_tblAPVendor_tblAPVendorToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblAPVendorToContact]([intVendorToContactId])
 );
 
 

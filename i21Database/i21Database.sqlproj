@@ -20,7 +20,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <SqlServerVerification>False</SqlServerVerification>
+    <SqlServerVerification>True</SqlServerVerification>
     <IncludeCompositeObjects>True</IncludeCompositeObjects>
     <TargetDatabaseSet>True</TargetDatabaseSet>
     <Containment>None</Containment>
@@ -388,7 +388,6 @@
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
     <Build Include="dbo\User Defined Types\RecapTableType.sql" />
-    <None Include="Scripts\Post-Deployment\Optional Run\1_SM\1_ZipCodeData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
@@ -783,12 +782,24 @@
     <Build Include="dbo\Functions\fnGetItemAverageCost.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalValueFromTransactions.sql" />
     <Build Include="dbo\Functions\fnCalculateAverageCost.sql" />
-    <Build Include="dbo\Tables\tblSTPaidOut.sql" />
-    <Build Include="dbo\Tables\tblSTPaymentMethod.sql" />
-    <Build Include="dbo\Tables\tblSTStore.sql" />
-    <Build Include="dbo\Tables\tblSTSubcategoryClass.sql" />
-    <Build Include="dbo\Tables\tblSTSubcategoryFamily.sql" />
-    <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql" />
+    <Build Include="dbo\Tables\tblSTPaidOut.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTPaymentMethod.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTStore.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTSubcategoryClass.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTSubcategoryFamily.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTSubcategoryRegProd.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspICPostFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFO.sql" />
@@ -824,8 +835,12 @@
     <Build Include="dbo\Stored Procedures\uspSMCreateImport.sql" />
     <Build Include="dbo\Stored Procedures\uspSMBuildTable.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFOOut.sql" />
-    <Build Include="dbo\Tables\tblSTPromotionItemList.sql" />
-    <Build Include="dbo\Tables\tblSTPromotionSalesList.sql" />
+    <Build Include="dbo\Tables\tblSTPromotionItemList.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTPromotionSalesList.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspICPostAverageCosting.sql" />
     <Build Include="dbo\Tables\tblARTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblICStorageLocation.sql" />
@@ -982,11 +997,21 @@
     <Build Include="dbo\Stored Procedures\uspGLGetNewID.sql" />
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Functions\fnGeti21FiscalPeriodIdFromOriginPeriod.sql" />
-    <Build Include="dbo\Tables\tblSTSubcategory.sql" />
-    <Build Include="dbo\Tables\tblSTPromotionSalesListDetail.sql" />
-    <Build Include="dbo\Tables\tblSTPromotionItemListDetail.sql" />
-    <Build Include="dbo\Tables\tblSTPaymentOption.sql" />
-    <Build Include="dbo\Tables\tblSTRegister.sql" />
+    <Build Include="dbo\Tables\tblSTSubcategory.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTPromotionSalesListDetail.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTPromotionItemListDetail.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTPaymentOption.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
+    <Build Include="dbo\Tables\tblSTRegister.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
     <Build Include="dbo\Tables\tblSCScaleSetup.sql" />
     <Build Include="dbo\Tables\tblSCTicket.sql" />
     <Build Include="dbo\Tables\tblSCTicketPrintOption.sql" />
@@ -1031,7 +1056,9 @@
     <Build Include="dbo\Stored Procedures\uspPOReceived.sql" />
     <Build Include="dbo\Views\vyuCTPriceContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreatePriceContract.sql" />
-    <Build Include="dbo\Tables\tblSTStoreGLAccount.sql" />
+    <Build Include="dbo\Tables\tblSTStoreGLAccount.sql">
+      <ApplicationScope>False</ApplicationScope>
+    </Build>
     <Build Include="dbo\Tables\tblSOSalesOrderDetail.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrder.sql" />
     <Build Include="dbo\Views\vyuSOSalesOrderSearch.sql" />

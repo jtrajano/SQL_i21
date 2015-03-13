@@ -14,9 +14,11 @@
     [strTimezone]      NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnActive]        BIT             CONSTRAINT [DF_tblEntityContact_ysnActive] DEFAULT ((1)) NOT NULL,
     [intConcurrencyId] INT            CONSTRAINT [DF_tblEntityContact_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+	[Type]	   NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
     CONSTRAINT [PK_tblEntityContact] PRIMARY KEY CLUSTERED ([intEntityContactId] ASC),
     CONSTRAINT [FK_tblEntityContact_tblEntity1] FOREIGN KEY ([intEntityContactId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [UKintContactId] UNIQUE NONCLUSTERED ([intEntityContactId] ASC)
+
 );
 
 
