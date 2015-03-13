@@ -1146,6 +1146,7 @@
     <Build Include="dbo\Tables\tblSMTaxGroupCode.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
     <Build Include="dbo\Views\vyuHDProjectList.sql" />
+    <Build Include="dbo\Views\vyuARCustomerSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
