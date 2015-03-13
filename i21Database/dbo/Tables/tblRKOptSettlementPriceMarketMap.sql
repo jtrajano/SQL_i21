@@ -5,7 +5,7 @@
     [intFutureSettlementPriceId] INT NOT NULL, 
     [intOptionMonthId] INT NOT NULL, 
     [dblStrike] NUMERIC(18, 6) NOT NULL, 
-    [intType] int NOT NULL, 
+    [intTypeId] int NOT NULL, 
     [dblSettle] NUMERIC(18, 6) NOT NULL, 
 	[dblDelta] NUMERIC(18, 6) NOT NULL, 
     [strComments] NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL,	
@@ -14,3 +14,4 @@
 	CONSTRAINT [FK_tblRKOptSettlementPriceMarketMap_tblRKOptionsMonth_intFutureMonthId] FOREIGN KEY ([intOptionMonthId]) REFERENCES [tblRKOptionsMonth]([intOptionMonthId])
 	
 )
+GO

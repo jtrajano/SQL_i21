@@ -2219,4 +2219,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intNewItemUOMId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="daba9ecc-4104-4f89-80e9-fc3ed0a37239" ChangeDateTime="03/13/2015 08:10:19">
+    <Property Name="ElementName" Value="[dbo].[tblRKOptSettlementPriceMarketMap].[intType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKOptSettlementPriceMarketMap]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTypeId" />
+  </Operation>
 </Operations>
