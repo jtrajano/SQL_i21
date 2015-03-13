@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTCreatePriceContract]
+﻿CREATE PROCEDURE [dbo].[uspCTDoPrice]
 	@XML varchar(max)
 AS
 BEGIN TRY
