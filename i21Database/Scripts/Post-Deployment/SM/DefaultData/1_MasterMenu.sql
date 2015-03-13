@@ -1742,6 +1742,29 @@ GO
             UPDATE tblSMMasterMenu
             SET strCommand = 'HelpDesk.view.ProjectList', intSort = 7
             WHERE strMenuName = 'Project Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskActivitiesId
+
+		/* ----------------- */
+		/* -- Maintenance -- */
+		/* ----------------- */
+		DECLARE @HelpDeskMaintenanceId INT
+		SELECT @HelpDeskMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Projects' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Projects', 'Help Desk', @HelpDeskMaintenanceId, 'Help Desk Projects', 'Screen', 'HelpDesk.view.Project', 'small-screen', 0, 0, 0, 1, NULL, 1)
+        ELSE
+            UPDATE tblSMMasterMenu
+            SET strCommand = 'HelpDesk.view.Project'
+            WHERE strMenuName = 'Projects' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceId		
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Milestones' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Milestones', 'Help Desk', @HelpDeskMaintenanceId, 'Milestones', 'Screen', 'HelpDesk.view.Milestone', 'small-screen', 0, 0, 0, 1, NULL, 1)
+        ELSE
+            UPDATE tblSMMasterMenu
+            SET strCommand = 'HelpDesk.view.Milestone'
+            WHERE strMenuName = 'Milestones' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceId
+
 GO
 
 	/* ------------------------------------------------- */
