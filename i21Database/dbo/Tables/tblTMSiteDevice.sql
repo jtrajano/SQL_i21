@@ -9,3 +9,49 @@
     CONSTRAINT [FK_tblTMSiteDevice_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]) ON DELETE CASCADE
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSiteDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSiteDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intSiteDeviceID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSiteDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intSiteID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Device ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSiteDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intDeviceId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Idicates if the device is to be transferred back to bulk location',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSiteDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnAtCustomerToBeTransferred'

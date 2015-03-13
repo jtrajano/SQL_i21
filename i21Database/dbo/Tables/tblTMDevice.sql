@@ -44,3 +44,301 @@
     CONSTRAINT [FK_tblTMDevice_tblTMTankType] FOREIGN KEY ([intTankTypeId]) REFERENCES [dbo].[tblTMTankType] ([intTankTypeId])
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intDeviceId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Serial Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strSerialNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Manufacturer ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strManufacturerID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Manufacturer Name',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strManufacturerName'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Model Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strModelNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Bulk Plant Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strBulkPlant'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Description',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strDescription'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Ownership',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strOwnership'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Asset Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strAssetNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Purchase Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmPurchaseDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Purchase Price',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'dblPurchasePrice'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Manufactured Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmManufacturedDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Comment',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strComment'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Underground',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnUnderground'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tank Size',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'dblTankSize'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tank Capacity',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'dblTankCapacity'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tank Reserve',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'dblTankReserve'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Est Gallons in Tank',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'dblEstimatedGalTank'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Meter Cycle ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intMeterCycle'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Device Type ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intDeviceTypeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Lease ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intLeaseId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Deployed Status ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intDeployedStatusID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Parent Device ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intParentDeviceID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Inventory Status Type ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intInventoryStatusTypeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tank Type ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intTankTypeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Meter Type ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intMeterTypeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Regulator Type ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intRegulatorTypeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Obsolet/Unused',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intLinkedToTankID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Meter Status',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'strMeterStatus'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Meter Reading',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'dblMeterReading'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicates if an Appliance instead of a Device',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnAppliance'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Appliance Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDevice',
+    @level2type = N'COLUMN',
+    @level2name = N'intApplianceTypeID'

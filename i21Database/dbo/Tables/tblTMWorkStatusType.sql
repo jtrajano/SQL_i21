@@ -9,3 +9,40 @@
 
 
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMWorkStatusType',
+    @level2type = N'COLUMN',
+    @level2name = N'intWorkStatusID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Work Status',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMWorkStatusType',
+    @level2type = N'COLUMN',
+    @level2name = N'strWorkStatus'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicates if default data',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMWorkStatusType',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnDefault'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMWorkStatusType',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
