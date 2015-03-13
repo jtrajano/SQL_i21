@@ -10,8 +10,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @TransactionName AS VARCHAR(500) = 'Create or Update a Lot Number' + CAST(NEWID() AS NVARCHAR(100));
-
 DECLARE @Active AS INT = 1
 		,@OnHold AS INT = 2
 		,@Quarantine AS INT = 3
@@ -139,8 +137,6 @@ FETCH NEXT FROM loopLotItems INTO
 		,@ysnProduced
 		,@intDetailId
 
-BEGIN TRAN @TransactionName
-
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
 -----------------------------------------------------------------------------------------------------------------------------
@@ -202,15 +198,17 @@ BEGIN
 						,strLotNumber = @strLotNumber
 						,intSubLocationId = @intSubLocationId
 						,intStorageLocationId = @intStorageLocationId
+						,dblQty = @dblQty
+						,dblWeight = @dblWeight
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
-			AND LotMaster.intLotId = LotToUpdate.intLotId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId 
 			AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
 			AND LotMaster.strLotNumber = LotToUpdate.strLotNumber 
 			AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
 			AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
 			AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+			AND ISNULL(LotMaster.dblWeightPerQty, 0) = dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight)
 
 		-- If matched, update the lot record 
 		WHEN MATCHED THEN 
@@ -281,13 +279,13 @@ BEGIN
 				,@strLotNumber
 				,@intSubLocationId
 				,@intStorageLocationId
-				,0 --@dblQty
+				,0 -- (keep at zero. We only need to create the lot record)
 				,@dtmExpiryDate
 				,@strLotAlias
 				,@intLotStatusId
-				,0 --@dblWeight
+				,0 -- (keep at zero. We only need to create the lot record)
 				,@intWeightUOMId
-				,dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight)
+				,dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight) -- (though, we need to know immediately the weight per qty). 
 				,@intOriginId
 				,@strBOLNo
 				,@strVessel
@@ -340,8 +338,6 @@ BEGIN
 		RETURN;
 	END
 	
-	SAVE TRAN @TransactionName 	
-	
 	-- Fetch the next row from cursor. 
 	FETCH NEXT FROM loopLotItems INTO 
 		@intId
@@ -378,6 +374,4 @@ CLOSE loopLotItems;
 DEALLOCATE loopLotItems;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
------------------------------------------------------------------------------------------------------------------------------
-
-COMMIT TRAN @TransactionName
+----------------------------------------------------------------------------------------------------------------------------
