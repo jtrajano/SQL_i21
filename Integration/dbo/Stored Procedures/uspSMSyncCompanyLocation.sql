@@ -218,12 +218,9 @@ BEGIN
      SELECT   
       CL.[strLocationNumber]   --[agloc_loc_no] 
       ,CL.[strLocationName]   --[agloc_name]  
-      ,(CASE WHEN LEN(RTRIM(LTRIM(CL.[strAddress]))) > 30  
-        THEN SUBSTRING(RTRIM(LTRIM(CL.[strAddress])), 0, 29)  
-        ELSE LEN(RTRIM(LTRIM(CL.[strAddress])))  
-       END)      --[agloc_addr]  
-      ,(CASE WHEN LEN(RTRIM(LTRIM(CL.[strAddress]))) > 30  
-        THEN SUBSTRING(RTRIM(LTRIM(CL.[strAddress])), 29, LEN(RTRIM(LTRIM(CL.[strAddress]))) - 31)  
+      ,SUBSTRING(LTRIM(RTRIM(SUBSTRING(strAddress, 0, CHARINDEX(CHAR(10), strAddress)))), 1, 30)      --[agloc_addr]  
+      ,(CASE WHEN CHARINDEX(CHAR(10), strAddress) > 0
+		THEN SUBSTRING(LTRIM(RTRIM(strAddress)), CHARINDEX(CHAR(10), strAddress), 30) 
         ELSE ''''  
        END)      --[agloc_addr2]  
       ,CL.[strCity]     --[agloc_city]  
@@ -528,14 +525,10 @@ BEGIN
      UPDATE [aglocmst]  
      SET   
       [agloc_name] = CL.[strLocationName]  
-      ,[agloc_addr] =   
-       (CASE WHEN LEN(RTRIM(LTRIM(CL.[strAddress]))) > 30  
-        THEN SUBSTRING(RTRIM(LTRIM(CL.[strAddress])), 0, 29)  
-        ELSE LEN(RTRIM(LTRIM(CL.[strAddress])))  
-       END)      
+      ,[agloc_addr] = SUBSTRING(LTRIM(RTRIM(SUBSTRING(strAddress, 0, CHARINDEX(CHAR(10), strAddress)))), 1, 30)      
       ,[agloc_addr2] =   
-       (CASE WHEN LEN(RTRIM(LTRIM(CL.[strAddress]))) > 30  
-        THEN SUBSTRING(RTRIM(LTRIM(CL.[strAddress])), 29, LEN(RTRIM(LTRIM(CL.[strAddress]))) - 31)  
+       (CASE WHEN CHARINDEX(CHAR(10), strAddress) > 0
+		THEN SUBSTRING(LTRIM(RTRIM(strAddress)), CHARINDEX(CHAR(10), strAddress), 30) 
         ELSE ''''  
        END)      
       ,[agloc_city] = CL.[strCity]   
