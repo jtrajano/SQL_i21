@@ -1146,7 +1146,6 @@
     <Build Include="dbo\Functions\fnAPValidatePO.sql" />
     <Build Include="dbo\Functions\fnAPCheckPOOrderStatus.sql" />
     <Build Include="dbo\Views\vyuARCustomerTaxCode.sql" />
-<<<<<<< Temporary merge branch 1
     <Build Include="dbo\Functions\fnCalculateUnitCost.sql" />
     <Build Include="dbo\Functions\fnCalculateStockUnitQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateStockReserves.sql" />
