@@ -1142,6 +1142,8 @@
     <Build Include="dbo\Stored Procedures\uspMFProduceWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReleaseBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveBlendSheet.sql" />
+    <None Include="dbo\Functions\5_LotStatus.sql" />
+    <None Include="Scripts\Post-Deployment\IC\6_FixBlankLotNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
