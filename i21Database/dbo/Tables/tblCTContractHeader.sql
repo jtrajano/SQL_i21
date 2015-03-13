@@ -20,7 +20,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intWeightId] [int] NOT NULL,
 	[intCropYearId] [int] NULL,
 	[strContractComments] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
-	[intAssociationId] INT NOT NULL, 
+	[intAssociationId] INT NULL, 
     [intTermId] INT NOT NULL, 
     [intPricingType] INT NOT NULL, 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
