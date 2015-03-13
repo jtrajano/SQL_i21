@@ -607,7 +607,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             switch (records[0].get('strLotTracking')){
                 case 'Yes - Serial Number':
-                    grdLotTracking.plugins[0].enable();
+                    grdLotTracking.setHidden(false);
                     var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
                         intInventoryReceiptItemId: current.get('intInventoryReceiptItemId') || current.get('strClientId'),
                         strLotId: '',
@@ -626,11 +626,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     break;
 
                 case 'Yes - Manual':
-                    grdLotTracking.plugins[0].enable();
+                    grdLotTracking.setHidden(false);
                     break;
 
                 default :
-                    grdLotTracking.plugins[0].disable();
+                    grdLotTracking.setHidden(true);
                     break;
             }
         }
@@ -1005,6 +1005,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var win = combo.up('window');
         var grid = combo.up('grid');
+        var grdLotTracking = win.down('#grdLotTracking');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         var po = records[0];
@@ -1026,6 +1027,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('intStorageLocationId', po.get('intStorageLocationId'));
         current.set('strSubLocationName', po.get('strSubLocationName'));
         current.set('strStorageLocationName', po.get('strStorageName'));
+
+        switch(po.get('strLotTracking')) {
+            case 'Yes - Serial Number':
+            case 'Yes - Manual':
+                grdLotTracking.setHidden(false);
+                break;
+            default:
+                grdLotTracking.setHidden(true);
+                break;
+        }
     },
 
     onItemGridColumnBeforeRender: function(column) {
@@ -1364,6 +1375,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (selModel) {
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
+            var grdLotTracking = win.down('#grdLotTracking');
             var txtLotItemId = win.down('#txtLotItemId');
             var txtLotItemDescription = win.down('#txtLotItemDescription');
             var txtLotUOM = win.down('#txtLotUOM');
@@ -1394,6 +1406,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
             else {
                 vm.data.currentReceiptItem = null;
+            }
+            if (vm.data.currentReceiptItem !== null){
+                grdLotTracking.setHidden(false);
+            }
+            else {
+                grdLotTracking.setHidden(true);
             }
         }
     },
