@@ -1180,6 +1180,7 @@
     <Build Include="dbo\Tables\tblRKBrokerageCommission.sql" />
     <Build Include="dbo\Tables\tblRKBrokerageAccount.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConvertAccountGroupToCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

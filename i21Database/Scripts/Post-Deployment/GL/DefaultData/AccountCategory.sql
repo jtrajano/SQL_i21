@@ -109,5 +109,8 @@ BEGIN
 	'Currency Purchase Gain/Loss','Currency Sales Gain/Loss','Discount Receivable','DP Income','DP Liability','End Inventory','Fee Expense','Fee Income',
 	'Freight Expenses','Interest Expense','Interest Income','Inventory','Options Expense','Options Income','Purchase Account','Rail Freight','Sales Account',
 	'Storage Expense','Storage Income','Storage Receivable','Variance Account')
+
 END
+
+EXEC dbo.[uspGLConvertAccountGroupToCategory]
 
