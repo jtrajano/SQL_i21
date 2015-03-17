@@ -6,6 +6,7 @@
 RETURNS BIT
 AS
 BEGIN
+	return 1
 
 	DECLARE @success AS BIT = 0;
 
