@@ -1181,6 +1181,8 @@
     <Build Include="dbo\Tables\tblRKBrokerageAccount.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConvertAccountGroupToCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeletePrePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreatePrePayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
