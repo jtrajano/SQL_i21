@@ -940,7 +940,7 @@ GO
 
 			-- Payroll / Maintenance / Employee Templates
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Templates', 'Payroll', @PayrollMaintenanceId, 'Employee Templates', 'Screen', 'Payroll.view.EmployeeTemplate', 'small-screen', 1, 1, 0, 1, 3, 0
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Templates', 'Payroll', @PayrollMaintenanceId, 'Employee Templates', 'Screen', 'Payroll.view.EmployeeTemplate', 'small-screen', 1, 1, 0, 1, 3, 1
 
 			-- Payroll / Maintenance / Employee Pay Groups
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Pay Groups' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
