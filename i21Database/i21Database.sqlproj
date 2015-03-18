@@ -1170,6 +1170,7 @@
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoRoll.sql" />
     <Build Include="dbo\Views\vyuSMControlPermission.sql" />
+    <Build Include="dbo\Views\vyuSMScreenPermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
