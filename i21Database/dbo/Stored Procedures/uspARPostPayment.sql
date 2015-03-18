@@ -179,6 +179,9 @@ IF (ISNULL(@recap, 0) = 0)
 						ON A.intPaymentId = P.intPaymentId					
 				WHERE
 					A.dblAmountPaid = 0
+					AND (NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE strTransactionType <> 'Invoice' AND intInvoiceId = B.intInvoiceId)
+						AND B.dblPayment <> 0)
+					
 				GROUP BY
 					A.intPaymentId, A.strRecordNumber
 				HAVING
@@ -356,7 +359,7 @@ IF (ISNULL(@recap, 0) = 0)
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
 					(A.dblAmountPaid) <> 0
-					AND (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) = 0								
+					AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0								
 
 				--ALREADY POSTED
 				INSERT INTO
@@ -1394,7 +1397,7 @@ ELSE
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
 					(A.dblAmountPaid) <> 0
-					AND (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId) = 0								
+					AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0								
 			END
 		ELSE
 			BEGIN
