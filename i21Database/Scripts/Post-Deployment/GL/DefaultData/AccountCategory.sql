@@ -256,3 +256,6 @@ BEGIN
 	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Inventory In-Transit'
 END
+
+EXEC dbo.[uspGLConvertAccountGroupToCategory]
+

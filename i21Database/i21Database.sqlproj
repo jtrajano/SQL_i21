@@ -143,6 +143,7 @@
     <Folder Include="Scripts\Post-Deployment\GR" />
     <Folder Include="Scripts\Post-Deployment\MF" />
     <Folder Include="dbo\Index" />
+    <Folder Include="dbo\Triggers" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1195,6 +1196,11 @@
     <Build Include="dbo\Tables\tblRKBrokersAccountMarketMapping.sql" />
     <Build Include="dbo\Tables\tblRKBrokerageCommission.sql" />
     <Build Include="dbo\Tables\tblRKBrokerageAccount.sql" />
+    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConvertAccountGroupToCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeletePrePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreatePrePayment.sql" />
+    <Build Include="dbo\Tables\tblFRRowDesignDrillDown.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

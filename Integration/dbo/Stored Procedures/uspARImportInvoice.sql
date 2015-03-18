@@ -155,8 +155,32 @@ BEGIN
 			INNER JOIN tblARInvoice INV ON INV.strShipToAddress COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(agstm_ivc_no COLLATE Latin1_General_CI_AS)) + LTRIM(RTRIM(agstm_bill_to_cus COLLATE Latin1_General_CI_AS))
 			WHERE agstm_un IS NOT NULL AND agstm_un_prc IS NOT NULL AND agstm_sls IS NOT NULL	
 				
-			--update strShipToAddress to null 	   
-			UPDATE tblARInvoice SET strShipToAddress = NULL WHERE intInvoiceId > @maxInvoiceId
+			UPDATE 
+				tblARInvoice 
+			SET
+				tblARInvoice.strBillToAddress		= B.strAddress 
+				,tblARInvoice.strBillToCity			= B.strCity
+				,tblARInvoice.strBillToCountry		= B.strCountry
+				,tblARInvoice.strBillToLocationName	= B.strLocationName 
+				,tblARInvoice.strBillToState		= B.strState 
+				,tblARInvoice.strBillToZipCode		= B.strZipCode 
+				,tblARInvoice.strShipToAddress		= S.strAddress 
+				,tblARInvoice.strShipToCity			= S.strCity
+				,tblARInvoice.strShipToCountry		= S.strCountry
+				,tblARInvoice.strShipToLocationName	= S.strLocationName 
+				,tblARInvoice.strShipToState		= S.strState 
+				,tblARInvoice.strShipToZipCode		= S.strZipCode 
+			FROM
+				tblARCustomer C
+			LEFT OUTER JOIN
+				tblEntityLocation B
+					ON C.intBillToId = B.intEntityLocationId 
+			LEFT OUTER JOIN
+				tblEntityLocation S
+					ON C.intShipToId = S.intEntityLocationId 													
+			WHERE
+				intInvoiceId > @maxInvoiceId
+				AND tblARInvoice.intCustomerId = C.intCustomerId
 
 	END
 

@@ -50,6 +50,11 @@ CREATE TABLE #tmpAROverpayment (
 	UNIQUE (intPaymentId)
 );
 
+CREATE TABLE #tmpARPrepayment (
+	intPaymentId int PRIMARY KEY,
+	UNIQUE (intPaymentId)
+);
+
 CREATE TABLE #tmpZeroPayment (
 	intPaymentId int PRIMARY KEY,
 	UNIQUE (intPaymentId)
@@ -173,7 +178,10 @@ IF (ISNULL(@recap, 0) = 0)
 					#tmpARReceivablePostData P
 						ON A.intPaymentId = P.intPaymentId					
 				WHERE
-					A.dblAmountPaid <> 0
+					A.dblAmountPaid = 0
+					AND (NOT EXISTS(SELECT NULL FROM tblARInvoice WHERE strTransactionType <> 'Invoice' AND intInvoiceId = B.intInvoiceId)
+						AND B.dblPayment <> 0)
+					
 				GROUP BY
 					A.intPaymentId, A.strRecordNumber
 				HAVING
@@ -198,6 +206,7 @@ IF (ISNULL(@recap, 0) = 0)
 						ON A.intPaymentId = P.intPaymentId						
 				WHERE
 					B.intPaymentId IS NULL
+					AND A.dblAmountPaid = 0
 					
 				--Return Payment not allowed
 				INSERT INTO
@@ -218,7 +227,7 @@ IF (ISNULL(@recap, 0) = 0)
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
 					(A.dblAmountPaid) < 0
-					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId AND B.dblPayment > 0 AND strTransactionType NOT IN ('Credit Memo', 'Overpayment'))
+					AND EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId AND B.dblPayment > 0 AND strTransactionType NOT IN ('Credit Memo', 'Overpayment', 'Prepayment'))
 
 				--Fiscal Year
 				INSERT INTO 
@@ -336,7 +345,21 @@ IF (ISNULL(@recap, 0) = 0)
 					#tmpARReceivablePostData P
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
-					(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)					
+					(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)	
+					
+				--+prepayment
+				INSERT INTO
+					#tmpARPrepayment
+				SELECT
+					A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId				
+				WHERE
+					(A.dblAmountPaid) <> 0
+					AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0								
 
 				--ALREADY POSTED
 				INSERT INTO
@@ -440,6 +463,22 @@ IF (ISNULL(@recap, 0) = 0)
 				WHERE
 					I.strTransactionType = 'Overpayment'
 					
+				---prepayment
+				INSERT INTO
+					#tmpARPrepayment
+				SELECT
+					A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblARInvoice I
+						ON A.strRecordNumber = I.strComments 				
+				WHERE
+					I.strTransactionType = 'Prepayment'					
+					
 			END
 		
 	--Get all invalid
@@ -478,7 +517,15 @@ IF (ISNULL(@recap, 0) = 0)
 					#tmpAROverpayment A
 				INNER JOIN 
 					#tmpARReceivableInvalidData
-						ON A.intPaymentId = #tmpARReceivableInvalidData.intTransactionId						
+						ON A.intPaymentId = #tmpARReceivableInvalidData.intTransactionId	
+						
+				DELETE 
+					#tmpARPrepayment
+				FROM
+					#tmpARPrepayment A
+				INNER JOIN 
+					#tmpARReceivableInvalidData
+						ON A.intPaymentId = #tmpARReceivableInvalidData.intTransactionId											
 
 			END
 
@@ -647,7 +694,51 @@ BEGIN
 			#tmpAROverpayment P
 				ON A.intPaymentId = P.intPaymentId
 		
-		UNION ALL		
+		UNION ALL
+		
+		--CREDIT Prepayment
+		SELECT
+			 A.intPaymentId
+			,A.strRecordNumber
+			,L.intARAccount 
+			,GLAccnt.strDescription
+			,C.strCustomerNumber
+			,A.dtmDatePaid
+			,dblDebit			= CASE WHEN @post = 1 THEN 0 ELSE A.dblAmountPaid END
+			,dblCredit			= CASE WHEN @post = 1 THEN A.dblAmountPaid ELSE 0 END
+			,dblDebitUnit		= CASE WHEN @post = 1 THEN 0 ELSE A.dblAmountPaid  * ISNULL(U.dblLbsPerUnit, 0) END
+			,dblCreditUnit		= CASE WHEN @post = 1 THEN A.dblAmountPaid * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END
+			,DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
+			,1
+			,dblExchangeRate		= 1
+			,intUserId			= @userId
+			,intEntityId		= @UserEntityID
+			,dtmDateEntered		= GETDATE()
+			,strBatchId			= @batchId
+			,strCode				= 'AR'
+			,strModuleName		= @MODULE_NAME
+			,strTransactionForm	= @SCREEN_NAME
+			,strTransactionType	= @SCREEN_NAME
+		FROM
+			tblARPayment A
+		INNER JOIN
+			tblSMCompanyLocation L
+				ON A.intLocationId = L.intCompanyLocationId 
+		INNER JOIN
+			tblGLAccount GLAccnt
+				ON L.intARAccount = GLAccnt.intAccountId 
+		INNER JOIN
+			tblARCustomer C
+				ON A.intCustomerId = C.intCustomerId
+		LEFT JOIN 
+			Units U
+				ON A.intAccountId = U.intAccountId
+		INNER JOIN
+			#tmpARPrepayment P
+				ON A.intPaymentId = P.intPaymentId
+		
+		UNION ALL				
 		
 		--Discount
 		SELECT
@@ -910,6 +1001,17 @@ BEGIN
 					
 					DELETE FROM #tmpAROverpayment WHERE intPaymentId = @PaymentIdToAdd
 				END
+				
+			--CREATE Prepayment
+			WHILE EXISTS(SELECT TOP 1 NULL FROM #tmpARPrepayment)
+				BEGIN
+					DECLARE @PaymentIdToAddPre int
+					SELECT TOP 1 @PaymentIdToAddPre = intPaymentId FROM #tmpARPrepayment
+					
+					EXEC [dbo].[uspARCreatePrePayment] @PaymentIdToAddPre, 1, @batchId ,@UserEntityID 
+					
+					DELETE FROM #tmpARPrepayment WHERE intPaymentId = @PaymentIdToAddPre
+				END				
 
 		END
 	ELSE
@@ -1079,7 +1181,18 @@ BEGIN
 					EXEC [dbo].[uspARDeleteOverPayment] @PaymentIdToDelete, 1, @batchId ,@UserEntityID 
 					
 					DELETE FROM #tmpAROverpayment WHERE intPaymentId = @PaymentIdToDelete
-				END			
+				END	
+				
+			--DELETE Prepayment
+			WHILE EXISTS(SELECT TOP 1 NULL FROM #tmpARPrepayment)
+				BEGIN			
+					DECLARE @PaymentIdToDeletePre int		
+					SELECT TOP 1 @PaymentIdToDeletePre = intPaymentId FROM #tmpARPrepayment
+					
+					EXEC [dbo].[uspARDeletePrePayment] @PaymentIdToDeletePre, 1, @batchId ,@UserEntityID 
+					
+					DELETE FROM #tmpARPrepayment WHERE intPaymentId = @PaymentIdToDeletePre
+				END							
 
 			IF @@ERROR <> 0 OR @success = 0 GOTO Post_Rollback;
 
@@ -1270,7 +1383,21 @@ ELSE
 					#tmpARReceivablePostData P
 						ON A.intPaymentId = P.intPaymentId				
 				WHERE
-					(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)				
+					(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)		
+					
+				--+prepayment
+				INSERT INTO
+					#tmpARPrepayment
+				SELECT
+					A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId				
+				WHERE
+					(A.dblAmountPaid) <> 0
+					AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0								
 			END
 		ELSE
 			BEGIN
@@ -1288,7 +1415,23 @@ ELSE
 					tblARInvoice I
 						ON A.strRecordNumber = I.strComments 				
 				WHERE
-					I.strTransactionType = 'Overpayment'			
+					I.strTransactionType = 'Overpayment'	
+					
+				---prepayment
+				INSERT INTO
+					#tmpARPrepayment
+				SELECT
+					A.intPaymentId
+				FROM
+					tblARPayment A 
+				INNER JOIN
+					#tmpARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblARInvoice I
+						ON A.strRecordNumber = I.strComments 				
+				WHERE
+					I.strTransactionType = 'Prepayment'							
 			END
 		
 		--TODO:
@@ -1413,7 +1556,50 @@ ELSE
 				ON A.intAccountId = U.intAccountId
 		INNER JOIN
 			#tmpAROverpayment P
-				ON A.intPaymentId = P.intPaymentId							
+				ON A.intPaymentId = P.intPaymentId		
+				
+		UNION ALL						
+			
+		--CREDIT - prepayment
+		SELECT
+			 strRecordNumber
+			,A.intPaymentId
+			,L.intARAccount 
+			,GLAccnt.strDescription
+			,C.strCustomerNumber
+			,A.dtmDatePaid
+			,dblDebit			= CASE WHEN @post = 1 THEN 0 ELSE A.dblAmountPaid END
+			,dblCredit			= CASE WHEN @post = 1 THEN A.dblAmountPaid ELSE 0 END
+			,dblDebitUnit		= CASE WHEN @post = 1 THEN 0 ELSE A.dblAmountPaid  * ISNULL(U.dblLbsPerUnit, 0) END
+			,dblCreditUnit		= CASE WHEN @post = 1 THEN A.dblAmountPaid * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END
+			,A.dtmDatePaid
+			,CASE WHEN @post = 1 THEN 0 ELSE 1 END
+			,1
+			,dblExchangeRate		= 1
+			,intUserId			= @userId
+			,dtmDateEntered		= GETDATE()
+			,strBatchId			= @batchId
+			,strCode				= 'AR'
+			,strModuleName		= @MODULE_NAME
+			,strTransactionForm	= @SCREEN_NAME
+			,strTransactionType	= @SCREEN_NAME
+		FROM
+			tblARPayment A 
+		INNER JOIN
+			tblSMCompanyLocation L
+				ON A.intLocationId = L.intCompanyLocationId 
+		INNER JOIN
+			tblGLAccount GLAccnt
+				ON L.intARAccount = GLAccnt.intAccountId 
+		INNER JOIN
+			tblARCustomer C
+				ON A.intCustomerId = C.intCustomerId
+		LEFT JOIN 
+			Units U
+				ON A.intAccountId = U.intAccountId
+		INNER JOIN
+			#tmpARPrepayment P
+				ON A.intPaymentId = P.intPaymentId											
 
 		--Discount
 		UNION ALL

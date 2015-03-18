@@ -940,7 +940,7 @@ GO
 
 			-- Payroll / Maintenance / Employee Templates
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Templates' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Templates', 'Payroll', @PayrollMaintenanceId, 'Employee Templates', 'Screen', 'Payroll.view.EmployeeTemplate', 'small-screen', 1, 1, 0, 1, 3, 0
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId) SELECT 'Employee Templates', 'Payroll', @PayrollMaintenanceId, 'Employee Templates', 'Screen', 'Payroll.view.EmployeeTemplate', 'small-screen', 1, 1, 0, 1, 3, 1
 
 			-- Payroll / Maintenance / Employee Pay Groups
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Employee Pay Groups' AND strModuleName = 'Payroll' AND intParentMenuID = @PayrollMaintenanceId)
@@ -1349,19 +1349,55 @@ GO
 
 GO
 
-    /* -------------------------- */
-    /*-- Add Announcements Menu --*/
-    /* ----------------------//-- */
+	/* --------------------------- */
+    /* ------- ADMIN MENUS ------- */
+	/* --------------------------- */
 
-    DECLARE @SystemManagerAdminMenuId INT
+	DECLARE @SystemManagerAdminMenuId INT
     SELECT @SystemManagerAdminMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User Security' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	UPDATE tblSMMasterMenu SET intSort = 0 WHERE strMenuName = 'User Security' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	UPDATE tblSMMasterMenu SET intSort = 1 WHERE strMenuName = 'User Roles' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Manager' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	UPDATE tblSMMasterMenu SET intSort = 2 WHERE strMenuName = 'Report Manager' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Motor Fuel Tax Cycle' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	UPDATE tblSMMasterMenu SET intSort = 3 WHERE strMenuName = 'Motor Fuel Tax Cycle' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Company Preferences' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	UPDATE tblSMMasterMenu SET intSort = 4 WHERE strMenuName = 'Company Preferences' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Starting Numbers' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	UPDATE tblSMMasterMenu SET intSort = 5 WHERE strMenuName = 'Starting Numbers' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
+	
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Custom Fields' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	UPDATE tblSMMasterMenu SET intSort = 6 WHERE strMenuName = 'Custom Fields' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User Preferences' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('User Preferences', 'System Manager', @SystemManagerAdminMenuId, 'User Preferences', 'Screen', 'i21.view.UserPreferences', 'small-screen', 0, 0, 0, 1, 7, 1)
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	UPDATE tblSMMasterMenu SET intSort = 8 WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
+
+	/* ----------------------------------- */
+    /* -- Add Announcements Menu Folder -- */
+    /* ----------------------------------- */
 
         /* ------------------------------ */
         /* -- Create Announcement Menu -- */
         /* ------------------------------ */
         IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @SystemManagerAdminMenuId)
-        INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-        VALUES ('Announcements', 'Help Desk', @SystemManagerAdminMenuId, 'Announcements', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 2)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Announcements', 'Help Desk', @SystemManagerAdminMenuId, 'Announcements', 'Folder', '', 'small-folder', 1, 0, 0, 0, 9, 2)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET intSort = 9
+			WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @SystemManagerAdminMenuId
 
         DECLARE @HelpDeskAnnouncementId INT
         SELECT @HelpDeskAnnouncementId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @SystemManagerAdminMenuId
@@ -1382,9 +1418,13 @@ GO
                 SET strCommand = 'HelpDesk.view.AnnouncementType', intSort = 1
                 WHERE strMenuName = 'Announcement Types' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskAnnouncementId
 
-    /*------------------------  */
-    /*-- End Announcements Menu */
-    /*------------------------  */
+    /* --------------------------------- */
+    /*-- End Announcements Menu Folder --*/
+    /* --------------------------------- */
+    
+	/* --------------------------- */
+    /* ----- END ADMIN MENUS ----- */
+	/* --------------------------- */
 
 GO
 	/* ---------------------------------------- */
@@ -2051,7 +2091,6 @@ GO
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Company Preferences' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller', 'view') 
 		WHERE strMenuName = 'Company Preferences' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.CompanyPreferences'
-
 	
 	DECLARE @SystemManagerAdminUtilitiesMenuId INT
 	SELECT @SystemManagerAdminUtilitiesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
