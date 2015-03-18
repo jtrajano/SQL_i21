@@ -3188,20 +3188,6 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnAddPricing',
-                                                                iconCls: 'small-add',
-                                                                text: 'Add'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnEditPricing',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
                                                                 itemId: 'btnDeletePricing',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
@@ -3219,9 +3205,35 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colPricingLocation',
-                                                        width: 116,
+                                                        width: 120,
                                                         dataIndex: 'string',
-                                                        text: 'Location'
+                                                        text: 'Location',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Name',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLocationType',
+                                                                    dataType: 'string',
+                                                                    text: 'Location Type',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboPricingLocation',
+                                                            displayField: 'strLocationName',
+                                                            valueField: 'intItemLocationId'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -3229,15 +3241,21 @@ Ext.define('Inventory.view.Item', {
                                                         width: 80,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'Last Cost'
+                                                        text: 'Last Cost',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colPricingStandardCost',
-                                                        width: 95,
+                                                        width: 120,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'Standard Cost'
+                                                        text: 'Standard Cost',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -3245,7 +3263,10 @@ Ext.define('Inventory.view.Item', {
                                                         width: 90,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'Average Cost'
+                                                        text: 'Average Cost',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -3253,43 +3274,68 @@ Ext.define('Inventory.view.Item', {
                                                         width: 85,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'EOM Cost'
+                                                        text: 'EOM Cost',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colPricingMethod',
                                                         width: 120,
                                                         dataIndex: 'string',
-                                                        text: 'Pricing Method'
+                                                        text: 'Pricing Method',
+                                                        editor: {
+                                                            xtype: 'combobox',
+                                                            itemId: 'cboPricingMethod',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        dataIndex: 'string',
                                                         itemId: 'colPricingAmount',
                                                         width: 110,
                                                         align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Amount/Percent'
+                                                        text: 'Amount/Percent',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        itemId: 'colPricingSalePrice',
+                                                        itemId: 'colPricingRetailPrice',
                                                         width: 80,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'Sales Price'
+                                                        text: 'Retail Price',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
-                                                        xtype: 'numbercolumn',
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colPricingMSRP',
                                                         width: 80,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'MSRP'
+                                                        text: 'MSRP',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
                                                     itemId: 'grvLocationStore'
-                                                }
+                                                },
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepPricing',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             },
                                             {
                                                 xtype: 'tabpanel',

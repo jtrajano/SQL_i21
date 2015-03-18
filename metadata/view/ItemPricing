@@ -314,116 +314,6 @@
                                 "layout|margins": null,
                                 "margin": "0 0 5 0"
                             },
-                            "name": "MyContainer27",
-                            "designerId": "835d8387-6322-45d2-88a8-7477fa963714",
-                            "cn": [
-                                {
-                                    "type": "Ext.form.field.ComboBox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "    {",
-                                            "        dataIndex: 'intUnitMeasureId',",
-                                            "        dataType: 'numeric',",
-                                            "        text: 'Unit Of Measure ID',",
-                                            "        hidden: true",
-                                            "    },",
-                                            "    {",
-                                            "        dataIndex: 'strUnitMeasure',",
-                                            "        dataType: 'string',",
-                                            "        text: 'Unit Measure',",
-                                            "        flex: 1",
-                                            "    },",
-                                            "    {",
-                                            "        dataIndex: 'strUnitType',",
-                                            "        dataType: 'string',",
-                                            "        text: 'Unit Type',",
-                                            "        flex: 1",
-                                            "    },",
-                                            "    {",
-                                            "        xtype: 'checkcolumn',",
-                                            "        dataIndex: 'ysnStockUnit',",
-                                            "        dataType: 'boolean',",
-                                            "        text: 'Stock Unit',",
-                                            "        flex: 1",
-                                            "    },",
-                                            "    {",
-                                            "        dataIndex: 'intDecimalCalculation',",
-                                            "        dataType: 'numeric',",
-                                            "        text: 'Decimal Places for Calculation',",
-                                            "        hidden: true",
-                                            "    },",
-                                            "    {",
-                                            "        dataIndex: 'intDecimalDisplay',",
-                                            "        dataType: 'numeric',",
-                                            "        text: 'Decimal Places for Display',",
-                                            "        hidden: true",
-                                            "    }",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strUnitMeasure",
-                                        "fieldLabel": "UOM",
-                                        "itemId": "cboUnitMeasure",
-                                        "labelWidth": 110,
-                                        "layout|flex": 1,
-                                        "tabIndex": 1,
-                                        "valueField": "intItemUOMId"
-                                    },
-                                    "name": "MyComboBox23",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "e2572cad-9dc2-4846-ba16-eb0ac83bb52e",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.form.field.Text",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "UPC",
-                                        "itemId": "txtUPC",
-                                        "labelWidth": 110,
-                                        "layout|flex": 1,
-                                        "margin": "0 0 0 5",
-                                        "readOnly": true,
-                                        "tabIndex": 2
-                                    },
-                                    "name": "MyTextField8",
-                                    "designerId": "dd642abe-8c51-414e-a914-4b87ed7e6dde"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.container.Container",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "container|align": "stretch",
-                                "designer|displayName": "container",
-                                "layout": "hbox",
-                                "layout|flex": null,
-                                "layout|margins": null,
-                                "margin": "0 0 5 0"
-                            },
                             "name": "MyContainer10",
                             "designerId": "f044f529-3448-4d20-8523-c0a8b82812f4",
                             "cn": [
@@ -793,61 +683,6 @@
                                     "designerId": "81d89f01-d6b8-4684-b019-b6318d94cfc2"
                                 }
                             ]
-                        },
-                        {
-                            "type": "Ext.container.Container",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "container|align": "stretch",
-                                "designer|displayName": "container",
-                                "layout": "hbox",
-                                "layout|flex": null,
-                                "layout|margins": null,
-                                "margin": "0 0 5 0"
-                            },
-                            "name": "MyContainer33",
-                            "designerId": "2191571b-22bd-4892-bee8-d9265fbfc46e",
-                            "cn": [
-                                {
-                                    "type": "Ext.form.field.Date",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Begin Date",
-                                        "itemId": "dtpBeginDate",
-                                        "labelWidth": 110,
-                                        "layout|flex": 1,
-                                        "tabIndex": 14
-                                    },
-                                    "name": "MyDateField3",
-                                    "designerId": "02579e82-dde7-4732-90e2-db3a3113a3ab"
-                                },
-                                {
-                                    "type": "Ext.form.field.Date",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "End Date",
-                                        "itemId": "dtpEndDate",
-                                        "labelWidth": 110,
-                                        "layout|flex": 1,
-                                        "margin": "0 0 0 5",
-                                        "tabIndex": 15
-                                    },
-                                    "name": "MyDateField4",
-                                    "designerId": "117415d4-7b3c-4eb5-a790-433ebc83c739"
-                                }
-                            ]
                         }
                     ]
                 },
@@ -867,7 +702,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging116",
+                    "name": "statusbarpaging11",
                     "designerId": "ee98d62c-330d-4829-b90b-22407d93d85f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

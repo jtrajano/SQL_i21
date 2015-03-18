@@ -24,7 +24,6 @@ Ext.define('Inventory.view.ItemPricing', {
         'Ext.toolbar.Separator',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Number',
-        'Ext.form.field.Date',
         'Ext.toolbar.Paging'
     ],
 
@@ -184,75 +183,6 @@ Ext.define('Inventory.view.ItemPricing', {
                             bind: {
                                 store: '{Location}'
                             }
-                        },
-                        {
-                            xtype: 'container',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'stretch'
-                            },
-                            items: [
-                                {
-                                    xtype: 'gridcombobox',
-                                    columns: [
-                                        {
-                                            dataIndex: 'intUnitMeasureId',
-                                            dataType: 'numeric',
-                                            text: 'Unit Of Measure ID',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'strUnitMeasure',
-                                            dataType: 'string',
-                                            text: 'Unit Measure',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strUnitType',
-                                            dataType: 'string',
-                                            text: 'Unit Type',
-                                            flex: 1
-                                        },
-                                        {
-                                            xtype: 'checkcolumn',
-                                            dataIndex: 'ysnStockUnit',
-                                            dataType: 'boolean',
-                                            text: 'Stock Unit',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'intDecimalCalculation',
-                                            dataType: 'numeric',
-                                            text: 'Decimal Places for Calculation',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'intDecimalDisplay',
-                                            dataType: 'numeric',
-                                            text: 'Decimal Places for Display',
-                                            hidden: true
-                                        }
-                                    ],
-                                    flex: 1,
-                                    tabIndex: 1,
-                                    itemId: 'cboUnitMeasure',
-                                    fieldLabel: 'UOM',
-                                    labelWidth: 110,
-                                    displayField: 'strUnitMeasure',
-                                    valueField: 'intItemUOMId'
-                                },
-                                {
-                                    xtype: 'textfield',
-                                    flex: 1,
-                                    tabIndex: 2,
-                                    itemId: 'txtUPC',
-                                    margin: '0 0 0 5',
-                                    fieldLabel: 'UPC',
-                                    labelWidth: 110,
-                                    readOnly: true
-                                }
-                            ]
                         },
                         {
                             xtype: 'container',
@@ -453,33 +383,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                     xtype: 'container',
                                     flex: 1,
                                     margin: '0 0 0 5'
-                                }
-                            ]
-                        },
-                        {
-                            xtype: 'container',
-                            margin: '0 0 5 0',
-                            layout: {
-                                type: 'hbox',
-                                align: 'stretch'
-                            },
-                            items: [
-                                {
-                                    xtype: 'datefield',
-                                    flex: 1,
-                                    tabIndex: 14,
-                                    itemId: 'dtpBeginDate',
-                                    fieldLabel: 'Begin Date',
-                                    labelWidth: 110
-                                },
-                                {
-                                    xtype: 'datefield',
-                                    flex: 1,
-                                    tabIndex: 15,
-                                    itemId: 'dtpEndDate',
-                                    margin: '0 0 0 5',
-                                    fieldLabel: 'End Date',
-                                    labelWidth: 110
                                 }
                             ]
                         }

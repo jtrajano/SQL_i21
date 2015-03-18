@@ -424,16 +424,30 @@ Ext.define('Inventory.view.ItemViewController', {
             //Pricing Tab//
             //-----------//
             grdPricing: {
-                colPricingLocation: 'strLocationName',
+                colPricingLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{pricingLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
+                    }
+                },
                 colPricingUOM: 'strUnitMeasure',
                 colPricingUPC: 'strUPC',
                 colPricingLastCost: 'dblLastCost',
                 colPricingStandardCost: 'dblStandardCost',
                 colPricingAverageCost: 'dblAverageCost',
                 colPricingEOMCost: 'dblEndMonthCost',
-                colPricingMethod: 'strPricingMethod',
+                colPricingMethod: {
+                    dataIndex: 'strPricingMethod',
+                    editor: {
+                        store: '{pricingPricingMethods}'
+                    }
+                },
                 colPricingAmount: 'dblAmountPercent',
-                colPricingSalePrice: 'dblSalePrice',
+                colPricingRetailPrice: 'dblSalePrice',
                 colPricingMSRP: 'dblMSRPPrice'
             },
 
@@ -873,8 +887,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     key: 'tblICItemPricings',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdPricing,
-                        deleteButton : grdPricing.down('#btnDeletePricing'),
-                        position: 'none'
+                        deleteButton : grdPricing.down('#btnDeletePricing')
                     })
                 },
                 {
@@ -948,11 +961,6 @@ Ext.define('Inventory.view.ItemViewController', {
         });
 
         me.subscribeLocationEvents(grdLocationStore, me);
-
-        var btnAddPricing = grdPricing.down('#btnAddPricing');
-        btnAddPricing.on('click', me.onAddPricingClick);
-        var btnEditPricing = grdPricing.down('#btnEditPricing');
-        btnEditPricing.on('click', me.onEditPricingClick);
 
         var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
         if (cepPricingLevel){
@@ -1842,6 +1850,23 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Pricing Tab Methods and Event Handlers">
 
+    onPricingLocationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var grid = combo.up('grid');
+        var grdPricing = win.down('#grdPricing');
+        var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
+        var plugin = grid.getPlugin('cepPricingLevel');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'cboPricingLocation'){
+            current.set('intItemLocationId', records[0].get('intItemLocationId'));
+            current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
+        }
+    },
+
     onPricingLevelSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -1909,155 +1934,6 @@ Ext.define('Inventory.view.ItemViewController', {
             }
             else { current.set('dblDiscountedPrice', 0.00); }
         }
-    },
-
-    onPricingDoubleClick: function(view, record, item, index, e, eOpts){
-        var win = view.up('window');
-        var me = win.controller;
-        var vm = win.getViewModel();
-        var pricingRecord = record;
-
-        var defaultLocation = 0;
-        if (app.DefaultLocation > 0){
-            var itemLocation = Ext.Array.findBy(win.viewModel.data.current.tblICItemLocations().data.items, function(record) {
-                if (record.get('intItemLocationId') === app.DefaultLocation){
-                    return true;
-                }
-                else { return false; }
-            });
-            if (itemLocation) defaultLocation = itemLocation.get('intItemLocationId');
-        }
-
-        if (!record){
-            iRely.Funtions.showErrorDialog('Please select a price to edit.');
-            return;
-        }
-
-        if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemPricingScreen('edit', win, pricingRecord, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
-            } });
-        }
-        else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
-                if (valid) {
-                    me.openItemPricingScreen('edit', win, pricingRecord, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
-                }
-            });
-        }
-    },
-
-    onAddPricingClick: function(button, e, eOpts) {
-        var win = button.up('window');
-        var me = win.controller;
-        var vm = win.getViewModel();
-
-        var defaultLocation = 0;
-        if (app.DefaultLocation > 0){
-            var record = Ext.Array.findBy(win.viewModel.data.current.tblICItemLocations().data.items, function(record) {
-                if (record.get('intItemLocationId') === app.DefaultLocation){
-                    return true;
-                }
-                else { return false; }
-            });
-            if (record) defaultLocation = record.get('intItemLocationId');
-        }
-
-        if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                var record = win.viewModel.data.current.tblICItemUOMs().data.items[0];
-                me.openItemPricingScreen('new', win, record, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
-            } });
-        }
-        else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
-                if (valid) {
-                    var record = win.viewModel.data.current.tblICItemUOMs().data.items[0];
-                    me.openItemPricingScreen('new', win, record, win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
-                }
-            });
-        }
-    },
-
-    onEditPricingClick: function(button, e, eOpts) {
-        var win = button.up('window');
-        var me = win.controller;
-        var vm = win.getViewModel();
-        var grd = button.up('grid');
-        var selection = grd.getSelectionModel().getSelection();
-
-        if (selection.length <= 0){
-            iRely.Funtions.showErrorDialog('Please select a price to edit.');
-            return;
-        }
-
-        var defaultLocation = 0;
-        if (app.DefaultLocation > 0){
-            var record = Ext.Array.findBy(win.viewModel.data.current.tblICItemLocations().data.items, function(record) {
-                if (record.get('intItemLocationId') === app.DefaultLocation){
-                    return true;
-                }
-                else { return false; }
-            });
-            if (record) defaultLocation = record.get('intItemLocationId');
-        }
-
-        if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
-                me.openItemPricingScreen('edit', win, selection[0], win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
-            } });
-        }
-        else {
-            win.context.data.validator.validateRecord({ window: win }, function(valid) {
-                if (valid) {
-                    me.openItemPricingScreen('edit', win, selection[0], win.viewModel.data.current.tblICItemPricings().data, defaultLocation);
-                }
-            });
-        }
-    },
-
-    openItemPricingScreen: function (action, window, record, table, defaultLocation) {
-        var win = window;
-        var me = win.controller;
-        var screenName = 'Inventory.view.ItemPricing';
-
-        Ext.require([
-            screenName,
-                screenName + 'ViewModel',
-                screenName + 'ViewController'
-        ], function() {
-            var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
-            view.on('destroy', me.onDestroyItemPricingScreen, me, { window: win });
-
-            var controller = view.getController();
-            var current = win.getViewModel().data.current;
-            if (action === 'edit'){
-                controller.show({ itemId: current.get('intItemId'), priceId: record.get('intItemPricingId'), table: table, defaultLocation: defaultLocation, action: action });
-            }
-            else if (action === 'new') {
-                if (record){
-                    controller.show({ itemId: current.get('intItemId'), uomId: record.get('intItemUOMId'), table: table, defaultLocation: defaultLocation, action: action });
-                }
-                else {
-                    controller.show({ itemId: current.get('intItemId'), table: table, defaultLocation: defaultLocation, action: action });
-                }
-            }
-        });
-    },
-
-    onDestroyItemPricingScreen: function(win, eOpts) {
-        var me = eOpts.window.getController();
-        var win = eOpts.window;
-        var grdPricing = win.down('#grdPricing');
-        var vm = win.getViewModel();
-        var itemId = vm.data.current.get('intItemId');
-        var filterItem = grdPricing.store.filters.items[0];
-
-        filterItem.setValue(itemId);
-        filterItem.config.value = itemId;
-        filterItem.initialConfig.value = itemId;
-        grdPricing.store.load();
     },
 
     onEditPricingLevel: function (editor, context, eOpts) {
@@ -2439,6 +2315,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboCertificationId": {
                 select: this.onCertificationSelect
             },
+            "#cboPricingLocation": {
+                select: this.onPricingLocationSelect
+            },
             "#cboPricingLevelLocation": {
                 select: this.onPricingLevelSelect
             },
@@ -2516,9 +2395,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#colAllowPurchase": {
                 beforecheckchange: this.onUOMBeforeCheckChange
-            },
-            "#grdPricing": {
-                itemdblclick: this.onPricingDoubleClick
             },
             "#grdLocationStore": {
                 itemdblclick: this.onLocationDoubleClick

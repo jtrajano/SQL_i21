@@ -372,6 +372,30 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'icbufferedcertification'
         },
 
+        pricingLocation: {
+            type: 'icbuffereditemlocation'
+        },
+        pricingPricingMethods: {
+            data: [
+                {
+                    strDescription: 'None'
+                },
+                {
+                    strDescription: 'Fixed Dollar Amount'
+                },
+                {
+                    strDescription: 'Markup Standard Cost'
+                },
+                {
+                    strDescription: 'Percent of Margin'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
 
         pricingLevelLocation: {
             type: 'icbuffereditemlocation'
@@ -382,6 +406,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         pricingLevelUOM: {
             type: 'icbuffereditemunitmeasure'
         },
+
         pricingMethods: {
             autoLoad: true,
             data: [

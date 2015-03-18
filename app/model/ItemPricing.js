@@ -53,7 +53,7 @@ Ext.define('Inventory.model.ItemPricing', {
     ],
 
     validators: [
-        {type: 'presence', field: 'intItemLocationId'},
+        {type: 'presence', field: 'strLocationName'},
         {type: 'presence', field: 'dblStandardCost'},
         {type: 'presence', field: 'strPricingMethod'},
         {type: 'presence', field: 'dblSalePrice'}
