@@ -28,23 +28,24 @@ Ext.define('Inventory.model.ReceiptItemLot', {
                 }
             }
         },
-        { name: 'intParentLotId', type: 'int', allowNull: true },
         { name: 'intLotId', type: 'int', allowNull: true },
-        { name: 'strParentLotId', type: 'string' },
-        { name: 'strLotId', type: 'string' },
+        { name: 'strLotNumber', type: 'string' },
+        { name: 'strLotAlias', type: 'string' },
+        { name: 'intSubLocationId', type: 'int', allowNull: true },
+        { name: 'intStorageLocationId', type: 'int', allowNull: true },
         { name: 'dblQuantity', type: 'float' },
-        { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'dblGrossWeight', type: 'float' },
         { name: 'dblTareWeight', type: 'float' },
+        { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'dblCost', type: 'float' },
-        { name: 'intStorageLocationId', type: 'int', allowNull: true },
-        { name: 'intUnitUOMId', type: 'int', allowNull: true },
-        { name: 'intUnits', type: 'int'},
-        { name: 'intUnitPallet', type: 'int'},
+        { name: 'intUnitPallet', type: 'int', allowNull: true },
         { name: 'dblStatedGrossPerUnit', type: 'float' },
         { name: 'dblStatedTarePerUnit', type: 'float' },
         { name: 'strContainerNo', type: 'string' },
-        { name: 'intGarden', type: 'int', allowNull: true },
+        { name: 'intVendorId', type: 'int', allowNull: true },
+        { name: 'intVendorLocationId', type: 'int', allowNull: true },
+        { name: 'strVendorLocation', type: 'string' },
+        { name: 'strMarkings', type: 'string' },
         { name: 'strGrade', type: 'string' },
         { name: 'intOriginId', type: 'int', allowNull: true },
         { name: 'intSeasonCropYear', type: 'int', allowNull: true },
@@ -53,12 +54,7 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'strRemarks', type: 'string' },
         { name: 'strCondition', type: 'string' },
         { name: 'dtmCertified', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
+        { name: 'dtmExpiryDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intSort', type: 'int', allowNull: true }
-    ],
-
-    validators: [
-        {type: 'presence', field: 'strWeightUOM'},
-        {type: 'presence', field: 'intUnits'},
-        {type: 'presence', field: 'intUnitPallet'}
     ]
 });

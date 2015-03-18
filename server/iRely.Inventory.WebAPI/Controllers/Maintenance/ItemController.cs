@@ -159,6 +159,10 @@ namespace iRely.Invetory.WebAPI.Controllers
                 {
                     errMessage = "Account Category must be unique.";
                 }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItem_strItemNo'"))
+                {
+                    errMessage = "Item No must be unique.";
+                }
             }
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
@@ -189,6 +193,10 @@ namespace iRely.Invetory.WebAPI.Controllers
                 if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
                 {
                     errMessage = "Account Category must be unique.";
+                }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItem_strItemNo'"))
+                {
+                    errMessage = "Item No must be unique.";
                 }
             }
 

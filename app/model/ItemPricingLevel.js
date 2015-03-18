@@ -46,11 +46,10 @@ Ext.define('Inventory.model.ItemPricingLevel', {
         { name: 'dblMin', type: 'float' },
         { name: 'dblMax', type: 'float' },
         { name: 'strPricingMethod', type: 'string' },
+        { name: 'dblAmountRate', type: 'float' },
+        { name: 'dblUnitPrice', type: 'float' },
         { name: 'strCommissionOn', type: 'string' },
         { name: 'dblCommissionRate', type: 'float' },
-        { name: 'dblUnitPrice', type: 'float' },
-        { name: 'dtmBeginDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
-        { name: 'dtmEndDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strLocationName', type: 'string'},
@@ -64,7 +63,6 @@ Ext.define('Inventory.model.ItemPricingLevel', {
         {type: 'presence', field: 'strUnitMeasure'},
         {type: 'presence', field: 'dblUnit'},
         {type: 'presence', field: 'strPricingMethod'},
-        {type: 'presence', field: 'dblUnitPrice'},
-        {type: 'presence', field: 'dtmBeginDate'}
+        {type: 'presence', field: 'dblUnitPrice'}
     ]
 });

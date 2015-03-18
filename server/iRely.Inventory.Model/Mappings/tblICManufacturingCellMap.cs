@@ -12,8 +12,8 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICManufacturingCell");
-            this.Property(t => t.dblStdCapacity).HasColumnName("dblStdCapacity");
-            this.Property(t => t.dblStdLineEfficiency).HasColumnName("dblStdLineEfficiency");
+            this.Property(t => t.dblStdCapacity).HasColumnName("dblStdCapacity").HasPrecision(18, 6);
+            this.Property(t => t.dblStdLineEfficiency).HasColumnName("dblStdLineEfficiency").HasPrecision(18, 6);
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.intManufacturingCellId).HasColumnName("intManufacturingCellId");
             this.Property(t => t.intStdCapacityRateId).HasColumnName("intStdCapacityRateId");
@@ -47,8 +47,8 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICManufacturingCellPackType");
-            this.Property(t => t.dblLineCapacity).HasColumnName("dblLineCapacity");
-            this.Property(t => t.dblLineEfficiencyRate).HasColumnName("dblLineEfficiencyRate");
+            this.Property(t => t.dblLineCapacity).HasColumnName("dblLineCapacity").HasPrecision(18, 6);
+            this.Property(t => t.dblLineEfficiencyRate).HasColumnName("dblLineEfficiencyRate").HasPrecision(18, 6);
             this.Property(t => t.intLineCapacityRateUnitMeasureId).HasColumnName("intLineCapacityRateUnitMeasureId");
             this.Property(t => t.intLineCapacityUnitMeasureId).HasColumnName("intLineCapacityUnitMeasureId");
             this.Property(t => t.intManufacturingCellId).HasColumnName("intManufacturingCellId");

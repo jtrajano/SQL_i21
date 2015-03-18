@@ -637,7 +637,6 @@ Ext.define('Inventory.view.Commodity', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        hidden: true,
                                         title: 'UOM',
                                         layout: {
                                             type: 'vbox',

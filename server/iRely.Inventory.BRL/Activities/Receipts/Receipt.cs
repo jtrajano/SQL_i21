@@ -68,7 +68,6 @@ namespace iRely.Inventory.BRL
                 .Include("tblICInventoryReceiptItems.vyuICGetReceiptItemSource")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICLot")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.WeightUOM.tblICUnitMeasure")
-                .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.UnitUOM.tblICUnitMeasure")
                 .Include("tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes")
                 .Include("tblICInventoryReceiptItems.tblSMCompanyLocationSubLocation")
                 .Include("tblICInventoryReceiptInspections.tblMFQAProperty")

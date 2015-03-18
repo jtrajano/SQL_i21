@@ -12,11 +12,11 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICStorageLocation");
-            this.Property(t => t.dblBatchSize).HasColumnName("dblBatchSize");
-            this.Property(t => t.dblMinBatchSize).HasColumnName("dblMinBatchSize");
-            this.Property(t => t.dblPackFactor).HasColumnName("dblPackFactor");
-            this.Property(t => t.dblResidualUnit).HasColumnName("dblResidualUnit");
-            this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot");
+            this.Property(t => t.dblBatchSize).HasColumnName("dblBatchSize").HasPrecision(18, 6);
+            this.Property(t => t.dblMinBatchSize).HasColumnName("dblMinBatchSize").HasPrecision(18, 6);
+            this.Property(t => t.dblPackFactor).HasColumnName("dblPackFactor").HasPrecision(18, 6);
+            this.Property(t => t.dblResidualUnit).HasColumnName("dblResidualUnit").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
             this.Property(t => t.intBatchSizeUOMId).HasColumnName("intBatchSizeUOMId");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
             this.Property(t => t.intParentStorageLocationId).HasColumnName("intParentStorageLocationId");

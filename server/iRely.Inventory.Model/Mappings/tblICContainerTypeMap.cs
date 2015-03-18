@@ -12,11 +12,11 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICContainerType");
-            this.Property(t => t.dblDepth).HasColumnName("dblDepth");
-            this.Property(t => t.dblHeight).HasColumnName("dblHeight");
-            this.Property(t => t.dblMaxWeight).HasColumnName("dblMaxWeight");
-            this.Property(t => t.dblPalletWeight).HasColumnName("dblPalletWeight");
-            this.Property(t => t.dblWidth).HasColumnName("dblWidth");
+            this.Property(t => t.dblDepth).HasColumnName("dblDepth").HasPrecision(18, 6);
+            this.Property(t => t.dblHeight).HasColumnName("dblHeight").HasPrecision(18, 6);
+            this.Property(t => t.dblMaxWeight).HasColumnName("dblMaxWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblPalletWeight).HasColumnName("dblPalletWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblWidth).HasColumnName("dblWidth").HasPrecision(18, 6);
             this.Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
             this.Property(t => t.intContainerTypeId).HasColumnName("intContainerTypeId");
             this.Property(t => t.intDimensionUnitMeasureId).HasColumnName("intDimensionUnitMeasureId");

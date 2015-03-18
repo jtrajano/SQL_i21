@@ -12,8 +12,8 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICFuelType");
-            this.Property(t => t.dblFeedStockFactor).HasColumnName("dblFeedStockFactor");
-            this.Property(t => t.dblPercentDenaturant).HasColumnName("dblPercentDenaturant");
+            this.Property(t => t.dblFeedStockFactor).HasColumnName("dblFeedStockFactor").HasPrecision(18, 6);
+            this.Property(t => t.dblPercentDenaturant).HasColumnName("dblPercentDenaturant").HasPrecision(18, 6);
             this.Property(t => t.intBatchNumber).HasColumnName("intBatchNumber");
             this.Property(t => t.intEndingRinGallons).HasColumnName("intEndingRinGallons");
             this.Property(t => t.strEquivalenceValue).HasColumnName("strEquivalenceValue");

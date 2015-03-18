@@ -213,6 +213,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'textfield',
                                                                         flex: 1.2,
+                                                                        tabIndex: 1,
                                                                         itemId: 'txtItemNo',
                                                                         fieldLabel: 'Item No',
                                                                         labelWidth: 80
@@ -220,6 +221,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'combobox',
                                                                         flex: 1,
+                                                                        tabIndex: 2,
                                                                         itemId: 'cboType',
                                                                         margin: '0 1 0 5',
                                                                         modelValidation: true,
@@ -234,6 +236,7 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'textareafield',
                                                                 flex: 1,
+                                                                tabIndex: 3,
                                                                 height: 62,
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
@@ -281,6 +284,7 @@ Ext.define('Inventory.view.Item', {
                                                                             }
                                                                         ],
                                                                         flex: 1,
+                                                                        tabIndex: 4,
                                                                         itemId: 'cboManufacturer',
                                                                         fieldLabel: 'Manufacturer',
                                                                         labelWidth: 80,
@@ -310,28 +314,117 @@ Ext.define('Inventory.view.Item', {
                                                                             }
                                                                         ],
                                                                         flex: 1,
+                                                                        tabIndex: 5,
                                                                         itemId: 'cboBrand',
                                                                         margin: '0 0 0 5',
                                                                         fieldLabel: 'Brand',
-                                                                        labelWidth: 40,
+                                                                        labelWidth: 80,
                                                                         displayField: 'strBrandCode',
                                                                         valueField: 'intBrandId'
                                                                     }
                                                                 ]
                                                             },
                                                             {
-                                                                xtype: 'combobox',
-                                                                itemId: 'cboStatus',
-                                                                fieldLabel: 'Status',
-                                                                labelWidth: 80,
-                                                                displayField: 'strStatus',
-                                                                valueField: 'strStatus'
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 0 5 0',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        flex: 1,
+                                                                        tabIndex: 6,
+                                                                        itemId: 'cboStatus',
+                                                                        fieldLabel: 'Status',
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strStatus',
+                                                                        valueField: 'strStatus'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        flex: 1,
+                                                                        tabIndex: 7,
+                                                                        itemId: 'txtModelNo',
+                                                                        margin: '0 0 0 5',
+                                                                        fieldLabel: 'Model No',
+                                                                        labelWidth: 80
+                                                                    }
+                                                                ]
                                                             },
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtModelNo',
-                                                                fieldLabel: 'Model No',
-                                                                labelWidth: 80
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 0 5 0',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCommodityId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strCommodityCode',
+                                                                                dataType: 'string',
+                                                                                text: 'Commodity Code',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        flex: 1,
+                                                                        tabIndex: 8,
+                                                                        itemId: 'cboCommodity',
+                                                                        fieldLabel: 'Commodity',
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strCommodityCode',
+                                                                        valueField: 'intCommodityId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCategoryId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Category ID',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strCategoryCode',
+                                                                                dataType: 'string',
+                                                                                text: 'Category Code',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        flex: 1,
+                                                                        tabIndex: 9,
+                                                                        itemId: 'cboCategory',
+                                                                        margin: '0 0 0 5',
+                                                                        fieldLabel: 'Category',
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strCategoryCode',
+                                                                        valueField: 'intCategoryId'
+                                                                    }
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'container',
@@ -341,6 +434,16 @@ Ext.define('Inventory.view.Item', {
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        flex: 1,
+                                                                        tabIndex: 10,
+                                                                        itemId: 'cboLotTracking',
+                                                                        fieldLabel: 'Lot Tracking',
+                                                                        labelWidth: 80,
+                                                                        displayField: 'strLotTracking',
+                                                                        valueField: 'strLotTracking'
+                                                                    },
                                                                     {
                                                                         xtype: 'combobox',
                                                                         columns: [
@@ -364,21 +467,13 @@ Ext.define('Inventory.view.Item', {
                                                                             }
                                                                         ],
                                                                         flex: 1,
+                                                                        tabIndex: 11,
                                                                         itemId: 'cboTracking',
+                                                                        margin: '0 0 0 5',
                                                                         fieldLabel: 'Inv. Valuation',
                                                                         labelWidth: 80,
                                                                         displayField: 'strDescription',
                                                                         valueField: 'strDescription'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'combobox',
-                                                                        flex: 1,
-                                                                        itemId: 'cboLotTracking',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'Lot Tracking',
-                                                                        labelWidth: 80,
-                                                                        displayField: 'strLotTracking',
-                                                                        valueField: 'strLotTracking'
                                                                     }
                                                                 ]
                                                             }
@@ -468,39 +563,36 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailUnitQty',
+                                                        modelValidation: true,
                                                         width: 62,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Unit Qty',
-                                                        format: '0',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            validateOnChange: false,
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true,
-                                                            minValue: 1
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colDetailWeight',
-                                                        width: 62,
-                                                        align: 'right',
-                                                        dataIndex: 'number',
-                                                        text: 'Weight',
-                                                        format: '0',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
+                                                            minValue: 0.000001
                                                         }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colWeightUOM',
+                                                        itemId: 'colDetailUpcCode',
                                                         minWidth: 80,
                                                         dataIndex: 'string',
-                                                        text: 'Weight UOM',
-                                                        flex: 2
+                                                        text: 'UPC Code',
+                                                        flex: 2,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailShortUPC',
+                                                        width: 70,
+                                                        dataIndex: 'string',
+                                                        text: 'Short UPC'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
@@ -522,12 +614,71 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colDetailWeight',
+                                                        width: 62,
+                                                        align: 'right',
+                                                        dataIndex: 'number',
+                                                        text: 'Weight',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            fieldStyle: 'text-align:right',
+                                                            hideTrigger: true,
+                                                            minValue: 0
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colDetailWeightUOM',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Weight UOM',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailWeightUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
                                                         itemId: 'colDetailLength',
                                                         width: 62,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Length',
-                                                        format: '0',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -541,7 +692,6 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Width',
-                                                        format: '0',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -555,7 +705,6 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Height',
-                                                        format: '0',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -564,11 +713,49 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colDimensionUOM',
-                                                        minWidth: 80,
-                                                        width: 91,
-                                                        dataIndex: 'string',
-                                                        text: 'Dimension UOM'
+                                                        itemId: 'colDetailDimensionUOM',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Dimension UOM',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailDimensionUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -577,7 +764,6 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Volume',
-                                                        format: '0',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -586,20 +772,56 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colVolumeUOM',
-                                                        minWidth: 80,
-                                                        width: 80,
-                                                        dataIndex: 'string',
-                                                        text: 'Volume UOM'
+                                                        itemId: 'colDetailVolumeUOM',
+                                                        minWidth: 95,
+                                                        dataIndex: 'intUnitMeasureId',
+                                                        text: 'Volume UOM',
+                                                        flex: 1.3,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure ID',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalCalculation',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Calculation',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intDecimalDisplay',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Decimal Places for Display',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboDetailVolumeUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colDetailMaxQty',
-                                                        width: 73,
                                                         align: 'right',
                                                         dataIndex: 'number',
                                                         text: 'Max Qty',
-                                                        format: '0',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -3002,20 +3224,6 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Location'
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colPricingUOM',
-                                                        width: 116,
-                                                        dataIndex: 'string',
-                                                        text: 'UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colPricingUPC',
-                                                        width: 116,
-                                                        dataIndex: 'string',
-                                                        text: 'UPC'
-                                                    },
-                                                    {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colPricingLastCost',
                                                         width: 80,
@@ -3037,7 +3245,7 @@ Ext.define('Inventory.view.Item', {
                                                         width: 90,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'Avarage Cost'
+                                                        text: 'Average Cost'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -3068,31 +3276,7 @@ Ext.define('Inventory.view.Item', {
                                                         width: 80,
                                                         align: 'right',
                                                         dataIndex: 'string',
-                                                        text: 'Sale Price'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colPricingRetailPrice',
-                                                        width: 80,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Retail Price'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colPricingWholesalePrice',
-                                                        width: 100,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Wholesale Price'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colPricingLargeVolumePrice',
-                                                        width: 115,
-                                                        align: 'right',
-                                                        dataIndex: 'string',
-                                                        text: 'Large Volume Price'
+                                                        text: 'Sales Price'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -3101,20 +3285,6 @@ Ext.define('Inventory.view.Item', {
                                                         align: 'right',
                                                         dataIndex: 'string',
                                                         text: 'MSRP'
-                                                    },
-                                                    {
-                                                        xtype: 'datecolumn',
-                                                        itemId: 'colPricingBeginDate',
-                                                        width: 80,
-                                                        dataIndex: 'string',
-                                                        text: 'Begin Date'
-                                                    },
-                                                    {
-                                                        xtype: 'datecolumn',
-                                                        itemId: 'colPricingEndDate',
-                                                        width: 80,
-                                                        dataIndex: 'string',
-                                                        text: 'End Date'
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -3289,20 +3459,14 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'UPC'
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelUnits',
-                                                                        width: 50,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Qty',
-                                                                        editor: {
-                                                                            xtype: 'numberfield',
-                                                                            fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true
-                                                                        }
+                                                                        text: 'Unit Qty'
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelMin',
                                                                         width: 50,
                                                                         align: 'right',
@@ -3315,7 +3479,7 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelMax',
                                                                         width: 50,
                                                                         align: 'right',
@@ -3341,38 +3505,11 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colPricingLevelCommissionOn',
-                                                                        width: 100,
-                                                                        dataIndex: 'strFieldName',
-                                                                        text: 'Commission On',
-                                                                        editor: {
-                                                                            xtype: 'combobox',
-                                                                            itemId: 'cboPricingLevelCommissionOn',
-                                                                            displayField: 'strDescription',
-                                                                            valueField: 'strDescription'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colPricingLevelCommissionRate',
-                                                                        width: 104,
-                                                                        align: 'right',
-                                                                        dataIndex: 'strFieldName',
-                                                                        text: 'Commision Rate',
-                                                                        editor: {
-                                                                            xtype: 'numberfield',
-                                                                            fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelAmount',
-                                                                        width: 68,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Amount',
+                                                                        text: 'Amount/Rate',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -3380,7 +3517,7 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelUnitPrice',
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
@@ -3392,23 +3529,26 @@ Ext.define('Inventory.view.Item', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'datecolumn',
-                                                                        itemId: 'colPricingLevelBeginDate',
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colPricingLevelCommissionOn',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Begin Date',
+                                                                        text: 'Commission On',
                                                                         editor: {
-                                                                            xtype: 'datefield',
-                                                                            fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true
+                                                                            xtype: 'combobox',
+                                                                            itemId: 'cboPricingLevelCommissionOn',
+                                                                            displayField: 'strDescription',
+                                                                            valueField: 'strDescription'
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'datecolumn',
-                                                                        itemId: 'colPricingLevelEndDate',
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colPricingLevelCommissionRate',
+                                                                        minWidth: 125,
+                                                                        align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'End Date',
+                                                                        text: 'Comm Amount/Rate',
                                                                         editor: {
-                                                                            xtype: 'datefield',
+                                                                            xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -3605,6 +3745,7 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Discount Amount/Percent',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            itemId: 'txtSpecialPricingDiscount',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
@@ -3618,12 +3759,14 @@ Ext.define('Inventory.view.Item', {
                                                                         text: 'Unit Price',
                                                                         editor: {
                                                                             xtype: 'numberfield',
+                                                                            itemId: 'txtSpecialPricingUnitPrice',
                                                                             fieldStyle: 'text-align:right',
                                                                             hideTrigger: true
                                                                         }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
+                                                                        autoRender: true,
                                                                         itemId: 'colSpecialPricingDiscountedPrice',
                                                                         width: 110,
                                                                         align: 'right',
@@ -3843,33 +3986,6 @@ Ext.define('Inventory.view.Item', {
                                                     align: 'stretch'
                                                 },
                                                 items: [
-                                                    {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
-                                                            {
-                                                                dataIndex: 'intCommodityId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strCommodityCode',
-                                                                dataType: 'string',
-                                                                text: 'Commodity Code',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strDescription',
-                                                                dataType: 'string',
-                                                                text: 'Description',
-                                                                flex: 1
-                                                            }
-                                                        ],
-                                                        itemId: 'cboCommodity',
-                                                        fieldLabel: 'Commodity',
-                                                        displayField: 'strCommodityCode',
-                                                        valueField: 'intCommodityId'
-                                                    },
                                                     {
                                                         xtype: 'numberfield',
                                                         itemId: 'txtGaShrinkFactor',

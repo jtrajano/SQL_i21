@@ -195,7 +195,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             grdLotTracking: {
                 colLotId: {
-                    dataIndex: 'strLotId'
+                    dataIndex: 'strLotNumber'
                 },
                 colLotQuantity: 'dblQuantity',
                 colLotWeightUOM: {
@@ -213,13 +213,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{storageLocation}'
                     }
                 },
-                colLotUnitUOM: {
-                    dataIndex: 'strUnitUOM',
-                    editor: {
-                        store: '{unitUOM}'
-                    }
-                },
-                colLotNoUnits: 'intUnits',
                 colLotUnitsPallet: 'intUnitPallet',
                 colLotStatedGross: 'dblStatedGrossPerUnit',
                 colLotStatedTare: 'dblStatedTarePerUnit',
@@ -614,7 +607,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             switch (records[0].get('strLotTracking')){
                 case 'Yes - Serial Number':
-                    grdLotTracking.plugins[0].enable();
+                    grdLotTracking.setHidden(false);
                     var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
                         intInventoryReceiptItemId: current.get('intInventoryReceiptItemId') || current.get('strClientId'),
                         strLotId: '',
@@ -633,11 +626,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     break;
 
                 case 'Yes - Manual':
-                    grdLotTracking.plugins[0].enable();
+                    grdLotTracking.setHidden(false);
                     break;
 
                 default :
-                    grdLotTracking.plugins[0].disable();
+                    grdLotTracking.setHidden(true);
                     break;
             }
         }
@@ -689,6 +682,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (!current.dummy)
                     iRely.Functions.openScreen('Inventory.view.Item', current.get('intItemId'));
             }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Item to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
         }
     },
 
@@ -934,13 +933,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var store = context.grid.store;
 
                 Ext.Array.each(store.data.items, function(record) {
-                    totalValue += record.get('dblQuantity');
+                    if (record.get('intInventoryReceiptItemLotId') === context.record.get('intInventoryReceiptItemLotId')){
+                        totalValue += context.value;
+                    }
+                    else{
+                        totalValue += record.get('dblQuantity');
+                    }
                 });
 
 
                 var txtLotTotalQty = win.down('#txtLotTotalQty');
-                txtLotTotalQty.setValue(totalValue);
+                txtLotTotalQty.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(totalValue, 2));
             }
+        }
+        else if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
+            var gross = context.record.get('dblGrossWeight');
+            var tare = context.record.get('dblTareWeight');
+
+            if (context.field === 'dblGrossWeight') { gross = context.value; }
+            else if (context.field === 'dblTareWeight') { tare = context.value; }
+
+            context.record.set('dblNetWeight', gross - tare);
         }
     },
 
@@ -992,13 +1005,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var win = combo.up('window');
         var grid = combo.up('grid');
+        var grdLotTracking = win.down('#grdLotTracking');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         var po = records[0];
 
         current.set('intLineNo', po.get('intPurchaseDetailId'));
         current.set('intSourceId', po.get('intPurchaseId'));
-        current.set('dblQtyOrdered', po.get('dblQtyOrdered'));
+        current.set('dblOrderQty', po.get('dblQtyOrdered'));
         current.set('dblReceived', po.get('dblQtyReceived'));
         current.set('dblOpenReceive', po.get('dblQtyOrdered'));
         current.set('strItemDescription', po.get('strDescription'));
@@ -1013,6 +1027,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('intStorageLocationId', po.get('intStorageLocationId'));
         current.set('strSubLocationName', po.get('strSubLocationName'));
         current.set('strStorageLocationName', po.get('strStorageName'));
+
+        switch(po.get('strLotTracking')) {
+            case 'Yes - Serial Number':
+            case 'Yes - Manual':
+                grdLotTracking.setHidden(false);
+                break;
+            default:
+                grdLotTracking.setHidden(true);
+                break;
+        }
     },
 
     onItemGridColumnBeforeRender: function(column) {
@@ -1351,6 +1375,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (selModel) {
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
+            var grdLotTracking = win.down('#grdLotTracking');
             var txtLotItemId = win.down('#txtLotItemId');
             var txtLotItemDescription = win.down('#txtLotItemDescription');
             var txtLotUOM = win.down('#txtLotUOM');
@@ -1373,8 +1398,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     txtLotItemId.setValue(current.get('strItemNo'));
                     txtLotItemDescription.setValue(current.get('strItemDescription'));
                     txtLotUOM.setValue(current.get('strUnitMeasure'));
-                    txtLotItemQty.setValue(current.get('dblOpenReceive'));
-                    txtLotCost.setValue(current.get('dblUnitCost'));
+                    txtLotItemQty.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblOpenReceive'), 2));
+                    txtLotCost.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblUnitCost'), 2));
                 }
                 else {
                     vm.data.currentReceiptItem = null;
@@ -1382,6 +1407,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
             else {
                 vm.data.currentReceiptItem = null;
+            }
+            if (vm.data.currentReceiptItem !== null){
+                grdLotTracking.setHidden(false);
+            }
+            else {
+                grdLotTracking.setHidden(true);
             }
         }
     },
@@ -1411,7 +1442,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var vm = win.viewModel;
                 var currentItem = vm.data.currentReceiptItem;
                 if (currentItem === undefined || currentItem === null){
-                    iRely.Functions.showErrorDialog('Please select a valid Lot-able Item.');
+                    iRely.Functions.showErrorDialog('Please select a lot tracked Item.');
                     oldCard.show();
                 }
                 break;

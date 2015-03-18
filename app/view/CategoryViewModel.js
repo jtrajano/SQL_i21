@@ -12,7 +12,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
         'i21.store.CompanyLocationBuffered',
         'Inventory.store.Class',
         'Inventory.store.Family',
-        'GeneralLedger.store.BufAccountCategory'
+        'GeneralLedger.store.BufAccountCategoryGroup'
     ],
 
     stores: {
@@ -102,7 +102,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
             type: 'icbufferedcompactitem'
         },
         accountCategory: {
-            type: 'glbufaccountcategory'
+            type: 'glbufaccountcategorygroup'
         },
         glAccount: {
             type: 'glbufaccountid'

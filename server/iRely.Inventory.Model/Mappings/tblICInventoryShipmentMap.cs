@@ -58,10 +58,10 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICInventoryShipmentItem");
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity");
-            this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight");
-            this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice");
-            this.Property(t => t.dbNetWeight).HasColumnName("dbNetWeight");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice").HasPrecision(18, 6);
+            this.Property(t => t.dbNetWeight).HasColumnName("dbNetWeight").HasPrecision(18, 6);
             this.Property(t => t.intDockDoorId).HasColumnName("intDockDoorId");
             this.Property(t => t.intInventoryShipmentId).HasColumnName("intInventoryShipmentId");
             this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
@@ -101,7 +101,7 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICInventoryShipmentItemLot");
-            this.Property(t => t.dblQuantityShipped).HasColumnName("dblQuantityShipped");
+            this.Property(t => t.dblQuantityShipped).HasColumnName("dblQuantityShipped").HasPrecision(18, 6);
             this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
             this.Property(t => t.intInventoryShipmentItemLotId).HasColumnName("intInventoryShipmentItemLotId");
             this.Property(t => t.intLotId).HasColumnName("intLotId");

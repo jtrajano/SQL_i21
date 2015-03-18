@@ -15,20 +15,20 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
-            this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty");
-            this.Property(t => t.dblWeight).HasColumnName("dblWeight");
+            this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty").HasPrecision(18, 6);
+            this.Property(t => t.dblWeight).HasColumnName("dblWeight").HasPrecision(18, 6);
             this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.strUpcCode).HasColumnName("strUpcCode");
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
             this.Property(t => t.ysnAllowPurchase).HasColumnName("ysnAllowPurchase");
             this.Property(t => t.ysnAllowSale).HasColumnName("ysnAllowSale");
-            this.Property(t => t.dblLength).HasColumnName("dblLength");
-            this.Property(t => t.dblWidth).HasColumnName("dblWidth");
-            this.Property(t => t.dblHeight).HasColumnName("dblHeight");
+            this.Property(t => t.dblLength).HasColumnName("dblLength").HasPrecision(18, 6);
+            this.Property(t => t.dblWidth).HasColumnName("dblWidth").HasPrecision(18, 6);
+            this.Property(t => t.dblHeight).HasColumnName("dblHeight").HasPrecision(18, 6);
             this.Property(t => t.intDimensionUOMId).HasColumnName("intDimensionUOMId");
-            this.Property(t => t.dblVolume).HasColumnName("dblVolume");
+            this.Property(t => t.dblVolume).HasColumnName("dblVolume").HasPrecision(18, 6);
             this.Property(t => t.intVolumeUOMId).HasColumnName("intVolumeUOMId");
-            this.Property(t => t.dblMaxQty).HasColumnName("dblMaxQty");
+            this.Property(t => t.dblMaxQty).HasColumnName("dblMaxQty").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasRequired(p => p.tblICUnitMeasure)

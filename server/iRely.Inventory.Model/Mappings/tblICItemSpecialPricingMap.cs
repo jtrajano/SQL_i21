@@ -19,12 +19,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmBeginDate).HasColumnName("dtmBeginDate");
             this.Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
             this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
-            this.Property(t => t.dblUnit).HasColumnName("dblUnit");
+            this.Property(t => t.dblUnit).HasColumnName("dblUnit").HasPrecision(18, 6);
             this.Property(t => t.strDiscountBy).HasColumnName("strDiscountBy");
-            this.Property(t => t.dblDiscount).HasColumnName("dblDiscount");
-            this.Property(t => t.dblUnitAfterDiscount).HasColumnName("dblUnitAfterDiscount");
-            this.Property(t => t.dblAccumulatedQty).HasColumnName("dblAccumulatedQty");
-            this.Property(t => t.dblAccumulatedAmount).HasColumnName("dblAccumulatedAmount");
+            this.Property(t => t.dblDiscount).HasColumnName("dblDiscount").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitAfterDiscount).HasColumnName("dblUnitAfterDiscount").HasPrecision(18, 6);
+            this.Property(t => t.dblAccumulatedQty).HasColumnName("dblAccumulatedQty").HasPrecision(18, 6);
+            this.Property(t => t.dblAccumulatedAmount).HasColumnName("dblAccumulatedAmount").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblICItemLocation)

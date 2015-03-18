@@ -12,11 +12,11 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICCommodity");
-            this.Property(t => t.dblConsolidateFactor).HasColumnName("dblConsolidateFactor");
-            this.Property(t => t.dblMaxOver).HasColumnName("dblMaxOver");
-            this.Property(t => t.dblMaxUnder).HasColumnName("dblMaxUnder");
-            this.Property(t => t.dblPriceCheckMax).HasColumnName("dblPriceCheckMax");
-            this.Property(t => t.dblPriceCheckMin).HasColumnName("dblPriceCheckMin");
+            this.Property(t => t.dblConsolidateFactor).HasColumnName("dblConsolidateFactor").HasPrecision(18, 6);
+            this.Property(t => t.dblMaxOver).HasColumnName("dblMaxOver").HasPrecision(18, 6);
+            this.Property(t => t.dblMaxUnder).HasColumnName("dblMaxUnder").HasPrecision(18, 6);
+            this.Property(t => t.dblPriceCheckMax).HasColumnName("dblPriceCheckMax").HasPrecision(18, 6);
+            this.Property(t => t.dblPriceCheckMin).HasColumnName("dblPriceCheckMin").HasPrecision(18, 6);
             this.Property(t => t.dtmCropEndDateCurrent).HasColumnName("dtmCropEndDateCurrent");
             this.Property(t => t.dtmCropEndDateNew).HasColumnName("dtmCropEndDateNew");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");

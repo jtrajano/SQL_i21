@@ -12,8 +12,8 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICSku");
-            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity");
-            this.Property(t => t.dblWeightPerUnit).HasColumnName("dblWeightPerUnit");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblWeightPerUnit).HasColumnName("dblWeightPerUnit").HasPrecision(18, 6);
             this.Property(t => t.dtmLastUpdateOn).HasColumnName("dtmLastUpdateOn");
             this.Property(t => t.dtmProductionDate).HasColumnName("dtmProductionDate");
             this.Property(t => t.dtmReceiveDate).HasColumnName("dtmReceiveDate");

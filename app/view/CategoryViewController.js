@@ -127,7 +127,11 @@ Ext.define('Inventory.view.CategoryViewController', {
                 colAccountCategory: {
                     dataIndex: 'strAccountCategory',
                     editor: {
-                        store: '{accountCategory}'
+                        store: '{accountCategory}',
+                        defaultFilters: [{
+                            column: 'strAccountCategoryGroupCode',
+                            value: 'INV'
+                        }]
                     }
                 },
                 colAccountId: {

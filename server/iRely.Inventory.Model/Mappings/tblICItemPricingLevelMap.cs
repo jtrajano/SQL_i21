@@ -17,15 +17,14 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.strPriceLevel).HasColumnName("strPriceLevel");
             this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
-            this.Property(t => t.dblUnit).HasColumnName("dblUnit");
-            this.Property(t => t.dblMin).HasColumnName("dblMin");
-            this.Property(t => t.dblMax).HasColumnName("dblMax");
+            this.Property(t => t.dblUnit).HasColumnName("dblUnit").HasPrecision(18, 6);
+            this.Property(t => t.dblMin).HasColumnName("dblMin").HasPrecision(18, 6);
+            this.Property(t => t.dblMax).HasColumnName("dblMax").HasPrecision(18, 6);
             this.Property(t => t.strPricingMethod).HasColumnName("strPricingMethod");
+            this.Property(t => t.dblAmountRate).HasColumnName("dblAmountRate").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice").HasPrecision(18, 6);
             this.Property(t => t.strCommissionOn).HasColumnName("strCommissionOn");
-            this.Property(t => t.dblCommissionRate).HasColumnName("dblCommissionRate");
-            this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice");
-            this.Property(t => t.dtmBeginDate).HasColumnName("dtmBeginDate");
-            this.Property(t => t.dtmEndDate).HasColumnName("dtmEndDate");
+            this.Property(t => t.dblCommissionRate).HasColumnName("dblCommissionRate").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.tblICItemLocation)

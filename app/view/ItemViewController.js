@@ -151,7 +151,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colGLAccountCategory: {
                     dataIndex: 'strAccountCategory',
                     editor: {
-                        store: '{accountCategory}'
+                        store: '{accountCategory}',
+                        defaultFilters: [{
+                            column: 'strAccountCategoryGroupCode',
+                            value: 'INV'
+                        }]
                     }
                 },
                 colGLAccountId: {
@@ -465,7 +469,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colPricingLevelUPC: 'strUPC',
-                colPricingLevelUnits: 'cboPricingLevelLocation',
+                colPricingLevelUnits: 'dblUnit',
                 colPricingLevelMin: 'dblMin',
                 colPricingLevelMax: 'dblMax',
                 colPricingLevelMethod: {
@@ -474,17 +478,15 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{pricingMethods}'
                     }
                 },
+                colPricingLevelAmount: 'dblAmountRate',
+                colPricingLevelUnitPrice: 'dblUnitPrice',
                 colPricingLevelCommissionOn: {
                     dataIndex: 'strCommissionOn',
                     editor: {
                         store: '{commissionsOn}'
                     }
                 },
-                colPricingLevelCommissionRate: 'dblCommissionRate',
-                colPricingLevelAmount: '',
-                colPricingLevelUnitPrice: 'dblUnitPrice',
-                colPricingLevelBeginDate: 'dtmBeginDate',
-                colPricingLevelEndDate: 'dtmEndDate'
+                colPricingLevelCommissionRate: 'dblCommissionRate'
             },
 
             grdSpecialPricing: {
@@ -951,6 +953,26 @@ Ext.define('Inventory.view.ItemViewController', {
         btnAddPricing.on('click', me.onAddPricingClick);
         var btnEditPricing = grdPricing.down('#btnEditPricing');
         btnEditPricing.on('click', me.onEditPricingClick);
+
+        var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
+        if (cepPricingLevel){
+            cepPricingLevel.on({
+                validateedit: me.onEditPricingLevel,
+                scope: me
+            });
+        }
+
+        var colDetailUnitQty = grdUOM.columns[1];
+        if (colDetailUnitQty) {
+            colDetailUnitQty.renderer = function (value, metadata, record) {
+                if (record) {
+                    if (record.get('intDecimalDisplay') > 0) {
+                        return i21.ModuleMgr.Inventory.roundDecimalFormat(value, record.get('intDecimalDisplay'));
+                    }
+                }
+            }
+        }
+
 
         return win.context;
     },
@@ -1420,6 +1442,17 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('intDecimalDisplay', records[0].get('intDecimalDisplay'));
+            current.set('intDecimalCalculation', records[0].get('intDecimalCalculation'));
+
+            var displayDecimal = records[0].get('intDecimalDisplay');
+
+            var colDetailUnitQty = grid.columns[1];
+            if (colDetailUnitQty.getEditor()) {
+                colDetailUnitQty.format = '0,000.00';
+                colDetailUnitQty.getEditor().decimalPrecision = i21.ModuleMgr.Inventory.createNumberFormat(displayDecimal);
+            }
+
             current.set('tblICUnitMeasure', records[0]);
 
             var uoms = grid.store.data.items;
@@ -1816,24 +1849,24 @@ Ext.define('Inventory.view.ItemViewController', {
         var win = combo.up('window');
         var grid = combo.up('grid');
         var grdPricing = win.down('#grdPricing');
+        var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
         var plugin = grid.getPlugin('cepPricingLevel');
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
-            current.set('dtmBeginDate', i21.ModuleMgr.Inventory.getTodayDate());
-            if (grdPricing.store){
-                var record = grdPricing.store.findRecord('intItemLocationId', records[0].get('intItemLocationId'));
-                if (record){
-                    current.set('dblUnitPrice', record.get('dblSalePrice'));
-                }
-            }
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
-            current.set('dblUnit', records[0].get('dblUnitQty'));
+
+            if (grdUnitOfMeasure.store){
+                var record = grdUnitOfMeasure.store.findRecord('intItemUOMId', records[0].get('intItemUOMId'));
+                if (record){
+                    current.set('dblUnit', record.get('dblUnitQty'));
+                }
+            }
         }
     },
 
@@ -2025,6 +2058,59 @@ Ext.define('Inventory.view.ItemViewController', {
         filterItem.config.value = itemId;
         filterItem.initialConfig.value = itemId;
         grdPricing.store.load();
+    },
+
+    onEditPricingLevel: function (editor, context, eOpts) {
+        if (context.field === 'strPricingMethod' || context.field === 'dblAmountRate') {
+            if (context.record) {
+                var win = context.grid.up('window');
+                var grdPricing = win.down('#grdPricing');
+                var pricingItems = grdPricing.store.data.items;
+                var pricingMethod = context.record.get('strPricingMethod');
+                var amount = context.record.get('dblCommissionRate');
+
+                if (context.field === 'strPricingMethod') {
+                    pricingMethod = context.value;
+                }
+                else if (context.field === 'dblAmountRate') {
+                    amount = context.value;
+                }
+
+                if (pricingItems) {
+                    var locationId = context.record.get('intItemLocationId');
+                    if (locationId > 0) {
+                        var selectedLoc = Ext.Array.findBy(pricingItems, function (row) {
+                            if (row.get('intItemLocationId') === locationId) {
+                                return true;
+                            }
+                        });
+                        if (selectedLoc) {
+                            var dblSalePrice = selectedLoc.get('dblSalePrice') * (context.record.get('dblUnit'));
+                            var amountRate = 0;
+                            switch (pricingMethod) {
+                                case 'Fixed Dollar Amount':
+                                case 'Markup Standard Cost':
+                                case 'Discount Sales Price':
+                                case 'MSRP Discount':
+                                    amountRate = amount;
+                                    break;
+                                case 'Percent of Margin':
+                                case 'Percent of Margin (MSRP)':
+                                    var percent = amount / 100;
+                                    amountRate = dblSalePrice * percent;
+                                    break;
+                                case 'None':
+                                default:
+                                    amountRate = 0;
+                                    break;
+                            }
+                            context.record.set('dblAmountRate', amountRate);
+                            context.record.set('dblUnitPrice', dblSalePrice - amountRate);
+                        }
+                    }
+                }
+            }
+        }
     },
 
     // </editor-fold>
