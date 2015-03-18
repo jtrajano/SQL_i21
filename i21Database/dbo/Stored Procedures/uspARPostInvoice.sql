@@ -168,6 +168,22 @@ BEGIN
 				ON A.intInvoiceId = B.intInvoiceId
 		WHERE  
 			A.dblInvoiceTotal = 0
+			
+		--negative amount
+		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT 
+			'You cannot post a ' + A.strTransactionType + ' with negative amount.',
+			A.strTransactionType,
+			A.strInvoiceNumber,
+			@batchId,
+			A.intInvoiceId
+		FROM 
+			tblARInvoice A 
+		INNER JOIN 
+			#tmpPostInvoiceData B
+				ON A.intInvoiceId = B.intInvoiceId
+		WHERE  
+			A.dblInvoiceTotal < 0
 
 		--No Terms specified
 		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
