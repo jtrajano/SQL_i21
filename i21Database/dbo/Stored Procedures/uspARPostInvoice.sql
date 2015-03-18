@@ -156,7 +156,7 @@ BEGIN
 		--zero amount
 		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
-			'You cannot post a ' + A.strTransactionType + ' with zero amount.',
+			'You cannot post an ' + A.strTransactionType + ' with zero amount.',
 			A.strTransactionType,
 			A.strInvoiceNumber,
 			@batchId,
@@ -172,7 +172,7 @@ BEGIN
 		--negative amount
 		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
-			'You cannot post a ' + A.strTransactionType + ' with negative amount.',
+			'You cannot post an ' + A.strTransactionType + ' with negative amount.',
 			A.strTransactionType,
 			A.strInvoiceNumber,
 			@batchId,
