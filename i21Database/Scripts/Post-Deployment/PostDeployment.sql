@@ -90,6 +90,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\2_MaterialNMFC.sql 
 :r .\IC\3_DefaultData.sql 
 :r .\IC\4_CostingMethods.sql 
+:r .\IC\6_FixBlankLotNumber.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
