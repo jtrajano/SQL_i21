@@ -640,6 +640,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
         }
+        else if (combo.itemId === 'cboSubLocation')
+        {
+            current.set('intSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
+        }
         else if (combo.itemId === 'cboPackageType')
         {
             current.set('intPackageTypeId', records[0].get('intUnitMeasureId'));
@@ -1462,6 +1466,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onReceiptItemSelect
             },
             "#cboItemUOM": {
+                select: this.onReceiptItemSelect
+            },
+            "#cboSubLocation": {
                 select: this.onReceiptItemSelect
             },
             "#cboPackageType": {

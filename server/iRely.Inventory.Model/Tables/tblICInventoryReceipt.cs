@@ -321,7 +321,7 @@ namespace iRely.Inventory.Model
             }
             set
             {
-                _packName = value;
+                _subLocationName = value;
             }
         }
         
