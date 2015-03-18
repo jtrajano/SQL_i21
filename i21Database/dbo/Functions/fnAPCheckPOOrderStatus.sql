@@ -6,7 +6,6 @@
 RETURNS BIT
 AS
 BEGIN
-	return 1
 
 	DECLARE @success AS BIT = 0;
 
@@ -34,5 +33,10 @@ BEGIN
 		)
 
 	END
+	ELSE
+	BEGIN
+		SET @success = 1;
+	END
+
 	RETURN(@success)
 END
