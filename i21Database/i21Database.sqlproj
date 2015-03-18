@@ -1183,6 +1183,7 @@
     <Build Include="dbo\Stored Procedures\uspGLConvertAccountGroupToCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeletePrePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreatePrePayment.sql" />
+    <Build Include="dbo\Tables\tblFRRowDesignDrillDown.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
