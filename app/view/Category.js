@@ -479,20 +479,20 @@ Ext.define('Inventory.view.Category', {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowPurchase',
                                                         width: 130,
-                                                        text: 'Purchase in Stock Unit'
+                                                        text: 'Allow Purchase'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowSale',
                                                         width: 100,
-                                                        text: 'Sale in Stock Unit'
+                                                        text: 'Allow Sale'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        dataIndex: 'number',
                                                         itemId: 'colDetailWeight',
                                                         width: 62,
                                                         align: 'right',
+                                                        dataIndex: 'number',
                                                         text: 'Weight',
                                                         editor: {
                                                             xtype: 'numberfield',
