@@ -77,7 +77,7 @@ DEALLOCATE cursortbl
 
 DELETE FROM #tmpTbl1 WHERE intAccountGroupId = @x
 
-UPDATE tblGLAccountSegment SET intAccountCategoryId = @intAccountCategoryId
+UPDATE s SET intAccountCategoryId = @intAccountCategoryId
 FROM tblGLAccountSegment s join #tmpTbl1 b
 on s.intAccountGroupId = b.intAccountGroupId
 
