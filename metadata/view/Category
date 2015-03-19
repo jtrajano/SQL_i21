@@ -746,7 +746,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter134",
+                                                    "name": "filter14",
                                                     "designerId": "53804780-f5bc-480e-aa2f-13d727814dbe",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -935,7 +935,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "itemId": "colAllowPurchase",
-                                                "text": "Purchase in Stock Unit",
+                                                "text": "Allow Purchase",
                                                 "width": 130
                                             },
                                             "name": "MyCheck9",
@@ -950,7 +950,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "itemId": "colAllowSale",
-                                                "text": "Sale in Stock Unit",
+                                                "text": "Allow Sale",
                                                 "width": 100
                                             },
                                             "name": "MyCheck4",
@@ -1565,7 +1565,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter135",
+                                                    "name": "filter15",
                                                     "designerId": "15a1d931-71e4-4cbc-8963-0531112b0fe0",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1780,7 +1780,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter136",
+                                                    "name": "filter16",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2084,7 +2084,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter137",
+                                                    "name": "filter17",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2727,7 +2727,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter138",
+                                                    "name": "filter18",
                                                     "designerId": "0763d06c-c630-47e6-91f4-89ddac6c34ff",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3453,7 +3453,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging17",
+                    "name": "statusbarpaging11",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
