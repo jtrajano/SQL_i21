@@ -604,13 +604,13 @@ Ext.define('Inventory.view.Item', {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowPurchase',
                                                         width: 130,
-                                                        text: 'Purchase in Stock Unit'
+                                                        text: 'Allow Purchase'
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colAllowSale',
                                                         width: 100,
-                                                        text: 'Sale in Stock Unit'
+                                                        text: 'Allow Sale'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -3294,10 +3294,10 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colPricingAmount',
                                                         width: 110,
                                                         align: 'right',
+                                                        dataIndex: 'string',
                                                         text: 'Amount/Percent',
                                                         editor: {
                                                             xtype: 'numberfield'

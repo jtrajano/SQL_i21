@@ -1440,6 +1440,8 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
             current.set('intDecimalDisplay', records[0].get('intDecimalDisplay'));
             current.set('intDecimalCalculation', records[0].get('intDecimalCalculation'));
+            current.set('ysnAllowPurchase', true);
+            current.set('ysnAllowSale', true);
             current.set('tblICUnitMeasure', records[0]);
 
             var uoms = grid.store.data.items;
@@ -1478,23 +1480,6 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onUOMBeforeCheckChange: function (obj, rowIndex, checked, eOpts) {
-        if (obj.dataIndex === 'ysnAllowPurchase' || obj.dataIndex === 'ysnAllowSale'){
-            var grid = obj.up('grid');
-            var selModel = grid.getSelectionModel();
-
-            if (selModel.hasSelection()){
-                var current = selModel.getSelection()[0];
-                if (current.data.ysnStockUnit !== true){
-                    return false;
-                }
-            }
-            else {
-                return false;
-            }
-        }
-    },
-
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
@@ -1514,8 +1499,6 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                     if (uom !== current){
                         uom.set('ysnStockUnit', false);
-                        uom.set('ysnAllowPurchase', false);
-                        uom.set('ysnAllowSale', false);
                     }
                     if (conversions){
                         var exists = Ext.Array.findBy(conversions, function(row) {
@@ -1531,8 +1514,6 @@ Ext.define('Inventory.view.ItemViewController', {
             }
             else {
                 if (current){
-                    current.set('ysnAllowPurchase', false);
-                    current.set('ysnAllowSale', false);
                     current.set('dblUnitQty', 1);
                 }
             }
@@ -2368,12 +2349,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#colStockUnit": {
                 beforecheckchange: this.onUOMStockUnitCheckChange
-            },
-            "#colAllowSale": {
-                beforecheckchange: this.onUOMBeforeCheckChange
-            },
-            "#colAllowPurchase": {
-                beforecheckchange: this.onUOMBeforeCheckChange
             },
             "#grdLocationStore": {
                 itemdblclick: this.onLocationDoubleClick
