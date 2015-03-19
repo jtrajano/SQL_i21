@@ -315,7 +315,7 @@ BEGIN
 	BEGIN 
 		 
          IF(@DateCondition = 'Not Equal To') BEGIN SET @WhereClause2 = @WhereClause2 + ' AND dtmDate <> ''' + @FromDate + '''' END
-         IF(@DateCondition = 'Between' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND (dtmDate BETWEEN ''' + @FromDate + ''' AND ''' +  @ToDate + ''')'END
+         IF(@DateCondition = 'Custom' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND (dtmDate BETWEEN ''' + @FromDate + ''' AND ''' +  @ToDate + ''')'END
          IF(@DateCondition = 'Equal To' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND dtmDate = ''' + @FromDate + '''' END
 	END
 	

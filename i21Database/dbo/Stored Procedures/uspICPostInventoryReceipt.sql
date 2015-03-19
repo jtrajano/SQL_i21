@@ -123,7 +123,7 @@ BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
 
 -- Create and validate the lot numbers
-IF @ysnRecap = 0 AND @ysnPost = 1
+IF @ysnPost = 1
 BEGIN 	
 	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt 
 		@strTransactionId

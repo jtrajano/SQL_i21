@@ -17,6 +17,15 @@ DECLARE @Active AS INT = 1
 DECLARE @intInsertedLotId AS INT 
 DECLARE @intLotTypeId AS INT
 DECLARE @intLocationId AS INT 
+DECLARE @errorFoundOnUpdate AS INT 
+DECLARE @strUnitMeasureItemUOMFrom AS NVARCHAR(50)
+DECLARE @strUnitMeasureItemUOMTo AS NVARCHAR(50)
+DECLARE @strUnitMeasureWeightUOMFrom AS NVARCHAR(50)
+DECLARE @strUnitMeasureWeightUOMTo AS NVARCHAR(50)
+DECLARE @strSubLocatioNameFrom AS NVARCHAR(50)
+DECLARE @strSubLocatioNameTo AS NVARCHAR(50)
+DECLARE @strStorageLocatioNameFrom AS NVARCHAR(50)
+DECLARE @strStorageLocatioNameTo AS NVARCHAR(50)
 
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
@@ -183,7 +192,52 @@ BEGIN
 	-- Upsert (update or insert) the record to the lot master table. 
 	BEGIN  
 		SET @intInsertedLotId = NULL 
+		SET @errorFoundOnUpdate = NULL 
 
+		-- Get the Item UOM String (old value)
+		SELECT	@strUnitMeasureItemUOMFrom = UOM.strUnitMeasure
+		FROM	dbo.tblICItemUOM ItemUOM INNER JOIN dbo.tblICUnitMeasure UOM
+					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+				INNER JOIN dbo.tblICLot Lot 
+					ON ItemUOM.intItemUOMId = Lot.intItemUOMId
+		WHERE	ItemUOM.intItemId = @intItemId
+				AND Lot.intLotId = @intLotId
+				AND Lot.intLocationId = @intLocationId
+				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(intStorageLocationId, 0)
+
+		-- Get the Weight UOM String (old value)
+		SELECT	@strUnitMeasureWeightUOMFrom = UOM.strUnitMeasure
+		FROM	dbo.tblICItemUOM ItemUOM INNER JOIN dbo.tblICUnitMeasure UOM
+					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+				INNER JOIN dbo.tblICLot Lot 
+					ON ItemUOM.intItemUOMId = Lot.intWeightUOMId
+		WHERE	ItemUOM.intItemId = @intItemId
+				AND Lot.intLotId = @intLotId
+				AND Lot.intLocationId = @intLocationId
+				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(intStorageLocationId, 0)
+
+		-- Get the Sub Location String (old value)
+		SELECT @strSubLocatioNameFrom = SubLocation.strSubLocationName
+		FROM	 dbo.tblSMCompanyLocationSubLocation SubLocation INNER JOIN dbo.tblICLot Lot
+					ON SubLocation.intCompanyLocationSubLocationId = Lot.intSubLocationId
+		WHERE	Lot.intItemId = @intItemId
+				AND Lot.intLotId = @intLotId
+				AND Lot.intLocationId = @intLocationId
+				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
+
+		-- Get the Storage Location String (old value)
+		SELECT @strSubLocatioNameFrom = StorageLocation.strName
+		FROM	 dbo.tblICStorageLocation StorageLocation INNER JOIN dbo.tblICLot Lot
+					ON StorageLocation.intStorageLocationId = Lot.intStorageLocationId
+		WHERE	Lot.intItemId = @intItemId
+				AND Lot.intLotId = @intLotId
+				AND Lot.intLocationId = @intLocationId
+				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
+				
 		-- Get the Lot id or insert a new record on the Lot master table. 
 		MERGE	
 		INTO	dbo.tblICLot 
@@ -202,40 +256,93 @@ BEGIN
 						,dblWeight = @dblWeight
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
-			AND LotMaster.intLocationId = LotToUpdate.intLocationId 
-			AND LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
 			AND LotMaster.strLotNumber = LotToUpdate.strLotNumber 
-			AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
-			AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
-			AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
-			AND ISNULL(LotMaster.dblWeightPerQty, 0) = dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight)
 
 		-- If matched, update the lot record 
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET		
-				dblQty					= 0 --ISNULL(LotMaster.dblQty, 0) + @dblQty
-				,dtmExpiryDate			= @dtmExpiryDate
-				,strLotAlias			= @strLotAlias
-				,intLotStatusId			= @intLotStatusId
-				,dblWeight				= 0 --@dblWeight
-				,dblWeightPerQty		= dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight)
-				,intOriginId			= @intOriginId
-				,strBOLNo				= @strBOLNo
-				,strVessel				= @strVessel
-				,strReceiptNumber		= @strReceiptNumber
-				,strMarkings			= @strMarkings
-				,strNotes				= @strNotes
-				,intVendorId			= @intVendorId
-				,strVendorLotNo			= @strVendorLotNo
-				,intVendorLocationId	= @intVendorLocationId
-				,strVendorLocation		= @strVendorLocation
-				,strContractNo			= @strContractNo
-				,dtmManufacturedDate	= @dtmManufacturedDate
-				,ysnReleasedToWarehouse = @ysnReleasedToWarehouse
-				,ysnProduced			= @ysnProduced
-				,intConcurrencyId		= ISNULL(intConcurrencyId, 0) + 1
-				,@intInsertedLotId		= @intLotId
+				-- The following fields are updated if it is changed from the source transaction. 
+				dtmExpiryDate			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @dtmExpiryDate ELSE LotMaster.dtmExpiryDate END 
+				,strLotAlias			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strLotAlias ELSE LotMaster.strLotAlias END 				
+				,intOriginId			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @intOriginId ELSE LotMaster.intOriginId END  
+				,strBOLNo				= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strBOLNo ELSE LotMaster.strBOLNo END 
+				,strVessel				= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strVessel ELSE LotMaster.strVessel END 
+				,strReceiptNumber		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
+				,strMarkings			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strMarkings ELSE LotMaster.strMarkings END 
+				,strNotes				= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strNotes ELSE LotMaster.strNotes END 
+				,intVendorId			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @intVendorId ELSE LotMaster.intVendorId END 
+				,strVendorLotNo			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strVendorLotNo ELSE LotMaster.strVendorLotNo END 
+				,intVendorLocationId	= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @intVendorLocationId ELSE LotMaster.intVendorLocationId END
+				,strVendorLocation		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strVendorLocation ELSE LotMaster.strVendorLocation END 
+				,strContractNo			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strContractNo ELSE LotMaster.strContractNo END 
+				,dtmManufacturedDate	= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @dtmManufacturedDate ELSE LotMaster.dtmManufacturedDate END 
+								
+				-- Find out if there any possible errors when updating an existing lot record. 
+				,@errorFoundOnUpdate	= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
+													CASE	WHEN ISNULL(LotMaster.intItemUOMId, 0) <> LotToUpdate.intItemUOMId THEN 1 
+															WHEN ISNULL(LotMaster.intWeightUOMId, 0) <> LotToUpdate.intWeightUOMId THEN 2
+															WHEN ISNULL(LotMaster.intSubLocationId, 0) <> ISNULL(LotToUpdate.intSubLocationId, 0) THEN 3
+															WHEN ISNULL(LotMaster.intStorageLocationId, 0) <> ISNULL(LotToUpdate.intStorageLocationId, 0) THEN 4
+															ELSE 0 
+													END 
+												ELSE 0
+										  END
+				-- Allow update on the following fields if it is changed from the source transaction. 
+				,dblWeightPerQty		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight) ELSE LotMaster.dblWeightPerQty END
+				,intItemUOMId			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemUOMId ELSE LotMaster.intItemUOMId END
+				,intWeightUOMId			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intWeightUOMId ELSE LotMaster.intWeightUOMId END
+				,intSubLocationId		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intSubLocationId ELSE LotMaster.intSubLocationId END
+				,intStorageLocationId	= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intStorageLocationId ELSE LotMaster.intStorageLocationId END
+
+				-- The following fields are always updated if it has the same: 
+				-- 1. Quantity UOM
+				-- 2. Weight UOM
+				-- 3. sub location 
+				-- 4. storage location
+				,intLotStatusId			= CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN @intLotStatusId ELSE LotMaster.intLotStatusId
+											END 
+				,ysnReleasedToWarehouse = CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN @ysnReleasedToWarehouse ELSE LotMaster.ysnReleasedToWarehouse
+											END 
+				,ysnProduced			= CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN @ysnProduced ELSE LotMaster.ysnProduced
+											END 
+				,intConcurrencyId		= CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN ISNULL(LotMaster.intConcurrencyId, 0) + 1 ELSE ISNULL(LotMaster.intConcurrencyId, 0)
+											END 
+				,@intInsertedLotId		= CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN LotMaster.intLotId ELSE 0 
+											END 
+				,@intLotId				= CASE WHEN (
+												LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+												AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+												AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+											) THEN LotMaster.intLotId ELSE 0 
+											END 
 
 		-- If none found, insert a new lot record. 
 		WHEN NOT MATCHED THEN 
@@ -305,7 +412,7 @@ BEGIN
 				,1
 			)
 		;
-		
+	
 		-- Get the lot id of the newly inserted record
 		IF @intInsertedLotId IS NULL 
 		BEGIN 
@@ -323,9 +430,72 @@ BEGIN
 			SELECT	@intLotId
 					,@strLotNumber
 					,@intDetailId
+			WHERE ISNULL(@intLotId, 0) <> 0 
 		END 
 	END 
 
+	-- Validation check point 1 of 5
+	IF @errorFoundOnUpdate = 1 
+	BEGIN 
+		-- Get the item id string value
+		SELECT	@strItemNo = strItemNo
+		FROM	dbo.tblICItem Item 
+		WHERE	Item.intItemId = @intItemId
+
+		-- Get the Item UOM String (proposed value)
+		SELECT	@strUnitMeasureItemUOMTo = UOM.strUnitMeasure
+		FROM	dbo.tblICItemUOM ItemUOM INNER JOIN dbo.tblICUnitMeasure UOM
+					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+		WHERE	ItemUOM.intItemId = @intItemId
+				AND ItemUOM.intItemUOMId = @intItemUOMId
+
+		--'The Quantity UOM for {Item} cannot be changed from {Item UOM} to {Item UOM} because a stock from it has been used from a different transaction.'
+		RAISERROR(51044, 11, 1, @strItemNo, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo);
+		RETURN;
+	END 
+
+	-- Validation check point 2 of 5
+	IF @errorFoundOnUpdate = 2
+	BEGIN 
+		-- Get the Weight UOM String (proposed value)
+		SELECT	@strUnitMeasureWeightUOMTo = UOM.strUnitMeasure
+		FROM	dbo.tblICItemUOM ItemUOM INNER JOIN dbo.tblICUnitMeasure UOM
+					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+		WHERE	ItemUOM.intItemId = @intItemId
+				AND ItemUOM.intItemUOMId = @intWeightUOMId
+
+		--'The Weight UOM for {Lot number} cannot be changed from {Weight UOM} to {Weight UOM} because a stock from it has been used from a different transaction.'
+		RAISERROR(51045, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
+		RETURN;
+	END 
+
+	-- Validation check point 3 of 5
+	IF @errorFoundOnUpdate = 3
+	BEGIN 
+		-- Get the Sub Location String (proposed value)
+		SELECT	@strSubLocatioNameTo = SubLocation.strSubLocationName
+		FROM	dbo.tblSMCompanyLocationSubLocation SubLocation 
+		WHERE	ISNULL(SubLocation.intCompanyLocationSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+
+		--'The Sub-Location for {Lot number} cannot be changed from {Sub Location} to {Sub Location} because a stock from it has been used from a different transaction.'
+		RAISERROR(51046, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
+		RETURN;
+	END 
+
+	-- Validation check point 4 of 5
+	IF @errorFoundOnUpdate = 4
+	BEGIN 
+		-- Get the Storage Location String (proposed value)
+		SELECT	@strSubLocatioNameTo = StorageLocation.strName
+		FROM	 dbo.tblICStorageLocation StorageLocation 
+		WHERE	ISNULL(StorageLocation.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
+
+		--'The Storage Location for {Lot number} cannot be changed from {Storage Location} to {StorageLocation} because a stock from it has been used from a different transaction.'
+		RAISERROR(51047, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
+		RETURN;
+	END
+
+	-- Validation check point 5 of 5
 	-- Validate if lot id is generated correctly. 
 	IF ISNULL(@intLotId, 0) = 0 AND ISNULL(@intInsertedLotId, 0) = 0 
 	BEGIN 
@@ -333,7 +503,7 @@ BEGIN
 		FROM	dbo.tblICItem Item
 		WHERE	Item.intItemId = @intItemId
 
-		--Failed to process the lot number for {Item}.
+		--Failed to process the lot number for {Item}. It may have been used on a different sub-location or storage location.'
 		RAISERROR(51043, 11, 1, @strItemNo);
 		RETURN;
 	END
