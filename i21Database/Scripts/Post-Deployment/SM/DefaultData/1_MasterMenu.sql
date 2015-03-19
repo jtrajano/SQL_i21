@@ -1025,6 +1025,18 @@ GO
             VALUES (N'Currency Exchange Rate Type', N'System Manager', 13, N'Currency Exchange Rate Type', N'Screen', N'i21.view.CurrencyExchangeRateType', N'small-screen', 0, 0, 0, 1, NULL, 1) 
         END
 
+		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID IN (1, 13) AND strMenuName = 'User Preferences')
+			BEGIN
+				INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+				VALUES (N'User Preferences', N'System Manager', 13, N'User Preferences', N'Screen', N'i21.view.UserPreferences', N'small-screen', 0, 0, 0, 1, NULL, 1)
+			END
+		ELSE
+			BEGIN
+				UPDATE tblSMMasterMenu
+				SET intParentMenuID = 13, intSort = NULL
+				WHERE strModuleName = 'System Manager' AND intParentMenuID IN (1, 13) AND strMenuName = 'User Preferences'
+			END
+
 		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Reminder List')
         BEGIN
             INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1381,11 +1393,7 @@ GO
 	UPDATE tblSMMasterMenu SET intSort = 5 WHERE strMenuName = 'Starting Numbers' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
 	
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Custom Fields' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
-	UPDATE tblSMMasterMenu SET intSort = 6 WHERE strMenuName = 'Custom Fields' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User Preferences' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
-	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-	VALUES ('User Preferences', 'System Manager', @SystemManagerAdminMenuId, 'User Preferences', 'Screen', 'i21.view.UserPreferences', 'small-screen', 0, 0, 0, 1, 7, 1)
+	UPDATE tblSMMasterMenu SET intSort = 6 WHERE strMenuName = 'Custom Fields' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId	
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
 	UPDATE tblSMMasterMenu SET intSort = 8 WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
