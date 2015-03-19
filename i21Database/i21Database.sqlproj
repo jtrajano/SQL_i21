@@ -1201,6 +1201,7 @@
     <Build Include="dbo\Stored Procedures\uspARDeletePrePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreatePrePayment.sql" />
     <Build Include="dbo\Tables\tblFRRowDesignDrillDown.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGenerateDrillDownRows.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
