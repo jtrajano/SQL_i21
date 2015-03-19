@@ -40,6 +40,8 @@ Ext.define('Inventory.model.ItemStockDetailPricing', {
         { name: 'strUnitMeasure', type: 'string' },
         { name: 'strUnitType', type: 'string' },
         { name: 'ysnStockUnit', type: 'boolean' },
+        { name: 'ysnAllowPurchase', type: 'boolean' },
+        { name: 'ysnAllowSale', type: 'boolean' },
         { name: 'dblUnitQty', type: 'float' },
         { name: 'dblAmountPercent', type: 'float' },
         { name: 'dblSalePrice', type: 'float' },
