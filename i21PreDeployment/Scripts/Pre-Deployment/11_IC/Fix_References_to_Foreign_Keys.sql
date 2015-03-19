@@ -177,7 +177,7 @@ BEGIN
 	DROP TABLE #tmpItemPricing')
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intSubLocation' AND object_id = object_id('tblSMCompanyLocationSubLocation'))
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intCompanyLocationSubLocationId' AND object_id = object_id('tblSMCompanyLocationSubLocation'))
 BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intSubLocationId' AND object_id = object_id('tblICItemLocation'))
 	BEGIN
