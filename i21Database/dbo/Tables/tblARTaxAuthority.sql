@@ -4,6 +4,6 @@
     [strAuthorityId1]   NVARCHAR (25)  COLLATE Latin1_General_CI_AS  NULL,
     [strAuthorityId2]   NVARCHAR (25)  COLLATE Latin1_General_CI_AS  NULL,
     [intConcurrencyId]  INT           CONSTRAINT [DF_tblARTaxAuthority_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblARTaxAuthority] PRIMARY KEY CLUSTERED ([intTaxAuthorityId] ASC)
+    CONSTRAINT [PK_tblARTaxAuthority_intTaxAuthorityId] PRIMARY KEY CLUSTERED ([intTaxAuthorityId] ASC)
 );
 
