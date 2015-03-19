@@ -22,6 +22,7 @@ Ext.define('Inventory.view.CommodityViewModel', {
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedStorageType',
         'GeneralLedger.store.BufAccountId',
+        'GeneralLedger.store.BufAccountCategoryGroup',
         'i21.store.CompanyLocationBuffered'
     ],
 
@@ -89,33 +90,8 @@ Ext.define('Inventory.view.CommodityViewModel', {
                 }
             ]
         },
-        accountDescriptions: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Sales'
-                },
-                {
-                    strDescription: 'Purchase'
-                },
-                {
-                    strDescription: 'Inventory'
-                },
-                {
-                    strDescription: 'Variance'
-                },
-                {
-                    strDescription: 'COGS'
-                },
-                {
-                    strDescription: 'Expenses'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
+        accountCategory: {
+            type: 'glbufaccountcategorygroup'
         },
         patronageCategory: {
             type: 'icbufferedpatronagecategory'

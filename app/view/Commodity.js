@@ -29,14 +29,14 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
         'Ext.grid.Panel',
+        'Ext.grid.column.Number',
+        'Ext.grid.column.Check',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
-        'Ext.grid.column.Check',
         'Ext.tree.Panel',
         'Ext.tree.View',
         'Ext.tree.Column',
-        'Ext.grid.column.Number',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
@@ -715,11 +715,11 @@ Ext.define('Inventory.view.Commodity', {
                                                         }
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colUOMWeightPerPack',
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colUOMUnitQty',
                                                         align: 'right',
                                                         dataIndex: 'strFieldName',
-                                                        text: 'Weight Per Pack',
+                                                        text: 'Unit Qty',
                                                         flex: 3,
                                                         editor: {
                                                             xtype: 'numberfield',
@@ -735,15 +735,9 @@ Ext.define('Inventory.view.Commodity', {
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
-                                                        itemId: 'colUOMAllowPurchase',
-                                                        text: 'Allow Purchase in Stock Unit',
-                                                        flex: 2
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'colUOMAllowSale',
-                                                        text: 'Allow Sale in Stock Unit',
-                                                        flex: 2
+                                                        itemId: 'colUOMDefaultUOM',
+                                                        text: 'Default UOM',
+                                                        flex: 1
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -1694,7 +1688,6 @@ Ext.define('Inventory.view.Commodity', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        hidden: true,
                                         layout: 'fit',
                                         title: 'GL Accounts',
                                         items: [
@@ -1764,22 +1757,43 @@ Ext.define('Inventory.view.Commodity', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colAccountDescription',
+                                                        itemId: 'colAccountCategory',
                                                         dataIndex: 'string',
-                                                        text: 'Account Description',
+                                                        text: 'Account Category',
                                                         flex: 1,
                                                         editor: {
-                                                            xtype: 'combobox',
-                                                            itemId: 'cboAccountDescription',
-                                                            displayField: 'strDescription',
-                                                            valueField: 'strDescription'
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intAccountCategoryId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Account Category Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strAccountCategory',
+                                                                    dataType: 'string',
+                                                                    text: 'Account Category',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboAccountCategory',
+                                                            displayField: 'strAccountCategory',
+                                                            valueField: 'strAccountCategory'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        itemId: 'colAccountGroup',
+                                                        text: 'Account Group',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colAccountId',
                                                         dataIndex: 'string',
-                                                        text: 'Account ID',
+                                                        text: 'Account Id',
                                                         flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -1825,6 +1839,13 @@ Ext.define('Inventory.view.Commodity', {
                                                             displayField: 'strAccountId',
                                                             valueField: 'strAccountId'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        dataIndex: 'string',
+                                                        itemId: 'colAccountDescription',
+                                                        text: 'Account Description',
+                                                        flex: 1
                                                     }
                                                 ],
                                                 viewConfig: {

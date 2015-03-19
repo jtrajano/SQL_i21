@@ -125,6 +125,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryShipment> ShipFromLocations { get; set; }
         public ICollection<tblICInventoryShipment> ShipToLocations { get; set; }
+
+        public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
         
 
     }

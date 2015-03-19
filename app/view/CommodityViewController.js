@@ -86,16 +86,9 @@ Ext.define('Inventory.view.CommodityViewController', {
                         store: '{unitMeasure}'
                     }
                 },
-                colUOMWeightPerPack: 'dblWeightPerPack',
+                colUOMUnitQty: 'dblUnitQty',
                 colUOMStockUnit: 'ysnStockUnit',
-                colUOMAllowPurchase: {
-                    dataIndex: 'ysnAllowPurchase',
-                    readOnly: ''
-                },
-                colUOMAllowSale: {
-                    dataIndex: 'ysnAllowSale',
-                    readOnly: ''
-                }
+                colUOMDefaultUOM: 'ysnDefault'
             },
 
             grdGlAccounts: {
@@ -105,18 +98,24 @@ Ext.define('Inventory.view.CommodityViewController', {
                         store: '{location}'
                     }
                 },
-                colAccountDescription: {
-                    dataIndex: 'strAccountDescription',
+                colAccountCategory: {
+                    dataIndex: 'strAccountCategory',
                     editor: {
-                        store: '{accountDescriptions}'
+                        store: '{accountCategory}',
+                        defaultFilters: [{
+                            column: 'strAccountCategoryGroupCode',
+                            value: 'INV'
+                        }]
                     }
                 },
+                colAccountGroup: 'strAccountGroup',
                 colAccountId: {
                     dataIndex: 'strAccountId',
                     editor: {
                         store: '{glAccount}'
                     }
-                }
+                },
+                colAccountDescription: 'strAccountDescription'
             },
 
             grdOrigin: {
@@ -282,9 +281,15 @@ Ext.define('Inventory.view.CommodityViewController', {
         {
             current.set('intLocationId', records[0].get('intCompanyLocationId'));
         }
+        else if (combo.column.itemId === 'colAccountCategory')
+        {
+            current.set('intAccountCategoryId', records[0].get('intAccountCategoryId'));
+        }
         else if (combo.column.itemId === 'colAccountId')
         {
             current.set('intAccountId', records[0].get('intAccountId'));
+            current.set('strAccountGroup', records[0].get('strAccountGroup'));
+            current.set('strAccountDescription', records[0].get('strDescription'));
         }
     },
 
@@ -337,6 +342,9 @@ Ext.define('Inventory.view.CommodityViewController', {
                 select: this.onUOMSelect
             },
             "#cboAccountLocation": {
+                select: this.onAccountSelect
+            },
+            "#cboAccountCategory": {
                 select: this.onAccountSelect
             },
             "#cboAccountId": {

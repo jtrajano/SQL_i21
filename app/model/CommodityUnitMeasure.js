@@ -28,11 +28,10 @@ Ext.define('Inventory.model.CommodityUnitMeasure', {
                 }
             }},
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
-        { name: 'dblWeightPerPack', type: 'float'},
-        { name: 'ysnStockUnit', type: 'boolean'},
-        { name: 'ysnAllowPurchase', type: 'boolean'},
-        { name: 'ysnAllowSale', type: 'boolean'},
-        { name: 'intSort', type: 'int'},
+        { name: 'dblUnitQty', type: 'float' },
+        { name: 'ysnStockUnit', type: 'boolean' },
+        { name: 'ysnDefault', type: 'boolean' },
+        { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strUnitMeasure', type: 'string'}
     ],

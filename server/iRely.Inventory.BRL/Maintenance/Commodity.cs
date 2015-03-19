@@ -53,6 +53,8 @@ namespace iRely.Inventory.BRL
             return _db.GetQuery<tblICCommodity>()
                 .Include("tblICCommodityUnitMeasures.tblICUnitMeasure")
                 .Include("tblICCommodityAccounts.tblGLAccount")
+                .Include("tblICCommodityAccounts.tblGLAccountCategory")
+                .Include("tblICCommodityAccounts.tblSMCompanyLocation")
                 .Include(p => p.tblICCommodityClassVariants)
                 .Include(p => p.tblICCommodityGrades)
                 .Include(p => p.tblICCommodityOrigins)

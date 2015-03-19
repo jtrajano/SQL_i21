@@ -14,11 +14,10 @@ namespace iRely.Inventory.Model
         public int intCommodityUnitMeasureId { get; set; }
         public int intCommodityId { get; set; }
         public int? intUnitMeasureId { get; set; }
-        public decimal? dblWeightPerPack { get; set; }
+        public decimal? dblUnitQty { get; set; }
         public bool ysnStockUnit { get; set; }
-        public bool ysnAllowPurchase { get; set; }
-        public bool ysnAllowSale { get; set; }
-        public int intSort { get; set; }
+        public bool ysnDefault { get; set; }
+        public int? intSort { get; set; }
 
         private string _unitmeasure;
         [NotMapped]
