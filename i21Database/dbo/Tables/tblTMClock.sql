@@ -28,6 +28,7 @@
     [strCountry]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [strCurrentSeason]          NVARCHAR (6)    COLLATE Latin1_General_CI_AS DEFAULT (N'Winter') NOT NULL,
     [strState]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ((0)) NULL,
+    [dtmWinterToWinterChangeDate] DATETIME NULL, 
     CONSTRAINT [PK_tblTMClock] PRIMARY KEY CLUSTERED ([intClockID] ASC)
 );
 
@@ -61,7 +62,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'strClockNumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Summer Change Date',
+    @value = N'Winter to Summer Change Date',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -70,7 +71,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dtmSummerChangeDate'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Winter Change Date',
+    @value = N'Summer to Winter Change Date',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -293,3 +294,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMClock',
     @level2type = N'COLUMN',
     @level2name = N'strState'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Winter to Winter Change Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMClock',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmWinterToWinterChangeDate'
