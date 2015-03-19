@@ -2,7 +2,8 @@
 
 IF EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('tblICLot'))
 BEGIN
-	IF NOT EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICLot') AND name = 'intLocationId')
+	IF	NOT EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICLot') AND name = 'intLocationId')
+		AND EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICLot') AND name = 'intItemLocationId')
 	BEGIN
 		-- Manually add the intLocationId as INT and NULLABLE field
 		EXEC('
