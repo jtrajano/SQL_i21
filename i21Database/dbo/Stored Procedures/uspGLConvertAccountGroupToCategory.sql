@@ -23,6 +23,7 @@ CREATE TABLE #tmpTbl1(
 INSERT INTO #catGroup values('Cash Accounts', 'Cash Account',0)
 INSERT INTO #catGroup values('Payables', 'AP Account',1)
 INSERT INTO #catGroup values('Receivables', 'AR Account',2)
+INSERT INTO #catGroup values('Undeposited Funds','Undeposited Funds',3)
 
 WHILE EXISTS (SELECT * FROM #catGroup)
 BEGIN
