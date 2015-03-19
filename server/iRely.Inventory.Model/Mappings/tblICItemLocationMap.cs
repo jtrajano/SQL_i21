@@ -19,7 +19,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblSuggestedQty).HasColumnName("dblSuggestedQty").HasPrecision(18, 6);
             this.Property(t => t.intAllowNegativeInventory).HasColumnName("intAllowNegativeInventory");
             this.Property(t => t.intBottleDepositNo).HasColumnName("intBottleDepositNo");
-            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
             this.Property(t => t.intClassId).HasColumnName("intClassId");
             this.Property(t => t.intCostingMethod).HasColumnName("intCostingMethod");
             this.Property(t => t.intCountGroupId).HasColumnName("intCountGroupId");
@@ -77,9 +76,6 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.vyuAPVendor)
                 .WithMany(p => p.tblICItemLocations)
                 .HasForeignKey(p => p.intVendorId);
-            this.HasOptional(p => p.tblICCategory)
-                .WithMany(p => p.tblICItemLocations)
-                .HasForeignKey(p => p.intCategoryId);
             this.HasOptional(p => p.tblICCountGroup)
                 .WithMany(p => p.tblICItemLocations)
                 .HasForeignKey(p => p.intCountGroupId);

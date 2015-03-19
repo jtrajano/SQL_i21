@@ -1841,23 +1841,6 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "string",
-                                                                "flex": 1,
-                                                                "itemId": "colLocationCategory",
-                                                                "minWidth": 150,
-                                                                "text": "Category"
-                                                            },
-                                                            "name": "MyColumn6",
-                                                            "designerId": "77a74c5a-5352-4ef0-88df-5a7a1703ffb1"
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "dataIndex": "string",
                                                                 "flex": null,
                                                                 "itemId": "colLocationVendor",
                                                                 "minWidth": 150,

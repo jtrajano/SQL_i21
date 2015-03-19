@@ -139,9 +139,8 @@ Ext.define('Inventory.view.ItemViewController', {
             grdLocationStore: {
                 colLocationLocation: 'strLocationName',
                 colLocationPOSDescription: 'strDescription',
-                colLocationCategory: 'strCategory',
                 colLocationVendor: 'strVendorId',
-                colLocationCostingMethod: 'intCostingMethod'
+                colLocationCostingMethod: 'strCostingMethod'
             },
 
             //--------------//
@@ -1062,10 +1061,9 @@ Ext.define('Inventory.view.ItemViewController', {
             case 'pgeLocation':
                 var pgeLocation = tabPanel.down('#pgeLocation');
                 var grdLocationStore = pgeLocation.down('#grdLocationStore');
-
-                var win = tabPanel.up('window');
-                var controller = win.getController();
-                if (controller.isLoadedLocation !== true)
+                if (grdLocationStore.store.complete === true)
+                    grdLocationStore.getView().refresh();
+                else
                     grdLocationStore.store.load();
                 break;
 
@@ -1541,7 +1539,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var vm = win.getViewModel();
 
         if (!record){
-            iRely.Funtions.showErrorDialog('Please select a location to edit.');
+            iRely.Functions.showErrorDialog('Please select a location to edit.');
             return;
         }
 
@@ -1586,7 +1584,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var selection = grd.getSelectionModel().getSelection();
 
         if (selection.length <= 0){
-            iRely.Funtions.showErrorDialog('Please select a location to edit.');
+            iRely.Functions.showErrorDialog('Please select a location to edit.');
             return;
         }
 
@@ -2209,25 +2207,6 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onCategorySelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var win = combo.up('window');
-        var controller = win.getController();
-        var vm = win.viewModel;
-        var current = vm.data.current;
-
-        controller.isLoadedLocation = false;
-        Ext.Array.each(current.tblICItemLocations().data.items, function (location) {
-            if (location.get('intCategoryId') !== records[0].get('intCategoryId')) {
-                location.set('intCategoryId', records[0].get('intCategoryId'));
-                location.set('strCategory', records[0].get('strCategoryCode'));
-                controller.isLoadedLocation = true;
-            }
-        });
-    },
-
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2361,9 +2340,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#txtSpecialPricingUnitPrice": {
                 change: this.onSpecialPricingDiscountChange
-            },
-            "#cboCategory": {
-                select: this.onCategorySelect
             }
         });
     }

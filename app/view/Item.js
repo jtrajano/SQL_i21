@@ -929,14 +929,6 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colLocationCategory',
-                                                                        minWidth: 150,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Category',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colLocationVendor',
                                                                         minWidth: 150,
                                                                         dataIndex: 'string',

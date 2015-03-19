@@ -18,7 +18,6 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public int? intCostingMethod { get; set; }
         public int? intAllowNegativeInventory { get; set; }
-        public int? intCategoryId { get; set; }
         public int? intSubLocationId { get; set; }
         public int? intStorageLocationId { get; set; }
         public int? intIssueUOMId { get; set; }
@@ -101,6 +100,30 @@ namespace iRely.Inventory.Model
                     return null;
             }
         }
+        [NotMapped]
+        public string strCostingMethod
+        {
+            get
+            {
+                var costingMethod = "";
+                switch (intCostingMethod)
+                {
+                    case 1:
+                        costingMethod = "AVG";
+                        break;
+                    case 2:
+                        costingMethod = "FIFO";
+                        break;
+                    case 3:
+                        costingMethod = "LIFO";
+                        break;
+                    default:
+                        costingMethod = "";
+                        break;
+                }
+                return costingMethod;
+            }
+        }
         private string _type;
         [NotMapped]
         public string strLocationType
@@ -158,25 +181,6 @@ namespace iRely.Inventory.Model
                 _vendor = value;
             }
         }
-        private string _category;
-        [NotMapped]
-        public string strCategory
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_category))
-                    if (tblICCategory != null)
-                        return tblICCategory.strCategoryCode;
-                    else
-                        return null;
-                else
-                    return _category;
-            }
-            set
-            {
-                _category = value;
-            }
-        }
         private string _subLocationName;
         [NotMapped]
         public string strSubLocationName
@@ -200,7 +204,6 @@ namespace iRely.Inventory.Model
         public tblICItem tblICItem { get; set; }
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public vyuAPVendor vyuAPVendor { get; set; }
-        public tblICCategory tblICCategory { get; set; }
         public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public tblICCountGroup tblICCountGroup { get; set; }
 

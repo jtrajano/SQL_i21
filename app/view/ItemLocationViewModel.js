@@ -24,7 +24,6 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         'i21.store.CompanyLocationSubLocationBuffered',
         'AccountsPayable.store.VendorBuffered',
         'Inventory.store.BufferedItemUnitMeasure',
-        'Inventory.store.BufferedCategory',
         'Inventory.store.Product',
         'Inventory.store.Class',
         'Inventory.store.Family',
@@ -71,9 +70,6 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         },
         storageLocation: {
             type: 'icbufferedstoragelocation'
-        },
-        category: {
-            type: 'icbufferedcategory'
         },
         issueUOM: {
             type: 'icbuffereditemunitmeasure'

@@ -63,7 +63,6 @@ namespace iRely.Inventory.Model
 
         public tblICCatalog tblICCatalog { get; set; }
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
-        public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICStorageLocationCategory> tblICStorageLocationCategories { get; set; }
 
 
