@@ -47,6 +47,7 @@
 
 -- AR
 :r .\7_AR\1_1410_to_1420.sql
+:r .\7_AR\FixARTransactionsAccounts.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql

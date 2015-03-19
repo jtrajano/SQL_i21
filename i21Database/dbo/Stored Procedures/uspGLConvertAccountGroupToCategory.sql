@@ -23,6 +23,7 @@ CREATE TABLE #tmpTbl1(
 INSERT INTO #catGroup values('Cash Accounts', 'Cash Account',0)
 INSERT INTO #catGroup values('Payables', 'AP Account',1)
 INSERT INTO #catGroup values('Receivables', 'AR Account',2)
+INSERT INTO #catGroup values('Undeposited Funds','Undeposited Funds',3)
 
 WHILE EXISTS (SELECT * FROM #catGroup)
 BEGIN
@@ -76,7 +77,7 @@ DEALLOCATE cursortbl
 
 DELETE FROM #tmpTbl1 WHERE intAccountGroupId = @x
 
-UPDATE tblGLAccountSegment SET intAccountCategoryId = @intAccountCategoryId
+UPDATE s SET intAccountCategoryId = @intAccountCategoryId
 FROM tblGLAccountSegment s join #tmpTbl1 b
 on s.intAccountGroupId = b.intAccountGroupId
 

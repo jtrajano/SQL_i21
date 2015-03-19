@@ -35,7 +35,6 @@
     [intLEDDeviceId] INT NULL, 
     [ysnCustomerFirst] BIT NOT NULL, 
     [intAllowOtherLocationContracts] INT NOT NULL, 
-    [intTimerDelay] DECIMAL(2, 1) NOT NULL, 
     [intWeightDisplayDelay] DECIMAL(2, 1) NOT NULL, 
     [intTicketSelectionDelay] DECIMAL(2, 1) NOT NULL,
     [intFreightHaulerIDRequired] INT NOT NULL, 
@@ -55,12 +54,13 @@
     [ysnReferenceNumberRequired] BIT NOT NULL, 
     [ysnDefaultDriverOffTruck] BIT NOT NULL, 
     [ysnAutomateTakeOutTicket] BIT NOT NULL, 
-    [ysnDefaultDeductFreightFromFarmer] BIT NOT NULL, 
-    [intAllowOptionalReadings] INT NOT NULL, 
+    [ysnDefaultDeductFreightFromFarmer] BIT NOT NULL,  
     [intStoreScaleOperator] INT NOT NULL, 
     [intDefaultStorageTypeId] INT NULL, 
     [intGrainBankStorageTypeId] INT NULL, 
     [ysnRefreshLoadsOnOpen] BIT NOT NULL, 
+	[ysnAllowSplitWeights] BIT NOT NULL,
+	[ysnRequireContractForInTransitTicket] BIT NOT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 
     CONSTRAINT [FK_tblSCScaleSetup_tblSCTicketPool] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 
@@ -377,15 +377,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = 'intAllowOtherLocationContracts'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Timer Delay',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleSetup',
-    @level2type = N'COLUMN',
-    @level2name = N'intTimerDelay'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Weight Display Delay',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -566,15 +557,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'ysnDefaultDeductFreightFromFarmer'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Allow Optional Readings',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCScaleSetup',
-    @level2type = N'COLUMN',
-    @level2name = N'intAllowOptionalReadings'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Store Scale Operator',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -636,3 +618,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCScaleSetup',
     @level2type = N'COLUMN',
     @level2name = 'ysnAllowZeroWeights'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Allow Split Weights',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCScaleSetup',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnAllowSplitWeights'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Require Contract for In-Transit Tickets',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCScaleSetup',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnRequireContractForInTransitTicket'

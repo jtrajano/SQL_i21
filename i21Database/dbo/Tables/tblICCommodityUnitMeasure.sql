@@ -15,10 +15,9 @@ Type the overview for the table here.
 		[intCommodityUnitMeasureId] INT NOT NULL IDENTITY, 
 		[intCommodityId] INT NOT NULL, 
 		[intUnitMeasureId] INT NOT NULL, 
-		[dblWeightPerPack] NUMERIC(18, 6) NULL, 
-		[ysnStockUnit] BIT NULL, 
-		[ysnAllowPurchase] BIT NULL, 
-		[ysnAllowSale] BIT NULL, 
+		[dblUnitQty] NUMERIC(18, 6) NULL,
+		[ysnStockUnit] BIT NULL DEFAULT ((0)), 
+		[ysnDefault] BIT NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodityUnitMeasure] PRIMARY KEY ([intCommodityUnitMeasureId]), 
@@ -45,14 +44,7 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intUnitMeasureId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Weight per pack',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodityUnitMeasure',
-		@level2type = N'COLUMN',
-		@level2name = N'dblWeightPerPack'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Stock Unit',
@@ -63,23 +55,9 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'ysnStockUnit'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Allow Purchase on Stock Unit',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodityUnitMeasure',
-		@level2type = N'COLUMN',
-		@level2name = N'ysnAllowPurchase'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Allow Sale on Stock Unit',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodityUnitMeasure',
-		@level2type = N'COLUMN',
-		@level2name = N'ysnAllowSale'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Sort Field',
@@ -98,3 +76,30 @@ Type the overview for the table here.
 		@level1name = N'tblICCommodityUnitMeasure',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Commodity Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICCommodityUnitMeasure',
+    @level2type = N'COLUMN',
+    @level2name = N'intCommodityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Unit Quantity',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICCommodityUnitMeasure',
+    @level2type = N'COLUMN',
+    @level2name = N'dblUnitQty'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Default UOM',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICCommodityUnitMeasure',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnDefault'

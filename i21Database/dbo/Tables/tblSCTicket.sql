@@ -73,6 +73,11 @@
     [strFieldNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
 	[strDiscountComment] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 	[strCommodityCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
+	[intCommodityId] INT NULL,
+	[intDiscountId] INT NULL,
+	[intContractId] INT NULL,
+    [intDiscountLocationId] INT NULL,
+	[intItemId] INT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),
@@ -80,7 +85,11 @@
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intProcessingLocationId] FOREIGN KEY ([intProcessingLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblSCTicket_tblSCTicketPool_intTicketPoolId] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 
     CONSTRAINT [FK_tblSCTicket_tblSCScaleSetup_intScaleSetupId] FOREIGN KEY ([intScaleSetupId]) REFERENCES [tblSCScaleSetup]([intScaleSetupId]), 
-    CONSTRAINT [FK_tblSCTicket_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+    CONSTRAINT [FK_tblSCTicket_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblSCTicket_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
+    CONSTRAINT [FK_tblSCTicket_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
+	CONSTRAINT [FK_tblSCTicket_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
+	CONSTRAINT [FK_tblSCTicket_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
 
 GO
@@ -749,3 +758,48 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'strCommodityCode'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Commodity Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intCommodityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Discount Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intDiscountId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'ContractId',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intContractId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Discount Location Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intDiscountLocationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intItemId'

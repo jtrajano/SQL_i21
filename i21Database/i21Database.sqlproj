@@ -1201,6 +1201,10 @@
     <Build Include="dbo\Stored Procedures\uspARDeletePrePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreatePrePayment.sql" />
     <Build Include="dbo\Tables\tblFRRowDesignDrillDown.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGenerateDrillDownRows.sql" />
+    <Build Include="dbo\Tables\tblSMReminderList.sql" />
+    <Build Include="dbo\Views\vyuSMControlPermission.sql" />
+    <Build Include="dbo\Views\vyuSMScreenPermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1246,5 +1250,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountCategory.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\12_ReminderList.sql" />
   </ItemGroup>
 </Project>
