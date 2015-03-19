@@ -22,7 +22,7 @@ AS
 	FETCH NEXT FROM cursortrigger INTO @intAccountCategory,@strCode,@intSortPrimary
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		IF @strCode != ''
+		IF @intAccountCategory != 0
 		BEGIN
 			
 			DECLARE cursortbl CURSOR FOR SELECT strMask, intSort FROM tblGLAccountStructure WHERE strType = 'Divider' ORDER BY intSort
