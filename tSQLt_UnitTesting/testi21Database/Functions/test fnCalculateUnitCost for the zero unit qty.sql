@@ -4,7 +4,7 @@ BEGIN
 	-- Arrange
 	DECLARE @dblCost AS NUMERIC(18,6) = 100
 	DECLARE @dblUnitQty AS NUMERIC(18,6) = 0
-	DECLARE @result AS NUMERIC(18,6)
+	DECLARE @result AS NUMERIC(38,20)
 
 	-- Act
 	SELECT @result = dbo.fnCalculateUnitCost(@dblCost, @dblUnitQty);

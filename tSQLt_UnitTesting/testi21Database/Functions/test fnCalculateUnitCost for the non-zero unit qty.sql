@@ -4,8 +4,8 @@ BEGIN
 	-- Arrange
 	DECLARE @dblCost AS NUMERIC(18,6) = 3
 	DECLARE @dblUnitQty AS NUMERIC(18,6) = 1.6843
-	DECLARE @result AS NUMERIC(18,6)
-	DECLARE @expected AS NUMERIC(18,6) = (3/1.6843)
+	DECLARE @result AS NUMERIC(38,20)
+	DECLARE @expected AS NUMERIC(38,20) = (3/1.6843)
 
 	-- Act
 	SELECT @result = dbo.fnCalculateUnitCost(@dblCost, @dblUnitQty);
