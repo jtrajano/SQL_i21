@@ -136,6 +136,9 @@
     <None Include="dbo\Stored Procedures\uspARImportServiceCharge.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportShipVia.sql" />
     <None Include="dbo\Stored Procedures\uspSMSyncShipVia.sql" />
+    <None Include="dbo\Stored Procedures\uspNRCreateAREntry.sql" />
+    <None Include="dbo\Stored Procedures\uspNRGetDetailsForInvoice.sql" />
+    <None Include="dbo\Stored Procedures\uspNRGenerateEFTSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
