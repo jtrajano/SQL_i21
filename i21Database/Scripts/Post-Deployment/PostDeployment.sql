@@ -84,6 +84,7 @@ print 'BEGIN POST DEPLOYMENT'
 --:r .\AP\FixstrBillId.sql
 :r .\AP\DefaultData\POOrderStatus.sql
 :r .\AP\ClearPostResult.sql
+:r .\AP\DateCreatedValueDefault.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 

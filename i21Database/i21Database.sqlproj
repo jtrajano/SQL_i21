@@ -1228,6 +1228,7 @@
     <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\NR\1_NRStartingNumber.sql" />
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DateCreatedValueDefault.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
