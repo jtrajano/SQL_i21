@@ -7,7 +7,8 @@
 	[ysnDefaultContact] BIT NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblAPVendorToContact] PRIMARY KEY CLUSTERED ([intVendorToContactId] ASC),
     CONSTRAINT [FK_tblAPVendorToContact_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]) ON DELETE CASCADE,
-    CONSTRAINT [FK_tblAPVendorToContact_tblEntityContact] FOREIGN KEY ([intEntityContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId]),
+    --CONSTRAINT [FK_tblAPVendorToContact_tblEntityContact] FOREIGN KEY ([intEntityContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId]),
+    CONSTRAINT [FK_tblAPVendorToContact_tblEntity] FOREIGN KEY ([intEntityContactId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [FK_tblAPVendorToContact_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId])
 );
 

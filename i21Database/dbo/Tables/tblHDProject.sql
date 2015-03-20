@@ -32,12 +32,15 @@
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
 	CONSTRAINT [UNQ_ProjectName] UNIQUE ([strProjectName]),
     CONSTRAINT [FK_Project_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
-    CONSTRAINT [FK_Project_Contact] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId]),
+    --CONSTRAINT [FK_Project_Contact] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId]),
+    CONSTRAINT [FK_Project_Contact] FOREIGN KEY ([intCustomerContactId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [FK_Project_TicketType] FOREIGN KEY ([intTicketTypeId]) REFERENCES [dbo].[tblHDTicketType] ([intTicketTypeId]),
     CONSTRAINT [FK_Project_IntProjMgr] FOREIGN KEY ([intInternalProjectManager]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
 	CONSTRAINT [FK_Project_IntSalesPerson] FOREIGN KEY ([intInternalSalesPerson]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-	CONSTRAINT [FK_Project_CusProjMgr] FOREIGN KEY ([intCustomerProjectManager]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId]),
-	CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId])
+	--CONSTRAINT [FK_Project_CusProjMgr] FOREIGN KEY ([intCustomerProjectManager]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId]),
+	CONSTRAINT [FK_Project_CusProjMgr] FOREIGN KEY ([intCustomerProjectManager]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+	--CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].[tblEntityContact] ([intEntityContactId])
+	CONSTRAINT [FK_Project_CusLeadSponsor] FOREIGN KEY ([intCustomerLeadershipSponsor]) REFERENCES [dbo].[tblEntity] ([intEntityId])
 )
 
 GO

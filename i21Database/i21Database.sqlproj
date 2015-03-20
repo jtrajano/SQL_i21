@@ -460,7 +460,7 @@
     <Build Include="dbo\Tables\tblEntityNote.sql" />
     <Build Include="dbo\Tables\tblEntityLocation.sql" />
     <Build Include="dbo\Tables\tblEntityEFTInformation.sql" />
-    <Build Include="dbo\Tables\tblEntityContact.sql" />
+    <Build Include="dbo\Tables\drptblEntityContact.sql" />
     <Build Include="dbo\Tables\tblEntity.sql" />
     <Build Include="dbo\Tables\tblSMUpload.sql" />
     <Build Include="dbo\Tables\tblSMCustomFieldValue.sql" />

@@ -39,7 +39,8 @@ SELECT
 	C.strNotes,
 	C.strState,
 	C.strZipCode,
-	D2.strEmail,
+	--D2.strEmail,
+	D.strEmail,
 	D.strEmail2,
 	D.strFax,
 	--D.strLocationName,
@@ -56,8 +57,10 @@ FROM
 		ON A.intEntityId = B.[intEntityVendorId]
 	INNER JOIN dbo.tblEntityLocation C
 		ON B.intDefaultLocationId = C.intEntityLocationId
-	INNER JOIN (dbo.tblEntityContact D INNER JOIN dbo.tblEntity D2 ON D.[intEntityContactId] = D2.intEntityId)
-		ON B.intDefaultContactId = D.[intEntityContactId]
+	--INNER JOIN (dbo.tblEntityContact D INNER JOIN dbo.tblEntity D2 ON D.[intEntityContactId] = D2.intEntityId)
+	--	ON B.intDefaultContactId = D.[intEntityContactId]
+	INNER JOIN dbo.tblEntity D
+		ON B.intDefaultContactId = D.[intEntityId]
 	LEFT JOIN dbo.tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN dbo.tblGLAccount F 

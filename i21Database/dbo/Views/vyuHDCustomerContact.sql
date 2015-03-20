@@ -1,12 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuHDCustomerContact]
 	AS 
 	select
-		intContactId = ec.[intEntityContactId]
+		intContactId = ec.[intEntityId]
 		,intCustomerId = c.[intEntityCustomerId]
 		,c.strCustomerNumber
 		,strCompanyName = e.strName
-		,strContactName = eec.strName
-		,eec.strEmail
+		,strContactName = ec.strName
+		,ec.strEmail
 		,ec.strTitle
 		,ec.strPhone
 		,ec.strMobile
@@ -17,13 +17,15 @@
 		,intVersionId = (select top 1 intVersionId from tblARCustomerProductVersion where intCustomerId = c.[intEntityCustomerId])
 		,ysnActive = c.ysnActive
 		,ysnActiveContact = ec.ysnActive
-		,eec.imgPhoto
+		,ec.imgPhoto
 	  from
-		tblEntityContact ec
-		inner join tblARCustomerToContact etc on etc.[intEntityContactId] = ec.[intEntityContactId]
+		--tblEntityContact ec
+		tblEntity ec
+		inner join tblARCustomerToContact etc on etc.[intEntityContactId] = ec.[intEntityId]
+		--inner join tblARCustomerToContact etc on etc.[intEntityContactId] = ec.[intEntityContactId]
 		inner join tblARCustomer c on c.[intEntityCustomerId] = etc.[intEntityCustomerId]
 		inner join tblEntity e on e.intEntityId = c.[intEntityCustomerId]
-		inner join tblEntity eec on eec.intEntityId = ec.[intEntityContactId]
+		--inner join tblEntity eec on eec.intEntityId = ec.[intEntityContactId]
 		left outer join tblEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
 	--select
 	--	intContactId = ec.intEntityId

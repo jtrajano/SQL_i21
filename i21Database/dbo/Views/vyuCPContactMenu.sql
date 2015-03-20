@@ -2,14 +2,18 @@
 AS  
 SELECT  
 intUserSecurityMenuId = Permission.intCustomerPortalPermissionId,  
-intUserSecurityId = Contact.[intEntityContactId],  
+--intUserSecurityId = Contact.[intEntityContactId],  
+intUserSecurityId = Contact.[intEntityId],  
 intMenuId = Menu.intCustomerPortalMenuId,  
 intParentMenuId = (CASE WHEN Menu.intCustomerPortalParentMenuId = 0 THEN 0 ELSE (
 					SELECT intCustomerPortalPermissionId
 					FROM tblARCustomerPortalPermission
 					LEFT JOIN tblARCustomerToContact  ON tblARCustomerPortalPermission.intARCustomerToContactId = tblARCustomerToContact.intARCustomerToContactId
-					LEFT JOIN tblEntityContact  ON tblARCustomerToContact.[intEntityContactId] = tblEntityContact.[intEntityContactId]
-					WHERE tblEntityContact.[intEntityContactId] = Contact.[intEntityContactId]
+					--LEFT JOIN tblEntityContact  ON tblARCustomerToContact.[intEntityContactId] = tblEntityContact.[intEntityContactId]
+					LEFT JOIN tblEntity  ON tblARCustomerToContact.[intEntityContactId] = tblEntity.[intEntityId]
+					--WHERE tblEntityContact.[intEntityContactId] = Contact.[intEntityContactId]
+					WHERE tblEntity.[intEntityId] = Contact.[intEntityId]
+
 					
 					AND	tblARCustomerPortalPermission.intCustomerPortalMenuId = Menu.intCustomerPortalParentMenuId
 					) END),
@@ -29,4 +33,5 @@ intSort = Menu.intCustomerPortalMenuId
 FROM tblARCustomerPortalMenu Menu  
 LEFT JOIN tblARCustomerPortalPermission Permission ON Menu.intCustomerPortalMenuId = Permission.intCustomerPortalMenuId
 LEFT JOIN tblARCustomerToContact CustomerToContact ON Permission.intARCustomerToContactId = CustomerToContact.intARCustomerToContactId
-LEFT JOIN tblEntityContact Contact ON CustomerToContact.[intEntityContactId] = Contact.[intEntityContactId]
+--LEFT JOIN tblEntityContact Contact ON CustomerToContact.[intEntityContactId] = Contact.[intEntityContactId]
+LEFT JOIN tblEntity Contact ON CustomerToContact.[intEntityContactId] = Contact.[intEntityId]
