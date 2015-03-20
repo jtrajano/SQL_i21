@@ -1442,17 +1442,19 @@ Ext.define('Inventory.view.ItemViewController', {
             });
             if (exists) {
                 var currUOM = exists.get('tblICUnitMeasure');
-                var conversions = currUOM.vyuICGetUOMConversions;
-                if (!conversions) {
-                    conversions = currUOM.data.vyuICGetUOMConversions;
-                }
-                var selectedUOM = Ext.Array.findBy(conversions, function (row) {
-                    if (row.intUnitMeasureId === records[0].get('intUnitMeasureId')) {
-                        return true;
+                if (currUOM) {
+                    var conversions = currUOM.vyuICGetUOMConversions;
+                    if (!conversions) {
+                        conversions = currUOM.data.vyuICGetUOMConversions;
                     }
-                });
-                if (selectedUOM) {
-                    current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                    var selectedUOM = Ext.Array.findBy(conversions, function (row) {
+                        if (row.intUnitMeasureId === records[0].get('intUnitMeasureId')) {
+                            return true;
+                        }
+                    });
+                    if (selectedUOM) {
+                        current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                    }
                 }
             }
         }

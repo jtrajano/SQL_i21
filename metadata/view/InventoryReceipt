@@ -1452,7 +1452,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter14",
+                                                            "name": "filter1",
                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -2658,6 +2658,7 @@
                                                         "dataType": "numeric",
                                                         "format": "0,000.##",
                                                         "itemId": "colLotNetWeight",
+                                                        "modelValidation": true,
                                                         "text": "Net",
                                                         "width": 65
                                                     },
