@@ -201,7 +201,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
-                        store: '{weightUOM}'
+                        store: '{weightUOM}',
+                        defaultFilters: [{
+                            column: 'strUnitType',
+                            value: 'Weight'
+                        }]
                     }
                 },
                 colLotGrossWeight: 'dblGrossWeight',
@@ -552,6 +556,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     btnUndo.enable();
                 }
             }
+
+            var selModel = grdInventoryReceipt.getSelectionModel();
+            selModel.clearSelections();
+            win.controller.onItemSelectionChange(selModel, selModel.getSelection());
         }
     },
 
@@ -605,6 +613,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
 
+            var intWeightUOM = null;
+            var strWeightUOM = '';
+            if (records[0].get('strReceiveUOMType') === 'Weight'){
+                intWeightUOM = records[0].get('intReceiveUOMId');
+                strWeightUOM = records[0].get('strReceiveUOM');
+            }
+            else if (records[0].get('strStockUOMType') === 'Weight'){
+                intWeightUOM = records[0].get('intStockUOMId');
+                strWeightUOM = records[0].get('strStockUOM');
+            }
+
             switch (records[0].get('strLotTracking')){
                 case 'Yes - Serial Number':
                     grdLotTracking.setHidden(false);
@@ -613,12 +632,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         strLotId: '',
                         strContainerNo: '',
                         dblQuantity: '',
-                        intUnits: '',
-                        intUnitUOMId: '',
                         intUnitPallet: '',
                         dblGrossWeight: '',
                         dblTareWeight: '',
-                        intWeightUOMId: '',
+                        intWeightUOMId: intWeightUOM,
+                        strWeightUOM: strWeightUOM,
                         dblStatedGrossPerUnit: '',
                         dblStatedTarePerUnit: ''
                     });

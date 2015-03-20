@@ -1241,6 +1241,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'numbercolumn',
                                                                 dataType: 'numeric',
                                                                 itemId: 'colLotNetWeight',
+                                                                modelValidation: true,
                                                                 width: 65,
                                                                 align: 'right',
                                                                 dataIndex: 'string',

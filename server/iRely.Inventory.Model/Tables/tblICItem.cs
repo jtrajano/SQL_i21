@@ -223,8 +223,13 @@ namespace iRely.Inventory.Model
         public string strLocationType { get; set; }
         public int? intVendorId { get; set; }
         public string strVendorId { get; set; }
+        public int? intStockUOMId { get; set; }
+        public string strStockUOM { get; set; }
+        public string strStockUOMType { get; set; }
         public int? intReceiveUOMId { get; set; }
         public int? intIssueUOMId { get; set; }
+        public string strReceiveUOMType { get; set; }
+        public string strIssueUOMType { get; set; }
         public string strReceiveUOM { get; set; }
         public decimal? dblReceiveSalePrice { get; set; }
         public decimal? dblReceiveMSRPPrice { get; set; }

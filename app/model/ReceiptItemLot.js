@@ -55,6 +55,22 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'strCondition', type: 'string' },
         { name: 'dtmCertified', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'dtmExpiryDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
-        { name: 'intSort', type: 'int', allowNull: true }
-    ]
+        { name: 'intSort', type: 'int', allowNull: true },
+
+        { name: 'dblNetWeight', type: 'float' }
+    ],
+
+    validate: function(options){
+        var errors = this.callParent(arguments);
+        if (this.get('intWeightUOMId')) {
+            var netWeight = this.get('dblGrossWeight') - this.get('dblTareWeight');
+            if (netWeight <= 0) {
+                errors.add({
+                    field: 'dblGrossWeight',
+                    message: 'Gross is used to calculate Net Weight. Net Weight could not be zero or lower.'
+                })
+            }
+        }
+        return errors;
+    }
 });
