@@ -109,6 +109,9 @@ print 'BEGIN POST DEPLOYMENT'
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 
+-- Payroll
+:r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
+
 -- Version Update
 :r .\VersionUpdate.sql
 

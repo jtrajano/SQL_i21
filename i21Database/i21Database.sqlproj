@@ -144,6 +144,8 @@
     <Folder Include="Scripts\Post-Deployment\MF" />
     <Folder Include="dbo\Index" />
     <Folder Include="dbo\Triggers" />
+    <Folder Include="Scripts\Post-Deployment\PR" />
+    <Folder Include="Scripts\Post-Deployment\PR\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1231,6 +1233,7 @@
     <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\NR\1_NRStartingNumber.sql" />
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DefaultData\1_TaxStatesAndLocalities.sql" />
     <None Include="Scripts\Post-Deployment\AP\DateCreatedValueDefault.sql" />
   </ItemGroup>
   <ItemGroup>
