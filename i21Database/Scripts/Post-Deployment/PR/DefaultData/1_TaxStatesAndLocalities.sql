@@ -6,8 +6,8 @@
 -- Created by: Armando Arenas Jr.
 -- --------------------------------------------------
 
-TRUNCATE TABLE tblPRTypeTaxState
-TRUNCATE TABLE tblPRTypeTaxLocal
+--TRUNCATE TABLE tblPRTypeTaxState
+--TRUNCATE TABLE tblPRTypeTaxLocal
 
 GO
 
