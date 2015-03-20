@@ -1143,6 +1143,7 @@
     <Build Include="dbo\Stored Procedures\uspMFReleaseBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveBlendSheet.sql" />
     <None Include="Scripts\Post-Deployment\IC\6_FixBlankLotNumber.sql" />
+    <Build Include="dbo\Tables\tblICInventoryGLAccountUsedOnPostLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
