@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[tblCTContractText](
 	[intContractPriceType] [int] NOT NULL,
 	[strTextCode] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTextDescription] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strText] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
+	[strText] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnActive] [bit] NOT NULL CONSTRAINT [DF_tblCTContractText_ysnActive]  DEFAULT ((1)),
  CONSTRAINT [PK_tblCTContractText_intContractTextId] PRIMARY KEY CLUSTERED 
 (
