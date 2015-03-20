@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblPRTypeTaxLocal](
-	[intTypeTaxLocalId] [int] NOT NULL,
+	[intTypeTaxLocalId] [int] IdENTITY(1,1) NOT NULL,
 	[intTypeTaxStateId] INT NOT NULL, 
 	[strLocalName] [nvarchar](20) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLocalType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
