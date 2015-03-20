@@ -20,7 +20,7 @@ Type the overview for the table here.
 		[intWriteOffSoldId] INT NULL DEFAULT ((0)), 
 		[intRevalueSoldId] INT NULL, 
 		[intAutoNegativeId] INT NULL, 
-		[strBatchId] NVARCHAR(20) NULL, 
+		[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmDateCreated] DATETIME NULL DEFAULT (GETDATE()), 
 		CONSTRAINT [PK_tblICInventoryGLAccountUsedOnPostLog] PRIMARY KEY ([intId])
 	)
