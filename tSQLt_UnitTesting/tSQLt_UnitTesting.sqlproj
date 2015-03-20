@@ -904,6 +904,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries on posting 6 decimal places to the GLDetail debits and credits.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnCalculateUnitCost for returning 20 decimal values.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
