@@ -84,6 +84,7 @@ print 'BEGIN POST DEPLOYMENT'
 --:r .\AP\FixstrBillId.sql
 :r .\AP\DefaultData\POOrderStatus.sql
 :r .\AP\ClearPostResult.sql
+:r .\AP\DateCreatedValueDefault.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 
@@ -107,6 +108,9 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
+
+-- Payroll
+:r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
 
 -- Version Update
 :r .\VersionUpdate.sql

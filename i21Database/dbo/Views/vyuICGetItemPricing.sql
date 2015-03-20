@@ -17,6 +17,8 @@ SELECT
 	UOM.strUnitMeasure,
 	UOM.strUnitType,
 	ItemUOM.ysnStockUnit,
+	ItemUOM.ysnAllowPurchase,
+	ItemUOM.ysnAllowSale,
 	ItemUOM.dblUnitQty,
 	dblAmountPercent = ISNULL(ItemPricing.dblAmountPercent, 0),
 	dblSalePrice = ISNULL(ItemPricing.dblSalePrice * ItemUOM.dblUnitQty, 0),

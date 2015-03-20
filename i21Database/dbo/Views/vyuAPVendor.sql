@@ -31,7 +31,7 @@ SELECT
 	B.dblCreditLimit,
 	C.intShipViaId,
 	C.intTaxCodeId,
-	ISNULL(C.intTermsId, 0) intTermsId,
+	C.intTermsId,
 	--C.strContactName,
 	C.strAddress,
 	C.strCity,

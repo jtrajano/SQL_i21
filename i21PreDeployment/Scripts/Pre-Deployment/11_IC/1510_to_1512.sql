@@ -21,3 +21,26 @@ BEGIN
 END
 
 PRINT N'END INVENTORY PATH from 15.10.x.x to 15.12.x.x'
+
+PRINT N'BEGIN Update of all Allow Purchase/Sale Fields set to True to Start 15.2'
+
+IF NOT EXISTS (SELECT * FROM tblSMBuildNumber WHERE strVersionNo = '15.2')
+BEGIN
+	IF EXISTS(SELECT * FROM sys.columns WHERE (name = 'ysnAllowPurchase' OR name = 'ysnAllowSale') AND object_id = OBJECT_ID('tblICItemUOM'))
+	BEGIN
+		EXEC ('UPDATE tblICItemUOM
+				SET ysnAllowPurchase = 1,
+				ysnAllowSale = 1')
+	END
+	
+	IF EXISTS(SELECT * FROM sys.columns WHERE (name = 'ysnAllowPurchase' OR name = 'ysnAllowSale') AND object_id = OBJECT_ID('tblICCategoryUOM'))
+	BEGIN
+		EXEC ('UPDATE tblICCategoryUOM
+				SET ysnAllowPurchase = 1,
+				ysnAllowSale = 1')
+	END
+	
+END
+
+PRINT N'END Update of all Allow Purchase/Sale Fields set to True to Start 15.2'
+

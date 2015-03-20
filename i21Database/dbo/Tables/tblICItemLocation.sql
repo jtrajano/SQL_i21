@@ -19,7 +19,6 @@ Type the overview for the table here.
 		[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intCostingMethod] INT NULL, 
 		[intAllowNegativeInventory] INT DEFAULT 3,
-		[intCategoryId] INT NULL, 
 		[intSubLocationId] INT NULL, 
 		[intStorageLocationId] INT NULL, 
 		[intIssueUOMId] INT NULL, 
@@ -78,7 +77,6 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Receive] FOREIGN KEY ([intReceiveUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [PK_tblICItemLocation] PRIMARY KEY ([intItemLocationId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
-		CONSTRAINT [FK_tblICItemLocation_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
 		CONSTRAINT [FK_tblICItemLocation_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
 		CONSTRAINT [FK_tblICItemLocation_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
@@ -89,10 +87,6 @@ Type the overview for the table here.
 
 	CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intItemId_intLocationId]
 		ON [dbo].[tblICItemLocation]([intItemId] ASC, [intLocationId] ASC);
-	GO
-
-	CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intCategoryId]
-		ON [dbo].[tblICItemLocation]([intCategoryId] ASC);
 	GO
 
 	EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -149,14 +143,7 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intCostingMethod'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Category Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemLocation',
-		@level2type = N'COLUMN',
-		@level2name = N'intCategoryId'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Sub Location Id',
