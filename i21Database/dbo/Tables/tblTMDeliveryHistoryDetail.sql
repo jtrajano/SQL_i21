@@ -11,3 +11,76 @@
     CONSTRAINT [FK_tblTMDeliveryHistoryDetail_tblTMDeliveryHistory] FOREIGN KEY ([intDeliveryHistoryID]) REFERENCES [dbo].[tblTMDeliveryHistory] ([intDeliveryHistoryID])
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistoryDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'intDeliveryHistoryDetailID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Invoice No.',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistoryDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'strInvoiceNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Quantity Delivered',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistoryDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'dblQuantityDelivered'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item No.',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistoryDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'strItemNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Delivery History Master Record ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistoryDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'intDeliveryHistoryID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistoryDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Percent After Delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistoryDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'dblPercentAfterDelivery'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Extended Amount',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistoryDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'dblExtendedAmount'
