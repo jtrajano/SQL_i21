@@ -189,6 +189,23 @@ BEGIN
 		RETURN;
 	END 	
 
+	-- If weight UOM is specified, make sure weight is not zero. 
+	IF ISNULL(@intWeightUOMId, 0) <> 0 AND ISNULL(@dblWeight, 0) = 0
+	BEGIN 
+		SELECT	@strItemNo = strItemNo
+		FROM	dbo.tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+
+		IF @intLotTypeId = @LotType_Serial
+		BEGIN 
+			SET @strLotNumber = '(To be generated)'
+		END 
+
+		-- '{Item} with lot number {Lot Number} needs to have a weight.'
+		RAISERROR(51048, 11, 1, @strItemNo, @strLotNumber)  
+		RETURN; 
+	END 
+
 	-- Upsert (update or insert) the record to the lot master table. 
 	BEGIN  
 		SET @intInsertedLotId = NULL 

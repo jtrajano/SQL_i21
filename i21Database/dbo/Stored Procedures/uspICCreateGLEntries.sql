@@ -96,6 +96,30 @@ BEGIN
 END 
 ;
 
+-- Log the g/l account used in this batch. 
+INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
+		intItemId
+		,intItemLocationId
+		,intInventoryId
+		,intContraInventoryId
+		,intWriteOffSoldId
+		,intRevalueSoldId
+		,intAutoNegativeId
+		,strBatchId
+)
+SELECT 
+		intItemId
+		,intItemLocationId
+		,intInventoryId
+		,intContraInventoryId
+		,intWriteOffSoldId
+		,intRevalueSoldId
+		,intAutoNegativeId
+		,@strBatchId
+FROM	@GLAccounts
+;
+
+
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
 	dtmDate

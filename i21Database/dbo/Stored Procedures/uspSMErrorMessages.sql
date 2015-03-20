@@ -192,4 +192,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51047) EXEC sp_dropmessa
 SET @strmessage = 'The Storage Location for %s cannot be changed from %s to %s because a stock from it has been used from a different transaction.'
 EXEC sp_addmessage 51047,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51048) EXEC sp_dropmessage 51048, 'us_english'	
+SET @strmessage = '%s with lot number %s needs to have a weight.'
+EXEC sp_addmessage 51048,11,@strmessage,'us_english','False'
 
