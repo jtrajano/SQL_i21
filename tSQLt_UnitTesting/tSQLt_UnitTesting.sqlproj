@@ -905,6 +905,9 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Functions\test fnCalculateUnitCost for returning 20 decimal values.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt to raise error 51038.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

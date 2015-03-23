@@ -847,4 +847,114 @@ BEGIN
 				,intConcurrencyId			= 1
 	
 	END
+
+	--------------------------------------------------------
+	-- Add the INVRCPT-XXXXX7
+	-- It has MANUAL lot items on it. 
+	-- Qty received does not match with the Lot Qty
+	--------------------------------------------------------
+	BEGIN
+		SET @strReceiptNumber = 'INVRCPT-XXXXX7'
+		SET @dtmDate = '01/15/2014'
+
+		-- Insert the Inventory Receipt header 
+		INSERT INTO dbo.tblICInventoryReceipt (
+				strReceiptNumber
+				,dtmReceiptDate
+				,strReceiptType
+				,intLocationId
+				,intShipViaId
+				,intShipFromId
+				,intReceiverId
+				,intCurrencyId
+				,strAllocateFreight
+				,intConcurrencyId
+				,intEntityId
+				,intCreatedUserId
+				,ysnPosted
+		)
+		SELECT 	strReceiptNumber		= @strReceiptNumber
+				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
+				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,intLocationId			= @Default_Location
+				,intShipViaId			= @Default_Location
+				,intShipFromId			= @Default_Location
+				,intReceiverId			= @Default_Location
+				,intCurrencyId			= @BaseCurrencyId
+				,strAllocateFreight		= 'No' -- Default is No
+				,intConcurrencyId		= 1
+				,intEntityId			= @intEntityId
+				,intCreatedUserId		= @intUserId
+				,ysnPosted				= 0
+		SET @intReceiptNumber = SCOPE_IDENTITY();
+
+		INSERT INTO dbo.tblICInventoryReceiptItem (
+			intInventoryReceiptId
+			,intLineNo
+			,intSourceId
+			,intItemId
+			,dblOrderQty
+			,dblOpenReceive
+			,dblReceived
+			,intUnitMeasureId
+			,intNoPackages
+			,intPackageTypeId
+			,dblExpPackageWeight
+			,dblUnitCost
+			,dblLineTotal
+			,intSort
+			,intConcurrencyId
+		)
+		-- intInventoryReceiptItemId: 19
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 1
+				,intSourceId			= ''
+				,intItemId				= @ManualLotGrains
+				,dblOrderQty			= 10
+				,dblOpenReceive			= 10
+				,dblReceived			= 0
+				,intUnitMeasureId		= @ManualLotGrains_BushelUOMId
+				,intNoPackages			= 0 -- None found from Purchase Order
+				,intPackageTypeId		= NULL -- None found from Purchase Order
+				,dblExpPackageWeight	= 0 -- None found from Purchase Order
+				,dblUnitCost			= 6.00
+				,dblLineTotal			= 60.00
+				,intSort				= 1
+				,intConcurrencyId		= 1
+		-- intInventoryReceiptItemId: 20
+		UNION ALL 
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 2
+				,intSourceId			= ''
+				,intItemId				= @ManualLotGrains
+				,dblOrderQty			= 20
+				,dblOpenReceive			= 20
+				,dblReceived			= 0
+				,intUnitMeasureId		= @ManualLotGrains_PoundUOMId
+				,intNoPackages			= 0 -- None found from Purchase Order
+				,intPackageTypeId		= NULL -- None found from Purchase Order
+				,dblExpPackageWeight	= 0 -- None found from Purchase Order
+				,dblUnitCost			= 7.00
+				,dblLineTotal			= 70.00
+				,intSort				= 2
+				,intConcurrencyId		= 1
+
+		INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				intInventoryReceiptItemId
+				,strLotNumber
+				,dblQuantity
+				,dblCost
+				,intSort
+				,intConcurrencyId
+		)
+		-- Manual Lot Grains
+		-- intInventoryReceiptItemLotId: 1
+		SELECT	intInventoryReceiptItemId	= 19
+				,strLotNumber				= 'MANUAL-LOT-00001'
+				,dblQuantity				= 7
+				,dblCost					= 6.10
+				,intSort					= 1
+				,intConcurrencyId			= 1
+	
+	END
 END 
