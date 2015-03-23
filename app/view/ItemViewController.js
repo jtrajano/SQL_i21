@@ -1489,28 +1489,30 @@ Ext.define('Inventory.view.ItemViewController', {
             if (checked === true){
                 var uoms = grid.store.data.items;
                 var currUOM = current.get('tblICUnitMeasure');
-                var conversions = currUOM.vyuICGetUOMConversions;
-                if (!conversions) {
-                    conversions = currUOM.data.vyuICGetUOMConversions;
-                }
-                uoms.forEach(function(uom){
-                    if (uom === current){
-                        current.set('dblUnitQty', 1);
+                if (currUOM) {
+                    var conversions = currUOM.vyuICGetUOMConversions;
+                    if (!conversions) {
+                        conversions = currUOM.data.vyuICGetUOMConversions;
                     }
-                    if (uom !== current){
-                        uom.set('ysnStockUnit', false);
-                    }
-                    if (conversions){
-                        var exists = Ext.Array.findBy(conversions, function(row) {
-                            if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
-                                return true;
-                            }
-                        });
-                        if (exists) {
-                            uom.set('dblUnitQty', exists.dblConversionToStock);
+                    uoms.forEach(function(uom){
+                        if (uom === current){
+                            current.set('dblUnitQty', 1);
                         }
-                    }
-                });
+                        if (uom !== current){
+                            uom.set('ysnStockUnit', false);
+                        }
+                        if (conversions){
+                            var exists = Ext.Array.findBy(conversions, function(row) {
+                                if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
+                                    return true;
+                                }
+                            });
+                            if (exists) {
+                                uom.set('dblUnitQty', exists.dblConversionToStock);
+                            }
+                        }
+                    });
+                }
             }
             else {
                 if (current){
@@ -2209,6 +2211,51 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onItemCategorySelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current){
+            var uoms = records[0].tblICCategoryUOMs().data.items;
+            if (uoms) {
+                if (uoms.length > 0) {
+                    current.tblICItemUOMs().removeAll();
+                    uoms.forEach(function(uom){
+                        var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
+                            intItemId : current.get('intItemId'),
+                            strUnitMeasure: uom.get('strUnitMeasure'),
+                            intUnitMeasureId : uom.get('intUnitMeasureId'),
+                            dblUnitQty : uom.get('dblUnitQty'),
+                            dblWeight : uom.get('dblWeight'),
+                            strWeightUOM: uom.get('strWeightUOM'),
+                            intWeightUOMId : uom.get('intWeightUOMId'),
+                            strUpcCode : uom.get('strUpcCode'),
+                            ysnStockUnit : uom.get('ysnStockUnit'),
+                            ysnAllowPurchase : uom.get('ysnAllowPurchase'),
+                            ysnAllowSale : uom.get('ysnAllowSale'),
+                            dblLength : uom.get('dblLength'),
+                            dblWidth : uom.get('dblWidth'),
+                            dblHeight : uom.get('dblHeight'),
+                            strDimensionUOM: uom.get('strDimensionUOM'),
+                            intDimensionUOMId : uom.get('intDimensionUOMId'),
+                            dblVolume : uom.get('dblVolume'),
+                            strVolumeUOM: uom.get('strVolumeUOM'),
+                            intVolumeUOMId : uom.get('intVolumeUOMId'),
+                            dblMaxQty : uom.get('dblMaxQty'),
+                            intSort : uom.get('intSort')
+                        });
+                        current.tblICItemUOMs().add(newItemUOM);
+                    });
+                    var grid = win.down('#grdUnitOfMeasure');
+                    grid.gridMgr.newRow.add();
+                }
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2342,6 +2389,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#txtSpecialPricingUnitPrice": {
                 change: this.onSpecialPricingDiscountChange
+            },
+            "#cboCategory": {
+                select: this.onItemCategorySelect
             }
         });
     }
