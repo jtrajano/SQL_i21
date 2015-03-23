@@ -147,3 +147,7 @@ EXEC sp_addmessage 51035,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51036) EXEC sp_dropmessage 51036, 'us_english'	
 SET @strmessage = 'Purchase Order already closed.'
 EXEC sp_addmessage 51036,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51037) EXEC sp_dropmessage 51037, 'us_english'	
+SET @strmessage = 'Cannot process Purchase Order with 0 amount.'
+EXEC sp_addmessage 51037,11,@strmessage,'us_english','False'

@@ -101,13 +101,19 @@ IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCate
 
 
 
-IF NOT EXISTS(SELECT TOP 1 1 from tblGLAccountCategoryGroup WHERE strAccountCategoryGroupCode = 'INV')
-BEGIN
-	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
-	SELECT intAccountCategoryId ,'Inventories','INV' from tblGLAccountCategory where strAccountCategory in
+;WITH cte(intAccountCategoryId)
+AS
+(
+	SELECT intAccountCategoryId from tblGLAccountCategory where strAccountCategory in
 	('Begin Inventory','Broker Expense','Contract Equity','Contract Purchase Gain/Loss','Contract Sales Gain/Loss','Cost of Goods','Currency Equity',
 	'Currency Purchase Gain/Loss','Currency Sales Gain/Loss','Discount Receivable','DP Income','DP Liability','End Inventory','Fee Expense','Fee Income',
 	'Freight Expenses','Interest Expense','Interest Income','Inventory','Options Expense','Options Income','Purchase Account','Rail Freight','Sales Account',
-	'Storage Expense','Storage Income','Storage Receivable','Variance Account')
-END
+	'Storage Expense','Storage Income','Storage Receivable','Variance Account','Write-Off Sold','Auto-Negative') 	
+
+)
+	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT a.intAccountCategoryId,'Inventories','INV' from cte a
+			LEFT JOIN tblGLAccountCategoryGroup b on a.intAccountCategoryId = b.intAccountCategoryId
+			WHERE b.intAccountCategoryId IS NULL
+
 

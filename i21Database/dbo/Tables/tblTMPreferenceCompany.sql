@@ -34,3 +34,192 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMPreferenceCompany',
     @level2type = N'COLUMN',
     @level2name = N'dblDefaultBurnRate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Obsolete/Unused',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strSummitIntegration'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'intPreferenceCompanyID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Ceiling Burn Rate',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'intCeilingBurnRate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Floor Burn Rate',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'intFloorBurnRate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Allow Class Fill Option',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnAllowClassFill'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Default Reserve Percent',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'dblDefaultReservePercent'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'SMTP Server',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strSMTPServer'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'SMTP Username',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strSMTPUsername'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'SMTP Password',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strSMTPPassword'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'From Email',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strFromMail'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'From Email Name',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strFromName'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Mail Server Port',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'intMailServerPort'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'SMTP Enable Authentication Option',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnableAuthentication'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'SMTP Eanable SSL',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnableSSL'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Lease Product Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strLeaseProductNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Enable ETracker Option',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnableETracker'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'ETracker URL ',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strETrackerURL'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Use Delivery Term On Consumption Site Option',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnUseDeliveryTermOnCS'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Enable Lease Billing Above Minimum Use',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnableLeaseBillingAboveMinUse'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicates if previous import was done for the Origin Degree Day data',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnOriginDataImported'

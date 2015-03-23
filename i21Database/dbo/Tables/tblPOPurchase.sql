@@ -2,7 +2,7 @@
 (
 	[intPurchaseId] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY, 
     [intVendorId] INT NOT NULL, 
-    [intAccountId] INT NOT NULL, 
+    [intAccountId] INT NULL, 
     [intFreightTermId] INT NULL, 
     [intCurrencyId] INT NOT NULL, 
     [intOrderById] INT NOT NULL, 
@@ -20,7 +20,7 @@
 	[dblShipping] DECIMAL NOT NULL DEFAULT 0,
 	[dblTax] DECIMAL NOT NULL DEFAULT 0,
 	[dblExchangeRate] DECIMAL NOT NULL DEFAULT 0,
-	[intOrderStatusId] INT NOT NULL, 
+	[intOrderStatusId] INT NOT NULL CONSTRAINT CK_PO_OrderStatus CHECK (dbo.[fnAPCheckPOOrderStatus](intOrderStatusId, intPurchaseId) = 1), 
     [strPurchaseOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strVendorOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipToAttention] NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 

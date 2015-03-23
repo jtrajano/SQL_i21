@@ -19,6 +19,7 @@
 	[intLastModifiedUserId] [int] NULL,
 	[intLastModifiedUserEntityId] [int] NULL,
 	[dtmLastModified] [datetime] NULL,
+	[strJiraKey] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
@@ -418,3 +419,12 @@ CREATE TRIGGER [dbo].[trgHDTicketHistory]
 		end catch
 
 	commit transaction;
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'JIRA Keys',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strJiraKey'

@@ -7,3 +7,40 @@
     CONSTRAINT [UQ_tblTMDeviceType_strDeviceType] UNIQUE NONCLUSTERED ([strDeviceType] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeviceType',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeviceType',
+    @level2type = N'COLUMN',
+    @level2name = N'intDeviceTypeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Device Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeviceType',
+    @level2type = N'COLUMN',
+    @level2name = N'strDeviceType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicates if default data',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeviceType',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnDefault'

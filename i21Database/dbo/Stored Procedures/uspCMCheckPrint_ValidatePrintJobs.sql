@@ -26,6 +26,10 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
 		,@AP_PAYMENT AS INT = 16
+		,@BANK_STMT_IMPORT AS INT = 17
+		,@AR_PAYMENT AS INT = 18
+		,@VOID_CHECK AS INT = 19
+		,@AP_ECHECK AS INT = 20
 
 -- Check if there are any print jobs for the specified bank account. 
 SELECT	TOP 1 
