@@ -469,8 +469,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strDescription: 'Discount'
                 },{
                     strDescription: 'Vendor Discount'
-                },{
-                    strDescription: 'Customer Discount'
                 }
             ],
             fields: [
@@ -542,6 +540,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+        commodityLocations: {
+            type: 'icbuffereditemlocation'
         },
 
 

@@ -41,6 +41,6 @@ namespace iRely.Inventory.Model
         }
 
         public tblICItemLocation tblICItemLocation { get; set; }
-        public ICollection<tblICItem> tblICItems { get; set; }
+        public tblICItem tblICItem { get; set; }
     }
 }

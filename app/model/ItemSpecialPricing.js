@@ -48,6 +48,8 @@ Ext.define('Inventory.model.ItemSpecialPricing', {
         { name: 'strDiscountBy', type: 'string' },
         { name: 'dblDiscount', type: 'float' },
         { name: 'dblUnitAfterDiscount', type: 'float' },
+        { name: 'dblDiscountThruQty', type: 'float' },
+        { name: 'dblDiscountThruAmount', type: 'float' },
         { name: 'dblAccumulatedQty', type: 'float' },
         { name: 'dblAccumulatedAmount', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },

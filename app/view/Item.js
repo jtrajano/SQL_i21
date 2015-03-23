@@ -1498,6 +1498,37 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'chkMaterialFee',
                                                                         fieldLabel: 'Material Fee',
                                                                         labelWidth: 125
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkAutoBlend',
+                                                                        fieldLabel: 'Auto Blend',
+                                                                        labelWidth: 125
+                                                                    },
+                                                                    {
+                                                                        xtype: 'panel',
+                                                                        flex: 1,
+                                                                        title: 'Software',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkEnableHelpDesk',
+                                                                                margin: 5,
+                                                                                fieldLabel: 'Enable HelpDesk',
+                                                                                labelWidth: 125
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkUserGroupFee',
+                                                                                margin: '0 0 0 5',
+                                                                                fieldLabel: 'User Group Fee',
+                                                                                labelWidth: 125
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             }
@@ -3831,6 +3862,32 @@ Ext.define('Inventory.view.Item', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
+                                                                        itemId: 'colSpecialPricingDiscQty',
+                                                                        width: 90,
+                                                                        align: 'right',
+                                                                        dataIndex: 'strFieldName',
+                                                                        text: 'Disc thru Qty',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            fieldStyle: 'text-align:right',
+                                                                            hideTrigger: true
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colSpecialPricingDiscAmount',
+                                                                        width: 90,
+                                                                        align: 'right',
+                                                                        dataIndex: 'strFieldName',
+                                                                        text: 'Disc thru Amt',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            fieldStyle: 'text-align:right',
+                                                                            hideTrigger: true
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colSpecialPricingAccumQty',
                                                                         width: 90,
                                                                         align: 'right',
@@ -4025,226 +4082,377 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'numberfield',
-                                                        itemId: 'txtGaShrinkFactor',
-                                                        fieldLabel: 'GA Shrink Factor',
-                                                        fieldStyle: 'text-align:right',
-                                                        hideTrigger: true
-                                                    },
-                                                    {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
+                                                        xtype: 'container',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
                                                             {
-                                                                dataIndex: 'intCommodityAttributeId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Attribute Id',
-                                                                hidden: true
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        itemId: 'txtGaShrinkFactor',
+                                                                        fieldLabel: 'GA Shrink Factor',
+                                                                        fieldStyle: 'text-align:right',
+                                                                        hideTrigger: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCommodityAttributeId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Attribute Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intCommodityId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strType',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute Type',
+                                                                                hidden: true
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboOrigin',
+                                                                        fieldLabel: 'Origin',
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'intCommodityAttributeId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCommodityAttributeId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Attribute Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intCommodityId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strType',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute Type',
+                                                                                hidden: true
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboProductType',
+                                                                        fieldLabel: 'Product Type',
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'intCommodityAttributeId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCommodityAttributeId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Attribute Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intCommodityId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strType',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute Type',
+                                                                                hidden: true
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboRegion',
+                                                                        fieldLabel: 'Region',
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'intCommodityAttributeId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCommodityAttributeId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Attribute Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intCommodityId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strType',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute Type',
+                                                                                hidden: true
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboSeason',
+                                                                        fieldLabel: 'Season',
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'intCommodityAttributeId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCommodityAttributeId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Attribute Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intCommodityId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strType',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute Type',
+                                                                                hidden: true
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboClass',
+                                                                        fieldLabel: 'Class',
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'intCommodityAttributeId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCommodityAttributeId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Attribute Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'intCommodityId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Commodity Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strType',
+                                                                                dataType: 'string',
+                                                                                text: 'Attribute Type',
+                                                                                hidden: true
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboProductLine',
+                                                                        fieldLabel: 'Product Line',
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'intCommodityAttributeId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboMarketValuation',
+                                                                        fieldLabel: 'Market Valuation',
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
+                                                                    }
+                                                                ]
                                                             },
                                                             {
-                                                                dataIndex: 'intCommodityId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strDescription',
-                                                                dataType: 'string',
-                                                                text: 'Attribute',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strType',
-                                                                dataType: 'string',
-                                                                text: 'Attribute Type',
-                                                                hidden: true
+                                                                xtype: 'container',
+                                                                flex: 1.5,
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                }
                                                             }
-                                                        ],
-                                                        itemId: 'cboOrigin',
-                                                        fieldLabel: 'Origin',
-                                                        displayField: 'strDescription',
-                                                        valueField: 'intCommodityAttributeId'
+                                                        ]
                                                     },
                                                     {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
+                                                        xtype: 'container',
+                                                        flex: 1,
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
                                                             {
-                                                                dataIndex: 'intCommodityAttributeId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Attribute Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'intCommodityId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strDescription',
-                                                                dataType: 'string',
-                                                                text: 'Attribute',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strType',
-                                                                dataType: 'string',
-                                                                text: 'Attribute Type',
-                                                                hidden: true
+                                                                xtype: 'advancefiltergrid',
+                                                                flex: 1,
+                                                                itemId: 'grdCommodityCost',
+                                                                title: 'Commodity Cost',
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteCommodityCost',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Remove'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colCommodityLocation',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Location',
+                                                                        flex: 3,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboCommodityLocation',
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'strLocationName'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colCommodityLastCost',
+                                                                        align: 'right',
+                                                                        dataIndex: 'number',
+                                                                        text: 'Last Cost',
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colCommodityStandardCost',
+                                                                        align: 'right',
+                                                                        dataIndex: 'number',
+                                                                        text: 'Standard Cost',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colCommodityAverageCost',
+                                                                        align: 'right',
+                                                                        dataIndex: 'number',
+                                                                        text: 'Average Cost',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colCommodityEOMCost',
+                                                                        align: 'right',
+                                                                        dataIndex: 'number',
+                                                                        text: 'End of Month Cost',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield'
+                                                                        }
+                                                                    }
+                                                                ],
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepCommodityCost',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ],
+                                                                selModel: {
+                                                                    selType: 'checkboxmodel',
+                                                                    allowDeselect: true,
+                                                                    mode: 'SINGLE'
+                                                                }
                                                             }
-                                                        ],
-                                                        itemId: 'cboProductType',
-                                                        fieldLabel: 'Product Type',
-                                                        displayField: 'strDescription',
-                                                        valueField: 'intCommodityAttributeId'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
-                                                            {
-                                                                dataIndex: 'intCommodityAttributeId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Attribute Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'intCommodityId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strDescription',
-                                                                dataType: 'string',
-                                                                text: 'Attribute',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strType',
-                                                                dataType: 'string',
-                                                                text: 'Attribute Type',
-                                                                hidden: true
-                                                            }
-                                                        ],
-                                                        itemId: 'cboRegion',
-                                                        fieldLabel: 'Region',
-                                                        displayField: 'strDescription',
-                                                        valueField: 'intCommodityAttributeId'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
-                                                            {
-                                                                dataIndex: 'intCommodityAttributeId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Attribute Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'intCommodityId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strDescription',
-                                                                dataType: 'string',
-                                                                text: 'Attribute',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strType',
-                                                                dataType: 'string',
-                                                                text: 'Attribute Type',
-                                                                hidden: true
-                                                            }
-                                                        ],
-                                                        itemId: 'cboSeason',
-                                                        fieldLabel: 'Season',
-                                                        displayField: 'strDescription',
-                                                        valueField: 'intCommodityAttributeId'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
-                                                            {
-                                                                dataIndex: 'intCommodityAttributeId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Attribute Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'intCommodityId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strDescription',
-                                                                dataType: 'string',
-                                                                text: 'Attribute',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strType',
-                                                                dataType: 'string',
-                                                                text: 'Attribute Type',
-                                                                hidden: true
-                                                            }
-                                                        ],
-                                                        itemId: 'cboClass',
-                                                        fieldLabel: 'Class',
-                                                        displayField: 'strDescription',
-                                                        valueField: 'intCommodityAttributeId'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
-                                                            {
-                                                                dataIndex: 'intCommodityAttributeId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Attribute Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'intCommodityId',
-                                                                dataType: 'numeric',
-                                                                text: 'Commodity Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strDescription',
-                                                                dataType: 'string',
-                                                                text: 'Attribute',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strType',
-                                                                dataType: 'string',
-                                                                text: 'Attribute Type',
-                                                                hidden: true
-                                                            }
-                                                        ],
-                                                        itemId: 'cboProductLine',
-                                                        fieldLabel: 'Product Line',
-                                                        displayField: 'strDescription',
-                                                        valueField: 'intCommodityAttributeId'
-                                                    },
-                                                    {
-                                                        xtype: 'combobox',
-                                                        itemId: 'cboMarketValuation',
-                                                        fieldLabel: 'Market Valuation',
-                                                        displayField: 'strDescription',
-                                                        valueField: 'strDescription'
+                                                        ]
                                                     }
                                                 ]
-                                            },
-                                            {
-                                                xtype: 'container',
-                                                flex: 1.5,
-                                                layout: {
-                                                    type: 'vbox',
-                                                    align: 'stretch'
-                                                }
                                             }
                                         ]
                                     },

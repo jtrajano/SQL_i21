@@ -230,6 +230,9 @@ Ext.define('Inventory.view.ItemViewController', {
             chkExportEdi: '{current.ysnExportEDI}',
             chkHazardMaterial: '{current.ysnHazardMaterial}',
             chkMaterialFee: '{current.ysnMaterialFee}',
+            chkAutoBlend: '{current.ysnAutoBlend}',
+            chkEnableHelpDesk: '{current.ysnEnableHelpDesk}',
+            chkUserGroupFee: '{current.ysnUserGroupFee}',
 
             //-------//
             //POS Tab//
@@ -338,7 +341,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCustomerXrefLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        store: '{custXrefLocation}'
+                        store: '{custXrefLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colCustomerXrefCustomer: {
@@ -356,7 +363,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colVendorXrefLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        store: '{vendorXrefLocation}'
+                        store: '{vendorXrefLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colVendorXrefVendor: {
@@ -383,7 +394,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colContractLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        store: '{contractLocation}'
+                        store: '{contractLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colContractItemName: 'strContractItemName',
@@ -542,6 +557,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colSpecialPricingDiscountedPrice: 'dblDiscountedPrice',
                 colSpecialPricingBeginDate: 'dtmBeginDate',
                 colSpecialPricingEndDate: 'dtmEndDate',
+                colSpecialPricingDiscQty: 'dblDiscountThruQty',
+                colSpecialPricingDiscAmount: 'dblDiscountThruAmount',
                 colSpecialPricingAccumQty: 'dblAccumulatedQty',
                 colSpecialPricingAccumAmount: 'dblAccumulatedAmount'
             },
@@ -600,6 +617,23 @@ Ext.define('Inventory.view.ItemViewController', {
             cboMarketValuation: {
                 value: '{current.strMarketValuation}',
                 store: '{marketValuations}'
+            },
+
+            grdCommodityCost: {
+                colCommodityLocation: {
+                    dataIndex: 'strLocationName',
+                    editor: {
+                        store: '{commodityLocations}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
+                    }
+                },
+                colCommodityLastCost: 'dblLastCost',
+                colCommodityStandardCost: 'dblStandardCost',
+                colCommodityAverageCost: 'dblAverageCost',
+                colCommodityEOMCost: 'dblEOMCost'
             },
 
             //------------//
@@ -730,7 +764,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colNoteLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        store: '{noteLocation}'
+                        store: '{noteLocation}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{current.intItemId}'
+                        }]
                     }
                 },
                 colNoteCommentType: {
@@ -768,6 +806,8 @@ Ext.define('Inventory.view.ItemViewController', {
             grdPricing = win.down('#grdPricing'),
             grdPricingLevel = win.down('#grdPricingLevel'),
             grdSpecialPricing = win.down('#grdSpecialPricing'),
+
+            grdCommodityCost = win.down('#grdCommodityCost'),
 
             grdAssembly = win.down('#grdAssembly'),
             grdBundle = win.down('#grdBundle'),
@@ -873,6 +913,13 @@ Ext.define('Inventory.view.ItemViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdStock,
                         position: 'none'
+                    })
+                },
+                {
+                    key: 'tblICItemCommodityCosts',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdCommodityCost,
+                        deleteButton : grdCommodityCost.down('#btnDeleteCommodityCost')
                     })
                 },
                 {
@@ -1159,6 +1206,15 @@ Ext.define('Inventory.view.ItemViewController', {
                     grdStock.getView().refresh();
                 else
                     grdStock.store.load();
+                break;
+
+            case 'pgeCommodity':
+                var pgeCommodity = tabPanel.down('#pgeCommodity');
+                var grdCommodityCost = pgeCommodity.down('#grdCommodityCost');
+                if (grdCommodityCost.store.complete === true)
+                    grdCommodityCost.getView().refresh();
+                else
+                    grdCommodityCost.store.load();
                 break;
 
             case 'pgeAssembly':
@@ -2256,6 +2312,19 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onItemCommodityLocationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCommodityCost');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colCommodityLocation'){
+            current.set('intItemLocationId', records[0].get('intItemLocationId'));
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2392,6 +2461,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboCategory": {
                 select: this.onItemCategorySelect
+            },
+            "#cboCommodityLocation": {
+                select: this.onItemCommodityLocationSelect
             }
         });
     }

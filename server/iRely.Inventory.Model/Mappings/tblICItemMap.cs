@@ -184,6 +184,9 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICItemOwners)
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemCommodityCosts)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
         }
     }
 
