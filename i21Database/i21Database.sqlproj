@@ -1209,6 +1209,8 @@
     <Build Include="dbo\Views\vyuSMScreenPermission.sql" />
     <None Include="Scripts\Post-Deployment\IC\6_FixBlankLotNumber.sql" />
     <Build Include="dbo\Tables\tblICInventoryGLAccountUsedOnPostLog.sql" />
+    <Build Include="dbo\Tables\tblCTBook.sql" />
+    <Build Include="dbo\Tables\tblCTSubBook.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
