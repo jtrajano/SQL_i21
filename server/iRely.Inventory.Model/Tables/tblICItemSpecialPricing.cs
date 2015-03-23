@@ -22,6 +22,8 @@ namespace iRely.Inventory.Model
         public string strDiscountBy { get; set; }
         public decimal? dblDiscount { get; set; }
         public decimal? dblUnitAfterDiscount { get; set; }
+        public decimal? dblDiscountThruQty { get; set; }
+        public decimal? dblDiscountThruAmount { get; set; }
         public decimal? dblAccumulatedQty { get; set; }
         public decimal? dblAccumulatedAmount { get; set; }
         public int? intSort { get; set; }

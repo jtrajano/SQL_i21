@@ -23,6 +23,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDiscountBy).HasColumnName("strDiscountBy");
             this.Property(t => t.dblDiscount).HasColumnName("dblDiscount").HasPrecision(18, 6);
             this.Property(t => t.dblUnitAfterDiscount).HasColumnName("dblUnitAfterDiscount").HasPrecision(18, 6);
+            this.Property(t => t.dblDiscountThruQty).HasColumnName("dblDiscountThruQty").HasPrecision(18, 6);
+            this.Property(t => t.dblDiscountThruAmount).HasColumnName("dblDiscountThruAmount").HasPrecision(18, 6);
             this.Property(t => t.dblAccumulatedQty).HasColumnName("dblAccumulatedQty").HasPrecision(18, 6);
             this.Property(t => t.dblAccumulatedAmount).HasColumnName("dblAccumulatedAmount").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");

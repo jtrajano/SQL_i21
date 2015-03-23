@@ -123,6 +123,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICItemKitDetail> tblICItemKitDetails { get; set; }
         public DbSet<tblICItemLocation> tblICItemLocations { get; set; }
         public DbSet<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
+        public DbSet<tblICItemCommodityCost> tblICItemCommodityCosts { get; set; }
         public DbSet<tblICItemNote> tblICItemNotes { get; set; }
         public DbSet<tblICItemOwner> tblICItemOwners { get; set; }
         public DbSet<tblICItemPOSCategory> tblICItemPOSCategorys { get; set; }
@@ -249,6 +250,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemKitDetailMap());
             modelBuilder.Configurations.Add(new tblICItemLocationMap());
             modelBuilder.Configurations.Add(new tblICItemManufacturingUOMMap());
+            modelBuilder.Configurations.Add(new tblICItemCommodityCostMap());
             modelBuilder.Configurations.Add(new tblICItemNoteMap());
             modelBuilder.Configurations.Add(new tblICItemOwnerMap());
             modelBuilder.Configurations.Add(new tblICItemPOSCategoryMap());

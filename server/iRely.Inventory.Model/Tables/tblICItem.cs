@@ -18,20 +18,21 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public int? intManufacturerId { get; set; }
         public int? intBrandId { get; set; }
+        public int? intCategoryId { get; set; }
         public string strStatus { get; set; }
         public string strModelNo { get; set; }
         public string strInventoryTracking { get; set; }
         public string strLotTracking { get; set; }
-        public bool ysnRequireCustomerApproval { get; set; }
+        public bool? ysnRequireCustomerApproval { get; set; }
         public int? intRecipeId { get; set; }
-        public bool ysnSanitationRequired { get; set; }
+        public bool? ysnSanitationRequired { get; set; }
         public int? intLifeTime { get; set; }
         public string strLifeTimeType { get; set; }
         public int? intReceiveLife { get; set; }
         public string strGTIN { get; set; }
         public string strRotationType { get; set; }
         public int? intNMFCId { get; set; }
-        public bool ysnStrictFIFO { get; set; }
+        public bool? ysnStrictFIFO { get; set; }
         public int? intDimensionUOMId { get; set; }
         public decimal? dblHeight { get; set; }
         public decimal? dblWidth { get; set; }
@@ -49,48 +50,51 @@ namespace iRely.Inventory.Model
         public string strMask3 { get; set; }
         public int? intPatronageCategoryId { get; set; }
         public int? intTaxClassId { get; set; }
-        public bool ysnStockedItem { get; set; }
-        public bool ysnDyedFuel { get; set; }
+        public bool? ysnStockedItem { get; set; }
+        public bool? ysnDyedFuel { get; set; }
         public string strBarcodePrint { get; set; }
-        public bool ysnMSDSRequired { get; set; }
+        public bool? ysnMSDSRequired { get; set; }
         public string strEPANumber { get; set; }
-        public bool ysnInboundTax { get; set; }
-        public bool ysnOutboundTax { get; set; }
-        public bool ysnRestrictedChemical { get; set; }
-        public bool ysnTankRequired { get; set; }
-        public bool ysnAvailableTM { get; set; }
+        public bool? ysnInboundTax { get; set; }
+        public bool? ysnOutboundTax { get; set; }
+        public bool? ysnRestrictedChemical { get; set; }
+        public bool? ysnTankRequired { get; set; }
+        public bool? ysnAvailableTM { get; set; }
         public decimal? dblDefaultFull { get; set; }
         public string strFuelInspectFee { get; set; }
         public string strRINRequired { get; set; }
         public int? intRINFuelTypeId { get; set; }
         public decimal? dblDenaturantPercent { get; set; }
-        public bool ysnTonnageTax { get; set; }
-        public bool ysnLoadTracking { get; set; }
+        public bool? ysnTonnageTax { get; set; }
+        public bool? ysnLoadTracking { get; set; }
         public decimal? dblMixOrder { get; set; }
-        public bool ysnHandAddIngredient { get; set; }
+        public bool? ysnHandAddIngredient { get; set; }
         public int? intMedicationTag { get; set; }
         public int? intIngredientTag { get; set; }
         public string strVolumeRebateGroup { get; set; }
         public int? intPhysicalItem { get; set; }
-        public bool ysnExtendPickTicket { get; set; }
-        public bool ysnExportEDI { get; set; }
-        public bool ysnHazardMaterial { get; set; }
-        public bool ysnMaterialFee { get; set; }
+        public bool? ysnExtendPickTicket { get; set; }
+        public bool? ysnExportEDI { get; set; }
+        public bool? ysnHazardMaterial { get; set; }
+        public bool? ysnMaterialFee { get; set; }
+        public bool? ysnAutoBlend { get; set; }
+        public bool? ysnEnableHelpDesk { get; set; }
+        public bool? ysnUserGroupFee { get; set; }
         public string strNACSCategory { get; set; }
         public string strWICCode { get; set; }
         public int? intAGCategory { get; set; }
-        public bool ysnReceiptCommentRequired { get; set; }
+        public bool? ysnReceiptCommentRequired { get; set; }
         public string strCountCode { get; set; }
-        public bool ysnLandedCost { get; set; }
+        public bool? ysnLandedCost { get; set; }
         public string strLeadTime { get; set; }
-        public bool ysnTaxable { get; set; }
+        public bool? ysnTaxable { get; set; }
         public string strKeywords { get; set; }
         public decimal? dblCaseQty { get; set; }
         public DateTime? dtmDateShip { get; set; }
         public decimal? dblTaxExempt { get; set; }
-        public bool ysnDropShip { get; set; }
-        public bool ysnCommisionable { get; set; }
-        public bool ysnSpecialCommission { get; set; }
+        public bool? ysnDropShip { get; set; }
+        public bool? ysnCommisionable { get; set; }
+        public bool? ysnSpecialCommission { get; set; }
         public int? intCommodityId { get; set; }
         public int? intCommodityHierarchyId { get; set; }
         public decimal? dblGAShrinkFactor { get; set; }
@@ -101,7 +105,6 @@ namespace iRely.Inventory.Model
         public int? intClassVarietyId { get; set; }
         public int? intProductLineId { get; set; }
         public string strMarketValuation { get; set; }
-        public int? intCategoryId { get; set; }
 
         private string _manufacturer;
         [NotMapped]

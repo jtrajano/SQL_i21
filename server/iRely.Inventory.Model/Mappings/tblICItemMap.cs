@@ -18,6 +18,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.intManufacturerId).HasColumnName("intManufacturerId");
             this.Property(t => t.intBrandId).HasColumnName("intBrandId");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
             this.Property(t => t.strStatus).HasColumnName("strStatus");
             this.Property(t => t.strModelNo).HasColumnName("strModelNo");
             this.Property(t => t.strInventoryTracking).HasColumnName("strInventoryTracking");
@@ -43,7 +44,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intInnerUnits).HasColumnName("intInnerUnits");
             this.Property(t => t.intLayerPerPallet).HasColumnName("intLayerPerPallet");
             this.Property(t => t.intUnitPerLayer).HasColumnName("intUnitPerLayer");
-            this.Property(t => t.dblStandardPalletRatio).HasColumnName("dblStandardPalletRatio");
+            this.Property(t => t.dblStandardPalletRatio).HasColumnName("dblStandardPalletRatio").HasPrecision(18, 6);
             this.Property(t => t.strMask1).HasColumnName("strMask1");
             this.Property(t => t.strMask2).HasColumnName("strMask2");
             this.Property(t => t.strMask3).HasColumnName("strMask3");
@@ -63,7 +64,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strFuelInspectFee).HasColumnName("strFuelInspectFee");
             this.Property(t => t.strRINRequired).HasColumnName("strRINRequired");
             this.Property(t => t.intRINFuelTypeId).HasColumnName("intRINFuelTypeId");
-            this.Property(t => t.dblDenaturantPercent).HasColumnName("dblDenaturantPercent");
+            this.Property(t => t.dblDenaturantPercent).HasColumnName("dblDenaturantPercent").HasPrecision(18, 6);
             this.Property(t => t.ysnTonnageTax).HasColumnName("ysnTonnageTax");
             this.Property(t => t.ysnLoadTracking).HasColumnName("ysnLoadTracking");
             this.Property(t => t.dblMixOrder).HasColumnName("dblMixOrder").HasPrecision(18, 6);
@@ -76,6 +77,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnExportEDI).HasColumnName("ysnExportEDI");
             this.Property(t => t.ysnHazardMaterial).HasColumnName("ysnHazardMaterial");
             this.Property(t => t.ysnMaterialFee).HasColumnName("ysnMaterialFee");
+            this.Property(t => t.ysnAutoBlend).HasColumnName("ysnAutoBlend");
+            this.Property(t => t.ysnEnableHelpDesk).HasColumnName("ysnEnableHelpDesk");
+            this.Property(t => t.ysnUserGroupFee).HasColumnName("ysnUserGroupFee");
             this.Property(t => t.strNACSCategory).HasColumnName("strNACSCategory");
             this.Property(t => t.strWICCode).HasColumnName("strWICCode");
             this.Property(t => t.intAGCategory).HasColumnName("intAGCategory");
@@ -101,7 +105,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intClassVarietyId).HasColumnName("intClassVarietyId");
             this.Property(t => t.intProductLineId).HasColumnName("intProductLineId");
             this.Property(t => t.strMarketValuation).HasColumnName("strMarketValuation");
-            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)
