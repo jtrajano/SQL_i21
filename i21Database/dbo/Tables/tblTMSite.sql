@@ -53,7 +53,7 @@
     [intTaxLocale1]               INT             DEFAULT 0 NULL,
     [intTaxLocale2]               INT             DEFAULT 0 NULL,
     [ysnAllowPriceChange]         BIT             DEFAULT 0 NULL,
-    [intRecurringPONumber]        INT             DEFAULT 0 NULL,
+    [strRecurringPONumber]        NVARCHAR(50)             DEFAULT 0 NULL,
     [ysnPrintARBalance]           BIT             DEFAULT 0 NOT NULL,
     [ysnPromptForPercentFull]     BIT             DEFAULT 0 NULL,
     [strFillGroup]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
@@ -584,7 +584,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblTMSite',
     @level2type = N'COLUMN',
-    @level2name = N'intRecurringPONumber'
+    @level2name = 'strRecurringPONumber'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Print AR Balance',
