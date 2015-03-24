@@ -1213,6 +1213,17 @@
     <Build Include="dbo\Tables\tblCTSubBook.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDSortRowDesign.sql" />
     <Build Include="dbo\Tables\tblICItemCommodityCost.sql" />
+    <Build Include="dbo\Tables\tblCCCompanyOwnedSite.sql" />
+    <Build Include="dbo\Tables\tblCCDealerSite.sql" />
+    <Build Include="dbo\Tables\tblCCImportSiteBatchDetail.sql" />
+    <Build Include="dbo\Tables\tblCCImportSiteDetail.sql" />
+    <Build Include="dbo\Tables\tblCCImportSiteHeader.sql" />
+    <Build Include="dbo\Tables\tblCCSite.sql" />
+    <Build Include="dbo\Tables\tblCCSiteBatchDetail.sql" />
+    <Build Include="dbo\Tables\tblCCSiteDetail.sql" />
+    <Build Include="dbo\Tables\tblCCSiteHeader.sql" />
+    <Build Include="dbo\Tables\tblCCVendorDefault.sql" />
+    <Build Include="dbo\Views\vyuCCVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
