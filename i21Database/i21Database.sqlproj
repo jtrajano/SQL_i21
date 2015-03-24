@@ -1224,6 +1224,12 @@
     <Build Include="dbo\Tables\tblCCSiteHeader.sql" />
     <Build Include="dbo\Tables\tblCCVendorDefault.sql" />
     <Build Include="dbo\Views\vyuCCVendor.sql" />
+    <Build Include="dbo\Tables\tblLGShippingInstructionCertificates.sql" />
+    <Build Include="dbo\Tables\tblLGShippingInstructionContractQty.sql" />
+    <Build Include="dbo\Tables\tblLGShippingInstruction.sql" />
+    <Build Include="dbo\Views\vyuLGNotifyPartiesAddresses.sql" />
+    <Build Include="dbo\Views\vyuLGShippingInstructionOpenContracts.sql" />
+    <Build Include="dbo\Views\vyuLGNotifyParties.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
