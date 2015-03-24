@@ -77,3 +77,4 @@ FROM tblPOPurchase A
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
+AND B.dblQtyOrdered != B.dblQtyReceived

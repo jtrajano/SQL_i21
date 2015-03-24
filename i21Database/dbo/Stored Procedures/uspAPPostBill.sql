@@ -641,10 +641,9 @@ BEGIN
 
 	WHILE @count != (SELECT COUNT(*) FROM #tmpPostBillData)
 	BEGIN
-
+		SET @count = @count + 1
 		SELECT TOP (@count) @id = intBillId FROM #tmpPostBillData
 		EXEC uspPOReceived @id, 2
-		SET @count = @count + 1
 	END
 
 END
