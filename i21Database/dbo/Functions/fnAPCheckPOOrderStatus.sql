@@ -11,7 +11,7 @@ BEGIN
 
        IF EXISTS(SELECT 1 FROM tblPOPurchaseDetail A
                            INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
-                           WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service') AND intPurchaseId = @poId)
+                           WHERE strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') AND intPurchaseId = @poId)
        BEGIN
 
               SET @success = 
@@ -23,7 +23,7 @@ BEGIN
                                   FROM   tblICInventoryReceipt IR INNER JOIN tblICInventoryReceiptItem IRItems
                                                        ON IR.intInventoryReceiptId = IRItems.intInventoryReceiptId
                                   WHERE  IRItems.intSourceId = @poId
-                                                AND IR.ysnPosted = 1
+                                                --AND IR.ysnPosted = 1
                            )
                            THEN 0
                            WHEN @orderStatus = 7 AND NOT EXISTS
@@ -32,7 +32,7 @@ BEGIN
                                   FROM   tblICInventoryReceipt IR INNER JOIN tblICInventoryReceiptItem IRItems
                                                        ON IR.intInventoryReceiptId = IRItems.intInventoryReceiptId
                                   WHERE  IRItems.intSourceId = @poId
-                                                AND IR.ysnPosted = 1
+                                                --AND IR.ysnPosted = 1
                            )
                            THEN 0
                      ELSE 1 END
