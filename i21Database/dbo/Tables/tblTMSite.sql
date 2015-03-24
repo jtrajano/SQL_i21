@@ -53,7 +53,7 @@
     [intTaxLocale1]               INT             DEFAULT 0 NULL,
     [intTaxLocale2]               INT             DEFAULT 0 NULL,
     [ysnAllowPriceChange]         BIT             DEFAULT 0 NULL,
-    [strRecurringPONumber]        NVARCHAR(50)             DEFAULT 0 NULL,
+    [strRecurringPONumber]        NVARCHAR(50)             COLLATE Latin1_General_CI_AS DEFAULT 0 NULL,
     [ysnPrintARBalance]           BIT             DEFAULT 0 NOT NULL,
     [ysnPromptForPercentFull]     BIT             DEFAULT 0 NULL,
     [strFillGroup]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
