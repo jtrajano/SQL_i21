@@ -2254,4 +2254,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8a0258f8-eaab-4749-8002-1367cd02b85a" ChangeDateTime="03/24/2015 10:33:11">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[intDiscountSchedule]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDiscountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="51ee2567-9e58-4ce1-9028-20a8836e437b" ChangeDateTime="03/24/2015 10:33:21">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[intDiscount]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDiscountType" />
+  </Operation>
 </Operations>
