@@ -565,8 +565,7 @@ BEGIN
 
 END
 
-
-	IF(ISNULL(@post,0) = 0)
+IF(ISNULL(@post,0) = 0)
 	BEGIN
 
 		IF(@billBatchId IS NOT NULL AND @totalRecords > 0)
@@ -633,6 +632,23 @@ END
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
+
+--UPDATE PO IF THERE ARE INVENTORY ITEMS
+IF EXISTS(SELECT 1 FROM tblAPBillDetail WHERE intItemReceiptId > 0 AND intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+BEGIN
+	
+	DECLARE @count INT = 0, @id INT;
+
+	WHILE @count != (SELECT COUNT(*) FROM #tmpPostBillData)
+	BEGIN
+
+		SELECT TOP (@count) @id = intBillId FROM #tmpPostBillData
+		EXEC uspPOReceived @id, 2
+		SET @count = @count + 1
+	END
+
+END
+
 END
 ELSE
 	BEGIN

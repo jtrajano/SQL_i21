@@ -60,7 +60,7 @@ A.intVendorId
 ,C.strItemNo
 ,C.strDescription
 ,B.dblQtyOrdered
-,B.dblQtyReceived
+,B.dblQtyOrdered
 ,B.intPurchaseDetailId
 ,B.dblCost
 ,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
