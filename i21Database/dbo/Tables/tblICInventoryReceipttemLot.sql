@@ -18,7 +18,8 @@ Type the overview for the table here.
 		[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strLotAlias] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intSubLocationId] INT NULL, 
-		[intStorageLocationId] INT NULL,		
+		[intStorageLocationId] INT NULL,	
+		[intItemUnitMeasureId] INT NULL,	
 		[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 		
 		[dblGrossWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblTareWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -45,7 +46,8 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICInventoryReceiptItemLot] PRIMARY KEY ([intInventoryReceiptItemLotId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
-		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
+		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
+		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 	)
 
 --	GO
