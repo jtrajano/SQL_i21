@@ -1,9 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuSMScreenPermission]
 AS 
 	SELECT 
-		A.intUserSecurityScreenPermissionId AS intScreenPermissionId,
+		A.intUserRoleScreenPermissionId AS intScreenPermissionId,
 		A.strPermission, 
-		A.intUserSecurityId, 
+		A.intUserRoleId, 
 		C.strNamespace
-	FROM tblSMUserSecurityScreenPermission A 
+	FROM tblSMUserRoleScreenPermission A 
 		INNER JOIN tblSMScreen C ON A.intScreenId = C.intScreenId 
