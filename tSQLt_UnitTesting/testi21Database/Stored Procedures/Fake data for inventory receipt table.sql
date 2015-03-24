@@ -131,9 +131,6 @@ BEGIN
 			,dblOpenReceive
 			,dblReceived
 			,intUnitMeasureId
-			,intNoPackages
-			,intPackageTypeId
-			,dblExpPackageWeight
 			,dblUnitCost
 			,dblLineTotal
 			,intSort
@@ -148,9 +145,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @WetGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 1.00
 				,dblLineTotal			= 10.00
 				,intSort				= 1
@@ -165,9 +159,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @StickyGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 2.00
 				,dblLineTotal			= 20.00
 				,intSort				= 2
@@ -182,9 +173,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @PremiumGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 3.00
 				,dblLineTotal			= 30.00
 				,intSort				= 3
@@ -199,9 +187,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @ColdGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 4.00
 				,dblLineTotal			= 40.00
 				,intSort				= 4
@@ -216,9 +201,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @HotGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 5.00
 				,dblLineTotal			= 50.00
 				,intSort				= 5
@@ -233,9 +215,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @ManualLotGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 6.00
 				,dblLineTotal			= 60.00
 				,intSort				= 6
@@ -250,9 +229,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @SerializedLotGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 7.00
 				,dblLineTotal			= 70.00
 				,intSort				= 7
@@ -342,9 +318,6 @@ BEGIN
 			,dblOpenReceive
 			,dblReceived
 			,intUnitMeasureId
-			,intNoPackages
-			,intPackageTypeId
-			,dblExpPackageWeight
 			,dblUnitCost
 			,dblLineTotal
 			,intSort
@@ -359,9 +332,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @WetGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 1.00
 				,dblLineTotal			= 10.00
 				,intSort				= 1
@@ -376,9 +346,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @StickyGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 2.00
 				,dblLineTotal			= 20.00
 				,intSort				= 2
@@ -393,9 +360,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @PremiumGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 3.00
 				,dblLineTotal			= 30.00
 				,intSort				= 3
@@ -410,9 +374,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @ColdGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 4.00
 				,dblLineTotal			= 40.00
 				,intSort				= 4
@@ -427,9 +388,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @HotGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 5.00
 				,dblLineTotal			= 50.00
 				,intSort				= 5
@@ -485,9 +443,6 @@ BEGIN
 			,dblOpenReceive
 			,dblReceived
 			,intUnitMeasureId
-			,intNoPackages
-			,intPackageTypeId
-			,dblExpPackageWeight
 			,dblUnitCost
 			,dblLineTotal
 			,intSort
@@ -502,9 +457,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @ManualLotGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 6.00
 				,dblLineTotal			= 60.00
 				,intSort				= 6
@@ -519,9 +471,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @SerializedLotGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 7.00
 				,dblLineTotal			= 70.00
 				,intSort				= 7
@@ -651,9 +600,6 @@ BEGIN
 			,dblOpenReceive
 			,dblReceived
 			,intUnitMeasureId
-			,intNoPackages
-			,intPackageTypeId
-			,dblExpPackageWeight
 			,dblUnitCost
 			,dblLineTotal
 			,intSort
@@ -668,9 +614,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @ManualLotGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 6.00
 				,dblLineTotal			= 60.00
 				,intSort				= 1
@@ -685,9 +628,6 @@ BEGIN
 				,dblOpenReceive			= 20
 				,dblReceived			= 0
 				,intUnitMeasureId		= @ManualLotGrains_PoundUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 7.00
 				,dblLineTotal			= 70.00
 				,intSort				= 2
@@ -775,9 +715,6 @@ BEGIN
 			,dblOpenReceive
 			,dblReceived
 			,intUnitMeasureId
-			,intNoPackages
-			,intPackageTypeId
-			,dblExpPackageWeight
 			,dblUnitCost
 			,dblLineTotal
 			,intSort
@@ -792,9 +729,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @SerializedLotGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 6.00
 				,dblLineTotal			= 60.00
 				,intSort				= 1
@@ -809,9 +743,6 @@ BEGIN
 				,dblOpenReceive			= 20
 				,dblReceived			= 0
 				,intUnitMeasureId		= @SerializedLotGrains_PoundUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 7.00
 				,dblLineTotal			= 70.00
 				,intSort				= 2
@@ -897,9 +828,6 @@ BEGIN
 			,dblOpenReceive
 			,dblReceived
 			,intUnitMeasureId
-			,intNoPackages
-			,intPackageTypeId
-			,dblExpPackageWeight
 			,dblUnitCost
 			,dblLineTotal
 			,intSort
@@ -914,9 +842,6 @@ BEGIN
 				,dblOpenReceive			= 10
 				,dblReceived			= 0
 				,intUnitMeasureId		= @ManualLotGrains_BushelUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 6.00
 				,dblLineTotal			= 60.00
 				,intSort				= 1
@@ -931,9 +856,6 @@ BEGIN
 				,dblOpenReceive			= 20
 				,dblReceived			= 0
 				,intUnitMeasureId		= @ManualLotGrains_PoundUOMId
-				,intNoPackages			= 0 -- None found from Purchase Order
-				,intPackageTypeId		= NULL -- None found from Purchase Order
-				,dblExpPackageWeight	= 0 -- None found from Purchase Order
 				,dblUnitCost			= 7.00
 				,dblLineTotal			= 70.00
 				,intSort				= 2
