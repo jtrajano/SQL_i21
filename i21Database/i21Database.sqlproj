@@ -1230,6 +1230,7 @@
     <Build Include="dbo\Views\vyuLGNotifyPartiesAddresses.sql" />
     <Build Include="dbo\Views\vyuLGShippingInstructionOpenContracts.sql" />
     <Build Include="dbo\Views\vyuLGNotifyParties.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateUserPermissions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
