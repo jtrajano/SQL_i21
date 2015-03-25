@@ -28,8 +28,6 @@ CREATE TABLE #tmpInventoryTransactionStockToReverse (
 DECLARE @AUTO_NEGATIVE AS INT = 1
 		,@WRITE_OFF_SOLD AS INT = 2
 		,@REVALUE_SOLD AS INT = 3
-		,@InventoryReceipt AS INT = 4
-		,@InventoryShipment AS INT = 5
 
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -90,42 +88,26 @@ WHERE	intTransactionId = @intTransactionId
 -- Call the FIFO unpost stored procedures. This is also used in Average Costing.
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	-- Reverse the "IN" qty 
-	IF @TransactionType IN (@InventoryReceipt)
-	BEGIN 
-		EXEC dbo.uspICUnpostFIFOIn 
-			@strTransactionId
-			,@intTransactionId
-	END
+	EXEC dbo.uspICUnpostFIFOIn 
+		@strTransactionId
+		,@intTransactionId
 
-	-- Reverse the "OUT" qty 
-	IF @TransactionType IN (@InventoryShipment)
-	BEGIN 
-		EXEC dbo.uspICUnpostFIFOOut
-			@strTransactionId
-			,@intTransactionId
-	END
+	EXEC dbo.uspICUnpostFIFOOut
+		@strTransactionId
+		,@intTransactionId
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Call the LIFO unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	-- Reverse the "IN" qty 
-	IF @TransactionType IN (@InventoryReceipt)
-	BEGIN 
-		EXEC dbo.uspICUnpostLIFOIn 
-			@strTransactionId
-			,@intTransactionId
-	END
+	EXEC dbo.uspICUnpostLIFOIn 
+		@strTransactionId
+		,@intTransactionId
 
-	-- Reverse the "OUT" qty 
-	IF @TransactionType IN (@InventoryShipment)
-	BEGIN 
-		EXEC dbo.uspICUnpostLIFOOut
-			@strTransactionId
-			,@intTransactionId
-	END
+	EXEC dbo.uspICUnpostLIFOOut
+		@strTransactionId
+		,@intTransactionId
 END
 
 
@@ -133,21 +115,13 @@ END
 -- Call the LOT unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	-- Reverse the "IN" qty 
-	IF @TransactionType IN (@InventoryReceipt)
-	BEGIN 
-		EXEC dbo.uspICUnpostLotIn 
-			@strTransactionId
-			,@intTransactionId
-	END
+	EXEC dbo.uspICUnpostLotIn 
+		@strTransactionId
+		,@intTransactionId
 
-	-- Reverse the "OUT" qty 
-	IF @TransactionType IN (@InventoryShipment)
-	BEGIN 
-		EXEC dbo.uspICUnpostLotOut
-			@strTransactionId
-			,@intTransactionId
-	END
+	EXEC dbo.uspICUnpostLotOut
+		@strTransactionId
+		,@intTransactionId
 END
 
 IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 

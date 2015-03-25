@@ -47,11 +47,24 @@ FROM	(
 					SELECT	strTransactionId = @strTransactionId
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
-					AND inventory_transaction.strTransactionId = Source_Query.strTransactionId
-					AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LIFO) 
+					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LIFO) 				
 					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
+					AND 
+					(
+						-- Link to the main transaction
+						(	
+							inventory_transaction.strTransactionId = Source_Query.strTransactionId
+							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+							AND ISNULL(inventory_transaction.dblQty, 0) > 0 -- Reverse Qty that is positive. 
+						)
+						-- Link to revalue and write-off sold 
+						OR (
+							inventory_transaction.strTransactionId = Source_Query.strTransactionId
+							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD)
+						)
+					)
 
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
