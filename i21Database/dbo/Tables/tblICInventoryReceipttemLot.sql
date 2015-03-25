@@ -46,8 +46,7 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICInventoryReceiptItemLot] PRIMARY KEY ([intInventoryReceiptItemLotId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
-		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
-		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]) 
 	)
 
 --	GO
