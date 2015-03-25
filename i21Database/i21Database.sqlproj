@@ -1231,6 +1231,9 @@
     <Build Include="dbo\Views\vyuLGShippingInstructionOpenContracts.sql" />
     <Build Include="dbo\Views\vyuLGNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserPermissions.sql" />
+    <Build Include="dbo\Tables\tblRKElectonicPricing.sql" />
+    <Build Include="dbo\Tables\tblRKElectronicPricingHistory.sql" />
+    <Build Include="dbo\Tables\tblRKElectronicPricingPreferences.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
