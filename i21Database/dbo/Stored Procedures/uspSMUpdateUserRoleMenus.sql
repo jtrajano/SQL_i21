@@ -116,16 +116,16 @@ BEGIN TRY
 
 	END
 	
-	-- Iterate through all affected user securities and apply Master Menus
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)
-	BEGIN
-		SELECT TOP 1 @UserSecurityID = intUserSecurityID FROM #tmpUserSecurities
-		print 'User ID :'
-		print @UserSecurityID
-		EXEC uspSMUpdateUserSecurityMenus @UserSecurityID, @ForceVisibility
+	---- Iterate through all affected user securities and apply Master Menus
+	--WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)
+	--BEGIN
+	--	SELECT TOP 1 @UserSecurityID = intUserSecurityID FROM #tmpUserSecurities
+	--	print 'User ID :'
+	--	print @UserSecurityID
+	--	EXEC uspSMUpdateUserSecurityMenus @UserSecurityID, @ForceVisibility
 		
-		DELETE FROM #tmpUserSecurities WHERE intUserSecurityID = @UserSecurityID
-	END
+	--	DELETE FROM #tmpUserSecurities WHERE intUserSecurityID = @UserSecurityID
+	--END
 
 	-- Drop temporary tables
 	DROP TABLE #tmpUserSecurities
