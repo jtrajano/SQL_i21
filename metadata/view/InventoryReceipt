@@ -1403,7 +1403,7 @@
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "itemId": "grdInventoryReceipt",
-                                                        "layout|flex": 2,
+                                                        "layout|flex": 3,
                                                         "margin": "7 0 0 0",
                                                         "reference": "grdInventoryReceipt",
                                                         "title": null
@@ -2250,9 +2250,10 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "hidden": true,
+                                                        "container|align": "stretch",
                                                         "itemId": "pnlLotTracking",
-                                                        "layout|flex": 1,
+                                                        "layout": "hbox",
+                                                        "layout|flex": 2,
                                                         "width": 100
                                                     },
                                                     "name": "MyContainer3",
@@ -2268,6 +2269,8 @@
                                                             "userConfig": {
                                                                 "designer|createAlias": "advancefiltergrid",
                                                                 "itemId": "grdLotTracking",
+                                                                "layout|flex": 1,
+                                                                "layout|margins": null,
                                                                 "margin": "5 0 0 0",
                                                                 "reference": "grdLotTracking",
                                                                 "title": null

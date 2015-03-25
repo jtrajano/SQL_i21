@@ -284,6 +284,25 @@ namespace iRely.Inventory.Model
                 _uom = value;
             }
         }
+        private string _uomType;
+        [NotMapped]
+        public string strUnitType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_uomType))
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUnitType;
+                    else
+                        return null;
+                else
+                    return _uomType;
+            }
+            set
+            {
+                _uomType = value;
+            }
+        }
         private string _subLocationName;
         [NotMapped]
         public string strSubLocationName

@@ -240,6 +240,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 else { return false; }
             }
         }
+
     }
 
 });

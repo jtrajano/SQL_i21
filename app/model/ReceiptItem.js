@@ -52,8 +52,8 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strLotTracking', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strWeightUOM', type: 'string'},
-        { name: 'strSubLocationName', type: 'string'}
-
+        { name: 'strSubLocationName', type: 'string'},
+        { name: 'strUnitType', type: 'string'}
     ],
 
     validators: [

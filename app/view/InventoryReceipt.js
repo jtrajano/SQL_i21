@@ -687,7 +687,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
-                                                                flex: 2,
+                                                                flex: 3,
                                                                 reference: 'grdInventoryReceipt',
                                                                 itemId: 'grdInventoryReceipt',
                                                                 margin: '7 0 0 0',
@@ -1092,13 +1092,17 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             },
                                                             {
                                                                 xtype: 'container',
-                                                                flex: 1,
-                                                                hidden: true,
+                                                                flex: 2,
                                                                 itemId: 'pnlLotTracking',
                                                                 width: 100,
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
                                                                 items: [
                                                                     {
                                                                         xtype: 'advancefiltergrid',
+                                                                        flex: 1,
                                                                         reference: 'grdLotTracking',
                                                                         itemId: 'grdLotTracking',
                                                                         margin: '5 0 0 0',

@@ -605,6 +605,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = combo.up('window');
         var pnlLotTracking = win.down('#pnlLotTracking');
         var grid = combo.up('grid');
+        var grdLotTracking = win.down('#grdLotTracking');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
 
@@ -618,6 +619,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
             current.set('dblItemUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
+            current.set('strUnitType', records[0].get('strUnitType'));
 
             var intUOM = null;
             var strUOM = '';
@@ -630,6 +632,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intWeightUOMId', intUOM);
                 current.set('strWeightUOM', strUOM);
                 current.set('dblWeightUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
+                grdLotTracking.columns[1].setHidden(false);
             }
             else if (records[0].get('strStockUOMType') === 'Weight'){
                 intUOM = records[0].get('intStockUOMId');
@@ -638,12 +641,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intWeightUOMId', intUOM);
                 current.set('strWeightUOM', strUOM);
                 current.set('dblWeightUOMConvFactor', 1);
+                grdLotTracking.columns[1].setHidden(true);
             }
             else {
                 intUOM = records[0].get('intReceiveUOMId');
                 strUOM = records[0].get('strReceiveUOM');
                 strWeightUOM = '';
                 current.set('dblWeightUOMConvFactor', 0);
+                grdLotTracking.columns[1].setHidden(true);
             }
 
             switch (records[0].get('strLotTracking')){
@@ -675,12 +680,42 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else if (combo.itemId === 'cboItemUOM')
         {
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
+            current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
+            current.set('strUnitType', records[0].get('strUnitType'));
+            if (current.tblICInventoryReceiptItemLots()) {
+                Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function(lot) {
+                    if (!lot.dummy) {
+                        lot.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+                        lot.set('intItemUnitMeasureId', records[0].get('intItemUnitMeasureId'));
+                    }
+                });
+            }
+            if (records[0].get('strUnitType') === 'Weight') {
+                grdLotTracking.columns[1].setHidden(false);
+            }
+            else {
+                grdLotTracking.columns[1].setHidden(true);
+            }
         }
         else if (combo.itemId === 'cboWeightUOM')
         {
-            current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
+            current.set('intWeightUOMId', records[0].get('intItemUOMId'));
+            current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
+            if (current.tblICInventoryReceiptItemLots()) {
+                Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function(lot) {
+                    if (!lot.dummy) {
+                        lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
+                    }
+                });
+            }
+            if (records[0].get('strUnitType') === 'Weight') {
+                grdLotTracking.columns[1].setHidden(false);
+            }
+            else {
+                grdLotTracking.columns[1].setHidden(true);
+            }
         }
 
         this.calculateGrossWeight(current);
@@ -691,11 +726,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (record.tblICInventoryReceiptItemLots()){
             Ext.Array.each(record.tblICInventoryReceiptItemLots().data.items, function(lot) {
-                if (record.get('intWeightUOMId') !== null && record.get('intWeightUOMId') !== undefined) {
+                if (!lot.dummy) {
+                    var qty = lot.get('dblQuantity');
+                    var lotCF = lot.get('dblLotUOMConvFactor');
+                    var itemUOMCF = record.get('dblItemUOMConvFactor');
+                    var weightCF = record.get('dblWeightUOMConvFactor');
 
-                }
-                else {
+                    if (record.get('intWeightUOMId') === null || record.get('intWeightUOMId') === undefined) {
+                        weightCF = itemUOMCF;
+                    }
 
+                    var total = (lotCF * qty) * weightCF;
+                    lot.set('dblGrossWeight', total);
+                    var tare = lot.get('dblTareWeight');
+                    var netTotal = total - tare;
+                    lot.set('dblNetWeight', netTotal);
                 }
             });
         }
@@ -919,6 +964,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onEditItem: function (editor, context, eOpts) {
+        var win = editor.grid.up('window');
+        var me = win.controller;
         if (context.field === 'dblOpenReceive' || context.field === 'dblUnitCost')
         {
             if (context.record) {
@@ -937,6 +984,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     var tblICInventoryReceiptItemLots = vw.data.currentReceiptItem.tblICInventoryReceiptItemLots();
                     if (tblICInventoryReceiptItemLots.data.length > 0){
                         tblICInventoryReceiptItemLots.data.items[0].set('dblQuantity', context.value);
+                        me.calculateGrossWeight(record);
                     }
                 }
                 else if (context.field === 'dblUnitCost'){
@@ -946,53 +994,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 record.set('dblLineTotal', value);
             }
         }
-        else if (context.field === 'intNoPackages')
-        {
-            if (context.record) {
-                var record = context.record;
-                var grid = context.column.up('grid');
-                var cboPackageType = grid.columns[15].getEditor();
-                
-                if (cboPackageType){
-                    var packStore = cboPackageType.store;
-                    if (packStore) {
-                        var index = packStore.findExact('intUnitMeasureId', context.value);
-                        var sourcePackage = packStore.getAt(index);
-                        if (sourcePackage) {
-                            var convertTo = sourcePackage.get('dblConversionToStock');
-                            var noPackages = context.value;
-                            var qtyReceive = record.get('dblOpenReceive');
-                            var final = noPackages * convertTo / qtyReceive * noPackages;
-
-                            record.set('dblExpPackageWeight', final);
-                        }
-                    }
-                }
-            }
-        }
     },
 
     onEditLots: function (editor, context, eOpts) {
         if (context.field === 'dblQuantity')
         {
-            if (context.record) {
-                var totalValue = 0;
-                var win = context.grid.up('window');
-                var store = context.grid.store;
-
-                Ext.Array.each(store.data.items, function(record) {
-                    if (record.get('intInventoryReceiptItemLotId') === context.record.get('intInventoryReceiptItemLotId')){
-                        totalValue += context.value;
-                    }
-                    else{
-                        totalValue += record.get('dblQuantity');
-                    }
-                });
-
-
-                var txtLotTotalQty = win.down('#txtLotTotalQty');
-                txtLotTotalQty.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(totalValue, 2));
+            var win = editor.grid.up('window');
+            var qty = context.value;
+            var lotCF = context.record.get('dblLotUOMConvFactor');
+            var itemUOMCF = win.viewModel.data.currentReceiptItem.get('dblItemUOMConvFactor');
+            var weightCF = win.viewModel.data.currentReceiptItem.get('dblWeightUOMConvFactor');
+            if (win.viewModel.data.currentReceiptItem.get('intWeightUOMId') === null || win.viewModel.data.currentReceiptItem.get('intWeightUOMId') === undefined) {
+                weightCF = itemUOMCF;
             }
+            var total = (lotCF * qty) * weightCF;
+            context.record.set('dblGrossWeight', total);
+            var tare = context.record.get('dblTareWeight');
+            var netTotal = total - tare;
+            context.record.set('dblNetWeight', netTotal);
         }
         else if (context.field === 'dblGrossWeight' || context.field === 'dblTareWeight') {
             var gross = context.record.get('dblGrossWeight');
@@ -1425,6 +1444,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
             var pnlLotTracking = win.down('#pnlLotTracking');
+            var grdLotTracking = win.down('#grdLotTracking');
             var txtLotItemId = win.down('#txtLotItemId');
             var txtLotItemDescription = win.down('#txtLotItemDescription');
             var txtLotUOM = win.down('#txtLotUOM');
@@ -1448,6 +1468,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     txtLotUOM.setValue(current.get('strUnitMeasure'));
                     txtLotItemQty.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblOpenReceive'), 2));
                     txtLotCost.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblUnitCost'), 2));
+
+                    if (current.get('strUnitType') === 'Weight') {
+                        grdLotTracking.columns[1].setHidden(false);
+                    }
+                    else {
+                        grdLotTracking.columns[1].setHidden(true);
+                    }
                 }
                 else {
                     vm.data.currentReceiptItem = null;
@@ -1462,6 +1489,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             else {
                 pnlLotTracking.setHidden(true);
             }
+
         }
     },
 
@@ -1469,6 +1497,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (records.length <= 0)
             return;
 
+        var win = combo.up('window');
+        var me = win.controller;
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItemLots');
         var current = plugin.getActiveRecord();
@@ -1477,20 +1507,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
-        }
-    },
-
-    onReceiptTabChange: function(tabPanel, newCard, oldCard, eOpts) {
-        switch(newCard.itemId) {
-            case 'pgeLots':
-                var win = tabPanel.up('window');
-                var vm = win.viewModel;
-                var currentItem = vm.data.currentReceiptItem;
-                if (currentItem === undefined || currentItem === null){
-                    iRely.Functions.showErrorDialog('Please select a lot tracked Item.');
-                    oldCard.show();
-                }
-                break;
+            me.calculateGrossWeight(win.viewModel.data.currentReceiptItem);
         }
     },
 
@@ -1507,9 +1524,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onReceiptItemSelect
             },
             "#cboItemUOM": {
-                select: this.onReceiptItemSelect
-            },
-            "#cboPackageType": {
                 select: this.onReceiptItemSelect
             },
             "#cboCalculationBasis": {
@@ -1564,9 +1578,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboWeightUOM": {
                 select: this.onReceiptItemSelect
-            },
-            "#tabInventoryReceipt": {
-                tabchange: this.onReceiptTabChange
             }
         })
     }
