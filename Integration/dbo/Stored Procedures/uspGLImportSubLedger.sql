@@ -7,7 +7,7 @@ BEGIN
 			DROP PROCEDURE [dbo].[uspGLImportSubLedger];
 	')
 
-EXEC('ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
+EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
     	AS
     	BEGIN
