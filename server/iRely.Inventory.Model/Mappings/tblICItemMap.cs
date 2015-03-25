@@ -215,7 +215,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
             this.Property(t => t.strStockUOMType).HasColumnName("strStockUOMType");
             this.Property(t => t.intReceiveUOMId).HasColumnName("intReceiveUOMId");
+            this.Property(t => t.dblReceiveUOMConvFactor).HasColumnName("dblReceiveUOMConvFactor").HasPrecision(18, 6);
             this.Property(t => t.intIssueUOMId).HasColumnName("intIssueUOMId");
+            this.Property(t => t.dblIssueUOMConvFactor).HasColumnName("dblIssueUOMConvFactor").HasPrecision(18, 6);
             this.Property(t => t.strReceiveUOMType).HasColumnName("strReceiveUOMType");
             this.Property(t => t.strIssueUOMType).HasColumnName("strIssueUOMType");
             this.Property(t => t.strReceiveUOM).HasColumnName("strReceiveUOM");

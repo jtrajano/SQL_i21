@@ -179,35 +179,39 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         }]
                     }
                 },
+                colWeightUOM: {
+                    dataIndex: 'strWeightUOM',
+                    editor: {
+                        store: '{weightUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdInventoryReceipt.selection.intItemId}',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colUnitCost: 'dblUnitCost',
                 colUnitRetail: 'dblUnitRetail',
                 colLineTotal: 'dblLineTotal',
-                colGrossMargin: 'dblGrossMargin',
-                colPackages: 'intNoPackages',
-                colPackageType: {
-                    dataIndex: 'strPackName',
-                    editor: {
-                        store: '{packageType}'
-                    }
-                },
-                colExpPackageWt: 'dblExpPackageWeight'
+                colGrossMargin: 'dblGrossMargin'
             },
 
             grdLotTracking: {
                 colLotId: {
                     dataIndex: 'strLotNumber'
                 },
-                colLotQuantity: 'dblQuantity',
-                colLotWeightUOM: {
-                    dataIndex: 'strWeightUOM',
+                colLotUOM: {
+                    dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{weightUOM}',
+                        store: '{lotUOM}',
                         defaultFilters: [{
-                            column: 'strUnitType',
-                            value: 'Weight'
+                            column: 'intItemId',
+                            value: '{currentReceiptItem.intItemId}',
+                            conjunction: 'and'
                         }]
                     }
                 },
+                colLotQuantity: 'dblQuantity',
                 colLotGrossWeight: 'dblGrossWeight',
                 colLotTareWeight: 'dblTareWeight',
                 colLotNetWeight: 'dblNetWeight',
@@ -221,6 +225,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotStatedGross: 'dblStatedGrossPerUnit',
                 colLotStatedTare: 'dblStatedTarePerUnit',
                 colLotStatedNet: 'dblStatedNetPerUnit',
+                colLotWeightUOM: 'strWeightUOM',
                 colLotPhyVsStated: 'dblPhyVsStated',
                 colLotParentLotId: {
                     dataIndex: 'strParentLotId',
@@ -404,7 +409,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        var colTaxDetails = grdInventoryReceipt.columns[17];
+        var colTaxDetails = grdInventoryReceipt.columns[15];
         var btnViewTaxDetail = colTaxDetails.items[0];
         if (btnViewTaxDetail){
             btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
@@ -598,7 +603,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             return;
 
         var win = combo.up('window');
-        var grdLotTracking = win.down('#grdLotTracking');
+        var pnlLotTracking = win.down('#pnlLotTracking');
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
@@ -612,43 +617,58 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strUnitMeasure', records[0].get('strReceiveUOM'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
+            current.set('dblItemUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
 
-            var intWeightUOM = null;
+            var intUOM = null;
+            var strUOM = '';
             var strWeightUOM = '';
+
             if (records[0].get('strReceiveUOMType') === 'Weight'){
-                intWeightUOM = records[0].get('intReceiveUOMId');
+                intUOM = records[0].get('intReceiveUOMId');
+                strUOM = records[0].get('strReceiveUOM');
                 strWeightUOM = records[0].get('strReceiveUOM');
+                current.set('intWeightUOMId', intUOM);
+                current.set('strWeightUOM', strUOM);
+                current.set('dblWeightUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
             }
             else if (records[0].get('strStockUOMType') === 'Weight'){
-                intWeightUOM = records[0].get('intStockUOMId');
+                intUOM = records[0].get('intStockUOMId');
+                strUOM = records[0].get('strStockUOM');
                 strWeightUOM = records[0].get('strStockUOM');
+                current.set('intWeightUOMId', intUOM);
+                current.set('strWeightUOM', strUOM);
+                current.set('dblWeightUOMConvFactor', 1);
+            }
+            else {
+                intUOM = records[0].get('intReceiveUOMId');
+                strUOM = records[0].get('strReceiveUOM');
+                strWeightUOM = '';
+                current.set('dblWeightUOMConvFactor', 0);
             }
 
             switch (records[0].get('strLotTracking')){
                 case 'Yes - Serial Number':
-                    grdLotTracking.setHidden(false);
+                case 'Yes - Manual':
+                    pnlLotTracking.setHidden(false);
                     var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
                         intInventoryReceiptItemId: current.get('intInventoryReceiptItemId') || current.get('strClientId'),
                         strLotId: '',
                         strContainerNo: '',
+                        intItemUnitMeasureId: intUOM,
+                        strUnitMeasure: strUOM,
+                        strWeightUOM: strWeightUOM,
                         dblQuantity: '',
                         intUnitPallet: '',
                         dblGrossWeight: '',
                         dblTareWeight: '',
-                        intWeightUOMId: intWeightUOM,
-                        strWeightUOM: strWeightUOM,
                         dblStatedGrossPerUnit: '',
                         dblStatedTarePerUnit: ''
                     });
                     current.tblICInventoryReceiptItemLots().add(newLot);
                     break;
 
-                case 'Yes - Manual':
-                    grdLotTracking.setHidden(false);
-                    break;
-
                 default :
-                    grdLotTracking.setHidden(true);
+                    pnlLotTracking.setHidden(true);
                     break;
             }
         }
@@ -658,16 +678,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
         }
-        else if (combo.itemId === 'cboPackageType')
+        else if (combo.itemId === 'cboWeightUOM')
         {
-            current.set('intPackageTypeId', records[0].get('intUnitMeasureId'));
+            current.set('intWeightUOMId', records[0].get('intItemUnitMeasureId'));
+        }
 
-            var convertTo = records[0].get('dblConversionToStock');
-            var noPackages = current.get('intNoPackages');
-            var qtyReceive = current.get('dblOpenReceive');
-            var final = noPackages * convertTo / qtyReceive * noPackages;
+        this.calculateGrossWeight(current);
+    },
 
-            current.set('dblExpPackageWeight', final);
+    calculateGrossWeight: function(record){
+        if (!record) return;
+
+        if (record.tblICInventoryReceiptItemLots()){
+            Ext.Array.each(record.tblICInventoryReceiptItemLots().data.items, function(lot) {
+                if (record.get('intWeightUOMId') !== null && record.get('intWeightUOMId') !== undefined) {
+
+                }
+                else {
+
+                }
+            });
         }
     },
 
@@ -992,16 +1022,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var proxy = obj.combo.store.proxy;
                 proxy.setExtraParams({include:'tblEntityLocations'});
             }
-            else if (obj.combo.itemId === 'cboLotWeightUOM') {
+            else if (obj.combo.itemId === 'cboLotUOM') {
                 obj.combo.defaultFilters = [{
                     column: 'intItemId',
                     value: win.viewModel.data.currentReceiptItem.get('intItemId')
                 }];
             }
-            else if (obj.combo.itemId === 'cboLotUnitUOM') {
+            else if (obj.combo.itemId === 'cboWeightUOM') {
                 obj.combo.defaultFilters = [{
                     column: 'intItemId',
-                    value: win.viewModel.data.currentReceiptItem.get('intItemId')
+                    value: win.viewModel.data.currentReceiptItem.get('intItemId'),
+                    conjunction: 'and'
                 }];
             }
         }
@@ -1023,7 +1054,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var win = combo.up('window');
         var grid = combo.up('grid');
-        var grdLotTracking = win.down('#grdLotTracking');
+        var pnlLotTracking = win.down('#pnlLotTracking');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         var po = records[0];
@@ -1049,10 +1080,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         switch(po.get('strLotTracking')) {
             case 'Yes - Serial Number':
             case 'Yes - Manual':
-                grdLotTracking.setHidden(false);
+                pnlLotTracking.setHidden(false);
                 break;
             default:
-                grdLotTracking.setHidden(true);
+                pnlLotTracking.setHidden(true);
                 break;
         }
     },
@@ -1393,7 +1424,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (selModel) {
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
-            var grdLotTracking = win.down('#grdLotTracking');
+            var pnlLotTracking = win.down('#pnlLotTracking');
             var txtLotItemId = win.down('#txtLotItemId');
             var txtLotItemDescription = win.down('#txtLotItemDescription');
             var txtLotUOM = win.down('#txtLotUOM');
@@ -1426,10 +1457,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 vm.data.currentReceiptItem = null;
             }
             if (vm.data.currentReceiptItem !== null){
-                grdLotTracking.setHidden(false);
+                pnlLotTracking.setHidden(false);
             }
             else {
-                grdLotTracking.setHidden(true);
+                pnlLotTracking.setHidden(true);
             }
         }
     },
@@ -1442,13 +1473,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var plugin = grid.getPlugin('cepItemLots');
         var current = plugin.getActiveRecord();
 
-        if (combo.itemId === 'cboLotWeightUOM')
+        if (combo.itemId === 'cboLotUOM')
         {
-            current.set('intWeightUOMId', records[0].get('intItemUOMId'));
-        }
-        else if (combo.itemId === 'cboLotUnitUOM')
-        {
-            current.set('intUnitUOMId', records[0].get('intItemUOMId'));
+            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
+            current.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
         }
     },
 
@@ -1531,13 +1559,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#grdInventoryReceipt": {
                 selectionchange: this.onItemSelectionChange
             },
-            "#cboLotWeightUOM": {
-                beforequery: this.onShipFromBeforeQuery,
+            "#cboLotUOM": {
                 select: this.onLotSelect
             },
-            "#cboLotUnitUOM": {
-                beforequery: this.onShipFromBeforeQuery,
-                select: this.onLotSelect
+            "#cboWeightUOM": {
+                select: this.onReceiptItemSelect
             },
             "#tabInventoryReceipt": {
                 tabchange: this.onReceiptTabChange

@@ -40,9 +40,7 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'dblOpenReceive', type: 'float'},
         { name: 'dblReceived', type: 'float'},
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
-        { name: 'intNoPackages', type: 'int'},
-        { name: 'intPackageTypeId', type: 'int', allowNull: true },
-        { name: 'dblExpPackageWeight', type: 'float'},
+        { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'dblUnitCost', type: 'float'},
         { name: 'dblUnitRetail', type: 'float'},
         { name: 'dblLineTotal', type: 'float'},
@@ -53,7 +51,9 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strItemDescription', type: 'string'},
         { name: 'strLotTracking', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strWeightUOM', type: 'string'},
         { name: 'strSubLocationName', type: 'string'}
+
     ],
 
     validators: [

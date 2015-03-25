@@ -168,9 +168,7 @@ namespace iRely.Inventory.Model
         public decimal? dblOpenReceive { get; set; }
         public decimal? dblReceived { get; set; }
         public int? intUnitMeasureId { get; set; }
-        public int? intNoPackages { get; set; }
-        public int? intPackageTypeId { get; set; }
-        public decimal? dblExpPackageWeight { get; set; }
+        public int? intWeightUOMId { get; set; }
         public decimal? dblUnitCost { get; set; }
         public decimal? dblLineTotal { get; set; }
         public int? intSort { get; set; }
@@ -286,25 +284,6 @@ namespace iRely.Inventory.Model
                 _uom = value;
             }
         }
-        private string _packName;
-        [NotMapped]
-        public string strPackName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_packName))
-                    if (PackageType != null)
-                        return PackageType.strUnitMeasure;
-                    else
-                        return null;
-                else
-                    return _packName;
-            }
-            set
-            {
-                _packName = value;
-            }
-        }
         private string _subLocationName;
         [NotMapped]
         public string strSubLocationName
@@ -321,14 +300,66 @@ namespace iRely.Inventory.Model
             }
             set
             {
-                _packName = value;
+                _subLocationName = value;
+            }
+        }
+        string _weigthUOM;
+        [NotMapped]
+        public string strWeightUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_weigthUOM))
+                    if (WeightUOM != null)
+                        return WeightUOM.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _weigthUOM;
+            }
+            set
+            {
+                _weigthUOM = value;
+            }
+        }
+        private decimal? _itemConv;
+        [NotMapped]
+        public decimal? dblItemUOMConvFactor
+        {
+            get
+            {
+                if (tblICItemUOM != null)
+                    return tblICItemUOM.dblUnitQty;
+                else
+                    return null;
+            }
+            set
+            {
+                _itemConv = value;
+            }
+        }
+        private decimal? _weightConv;
+        [NotMapped]
+        public decimal? dblWeightUOMConvFactor
+        {
+            get
+            {
+                if (WeightUOM != null)
+                    return WeightUOM.dblUnitQty;
+                else
+                    return null;
+            }
+            set
+            {
+                _weightConv = value;
             }
         }
         
+
+        public tblICItemUOM WeightUOM { get; set; }
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public tblICItem tblICItem { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
-        public tblICUnitMeasure PackageType { get; set; }
         public vyuICGetReceiptItemSource vyuICGetReceiptItemSource { get; set; }
         public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         
@@ -356,10 +387,11 @@ namespace iRely.Inventory.Model
         public string strLotAlias { get; set; }
         public int? intSubLocationId { get; set; }
         public int? intStorageLocationId { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
         public decimal? dblQuantity { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
-        public int? intWeightUOMId { get; set; }
+        
         public decimal? dblCost { get; set; }
         public int? intUnitPallet { get; set; }
         public decimal? dblStatedGrossPerUnit { get; set; }
@@ -380,25 +412,6 @@ namespace iRely.Inventory.Model
         public DateTime? dtmExpiryDate { get; set; }
         public int? intSort { get; set; }
 
-        string _weigthUOM;
-        [NotMapped]
-        public string strWeightUOM
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_weigthUOM))
-                    if (WeightUOM != null)
-                        return WeightUOM.strUnitMeasure;
-                    else
-                        return null;
-                else
-                    return _weigthUOM;
-            }
-            set
-            {
-                _weigthUOM = value;
-            }
-        }
         [NotMapped]
         public decimal dblNetWeight
         {
@@ -407,9 +420,84 @@ namespace iRely.Inventory.Model
                 return (this.dblGrossWeight ?? 0) - (this.dblTareWeight ?? 0);
             }
         }
+        private string _uom;
+        [NotMapped]
+        public string strUnitMeasure
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_uom))
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _uom;
+            }
+            set
+            {
+                _uom = value;
+            }
+        }
+        private string _weightUOM;
+        [NotMapped]
+        public string strWeightUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_weightUOM))
+                    if (tblICInventoryReceiptItem != null)
+                        return tblICInventoryReceiptItem.strWeightUOM;
+                    else
+                        return null;
+                else
+                    return _weightUOM;
+            }
+            set
+            {
+                _weightUOM = value;
+            }
+        }
+        private decimal? _lotConv;
+        [NotMapped]
+        public decimal? dblLotUOMConvFactor
+        {
+            get
+            {
+                if (tblICItemUOM != null)
+                    return tblICItemUOM.dblUnitQty;
+                else
+                    return null;
+            }
+            set
+            {
+                _lotConv = value;
+            }
+        }
+        private string _storageLocation;
+        [NotMapped]
+        public string strStorageLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_storageLocation))
+                    if (tblICStorageLocation != null)
+                        return tblICStorageLocation.strName;
+                    else
+                        return null;
+                else
+                    return _storageLocation;
+            }
+            set
+            {
+                _storageLocation = value;
+            }
+        }
 
-        public tblICItemUOM WeightUOM { get; set; }
+        public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
         public tblICLot tblICLot { get; set; }
+        public tblICItemUOM tblICItemUOM { get; set; }
+        public tblICStorageLocation tblICStorageLocation { get; set; }
     }
 
     public class tblICInventoryReceiptItemTax : BaseEntity
