@@ -208,28 +208,29 @@ BEGIN
 					WHERE B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 							AND (B.intAccountId IS NULL AND B.intAccountId = 0))
 
-		INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT
-			'The item "' + C.strItemNo + '" on this transaction was already billed.',
-			'Bill',
-			A.strBillId,
-			@batchId,
-			A.intBillId
-		FROM tblAPBill A 
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			INNER JOIN
-			(
-				SELECT
-					D.strReceiptNumber
-					,F.strItemNo
-					,intInventoryReceiptItemId
-					,intLineNo
-				FROM tblICInventoryReceipt D
-					INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
-					INNER JOIN tblICItem F ON E.intItemId = F.intItemId
-				WHERE E.dblOpenReceive = E.dblBillQty
-			) C ON C.intLineNo = B.intItemReceiptId
-			WHERE A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+		--INSERT INTO #tmpInvalidBillData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		--SELECT
+		--	'The item "' + C.strItemNo + '" on this transaction was already billed.',
+		--	'Bill',
+		--	A.strBillId,
+		--	@batchId,
+		--	A.intBillId
+		--FROM tblAPBill A 
+		--	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		--	INNER JOIN
+		--	(
+		--		SELECT
+		--			D.strReceiptNumber
+		--			,F.strItemNo
+		--			,intInventoryReceiptItemId
+		--			,intLineNo
+		--		FROM tblICInventoryReceipt D
+		--			INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
+		--			INNER JOIN tblICItem F ON E.intItemId = F.intItemId
+		--		WHERE E.dblOpenReceive = E.dblBillQty
+		--	) C ON C.intLineNo = B.intItemReceiptId
+		--	WHERE A.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+
 	END 
 
 	--UNPOSTING VALIDATIONS
@@ -366,7 +367,7 @@ BEGIN
 			[strDescription] = A.strReference,
 			[strJournalLineDescription] = 'Posted Bill',
 			[strReference] = C.strVendorId,
-			[dtmTransactionDate] = A.dtmDate,
+			[dtmTransactionDate] = A.dtmBillDate,
 			[dblDebit]				= CASE WHEN @post = 1 THEN 0 ELSE A.dblTotal END,
 			[dblCredit]				= CASE WHEN @post = 1 THEN A.dblTotal ELSE 0 END,
 			[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END,
@@ -400,7 +401,7 @@ BEGIN
 			[strDescription] = A.strReference,
 			[strJournalLineDescription] = B.strDescription,
 			[strReference] = C.strVendorId,
-			[dtmTransactionDate] = A.dtmDate,
+			[dtmTransactionDate] = A.dtmBillDate,
 			[dblDebit]				= CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END, --Bill Detail
 			[dblCredit]				= CASE WHEN @post = 1 THEN 0 ELSE B.dblTotal END, -- Bill
 			[dblDebitUnit]			= CASE WHEN @post = 1 THEN ISNULL(A.[dblTotal], 0)  * ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) ELSE 0 END,

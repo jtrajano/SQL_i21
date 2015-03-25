@@ -34,7 +34,7 @@ FROM tblPOPurchase A
 		FROM tblICInventoryReceipt A
 			INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
 			INNER JOIN tblICItemLocation loc ON B.intItemId = loc.intItemId AND A.intLocationId = loc.intLocationId
-		WHERE A.ysnPosted = 1 AND B.dblOpenReceive != B.dblBillQty
+		WHERE A.ysnPosted = 1 AND B.dblReceived != B.dblBillQty
 		GROUP BY
 			B.intInventoryReceiptItemId
 			,B.intItemId 

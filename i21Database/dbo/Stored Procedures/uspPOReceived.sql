@@ -8,6 +8,8 @@ BEGIN
 	DECLARE @strItemNo NVARCHAR(50);
 	DECLARE @posted BIT;
 	DECLARE @receivedNum DECIMAL(18,6);
+	DECLARE @itemFull NVARCHAR(200);
+	DECLARE @errMsg NVARCHAR(200);
 
 	IF OBJECT_ID('tempdb..#receivedItems') IS NOT NULL
 		DROP TABLE #receivedItems
@@ -49,6 +51,46 @@ BEGIN
 	SELECT TOP (1) @posted = ysnPosted FROM #receivedItems
 
 	--VALIDATIONS
+
+	IF(@tranType = 1)
+	BEGIN
+		SELECT @itemFull = C.strItemNo FROM tblPOPurchaseDetail A 
+						INNER JOIN #receivedItems B ON A.intPurchaseDetailId = B.intLineNo 
+															AND A.intItemId = B.intItemId 
+															AND intPurchaseId = intSourceId 
+						INNER JOIN tblICItem C ON B.intItemId = C.intItemId
+						INNER JOIN tblICInventoryReceiptItem D ON B.intLineNo = D.intLineNo
+						WHERE C.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')
+						AND D.dblBillQty = D.dblReceived AND dblReceived != 0
+
+		IF @itemFull IS NOT NULL AND @posted = 1
+		BEGIN
+			--fully billed item
+			SET @errMsg = '''' + @itemFull + ''' item was fully billed.'
+			RAISERROR(@errMsg, 16, 1); 
+			RETURN;
+		END
+	END
+
+	IF(@tranType = 2)
+	BEGIN
+		SELECT @itemFull = C.strItemNo FROM tblPOPurchaseDetail A 
+						INNER JOIN #receivedItems B ON A.intPurchaseDetailId = B.intLineNo 
+															AND A.intItemId = B.intItemId 
+															AND intPurchaseId = intSourceId 
+															AND dblQtyReceived = dblQtyOrdered
+						INNER JOIN tblICItem C ON B.intItemId = C.intItemId
+						WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
+
+		IF @itemFull IS NOT NULL AND @posted = 1
+		BEGIN
+			--fully billed item
+			SET @errMsg = '''' + @itemFull + ''' item was fully billed.'
+			RAISERROR(@errMsg, 16, 1); 
+			RETURN;
+		END
+	END
+
 	--Validate if purchase order exists..
 	DECLARE @purchaseOrderNumber NVARCHAR(50);
 	SELECT	TOP 1 
