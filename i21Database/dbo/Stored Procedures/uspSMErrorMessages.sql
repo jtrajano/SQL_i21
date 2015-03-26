@@ -196,3 +196,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51048) EXEC sp_dropmessa
 SET @strmessage = '%s with lot number %s needs to have a weight.'
 EXEC sp_addmessage 51048,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51049) EXEC sp_dropmessage 51049, 'us_english'	
+SET @strmessage = 'Please correct the UOM. The UOM for %s in PO is %s. It is now using %s in the Inventory Receipt'
+EXEC sp_addmessage 51049,11,@strmessage,'us_english','False'
+
