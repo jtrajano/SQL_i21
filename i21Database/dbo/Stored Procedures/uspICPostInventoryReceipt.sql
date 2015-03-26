@@ -116,6 +116,17 @@ BEGIN
 	END  
 END   
 
+-- Check the UOM
+BEGIN 
+	DECLARE @intUOMError AS INT
+
+	EXEC @intUOMError = dbo.uspICValidateInventoryRecieptwithPO
+		@strTransactionId
+
+	IF @intUOMError <> 0 
+		GOTO Post_Exit    
+END 
+
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
