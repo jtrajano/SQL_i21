@@ -52,7 +52,7 @@ BEGIN
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
-				,dblOnOrder = -450
+				,dblOnOrder = 0 -- It should never go down to -450. When it goes negative, the order qty is set to zero. 
 
 		CREATE TABLE actual (
 			intItemId INT
