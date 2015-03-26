@@ -148,3 +148,63 @@
 		SET @Message = 'There is a discrepancy on Term records.'
 		RETURN;	
 	END
+
+
+	--==========================
+	--	Company Location Setup
+	--==========================		
+	DECLARE @CompanyLocation VARCHAR(250)
+	--AR Account
+	SET @CompanyLocation = 
+	(SELECT TOP 1 CL.strLocationName
+	FROM agivcmst
+	LEFT JOIN tblARInvoice Inv ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+	INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = agivc_bill_to_cus COLLATE Latin1_General_CI_AS
+	INNER JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = agivc_slsmn_no COLLATE Latin1_General_CI_AS
+	INNER JOIN tblSMCompanyLocation CL ON agivcmst.agivc_loc_no COLLATE Latin1_General_CI_AS = CL.strLocationNumber  COLLATE Latin1_General_CI_AS
+	WHERE Inv.strInvoiceNumber IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
+	AND (
+			((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+			OR
+			((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+		)
+	AND (CL.intARAccount IS NULL OR CL.intARAccount = 0))
+
+	IF(@CompanyLocation IS NULL)
+	BEGIN
+		SET @Sucess = 1
+	END
+	IF(@CompanyLocation IS NOT NULL)
+	BEGIN
+		SET @Sucess = 0
+		SET @Message = 'The AR Account of Company Location - ' + @CompanyLocation + 'was not set.'
+		RETURN;	
+	END
+
+	--Service Charge Account
+	SET @CompanyLocation = NULL
+	SET @CompanyLocation = 
+	(SELECT TOP 1 CL.strLocationName
+	FROM agivcmst
+	LEFT JOIN tblARInvoice Inv ON agivcmst.agivc_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+	INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = agivc_bill_to_cus COLLATE Latin1_General_CI_AS
+	INNER JOIN tblARSalesperson Salesperson ON strSalespersonId COLLATE Latin1_General_CI_AS = agivc_slsmn_no COLLATE Latin1_General_CI_AS
+	INNER JOIN tblSMCompanyLocation CL ON agivcmst.agivc_loc_no COLLATE Latin1_General_CI_AS = CL.strLocationNumber  COLLATE Latin1_General_CI_AS
+	WHERE Inv.strInvoiceNumber IS NULL AND agivcmst.agivc_ivc_no = UPPER(agivcmst.agivc_ivc_no) COLLATE Latin1_General_CS_AS
+	AND (
+			((CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) BETWEEN @StartDate AND @EndDate)
+			OR
+			((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+		)
+	AND (CL.intServiceCharges IS NULL OR CL.intServiceCharges = 0))
+
+	IF(@CompanyLocation IS NULL)
+	BEGIN
+		SET @Sucess = 1
+	END
+	IF(@CompanyLocation IS NOT NULL)
+	BEGIN
+		SET @Sucess = 0
+		SET @Message = 'The Service Charge Account of Company Location - ' + @CompanyLocation + 'was not set.'
+		RETURN;	
+	END
