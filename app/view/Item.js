@@ -1953,11 +1953,12 @@ Ext.define('Inventory.view.Item', {
                                                                                 },
                                                                                 items: [
                                                                                     {
-                                                                                        xtype: 'textfield',
+                                                                                        xtype: 'numberfield',
                                                                                         flex: 2,
                                                                                         itemId: 'txtLifeTime',
                                                                                         fieldLabel: 'Life Time',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 125,
+                                                                                        hideTrigger: true
                                                                                     },
                                                                                     {
                                                                                         xtype: 'combobox',
