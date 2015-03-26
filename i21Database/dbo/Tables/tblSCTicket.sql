@@ -78,6 +78,7 @@
 	[intContractId] INT NULL,
     [intDiscountLocationId] INT NULL,
 	[intItemId] INT NULL,
+	[intEntityId] INT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),
@@ -89,7 +90,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
     CONSTRAINT [FK_tblSCTicket_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
 	CONSTRAINT [FK_tblSCTicket_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-	CONSTRAINT [FK_tblSCTicket_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+	CONSTRAINT [FK_tblSCTicket_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblSCTicket_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId])
 )
 
 GO
@@ -803,3 +805,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'intItemId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Entity Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intEntityId'

@@ -2275,4 +2275,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strRecurringPONumber" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d3c94db7-ae8e-434b-9349-e0278bc1ab49" ChangeDateTime="03/26/2015 10:25:46">
+    <Property Name="ElementName" Value="[dbo].[tblSCTruckDriverReference].[intCustomerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTruckDriverReference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
+  </Operation>
 </Operations>
