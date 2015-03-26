@@ -78,6 +78,18 @@ IF ISNULL(@ysnPost, 0) = 0
 							'Unable to find an open accounting period to match the transaction date.' AS strMessage
 						FROM tblGLJournal A 
 						WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0 
+
+						UNION 
+						SELECT DISTINCT A.intJournalId,
+							'Unable to post. The transaction includes restricted accounts.' AS strMessage
+						FROM tblGLJournalDetail A JOIN tblGLAccount B
+						ON A.intAccountId = B.intAccountId
+						JOIN tblGLAccountCategory C
+						ON B.intAccountCategoryId = C.intAccountCategoryId
+						WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
+						AND C.strAccountCategory != 'General'
+						GROUP BY A.intJournalId	
+
 					) tmpBatchResults
 			END
 
@@ -166,6 +178,17 @@ IF ISNULL(@ysnRecap, 0) = 0
 				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
 				GROUP BY A.intJournalId		
 				HAVING SUM(ISNULL(A.dblCredit,0)) <> SUM(ISNULL(A.dblDebit,0)) 
+
+				UNION 
+				SELECT DISTINCT A.intJournalId,
+					'Unable to post. The transaction includes restricted accounts.' AS strMessage
+				FROM tblGLJournalDetail A JOIN tblGLAccount B
+				ON A.intAccountId = B.intAccountId
+				JOIN tblGLAccountCategory C
+				ON B.intAccountCategoryId = C.intAccountCategoryId
+				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
+				AND C.strAccountCategory != 'General'
+				GROUP BY A.intJournalId	
 				--UNION 
 				--SELECT DISTINCT B.intJournalId,
 				--	'You cannot post this transaction because Accounting Unit setup does not match account id ' + C.strAccountId + ' setup.' AS strMessage

@@ -22,8 +22,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dblRate] [numeric](8, 4) NOT NULL,
 	[strCurrencyReference] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
 	[intMarketZoneId] [int] NOT NULL,
-	[intDiscount] [int] NOT NULL CONSTRAINT [DF_tblCTContractDetail_intDiscount]  DEFAULT ((1)),
-	[intDiscountSchedule] [int] NULL,
+	[intDiscountType] [int] NOT NULL ,
+	[intDiscountId] [int] NULL,
 	[intContractOptHeaderId] [int] NULL,
 	[strBuyerSeller] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intBillTo] [int] NULL,
@@ -49,5 +49,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMFreightTerms_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]),
 	CONSTRAINT [FK_tblCTContractDetail_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblAPVendor_intVendorId] FOREIGN KEY ([intBillTo]) REFERENCES [tblAPVendor]([intVendorId])
+	CONSTRAINT [FK_tblCTContractDetail_tblAPVendor_intVendorId] FOREIGN KEY ([intBillTo]) REFERENCES [tblAPVendor]([intVendorId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblCTDiscount_intDiscountType] FOREIGN KEY ([intDiscountType]) REFERENCES [tblCTDiscount]([Value])
 ) 

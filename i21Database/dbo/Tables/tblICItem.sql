@@ -76,6 +76,9 @@ Type the overview for the table here.
 		[ysnExportEDI] BIT NULL DEFAULT ((0)), 
 		[ysnHazardMaterial] BIT NULL DEFAULT ((0)), 
 		[ysnMaterialFee] BIT NULL DEFAULT ((0)), 
+		[ysnAutoBlend] BIT NULL DEFAULT ((0)),
+		[ysnEnableHelpDesk] BIT NULL DEFAULT ((0)),
+		[ysnUserGroupFee] BIT NULL DEFAULT ((0)),
 		[strNACSCategory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strWICCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intAGCategory] INT NULL, 
@@ -882,3 +885,30 @@ Type the overview for the table here.
 
 		GO
 		EXECUTE sp_addextendedproperty @name = N'iMake Mapping', @value = N'Identity Field', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'intItemId';
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Auto Blend',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnAutoBlend'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Enable HelpDesk',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnableHelpDesk'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'User Group Fee',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnUserGroupFee'

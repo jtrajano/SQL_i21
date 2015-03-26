@@ -163,3 +163,19 @@ UPDATE tblFRReport SET strReportType = 'Single'
 GO
 	PRINT N'END RENAME REPORT TYPE'
 GO
+
+
+--=====================================================================================================================================
+-- 	FIX: NULL Description to EMPTY String
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN NULL TO EMPTY STRING'
+GO
+
+UPDATE tblFRRowDesign SET strDescription = '' 
+	WHERE strDescription is null 
+
+GO
+	PRINT N'END NULL TO EMPTY STRING'
+GO

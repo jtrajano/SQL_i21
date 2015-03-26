@@ -1395,6 +1395,10 @@ GO
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Custom Fields' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
 	UPDATE tblSMMasterMenu SET intSort = 6 WHERE strMenuName = 'Custom Fields' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId	
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Company Setup' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Company Setup', 'System Manager', @SystemManagerAdminMenuId, 'Company Setup', 'Screen', 'i21.view.CompanySetup', 'small-screen', 0, 0, 0, 1, 7, 1)
+
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
 	UPDATE tblSMMasterMenu SET intSort = 8 WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
 
@@ -1853,6 +1857,7 @@ GO
 	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.HelpDeskEmailSetup' WHERE strCommand = 'HelpDesk.controller.EmailSetup'
 	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.TicketGroup' WHERE strCommand = 'HelpDesk.controller.TicketGroup'
 	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.Product' WHERE strCommand = 'HelpDesk.controller.Product'
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.ExportHoursWorked' WHERE strCommand = 'HelpDesk.controller.ExportHoursWorked'
 
 	/* ------------------------------------------------- */
 	/* -- End Update Help Desk Menu Commands for MVVM -- */

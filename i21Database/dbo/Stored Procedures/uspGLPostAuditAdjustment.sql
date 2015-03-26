@@ -145,7 +145,17 @@ IF ISNULL(@ysnRecap, 0) = 0
 									ISNULL((SELECT TOP 1 1 FROM tblGLFiscalYear WHERE dtmDateFrom <= A.dtmDate and dtmDateTo >= A.dtmDate and intRetainAccount IS NULL),0) = 1 THEN 0
 								ELSE 1
 							END 
-						END AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)																
+						END AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)				
+				UNION 
+				SELECT DISTINCT A.intJournalId,
+					'Unable to post. The transaction includes restricted accounts.' AS strMessage
+				FROM tblGLJournalDetail A JOIN tblGLAccount B
+				ON A.intAccountId = B.intAccountId
+				JOIN tblGLAccountCategory C
+				ON B.intAccountCategoryId = C.intAccountCategoryId
+				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
+				AND C.strAccountCategory != 'General'
+				GROUP BY A.intJournalId													
 			) tmpBatchResults
 		LEFT JOIN tblGLJournal tblB ON tmpBatchResults.intJournalId = tblB.intJournalId
 	END

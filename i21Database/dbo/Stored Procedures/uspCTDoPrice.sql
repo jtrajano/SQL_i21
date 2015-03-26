@@ -85,7 +85,7 @@ BEGIN TRY
 				intShipViaId,		dblQuantity,			intUnitMeasureId,		intPricingType,
 				dblFutures,			dblBasis,				intFutureMarketId,		strFuturesMonth,
 				dblCashPrice,		intCurrencyId,			dblRate,				strCurrencyReference,
-				intMarketZoneId,	intDiscount,			intDiscountSchedule,	intContractOptHeaderId,
+				intMarketZoneId,	intDiscountType,		intDiscountId,			intContractOptHeaderId,
 				strBuyerSeller,		intBillTo,				intFreightRateId,		strFobBasis,
 				intGrade,			strRemark,				dblOriginalQty,			dblBalance,
 				dblIntransitQty,	dblScheduleQty
@@ -96,7 +96,7 @@ BEGIN TRY
 				intShipViaId,		@CurrentQty-@Quantity,	intUnitMeasureId,		intPricingType,
 				dblFutures,			dblBasis,				intFutureMarketId,		strFuturesMonth,
 				dblCashPrice,		intCurrencyId,			dblRate,				strCurrencyReference,
-				intMarketZoneId,	intDiscount,			intDiscountSchedule,	intContractOptHeaderId,
+				intMarketZoneId,	intDiscountType,		intDiscountId,			intContractOptHeaderId,
 				strBuyerSeller,		intBillTo,				intFreightRateId,		strFobBasis,
 				intGrade,			strRemark,				dblOriginalQty,			dblBalance,
 				dblIntransitQty,	dblScheduleQty
