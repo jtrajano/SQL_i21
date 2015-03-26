@@ -1238,6 +1238,7 @@
     <Build Include="dbo\Tables\tblRKElectronicPricingHistory.sql" />
     <Build Include="dbo\Tables\tblRKElectronicPricingPreferences.sql" />
     <Build Include="dbo\Tables\tblLGEquipmentType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessToItemShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
