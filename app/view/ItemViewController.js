@@ -1304,7 +1304,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(true);
                 pgeKit.tab.setHidden(true);
                 pgeFactory.tab.setHidden(false);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
@@ -1322,7 +1322,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(false);
                 pgeKit.tab.setHidden(true);
                 pgeFactory.tab.setHidden(true);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
@@ -1341,7 +1341,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(true);
                 pgeKit.tab.setHidden(true);
                 pgeFactory.tab.setHidden(true);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
@@ -1359,7 +1359,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(true);
                 pgeKit.tab.setHidden(false);
                 pgeFactory.tab.setHidden(true);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(false);
@@ -1378,7 +1378,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(true);
                 pgeKit.tab.setHidden(true);
                 pgeFactory.tab.setHidden(false);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(true);
@@ -1397,7 +1397,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(true);
                 pgeKit.tab.setHidden(true);
                 pgeFactory.tab.setHidden(true);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
@@ -1415,7 +1415,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(true);
                 pgeKit.tab.setHidden(true);
                 pgeFactory.tab.setHidden(true);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
@@ -1433,7 +1433,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(true);
                 pgeKit.tab.setHidden(true);
                 pgeFactory.tab.setHidden(true);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
@@ -1451,7 +1451,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(true);
                 pgeKit.tab.setHidden(true);
                 pgeFactory.tab.setHidden(true);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(true);
                 pgePOS.tab.setHidden(true);
@@ -1470,7 +1470,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeBundle.tab.setHidden(true);
                 pgeKit.tab.setHidden(true);
                 pgeFactory.tab.setHidden(false);
-                pgeNotes.tab.setHidden(false);
+//                pgeNotes.tab.setHidden(false);
                 pgeAttachments.tab.setHidden(false);
                 pgeSales.tab.setHidden(false);
                 pgePOS.tab.setHidden(true);

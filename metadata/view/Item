@@ -12015,6 +12015,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "bodyPadding": null,
+                                "hidden": true,
                                 "itemId": "pgeNotes",
                                 "layout": "fit",
                                 "title": "Notes"

@@ -5417,6 +5417,7 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        hidden: true,
                                         itemId: 'pgeNotes',
                                         layout: 'fit',
                                         title: 'Notes',
