@@ -35,6 +35,7 @@
 -- SM
 :r .\4_SM\1_DataCleanup.sql
 :r .\4_SM\2_DropProcedureUspCMPostMessages.sql
+:r .\4_SM\3_DataMigration.sql
 
 -- CM
 :r .\5_CM\1_DropTriggers.sql
