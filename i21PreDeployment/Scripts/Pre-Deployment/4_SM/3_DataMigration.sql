@@ -17,13 +17,13 @@ GO
 
 		PRINT N'UPDATE intUserSecurityMenuId with intUserRoleMenuId data AND INSERT the intUserSecurityId'
 
-		UPDATE MenuFavorite SET MenuFavorite.intUserRoleMenuId = RoleMenu.intUserRoleMenuId, MenuFavorite.intUserSecurityId = UserSecurity.intUserSecurityID
+		EXEC ('UPDATE MenuFavorite SET MenuFavorite.intUserRoleMenuId = RoleMenu.intUserRoleMenuId, MenuFavorite.intUserSecurityId = UserSecurity.intUserSecurityID
 		FROM tblSMUserRoleMenu RoleMenu
 		JOIN tblSMUserSecurity UserSecurity 
 			ON RoleMenu.intUserRoleId = UserSecurity.intUserRoleID
 		JOIN tblSMUserSecurityMenu SecurityMenu 
 			ON UserSecurity.intUserSecurityID = SecurityMenu.intUserSecurityId AND SecurityMenu.intMenuId = RoleMenu.intMenuId
 		JOIN tblSMUserSecurityMenuFavorite MenuFavorite 
-			ON SecurityMenu.intUserSecurityMenuId = MenuFavorite.intUserSecurityMenuId
+			ON SecurityMenu.intUserSecurityMenuId = MenuFavorite.intUserSecurityMenuId')
 	END
 GO
