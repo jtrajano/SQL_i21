@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "inventoryadjustment",
+        "designer|userAlias": "icinventoryadjustment",
         "designer|userClassName": "InventoryAdjustment",
         "height": 700,
         "helpURL": null,
@@ -715,7 +715,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter138",
+                                                    "name": "filter129",
                                                     "designerId": "f7c10b11-c359-49ba-99e8-69e1af636272",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1055,6 +1055,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "itemId": "colExpirationDate",
                                                 "text": "Expiration Date"
                                             },
                                             "name": "MyDateColumn4",
@@ -1068,6 +1069,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "itemId": "colNewExpirationDate",
                                                 "text": "New Expiration Date",
                                                 "width": 117
                                             },
@@ -1345,7 +1347,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter139",
+                                                    "name": "filter130",
                                                     "designerId": "675f97e5-0409-46e6-8715-a4dc0129950a",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1361,24 +1363,8 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 1,
-                                                "itemId": "colNoteLocation",
-                                                "text": "Location"
-                                            },
-                                            "name": "MyColumn63",
-                                            "designerId": "ffe8bbba-6382-4dc1-95c1-71e459213994"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
-                                                "itemId": "colNoteType",
-                                                "text": "Note Type"
+                                                "itemId": "colNoteDescription",
+                                                "text": "Description"
                                             },
                                             "name": "MyColumn65",
                                             "designerId": "0690bbd0-2c7b-4ca6-904d-c081e996e700"
@@ -1393,7 +1379,7 @@
                                             "userConfig": {
                                                 "dataIndex": "string",
                                                 "flex": 3,
-                                                "itemId": "colNote",
+                                                "itemId": "colNotes",
                                                 "text": "Notes"
                                             },
                                             "name": "MyColumn66",
@@ -1522,7 +1508,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging19",
+                    "name": "statusbarpaging12",
                     "designerId": "76244995-910a-41a2-86d9-d8e3a962e968",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

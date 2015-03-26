@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activities\Inventory Adjustment\Adjustment.cs" />
     <Compile Include="Activities\Receipts\Lot.cs" />
     <Compile Include="Activities\Receipts\Receipt_Posting.cs" />
     <Compile Include="Activities\Shipments\Shipment.cs" />
@@ -136,7 +137,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Activities\Inventory Adjustment\" />
     <Folder Include="Activities\Inventory Transfer\" />
     <Folder Include="Activities\Physical Count\" />
   </ItemGroup>

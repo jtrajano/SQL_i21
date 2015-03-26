@@ -136,6 +136,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\Activities\Adjustments\AdjustmentController.cs" />
     <Compile Include="Controllers\Activities\Receipts\LotController.cs" />
     <Compile Include="Controllers\Activities\Shipments\ShipmentController.cs" />
     <Compile Include="Controllers\Common\PricingLevelController.cs" />

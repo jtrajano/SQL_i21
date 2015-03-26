@@ -127,7 +127,8 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryShipment> ShipToLocations { get; set; }
 
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
-        
+
+        public ICollection<tblICInventoryAdjustment> tblICInventoryAdjustments { get; set; }
 
     }
 
@@ -141,6 +142,8 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
         public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
+        public ICollection<tblICInventoryAdjustmentDetail> DebitAdjustmentDetails { get; set; }
+        public ICollection<tblICInventoryAdjustmentDetail> CreditAdjustmentDetails { get; set; }
 
     }
 
@@ -152,6 +155,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
         public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
+        public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
     }
 
     
@@ -325,5 +329,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
         public ICollection<tblICStorageLocation> tblICStorageLocations { get; set; }
         public ICollection<tblICItemStock> tblICItemStocks { get; set; }
+        public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
     }
 }

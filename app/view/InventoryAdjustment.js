@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryAdjustment', {
     extend: 'Ext.window.Window',
-    alias: 'widget.inventoryadjustment',
+    alias: 'widget.icinventoryadjustment',
 
     requires: [
         'Inventory.view.Filter1',
@@ -459,10 +459,12 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'datecolumn',
+                                                        itemId: 'colExpirationDate',
                                                         text: 'Expiration Date'
                                                     },
                                                     {
                                                         xtype: 'datecolumn',
+                                                        itemId: 'colNewExpirationDate',
                                                         width: 117,
                                                         text: 'New Expiration Date'
                                                     },
@@ -580,21 +582,14 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colNoteLocation',
+                                                        itemId: 'colNoteDescription',
                                                         dataIndex: 'string',
-                                                        text: 'Location',
+                                                        text: 'Description',
                                                         flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colNoteType',
-                                                        dataIndex: 'string',
-                                                        text: 'Note Type',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNote',
+                                                        itemId: 'colNotes',
                                                         dataIndex: 'string',
                                                         text: 'Notes',
                                                         flex: 3

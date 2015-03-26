@@ -182,6 +182,10 @@ namespace iRely.Inventory.Model
         public DbSet<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public DbSet<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
 
+        public DbSet<tblICInventoryAdjustment> tblICInventoryAdjustments { get; set; }
+        public DbSet<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
+        public DbSet<tblICInventoryAdjustmentNote> tblICInventoryAdjustmentNotes { get; set; }
+
         public DbSet<tblICStockReservation> tblICStockReservations { get; set; }
 
         public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
@@ -324,6 +328,10 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryShipmentMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemLotMap());
+
+            modelBuilder.Configurations.Add(new tblICInventoryAdjustmentMap());
+            modelBuilder.Configurations.Add(new tblICInventoryAdjustmentDetailMap());
+            modelBuilder.Configurations.Add(new tblICInventoryAdjustmentNoteMap());
 
             modelBuilder.Configurations.Add(new tblICStockReservationMap());
 

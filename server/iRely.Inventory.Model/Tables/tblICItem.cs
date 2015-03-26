@@ -200,6 +200,9 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public ICollection<tblICItemCommodityCost> tblICItemCommodityCosts { get; set; }
 
+        public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
+        public ICollection<tblICInventoryAdjustmentDetail> NewAdjustmentDetails { get; set; }
+
 
         //public tblICCommodity tblICCommodity { get; set; }
         //public tblICCommodityAttribute CommodityOrigin { get; set; }
