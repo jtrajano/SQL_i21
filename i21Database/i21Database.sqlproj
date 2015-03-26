@@ -1234,6 +1234,7 @@
     <Build Include="dbo\Tables\tblRKElectonicPricing.sql" />
     <Build Include="dbo\Tables\tblRKElectronicPricingHistory.sql" />
     <Build Include="dbo\Tables\tblRKElectronicPricingPreferences.sql" />
+    <Build Include="dbo\Tables\tblLGEquipmentType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
