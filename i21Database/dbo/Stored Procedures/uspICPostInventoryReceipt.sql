@@ -168,8 +168,9 @@ BEGIN
 						END 
 			,dtmDate = Header.dtmReceiptDate  
 			,dblQty =	
-						CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 THEN 
-									CASE	WHEN ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN DetailItemLot.dblQuantity
+						CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+									CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN DetailItemLot.dblQuantity
+											WHEN ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN DetailItemLot.dblQuantity
 											ELSE ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
 									END 									
 								ELSE	
