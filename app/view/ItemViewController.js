@@ -2038,13 +2038,14 @@ Ext.define('Inventory.view.ItemViewController', {
         var commodity = records[0];
         var intCommodityId = commodity.get('intCommodityId');
 
-        var pnlCommodity = combo.up('panel');
-        var cboOrigin = pnlCommodity.down('#cboOrigin');
-        var cboProductType = pnlCommodity.down('#cboProductType');
-        var cboRegion = pnlCommodity.down('#cboRegion');
-        var cboSeason = pnlCommodity.down('#cboSeason');
-        var cboClass = pnlCommodity.down('#cboClass');
-        var cboProductLine = pnlCommodity.down('#cboProductLine');
+        var win = combo.up('window');
+        var pgeCommodity = win.down('#pgeCommodity');
+        var cboOrigin = pgeCommodity.down('#cboOrigin');
+        var cboProductType = pgeCommodity.down('#cboProductType');
+        var cboRegion = pgeCommodity.down('#cboRegion');
+        var cboSeason = pgeCommodity.down('#cboSeason');
+        var cboClass = pgeCommodity.down('#cboClass');
+        var cboProductLine = pgeCommodity.down('#cboProductLine');
 
         var filter = [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }];
 

@@ -144,10 +144,30 @@ namespace iRely.Inventory.Model
                 _brand = value;
             }
         }
+        private string _commodityCode;
+        [NotMapped]
+        public string strCommodityCode
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_commodityCode))
+                    if (tblICCommodity != null)
+                        return tblICCommodity.strCommodityCode;
+                    else
+                        return null;
+                else
+                    return _commodityCode;
+            }
+            set
+            {
+                _commodityCode = value;
+            }
+        }
 
         public tblICManufacturer tblICManufacturer { get; set; }
         public tblICBrand tblICBrand { get; set; }
-        public tblICCategory tblICCategory { get; set; } 
+        public tblICCategory tblICCategory { get; set; }
+        public tblICCommodity tblICCommodity { get; set; } 
 
         public ICollection<tblICItemUOM> tblICItemUOMs { get; set; }
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
@@ -204,6 +224,8 @@ namespace iRely.Inventory.Model
         public string strModelNo { get; set; }
         public string strTracking { get; set; }
         public string strLotTracking { get; set; }
+        public int? intCommodityId { get; set; }
+        public string strCommodity { get; set; }
     }
 
     public class vyuICGetItemStock

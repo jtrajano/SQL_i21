@@ -59,6 +59,7 @@ namespace iRely.Inventory.Model
         public tblICPatronageCategory PatronageCategory { get; set; }
         public tblICPatronageCategory PatronageCategoryDirect { get; set; }
 
+        public ICollection<tblICItem> tblICItems { get; set; }
         public ICollection<tblICCommodityGroup> tblICCommodityGroups { get; set; }
         public ICollection<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }

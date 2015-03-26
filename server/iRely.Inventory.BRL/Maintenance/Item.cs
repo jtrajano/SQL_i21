@@ -80,6 +80,7 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItem>()
                     .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
+                    .Include(p => p.tblICCommodity)
                     .OrderBySelector(sortSelector)
                     .Skip(start)
                     .Take(limit)
@@ -92,7 +93,9 @@ namespace iRely.Inventory.BRL
                         strDescription = p.strDescription,
                         strStatus = p.strStatus,
                         strModelNo = p.strModelNo,
-                        strLotTracking = p.strLotTracking
+                        strLotTracking = p.strLotTracking,
+                        intCommodityId = p.intCommodityId,
+                        strCommodityId = p.tblICCommodity.strCommodityCode
                     }).ToList();
         }
 
