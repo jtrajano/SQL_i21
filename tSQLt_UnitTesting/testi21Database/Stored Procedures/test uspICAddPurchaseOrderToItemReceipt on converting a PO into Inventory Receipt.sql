@@ -138,9 +138,6 @@ BEGIN
 				,dblOpenReceive
 				,dblReceived
 				,intUnitMeasureId
-				,intNoPackages
-				--,intPackTypeId
-				,dblExpPackageWeight
 				,dblUnitCost
 				,dblLineTotal
 				,intSort
@@ -189,9 +186,6 @@ BEGIN
 				,dblOpenReceive = (10 - 0)
 				,dblReceived = 0
 				,intUnitMeasureId = @WetGrains_BushelUOMId
-				,intNoPackages = 0
-				--,intPackTypeId = 0 
-				,dblExpPackageWeight = 0
 				,dblUnitCost = 50.00
 				,dblLineTotal = ((10 - 0) * 50.00)
 				,intSort = 11
@@ -205,9 +199,6 @@ BEGIN
 				,dblOpenReceive = (5-0)
 				,dblReceived = 0
 				,intUnitMeasureId = @PremiumGrains_BushelUOMId
-				,intNoPackages = 0
-				--,intPackTypeId = 0 
-				,dblExpPackageWeight = 0
 				,dblUnitCost = 100.00
 				,dblLineTotal = ((5-0) * 100.00)
 				,intSort = 12
@@ -221,9 +212,6 @@ BEGIN
 				,dblOpenReceive = (2-0)
 				,dblReceived = 0
 				,intUnitMeasureId = @HotGrains_BushelUOMId
-				,intNoPackages = 0
-				--,intPackTypeId = 0 
-				,dblExpPackageWeight = 0
 				,dblUnitCost = 200.00
 				,dblLineTotal = ((2-0) * 200.00)
 				,intSort = 13
@@ -237,9 +225,6 @@ BEGIN
 				,dblOpenReceive = (4-0)
 				,dblReceived = 0
 				,intUnitMeasureId = @ColdGrains_BushelUOMId
-				,intNoPackages = 0
-				--,intPackTypeId = 0 
-				,dblExpPackageWeight = 0
 				,dblUnitCost = 125.00
 				,dblLineTotal = ((4-0) * 125.00)
 				,intSort = 14
@@ -284,9 +269,6 @@ BEGIN
 				,dblOpenReceive
 				,dblReceived
 				,intUnitMeasureId
-				,intNoPackages
-				--,intPackTypeId
-				,dblExpPackageWeight
 				,dblUnitCost
 				,dblLineTotal
 				,intSort

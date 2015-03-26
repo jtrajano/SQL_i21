@@ -163,7 +163,7 @@ BEGIN
 			,intItemLocationId = ItemLocation.intItemLocationId
 			,intItemUOMId = 
 						-- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
-						CASE	WHEN ISNULL(DetailItemLot.intWeightUOMId, 0) <> 0 THEN DetailItemLot.intWeightUOMId 
+						CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
 								ELSE DetailItem.intUnitMeasureId 
 						END 
 			,dtmDate = Header.dtmReceiptDate  
@@ -177,12 +177,12 @@ BEGIN
 						END 				
 			,dblUOMQty = 
 						-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId
-						CASE	WHEN ISNULL(DetailItemLot.intWeightUOMId, 0) <> 0 THEN 
+						CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
 									(
 										SELECT	TOP 1 
 												dblUnitQty
 										FROM	dbo.tblICItemUOM
-										WHERE	intItemUOMId = DetailItemLot.intWeightUOMId									
+										WHERE	intItemUOMId = DetailItem.intWeightUOMId									
 									)
 								ELSE 
 									(
@@ -194,7 +194,7 @@ BEGIN
 						END 
 
 			,dblCost =	-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
-						CASE	WHEN ISNULL(DetailItemLot.intWeightUOMId, 0) <> 0 THEN dbo.fnCalculateCostPerWeight(DetailItemLot.dblQuantity, DetailItem.dblUnitCost, ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)) 
+						CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN dbo.fnCalculateCostPerWeight(DetailItemLot.dblQuantity, DetailItem.dblUnitCost, ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)) 
 								ELSE DetailItem.dblUnitCost  
 						END 
 

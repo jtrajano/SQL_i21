@@ -54,6 +54,7 @@
 :r .\8_AP\DropTriggers.sql
 :r .\8_AP\1_1410_to_1420.sql
 :r .\8_AP\1_1420_to_1430.sql
+:r .\8_AP\DropCK_PO_OrderStatus.sql
 --:r .\8_AP\FixEntityId.sql
 --:r .\8_AP\FixstrBillId.sql
 --:r .\8_AP\FixPaymentWithoutVendorId.sql

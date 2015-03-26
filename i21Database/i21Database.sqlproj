@@ -304,7 +304,10 @@
     <Build Include="dbo\Tables\tblTMRegulatorType.sql" />
     <Build Include="dbo\Tables\tblTMRoute.sql" />
     <Build Include="dbo\Tables\tblTMSeasonResetArchive.sql" />
-    <Build Include="dbo\Tables\tblTMSite.sql" />
+    <Build Include="dbo\Tables\tblTMSite.sql">
+      <SuppressTSqlWarnings>
+      </SuppressTSqlWarnings>
+    </Build>
     <Build Include="dbo\Tables\tblTMSiteDevice.sql" />
     <Build Include="dbo\Tables\tblTMSiteDeviceLink.sql" />
     <Build Include="dbo\Tables\tblTMSiteJulianCalendar.sql" />
@@ -1209,6 +1212,10 @@
     <Build Include="dbo\Views\vyuSMScreenPermission.sql" />
     <None Include="Scripts\Post-Deployment\IC\6_FixBlankLotNumber.sql" />
     <Build Include="dbo\Tables\tblICInventoryGLAccountUsedOnPostLog.sql" />
+    <None Include="Scripts\Post-Deployment\IC\PatchFor_1510_RemoveOn_1520.sql" />
+    <Build Include="dbo\Functions\fnCalculateItemUnitQty.sql" />
+    <Build Include="dbo\Functions\fnGetItemUnitType.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOUpdateStatusFromInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

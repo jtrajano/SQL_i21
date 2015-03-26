@@ -26,7 +26,7 @@ USING (
 -- If matched, update the On-Order qty 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnOrder = ISNULL(ItemStock.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty
+	SET		dblOnOrder = CASE WHEN ISNULL(ItemStock.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty < 0 THEN 0 ELSE ISNULL(ItemStock.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty END 
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -45,7 +45,7 @@ WHEN NOT MATCHED THEN
 		,Source_Query.intItemLocationId
 		,0
 		,0
-		,Source_Query.Aggregrate_OnOrderQty -- dblOnOrder
+		,CASE WHEN Source_Query.Aggregrate_OnOrderQty < 0 THEN 0 ELSE Source_Query.Aggregrate_OnOrderQty END -- dblOnOrder
 		,0
 		,NULL 
 		,1	
@@ -76,7 +76,7 @@ USING (
 -- If matched, update the On-Order qty 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOnOrder = ISNULL(ItemStockUOM.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty
+	SET		dblOnOrder = CASE WHEN ISNULL(ItemStockUOM.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty < 0 THEN 0 ELSE ISNULL(ItemStockUOM.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty END 
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -97,7 +97,7 @@ WHEN NOT MATCHED THEN
 		,Source_Query.intSubLocationId
 		,Source_Query.intStorageLocationId
 		,0
-		,Source_Query.Aggregrate_OnOrderQty 
+		,CASE WHEN Source_Query.Aggregrate_OnOrderQty < 0 THEN 0 ELSE Source_Query.Aggregrate_OnOrderQty END
 		,1	
 	)
 ;

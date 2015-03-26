@@ -161,4 +161,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\1510_to_1512.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\8_AP\DropCK_PO_OrderStatus.sql" />
+  </ItemGroup>
 </Project>

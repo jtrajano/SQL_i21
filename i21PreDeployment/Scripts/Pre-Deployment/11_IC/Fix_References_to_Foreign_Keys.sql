@@ -188,3 +188,53 @@ BEGIN
 		')
 	END
 END
+
+IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intWeightUOMId' AND object_id = OBJECT_ID('tblICInventoryReceiptItemLot'))
+BEGIN
+	EXEC ('
+
+	DECLARE @ReceiptNumber NVARCHAR(50) = '''',
+	@ItemNo NVARCHAR(50) = ''''
+
+	SELECT TOP 1 
+		@ReceiptNumber = Receipt.strReceiptNumber,
+		@ItemNo = Item.strItemNo
+	FROM (
+		SELECT intInventoryReceiptItemId, COUNT(*) intCount
+		FROM tblICInventoryReceiptItemLot
+		WHERE ISNULL(intWeightUOMId, 0) <> 0
+		GROUP BY intInventoryReceiptItemId
+	) LotCount
+	LEFT JOIN (
+		SELECT intInventoryReceiptItemId, intWeightUOMId, COUNT(*) intWeightCount
+		FROM tblICInventoryReceiptItemLot
+		WHERE ISNULL(intWeightUOMId, 0) <> 0
+		GROUP BY intInventoryReceiptItemId, intWeightUOMId
+	) LotWeightCount ON LotCount.intInventoryReceiptItemId = LotWeightCount.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = LotWeightCount.intInventoryReceiptItemId
+	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
+	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+	WHERE intCount <> intWeightCount
+	IF (ISNULL(@ReceiptNumber, '''') <> '''')
+	BEGIN
+		DECLARE @msg NVARCHAR(MAX) = '''';
+		SET @msg = ''Receipt number '' + @ReceiptNumber + '' with Item number '' + @ItemNo + '' should have the same Weight UOMs all throughout its lots!'';
+		THROW 50000, @msg, 1
+		RETURN
+	END
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = ''intWeightUOMId'' AND object_id = OBJECT_ID(''tblICInventoryReceiptItem''))
+	BEGIN
+		ALTER TABLE tblICInventoryReceiptItem
+		ADD intWeightUOMId INT NULL
+	END
+
+	UPDATE tblICInventoryReceiptItem
+	SET tblICInventoryReceiptItem.intWeightUOMId = tblPatch.intWeightUOMId
+	FROM (
+		SELECT DISTINCT intInventoryReceiptItemId, intWeightUOMId
+		FROM tblICInventoryReceiptItemLot
+		WHERE ISNULL(intWeightUOMId, 0) <> 0) tblPatch
+		WHERE tblPatch.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+	')
+END

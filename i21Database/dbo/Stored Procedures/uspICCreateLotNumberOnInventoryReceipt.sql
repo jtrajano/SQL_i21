@@ -30,9 +30,19 @@ BEGIN
 	-- Get the top record and tell the user about it. 
 	-- Msg: The lot Quantity(ies) on %s must match its Open Receive Quantity.
 	DECLARE @strItemNo AS NVARCHAR(50)
+	DECLARE @OpenReceiveQty AS NUMERIC(18,6)
+	DECLARE @LotQty AS NUMERIC(18,6)
+
+	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
+	DECLARE @FormattedLotQty AS NVARCHAR(50)
+
 	SET @strItemNo = NULL 
+
+	-- Check quantity if Weight UOM is not specified
 	SELECT	TOP 1 
 			@strItemNo = Item.strItemNo
+			,@OpenReceiveQty = ReceiptItem.dblOpenReceive
+			,@LotQty = SUM(ISNULL(ItemLot.dblQuantity, 0))
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -41,13 +51,60 @@ BEGIN
 				ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId	
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
+			AND ISNULL(ReceiptItem.intWeightUOMId, 0) = 0
 	GROUP BY  ReceiptItem.intInventoryReceiptItemId, Item.strItemNo, ReceiptItem.dblOpenReceive
 	HAVING SUM(ISNULL(ItemLot.dblQuantity, 0)) <> ReceiptItem.dblOpenReceive
 
 	IF @strItemNo IS NOT NULL 
 	BEGIN 
-		-- The lot Quantity(ies) on %s must match its Open Receive Quantity.
-		RAISERROR(51038, 11, 1, @strItemNo)  
+		-- The expected qty to receive for %s is %s. Lot Quantity is %s. These quantities must be the same.'
+		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@OpenReceiveQty AS MONEY), 1)
+		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQty AS MONEY), 1)
+
+		RAISERROR(51038, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty)  
+		RETURN; 
+	END 
+
+	-- Check weight if Weight UOM is specified. 
+	SELECT @strItemNo = ItemSubQuery.strItemNo
+			,@OpenReceiveQty = ItemSubQuery.OpenReceiveQty
+			,@LotQty = LotSubQuery.LotReceiveQty
+	FROM	(
+				SELECT	Item.strItemNo
+						,ReceiptItem.intInventoryReceiptItemId
+						,OpenReceiveQty = dbo.fnCalculateItemUnitQty(ReceiptItem.intWeightUOMId, ReceiptItem.dblOpenReceive)
+				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+						INNER JOIN dbo.tblICItem Item
+							ON Item.intItemId = ReceiptItem.intItemId
+				WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+						AND Receipt.strReceiptNumber = @strTransactionId
+						AND ISNULL(ReceiptItem.intWeightUOMId, 0) <> 0				
+			
+			) ItemSubQuery LEFT JOIN 	
+			(
+				SELECT	ItemLot.intInventoryReceiptItemId
+						,LotReceiveQty = ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0) 
+				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+						INNER JOIN dbo.tblICItem Item
+							ON Item.intItemId = ReceiptItem.intItemId
+						LEFT JOIN dbo.tblICInventoryReceiptItemLot ItemLot
+							ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
+				WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+						AND Receipt.strReceiptNumber = @strTransactionId
+						AND ISNULL(ReceiptItem.intWeightUOMId, 0) <> 0
+			) LotSubQuery	
+				ON ItemSubQuery.intInventoryReceiptItemId = LotSubQuery.intInventoryReceiptItemId
+	WHERE	ItemSubQuery.OpenReceiveQty <> LotSubQuery.LotReceiveQty
+
+	IF @strItemNo IS NOT NULL 
+	BEGIN 
+		-- The expected qty to receive for %s is %s. Lot Quantity is %s. These quantities must be the same.'
+		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@OpenReceiveQty AS MONEY), 1)
+		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQty AS MONEY), 1)
+
+		RAISERROR(51038, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty)  
 		RETURN; 
 	END 
 END
@@ -90,7 +147,7 @@ BEGIN
 			,dblQty					= ItemLot.dblQuantity * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
 			,intItemUOMId			= ReceiptItem.intUnitMeasureId
 			,dblWeight				= ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0) * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
-			,intWeightUOMId			= ItemLot.intWeightUOMId
+			,intWeightUOMId			= ReceiptItem.intWeightUOMId
 			,dtmExpiryDate			= ItemLot.dtmExpiryDate
 			,dtmManufacturedDate	= ItemLot.dtmManufacturedDate
 			,intOriginId			= ItemLot.intOriginId

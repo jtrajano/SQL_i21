@@ -12,7 +12,8 @@ BEGIN
 		DECLARE @MiscExpenses_BetterHaven AS INT = 4002	
 	
 		-- Add fake data
-		EXEC [testi21Database].[Fake COA used in Cash Management]
+		EXEC [testi21Database].[Fake open fiscal year and accounting periods]
+		EXEC [testi21Database].[Fake COA used in Cash Management]		
 
 		-- Arrange the fake table 
 		EXEC tSQLt.FakeTable 'dbo.tblCMBankTransaction', @Identity = 1;
@@ -31,7 +32,7 @@ BEGIN
 
 		-- Variables used in calling the stored procedure 
 		DECLARE @intBankAccountId AS INT = 1
-				,@dtmDate AS DATETIME = '02/28/2012'
+				,@dtmDate AS DATETIME = GETDATE()
 				,@intGLAccountId AS INT = @MiscExpenses_Default
 				,@dblAmount AS NUMERIC(18,6) = 496.88
 				,@strDescription AS NVARCHAR(255) = 'this is the description'
@@ -58,7 +59,7 @@ BEGIN
 
 		-- Setup the expected data. 
 		INSERT INTO expected (intBankAccountId, dtmDate, dblAmount, strMemo, intCreatedUserId) 
-		SELECT @intBankAccountId, '02/28/2012', 496.88, 'this is the description', 4546
+		SELECT @intBankAccountId, @dtmDate, 496.88, 'this is the description', 4546
 
 		-- Create the actual detail table 
 		CREATE TABLE actualDetail (

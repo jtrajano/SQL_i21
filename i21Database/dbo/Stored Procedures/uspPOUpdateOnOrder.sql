@@ -13,7 +13,7 @@ BEGIN
 		,[intItemUOMId]			=	B.intUnitOfMeasureId
 		,[dtmDate]				=	A.dtmDate
 		,[dblQty]				=	CASE WHEN @negate = 1 THEN B.dblQtyOrdered * -1 ELSE B.dblQtyOrdered END
-		,[dblUOMQty]			=	1
+		,[dblUOMQty]			=	ItemUOM.dblUnitQty
 		,[dblCost]				=	B.dblCost
 		,[dblValue]				=	0
 		,[dblSalesPrice]		=	0
@@ -30,6 +30,8 @@ BEGIN
 		INNER JOIN tblPOPurchaseDetail B 
 			ON A.intPurchaseId = B.intPurchaseId
 			AND B.intItemId = ItemLocation.intItemId 
+		INNER JOIN tblICItemUOM ItemUOM
+			ON B.intUnitOfMeasureId = ItemUOM.intItemUOMId
 	WHERE A.intPurchaseId = @poId			
 
 	EXEC uspICIncreaseOnOrderQty @items

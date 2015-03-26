@@ -246,5 +246,6 @@
     <None Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </None>
+    <None Include="dbo\Views\vyuTMConsumptionSiteSearch.sql" />
   </ItemGroup>
 </Project>
