@@ -136,10 +136,19 @@ SAVE TRAN @TransactionName
 -- Create and validate the lot numbers
 IF @ysnPost = 1
 BEGIN 	
-	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt 
-		@strTransactionId
-		,@intUserId
-		,@ysnPost
+	DECLARE @intCreateUpdateLotError AS INT 
+
+	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryReceipt 
+			@strTransactionId
+			,@intUserId
+			,@ysnPost
+
+	IF @intCreateUpdateLotError <> 0
+	BEGIN 
+		ROLLBACK TRAN @TransactionName
+		COMMIT TRAN @TransactionName
+		GOTO Post_Exit;
+	END
 END
 
 -- Get the next batch number
