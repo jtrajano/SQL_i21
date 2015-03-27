@@ -69,54 +69,46 @@ BEGIN
 	SET @intItemId = NULL 
 
 	SELECT	TOP 1 
-			@strItemNo = Item.strItemNo
-			,@intItemId = Item.intItemId
-			,@OpenReceiveQty = ReceiptItem.dblOpenReceive
-			,@LotQty = SUM(ISNULL(ItemLot.dblQuantity, 0))
-			,@LotQtyInItemUOM = 
-				SUM(
-					dbo.fnCalculateQtyBetweenUOM(
-						ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId)
-						,ReceiptItem.intUnitMeasureId
-						,ItemLot.dblQuantity
-						,ReceiptItem.intItemId
-					)
-				)
-			,@OpenReceiveQtyInItemUOM = 
-				SUM(
-					dbo.fnCalculateQtyBetweenUOM(
-						ReceiptItem.intUnitMeasureId
-						,ReceiptItem.intUnitMeasureId
-						,ReceiptItem.dblOpenReceive
-						,ReceiptItem.intItemId
-					)
-				)
+			@strItemNo					= Item.strItemNo
+			,@intItemId					= Item.intItemId
+			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
+			,@LotQty					= ItemLot.TotalLotQty
+			,@LotQtyInItemUOM			= ItemLot.TotalLotQtyInItemUOM
+			,@OpenReceiveQtyInItemUOM	= dbo.fnCalculateQtyBetweenUOM (
+											ReceiptItem.intUnitMeasureId
+											,ReceiptItem.intUnitMeasureId
+											,ReceiptItem.dblOpenReceive
+										)
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = ReceiptItem.intItemId
-			LEFT JOIN dbo.tblICInventoryReceiptItemLot ItemLot
-				ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId	
+			LEFT JOIN (
+				SELECT  AggregrateLot.intInventoryReceiptItemId
+						,TotalLotQtyInItemUOM = SUM(
+							dbo.fnCalculateQtyBetweenUOM(
+								ISNULL(AggregrateLot.intItemUnitMeasureId, tblICInventoryReceiptItem.intUnitMeasureId)
+								,tblICInventoryReceiptItem.intUnitMeasureId
+								,AggregrateLot.dblQuantity
+							)
+						)
+						,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantity, 0))
+				FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
+							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
+							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
+				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
+				GROUP BY AggregrateLot.intInventoryReceiptItemId
+			) ItemLot
+				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
-	GROUP BY  ReceiptItem.intInventoryReceiptItemId, Item.strItemNo, ReceiptItem.dblOpenReceive, Item.intItemId
-	HAVING	SUM(
-				dbo.fnCalculateQtyBetweenUOM(
+			AND ItemLot.TotalLotQtyInItemUOM <>
+				dbo.fnCalculateQtyBetweenUOM (
 					ReceiptItem.intUnitMeasureId
 					,ReceiptItem.intUnitMeasureId
 					,ReceiptItem.dblOpenReceive
-					,ReceiptItem.intItemId
 				)
-			)
-			<>
-			SUM(
-				dbo.fnCalculateQtyBetweenUOM(
-					ItemLot.intItemUnitMeasureId
-					,ReceiptItem.intUnitMeasureId
-					,ItemLot.dblQuantity
-					,ReceiptItem.intItemId
-				)
-			)
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 

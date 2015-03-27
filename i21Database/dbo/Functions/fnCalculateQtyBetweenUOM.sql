@@ -1,5 +1,4 @@
-﻿
-/*
+﻿/*
 	This function convert the qty to the stock unit qty. 
 
 	Formula used:
@@ -33,7 +32,6 @@ CREATE FUNCTION [dbo].[fnCalculateQtyBetweenUOM](
 	@intItemUOMIdFrom INT
 	,@intItemUOMIdTo INT 
 	,@dblQty NUMERIC(18,6)
-	,@intItemId INT = NULL -- Optional 
 )
 RETURNS NUMERIC(18,6)
 AS 
@@ -65,13 +63,24 @@ BEGIN
 
 	-- Calculate the Unit Qty
 	SET @result = 
-			CASE	WHEN @dblUnitQtyFrom = 1 AND @dblUnitQtyTo <> 1 THEN 
-						@dblQty / @dblUnitQtyFrom
-					WHEN @dblUnitQtyFrom <> 1 AND @dblUnitQtyTo = 1 THEN 
-						@dblQty * @dblUnitQtyFrom
+			CASE	WHEN @dblUnitQtyFrom = 1 THEN 
+						CASE	WHEN FLOOR(@dblUnitQtyTo) = 0 THEN 
+									@dblQty * @dblUnitQtyTo
+								ELSE 
+									@dblQty / @dblUnitQtyTo
+						END
+					WHEN @dblUnitQtyTo = 1 THEN 
+						CASE	WHEN FLOOR(@dblUnitQtyFrom) = 0 THEN 
+									@dblQty / @dblUnitQtyFrom
+								ELSE 
+									@dblQty * @dblUnitQtyFrom			
+						END
+
 					WHEN @dblUnitQtyFrom <> 1 AND @dblUnitQtyTo <> 1 THEN
-						CASE	WHEN FLOOR(@dblUnitQtyTo) = 0 THEN @dblQty * @dblUnitQtyFrom * @dblUnitQtyTo
-								ELSE @dblQty * @dblUnitQtyFrom / @dblUnitQtyTo
+						CASE	WHEN FLOOR(@dblUnitQtyTo) = 0 THEN 
+									@dblQty * @dblUnitQtyFrom * @dblUnitQtyTo
+								ELSE 
+									@dblQty * @dblUnitQtyFrom / @dblUnitQtyTo
 						END 						
 					ELSE @dblQty
 			END 
