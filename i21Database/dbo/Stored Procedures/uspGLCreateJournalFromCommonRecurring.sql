@@ -27,8 +27,6 @@ BEGIN
 			SELECT @intJournalID,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit,dblDebitRate,strDescription,strReference,strComments,strDocument,@journalDate
 			FROM tblGLJournalDetail
 			WHERE intJournalId = @journalId
-		CLOSE cursor_id
-		DEALLOCATE cursor_id
 		COMMIT TRANSACTION
 		SET @strJournalId = @smID
 	END TRY
