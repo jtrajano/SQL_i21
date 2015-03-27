@@ -9,39 +9,35 @@ BEGIN
 -- You can increase @PREFIX_COUNT in case future check number requirement increases. 
 DECLARE @PREFIX_COUNT AS INT = 8
 
--- Localize parameter to optimize function
-DECLARE @strCheckNumberLocal AS NVARCHAR(MAX)
-SET @strCheckNumberLocal = @strCheckNumber
-
 -- Check if the parameter is a number field. If non-numeric, return same value. 
-IF ISNUMERIC('-' + @strCheckNumberLocal + '.0e0') = 0
+IF ISNUMERIC(@strCheckNumber) = 0
 BEGIN 
-	RETURN @strCheckNumberLocal
+	RETURN @strCheckNumber
 END 
 
 -- Check if the parameter is a decimal. If yes, return same value. 
-IF FLOOR(@strCheckNumberLocal) <> CEILING(@strCheckNumberLocal)
+IF FLOOR(@strCheckNumber) <> CEILING(@strCheckNumber)
 BEGIN 
-	RETURN @strCheckNumberLocal
+	RETURN @strCheckNumber
 END 
 
 -- Check if the parameter is more than 20 chars. If yes, return a truncated string (20-chars). 
-IF LEN(@strCheckNumberLocal) > 20 
+IF LEN(@strCheckNumber) > 20 
 BEGIN 
-	RETURN @strCheckNumberLocal
+	RETURN @strCheckNumber
 END 
 
 -- Check if parameter is a positive number. 
-IF CAST(@strCheckNumberLocal AS NUMERIC(38, 0)) < 0 
+IF CAST(@strCheckNumber AS NUMERIC(38, 0)) < 0 
 BEGIN 
-	RETURN @strCheckNumberLocal
+	RETURN @strCheckNumber
 END 
 
 -- Convert the value to integer-string. 
-SET @strCheckNumberLocal = CAST( CAST(@strCheckNumberLocal AS  NUMERIC(38, 0)) AS NVARCHAR(20))
+SET @strCheckNumber = CAST( CAST(@strCheckNumber AS  NUMERIC(38, 0)) AS NVARCHAR(20))
 
 -- Return a string with zero prefixes. 
-RETURN	ISNULL(REPLICATE('0', @PREFIX_COUNT - LEN(@strCheckNumberLocal)), '') + 
-		@strCheckNumberLocal
+RETURN	ISNULL(REPLICATE('0', @PREFIX_COUNT - LEN(@strCheckNumber)), '') + 
+		@strCheckNumber
 		
 END
