@@ -168,7 +168,7 @@ BEGIN
 
 		--Please specify the lot numbers for {Item}.
 		RAISERROR(51037, 11, 1, @strItemNo);
-		RETURN;
+		RETURN -1;
 	END 	
 	
 	-- Generate the next lot number - if it is blank AND it is a serial lot item. 
@@ -186,7 +186,7 @@ BEGIN
 
 		--Unable to generate the serial lot number for {Item}.
 		RAISERROR(51042, 11, 1, @strItemNo);
-		RETURN;
+		RETURN -2;
 	END 	
 
 	-- If weight UOM is specified, make sure weight is not zero. 
@@ -203,7 +203,7 @@ BEGIN
 
 		-- '{Item} with lot number {Lot Number} needs to have a weight.'
 		RAISERROR(51048, 11, 1, @strItemNo, @strLotNumber)  
-		RETURN; 
+		RETURN -3; 
 	END 
 
 	-- Upsert (update or insert) the record to the lot master table. 
@@ -482,7 +482,7 @@ BEGIN
 
 		--'The Quantity UOM for {Item} cannot be changed from {Item UOM} to {Item UOM} because a stock from it has been used from a different transaction.'
 		RAISERROR(51044, 11, 1, @strItemNo, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo);
-		RETURN;
+		RETURN -4;
 	END 
 
 	-- Validation check point 2 of 5
@@ -497,7 +497,7 @@ BEGIN
 
 		--'The Weight UOM for {Lot number} cannot be changed from {Weight UOM} to {Weight UOM} because a stock from it has been used from a different transaction.'
 		RAISERROR(51045, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
-		RETURN;
+		RETURN -5;
 	END 
 
 	-- Validation check point 3 of 5
@@ -510,7 +510,7 @@ BEGIN
 
 		--'The Sub-Location for {Lot number} cannot be changed from {Sub Location} to {Sub Location} because a stock from it has been used from a different transaction.'
 		RAISERROR(51046, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
-		RETURN;
+		RETURN -6;
 	END 
 
 	-- Validation check point 4 of 5
@@ -523,7 +523,7 @@ BEGIN
 
 		--'The Storage Location for {Lot number} cannot be changed from {Storage Location} to {StorageLocation} because a stock from it has been used from a different transaction.'
 		RAISERROR(51047, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
-		RETURN;
+		RETURN -7;
 	END
 
 	-- Validation check point 5 of 5
@@ -536,7 +536,7 @@ BEGIN
 
 		--Failed to process the lot number for {Item}. It may have been used on a different sub-location or storage location.'
 		RAISERROR(51043, 11, 1, @strItemNo);
-		RETURN;
+		RETURN -8;
 	END
 	
 	-- Fetch the next row from cursor. 
@@ -576,3 +576,5 @@ DEALLOCATE loopLotItems;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
 ----------------------------------------------------------------------------------------------------------------------------
+
+RETURN 0;
