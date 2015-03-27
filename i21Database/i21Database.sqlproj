@@ -1147,6 +1147,9 @@
     <Build Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql" />
     <Build Include="dbo\Views\vyuHDProjectList.sql" />
     <Build Include="dbo\Views\vyuARCustomerSearch.sql" />
+    <Build Include="dbo\Tables\tblAPVendorPortalMenu.sql" />
+    <Build Include="dbo\Tables\tblAPVendorPortalPermission.sql" />
+    <Build Include="dbo\Views\vyuEMSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
