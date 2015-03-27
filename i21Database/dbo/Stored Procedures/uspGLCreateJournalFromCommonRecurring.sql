@@ -10,7 +10,8 @@ CREATE PROCEDURE [dbo].[uspGLCreateJournalFromCommonRecurring]
 	@strJournalId NVARCHAR(100) OUTPUT 
 AS
 BEGIN
-	SET NOCOUNT ON;
+	SET XACT_ABORT ON
+	SET NOCOUNT ON
 	DECLARE @entityid INT ,@intNumber INT, @strPrefix VARCHAR(10),@smID varchar(10),@intJournalID INT
 	BEGIN TRY
 		BEGIN TRANSACTION
@@ -26,12 +27,10 @@ BEGIN
 			SELECT @intJournalID,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit,dblDebitRate,strDescription,strReference,strComments,strDocument,dtmDate
 			FROM tblGLJournalDetail
 			WHERE intJournalId = @journalId
-		CLOSE cursor_id
-		DEALLOCATE cursor_id
 		COMMIT TRANSACTION
 		SET @strJournalId = @smID
 	END TRY
 	BEGIN CATCH
-		IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
+		ROLLBACK TRANSACTION
 	END CATCH
 END
