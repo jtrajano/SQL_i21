@@ -6,7 +6,8 @@
 CREATE PROCEDURE [dbo].[uspGLCreateJournalFromCommonRecurring] 
 	@journalId  INT, 
 	@journalDate DATETIME,
-	@userId  INT
+	@userId  INT,
+	@strJournalId NVARCHAR(50) OUTPUT 
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -29,10 +30,9 @@ BEGIN
 		CLOSE cursor_id
 		DEALLOCATE cursor_id
 		COMMIT TRANSACTION
-		RETURN @smID
+		SET @strJournalId = @smID
 	END TRY
 	BEGIN CATCH
 		IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
-		RETURN ''
 	END CATCH
 END
