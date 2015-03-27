@@ -191,7 +191,7 @@ END
 
 IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intWeightUOMId' AND object_id = OBJECT_ID('tblICInventoryReceiptItemLot'))
 BEGIN
-	EXEC ('
+EXEC ('
 
 	DECLARE @ReceiptNumber NVARCHAR(50) = '''',
 	@ItemNo NVARCHAR(50) = ''''
@@ -219,21 +219,24 @@ BEGIN
 	BEGIN
 		DECLARE @msg NVARCHAR(MAX) = '''';
 		SET @msg = ''Receipt number '' + @ReceiptNumber + '' with Item number '' + @ItemNo + '' should have the same Weight UOMs all throughout its lots!'';
+		RAISERROR(@msg, 11, 1)
 		RETURN
-	END')
+	END
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intWeightUOMId' AND object_id = OBJECT_ID('tblICInventoryReceiptItem'))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = ''intWeightUOMId'' AND object_id = OBJECT_ID(''tblICInventoryReceiptItem''))
 	BEGIN
 		ALTER TABLE tblICInventoryReceiptItem
 		ADD intWeightUOMId INT NULL
-	END
+	END	
+	')
 
-	EXEC ('UPDATE tblICInventoryReceiptItem
-	SET intWeightUOMId = tblPatch.intWeightUOMId
-	FROM (
-		SELECT DISTINCT intInventoryReceiptItemId, intWeightUOMId
-		FROM tblICInventoryReceiptItemLot
-		WHERE ISNULL(intWeightUOMId, 0) <> 0) tblPatch
-		WHERE tblPatch.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+	EXEC ('
+		UPDATE tblICInventoryReceiptItem
+		SET tblICInventoryReceiptItem.intWeightUOMId = tblPatch.intWeightUOMId
+		FROM (
+			SELECT DISTINCT intInventoryReceiptItemId, intWeightUOMId
+			FROM tblICInventoryReceiptItemLot
+			WHERE ISNULL(intWeightUOMId, 0) <> 0) tblPatch
+			WHERE tblPatch.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId	
 	')
 END
