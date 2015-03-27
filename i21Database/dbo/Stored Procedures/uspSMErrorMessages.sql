@@ -147,3 +147,52 @@ EXEC sp_addmessage 51035,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51036) EXEC sp_dropmessage 51036, 'us_english'	
 SET @strmessage = 'Purchase Order already closed.'
 EXEC sp_addmessage 51036,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51037) EXEC sp_dropmessage 51037, 'us_english'	
+SET @strmessage = 'Please specify the lot numbers for %s.'
+EXEC sp_addmessage 51037,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51038) EXEC sp_dropmessage 51038, 'us_english'	
+SET @strmessage = 'The expected qty to receive for %s is %s. Lot Quantity is %s. These quantities must be the same.'
+EXEC sp_addmessage 51038,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51039) EXEC sp_dropmessage 51039, 'us_english'	
+SET @strmessage = 'Cannot process Purchase Order with 0 amount.'
+EXEC sp_addmessage 51039,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51040) EXEC sp_dropmessage 51040, 'us_english'	
+SET @strmessage = 'There is not enough stocks for %s'
+EXEC sp_addmessage 51040,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51041) EXEC sp_dropmessage 51041, 'us_english'	
+SET @strmessage = 'G/L account setup is missing for %s.'
+EXEC sp_addmessage 51041,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51042) EXEC sp_dropmessage 51042, 'us_english'	
+SET @strmessage = 'Unable to generate the serial lot number for %s.'
+EXEC sp_addmessage 51042,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51043) EXEC sp_dropmessage 51043, 'us_english'	
+SET @strmessage = 'Failed to process the lot number for %s. It may have been used on a different sub-location or storage location.'
+EXEC sp_addmessage 51043,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51044) EXEC sp_dropmessage 51044, 'us_english'	
+SET @strmessage = 'The Quantity UOM for %s cannot be changed from %s to %s because a stock from it has been used from a different transaction.'
+EXEC sp_addmessage 51044,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51045) EXEC sp_dropmessage 51045, 'us_english'	
+SET @strmessage = 'The Weight UOM for %s cannot be changed from %s to %s because a stock from it has been used from a different transaction.'
+EXEC sp_addmessage 51045,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51046) EXEC sp_dropmessage 51046, 'us_english'	
+SET @strmessage = 'The Sub-Location for %s cannot be changed from %s to %s because a stock from it has been used from a different transaction.'
+EXEC sp_addmessage 51046,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51047) EXEC sp_dropmessage 51047, 'us_english'	
+SET @strmessage = 'The Storage Location for %s cannot be changed from %s to %s because a stock from it has been used from a different transaction.'
+EXEC sp_addmessage 51047,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51048) EXEC sp_dropmessage 51048, 'us_english'	
+SET @strmessage = '%s with lot number %s needs to have a weight.'
+EXEC sp_addmessage 51048,11,@strmessage,'us_english','False'
+

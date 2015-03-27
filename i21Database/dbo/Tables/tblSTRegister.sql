@@ -74,7 +74,7 @@
     [ysnSupportPropFleetCards] BIT NULL, 
     [intDebitCardMop] INT NULL, 
     [intLotteryWinnersMop] INT NULL, 
-    [ysnCreateCfnAtImport] INT NULL, 
+    [ysnCreateCfnAtImport] BIT NULL, 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTRegister] PRIMARY KEY CLUSTERED ([intRegisterId] ASC), 
     CONSTRAINT [AK_tblSTRegister_intStoreId_strRegisterName_strRegisterClass] UNIQUE NONCLUSTERED ([intStoreId],[strRegisterName],[strRegisterClass] ASC), 

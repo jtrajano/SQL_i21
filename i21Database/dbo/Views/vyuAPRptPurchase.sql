@@ -2,7 +2,8 @@
 WITH SCHEMABINDING
 AS 
 SELECT 
-A.intPurchaseId
+(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
+,A.intPurchaseId
 ,A.dtmDate
 ,A.dtmExpectedDate
 ,A.intVendorId
@@ -10,6 +11,7 @@ A.intPurchaseId
 ,A.strVendorOrderNumber
 ,A.strReference
 ,C.strVendorId 
+,RTRIM(LTRIM(C.strVendorId)) + ' - ' + C1.strName AS strVendorName
 ,strShipTo =  (CASE WHEN LEN(A.strShipToAttention) <> 0 THEN CHAR(32) + 'Attn: ' + A.strShipToAttention + CHAR(13) + CHAR (10) else '' end +    
   CASE WHEN LEN(A.strShipToAddress) <> 0 THEN CHAR(32) + Replace(A.strShipToAddress,char(10), ' ') + CHAR(13) + CHAR (10) else '' end +    
  CASE WHEN LEN(A.strShipToCity) <> 0 THEN CHAR(32) + A.strShipToCity + ','  else '' end +    
@@ -25,12 +27,12 @@ A.intPurchaseId
  CASE WHEN LEN(A.strShipFromCountry) <> 0 THEN CHAR(32) + A.strShipFromCountry + CHAR(13) + CHAR (10) else '' end +    
  CASE WHEN LEN(A.strShipFromPhone) <> 0 THEN CHAR(32) + A.strShipFromPhone + CHAR(13) + CHAR (10) else '' end)
  ,intShipViaId
- ,strShipVia = (SELECT strShipVia FROM dbo.tblSMShipVia WHERE intShipViaID = intShipViaID)
+ ,strShipVia = (SELECT strShipVia FROM dbo.tblSMShipVia WHERE intShipViaID = A.intShipViaId)
  ,intTermsId
- ,strTerm = (SELECT strTerm FROM dbo.tblSMTerm WHERE intTermID = intTermsId)
+ ,strTerm = (SELECT strTerm FROM dbo.tblSMTerm WHERE intTermID = A.intTermsId)
  ,B.dblQtyOrdered
  ,B.dblCost
- ,B.dblDiscount
+ ,B.dblDiscount / 100 AS dblDiscount
  ,B.dblTotal AS dblDetailTotal
  ,A.dblTotal
  ,A.dblSubtotal
@@ -39,9 +41,14 @@ A.intPurchaseId
  ,D.intItemId
  ,D.strItemNo
  ,D.strDescription
+ ,E.strUnitMeasure
 FROM dbo.tblPOPurchase A
-	INNER JOIN dbo.tblAPVendor C ON A.intVendorId = C.[intEntityVendorId]
+	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEntity C1 ON C.intEntityVendorId = C1.intEntityId)
+			ON A.intVendorId = C.intEntityVendorId
 	LEFT JOIN dbo.tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN dbo.tblICItem D ON B.intItemId = D.intItemId
+	INNER JOIN (dbo.tblICItemUOM E1 
+				INNER JOIN dbo.tblICUnitMeasure E ON E1.intUnitMeasureId = E.intUnitMeasureId)
+				ON B.intUnitOfMeasureId = E1.intItemUOMId
 	
 	

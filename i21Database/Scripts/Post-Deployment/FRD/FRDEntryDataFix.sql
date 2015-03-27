@@ -131,3 +131,51 @@ UPDATE tblFRRowDesign SET strSource = 'Column'
 GO
 	PRINT N'END SET VALUE'
 GO
+
+
+--=====================================================================================================================================
+-- 	RENAME COLUMN TYPE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN RENAME COLUMN TYPE'
+GO
+
+UPDATE tblFRColumnDesign SET strColumnType = 'GL Amounts' 
+	WHERE strColumnType = 'Calculation'
+
+GO
+	PRINT N'END RENAME COLUMN TYPE'
+GO
+
+
+--=====================================================================================================================================
+-- 	RENAME REPORT TYPE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN RENAME REPORT TYPE'
+GO
+
+UPDATE tblFRReport SET strReportType = 'Single' 
+	WHERE strReportType = 'Report'
+
+GO
+	PRINT N'END RENAME REPORT TYPE'
+GO
+
+
+--=====================================================================================================================================
+-- 	FIX: NULL Description to EMPTY String
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN NULL TO EMPTY STRING'
+GO
+
+UPDATE tblFRRowDesign SET strDescription = '' 
+	WHERE strDescription is null 
+
+GO
+	PRINT N'END NULL TO EMPTY STRING'
+GO

@@ -24,3 +24,202 @@
     CONSTRAINT [PK_tblTMSyncFailed] PRIMARY KEY CLUSTERED ([intSyncFailedID] ASC)
 );
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Identity Field',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'intSyncFailedID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Customer Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strCustomerNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Customer Name',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strCustomerName'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strSiteNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Address',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strSiteAddress'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Meter Reading',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'dblMeterReading'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Invoice Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strInvoiceNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Bulk Plant Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strBulkPlantNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Invoice Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmInvoiceDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strItemNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item Available for TM Option',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strItemAvailableForTM'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Reverse Previous Delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strReversePreviousDelivery'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Performer ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strPerformerID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Invoice Line Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'intInvoiceLineNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Extended Amount',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'dblExtendedAmount'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Quantity Delivered',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'dblQuantityDelivered'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Actual Percent After Delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'dblActualPercentAfterDelivery'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Invoice Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strInvoiceType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sales Person ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strSalesPersonID'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Fail Reason',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'strReason'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Obsolete/Unused',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnTemp'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Concurrency Check',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSyncFailed',
+    @level2type = N'COLUMN',
+    @level2name = N'intConcurrencyId'

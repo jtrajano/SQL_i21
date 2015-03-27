@@ -127,7 +127,7 @@ BEGIN
 							TRUNCATE TABLE #TempResults
 				
 							INSERT INTO #TempResults
-							SELECT CA.strCode + @strDivider + PA.strCode AS strCode, CA.strPrimary + @strDivider + PA.strCode AS strPrimary, '''' as strSegment, CA.strDescription + @strDivider + PA.strDescription AS strDescription,
+							SELECT CA.strCode + @strDivider + PA.strCode AS strCode, CA.strPrimary + @strDivider + PA.strCode AS strPrimary, '''' as strSegment, REPLACE(CA.strDescription,PA.strDescription ,'' '') + @strDivider + PA.strDescription AS strDescription,
 								PA.strAccountGroup, PA.intAccountGroupId, PA.intAccountStructureId, PA.intAccountSegmentId, PA.intAccountSegmentId AS strAccountSegmentId
 							FROM #ConstructAccount CA, #PrimaryAccounts PA
 							WHERE PA.intAccountStructureId = @iStructureType

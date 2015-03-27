@@ -32,7 +32,7 @@ BEGIN TRY
 		
 		print @UserRoleID
 		
-		EXEC uspSMUpdateUserRoleMenus @UserRoleID
+		EXEC uspSMUpdateUserRoleMenus @UserRoleID, @ForceVisibility = 1
 		
 		DELETE FROM #tmpUserRoles WHERE intUserRoleID = @UserRoleID
 	END

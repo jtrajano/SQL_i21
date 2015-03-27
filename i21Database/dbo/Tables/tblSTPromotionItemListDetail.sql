@@ -2,7 +2,9 @@
 (
 	[intPromoItemListDetailId] INT NOT NULL IDENTITY, 
     [intPromoItemListId] INT NOT NULL, 
-    [intItemUOMId] INT NOT NULL, 
+    [intItemUOMId] INT NULL, 
+	[strUpcCode] NVARCHAR(14) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strUpcDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
     [intUpcModifier] INT NOT NULL, 
     [dblRetailPrice] NUMERIC(7, 2) NULL, 
     [intConcurrencyId] INT NOT NULL, 

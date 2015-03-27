@@ -1,15 +1,70 @@
 ﻿CREATE PROCEDURE [testi21Database].[test uspICGetItemsForItemReceipt for getting the items from PO]
 AS
 BEGIN
+	-- Declare the variables for grains (item)
+	DECLARE @WetGrains AS INT = 1
+			,@StickyGrains AS INT = 2
+			,@PremiumGrains AS INT = 3
+			,@ColdGrains AS INT = 4
+			,@HotGrains AS INT = 5
+			,@ManualLotGrains AS INT = 6
+			,@SerializedLotGrains AS INT = 7
+			,@InvalidItem AS INT = -1
+
+	-- Declare the variables for location
+	DECLARE @Default_Location AS INT = 1
+			,@NewHaven AS INT = 2
+			,@BetterHaven AS INT = 3
+			,@InvalidLocation AS INT = -1
+
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
+			,@ManualLotGrains_BushelUOMId AS INT = 6
+			,@SerializedLotGrains_BushelUOMId AS INT = 7
+
+			,@WetGrains_PoundUOMId AS INT = 8
+			,@StickyGrains_PoundUOMId AS INT = 9
+			,@PremiumGrains_PoundUOMId AS INT = 10
+			,@ColdGrains_PoundUOMId AS INT = 11
+			,@HotGrains_PoundUOMId AS INT = 12
+			,@ManualLotGrains_PoundUOMId AS INT = 13
+			,@SerializedLotGrains_PoundUOMId AS INT = 14
+
+	-- Declare Item-Locations
+	DECLARE @WetGrains_DefaultLocation AS INT = 1
+			,@StickyGrains_DefaultLocation AS INT = 2
+			,@PremiumGrains_DefaultLocation AS INT = 3
+			,@ColdGrains_DefaultLocation AS INT = 4
+			,@HotGrains_DefaultLocation AS INT = 5
+
+			,@WetGrains_NewHaven AS INT = 6
+			,@StickyGrains_NewHaven AS INT = 7
+			,@PremiumGrains_NewHaven AS INT = 8
+			,@ColdGrains_NewHaven AS INT = 9
+			,@HotGrains_NewHaven AS INT = 10
+
+			,@WetGrains_BetterHaven AS INT = 11
+			,@StickyGrains_BetterHaven AS INT = 12
+			,@PremiumGrains_BetterHaven AS INT = 13
+			,@ColdGrains_BetterHaven AS INT = 14
+			,@HotGrains_BetterHaven AS INT = 15
+
+			,@ManualLotGrains_DefaultLocation AS INT = 16
+			,@SerializedLotGrains_DefaultLocation AS INT = 17
+
 	-- Arrange 
 	BEGIN 
-
 		-- Create the assert tables 
 		-- Assert table for the expected
 		SELECT	intItemId				= PODetail.intItemId
 				,intItemLocationId		= ItemLocation.intItemLocationId
+				,intItemUOMId			= PODetail.intUnitOfMeasureId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
-				,dblUnitQty				= PODetail.dblQtyOrdered 
+				,dblQty					= PODetail.dblQtyOrdered 
 				,dblUOMQty				= ItemUOM.dblUnitQty  
 				,dblCost				= PODetail.dblCost
 				,dblSalesPrice			= 0
@@ -19,6 +74,8 @@ BEGIN
 				,strTransactionId		= PO.strPurchaseOrderNumber
 				,intTransactionTypeId	= CAST(NULL AS INT) 
 				,intLotId				= CAST(NULL AS INT) 
+				,intSubLocationId		= CAST(NULL AS INT) 
+				,intStorageLocationId	= CAST(NULL AS INT) 
 		INTO	expected
 		FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 					ON PO.intPurchaseId = PODetail.intPurchaseId
@@ -30,25 +87,12 @@ BEGIN
 				INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON PODetail.intItemId = ItemLocation.intItemId
 					AND PODetail.intLocationId = ItemLocation.intLocationId
-
 		WHERE	1 = 0
 
 		-- Assert table for the actual 
 		SELECT	* 
 		INTO	actual
 		FROM	expected
-
-		-- Declare the variables for grains (item)
-		DECLARE @WetGrains AS INT = 1
-				,@StickyGrains AS INT = 2
-				,@PremiumGrains AS INT = 3
-				,@ColdGrains AS INT = 4
-				,@HotGrains AS INT = 5
-
-		-- Declare the variables for location
-		DECLARE @Default_Location AS INT = 1
-				,@NewHaven AS INT = 2
-				,@BetterHaven AS INT = 3
 				
 		DECLARE @UOMBushel AS INT = 1
 		DECLARE @UOMPound AS INT = 2			
@@ -63,6 +107,10 @@ BEGIN
 
 		-- Create the fake data
 		EXEC testi21Database.[Fake inventory items]
+
+		-- Mark all items as stock-keeping items. 
+		UPDATE dbo.tblICItem
+		SET strType = 'Inventory'
 
 		-- Create the fake PO tables 
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchase';
@@ -80,17 +128,18 @@ BEGIN
 		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightTermId, dblShipping, dblTotal, intVendorId) VALUES (1, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish)
 
 		-- Fake PO Detail data
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 1, @WetGrains, 10, 0, @UOMBushel, 50.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 2, @PremiumGrains, 5, 0, @UOMBushel, 100.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 3, @HotGrains, 2, 0, @UOMBushel, 200.00)
-		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 4, @ColdGrains, 4, 0, @UOMBushel, 125.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 1, @WetGrains, 10, 0, @WetGrains_BushelUOMId, 50.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 2, @PremiumGrains, 5, 0, @PremiumGrains_BushelUOMId, 100.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 3, @HotGrains, 2, 0, @HotGrains_BushelUOMId, 200.00)
+		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 4, @ColdGrains, 4, 0, @ColdGrains_BushelUOMId, 125.00)
 
 		-- Setup the expected data
 		INSERT INTO expected
 		SELECT	intItemId				= @WetGrains
-				,intItemLocationId			= @Default_Location
+				,intItemLocationId		= @WetGrains_DefaultLocation
+				,intItemUOMId			= @WetGrains_BushelUOMId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
-				,dblUnitQty				= 10
+				,dblQty					= 10
 				,dblUOMQty				= 1
 				,dblCost				= 50.00
 				,dblSalesPrice			= 0
@@ -100,11 +149,14 @@ BEGIN
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
+				,intSubLocationId		= NULL
+				,intStorageLocationId	= NULL
 		UNION ALL 
 		SELECT	intItemId				= @PremiumGrains
-				,intItemLocationId			= @Default_Location
+				,intItemLocationId		= @PremiumGrains_DefaultLocation
+				,intItemUOMId			= @PremiumGrains_BushelUOMId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
-				,dblUnitQty				= 5
+				,dblQty					= 5
 				,dblUOMQty				= 1
 				,dblCost				= 100.00
 				,dblSalesPrice			= 0
@@ -114,11 +166,14 @@ BEGIN
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
+				,intSubLocationId		= NULL
+				,intStorageLocationId	= NULL
 		UNION ALL 
 		SELECT	intItemId				= @HotGrains
-				,intItemLocationId			= @Default_Location
+				,intItemLocationId		= @HotGrains_DefaultLocation
+				,intItemUOMId			= @HotGrains_BushelUOMId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
-				,dblUnitQty				= 2
+				,dblQty					= 2
 				,dblUOMQty				= 1
 				,dblCost				= 200.00
 				,dblSalesPrice			= 0
@@ -128,11 +183,14 @@ BEGIN
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
+				,intSubLocationId		= NULL
+				,intStorageLocationId	= NULL
 		UNION ALL 
 		SELECT	intItemId				= @ColdGrains
-				,intItemLocationId			= @Default_Location
+				,intItemLocationId		= @ColdGrains_DefaultLocation
+				,intItemUOMId			= @ColdGrains_BushelUOMId
 				,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
-				,dblUnitQty				= 4
+				,dblQty					= 4
 				,dblUOMQty				= 1
 				,dblCost				= 125.00
 				,dblSalesPrice			= 0
@@ -142,15 +200,19 @@ BEGIN
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
+				,intSubLocationId		= NULL
+				,intStorageLocationId	= NULL
+
 	END 
-	
+		
 	-- Act 
 	BEGIN 
 		INSERT INTO actual (
 			intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,dtmDate
-			,dblUnitQty
+			,dblQty
 			,dblUOMQty
 			,dblCost
 			,dblSalesPrice
@@ -160,6 +222,8 @@ BEGIN
 			,strTransactionId
 			,intTransactionTypeId
 			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
 		)
 		EXEC dbo.uspICGetItemsForItemReceipt 
 			@intSourceTransactionId = 1

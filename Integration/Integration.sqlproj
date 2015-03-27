@@ -136,6 +136,9 @@
     <None Include="dbo\Stored Procedures\uspARImportServiceCharge.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportShipVia.sql" />
     <None Include="dbo\Stored Procedures\uspSMSyncShipVia.sql" />
+    <None Include="dbo\Stored Procedures\uspNRCreateAREntry.sql" />
+    <None Include="dbo\Stored Procedures\uspNRGetDetailsForInvoice.sql" />
+    <None Include="dbo\Stored Procedures\uspNRGenerateEFTSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -243,5 +246,6 @@
     <None Include="dbo\Stored Procedures\uspCMUpdateOriginNextCheckNo.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </None>
+    <None Include="dbo\Views\vyuTMConsumptionSiteSearch.sql" />
   </ItemGroup>
 </Project>

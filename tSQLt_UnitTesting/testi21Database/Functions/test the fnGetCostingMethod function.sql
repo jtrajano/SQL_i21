@@ -169,8 +169,8 @@ BEGIN
 		UNION ALL SELECT strDescription = 'I am item 2', strLotTracking = NULL
 		UNION ALL SELECT strDescription = 'I am item 3', strLotTracking = 'No'
 		UNION ALL SELECT strDescription = 'I am item 4', strLotTracking = 'No'
-		UNION ALL SELECT strDescription = 'I am item 5', strLotTracking = 'Yes, Manual'
-		UNION ALL SELECT strDescription = 'I am item 6', strLotTracking = 'Yes, Serial Number'
+		UNION ALL SELECT strDescription = 'I am item 5', strLotTracking = 'Yes - Manual'
+		UNION ALL SELECT strDescription = 'I am item 6', strLotTracking = 'Yes - Serial Number'
 	END
 
 
@@ -257,7 +257,7 @@ BEGIN
 		EXEC tSQLt.AssertEquals NULL, @actual;
 	END			
 
-	-- Test the Lot tracking: 'Yes, Manual'
+	-- Test the Lot tracking: 'Yes - Manual'
 	BEGIN 
 		-- Act
 		SELECT @actual = [dbo].[fnGetCostingMethod](@LotItem1, NULL);
@@ -266,7 +266,7 @@ BEGIN
 		EXEC tSQLt.AssertEquals @LotCost, @actual;
 	END
 
-	-- Test the Lot tracking: 'Yes, Manual'
+	-- Test the Lot tracking: 'Yes - Manual'
 	BEGIN 
 		-- Act
 		SELECT @actual = [dbo].[fnGetCostingMethod](@LotItem1, @LocationA);
@@ -275,7 +275,7 @@ BEGIN
 		EXEC tSQLt.AssertEquals @LotCost, @actual;
 	END
 
-	-- Test the Lot tracking: 'Yes, Serial Number'
+	-- Test the Lot tracking: 'Yes - Serial Number'
 	BEGIN 
 		-- Act
 		SELECT @actual = [dbo].[fnGetCostingMethod](@LotItem2, NULL);
@@ -284,7 +284,7 @@ BEGIN
 		EXEC tSQLt.AssertEquals @LotCost, @actual;
 	END
 
-	-- Test the Lot tracking: 'Yes, Serial Number'
+	-- Test the Lot tracking: 'Yes - Serial Number'
 	BEGIN 
 		-- Act
 		SELECT @actual = [dbo].[fnGetCostingMethod](@LotItem2, @LocationA);

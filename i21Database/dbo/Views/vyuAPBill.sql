@@ -9,10 +9,12 @@ SELECT
 	A.dtmDate,
 	A.dtmBillDate,
 	A.strVendorOrderNumber,
+	A.dtmDateCreated,
 	A.intTransactionType,
 	B1.strName,
 	C.strAccountId,
-	Payment.strPaymentInfo
+	Payment.strPaymentInfo,
+	F.strUserName AS strUserId
 FROM
 	tblAPBill A
 	INNER JOIN 
@@ -30,3 +32,4 @@ FROM
 		WHERE E.ysnPosted = 1 AND A.intBillId = D.intBillId
 		ORDER BY intBillId, E.dtmDatePaid DESC --get only the latest payment
 	) Payment
+	LEFT JOIN dbo.tblSMUserSecurity F ON A.intEntityId = F.intEntityId

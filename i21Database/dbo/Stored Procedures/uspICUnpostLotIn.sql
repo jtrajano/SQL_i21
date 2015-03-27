@@ -48,11 +48,24 @@ FROM	(
 					SELECT	strTransactionId = @strTransactionId
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
-					AND inventory_transaction.strTransactionId = Source_Query.strTransactionId
-					AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LOT) 
+					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LOT)
 					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
+					AND 
+					(
+						-- Link to the main transaction
+						(	
+							inventory_transaction.strTransactionId = Source_Query.strTransactionId
+							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+							AND ISNULL(inventory_transaction.dblQty, 0) > 0 -- Reverse Qty that is positive. 
+						)
+						-- Link to revalue and write-off sold 
+						OR (
+							inventory_transaction.strTransactionId = Source_Query.strTransactionId
+							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD)
+						)
+					)
 
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
@@ -82,7 +95,10 @@ FROM	dbo.tblICInventoryLot LotBucket INNER JOIN (
 INSERT INTO dbo.tblICInventoryLot (
 		intItemId
 		,intItemLocationId
+		,intItemUOMId
 		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
 		,dblStockIn
 		,dblStockOut
 		,dblCost
@@ -94,9 +110,12 @@ INSERT INTO dbo.tblICInventoryLot (
 )
 SELECT	intItemId = OutTransactions.intItemId
 		,intItemLocationId = OutTransactions.intItemLocationId
+		,intItemUOMId = OutTransactions.intItemUOMId
 		,intLotId = OutTransactions.intLotId
+		,intSubLocationId = OutTransactions.intSubLocationId
+		,intStorageLocationId = OutTransactions.intStorageLocationId
 		,dblStockIn = 0 
-		,dblStockOut = ABS(OutTransactions.dblUnitQty)
+		,dblStockOut = ABS(ISNULL(OutTransactions.dblQty, 0))
 		,dblCost = OutTransactions.dblCost
 		,strTransactionId = OutTransactions.strTransactionId
 		,intTransactionId = OutTransactions.intTransactionId
@@ -107,7 +126,7 @@ FROM	dbo.tblICInventoryLot Lot INNER JOIN dbo.tblICInventoryLotOut LotOut
 			ON Lot.intInventoryLotId = LotOut.intInventoryLotId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
 			ON OutTransactions.intInventoryTransactionId = LotOut.intInventoryTransactionId
-			AND OutTransactions.dblUnitQty < 0 
+			AND ISNULL(OutTransactions.dblQty, 0) < 0 
 WHERE	Lot.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND Lot.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0

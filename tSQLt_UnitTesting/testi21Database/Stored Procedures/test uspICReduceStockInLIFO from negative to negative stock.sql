@@ -23,6 +23,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Create a fake data for tblICInventoryLIFO
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryLIFO
@@ -33,6 +40,7 @@ BEGIN
 		INSERT INTO dbo.tblICInventoryLIFO (
 			[intItemId]
 			,[intItemLocationId]
+			,[intItemUOMId]
 			,[dtmDate]
 			,[dblStockIn]
 			,[dblStockOut]
@@ -43,6 +51,7 @@ BEGIN
 		)
 		SELECT	[intItemId] = @WetGrains
 				,[intItemLocationId] = @Default_Location
+				,[intItemUOMId] = @WetGrains_BushelUOMId
 				,[dtmDate] = 'January 15, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 60
@@ -55,6 +64,7 @@ BEGIN
 		CREATE TABLE expected (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -66,6 +76,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -77,6 +88,7 @@ BEGIN
 		-- Create the variables used by uspICReduceStockInLIFO
 		DECLARE @intItemId AS INT = @WetGrains
 				,@intItemLocationId AS INT = @Default_Location
+				,@intItemUOMId AS INT = @WetGrains_BushelUOMId
 				,@dtmDate AS DATETIME = 'January 18, 2014'
 				,@dblSoldQty NUMERIC(18,6) = -10
 				,@dblCost AS NUMERIC(18,6) = 33.19
@@ -94,6 +106,7 @@ BEGIN
 		INSERT INTO expected (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -103,6 +116,7 @@ BEGIN
 		)
 		SELECT	[intItemId] = @WetGrains
 				,[intItemLocationId] = @Default_Location
+				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 15, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 60
@@ -112,6 +126,7 @@ BEGIN
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
 				,[intItemLocationId] = @Default_Location
+				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] =  'January 18, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 10
@@ -138,6 +153,7 @@ BEGIN
 			EXEC dbo.uspICReduceStockInLIFO
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId
 				,@dtmDate
 				,@dblReduceQty
 				,@dblCost
@@ -164,6 +180,7 @@ BEGIN
 		INSERT INTO actual (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -174,6 +191,7 @@ BEGIN
 		SELECT
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]

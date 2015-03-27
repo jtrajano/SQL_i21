@@ -6,6 +6,7 @@ BEGIN
 		EXEC [testi21Database].[Fake inventory items]; 
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 
 		-- Create the variables for the internal transaction types used by costing. 	
 		DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
@@ -31,6 +32,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
+
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
 
 		-- Declare the variables for the currencies
 		DECLARE @USD AS INT = 1;
@@ -66,8 +74,10 @@ BEGIN
 		INSERT INTO tblICInventoryTransaction (
 				intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dtmDate
-				,dblUnitQty
+				,dblQty
+				,dblUOMQty
 				,dblCost
 				,dblValue
 				,dblSalesPrice
@@ -85,8 +95,10 @@ BEGIN
 		)
 		SELECT 	intItemId = @StickyGrains
 				,intItemLocationId = 2
+				,intItemUOMId = @StickyGrains_BushelUOMId
 				,dtmDate = 'January 17, 2014'
-				,dblUnitQty = -11
+				,dblQty = -11
+				,dblUOMQty = 1
 				,dblCost = 1.50
 				,dblValue = 0
 				,dblSalesPrice = 0
@@ -195,10 +207,6 @@ BEGIN
 		FROM dbo.tblGLAccount
 		WHERE intAccountId = @AutoNegative_Default				
 	END 
-	
-	--select 'debug tblICInventoryTransaction', * from tblICInventoryTransaction 
-	--select * from tblICInventoryTransactionType	
-	--select 'fnGetItemGLAccountAsTable', * from dbo.fnGetItemGLAccountAsTable (2, 2, 'Auto-Negative') AutoNegative;
 	
 	-- Act
 	BEGIN 

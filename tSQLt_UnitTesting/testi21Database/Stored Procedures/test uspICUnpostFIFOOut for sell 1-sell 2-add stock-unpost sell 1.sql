@@ -117,7 +117,7 @@ BEGIN
 		-- Add fake data for tblICInventoryTransaction
 		INSERT INTO dbo.tblICInventoryTransaction (
 			dtmDate
-			,dblUnitQty
+			,dblQty
 			,dblCost
 			,dblValue
 			,dblSalesPrice
@@ -132,9 +132,9 @@ BEGIN
 			,strBatchId
 		)
 		SELECT	dtmDate = '1/1/2014'
-				,dblUnitQty = -100
+				,dblQty = -100
 				,dblCost = 2.15
-				,dblValue = NULL 
+				,dblValue = 0 
 				,dblSalesPrice = 12.15
 				,intTransactionId = 1
 				,strTransactionId = 'InvShip-0000001'
@@ -147,9 +147,9 @@ BEGIN
 				,strBatchId = 'BATCH-0001'
 		UNION ALL 
 		SELECT	dtmDate = '1/4/2014'
-				,dblUnitQty = -15
+				,dblQty = -15
 				,dblCost = 2.15
-				,dblValue = NULL 
+				,dblValue = 0 
 				,dblSalesPrice = 14.25
 				,intTransactionId = 2
 				,strTransactionId = 'InvShip-0000002'
@@ -162,9 +162,9 @@ BEGIN
 				,strBatchId = 'BATCH-0002'		
 		UNION ALL 
 		SELECT	dtmDate = '1/6/2014'
-				,dblUnitQty = 130
+				,dblQty = 130
 				,dblCost = 3.40
-				,dblValue = NULL 
+				,dblValue = 0 
 				,dblSalesPrice = 0
 				,intTransactionId = 1 
 				,strTransactionId = 'InvRcpt-0000001'
@@ -178,7 +178,7 @@ BEGIN
 		-- Revalue sold for InvShip-0000001
 		UNION ALL 		
 		SELECT	dtmDate = '1/6/2014'
-				,dblUnitQty = 0
+				,dblQty = 0
 				,dblCost = 0
 				,dblValue = -340.00
 				,dblSalesPrice = 0
@@ -194,7 +194,7 @@ BEGIN
 		-- Write-Off sold for InvShip-0000001
 		UNION ALL 		
 		SELECT	dtmDate = '1/6/2014'
-				,dblUnitQty = 0
+				,dblQty = 0
 				,dblCost = 0
 				,dblValue = 215.00
 				,dblSalesPrice = 0
@@ -210,7 +210,7 @@ BEGIN
 		-- Revalue sold for InvShip-0000002
 		UNION ALL 		
 		SELECT	dtmDate = '1/6/2014'
-				,dblUnitQty = 0
+				,dblQty = 0
 				,dblCost = 0
 				,dblValue = -51.00
 				,dblSalesPrice = 0
@@ -226,7 +226,7 @@ BEGIN
 		-- Write-Off sold for InvShip-0000002
 		UNION ALL 		
 		SELECT	dtmDate = '1/6/2014'
-				,dblUnitQty = 0
+				,dblQty = 0
 				,dblCost = 0
 				,dblValue = 32.25
 				,dblSalesPrice = 0

@@ -49,18 +49,26 @@ RETURN (
 																					AND AccntCategory.strAccountCategory = @strAccountCategory
 																		) AS ItemLevel
 																		FULL JOIN (
-																			-- Get the base account at the Item-Location level and then at the Category. 
+																			-- Get the base account at the Category level.
 																			SELECT	TOP 1 
 																					CategoryAccounts.intAccountId
-																			FROM	dbo.tblICItemLocation ItemLocation INNER JOIN dbo.tblICCategory Category
-																						ON ItemLocation.intCategoryId = Category.intCategoryId
+																			FROM	dbo.tblICItem Item INNER JOIN dbo.tblICCategory Category
+																						ON Item.intCategoryId = Category.intCategoryId
 																					INNER JOIN tblICCategoryAccount CategoryAccounts
 																						ON Category.intCategoryId = CategoryAccounts.intCategoryId
 																					INNER JOIN dbo.tblGLAccountCategory AccntCategory
 																						ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
-																			WHERE	ItemLocation.intItemId = @intItemId
-																					AND ItemLocation.intItemLocationId = @intItemLocationId
-																					AND AccntCategory.strAccountCategory = @strAccountCategory 			
+																			WHERE	Item.intItemId = @intItemId
+																					AND AccntCategory.strAccountCategory = @strAccountCategory 
+																			--FROM	dbo.tblICItemLocation ItemLocation INNER JOIN dbo.tblICCategory Category
+																			--			ON ItemLocation.intCategoryId = Category.intCategoryId
+																			--		INNER JOIN tblICCategoryAccount CategoryAccounts
+																			--			ON Category.intCategoryId = CategoryAccounts.intCategoryId
+																			--		INNER JOIN dbo.tblGLAccountCategory AccntCategory
+																			--			ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
+																			--WHERE	ItemLocation.intItemId = @intItemId
+																			--		AND ItemLocation.intItemLocationId = @intItemLocationId
+																			--		AND AccntCategory.strAccountCategory = @strAccountCategory 			
 																		) AS CategoryLevel
 																			ON CategoryLevel.intAccountId = CategoryLevel.intAccountId
 																		FULL JOIN (
@@ -98,7 +106,7 @@ RETURN (
 									, 1 -- We expect the divider used in COA setup is always one character. 
 									, '' 
 							)	
-			) AS RecreatedAccount INNER JOIN tblGLAccount 
+			) AS RecreatedAccount LEFT JOIN tblGLAccount 
 				-- To be sure, cross reference the re-created account id with the tblGLAccount table
 				ON RecreatedAccount.strAccountId = tblGLAccount.strAccountId COLLATE Latin1_General_CI_AS
 )

@@ -112,7 +112,7 @@ BEGIN
 		-- Add fake data for tblICInventoryTransaction
 		INSERT INTO dbo.tblICInventoryTransaction (
 			dtmDate
-			,dblUnitQty
+			,dblQty
 			,dblCost
 			,dblValue
 			,dblSalesPrice
@@ -127,9 +127,9 @@ BEGIN
 			,strBatchId
 		)
 		SELECT	dtmDate = '1/1/2014'
-				,dblUnitQty = 100
+				,dblQty = 100
 				,dblCost = 2.15
-				,dblValue = NULL 
+				,dblValue = 0 
 				,dblSalesPrice = 0
 				,intTransactionId = 1
 				,strTransactionId = 'InvRcpt-0000001'
@@ -142,9 +142,9 @@ BEGIN
 				,strBatchId = 'BATCH-0001'
 		UNION ALL 
 		SELECT	dtmDate = '1/2/2014'
-				,dblUnitQty = 23
+				,dblQty = 23
 				,dblCost = 2.24
-				,dblValue = NULL 
+				,dblValue = 0 
 				,dblSalesPrice = 0
 				,intTransactionId = 2
 				,strTransactionId = 'InvRcpt-0000002'

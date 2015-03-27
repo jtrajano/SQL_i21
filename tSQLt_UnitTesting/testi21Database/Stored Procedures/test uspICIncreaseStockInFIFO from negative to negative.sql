@@ -22,6 +22,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Create a fake data for tblICInventoryFIFO
 			/***************************************************************************************************************************************************************************************************************
 			The initial data in tblICInventoryFIFO
@@ -34,6 +41,7 @@ BEGIN
 		INSERT INTO dbo.tblICInventoryFIFO (
 			[intItemId]
 			,[intItemLocationId]
+			,[intItemUOMId]
 			,[dtmDate]
 			,[dblStockIn]
 			,[dblStockOut]
@@ -47,6 +55,7 @@ BEGIN
 		-- Sold to negative
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 15, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 30
@@ -61,6 +70,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 14, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 56
@@ -74,6 +84,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 13, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 77
@@ -87,6 +98,7 @@ BEGIN
 		CREATE TABLE expected (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -98,6 +110,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -109,6 +122,7 @@ BEGIN
 		-- Create the variables used by uspICIncreaseStockInFIFO
 		DECLARE @intItemId AS INT = @PremiumGrains
 				,@intItemLocationId AS INT = @BetterHaven
+				,@intItemUOMId AS INT = @PremiumGrains_BushelUOMId
 				,@dtmDate AS DATETIME = 'January 16, 2014'
 				,@dblQty NUMERIC(18,6) = 100
 				,@dblCost AS NUMERIC(18,6) = 22
@@ -129,6 +143,7 @@ BEGIN
 		INSERT INTO expected (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -139,6 +154,7 @@ BEGIN
 		-- There is an offset to the negative stock
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 13, 2014'
 				,[dblStockIn] = 77
 				,[dblStockOut] = 77
@@ -149,6 +165,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 14, 2014'
 				,[dblStockIn] = 23
 				,[dblStockOut] = 56
@@ -159,6 +176,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 15, 2014'
 				,[dblStockIn] = 0
 				,[dblStockOut] = 30
@@ -169,6 +187,7 @@ BEGIN
 		UNION ALL 
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
+				,[intItemUOMId] = @PremiumGrains_BushelUOMId
 				,[dtmDate] = 'January 16, 2014'
 				,[dblStockIn] = 100
 				,[dblStockOut] = 100
@@ -202,6 +221,7 @@ BEGIN
 			EXEC dbo.uspICIncreaseStockInFIFO
 				@intItemId
 				,@intItemLocationId
+				,@intItemUOMId
 				,@dtmDate
 				,@dblQty
 				,@dblCost
@@ -256,6 +276,7 @@ BEGIN
 		INSERT INTO actual (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -266,6 +287,7 @@ BEGIN
 		SELECT
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId]
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]

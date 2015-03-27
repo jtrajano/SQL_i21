@@ -3,6 +3,8 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
+		EXEC [testi21Database].[Fake inventory items];
+
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
 				,@StickyGrains AS INT = 2
@@ -17,21 +19,30 @@ BEGIN
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 1
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'Dummy-000001'
 		DECLARE @intUserId AS INT = 1
 		DECLARE @intEntityId AS INT = 1
-		DECLARE @dtmDate AS DATETIME = GETDATE()
+		DECLARE @dtmDate AS DATETIME = GETDATE()			
 
-		EXEC [testi21Database].[Fake inventory items];
-
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemLot', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
 		INSERT INTO tblICInventoryReceipt (
 			strReceiptNumber
@@ -50,6 +61,7 @@ BEGIN
 			,dblOrderQty
 			,dblOpenReceive
 			,dblUnitCost
+			,intUnitMeasureId
 		)
 		VALUES (
 			1
@@ -57,6 +69,7 @@ BEGIN
 			,10
 			,10
 			,12.50
+			,@WetGrains_BushelUOMId
 		);
 		
 		CREATE TABLE actual (

@@ -217,4 +217,13 @@ GO
 
 GO
 	PRINT N'End updating tblHDTicket strJiraIssue.'
+	PRINT N'Start updating tblHDTicket Customer Id.'
+GO
+
+	update tblHDTicket set intCustomerId = (
+		select tblARCustomer.intCustomerId from tblARCustomer where strCustomerNumber = tblHDTicket.strCustomerNumber
+	)
+
+GO
+	PRINT N'End updating tblHDTicket Customer Id.'
 GO

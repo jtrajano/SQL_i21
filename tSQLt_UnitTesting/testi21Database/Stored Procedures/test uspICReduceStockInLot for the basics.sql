@@ -8,6 +8,7 @@ BEGIN
 		CREATE TABLE expected (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -20,6 +21,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -32,7 +34,10 @@ BEGIN
 		-- Create the variables 
 		DECLARE @intItemId AS INT
 				,@intItemLocationId AS INT
+				,@intItemUOMId AS INT
 				,@intLotId AS INT
+				,@intSubLocationId AS INT
+				,@intStorageLocationId AS INT
 				,@dblSoldQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
@@ -49,7 +54,10 @@ BEGIN
 		EXEC [dbo].[uspICReduceStockInLot]
 			@intItemId 
 			,@intItemLocationId 
+			,@intItemUOMId 
 			,@intLotId 
+			,@intSubLocationId 
+			,@intStorageLocationId 
 			,@dblSoldQty 
 			,@dblCost
 			,@strTransactionId
@@ -63,6 +71,7 @@ BEGIN
 		INSERT INTO actual (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -74,6 +83,7 @@ BEGIN
 		SELECT
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -99,4 +109,4 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 
-END 
+END

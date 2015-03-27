@@ -56,6 +56,7 @@ FROM	(
 						(	
 							inventory_transaction.strTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+							AND ISNULL(inventory_transaction.dblQty, 0) < 0 -- Reverse Qty that is negative. 
 						)
 						-- Link to the related transactions 
 						OR (
@@ -73,14 +74,18 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
--- If LIFO_bucket was from a negative stock, let dblStockIn equal to dblStockOut. 
+-- If LIFOBucket was from a negative stock, let dblStockIn equal to dblStockOut. 
 UPDATE	LIFOBucket
 SET		dblStockIn = dblStockOut
 		,ysnIsUnposted = 1
-FROM	dbo.tblICInventoryLIFO LIFOBucket INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
-			ON LIFOBucket.intTransactionId = InventoryToReverse.intTransactionId
-			AND LIFOBucket.strTransactionId = InventoryToReverse.strTransactionId
-WHERE	InventoryToReverse.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+FROM	dbo.tblICInventoryLIFO LIFOBucket 
+WHERE	EXISTS (
+			SELECT	TOP 1 1 
+			FROM	#tmpInventoryTransactionStockToReverse InventoryToReverse
+			WHERE	InventoryToReverse.intTransactionId = LIFOBucket.intTransactionId
+					AND InventoryToReverse.strTransactionId = LIFOBucket.strTransactionId
+					AND InventoryToReverse.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+		)
 ;
 
 -- If there are LIFO out records, update the costing bucket. Return the out-qty back to the bucket where it came from. 

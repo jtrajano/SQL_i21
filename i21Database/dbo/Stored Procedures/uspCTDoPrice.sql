@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTCreatePriceContract]
+﻿CREATE PROCEDURE [dbo].[uspCTDoPrice]
 	@XML varchar(max)
 AS
 BEGIN TRY
@@ -17,8 +17,9 @@ BEGIN TRY
 			@ContractOptHeaderId	INT,
 			@CurrentQty				DECIMAL(12,4),
 			@ContractSeq			INT,
-	        @NewContractDetailId	INT 
-	                  
+	        @NewContractDetailId	INT, 
+	        @intPricingType			INT
+			          
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
 	SELECT	
@@ -68,6 +69,13 @@ BEGIN TRY
 				WHERE intContractDetailId = @ContractDetailId
 			)
 	
+	IF	(ISNULL(@Futures,0) > 0 AND ISNULL(@Basis,0) > 0)
+		SET @intPricingType = 1
+	ELSE IF	(@Futures IS NULL)
+		SET @intPricingType = 2
+	ELSE IF	(@Basis IS NULL)
+		SET @intPricingType = 3
+
 	IF	@CurrentQty <> @Quantity
 	BEGIN
 		INSERT	INTO tblCTContractDetail
@@ -77,7 +85,7 @@ BEGIN TRY
 				intShipViaId,		dblQuantity,			intUnitMeasureId,		intPricingType,
 				dblFutures,			dblBasis,				intFutureMarketId,		strFuturesMonth,
 				dblCashPrice,		intCurrencyId,			dblRate,				strCurrencyReference,
-				intMarketZoneId,	intDiscount,			intDiscountSchedule,	intContractOptHeaderId,
+				intMarketZoneId,	intDiscountType,		intDiscountId,			intContractOptHeaderId,
 				strBuyerSeller,		intBillTo,				intFreightRateId,		strFobBasis,
 				intGrade,			strRemark,				dblOriginalQty,			dblBalance,
 				dblIntransitQty,	dblScheduleQty
@@ -88,7 +96,7 @@ BEGIN TRY
 				intShipViaId,		@CurrentQty-@Quantity,	intUnitMeasureId,		intPricingType,
 				dblFutures,			dblBasis,				intFutureMarketId,		strFuturesMonth,
 				dblCashPrice,		intCurrencyId,			dblRate,				strCurrencyReference,
-				intMarketZoneId,	intDiscount,			intDiscountSchedule,	intContractOptHeaderId,
+				intMarketZoneId,	intDiscountType,		intDiscountId,			intContractOptHeaderId,
 				strBuyerSeller,		intBillTo,				intFreightRateId,		strFobBasis,
 				intGrade,			strRemark,				dblOriginalQty,			dblBalance,
 				dblIntransitQty,	dblScheduleQty
@@ -130,7 +138,7 @@ BEGIN TRY
 				strFuturesMonth			=	@FuturesMonth	,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
-				intPricingType			=	1	
+				intPricingType			=	@intPricingType	
 		WHERE	intContractDetailId		=	@ContractDetailId
 		
 	END
@@ -144,7 +152,7 @@ BEGIN TRY
 				strFuturesMonth			=	@FuturesMonth	,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
-				intPricingType			=	1	
+				intPricingType			=	@intPricingType	
 		WHERE	intContractDetailId		=	@ContractDetailId
 	END
 	
@@ -154,4 +162,3 @@ BEGIN CATCH
  IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 END CATCH
-

@@ -30,14 +30,16 @@ BEGIN
 	WHERE	strName = 'Purchase Order'
 END 
 
--- Get a distinct list of items, per location, and per Purchase order. 
+-- Get a distinct list of items, per location, per UOM, and per Purchase order. 
 -- Store it in a temporary table 
 BEGIN 
 	CREATE TABLE #tmpPurchaseOrderItems (
 		intItemId INT NOT NULL 
 		,intItemLocationId INT NOT NULL 
+		,intItemUOMId INT 
 		,dtmDate DATETIME
 		,dblOrderQty NUMERIC(18,6) DEFAULT 0
+		,dblUOMQty NUMERIC(18,6) DEFAULT 0		
 		,dblValue NUMERIC(18,6)
 		,intTransactionId INT
 		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -46,16 +48,18 @@ BEGIN
 	INSERT INTO #tmpPurchaseOrderItems (
 			intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,dtmDate
 			,intTransactionId
-			,strTransactionId
+			,strTransactionId			
 	)
 	SELECT 	DISTINCT 
 			Items.intItemId 
 			,ItemLocation.intItemLocationId
+			,Items.intUnitMeasureId
 			,PO.dtmDate
 			,intTransactionId = Items.intSourceId
-			,strTransactionId = PO.strPurchaseOrderNumber
+			,strTransactionId = PO.strPurchaseOrderNumber			
 	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem Items
 				ON Header.intInventoryReceiptId = Items.intInventoryReceiptId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -68,17 +72,20 @@ BEGIN
 			AND Items.intSourceId IS NOT NULL 
 
 	-- Remove duplicate records 
-	DELETE	SOItems
-	FROM	#tmpPurchaseOrderItems SOItems
+	DELETE	POItems
+	FROM	#tmpPurchaseOrderItems POItems
 	WHERE	EXISTS (
 				SELECT	TOP 1 1 
 				FROM	dbo.tblICInventoryTransaction InvTransactions
-				WHERE	InvTransactions.intItemId = SOItems.intItemId
-						AND InvTransactions.intItemLocationId = SOItems.intItemLocationId
-						AND InvTransactions.intTransactionId = SOItems.intTransactionId
-						AND InvTransactions.strTransactionId = SOItems.strTransactionId
+				WHERE	InvTransactions.intItemId = POItems.intItemId
+						AND InvTransactions.intItemLocationId = POItems.intItemLocationId
+						AND InvTransactions.intItemUOMId = POItems.intItemLocationId
+						AND InvTransactions.intTransactionId = POItems.intTransactionId
+						AND InvTransactions.strTransactionId = POItems.strTransactionId
 			)
 
+	-- Update the ordered qty. 
+	-- Group it by item, location, and UOM. 
 	UPDATE	tempItems
 	SET		dblOrderQty = AggregrateOrderQty.dblOrderQty
 			,dblValue = AggregrateOrderQty.dblValue 
@@ -87,6 +94,7 @@ BEGIN
 						,dblValue = SUM(ISNULL(POItems.dblQtyOrdered, 0) * ISNULL(POItems.dblCost, 0)) 
 						,Items.intItemId
 						,Items.intItemLocationId
+						,POItems.intUnitOfMeasureId
 				FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail POItems
 							ON PO.intPurchaseId = POItems.intPurchaseId				
 						INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -95,10 +103,19 @@ BEGIN
 						INNER JOIN #tmpPurchaseOrderItems Items 
 							ON Items.intItemId = POItems.intItemId
 							AND Items.intItemLocationId = ItemLocation.intItemLocationId
-				GROUP BY Items.intItemId, Items.intItemLocationId
+				GROUP BY Items.intItemId, Items.intItemLocationId, POItems.intUnitOfMeasureId
 			) AggregrateOrderQty INNER JOIN #tmpPurchaseOrderItems tempItems
 				ON AggregrateOrderQty.intItemId = tempItems.intItemId
 				AND AggregrateOrderQty.intItemLocationId = tempItems.intItemLocationId
+				AND AggregrateOrderQty.intUnitOfMeasureId = tempItems.intItemUOMId
+
+	-- Get the UOM Qty 
+	UPDATE	tempItems
+	SET		dblUOMQty = ItemUOM.dblUnitQty
+	FROM	#tmpPurchaseOrderItems tempItems INNER JOIN dbo.tblICItemUOM ItemUOM
+				ON tempItems.intItemId = ItemUOM.intItemId
+				AND tempItems.intItemUOMId = ItemUOM.intItemUOMId
+
 END
 
 -- Insert the Purchase Order to the Inventory Transaction table from the temporary table
@@ -106,8 +123,10 @@ BEGIN
 	INSERT INTO dbo.tblICInventoryTransaction (
 			intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,dtmDate
-			,dblUnitQty
+			,dblQty
+			,dblUOMQty
 			,dblCost
 			,dblValue
 			,dblSalesPrice
@@ -126,10 +145,12 @@ BEGIN
 	)
 	SELECT 	intItemId 
 			,intItemLocationId
+			,intItemUOMId			= Items.intItemUOMId -- UOM used in the PO. 
 			,dtmDate				
-			,dblUnitQty				= dblOrderQty -- (total qty ordered from PO)
+			,dblQty					= dblOrderQty -- (total qty ordered from PO)
+			,dblUOMQty				= dblUOMQty -- (unit qty of the UOM)
 			,dblCost				= 0 -- Unable to track it. 
-			,dblValue				-- (total value from PO)				
+			,dblValue				-- (total value from PO)			
 			,dblSalesPrice			= 0 -- Tracking not needed
 			,intCurrencyId			= NULL -- Tracking not needed
 			,dblExchangeRate		= 1 -- Tracking not needed

@@ -6,5 +6,5 @@
     [intSalespersonId] INT NOT NULL, 
     CONSTRAINT [PK_tblRKTradersbyBrokersAccountMapping_intTradersbyBrokersAccountId] PRIMARY KEY ([intTradersbyBrokersAccountId]), 
     CONSTRAINT [FK_tblRKTradersbyBrokersAccountMapping_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblRKTradersbyBrokersAccountMapping_tblARSalesperson_intSalesersonId] FOREIGN KEY ([intSalespersonId]) REFERENCES [tblARSalesperson]([intSalespersonId])
+    CONSTRAINT [FK_tblRKTradersbyBrokersAccountMapping_tblARSalesperson_intSalesersonId] FOREIGN KEY ([intSalespersonId]) REFERENCES [tblARSalesperson]([intEntitySalespersonId])
 )

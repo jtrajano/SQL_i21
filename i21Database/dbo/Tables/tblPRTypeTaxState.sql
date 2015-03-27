@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblPRTypeTaxState](
-	[intTypeTaxStateId] [int] NOT NULL IDENTITY,
+	[intTypeTaxStateId] [int] NOT NULL,
 	[strState] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCode] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 

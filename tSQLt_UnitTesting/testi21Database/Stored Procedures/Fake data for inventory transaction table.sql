@@ -2,6 +2,7 @@
 AS
 BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction';
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -17,6 +18,13 @@ BEGIN
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Declare the variables for the transaction 
 		DECLARE @intTransactionId AS INT = 1;
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'TRANSACTIONID-XXX1';
@@ -27,16 +35,17 @@ BEGIN
 		DECLARE @intTransactionTypeId AS INT = 10;
 		
 		-- Add 3 items (Wet, Sticky, and Premium Grains) for the 1st transaction. 
-		INSERT INTO tblICInventoryTransaction (intTransactionId, strTransactionId, strBatchId, dtmDate, intItemId, intItemLocationId, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionTypeId)
+		INSERT INTO tblICInventoryTransaction (intTransactionId, strTransactionId, strBatchId, dtmDate, intItemId, intItemLocationId, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionTypeId)
 		SELECT	intTransactionId = @intTransactionId
 				, strTransactionId = @strTransactionId
 				, strBatchId = @strBatchId
 				, dtmDate = @dtmDate
 				, intItemId = @WetGrains
 				, intItemLocationId = @NewHaven
-				, dblUnitQty = 1
+				, dblQty = 1
+				, dblUOMQty = 1
 				, dblCost = 100
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -48,9 +57,10 @@ BEGIN
 				, dtmDate = @dtmDate
 				, intItemId = @StickyGrains
 				, intItemLocationId = @NewHaven
-				, dblUnitQty = 2
+				, dblQty = 2
+				, dblUOMQty = 1
 				, dblCost = 100
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -62,9 +72,10 @@ BEGIN
 				, dtmDate = @dtmDate
 				, intItemId = @PremiumGrains
 				, intItemLocationId = @NewHaven
-				, dblUnitQty = 2
+				, dblQty = 2
+				, dblUOMQty = 1
 				, dblCost = 100
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -79,16 +90,17 @@ BEGIN
 		SET @dtmDate = '10/11/2014';
 		SET @intTransactionTypeId = 11;
 
-		INSERT INTO tblICInventoryTransaction (intTransactionId, strTransactionId, strBatchId, dtmDate, intItemId, intItemLocationId, dblUnitQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionTypeId)
+		INSERT INTO tblICInventoryTransaction (intTransactionId, strTransactionId, strBatchId, dtmDate, intItemId, intItemLocationId, dblQty, dblUOMQty, dblCost, dblValue, dblSalesPrice, intCurrencyId, dblExchangeRate, intTransactionTypeId)
 		SELECT	intTransactionId = @intTransactionId
 				, strTransactionId = @strTransactionId
 				, strBatchId = @strBatchId
 				, dtmDate = @dtmDate
 				, intItemId = @ColdGrains
 				, intItemLocationId = @BetterHaven
-				, dblUnitQty = 1
+				, dblQty = 1
+				, dblUOMQty = 1
 				, dblCost = 100
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 2000
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate
@@ -100,9 +112,10 @@ BEGIN
 				, dtmDate = @dtmDate
 				, intItemId = @HotGrains
 				, intItemLocationId = @BetterHaven
-				, dblUnitQty = 2
+				, dblQty = 2
+				, dblUOMQty = 1
 				, dblCost = 15.11
-				, dblValue = NULL
+				, dblValue = 0
 				, dblSalesPrice = 781.20
 				, intCurrencyId = @BaseCurrencyId
 				, dblExchangeRate = @dblExchangeRate

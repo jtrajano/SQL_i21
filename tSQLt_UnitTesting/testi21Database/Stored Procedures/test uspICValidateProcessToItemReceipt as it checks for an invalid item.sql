@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [testi21Database].[test uspICValidateProcessToItemReceipt as it checks for an invalid item]
+﻿CREATE PROCEDURE [testi21Database].[test uspICValidateProcessToItemReceipt as it checks for an invalid item]
 AS
 BEGIN
 	-- Arrange 
@@ -18,29 +16,38 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Create the items to validate variable. 
 		DECLARE @Items AS ItemCostingTableType
 
 		-- Insert a record to process 
 		INSERT	@Items (
 				intItemId
-				, intItemLocationId
-				, dtmDate
-				, dblUnitQty
-				, dblUOMQty
-				, dblCost
-				, dblSalesPrice
-				, intCurrencyId
-				, dblExchangeRate
-				, intTransactionId
-				, strTransactionId
-				, intTransactionTypeId
-				, intLotId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
 		)
 		SELECT	intItemId = @InvalidItem
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = -1
 				,dtmDate = GETDATE()
-				,dblUnitQty = 10
+				,dblQty = 10
 				,dblUOMQty = 1
 				,dblCost = 1.00
 				,dblSalesPrice = 2.00
@@ -58,6 +65,6 @@ BEGIN
 	-- Act and Assert
 	BEGIN 
 		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50027
-		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsToValidate = @Items;
+		EXEC dbo.uspICValidateProcessToItemReceipt @Items;
 	END 
 END 

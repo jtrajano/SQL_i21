@@ -34,7 +34,8 @@ BEGIN
 
 		-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" group. 
 		UPDATE	tblGLAccount
-		SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts'')
+		SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts''),
+				intAccountCategoryId = (SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = ''Cash Account'')
 		from	tblGLAccount gl INNER JOIN (
 					SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
 				) Q

@@ -38,6 +38,10 @@ DECLARE -- Constant variables for bank account types:
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
 		,@AP_PAYMENT AS INT = 16
+		,@BANK_STMT_IMPORT AS INT = 17
+		,@AR_PAYMENT AS INT = 18
+		,@VOID_CHECK AS INT = 19
+		,@AP_ECHECK AS INT = 20
 
 		-- Constant variables for Check number status. 
 		,@CHECK_NUMBER_STATUS_UNUSED AS INT = 1

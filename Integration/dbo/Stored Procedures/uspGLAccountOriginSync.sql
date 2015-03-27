@@ -105,7 +105,7 @@ BEGIN
 					@LegacySide_update,
 					'''',
 					'''',
-					(SELECT TOP 1 A4GLIdentity FROM gluommst WHERE CAST(gluom_code AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = (SELECT TOP 1 strUOMCode FROM tblGLAccountUnit WHERE tblGLAccountUnit.intAccountUnitId = tblGLAccount.intAccountUnitId)), --glact_uom 
+					(SELECT TOP 1 gluom_code FROM gluommst WHERE CAST(gluom_code AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = (SELECT TOP 1 strUOMCode FROM tblGLAccountUnit WHERE tblGLAccountUnit.intAccountUnitId = tblGLAccount.intAccountUnitId)), --glact_uom 
 					'''',
 					(CASE WHEN ysnActive = 0 THEN ''N'' ELSE ''Y'' END) as glact_active_yn,
 					(CASE WHEN ysnSystem = 0 THEN ''N'' ELSE ''Y'' END) as glact_sys_acct_yn,

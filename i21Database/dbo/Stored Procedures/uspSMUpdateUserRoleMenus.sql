@@ -36,7 +36,12 @@ BEGIN TRY
 		
 		-- Iterate through all affected user roles and apply Master Menus
 		INSERT INTO tblSMUserRoleMenu(intUserRoleId, intMenuId, ysnVisible, intSort)
-		SELECT @UserRoleID, intMenuID, @IsAdmin, intSort = intMenuID FROM tblSMMasterMenu
+		SELECT @UserRoleID, intMenuID, (CASE @IsAdmin WHEN 1
+										THEN (CASE @ForceVisibility WHEN 1
+											THEN 1
+											ELSE ISNULL((SELECT ysnVisible FROM tblSMUserRoleMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserRoleId = @UserRoleID), 0) END)
+										ELSE 0 END),
+		intSort = intMenuID FROM tblSMMasterMenu Menu
 		WHERE intMenuID NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu WHERE intUserRoleId = @UserRoleID)
 		
 		IF (@IsAdmin = 0)
@@ -46,8 +51,8 @@ BEGIN TRY
 			AND intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu
 								WHERE ((strMenuName = 'Admin' 
 										AND strCommand = 'i21' 
-										AND intParentMenuID = 0) 
-									OR intParentMenuID IN (1, 10)))
+										AND intParentMenuID = 0)
+										OR intParentMenuID IN (1, 10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))
 		END
 		
 		UPDATE tblSMUserRoleMenu
@@ -111,16 +116,16 @@ BEGIN TRY
 
 	END
 	
-	-- Iterate through all affected user securities and apply Master Menus
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)
-	BEGIN
-		SELECT TOP 1 @UserSecurityID = intUserSecurityID FROM #tmpUserSecurities
-		print 'User ID :'
-		print @UserSecurityID
-		EXEC uspSMUpdateUserSecurityMenus @UserSecurityID, @ForceVisibility
+	---- Iterate through all affected user securities and apply Master Menus
+	--WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)
+	--BEGIN
+	--	SELECT TOP 1 @UserSecurityID = intUserSecurityID FROM #tmpUserSecurities
+	--	print 'User ID :'
+	--	print @UserSecurityID
+	--	EXEC uspSMUpdateUserSecurityMenus @UserSecurityID, @ForceVisibility
 		
-		DELETE FROM #tmpUserSecurities WHERE intUserSecurityID = @UserSecurityID
-	END
+	--	DELETE FROM #tmpUserSecurities WHERE intUserSecurityID = @UserSecurityID
+	--END
 
 	-- Drop temporary tables
 	DROP TABLE #tmpUserSecurities

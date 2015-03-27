@@ -123,14 +123,14 @@ BEGIN
 											THEN ''D''
 										WHEN SrvCharge.strFrequency = ''Monthly''
 											THEN ''M''
-										ELSE ''D''
+										ELSE ''''
 									END)
 				,ptsrv_amt = CAST(SrvCharge.dblServiceChargeAPR as decimal(9,2)) 
 				,ptsrv_min_svchg = CAST(SrvCharge.dblMinimumCharge as decimal(9,2))
 				,ptsrv_grace_per = SrvCharge.intGracePeriod 
-				,ptsrv_applied = (CASE	WHEN SrvCharge.strFrequency = ''Invoice''
+				,ptsrv_applied = (CASE	WHEN SrvCharge.strAppliedPer = ''Invoice''
 											THEN ''I''
-										WHEN SrvCharge.strFrequency = ''Customer''
+										WHEN SrvCharge.strAppliedPer = ''Customer''
 											THEN ''C''
 										ELSE ''I''
 									END)
@@ -162,7 +162,7 @@ BEGIN
 						THEN ''D''
 					WHEN strFrequency = ''Monthly''
 						THEN ''M''
-					ELSE ''D''
+					ELSE NULL
 				END)
 				,CAST(dblServiceChargeAPR as decimal(9,2))
 				,CAST(dblMinimumCharge as decimal(9,2))
@@ -171,7 +171,7 @@ BEGIN
 							THEN ''I''
 						WHEN strAppliedPer = ''Customer''
 							THEN ''C''
-						ELSE ''I''
+						ELSE ''''
 					END)
 				,(CASE	WHEN ysnAllowCatchUpCharges = 1
 							THEN ''Y''
@@ -216,7 +216,7 @@ BEGIN
 						THEN ''Daily''
 					WHEN ptsrv_pct_freq = ''M''
 						THEN ''Monthly''
-					ELSE ''''
+					ELSE ''Annual''
 				END)
 			,CAST(ptsrv_amt AS numeric(18,2))
 			,CAST(ptsrv_min_svchg  AS numeric(18,2))

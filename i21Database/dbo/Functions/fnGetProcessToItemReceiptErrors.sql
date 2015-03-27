@@ -5,10 +5,10 @@
 * Sample usage: 
 *
 *	SELECT	B.*
-*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetProcessToItemReceiptErrors(A.intItemId, A.intLocationId, (A.dblUnitQty * A.dblUOMQty)) B
+*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetProcessToItemReceiptErrors(A.intItemId, A.intLocationId, A.dblQty, A.dblUOMQty) B
 * 
 */
-CREATE FUNCTION fnGetProcessToItemReceiptErrors (@intItemId AS INT, @intItemLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0)
+CREATE FUNCTION fnGetProcessToItemReceiptErrors (@intItemId AS INT, @intItemLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0, @dblUOMQty AS NUMERIC(18,6) = 0)
 RETURNS TABLE 
 AS
 RETURN (

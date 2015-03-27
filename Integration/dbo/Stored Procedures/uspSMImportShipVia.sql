@@ -2,7 +2,8 @@
 	DROP PROCEDURE uspSMImportShipVia
 GO
 
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE (strPrefix = 'AG' or strPrefix = 'PT') and strDBName = db_name()) = 1
+--IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE (strPrefix = 'AG' or strPrefix = 'PT') and strDBName = db_name()) = 1
+IF 1 = 1
 BEGIN
 
 	EXEC('

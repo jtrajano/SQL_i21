@@ -7,7 +7,7 @@ BEGIN
 			intItemId INT
 			,intItemLocationId INT
 			,dtmDate  DATETIME
-			,dblUnitQty NUMERIC(18,6)
+			,dblQty NUMERIC(18,6)
 			,dblCost NUMERIC(18,6)
 			,dblSalesPrice NUMERIC(18,6)
 			,intCurrencyId INT 
@@ -22,7 +22,7 @@ BEGIN
 			intItemId INT
 			,intItemLocationId INT
 			,dtmDate  DATETIME
-			,dblUnitQty NUMERIC(18,6)
+			,dblQty NUMERIC(18,6)
 			,dblCost NUMERIC(18,6)
 			,dblSalesPrice NUMERIC(18,6)
 			,intCurrencyId INT 
@@ -55,7 +55,7 @@ BEGIN
 			intItemId
 			,intItemLocationId
 			,dtmDate
-			,dblUnitQty
+			,dblQty
 			,dblCost
 			,dblSalesPrice
 			,intCurrencyId
@@ -69,7 +69,7 @@ BEGIN
 			intItemId = @ColdGrains
 			,intItemLocationId = @BetterHaven
 			,dtmDate = '10/11/2014'
-			,dblUnitQty = 1
+			,dblQty = 1
 			,dblCost = 100
 			,dblSalesPrice = 2000
 			,intCurrencyId = 1
@@ -83,7 +83,7 @@ BEGIN
 			intItemId = @HotGrains
 			,intItemLocationId = @BetterHaven
 			,dtmDate = '10/11/2014'
-			,dblUnitQty = 2
+			,dblQty = 2
 			,dblCost = 15.11
 			,dblSalesPrice = 781.20
 			,intCurrencyId = 1
@@ -100,7 +100,7 @@ BEGIN
 			intItemId
 			,intItemLocationId
 			,dtmDate
-			,dblUnitQty
+			,dblQty
 			,dblCost
 			,dblSalesPrice
 			,intCurrencyId
@@ -114,7 +114,7 @@ BEGIN
 			intItemId
 			,intItemLocationId
 			,dtmDate
-			,dblUnitQty
+			,dblQty
 			,dblCost
 			,dblSalesPrice
 			,intCurrencyId

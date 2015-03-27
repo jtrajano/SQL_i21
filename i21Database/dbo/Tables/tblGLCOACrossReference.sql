@@ -2,6 +2,7 @@
     [intCrossReferenceId]  INT            IDENTITY (1, 1) NOT NULL,
     [inti21Id]             INT            NOT NULL,
     [stri21Id]             NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NOT NULL,
+	[stri21IdNumber]         NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strExternalId]        NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NOT NULL,
     [strCurrentExternalId] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strCompanyId]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,

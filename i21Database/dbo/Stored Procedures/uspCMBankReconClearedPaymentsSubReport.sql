@@ -24,6 +24,10 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@ORIGIN_WITHDRAWAL AS INT = 14
 		,@ORIGIN_WIRE AS INT = 15
 		,@AP_PAYMENT AS INT = 16
+		,@BANK_STMT_IMPORT AS INT = 17
+		,@AR_PAYMENT AS INT = 18
+		,@VOID_CHECK AS INT = 19
+		,@AP_ECHECK AS INT = 20
 
 --SET @xmlparam = '
 --<xmlparam>
@@ -149,6 +153,6 @@ WHERE	BankTrans.ysnPosted = 1
 		)
 		AND (
 			-- Filter for all the bank payments and debits:
-			BankTrans.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT)
+			BankTrans.intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK)
 			OR ( BankTrans.dblAmount < 0 AND BankTrans.intBankTransactionTypeId = @BANK_TRANSACTION )
 		)

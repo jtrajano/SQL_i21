@@ -80,6 +80,7 @@ Tracks all stocks in a LIFO manner. Records are physically arranged in a LIFO ma
 		[dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+		[intItemUOMId] INT NOT NULL,
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 

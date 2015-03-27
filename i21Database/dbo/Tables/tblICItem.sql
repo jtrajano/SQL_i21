@@ -17,6 +17,7 @@ Type the overview for the table here.
 		[strDescription]             NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
 		[intManufacturerId]          INT             NULL,
 		[intBrandId]                 INT             NULL,
+		[intCategoryId]				INT				NULL,
 		[strStatus]                NVARCHAR(50)    COLLATE Latin1_General_CI_AS           NULL,
 		[strModelNo]                 NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
 		[strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -75,6 +76,9 @@ Type the overview for the table here.
 		[ysnExportEDI] BIT NULL DEFAULT ((0)), 
 		[ysnHazardMaterial] BIT NULL DEFAULT ((0)), 
 		[ysnMaterialFee] BIT NULL DEFAULT ((0)), 
+		[ysnAutoBlend] BIT NULL DEFAULT ((0)),
+		[ysnEnableHelpDesk] BIT NULL DEFAULT ((0)),
+		[ysnUserGroupFee] BIT NULL DEFAULT ((0)),
 		[strNACSCategory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strWICCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intAGCategory] INT NULL, 
@@ -113,7 +117,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_tblICRinFuelCategory] FOREIGN KEY ([intRINFuelTypeId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]), 
 		CONSTRAINT [FK_tblICItem_MedicationTag] FOREIGN KEY ([intMedicationTag]) REFERENCES [tblICTag]([intTagId]),
 		CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
-		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])  
+		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
+		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId])  
 	);
 	GO
 
@@ -880,3 +885,30 @@ Type the overview for the table here.
 
 		GO
 		EXECUTE sp_addextendedproperty @name = N'iMake Mapping', @value = N'Identity Field', @level0type = N'SCHEMA', @level0name = N'dbo', @level1type = N'TABLE', @level1name = N'tblICItem', @level2type = N'COLUMN', @level2name = N'intItemId';
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Auto Blend',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnAutoBlend'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Enable HelpDesk',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnEnableHelpDesk'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'User Group Fee',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnUserGroupFee'

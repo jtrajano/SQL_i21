@@ -21,9 +21,20 @@ BEGIN
 	IF EXISTS (SELECT 1 WHERE dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) IN (@AVERAGECOST, @FIFO, @STANDARDCOST))
 	BEGIN 
 		-- Recalculate the average cost from the fifo table 	
-		SELECT	@TotalQty = SUM(ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0))
-				,@TotalValue = SUM( (ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0)) * ISNULL(fifo.dblCost,0))
-		FROM	dbo.tblICInventoryFIFO fifo 
+		SELECT	@TotalQty = SUM (
+					dbo.fnCalculateStockUnitQty(fifo.dblStockIn, ItemUOM.dblUnitQty)
+					- dbo.fnCalculateStockUnitQty(fifo.dblStockOut, ItemUOM.dblUnitQty)
+				)					
+				,@TotalValue = SUM (
+					(
+						dbo.fnCalculateStockUnitQty(fifo.dblStockIn, ItemUOM.dblUnitQty)
+						- dbo.fnCalculateStockUnitQty(fifo.dblStockOut, ItemUOM.dblUnitQty)
+					)
+					* dbo.fnCalculateUnitCost(fifo.dblCost, ItemUOM.dblUnitQty)				
+				)
+
+		FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICItemUOM ItemUOM
+					ON fifo.intItemUOMId = ItemUOM.intItemUOMId
 		WHERE	fifo.intItemId = @intItemId
 				AND fifo.intItemLocationId = @intItemLocationId
 				AND ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0) > 0	
@@ -31,9 +42,21 @@ BEGIN
 	ELSE IF EXISTS (SELECT 1 WHERE dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) IN (@LIFO))
 	BEGIN 
 		-- Recalculate the average cost from the lifo table
-		SELECT	@TotalQty = SUM(ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0))
-				,@TotalValue = SUM( (ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0)) * ISNULL(lifo.dblCost,0))
-		FROM	dbo.tblICInventoryLIFO lifo	
+		SELECT	
+				@TotalQty = SUM (
+					dbo.fnCalculateStockUnitQty(lifo.dblStockIn, ItemUOM.dblUnitQty)
+					- dbo.fnCalculateStockUnitQty(lifo.dblStockOut, ItemUOM.dblUnitQty)
+				)					
+				,@TotalValue = SUM (
+					(
+						dbo.fnCalculateStockUnitQty(lifo.dblStockIn, ItemUOM.dblUnitQty)
+						- dbo.fnCalculateStockUnitQty(lifo.dblStockOut, ItemUOM.dblUnitQty)
+					)
+					* dbo.fnCalculateUnitCost(lifo.dblCost, ItemUOM.dblUnitQty)				
+				)
+
+		FROM	dbo.tblICInventoryLIFO lifo	INNER JOIN dbo.tblICItemUOM ItemUOM
+					ON lifo.intItemUOMId = ItemUOM.intItemUOMId
 		WHERE	lifo.intItemId = @intItemId
 				AND lifo.intItemLocationId = @intItemLocationId
 				AND ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0) > 0	
@@ -41,9 +64,21 @@ BEGIN
 	ELSE 
 	BEGIN 
 		-- Recalculate the average cost from the lot table
-		SELECT	@TotalQty = SUM(ISNULL(Lot.dblStockIn, 0) - ISNULL(Lot.dblStockOut, 0))
-				,@TotalValue = SUM( (ISNULL(Lot.dblStockIn, 0) - ISNULL(Lot.dblStockOut, 0)) * ISNULL(Lot.dblCost,0))
-		FROM	dbo.tblICInventoryLot Lot
+		SELECT	
+				@TotalQty = SUM (
+					dbo.fnCalculateStockUnitQty(Lot.dblStockIn, ItemUOM.dblUnitQty)
+					- dbo.fnCalculateStockUnitQty(Lot.dblStockOut, ItemUOM.dblUnitQty)
+				)					
+				,@TotalValue = SUM (
+					(
+						dbo.fnCalculateStockUnitQty(Lot.dblStockIn, ItemUOM.dblUnitQty)
+						- dbo.fnCalculateStockUnitQty(Lot.dblStockOut, ItemUOM.dblUnitQty)
+					)
+					* dbo.fnCalculateUnitCost(Lot.dblCost, ItemUOM.dblUnitQty)				
+				)
+
+		FROM	dbo.tblICInventoryLot Lot INNER JOIN dbo.tblICItemUOM ItemUOM
+					ON Lot.intItemUOMId = ItemUOM.intItemUOMId
 		WHERE	Lot.intItemId = @intItemId
 				AND Lot.intItemLocationId = @intItemLocationId
 				AND ISNULL(Lot.dblStockIn, 0) - ISNULL(Lot.dblStockOut, 0) > 0	
