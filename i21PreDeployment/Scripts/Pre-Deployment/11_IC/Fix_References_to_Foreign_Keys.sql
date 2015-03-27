@@ -220,16 +220,16 @@ BEGIN
 		DECLARE @msg NVARCHAR(MAX) = '''';
 		SET @msg = ''Receipt number '' + @ReceiptNumber + '' with Item number '' + @ItemNo + '' should have the same Weight UOMs all throughout its lots!'';
 		RETURN
-	END
+	END')
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = ''intWeightUOMId'' AND object_id = OBJECT_ID(''tblICInventoryReceiptItem''))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intWeightUOMId' AND object_id = OBJECT_ID('tblICInventoryReceiptItem'))
 	BEGIN
 		ALTER TABLE tblICInventoryReceiptItem
 		ADD intWeightUOMId INT NULL
 	END
 
-	UPDATE tblICInventoryReceiptItem
-	SET tblICInventoryReceiptItem.intWeightUOMId = tblPatch.intWeightUOMId
+	EXEC ('UPDATE tblICInventoryReceiptItem
+	SET intWeightUOMId = tblPatch.intWeightUOMId
 	FROM (
 		SELECT DISTINCT intInventoryReceiptItemId, intWeightUOMId
 		FROM tblICInventoryReceiptItemLot
