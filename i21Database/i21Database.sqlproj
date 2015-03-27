@@ -1239,6 +1239,8 @@
     <Build Include="dbo\Tables\tblRKElectronicPricingPreferences.sql" />
     <Build Include="dbo\Tables\tblLGEquipmentType.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessToItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOValidateStatus.sql" />
+    <Build Include="dbo\Views\vyuPOStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
