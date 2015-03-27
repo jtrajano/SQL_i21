@@ -219,7 +219,6 @@ BEGIN
 	BEGIN
 		DECLARE @msg NVARCHAR(MAX) = '''';
 		SET @msg = ''Receipt number '' + @ReceiptNumber + '' with Item number '' + @ItemNo + '' should have the same Weight UOMs all throughout its lots!'';
-		THROW 50000, @msg, 1
 		RETURN
 	END
 
