@@ -247,5 +247,6 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </None>
     <None Include="dbo\Views\vyuTMConsumptionSiteSearch.sql" />
+    <None Include="dbo\Stored Procedures\uspGLBuildAccountTemporary.sql" />
   </ItemGroup>
 </Project>
