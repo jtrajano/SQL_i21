@@ -25,6 +25,7 @@
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
 :r "..\dbo\Stored Procedures\uspGLAccountOriginSync.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildAccount.sql"
+:r "..\dbo\Stored Procedures\uspGLBuildAccountTemporary.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildOriginAccount.sql"
 :r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
 :r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"

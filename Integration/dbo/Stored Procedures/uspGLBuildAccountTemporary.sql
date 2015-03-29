@@ -189,10 +189,10 @@ SELECT strCode AS strAccountId,
 	   strAccountGroup,
 	   intAccountGroupId,
 	   strAccountSegmentId,	   
-	    (select top 1 intAccountUnitId from tblGLAccountUnit a, glactmst_bak b, gluommst c
-       	   where a.strUOMCode =  CAST(c.gluom_code AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-       	   and REPLACE(LTRIM(REPLACE(strPrimary,''0'','' '')),'' '',''0'')   = b.glact_acct1_8
-       	   and REPLACE(LTRIM(REPLACE(strSegment,''0'','' '')),'' '',''0'')   = b.glact_acct9_16
+	   ( select top 1 intAccountUnitId from tblGLAccountUnit a join 
+			gluommst c on a.strUOMCode =  CAST(c.gluom_code AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+			join glactmst_bak b on CAST(c.gluom_code AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(b.glact_uom AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+			where REPLACE(LTRIM(REPLACE(strPrimary,''0'','' '')),'' '',''0'')  = b.glact_acct1_8 and REPLACE(LTRIM(REPLACE(strSegment,''0'','' '')),'' '',''0'') = b.glact_acct9_16
        	   ) as intAccountUnitId ,
 	   ysnSystem = 0,
 	   ysnActive = 1,

@@ -34,7 +34,7 @@ BEGIN
             IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[dbo].[glactmst_bak]'') AND type IN (N''U''))
                 DROP TABLE glactmst_bak
             SELECT * INTO glactmst_bak FROM glactmst
-            DELETE glactmst
+            DELETE FROM glactmst
         END
         IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[dbo].[glactmst_bak]'') AND type IN (N''U''))
         	SELECT * INTO glactmst_bak FROM glactmst
