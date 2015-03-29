@@ -25,6 +25,13 @@ BEGIN
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Declare the variables for the currencies and unit of measure
 		DECLARE @USD AS INT = 1;
 		
@@ -80,10 +87,12 @@ BEGIN
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblUnitQty = -100
 				,dblUOMQty = 1
 				,dblCost = 14.00
+				,dblValue = 0
 				,dblSalesPrice = 20.00
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
@@ -91,6 +100,8 @@ BEGIN
 				,strTransactionId = 'SALE-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
+				,intSubLocationId = NULL
+				,intStorageLocationId = NULL
 
 		-- Setup the expected g/l entries 
 		INSERT INTO expected (

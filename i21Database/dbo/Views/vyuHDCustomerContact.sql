@@ -2,6 +2,7 @@
 	AS 
 	select
 		intContactId = ec.intEntityId
+		,intCustomerId = c.intCustomerId
 		,c.strCustomerNumber
 		,strCompanyName = e.strName
 		,strContactName = eec.strName
@@ -15,6 +16,7 @@
 		,intTicketProductId = (select top 1 intProductId from tblARCustomerProductVersion where intCustomerId = c.intCustomerId)
 		,intVersionId = (select top 1 intVersionId from tblARCustomerProductVersion where intCustomerId = c.intCustomerId)
 		,ysnActive = c.ysnActive
+		,ysnActiveContact = ec.ysnActive
 		,eec.imgPhoto
 	  from
 		tblEntityContact ec

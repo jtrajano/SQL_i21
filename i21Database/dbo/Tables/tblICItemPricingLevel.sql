@@ -20,12 +20,11 @@ Type the overview for the table here.
 		[dblUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMin] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMax] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[strPricingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strPricingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[dblAmountRate] NUMERIC(18,6) NULL DEFAULT ((0)), 
+		[dblUnitPrice] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[strCommissionOn] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[dblCommissionRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblUnitPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dtmBeginDate] DATETIME NULL DEFAULT getdate(), 
-		[dtmEndDate] DATETIME NULL, 
+		[dblCommissionRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICItemPricingLevel] PRIMARY KEY ([intItemPricingLevelId]), 
@@ -165,20 +164,14 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Begin Date',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemPricingLevel',
-		@level2type = N'COLUMN',
-		@level2name = N'dtmBeginDate'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'End Date',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemPricingLevel',
-		@level2type = N'COLUMN',
-		@level2name = N'dtmEndDate'
+	
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Amount/Rate',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemPricingLevel',
+    @level2type = N'COLUMN',
+    @level2name = N'dblAmountRate'

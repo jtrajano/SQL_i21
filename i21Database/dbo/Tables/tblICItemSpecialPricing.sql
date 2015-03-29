@@ -23,6 +23,8 @@ Type the overview for the table here.
 		[strDiscountBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL , 
 		[dblDiscount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblUnitAfterDiscount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblDiscountThruQty] NUMERIC(18,6) NULL DEFAULT ((0)),
+		[dblDiscountThruAmount] NUMERIC(18,6) NULL DEFAULT ((0)),
 		[dblAccumulatedQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblAccumulatedAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
@@ -170,3 +172,21 @@ Type the overview for the table here.
 		@level1name = N'tblICItemSpecialPricing',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Discount Thru Quantity',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemSpecialPricing',
+    @level2type = N'COLUMN',
+    @level2name = N'dblDiscountThruQty'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Discount Thru Amount',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemSpecialPricing',
+    @level2type = N'COLUMN',
+    @level2name = N'dblDiscountThruAmount'

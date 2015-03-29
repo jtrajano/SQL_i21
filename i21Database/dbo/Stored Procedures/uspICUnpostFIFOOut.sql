@@ -47,7 +47,7 @@ FROM	(
 					SELECT	strTransactionId = @strTransactionId
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
+					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
 					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@AVERAGECOST, @FIFO) 
 					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
 					AND 
@@ -56,6 +56,7 @@ FROM	(
 						(	
 							inventory_transaction.strTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+							AND ISNULL(inventory_transaction.dblQty, 0) < 0 -- Reverse Qty that is negative. 
 						)
 						-- Link to the related transactions 
 						OR (
@@ -73,25 +74,29 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
--- If fifo_bucket was from a negative stock, let dblStockIn equal to dblStockOut. 
-UPDATE	fifoBucket
+-- If FIFOBucket was from a negative stock, let dblStockIn equal to dblStockOut. 
+UPDATE	FIFOBucket
 SET		dblStockIn = dblStockOut
 		,ysnIsUnposted = 1
-FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
-			ON fifoBucket.intTransactionId = InventoryToReverse.intTransactionId
-			AND fifoBucket.strTransactionId = InventoryToReverse.strTransactionId
-WHERE	InventoryToReverse.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+FROM	dbo.tblICInventoryFIFO FIFOBucket 
+WHERE	EXISTS (
+			SELECT	TOP 1 1 
+			FROM	#tmpInventoryTransactionStockToReverse InventoryToReverse
+			WHERE	InventoryToReverse.intTransactionId = FIFOBucket.intTransactionId
+					AND InventoryToReverse.strTransactionId = FIFOBucket.strTransactionId
+					AND InventoryToReverse.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+		)
 ;
 
 -- If there are fifo out records, update the costing bucket. Return the out-qty back to the bucket where it came from. 
-UPDATE	fifoBucket
-SET		fifoBucket.dblStockOut = ISNULL(fifoBucket.dblStockOut, 0) - fifoOutGrouped.dblQty
-FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN (
-			SELECT	fifoOut.intInventoryFIFOId, dblQty = SUM(fifoOut.dblQty)
-			FROM	dbo.tblICInventoryFIFOOut fifoOut INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
-						ON fifoOut.intInventoryTransactionId = InventoryToReverse.intInventoryTransactionId	
-			GROUP BY fifoOut.intInventoryFIFOId
-		) AS fifoOutGrouped
-			ON fifoOutGrouped.intInventoryFIFOId = fifoBucket.intInventoryFIFOId
-WHERE	ISNULL(fifoBucket.ysnIsUnposted, 0) = 0
+UPDATE	FIFOBucket
+SET		FIFOBucket.dblStockOut = ISNULL(FIFOBucket.dblStockOut, 0) - FIFOOutGrouped.dblQty
+FROM	dbo.tblICInventoryFIFO FIFOBucket INNER JOIN (
+			SELECT	FIFOOut.intInventoryFIFOId, dblQty = SUM(FIFOOut.dblQty)
+			FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
+						ON FIFOOut.intInventoryTransactionId = InventoryToReverse.intInventoryTransactionId	
+			GROUP BY FIFOOut.intInventoryFIFOId
+		) AS FIFOOutGrouped
+			ON FIFOOutGrouped.intInventoryFIFOId = FIFOBucket.intInventoryFIFOId
+WHERE	ISNULL(FIFOBucket.ysnIsUnposted, 0) = 0
 ;

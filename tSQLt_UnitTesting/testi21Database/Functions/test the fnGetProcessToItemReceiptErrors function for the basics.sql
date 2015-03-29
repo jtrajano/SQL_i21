@@ -38,7 +38,7 @@ BEGIN
 	-- Act
 	BEGIN 
 		INSERT INTO actual
-		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@WetGrains, @Default_Location, 0)		
+		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@WetGrains, @Default_Location, 0, 1)
 	END
 
 	-- Assert

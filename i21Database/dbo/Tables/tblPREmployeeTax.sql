@@ -13,8 +13,6 @@
     [intExpenseAccountId] INT             NULL,
     [intAllowance]        INT             DEFAULT ((0)) NULL,
     [strPaidBy]           NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
-    [strStateTax]         NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
-    [strCountry]          NVARCHAR (35)   COLLATE Latin1_General_CI_AS NULL,
     [strVal1]             NVARCHAR (5)    COLLATE Latin1_General_CI_AS NULL,
     [strVal2]             NVARCHAR (5)    COLLATE Latin1_General_CI_AS NULL,
     [strVal3]             NVARCHAR (5)    COLLATE Latin1_General_CI_AS NULL,

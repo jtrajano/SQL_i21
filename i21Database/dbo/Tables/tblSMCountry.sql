@@ -5,7 +5,8 @@
     [strCountryCode]   NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
     [intSort]          INT            NULL,
     [intConcurrencyId] INT            DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_SMCountry_CoutryID] PRIMARY KEY CLUSTERED ([intCountryID] ASC)
+    CONSTRAINT [PK_SMCountry_CoutryID] PRIMARY KEY CLUSTERED ([intCountryID] ASC), 
+    CONSTRAINT [AK_tblSMCountry_Country] UNIQUE (strCountry)
 );
 
 

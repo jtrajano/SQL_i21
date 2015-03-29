@@ -1,4 +1,5 @@
-CREATE TABLE [dbo].[tblCTContractDetail](
+CREATE TABLE [dbo].[tblCTContractDetail]
+(
 	[intContractDetailId] [int] IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intContractHeaderId] [int] NOT NULL,
@@ -21,8 +22,8 @@ CREATE TABLE [dbo].[tblCTContractDetail](
 	[dblRate] [numeric](8, 4) NOT NULL,
 	[strCurrencyReference] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
 	[intMarketZoneId] [int] NOT NULL,
-	[intDiscount] [int] NOT NULL CONSTRAINT [DF_tblCTContractDetail_intDiscount]  DEFAULT ((1)),
-	[intDiscountSchedule] [int] NULL,
+	[intDiscountType] [int] NOT NULL ,
+	[intDiscountId] [int] NULL,
 	[intContractOptHeaderId] [int] NULL,
 	[strBuyerSeller] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intBillTo] [int] NULL,
@@ -30,99 +31,39 @@ CREATE TABLE [dbo].[tblCTContractDetail](
 	[strFobBasis] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intGrade] [int] NULL,
 	[strRemark] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
- [dblOriginalQty] NUMERIC(12, 4) NULL, 
+	[dblOriginalQty] NUMERIC(12, 4) NULL, 
     [dblBalance] NUMERIC(12, 4) NULL, 
     [dblIntransitQty] NUMERIC(12, 4) NULL, 
     [dblScheduleQty] NUMERIC(12, 4) NULL, 
-    CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED 
-(
-	[intContractDetailId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
-) ON [PRIMARY]
-
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY([intMarketZoneId])
-REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY([intContractHeaderId])
-REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]) ON DELETE CASCADE
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblCTContractOptHeader_intContractOptHeaderId] FOREIGN KEY([intContractOptHeaderId])
-REFERENCES [dbo].[tblCTContractOptHeader] ([intContractOptHeaderId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblCTContractOptHeader_intContractOptHeaderId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblCTFreightRate_intFreightRateId] FOREIGN KEY([intFreightRateId])
-REFERENCES [dbo].[tblCTFreightRate] ([intFreightRateId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblCTFreightRate_intFreightRateId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblCTPricingType_intPricingType] FOREIGN KEY([intPricingType])
-REFERENCES [dbo].[tblCTPricingType] ([Value])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblCTPricingType_intPricingType]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblCTRailGrade_intGrade] FOREIGN KEY([intGrade])
-REFERENCES [dbo].[tblCTRailGrade] ([Value])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblCTRailGrade_intGrade]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblICItem_intItemId] FOREIGN KEY([intItemId])
-REFERENCES [dbo].[tblICItem] ([intItemId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblICItem_intItemId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId])
-REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intUnitMeasureId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY([intCompanyLocationId])
-REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblSMCompanyLocation_intCompanyLocationId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])
-REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intCurrencyId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblSMFreightTerms_intFreightTermId] FOREIGN KEY([intFreightTermId])
-REFERENCES [dbo].[tblSMFreightTerms] ([intFreightTermId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblSMFreightTerms_intFreightTermId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractDetail_tblSMShipVia_intShipViaId] FOREIGN KEY([intShipViaId])
-REFERENCES [dbo].[tblSMShipVia] ([intShipViaID])
-GO
-
-ALTER TABLE [dbo].[tblCTContractDetail] CHECK CONSTRAINT [FK_tblCTContractDetail_tblSMShipVia_intShipViaId]
-GO
-
+    [intPriceUOMId] INT NULL, 
+    [intLoadingPortId] INT NULL, 
+    [intDestinationPortId] INT NULL, 
+    [strShippingTerm] NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
+    [intShippingLineId] INT NULL, 
+	[strVessel] NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
+    [intDestinationCityId] INT NULL, 
+    [intShipperId] INT NULL, 
+    CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
+	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblCTContractDetail_tblCTContractOptHeader_intContractOptHeaderId] FOREIGN KEY ([intContractOptHeaderId]) REFERENCES [tblCTContractOptHeader]([intContractOptHeaderId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblCTFreightRate_intFreightRateId] FOREIGN KEY ([intFreightRateId]) REFERENCES [tblCTFreightRate]([intFreightRateId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblCTPricingType_intPricingType] FOREIGN KEY ([intPricingType]) REFERENCES [tblCTPricingType]([Value]),
+	CONSTRAINT [FK_tblCTContractDetail_tblCTRailGrade_intGrade] FOREIGN KEY ([intGrade]) REFERENCES [tblCTRailGrade]([Value]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMFreightTerms_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]),
+	CONSTRAINT [FK_tblCTContractDetail_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblAPVendor_intVendorId] FOREIGN KEY ([intBillTo]) REFERENCES [tblAPVendor]([intVendorId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblCTDiscount_intDiscountType] FOREIGN KEY ([intDiscountType]) REFERENCES [tblCTDiscount]([Value]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intPriceUOMId_intUnitMeasureId] FOREIGN KEY ([intPriceUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intLoadingPortId_intCityId] FOREIGN KEY ([intLoadingPortId]) REFERENCES [tblSMCity]([intCityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationPortId_intCityId] FOREIGN KEY ([intDestinationPortId]) REFERENCES [tblSMCity]([intCityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationCityId_intCityId] FOREIGN KEY ([intDestinationCityId]) REFERENCES [tblSMCity]([intCityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShippingLineId_intEntityId] FOREIGN KEY ([intShippingLineId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShipperId_intEntityId] FOREIGN KEY ([intShipperId]) REFERENCES [tblEntity]([intEntityId])
+) 

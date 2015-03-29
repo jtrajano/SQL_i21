@@ -41,8 +41,8 @@ BEGIN TRANSACTION
 		AND intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu
 							WHERE ((strMenuName = 'Admin' 
 									AND strCommand = 'i21' 
-									AND intParentMenuID = 0) 
-								OR intParentMenuID IN (1, 10)))
+									AND intParentMenuID = 0)
+									OR intParentMenuID IN (1, 10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))
 	END
 	
 	UPDATE tblSMUserSecurityMenu

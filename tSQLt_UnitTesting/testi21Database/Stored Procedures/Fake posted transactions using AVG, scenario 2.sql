@@ -47,6 +47,13 @@ BEGIN
 			,@NewHaven AS INT = 2
 			,@BetterHaven AS INT = 3
 
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
+
 	-- Declare the variables for the currencies
 	DECLARE @USD AS INT = 1;	
 	DECLARE @USD_ExchangeRate AS NUMERIC(18,6) = 1;
@@ -91,6 +98,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 		
@@ -117,31 +125,37 @@ BEGIN
 			,intItemId 
 			,dblQuantity
 			,dblUnitPrice
+			,intUnitMeasureId
 	)
 	SELECT 	intInventoryShipmentId = 1
 			,intItemId = @WetGrains
 			,dblQuantity = 100
 			,dblUnitPrice = 55.23
+			,intUnitMeasureId = @WetGrains_BushelUOMId
 	UNION ALL
 	SELECT 	intInventoryShipmentId = 1
 			,intItemId = @StickyGrains
 			,dblQuantity = 100
 			,dblUnitPrice = 55.23
+			,intUnitMeasureId = @StickyGrains_BushelUOMId
 	UNION ALL
 	SELECT 	intInventoryShipmentId = 1
 			,intItemId = @PremiumGrains
 			,dblQuantity = 100
 			,dblUnitPrice = 55.23
+			,intUnitMeasureId = @PremiumGrains_BushelUOMId
 	UNION ALL
 	SELECT 	intInventoryShipmentId = 1
 			,intItemId = @ColdGrains
 			,dblQuantity = 100
 			,dblUnitPrice = 55.23
+			,intUnitMeasureId = @ColdGrains_BushelUOMId
 	UNION ALL
 	SELECT 	intInventoryShipmentId = 1
 			,intItemId = @HotGrains
 			,dblQuantity = 100
 			,dblUnitPrice = 55.23
+			,intUnitMeasureId = @HotGrains_BushelUOMId
 
 	----------------------------------------------------------------
 	-- Fake data for tblICItemStock
@@ -207,6 +221,7 @@ BEGIN
 				dtmDate
 				,intItemId
 				,intItemLocationId
+				,intItemUOMId
 				,dblStockIn
 				,dblStockOut
 				,dblCost
@@ -216,6 +231,7 @@ BEGIN
 		SELECT	dtmDate = '01/01/2014'
 				,intItemId = @WetGrains 
 				,intItemLocationId = 1
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dblStockIn = 0
 				,dblStockOut = 100 
 				,dblCost = 2.00
@@ -225,6 +241,7 @@ BEGIN
 		SELECT	dtmDate = '01/01/2014'
 				,intItemId = @StickyGrains 
 				,intItemLocationId = 2
+				,intItemUOMId = @StickyGrains_BushelUOMId
 				,dblStockIn = 0
 				,dblStockOut = 100 
 				,dblCost = 2.00
@@ -234,6 +251,7 @@ BEGIN
 		SELECT	dtmDate = '01/01/2014'
 				,intItemId = @PremiumGrains 
 				,intItemLocationId = 3
+				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,dblStockIn = 0
 				,dblStockOut = 100 
 				,dblCost = 2.00
@@ -243,6 +261,7 @@ BEGIN
 		SELECT	dtmDate = '01/01/2014'
 				,intItemId = @ColdGrains 
 				,intItemLocationId = 4
+				,intItemUOMId = @ColdGrains_BushelUOMId
 				,dblStockIn = 0
 				,dblStockOut = 100
 				,dblCost = 2.00
@@ -252,6 +271,7 @@ BEGIN
 		SELECT	dtmDate = '01/01/2014'
 				,intItemId = @HotGrains 
 				,intItemLocationId = 5
+				,intItemUOMId = @HotGrains_BushelUOMId
 				,dblStockIn = 0
 				,dblStockOut = 100
 				,dblCost = 2.00
@@ -270,7 +290,8 @@ BEGIN
 	BEGIN 
 		INSERT INTO dbo.tblICInventoryTransaction (
 			dtmDate
-			,dblUnitQty
+			,dblQty
+			,dblUOMQty
 			,dblCost
 			,dblValue
 			,dblSalesPrice
@@ -282,10 +303,12 @@ BEGIN
 			,ysnIsUnposted
 			,intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,strBatchId
 		)
 		SELECT	dtmDate = '01/01/2014'
-				,dblUnitQty = -100
+				,dblQty = -100
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -297,10 +320,12 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @WetGrains
 				,intItemLocationId = 1
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,dblUnitQty = -100
+				,dblQty = -100
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -312,10 +337,12 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @StickyGrains
 				,intItemLocationId = 2
+				,intItemUOMId = @StickyGrains_BushelUOMId
 				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,dblUnitQty = -100
+				,dblQty = -100
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -327,10 +354,12 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @PremiumGrains
 				,intItemLocationId = 3
+				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,strBatchId = @strBatchId
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,dblUnitQty = -100
+				,dblQty = -100
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -342,10 +371,12 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @ColdGrains
 				,intItemLocationId = 4
+				,intItemUOMId = @ColdGrains_BushelUOMId
 				,strBatchId = @strBatchId			
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
-				,dblUnitQty = -100
+				,dblQty = -100
+				,dblUOMQty = 1
 				,dblCost = 2.00
 				,dblValue = 0
 				,dblSalesPrice = 55.23
@@ -357,6 +388,7 @@ BEGIN
 				,ysnIsUnposted = 0
 				,intItemId = @HotGrains
 				,intItemLocationId = 5
+				,intItemUOMId = @HotGrains_BushelUOMId
 				,strBatchId = @strBatchId				
 	END 
 

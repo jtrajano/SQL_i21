@@ -6,6 +6,7 @@ BEGIN
 	-- Create the fake tables for the stock path
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStockPath', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 
 	-- Re-apply the constraints for the Item stock path table. 
 	EXEC tSQLt.ApplyConstraint 'dbo.tblICItemStockPath','UN_tblICItemStockPath';
@@ -52,7 +53,7 @@ BEGIN
 		intItemId
 		,intItemLocationId
 		,dtmDate
-		,dblUnitQty
+		,dblQty
 		,dblCost
 		,dblValue
 		,dblSalesPrice 		
@@ -66,7 +67,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/01/2014'
-			,dblUnitQty = 100
+			,dblQty = 100
 			,dblCost = 2.15
 			,dblValue = 0
 			,dblSalesPrice = 0
@@ -80,7 +81,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/02/2014'
-			,dblUnitQty = 100
+			,dblQty = 100
 			,dblCost = 2.15
 			,dblValue = 0
 			,dblSalesPrice = 0
@@ -94,7 +95,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/03/2014'
-			,dblUnitQty = -25
+			,dblQty = -25
 			,dblCost = 2.15
 			,dblValue = 0
 			,dblSalesPrice = 15.00
@@ -108,7 +109,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/04/2014'
-			,dblUnitQty = 25
+			,dblQty = 25
 			,dblCost = 2.00
 			,dblValue = 0
 			,dblSalesPrice = 16.00
@@ -122,7 +123,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/05/2014'
-			,dblUnitQty = -30
+			,dblQty = -30
 			,dblCost = 2.00
 			,dblValue = 0
 			,dblSalesPrice = 17.00
@@ -136,7 +137,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/06/2014'
-			,dblUnitQty = 200
+			,dblQty = 200
 			,dblCost = 2.00
 			,dblValue = 0
 			,dblSalesPrice = 17.00
@@ -150,7 +151,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/07/2014'
-			,dblUnitQty = 500
+			,dblQty = 500
 			,dblCost = 2.25
 			,dblValue = 0
 			,dblSalesPrice = 17.00
@@ -164,7 +165,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/08/2014'
-			,dblUnitQty = -75
+			,dblQty = -75
 			,dblCost = 1.25
 			,dblValue = 0
 			,dblSalesPrice = 0
@@ -179,7 +180,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/05/2014'
-			,dblUnitQty = -30
+			,dblQty = -30
 			,dblCost = 2.00
 			,dblValue = 0
 			,dblSalesPrice = 17.00
@@ -194,7 +195,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/05/2014'
-			,dblUnitQty = -30
+			,dblQty = -30
 			,dblCost = 2.00
 			,dblValue = 0
 			,dblSalesPrice = 17.00
@@ -209,7 +210,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/05/2014'
-			,dblUnitQty = -30
+			,dblQty = -30
 			,dblCost = 2.00
 			,dblValue = 0
 			,dblSalesPrice = 17.00
@@ -224,7 +225,7 @@ BEGIN
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @WetGrains_NewHaven
 			,dtmDate = '01/05/2014'
-			,dblUnitQty = -30
+			,dblQty = -30
 			,dblCost = 2.00
 			,dblValue = 0
 			,dblSalesPrice = 17.00

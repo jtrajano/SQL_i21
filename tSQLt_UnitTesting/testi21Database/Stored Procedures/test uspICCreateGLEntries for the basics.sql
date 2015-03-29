@@ -6,6 +6,7 @@ BEGIN
 		EXEC [testi21Database].[Fake COA used for fake inventory items]
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @WRITE_OFF_SOLD AS INT = -1

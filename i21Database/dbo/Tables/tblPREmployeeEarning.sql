@@ -1,21 +1,23 @@
-﻿CREATE TABLE [dbo].[tblPREmployeeEarning](
-	[intEmployeeEarningId] [int] NOT NULL IDENTITY,
-	[intEmployeeId] [int] NOT NULL,
-	[intTypeEarningId] [int] NOT NULL,
-	[strCalculationType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
-	[dblDefaultHours] [numeric](18, 6) NULL DEFAULT ((0)),
-	[intAccountId] INT NULL,
-	[strW2Code] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[intEmployeeTimeOffId] [int] NULL,
-	[ysnDefault] [bit] NOT NULL DEFAULT ((1)),
-	[intSort] [int] NULL,
-	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPREmployeeEarning] PRIMARY KEY ([intEmployeeEarningId]), 
-    CONSTRAINT [FK_tblPREmployeeEarning_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]), 
-    CONSTRAINT [FK_tblPREmployeeEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [tblPRTypeEarning]([intTypeEarningId]),
-	CONSTRAINT [FK_tblPREmployeeEarning_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
-) ON [PRIMARY]
+﻿CREATE TABLE [dbo].[tblPREmployeeEarning] (
+    [intEmployeeEarningId] INT             IDENTITY (1, 1) NOT NULL,
+    [intEmployeeId]        INT             NOT NULL,
+    [intTypeEarningId]     INT             NOT NULL,
+    [strCalculationType]   NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [dblAmount]            NUMERIC (18, 6) DEFAULT ((0)) NULL,
+    [dblDefaultHours]      NUMERIC (18, 6) DEFAULT ((0)) NULL,
+    [intAccountId]         INT             NULL,
+    [strW2Code]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [intEmployeeTimeOffId] INT             NULL,
+    [ysnDefault]           BIT             DEFAULT ((1)) NOT NULL,
+    [intSort]              INT             NULL,
+    [intConcurrencyId]     INT             DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblPREmployeeEarning] PRIMARY KEY CLUSTERED ([intEmployeeEarningId] ASC),
+    CONSTRAINT [FK_tblPREmployeeEarning_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+    CONSTRAINT [FK_tblPREmployeeEarning_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [dbo].[tblPRTypeEarning] ([intTypeEarningId])
+);
+
+
 GO
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeEarning] ON [dbo].[tblPREmployeeEarning] ([intEmployeeId], [intTypeEarningId]) WITH (IGNORE_DUP_KEY = OFF)

@@ -22,9 +22,10 @@ DECLARE @intDirectType AS INT = 3
 IF @strSourceType = @ReceiptType_PurchaseOrder
 BEGIN 
 	SELECT	intItemId = PODetail.intItemId
-			,intLocationId = PO.intShipToId -- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+			,intLocationId = ItemLocation.intItemLocationId 
+			,intItemUOMId = ItemUOM.intItemUOMId
 			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-			,dblUnitQty = PODetail.dblQtyOrdered 
+			,dblQty = PODetail.dblQtyOrdered 
 			,dblUOMQty = ItemUOM.dblUnitQty
 			,dblCost = PODetail.dblCost
 			,dblSalesPrice = 0
@@ -33,13 +34,20 @@ BEGIN
 			,intTransactionId = PO.intPurchaseId
 			,strTransactionId = PO.strPurchaseOrderNumber
 			,intTransactionTypeId = @intPurchaseOrderType
-			,intLotId = null 
+			,intLotId = NULL 
+			,intSubLocationId = PODetail.intSubLocationId
+			,intStorageLocationId = PODetail.intStorageLocationId
 	FROM	dbo.tblPOPurchase PO INNER JOIN dbo.tblPOPurchaseDetail PODetail
 				ON PO.intPurchaseId = PODetail.intPurchaseId
 			INNER JOIN dbo.tblICItemUOM ItemUOM
 				ON PODetail.intItemId = ItemUOM.intItemId
-				AND PODetail.intUnitOfMeasureId = ItemUOM.intUnitMeasureId
-			INNER JOIN dbo.tblICUnitMeasure UOM
-				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+				AND PODetail.intUnitOfMeasureId = ItemUOM.intItemUOMId
+			INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON PODetail.intItemId = ItemLocation.intItemId
+				-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+				AND PO.intShipToId = ItemLocation.intLocationId
 	WHERE	PODetail.intPurchaseId = @intSourceTransactionId
+			AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+			
 END
+

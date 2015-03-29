@@ -163,13 +163,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		CLOSE cursor_tbl
     		DEALLOCATE cursor_tbl
 
-
     		DECLARE @postdate DATE,@intJournalId INT,@strJournalId VARCHAR(10),
     				@glije_date VARCHAR(20),@intAccountId INT,@intAccountId1 INT, @strDescription VARCHAR(50),@strDescription1 VARCHAR(50),@dtmDate DATE,
     				@glije_amt DECIMAL(12,2) ,@glije_units DECIMAL(10,2),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(12,2),@credit DECIMAL(12,2),
     				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),@totalDebit DECIMAL(18,2),@totalCredit DECIMAL(18,2),
     				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT
-
 
     		-- INSERTS INTO THE tblGLJournal GROUPED BY glije_postdate COLUMN in tblGLIjemst
     		DECLARE cursor_postdate CURSOR LOCAL FOR  SELECT glije_postdate FROM tblGLIjemst WHERE glije_uid =@uid GROUP BY glije_postdate
@@ -202,8 +200,6 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     			@glije_correcting,@glije_error_desc,@glije_period,@glije_src_sys,@glije_src_no
     			WHILE @@FETCH_STATUS = 0
     			BEGIN
-
-
 
     				SELECT @debit = 0,@credit = 0,@debitUnit = 0,@creditUnit = 0, @creditUnitInLBS = 0 , @debitUnitInLBS = 0
     				IF NOT EXISTS (
@@ -332,7 +328,6 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				SELECT @errorMsg = ERROR_MESSAGE()
     				UPDATE tblGLCOAImportLog SET strEvent = @errorMsg WHERE intImportLogId = @importLogId
     		END CATCH
-    		
     	END')
 
 END

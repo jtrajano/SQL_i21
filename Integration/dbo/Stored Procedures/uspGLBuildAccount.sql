@@ -30,9 +30,14 @@ BEGIN
 
 		-- +++++ DELETE LEGACY COA TABLE AT 1st BUILD +++++ --
 		IF NOT EXISTS(SELECT 1 FROM tblGLCOACrossReference)
-		BEGIN
-			DELETE glactmst	
-		END
+        BEGIN
+            IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[dbo].[glactmst_bak]'') AND type IN (N''U''))
+                DROP TABLE glactmst_bak
+            SELECT * INTO glactmst_bak FROM glactmst
+            DELETE FROM glactmst
+        END
+        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[dbo].[glactmst_bak]'') AND type IN (N''U''))
+        	SELECT * INTO glactmst_bak FROM glactmst
 
 		-- +++++ INSERT CROSS REFERENCE +++++ --
 		IF (select SUM(intLength) from tblGLAccountStructure where strType = ''Segment'') <= 8

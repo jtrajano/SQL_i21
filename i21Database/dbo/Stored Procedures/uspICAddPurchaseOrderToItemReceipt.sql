@@ -120,36 +120,43 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intLineNo
 	,intSourceId
     ,intItemId
+	,intSubLocationId
 	,dblOrderQty
 	,dblOpenReceive
 	,dblReceived
     ,intUnitMeasureId
-    ,intNoPackages
-	,intPackageTypeId
-    ,dblExpPackageWeight
     ,dblUnitCost
 	,dblLineTotal
     ,intSort
     ,intConcurrencyId
 )
-SELECT	intInventoryReceiptId = @InventoryReceiptId
+SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,intLineNo				= PODetail.intPurchaseDetailId
 		,intSourceId			= @PurchaseOrderId
 		,intItemId				= PODetail.intItemId
+		,intSubLocationId		= PODetail.intSubLocationId
 		,dblOrderQty			= ISNULL(PODetail.dblQtyOrdered, 0)
 		,dblOpenReceive			= ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)
 		,dblReceived			= ISNULL(PODetail.dblQtyReceived, 0)
-		,intUnitMeasureId		= PODetail.intUnitOfMeasureId
-		,intNoPackages			= 0 -- None found from Purchase Order
-		,intPackageTypeId		= NULL -- None found from Purchase Order
-		,dblExpPackageWeight	= 0 -- None found from Purchase Order
+		,intUnitMeasureId		= ItemUOM.intItemUOMId
 		,dblUnitCost			= PODetail.dblCost
-		,dblLineTotal			= 0
+		,dblLineTotal			= (ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)) * PODetail.dblCost
 		,intSort				= PODetail.intLineNo
 		,intConcurrencyId		= 1
 FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = PODetail.intItemId
-			AND ItemUOM.intUnitMeasureId = PODetail.intUnitOfMeasureId
+			AND ItemUOM.intItemUOMId = PODetail.intUnitOfMeasureId
 		INNER JOIN dbo.tblICUnitMeasure UOM
 			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 WHERE	PODetail.intPurchaseId = @PurchaseOrderId
+		AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+
+-- Re-update the total cost 
+UPDATE	Receipt
+SET		dblInvoiceAmount = (
+			SELECT	ISNULL(SUM(ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0)) , 0)
+			FROM	dbo.tblICInventoryReceiptItem ReceiptItem
+			WHERE	ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+		)
+FROM	dbo.tblICInventoryReceipt Receipt 
+WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId

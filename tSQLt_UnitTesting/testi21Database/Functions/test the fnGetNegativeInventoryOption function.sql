@@ -31,7 +31,7 @@ BEGIN
 	BEGIN 
 		-- Act
 		SET @intItemId = 1
-		SET @intItemLocationId = 2
+		SET @intItemLocationId = 6
 		SELECT @actual = [dbo].[fnGetNegativeInventoryOption](@intItemId, @intItemLocationId);
 
 		-- Assert
@@ -42,7 +42,7 @@ BEGIN
 	BEGIN 
 		-- Act
 		SET @intItemId = 1
-		SET @intItemLocationId = 3
+		SET @intItemLocationId = 11
 		SELECT @actual = [dbo].[fnGetNegativeInventoryOption](@intItemId, @intItemLocationId);
 
 		-- Assert

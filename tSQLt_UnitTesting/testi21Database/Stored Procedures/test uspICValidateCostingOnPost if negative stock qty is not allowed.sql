@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [testi21Database].[test uspICValidateCostingOnPost if negative stock qty is not allowed]
+﻿CREATE PROCEDURE [testi21Database].[test uspICValidateCostingOnPost if negative stock qty is not allowed]
 AS
 BEGIN
 	-- Arrange 
@@ -18,29 +16,38 @@ BEGIN
 				,@NewHaven AS INT = 2 -- This location allows negative stock
 				,@BetterHaven AS INT = 3 -- This location does not allow negative stock
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Create the items to validate variable. 
 		DECLARE @Items AS ItemCostingTableType
 
 		-- Insert a record to process 
 		INSERT	@Items (
 				intItemId
-				, intItemLocationId
-				, dtmDate
-				, dblUnitQty
-				, dblUOMQty
-				, dblCost
-				, dblSalesPrice
-				, intCurrencyId
-				, dblExchangeRate
-				, intTransactionId
-				, strTransactionId
-				, intTransactionTypeId
-				, intLotId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 11 --@BetterHaven -- <<< NEGATIVE STOCK IS NOT ALLOWED AT THIS LOCATION
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = GETDATE()
-				,dblUnitQty = -10
+				,dblQty = -10
 				,dblUOMQty = 1
 				,dblCost = 1.00
 				,dblSalesPrice = 2.00
@@ -53,8 +60,9 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 1 -- @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = GETDATE()
-				,dblUnitQty = -10000
+				,dblQty = -10000
 				,dblUOMQty = 1
 				,dblCost = 1.00
 				,dblSalesPrice = 2.00
@@ -67,8 +75,9 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 6 --@NewHaven
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = GETDATE()
-				,dblUnitQty = -10000
+				,dblQty = -10000
 				,dblUOMQty = 1
 				,dblCost = 1.00
 				,dblSalesPrice = 2.00

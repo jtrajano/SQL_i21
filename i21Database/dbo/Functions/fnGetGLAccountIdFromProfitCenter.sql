@@ -52,7 +52,7 @@ BEGIN
 									, 1 -- We expect the divider used in COA setup is always one character. 
 									, '' 
 							)	
-			) AS RecreatedAccount INNER JOIN tblGLAccount 
+			) AS RecreatedAccount LEFT JOIN tblGLAccount 
 				ON RecreatedAccount.strAccountId = tblGLAccount.strAccountId COLLATE Latin1_General_CI_AS
 
 

@@ -9,6 +9,7 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 
 		-- Create the variables for the internal transaction types used by costing. 
 		DECLARE @WRITE_OFF_SOLD AS INT = -1
@@ -28,6 +29,13 @@ BEGIN
 		DECLARE @Default_Location AS INT = 1
 				,@NewHaven AS INT = 2
 				,@BetterHaven AS INT = 3
+
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
 
 		-- Declare the variables for the currencies and unit of measure
 		DECLARE @USD AS INT = 1;
@@ -70,17 +78,21 @@ BEGIN
 		INSERT INTO @ItemsToPost 
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
-				,dblUnitQty = -100
+				,dblQty = 100
 				,dblUOMQty = 1
 				,dblCost = 14.00
 				,dblSalesPrice = 20.00
+				,dblValue = 0
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
-				,strTransactionId = 'SALE-000001'
-				,intTransactionTypeId = @SalesType
+				,strTransactionId = 'INVRCT-000001'
+				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
+				,intSubLocationId = null 
+				,intStorageLocationId = null 
 
 		-- Setup the expected g/l entries 
 		INSERT INTO expected (
@@ -90,10 +102,9 @@ BEGIN
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
-				,dblUnitOnHand = (0 - 100)  -- Reduce stock by 100
+				,dblUnitOnHand = (0 + 100)  -- Reduce stock by 100
 	END 
-	
-	
+
 	-- Act
 	BEGIN 	
 		-- Call uspICPostCosting to post the costing and generate the g/l entries  
@@ -128,5 +139,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-END 
-GO 
+END

@@ -91,6 +91,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Fix_References_to_Foreign_Keys.sql" />
     <None Include="Scripts\Pre-Deployment\9_FRD\2_1440_to_1510.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\Account_Category_Change_14_4.sql" />
+    <None Include="Scripts\Pre-Deployment\7_AR\FixARTransactionsAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -98,6 +99,7 @@
   <ItemGroup>
     <PreDeploy Include="Scripts\Pre-Deployment\PreDeployment.sql" />
     <None Include="Scripts\Pre-Deployment\10_RPT\1_1430_to_1430.sql" />
+    <None Include="Scripts\Pre-Deployment\4_SM\3_DataMigration.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\1_1320_to_1340.sql" />
@@ -156,5 +158,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\6_GL\3_1440_to_1510.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\1510_to_1512.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\8_AP\DropCK_PO_OrderStatus.sql" />
   </ItemGroup>
 </Project>

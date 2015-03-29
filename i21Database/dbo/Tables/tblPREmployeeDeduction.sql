@@ -1,23 +1,25 @@
-﻿CREATE TABLE [dbo].[tblPREmployeeDeduction](
-	[intEmployeeDeductionId] [int] NOT NULL IDENTITY,
-	[intEmployeeId] INT NOT NULL,
-	[intTypeDeductionId] INT NOT NULL,
-	[strDeductFrom] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[strCalculationType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[dblAmount] [numeric](18, 6) NOT NULL DEFAULT ((0)),
-	[dblLimit] [numeric](18, 6) NOT NULL DEFAULT ((0)),
-	[dtmBeginDate] [datetime] NULL,
-	[dtmEndDate] [datetime] NULL,
-	[intAccountId] INT NULL,
-	[strPaidBy] [nvarchar](15) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Employee'),
-	[ysnDefault] [bit] NOT NULL DEFAULT ((1)),
-	[intSort] [int] NULL,
-	[intConcurrencyId] [int] NULL DEFAULT ((1)),
-    CONSTRAINT [PK_tblPREmployeeDeduction] PRIMARY KEY ([intEmployeeDeductionId]),
-	CONSTRAINT [FK_tblPREmployeeDeduction_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]), 
-    CONSTRAINT [FK_tblPREmployeeDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [tblPRTypeDeduction]([intTypeDeductionId]),
-	CONSTRAINT [FK_tblPREmployeeDeduction_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
-) ON [PRIMARY]
+﻿CREATE TABLE [dbo].[tblPREmployeeDeduction] (
+    [intEmployeeDeductionId] INT             IDENTITY (1, 1) NOT NULL,
+    [intEmployeeId]          INT             NOT NULL,
+    [intTypeDeductionId]     INT             NOT NULL,
+    [strDeductFrom]          NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [strCalculationType]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [dblAmount]              NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
+    [dblLimit]               NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
+    [dtmBeginDate]           DATETIME        NULL,
+    [dtmEndDate]             DATETIME        NULL,
+    [intAccountId]           INT             NULL,
+    [strPaidBy]              NVARCHAR (15)   COLLATE Latin1_General_CI_AS DEFAULT ('Employee') NOT NULL,
+    [ysnDefault]             BIT             DEFAULT ((1)) NOT NULL,
+    [intSort]                INT             NULL,
+    [intConcurrencyId]       INT             DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblPREmployeeDeduction] PRIMARY KEY CLUSTERED ([intEmployeeDeductionId] ASC),
+    CONSTRAINT [FK_tblPREmployeeDeduction_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+    CONSTRAINT [FK_tblPREmployeeDeduction_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [dbo].[tblPRTypeDeduction] ([intTypeDeductionId])
+);
+
+
 GO
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeDeduction] ON [dbo].[tblPREmployeeDeduction] ([intEmployeeId], [intTypeDeductionId]) WITH (IGNORE_DUP_KEY = OFF)

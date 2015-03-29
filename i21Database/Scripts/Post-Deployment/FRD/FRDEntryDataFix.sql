@@ -42,3 +42,140 @@ UPDATE tblFRColumnDesignSegment
 GO
 	PRINT N'END UPDATE NEW FORIEGN KEYS'
 GO
+
+
+--=====================================================================================================================================
+-- 	RENAME COLUMN HEADER AND COLUMN DESCRIPTION TO COLUMN NAME
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN RENAME'
+GO
+
+UPDATE tblFRRowDesign SET strRowType = 'Column Name' WHERE strRowType = 'Description Title'
+UPDATE tblFRRowDesign SET strRowType = 'Row Name - Center Align' WHERE strRowType = 'Center Title'
+UPDATE tblFRRowDesign SET strRowType = 'Row Name - Left Align' WHERE strRowType = 'Left Title'
+UPDATE tblFRRowDesign SET strRowType = 'Row Name - Right Align' WHERE strRowType = 'Right Title'
+UPDATE tblFRColumnDesign SET strColumnType = 'Row Name' WHERE strColumnType = 'Row Description'
+UPDATE tblFRColumnDesign SET strColumnCaption = 'Column Name' WHERE strColumnCaption = 'Column Header'
+
+GO
+	PRINT N'END RENAME'
+GO
+
+
+--=====================================================================================================================================
+-- 	REMOVE BALANCE SIDE FOR NON-CALCULATION TYPES
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN REMOVE'
+GO
+
+UPDATE tblFRRowDesign SET strBalanceSide = '' 
+	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts') AND strBalanceSide <> ''
+
+GO
+	PRINT N'END REMOVE'
+GO
+
+
+--=====================================================================================================================================
+-- 	RENAME ROW TYPES
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN RENAME ROW TYPES'
+GO
+
+UPDATE tblFRRowDesign SET strRowType = 'Filter Accounts' WHERE strRowType = 'Calculation'
+UPDATE tblFRRowDesign SET strRowType = 'Row Calculation' WHERE strRowType like '%Total Calculation%'
+
+GO
+	PRINT N'END RENAME ROW TYPES'
+GO
+
+
+--=====================================================================================================================================
+-- 	DROP TABLE tblFRGroupsDetail
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN DROP TABLE tblFRGroupsDetail'
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblFRGroupsDetail]') AND type in (N'U')) 
+BEGIN
+	DROP TABLE tblFRGroupsDetail
+END
+
+GO
+	PRINT N'END DROP TABLE tblFRGroupsDetail'
+GO
+
+
+--=====================================================================================================================================
+-- 	SET DEFAULT VALUE FOR NEW FIELD
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN SET VALUE'
+GO
+
+UPDATE tblFRRowDesign SET strSource = '' 
+	WHERE strRowType NOT IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts') AND strSource IS NULL
+
+UPDATE tblFRRowDesign SET strSource = 'Column' 
+	WHERE strRowType IN ('Calculation','Hidden','Cash Flow Activity','Filter Accounts') AND strSource IS NULL
+
+GO
+	PRINT N'END SET VALUE'
+GO
+
+
+--=====================================================================================================================================
+-- 	RENAME COLUMN TYPE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN RENAME COLUMN TYPE'
+GO
+
+UPDATE tblFRColumnDesign SET strColumnType = 'GL Amounts' 
+	WHERE strColumnType = 'Calculation'
+
+GO
+	PRINT N'END RENAME COLUMN TYPE'
+GO
+
+
+--=====================================================================================================================================
+-- 	RENAME REPORT TYPE
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN RENAME REPORT TYPE'
+GO
+
+UPDATE tblFRReport SET strReportType = 'Single' 
+	WHERE strReportType = 'Report'
+
+GO
+	PRINT N'END RENAME REPORT TYPE'
+GO
+
+
+--=====================================================================================================================================
+-- 	FIX: NULL Description to EMPTY String
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN NULL TO EMPTY STRING'
+GO
+
+UPDATE tblFRRowDesign SET strDescription = '' 
+	WHERE strDescription is null 
+
+GO
+	PRINT N'END NULL TO EMPTY STRING'
+GO

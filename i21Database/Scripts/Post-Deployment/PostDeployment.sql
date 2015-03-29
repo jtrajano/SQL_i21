@@ -84,15 +84,15 @@ print 'BEGIN POST DEPLOYMENT'
 --:r .\AP\FixstrBillId.sql
 :r .\AP\DefaultData\POOrderStatus.sql
 :r .\AP\ClearPostResult.sql
+:r .\AP\DateCreatedValueDefault.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 
 :r .\IC\2_MaterialNMFC.sql 
 :r .\IC\3_DefaultData.sql 
 :r .\IC\4_CostingMethods.sql 
-
--- Version Update
-:r .\VersionUpdate.sql
+:r .\IC\6_FixBlankLotNumber.sql
+:r .\IC\PatchFor_1510_RemoveOn_1520.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
@@ -106,5 +106,14 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Grain
 :R .\GR\1_MasterTables.sql
+
+--Manufacturing
+:R .\MF\1_MasterTables.sql
+
+-- Payroll
+:r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
+
+-- Version Update
+:r .\VersionUpdate.sql
 
 print 'END POST DEPLOYMENT'

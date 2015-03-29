@@ -16,6 +16,13 @@ BEGIN
 				,@NewHaven AS INT = 2 -- This location allows negative stock
 				,@BetterHaven AS INT = 3 -- This location does not allow negative stock
 
+		-- Declare the variables for the Item UOM Ids
+		DECLARE @WetGrains_BushelUOMId AS INT = 1
+				,@StickyGrains_BushelUOMId AS INT = 2
+				,@PremiumGrains_BushelUOMId AS INT = 3
+				,@ColdGrains_BushelUOMId AS INT = 4
+				,@HotGrains_BushelUOMId AS INT = 5
+
 		-- Create the items to validate variable. 
 		DECLARE @Items AS dbo.UnpostItemsTableType
 
@@ -23,19 +30,28 @@ BEGIN
 		INSERT	@Items (
 				intItemId
 				,intItemLocationId
-				,dblTotalQty
+				,intItemUOMId
+				,dblQty
+				,dblUOMQty
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 11 --@BetterHaven -- <<< NEGATIVE STOCK IS NOT ALLOWED AT THIS LOCATION
-				,dblTotalQty = -10 
+				,intItemUOMId = @WetGrains_BushelUOMId
+				,dblQty = -10
+				,dblUOMQty = 1
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 1 --@Default_Location
-				,dblTotalQty = -10000
+				,intItemUOMId = @WetGrains_BushelUOMId
+				,dblQty = -10000
+				,dblUOMQty = 1
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = 6 --@NewHaven
-				,dblTotalQty = -10000
+				,intItemUOMId = @WetGrains_BushelUOMId
+				,dblQty = -10000
+				,dblUOMQty = 1
+
 
 		-- Use the simple item mock data
 		EXEC testi21Database.[Fake transactions for item costing]

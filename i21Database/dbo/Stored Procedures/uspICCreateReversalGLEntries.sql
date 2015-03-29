@@ -133,8 +133,8 @@ BEGIN
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
 			INNER JOIN dbo.tblGLAccount	
 				ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @AUTO_NEGATIVE
 
@@ -170,8 +170,8 @@ BEGIN
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
 			INNER JOIN dbo.tblGLAccount	
 				ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
-			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblUnitQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
+			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
 			AND ItemTransactions.intTransactionTypeId = @AUTO_NEGATIVE
 END

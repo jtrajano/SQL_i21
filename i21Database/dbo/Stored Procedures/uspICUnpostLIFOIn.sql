@@ -47,11 +47,24 @@ FROM	(
 					SELECT	strTransactionId = @strTransactionId
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
-					AND inventory_transaction.strTransactionId = Source_Query.strTransactionId
-					AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LIFO) 
+					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LIFO) 				
 					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
+					AND 
+					(
+						-- Link to the main transaction
+						(	
+							inventory_transaction.strTransactionId = Source_Query.strTransactionId
+							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+							AND ISNULL(inventory_transaction.dblQty, 0) > 0 -- Reverse Qty that is positive. 
+						)
+						-- Link to revalue and write-off sold 
+						OR (
+							inventory_transaction.strTransactionId = Source_Query.strTransactionId
+							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
+							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD)
+						)
+					)
 
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
@@ -81,10 +94,11 @@ FROM	dbo.tblICInventoryLIFO LIFOBucket INNER JOIN (
 INSERT INTO dbo.tblICInventoryLIFO (
 		intItemId
 		,intItemLocationId
+		,intItemUOMId
 		,dtmDate
 		,dblStockIn
 		,dblStockOut
-		,dblCost
+		,dblCost		
 		,strTransactionId
 		,intTransactionId
 		,dtmCreated
@@ -93,10 +107,11 @@ INSERT INTO dbo.tblICInventoryLIFO (
 )
 SELECT	intItemId = OutTransactions.intItemId
 		,intItemLocationId = OutTransactions.intItemLocationId
+		,intItemUOMId = OutTransactions.intItemUOMId
 		,dtmDate = OutTransactions.dtmDate
 		,dblStockIn = 0 
-		,dblStockOut = ABS(OutTransactions.dblUnitQty)
-		,dblCost = OutTransactions.dblCost
+		,dblStockOut = ABS(ISNULL(OutTransactions.dblQty, 0))
+		,dblCost = OutTransactions.dblCost		
 		,strTransactionId = OutTransactions.strTransactionId
 		,intTransactionId = OutTransactions.intTransactionId
 		,dtmCreated = GETDATE()
@@ -106,7 +121,7 @@ FROM	dbo.tblICInventoryLIFO LIFO INNER JOIN dbo.tblICInventoryLIFOOut LIFOOut
 			ON LIFO.intInventoryLIFOId = LIFOOut.intInventoryLIFOId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
 			ON OutTransactions.intInventoryTransactionId = LIFOOut.intInventoryTransactionId
-			AND OutTransactions.dblUnitQty < 0 
+			AND ISNULL(OutTransactions.dblQty, 0) < 0 
 WHERE	LIFO.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND LIFO.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
 		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0

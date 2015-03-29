@@ -25,6 +25,7 @@
 :r "..\dbo\Stored Procedures\uspGLImportOriginCOA.sql"
 :r "..\dbo\Stored Procedures\uspGLAccountOriginSync.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildAccount.sql"
+:r "..\dbo\Stored Procedures\uspGLBuildAccountTemporary.sql"
 :r "..\dbo\Stored Procedures\uspGLBuildOriginAccount.sql"
 :r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
 :r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
@@ -109,6 +110,7 @@
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithoutGasCheck.sql"
 :r "..\dbo\Views\vyuTMOriginDegreeOption.sql"
 :r "..\Scripts\TM\Customer.sql"
+:r "..\dbo\Views\vyuTMConsumptionSiteSearch.sql"
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"

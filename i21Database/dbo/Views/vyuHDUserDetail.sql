@@ -2,6 +2,7 @@
 	AS 
 	select
 			strCustomer = 'i21 User'
+			,intCustomerId = null
 			,strCompanyName = 'iRely'
 			,us.strFullName
 			,us.strPhone
@@ -32,6 +33,7 @@
 
 		select
 			strCustomer = cus.strCustomerNumber
+			,intCustomerId = cus.intCustomerId
 			,strCompanyName = (select top 1 strName from tblEntity where intEntityId = cus.intEntityId)
 			,strFullName = en.strEmail
 			,strPhone = ec.strPhone

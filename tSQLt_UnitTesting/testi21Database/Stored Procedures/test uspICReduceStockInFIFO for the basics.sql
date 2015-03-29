@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [testi21Database].[test uspICReduceStockInFIFO for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICReduceStockInFIFO for the basics]
 AS
 BEGIN
 	-- Arrange 
@@ -10,6 +8,7 @@ BEGIN
 		CREATE TABLE expected (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -22,6 +21,7 @@ BEGIN
 		CREATE TABLE actual (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
+			,[intItemUOMId] INT 
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -34,8 +34,9 @@ BEGIN
 		-- Create the variables 
 		DECLARE @intItemId AS INT
 				,@intItemLocationId AS INT
+				,@intItemUOMId AS INT
 				,@dtmDate AS DATETIME
-				,@dblSoldQty NUMERIC(18,6) 
+				,@dblQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT
@@ -51,8 +52,9 @@ BEGIN
 		EXEC [dbo].[uspICReduceStockInFIFO]
 			@intItemId 
 			,@intItemLocationId 
+			,@intItemUOMId 
 			,@dtmDate 
-			,@dblSoldQty 
+			,@dblQty 
 			,@dblCost
 			,@strTransactionId
 			,@intTransactionId			 
@@ -65,6 +67,7 @@ BEGIN
 		INSERT INTO actual (
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -76,6 +79,7 @@ BEGIN
 		SELECT
 				[intItemId] 
 				,[intItemLocationId] 
+				,[intItemUOMId] 
 				,[dtmDate] 
 				,[dblStockIn] 
 				,[dblStockOut]

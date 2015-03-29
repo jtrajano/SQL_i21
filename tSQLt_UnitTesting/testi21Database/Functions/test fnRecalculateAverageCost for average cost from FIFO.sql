@@ -9,8 +9,10 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFO', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation';
+	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation';	
 	EXEC tSQLt.FakeTable 'dbo.tblICItem';
+	EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;
 
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -38,6 +40,22 @@ BEGIN
 	UNION ALL SELECT @PremiumGrains
 	UNION ALL SELECT @ColdGrains
 	UNION ALL SELECT @HotGrains			
+
+	-- Fake Unit of Measure
+	INSERT INTO dbo.tblICUnitMeasure(
+		strUnitMeasure
+	)
+	VALUES ('Bushel')
+
+	-- Fake UOM 
+	INSERT INTO dbo.tblICItemUOM(
+			intItemId
+			,intUnitMeasureId
+			,dblUnitQty
+	)
+	SELECT	intItemId = @WetGrains
+			,intUnitMeasureId = 1
+			,dblUnitQty = 1
 			
 	-- Add fake data to the item location table
 	INSERT INTO dbo.tblICItemLocation (
@@ -65,24 +83,28 @@ BEGIN
 	INSERT INTO dbo.tblICInventoryFIFO (
 			intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,dblStockIn
 			,dblStockOut
 			,dblCost		
 	)
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @Default_Location
+			,intItemUOMId = 1
 			,dblStockIn = 100
 			,dblStockOut = 100
 			,dblCost = 2.50
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @Default_Location
+			,intItemUOMId = 1
 			,dblStockIn = 20
 			,dblStockOut = 10
 			,dblCost = 2.50
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @Default_Location
+			,intItemUOMId = 1
 			,dblStockIn = 50
 			,dblStockOut = 0
 			,dblCost = 2.25
@@ -92,24 +114,28 @@ BEGIN
 	INSERT INTO dbo.tblICInventoryLIFO (
 			intItemId
 			,intItemLocationId
+			,intItemUOMId
 			,dblStockIn
 			,dblStockOut
 			,dblCost		
 	)
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @Default_Location
+			,intItemUOMId = 1
 			,dblStockIn = 100
 			,dblStockOut = 100
 			,dblCost = 2.50
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @Default_Location
+			,intItemUOMId = 1
 			,dblStockIn = 90
 			,dblStockOut = 10
 			,dblCost = 2.50
 	UNION ALL 
 	SELECT	intItemId = @WetGrains
 			,intItemLocationId = @Default_Location
+			,intItemUOMId = 1
 			,dblStockIn = 26
 			,dblStockOut = 0
 			,dblCost = 2.25

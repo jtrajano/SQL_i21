@@ -18,23 +18,20 @@ BEGIN
 	-- If item is a Lot item, return Lot Costing. 
 	-- If not, get the costing method at item-location level. 
 	-- If not found, get the costing method at the category level. 
-	SELECT 	@costingMethod = ISNULL(ItemLevel.intCostingMethod, ItemLocationCategoryLevel.intCostingMethod)
+	SELECT 	@costingMethod = ISNULL(ItemLevel.intCostingMethod, ISNULL(ItemLocation.intCostingMethod, Category.intCostingMethod))
 	FROM	(
 				SELECT	intCostingMethod =  
-							CASE	WHEN Item.strLotTracking IN ('Yes, Manual', 'Yes, Serial Number') THEN @LotCost 
+							CASE	WHEN Item.strLotTracking IN ('Yes - Manual', 'Yes - Serial Number') THEN @LotCost 
 									ELSE NULL 
-							END 
+							END,
+						intCategoryId 
 				FROM	dbo.tblICItem Item
 				WHERE	Item.intItemId = @intItemId
 			) ItemLevel 
-			LEFT JOIN (
-				SELECT	intCostingMethod = ISNULL(ItemLocation.intCostingMethod, Category.intCostingMethod)
-				FROM	dbo.tblICItemLocation ItemLocation LEFT JOIN dbo.tblICCategory Category
-							ON ItemLocation.intCategoryId = Category.intCategoryId
-				WHERE	ItemLocation.intItemId = @intItemId
-						AND ItemLocation.intItemLocationId = @intItemLocationId
-			) ItemLocationCategoryLevel
-				ON 1 = 1
+			LEFT JOIN tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = @intItemId AND ItemLocation.intItemLocationId = @intItemLocationId
+			LEFT JOIN dbo.tblICCategory Category
+				ON ItemLevel.intCategoryId = Category.intCategoryId
 
 	RETURN @costingMethod;	
 END
