@@ -117,6 +117,7 @@ BEGIN
 END   
 
 -- Check the UOM
+IF @ysnPost = 1 
 BEGIN 
 	DECLARE @intUOMError AS INT
 
