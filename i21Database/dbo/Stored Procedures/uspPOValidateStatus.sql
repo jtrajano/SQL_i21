@@ -44,7 +44,9 @@ BEGIN
 
 	IF @statusId = 1
 	BEGIN
-		IF @hasItemReceipt = 1 AND (@currentStatus != 4 OR @currentStatus != 6)
+		IF @hasItemReceipt = 1 AND EXISTS(SELECT 1 FROM (
+																	SELECT intOrderStatusId FROM tblPOOrderStatus WHERE intOrderStatusId IN (4,6)) POStatus 
+																	WHERE intOrderStatusId = @currentStatus)
 		BEGIN
 			--Do not allow to set to open when current status is not equal to 'Cancelled' or 'Short Closed'
 			SET @success = 0;
