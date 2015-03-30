@@ -152,7 +152,7 @@ SET @strmessage = 'Please specify the lot numbers for %s.'
 EXEC sp_addmessage 51037,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51038) EXEC sp_dropmessage 51038, 'us_english'	
-SET @strmessage = 'The expected qty to receive for %s is %s. Lot Quantity is %s. The difference is %s.'
+SET @strmessage = 'The Qty to Receive for %s is %s. Total Lot Quantity is %s. The difference is %s.'
 EXEC sp_addmessage 51038,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51039) EXEC sp_dropmessage 51039, 'us_english'	
