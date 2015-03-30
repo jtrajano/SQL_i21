@@ -5,7 +5,6 @@
 	[intFutureMarketId] INT NOT NULL,
 	[strOptionMonth] NVARCHAR(20)  COLLATE Latin1_General_CI_AS NOT NULL ,  
     [intFutureMonthId] INT NOT NULL, 
-    [strOptionMonthId] NVARCHAR(20)  COLLATE Latin1_General_CI_AS NOT NULL, 
     [ysnMonthExpired] BIT NULL, 
     [Expiration Date] DATETIME NULL, 
     CONSTRAINT [PK_tblRKOptionsMonth_intOptionMonthId] PRIMARY KEY ([intOptionMonthId]), 
