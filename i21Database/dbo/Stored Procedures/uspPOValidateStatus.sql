@@ -22,26 +22,41 @@ BEGIN
 								ELSE 0
 							END
 
-	SET @fullyReceived = CASE WHEN
+	SET @hasBill  = CASE WHEN 
 								EXISTS(SELECT 1 
 									FROM   tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 														ON A.intInventoryReceiptId = B.intInventoryReceiptId
-											INNER JOIN tblPOPurchaseDetail C
-														ON B.intLineNo = C.intPurchaseDetailId
-									WHERE  B.intSourceId = @poId
-											AND B.dblReceived = C.dblQtyOrdered
-											AND A.ysnPosted = 1)
+									WHERE  B.intSourceId = @poId)
+								THEN 1
+								ELSE 0
+							END
+	SET @fullyReceived = CASE WHEN
+								(SELECT SUM(dblItemQtyReceived) FROM vyuPOStatus WHERE intPurchaseId = @poId) = (SELECT SUM(dblQtyOrdered) FROM vyuPOStatus WHERE intPurchaseId = @poId)
+								THEN 1
+								ELSE 0
+							END 
+	SET @fullyBilled = CASE WHEN
+								(SELECT SUM(dblItemQtyBilled) FROM vyuPOStatus WHERE intPurchaseId = @poId) = (SELECT SUM(dblQtyOrdered) FROM vyuPOStatus WHERE intPurchaseId = @poId)
 								THEN 1
 								ELSE 0
 							END 
 
+
 	IF @statusId = 1
 	BEGIN
-		IF (@currentStatus != 4 OR @currentStatus != 6)
+		IF @hasItemReceipt = 1 AND (@currentStatus != 4 OR @currentStatus != 6)
 		BEGIN
 			--Do not allow to set to open when current status is not equal to 'Cancelled' or 'Short Closed'
 			SET @success = 0;
-			SET @errorMsg = 'You cannot open a purchase order with item receipt.';
+			SET @errorMsg = 'You cannot open a purchase order with created item receipt.';
+		END
+	END
+	ELSE IF @statusId = 2
+	BEGIN
+		IF EXISTS(SELECT 1 FROM vyuPOStatus WHERE intPurchaseId = @poId AND dblQtyReceived > 0)
+		BEGIN
+			SET @success = 0;
+			SET @errorMsg = 'Purchase order will automatically set to "Partial" when at least 1 item have been received/billed.';
 		END
 	END
 	ELSE IF @statusId = 3
@@ -50,6 +65,14 @@ BEGIN
 		BEGIN
 			SET @success = 0;
 			SET @errorMsg = 'Purchase order will automatically set to "Closed" when all items have been received/billed.';
+		END
+	END
+	ELSE IF @statusId = 4
+	BEGIN
+		IF @currentStatus != 3 AND EXISTS(SELECT 1 FROM vyuPOStatus WHERE intPurchaseId = @poId AND ysnItemReceived = 1)
+		BEGIN
+			SET @success = 0;
+			SET @errorMsg = 'You cannot change the status of this PO to "Cancelled" because it has received item(s).';
 		END
 	END
 	ELSE IF @statusId = 7
