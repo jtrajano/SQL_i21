@@ -619,36 +619,37 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
             current.set('dblItemUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
-            current.set('strUnitType', records[0].get('strUnitType'));
+            current.set('strUnitType', records[0].get('strReceiveUOMType'));
 
             var intUOM = null;
             var strUOM = '';
             var strWeightUOM = '';
+            var dblLotUOMConvFactor = 0;
 
             if (records[0].get('strReceiveUOMType') === 'Weight'){
                 intUOM = records[0].get('intReceiveUOMId');
                 strUOM = records[0].get('strReceiveUOM');
                 strWeightUOM = records[0].get('strReceiveUOM');
+                dblLotUOMConvFactor = records[0].get('dblReceiveUOMConvFactor');
                 current.set('intWeightUOMId', intUOM);
                 current.set('strWeightUOM', strUOM);
                 current.set('dblWeightUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
-                grdLotTracking.columns[1].setHidden(false);
             }
             else if (records[0].get('strStockUOMType') === 'Weight'){
                 intUOM = records[0].get('intStockUOMId');
                 strUOM = records[0].get('strStockUOM');
                 strWeightUOM = records[0].get('strStockUOM');
+                dblLotUOMConvFactor = 1;
                 current.set('intWeightUOMId', intUOM);
                 current.set('strWeightUOM', strUOM);
                 current.set('dblWeightUOMConvFactor', 1);
-                grdLotTracking.columns[1].setHidden(true);
             }
             else {
                 intUOM = records[0].get('intReceiveUOMId');
                 strUOM = records[0].get('strReceiveUOM');
                 strWeightUOM = '';
+                dblLotUOMConvFactor = 0;
                 current.set('dblWeightUOMConvFactor', 0);
-                grdLotTracking.columns[1].setHidden(true);
             }
 
             switch (records[0].get('strLotTracking')){
@@ -662,6 +663,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         intItemUnitMeasureId: intUOM,
                         strUnitMeasure: strUOM,
                         strWeightUOM: strWeightUOM,
+                        dblLotUOMConvFactor: dblLotUOMConvFactor,
                         dblQuantity: '',
                         intUnitPallet: '',
                         dblGrossWeight: '',
@@ -692,12 +694,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
-            if (records[0].get('strUnitType') === 'Weight') {
-                grdLotTracking.columns[1].setHidden(false);
-            }
-            else {
-                grdLotTracking.columns[1].setHidden(true);
-            }
         }
         else if (combo.itemId === 'cboWeightUOM')
         {
@@ -710,14 +706,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
-            if (records[0].get('strUnitType') === 'Weight') {
-                grdLotTracking.columns[1].setHidden(false);
-            }
-            else {
-                grdLotTracking.columns[1].setHidden(true);
-            }
         }
-
         this.calculateGrossWeight(current);
     },
 
@@ -992,6 +981,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     record.set('dblUnitRetail', context.value);
                 }
                 record.set('dblLineTotal', value);
+            }
+        }
+        else if (context.field === 'strWeightUOM') {
+            if (iRely.Functions.isEmpty(context.oldValue)) return false;
+            if (context.newValue === '') {
+                context.record.set('intWeightUOMId', null);
             }
         }
     },
@@ -1323,12 +1318,61 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     })
                                 });
                                 break;
+                            case 'colUOM' :
+                                return Ext.create('Ext.grid.CellEditor', {
+                                    field: Ext.widget({
+                                        xtype: 'gridcombobox',
+                                        matchFieldWidth: false,
+                                        columns: [
+                                            {
+                                                dataIndex: 'intItemUOMId',
+                                                dataType: 'numeric',
+                                                text: 'Unit Of Measure Id',
+                                                hidden: true
+                                            },
+                                            {
+                                                dataIndex: 'strUnitMeasure',
+                                                dataType: 'string',
+                                                text: 'Unit Measure',
+                                                flex: 1
+                                            },
+                                            {
+                                                dataIndex: 'strUnitType',
+                                                dataType: 'string',
+                                                text: 'Unit Type',
+                                                flex: 1
+                                            },
+                                            {
+                                                xtype: 'checkcolumn',
+                                                dataIndex: 'ysnStockUnit',
+                                                dataType: 'boolean',
+                                                text: 'Stock Unit',
+                                                flex: 1
+                                            }
+                                        ],
+                                        itemId: 'cboItemUOM',
+                                        displayField: 'strUnitMeasure',
+                                        valueField: 'strUnitMeasure',
+                                        store: win.viewModel.storeInfo.itemUOM,
+                                        defaultFilters: [{
+                                            column: 'intItemId',
+                                            value: record.get('intItemId'),
+                                            conjunction: 'and'
+                                        },{
+                                            column: 'intLocationId',
+                                            value: current.get('intLocationId'),
+                                            conjunction: 'and'
+                                        }]
+                                    })
+                                });
+                                break;
                         }
                     }
                     else {
                         switch (columnId) {
                             case 'colSourceNumber' :
                             case 'colItemNo' :
+                            case 'colUOM' :
                                 return false;
                                 break;
                         };
@@ -1408,9 +1452,139 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 })
                             });
                             break;
+                        case 'colUOM' :
+                            return Ext.create('Ext.grid.CellEditor', {
+                                field: Ext.widget({
+                                    xtype: 'gridcombobox',
+                                    matchFieldWidth: false,
+                                    columns: [
+                                        {
+                                            dataIndex: 'intItemUOMId',
+                                            dataType: 'numeric',
+                                            text: 'Unit Of Measure Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strUnitMeasure',
+                                            dataType: 'string',
+                                            text: 'Unit Measure',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strUnitType',
+                                            dataType: 'string',
+                                            text: 'Unit Type',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'checkcolumn',
+                                            dataIndex: 'ysnStockUnit',
+                                            dataType: 'boolean',
+                                            text: 'Stock Unit',
+                                            flex: 1
+                                        }
+                                    ],
+                                    itemId: 'cboItemUOM',
+                                    displayField: 'strUnitMeasure',
+                                    valueField: 'strUnitMeasure',
+                                    store: win.viewModel.storeInfo.itemUOM,
+                                    defaultFilters: [{
+                                        column: 'intItemId',
+                                        value: record.get('intItemId'),
+                                        conjunction: 'and'
+                                    },{
+                                        column: 'intLocationId',
+                                        value: current.get('intLocationId'),
+                                        conjunction: 'and'
+                                    }]
+                                })
+                            });
+                            break;
                     };
                     break;
             };
+        };
+    },
+
+    onLotGridColumnBeforeRender: function(column) {
+        "use strict";
+        if (!column) return false;
+        var me = this,
+            win = column.up('window');
+
+        // Show or hide the editor based on the selected Field type.
+        column.getEditor = function(record){
+
+            var vm = win.viewModel,
+                currentReceiptItem = vm.data.currentReceiptItem;
+
+            if (!record) return false;
+
+            var UOMType = currentReceiptItem.get('strUnitType');
+            var columnId = column.itemId;
+
+            switch (UOMType) {
+                case 'Weight':
+                    switch (columnId) {
+                        case 'colLotUOM' :
+                            return Ext.create('Ext.grid.CellEditor', {
+                                field: Ext.widget({
+                                    xtype: 'gridcombobox',
+                                    matchFieldWidth: false,
+                                    columns: [
+                                        {
+                                            dataIndex: 'intItemId',
+                                            dataType: 'numeric',
+                                            text: 'Item Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'intLocationId',
+                                            dataType: 'numeric',
+                                            text: 'Location Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'intItemUnitMeasureId',
+                                            dataType: 'numeric',
+                                            text: 'Item UOM Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strUnitMeasure',
+                                            dataType: 'string',
+                                            text: 'UOM',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strUnitType',
+                                            dataType: 'string',
+                                            text: 'Unit Type',
+                                            flex: 1
+                                        }
+                                    ],
+                                    itemId: 'cboLotUOM',
+                                    displayField: 'strUnitMeasure',
+                                    valueField: 'strUnitMeasure',
+                                    store: win.viewModel.storeInfo.lotUOM,
+                                    defaultFilters: [{
+                                        column: 'intItemId',
+                                        value: currentReceiptItem.get('intItemId'),
+                                        conjunction: 'and'
+                                    }]
+                                })
+                            });
+                            break;
+                    }
+                    break;
+                default:
+                    switch (columnId) {
+                        case 'colLotUOM' :
+                            return false;
+                            break;
+                    }
+                    break;
+            }
         };
     },
 
@@ -1468,13 +1642,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     txtLotUOM.setValue(current.get('strUnitMeasure'));
                     txtLotItemQty.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblOpenReceive'), 2));
                     txtLotCost.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblUnitCost'), 2));
-
-                    if (current.get('strUnitType') === 'Weight') {
-                        grdLotTracking.columns[1].setHidden(false);
-                    }
-                    else {
-                        grdLotTracking.columns[1].setHidden(true);
-                    }
                 }
                 else {
                     vm.data.currentReceiptItem = null;
@@ -1508,6 +1675,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
             me.calculateGrossWeight(win.viewModel.data.currentReceiptItem);
+        }
+    },
+
+    onWeightUOMChange: function(combo, newValue, oldValue, eOpts) {
+        if (iRely.Functions.isEmpty(oldValue)) return false;
+
+        if (newValue === '') {
+
         }
     },
 
@@ -1566,6 +1741,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#colItemNo": {
                 beforerender: this.onItemGridColumnBeforeRender
+            },
+            "#colUOM": {
+                beforerender: this.onItemGridColumnBeforeRender
+            },
+            "#colLotUOM": {
+                beforerender: this.onLotGridColumnBeforeRender
+            },
+            "#colWeightUOM": {
+                change: this.onWeightUOMChange
             },
             "#txtNotes": {
                 specialKey: this.onSpecialKeyTab
