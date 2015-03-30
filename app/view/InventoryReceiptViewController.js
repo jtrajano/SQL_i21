@@ -969,12 +969,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (!vw.data.currentReceiptItem) {
                         vw.data.currentReceiptItem = context.record;
                     }
-
-                    var tblICInventoryReceiptItemLots = vw.data.currentReceiptItem.tblICInventoryReceiptItemLots();
-                    if (tblICInventoryReceiptItemLots.data.length > 0){
-                        tblICInventoryReceiptItemLots.data.items[0].set('dblQuantity', context.value);
-                        me.calculateGrossWeight(record);
-                    }
+                    me.calculateGrossWeight(record);
                 }
                 else if (context.field === 'dblUnitCost'){
                     value = context.value * (record.get('dblOpenReceive'));
