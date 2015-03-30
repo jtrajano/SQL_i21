@@ -34,6 +34,7 @@ BEGIN TRANSACTION
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #tmpARReceivablePostData (
 	intPaymentId int PRIMARY KEY,
+	strTransactionId NVARCHAR(50),
 	UNIQUE (intPaymentId)
 );
 
@@ -71,11 +72,11 @@ IF (@param IS NOT NULL)
 	BEGIN
 		IF(@param = 'all')
 			BEGIN
-				INSERT INTO #tmpARReceivablePostData SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 0
+				INSERT INTO #tmpARReceivablePostData SELECT intPaymentId, strRecordNumber FROM tblARPayment WHERE ysnPosted = 0
 			END
 		ELSE
 			BEGIN
-				INSERT INTO #tmpARReceivablePostData SELECT intID FROM fnGetRowsFromDelimitedValues(@param)
+				INSERT INTO #tmpARReceivablePostData SELECT intPaymentId, strRecordNumber FROM tblARPayment WHERE intPaymentId in (SELECT intID FROM fnGetRowsFromDelimitedValues(@param))
 			END
 	END
 	
@@ -89,6 +90,7 @@ IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
 		INNER JOIN 
 			#tmpARReceivablePostData I
 				ON GL.intTransactionId = I.intPaymentId
+				AND GL.strTransactionId = I.strTransactionId
 		WHERE
 			GL.strTransactionType = @SCREEN_NAME
 			AND	GL.strModuleName = @MODULE_NAME
@@ -104,14 +106,14 @@ SET @batchIdUsed = @batchId
 IF(@beginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO #tmpARReceivablePostData
-		SELECT intPaymentId FROM tblARPayment
+		SELECT intPaymentId, strRecordNumber FROM tblARPayment
 		WHERE dtmDatePaid BETWEEN @beginDate AND @endDate AND ysnPosted = 0
 	END
 
 IF(@beginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO #tmpARReceivablePostData
-		SELECT intPaymentId FROM tblARPayment
+		SELECT intPaymentId, strRecordNumber FROM tblARPayment
 		WHERE intPaymentId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
 	END
 
@@ -932,8 +934,12 @@ BEGIN
 						,dblCreditUnit    = CASE  WHEN dblCreditUnit < 0 THEN ABS(dblCreditUnit)
 												WHEN dblDebitUnit < 0 THEN 0
 												ELSE dblDebitUnit END
-				FROM tblGLDetail A WHERE A.strTransactionId IN (SELECT strRecordNumber FROM tblARPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData))
-				AND ysnIsUnposted = 0 AND strCode = 'AR'
+				FROM tblGLDetail A
+				INNER JOIN #tmpARReceivablePostData RID
+					ON A.intTransactionId = RID.intPaymentId
+					AND A.strTransactionId = RID.strTransactionId
+				 WHERE 
+					ysnIsUnposted = 0 AND strCode = 'AR'
 			)
 			UPDATE  tblGLSummary
 			SET      dblDebit = ISNULL(tblGLSummary.dblDebit, 0) - ISNULL(GLDetailGrouped.dblDebit, 0)
@@ -1294,7 +1300,10 @@ ELSE
 		--TODO:
 		--DELETE TABLE PER Session
 		DELETE FROM tblGLDetailRecap
-			WHERE intTransactionId IN (SELECT intPaymentId FROM #tmpARReceivablePostData);
+		FROM tblGLDetailRecap A
+		INNER JOIN #tmpARReceivablePostData B		
+			ON A.intTransactionId = B.intPaymentId
+			AND A.strTransactionId = B.strTransactionId;
 
 		--GO
 
@@ -1615,7 +1624,9 @@ Post_Cleanup:
 			----clean gl detail recAR after posting
 			DELETE FROM tblGLDetailRecap
 			FROM tblGLDetailRecap A
-			INNER JOIN #tmpARReceivablePostData B ON A.intTransactionId = B.intPaymentId 
+			INNER JOIN #tmpARReceivablePostData B 
+				ON A.intTransactionId = B.intPaymentId 
+				AND A.strTransactionId = B.strTransactionId
 
 		
 			----removed from tblARInvalidTransaction the successful records
