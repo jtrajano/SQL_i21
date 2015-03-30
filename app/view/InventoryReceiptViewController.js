@@ -376,7 +376,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             key: 'tblICInventoryReceiptItemLots',
                             component: Ext.create('iRely.mvvm.grid.Manager', {
                                 grid: grdLotTracking,
-                                deleteButton : grdLotTracking.down('#btnRemoveLot')
+                                deleteButton : grdLotTracking.down('#btnRemoveLot'),
+                                createRecord : me.onLotCreateRecord
                             })
                         }
                     ]
@@ -470,6 +471,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('dtmReceiptDate', today);
         record.set('intBlanketRelease', 0);
         record.set('ysnPosted', false);
+        action(record);
+    },
+
+    onLotCreateRecord: function(config, action) {
+        var win = config.grid.up('window');
+        var currentReceiptItem = win.viewModel.data.currentReceiptItem;
+        var record = Ext.create('Inventory.model.ReceiptItemLot');
+        record.set('strUnitMeasure', currentReceiptItem.get('strUnitMeasure'));
+        record.set('intItemUnitMeasureId', currentReceiptItem.get('intUnitMeasureId'));
+        record.set('dblLotUOMConvFactor', currentReceiptItem.get('dblItemUOMConvFactor'));
+        record.set('dblGrossWeight', 0.00);
+        record.set('dblTareWeight', 0.00);
+        record.set('dblNetWeight', 0.00);
+        record.set('dblQuantity', 0.00);
         action(record);
     },
 
@@ -720,6 +735,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     var lotCF = lot.get('dblLotUOMConvFactor');
                     var itemUOMCF = record.get('dblItemUOMConvFactor');
                     var weightCF = record.get('dblWeightUOMConvFactor');
+
+                    if (iRely.Functions.isEmpty(qty)) qty = 0.00;
+                    if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
+                    if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
+                    if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
 
                     if (record.get('intWeightUOMId') === null || record.get('intWeightUOMId') === undefined) {
                         weightCF = itemUOMCF;
@@ -1001,6 +1021,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var lotCF = context.record.get('dblLotUOMConvFactor');
             var itemUOMCF = win.viewModel.data.currentReceiptItem.get('dblItemUOMConvFactor');
             var weightCF = win.viewModel.data.currentReceiptItem.get('dblWeightUOMConvFactor');
+
+            if (iRely.Functions.isEmpty(qty)) qty = 0.00;
+            if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
+            if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
+            if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
+
             if (win.viewModel.data.currentReceiptItem.get('intWeightUOMId') === null || win.viewModel.data.currentReceiptItem.get('intWeightUOMId') === undefined) {
                 weightCF = itemUOMCF;
             }
