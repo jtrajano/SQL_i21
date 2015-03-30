@@ -1084,7 +1084,14 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'ContractManagement.view.PriceContracts', intSort = 1
 			WHERE strMenuName = 'Price Contracts' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId
-		
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract Adjustments' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Contract Adjustments', 'Contract Management', @ContractManagementActivityId, 'Contract Adjustments', 'Screen', 'ContractManagement.view.ContractAdjustment', 'small-screen', 0, 0, 0, 1, 2, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.ContractAdjustment', intSort = 2
+			WHERE strMenuName = 'Contract Adjustments' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId		
 
 	/* ------------------------------------------------- */
 	/* -- Create Contract Management Maintenance Menu -- */
@@ -1159,6 +1166,14 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'ContractManagement.view.Associations', intSort = 0
 			WHERE strMenuName = 'Associations' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Book' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Book', 'Contract Management', @ContractManagementMaintenanceId, 'Book', 'Screen', 'ContractManagement.view.Book', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.Book', intSort = 0
+			WHERE strMenuName = 'Book' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceId
 
 	/* --------------------------------------------------- */
 	/* -- End of Create Contract Management Module Menu -- */
