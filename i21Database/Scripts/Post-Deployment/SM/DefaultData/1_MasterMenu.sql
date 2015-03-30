@@ -1704,6 +1704,28 @@ GO
 			SET strCommand = 'Logistics.view.ContainerType', intSort = 0
 			WHERE strMenuName = 'Container Type' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceId
 GO
+	/* --------------------------------- */
+	/* -- Tank Management Module Menu -- */
+	/* --------------------------------- */
+
+	DECLARE @TankManagementModuleId INT
+	SELECT @TankManagementModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Tank Management' AND strModuleName = 'Tank Management' AND intParentMenuID = 0
+
+		/* -------------------------------------- */
+		/* -- Tank Management Maintenance Menu -- */
+		/* -------------------------------------- */
+
+		DECLARE @TankManagementMaintenanceId INT
+		SELECT @TankManagementMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Clock Reading History' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementMaintenanceId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Clock Reading History', 'Tank Management', @TankManagementMaintenanceId, 'Clock Reading History', 'Screen', 'TankManagement.view.ClockReadingHistory', 'small-screen', 0, 0, 0, 1, NULL, 1)
+
+	/* --------------------------------- */
+	/* -- Tank Management Module Menu -- */
+	/* --------------------------------- */
+GO
 
 	/* ----------------------------------------------- */
 	/* --   Update Financial Reports Module Menu    -- */
