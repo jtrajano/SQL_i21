@@ -21,6 +21,10 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICUnitMeasure] PRIMARY KEY ([intUnitMeasureId]) 
 	)
+	GO
+		CREATE NONCLUSTERED INDEX [IX_tblICUnitMeasure_intUnitMeasureId_strUnitMeasure]
+		ON [dbo].[tblICUnitMeasure]([intUnitMeasureId] ASC, [strUnitMeasure] ASC);
+	GO
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
