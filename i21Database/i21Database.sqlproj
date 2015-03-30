@@ -1246,6 +1246,8 @@
     <Build Include="dbo\Views\vyuPOStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateFuturesMonthList.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesMonthList.sql" />
+    <Build Include="dbo\Tables\tblSMScreenStage.sql" />
+    <Build Include="dbo\Tables\tblSMControlStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
