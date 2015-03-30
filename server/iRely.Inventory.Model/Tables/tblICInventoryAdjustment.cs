@@ -25,7 +25,26 @@ namespace iRely.Inventory.Model
         public string strAdjustmentNo { get; set; }
         public string strDescription { get; set; }
         public int? intSort { get; set; }
-      
+
+        private string _location;
+        [NotMapped]
+        public string strLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_location))
+                    if (tblSMCompanyLocation != null)
+                        return tblSMCompanyLocation.strLocationName;
+                    else
+                        return null;
+                else
+                    return _location;
+            }
+            set
+            {
+                _location = value;
+            }
+        }
         [NotMapped]
         public string strAdjustmentType
         {
@@ -66,8 +85,9 @@ namespace iRely.Inventory.Model
         public string strAdjustmentNo { get; set; }
         public string strDescription { get; set; }
         public int? intSort { get; set; }
-        public string strLocationName { get; set; }
+        public string strLocationName{ get; set; }
         public string strAdjustmentType { get; set; }
+    
     }
 
     public class tblICInventoryAdjustmentDetail : BaseEntity

@@ -30,9 +30,11 @@ Ext.define('Inventory.view.InventoryAdjustment', {
         'Ext.form.Label',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.column.Date',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
+        'Ext.form.field.TextArea',
         'Ext.toolbar.Paging'
     ],
 
@@ -229,11 +231,33 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'combobox',
+                                                                xtype: 'gridcombobox',
                                                                 flex: 1,
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intCompanyLocationId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Location Id',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strLocationName',
+                                                                        dataType: 'string',
+                                                                        text: 'Location Name',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strLocationType',
+                                                                        dataType: 'string',
+                                                                        text: 'Location Type',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
                                                                 itemId: 'cboLocation',
                                                                 fieldLabel: 'Location',
-                                                                labelWidth: 70
+                                                                labelWidth: 70,
+                                                                displayField: 'strLocationName',
+                                                                valueField: 'intCompanyLocationId'
                                                             },
                                                             {
                                                                 xtype: 'datefield',
@@ -248,7 +272,9 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 flex: 1,
                                                                 itemId: 'cboAdjustmentType',
                                                                 fieldLabel: 'Adjustment Type',
-                                                                labelWidth: 110
+                                                                labelWidth: 110,
+                                                                displayField: 'strDescription',
+                                                                valueField: 'intAdjustmentTypeId'
                                                             },
                                                             {
                                                                 xtype: 'textfield',
@@ -332,7 +358,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colItemNumber',
                                                         width: 100,
                                                         dataIndex: 'strItemNumber',
-                                                        text: 'Item No.'
+                                                        text: 'Item No.',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -346,28 +375,40 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colSubLocation',
                                                         width: 100,
                                                         dataIndex: 'strSubLocation',
-                                                        text: 'Sub Location'
+                                                        text: 'Sub Location',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colStorageLocation',
                                                         width: 100,
                                                         dataIndex: 'strStorageLocation',
-                                                        text: 'Storage Location'
+                                                        text: 'Storage Location',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colLotID',
                                                         width: 90,
                                                         dataIndex: 'strLotID',
-                                                        text: 'Lot ID'
+                                                        text: 'Lot ID',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewLotID',
                                                         width: 90,
                                                         dataIndex: 'strNewLotID',
-                                                        text: 'New Lot ID'
+                                                        text: 'New Lot ID',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -414,21 +455,30 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         align: 'right',
                                                         dataIndex: 'dblNewQuantity',
                                                         text: 'New Quantity',
-                                                        format: '0,000.##'
+                                                        format: '0,000.##',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewUOM',
                                                         width: 70,
                                                         dataIndex: 'strNewUOM',
-                                                        text: 'New UOM'
+                                                        text: 'New UOM',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewItemNumber',
                                                         width: 90,
                                                         dataIndex: 'strNewItemNumber',
-                                                        text: 'New Item No.'
+                                                        text: 'New Item No.',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -455,7 +505,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         align: 'right',
                                                         dataIndex: 'dblNewPhysicalCount',
                                                         text: 'New Physical Count',
-                                                        format: '0,000'
+                                                        format: '0,000',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'datecolumn',
@@ -466,7 +519,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         xtype: 'datecolumn',
                                                         itemId: 'colNewExpirationDate',
                                                         width: 117,
-                                                        text: 'New Expiration Date'
+                                                        text: 'New Expiration Date',
+                                                        editor: {
+                                                            xtype: 'datefield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -480,7 +536,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colNewStatus',
                                                         width: 75,
                                                         dataIndex: 'strNewStatus',
-                                                        text: 'New Status'
+                                                        text: 'New Status',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -497,7 +556,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colCreditAccount',
                                                         width: 96,
                                                         dataIndex: 'strCreditAccount',
-                                                        text: 'Credit Account'
+                                                        text: 'Credit Account',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -511,11 +573,14 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colDebitAccount',
                                                         width: 97,
                                                         dataIndex: 'strDebitAccount',
-                                                        text: 'Debit Account'
+                                                        text: 'Debit Account',
+                                                        editor: {
+                                                            xtype: 'combobox'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colDebitAccountDescription1',
+                                                        itemId: 'colDebitAccountDescription',
                                                         width: 150,
                                                         dataIndex: 'strDebitAccountDescription',
                                                         text: 'Description'
@@ -585,14 +650,20 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colNoteDescription',
                                                         dataIndex: 'string',
                                                         text: 'Description',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNotes',
                                                         dataIndex: 'string',
                                                         text: 'Notes',
-                                                        flex: 3
+                                                        flex: 3,
+                                                        editor: {
+                                                            xtype: 'textareafield'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {

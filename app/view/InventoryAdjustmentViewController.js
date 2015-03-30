@@ -37,24 +37,28 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
             grdInventoryAdjustment: {
                 colItemNumber: {
-                    dataIndex: 'strUnitMeasure',
+                    dataIndex: 'strItemNo',
                     editor: {
-                        store: '{uomUnitMeasure}'
+                        store: '{item}'
                     }
                 },
-                colDescription: {
-                    dataIndex: 'dblUnitQty'
-                },
+                colDescription: 'strItemDescription',
                 colSubLocation: {
-                    dataIndex: 'dblSellQty'
+                    dataIndex: 'strSubLocation',
+                    editor: {
+                        store: '{subLocation}'
+                    }
                 },
                 colStorageLocation: {
-                    dataIndex: 'dblWeight'
+                    dataIndex: 'strStorageLocation',
+                    editor: {
+                        store: '{storageLocation}'
+                    }
                 },
                 colLotID: {
-                    dataIndex: 'strWeightUOM',
+                    dataIndex: 'strLotNumber',
                     editor: {
-                        store: '{weightUOM}',
+                        store: '{lot}',
                         defaultFilters: [{
                             column: 'strUnitType',
                             value: 'Weight',
@@ -62,51 +66,61 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         }]
                     }
                 },
-                colNewLotID: 'strDescription',
-                colQuantity: 'strUpcCode',
-                colUOM: 'ysnStockUnit',
-                colWeightPerUnit: 'ysnAllowSale',
-                colUnitCost: 'ysnAllowPurchase',
-                colNewQuantity: 'dblConvertToStock',
-                colNewUOM: 'dblConvertFromStock',
-                colNewItemNumber: 'dblLength',
-                colNewItemDescription: 'dblWidth',
-                colPhysicalCount: 'dblHeight',
-                colNewPhysicalCount: {
-                    dataIndex: 'strDimensionUOM',
+                colNewLotID: {
+                    dataIndex: 'strNewLotNumber',
                     editor: {
-                        store: '{dimensionUOM}',
-                        defaultFilters: [{
-                            column: 'strUnitType',
-                            value: '',
-                            conjunction: 'and'
-                        }]
+                        store: '{newLot}'
                     }
                 },
-                colExpirationDate: 'dblVolume',
-                colNewExpirationDate: {
-                    dataIndex: 'strVolumeUOM',
+                colQuantity: 'dblLotQty',
+                colUOM: '',
+                colWeightPerUnit: 'dblLotWeightPerUnit',
+                colUnitCost: 'dblLotUnitCost',
+                colNewQuantity: 'dblNewQuantity',
+                colNewUOM: {
+                    dataIndex: 'strNewItemUOM',
                     editor: {
-                        store: '{volumeUOM}',
-                        defaultFilters: [{
-                            column: 'strUnitType',
-                            value: 'Volume',
-                            conjunction: 'and'
-                        }]
+                        store: '{newItemUOM}'
                     }
                 },
-                colStatus: 'dblMaxQty',
-                colNewStatus: 'dblMaxQty',
-                colGLAmount: 'dblMaxQty',
-                colCreditAccount: 'dblMaxQty',
-                colCreditAccountDescription: 'dblMaxQty',
-                colDebitAccount: 'dblMaxQty',
-                colDebitAccountDescription1: 'dblMaxQty'
+                colNewItemNumber: {
+                    dataIndex: 'strNewItemNo',
+                    editor: {
+                        store: '{newItem}'
+                    }
+                },
+                colNewItemDescription: 'strNewItemDescription',
+                colPhysicalCount: '',
+                colNewPhysicalCount: 'dblNewPhysicalCount',
+                colExpirationDate: '',
+                colNewExpirationDate: 'dtmNewExpiryDate',
+                colStatus: '',
+                colNewStatus: {
+                    dataIndex: 'strNewLotStatus',
+                    editor: {
+                        store: '{newLotStatus}'
+                    }
+                },
+                colGLAmount: '',
+                colCreditAccount: {
+                    dataIndex: 'strCreditAccountId',
+                    editor: {
+                        store: '{creditGLAccount}'
+                    }
+                },
+                colCreditAccountDescription: 'strCreditAccountDescription',
+                colDebitAccount: {
+                    dataIndex: 'strDebitAccountId',
+                    editor: {
+                        store: '{debitGLAccount}'
+                    }
+                },
+                colDebitAccountDescription: 'strDebitAccountDescription'
             },
 
             grdNotes: {
-                colNoteDescription: '',
-                colNotes: ''
+                colNoteDescription: 'strDescription',
+                colNotes: 'strNotes'
             }
         }
     },
@@ -121,6 +135,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             store  : store,
             createRecord : me.createRecord,
             binding: me.config.binding,
+            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
+                type: 'Inventory.InventoryAdjustment',
+                window: win
+            }),
             details: [
                 {
                     key: 'tblICInventoryAdjustmentDetails',
