@@ -33,7 +33,7 @@ BEGIN
 			,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 			,intTransactionId = PO.intPurchaseId
 			,strTransactionId = PO.strPurchaseOrderNumber
-			,intTransactionTypeId = @intPurchaseOrderType
+			,intTransactionTypeId = @intPurchaseOrderType 
 			,intLotId = NULL 
 			,intSubLocationId = PODetail.intSubLocationId
 			,intStorageLocationId = PODetail.intStorageLocationId
@@ -51,3 +51,5 @@ BEGIN
 			
 END
 
+-- TODO: IF @strSourceType = @@ReceiptType_TransferOrder
+-- TODO: IF @strSourceType = @@ReceiptType_TransferOrder

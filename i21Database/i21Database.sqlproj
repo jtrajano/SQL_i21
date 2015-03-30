@@ -1275,6 +1275,10 @@
     <Build Include="dbo\Tables\tblLGAllocationDetail.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenSContracts.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenPContracts.sql" />
+	<Build Include="dbo\Stored Procedures\uspICGetItemsForItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemShipment.sql" />
+    <Build Include="dbo\Functions\fnGetProcessToItemShipmentErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddSalesOrderToItemShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
