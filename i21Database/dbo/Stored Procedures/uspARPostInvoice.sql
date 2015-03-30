@@ -34,7 +34,7 @@ BEGIN TRANSACTION
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #tmpPostInvoiceData (
 	intInvoiceId int PRIMARY KEY,
-	strTransactionId NVARCHAR(50),
+	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	UNIQUE (intInvoiceId)
 );
 
@@ -1009,7 +1009,7 @@ END
 			#tmpPostInvoiceData
 		WHERE
 			tblGLDetail.intTransactionId = #tmpPostInvoiceData.intInvoiceId
-			AND tblGLDetail.intTransactionId = #tmpPostInvoiceData.strTransactionId
+			AND tblGLDetail.strTransactionId = #tmpPostInvoiceData.strTransactionId
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblARPostResult(
@@ -1068,7 +1068,7 @@ ELSE
 		DELETE FROM tblGLDetailRecap
 		FROM tblGLDetailRecap A
 		INNER JOIN #tmpPostInvoiceData B
-			ON A.intTransactionId = B.intInvoiceId AND A.intTransactionId = B.strTransactionId;
+			ON A.intTransactionId = B.intInvoiceId AND A.strTransactionId = B.strTransactionId;
 
 		WITH Units 
 		AS 
@@ -1499,7 +1499,7 @@ Post_Cleanup:
 			DELETE FROM tblGLDetailRecap
 			FROM tblGLDetailRecap A
 			INNER JOIN #tmpPostInvoiceData B 
-				ON A.intTransactionId = B.intInvoiceId AND A.intTransactionId = B.strTransactionId
+				ON A.intTransactionId = B.intInvoiceId AND A.strTransactionId = B.strTransactionId
 		END
 
 	END

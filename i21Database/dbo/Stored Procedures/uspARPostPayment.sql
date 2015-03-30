@@ -34,7 +34,7 @@ BEGIN TRANSACTION
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #tmpARReceivablePostData (
 	intPaymentId int PRIMARY KEY,
-	strTransactionId NVARCHAR(50),
+	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	UNIQUE (intPaymentId)
 );
 
@@ -53,6 +53,7 @@ CREATE TABLE #tmpAROverpayment (
 
 CREATE TABLE #tmpZeroPayment (
 	intPaymentId int PRIMARY KEY,
+	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	UNIQUE (intPaymentId)
 );
 
@@ -137,6 +138,7 @@ IF (ISNULL(@recap, 0) = 0)
 			#tmpZeroPayment
 		SELECT
 			A.intPaymentId
+			,A.strRecordNumber
 		FROM
 			tblARPayment A 
 		INNER JOIN 
@@ -971,7 +973,7 @@ BEGIN
 			
 			-- Insert Zero Payments for updating
 			INSERT INTO #tmpARReceivablePostData
-			SELECT Z.intPaymentId FROM #tmpZeroPayment Z
+			SELECT Z.intPaymentId, Z.strTransactionId FROM #tmpZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM #tmpARReceivablePostData WHERE intPaymentId = Z.intPaymentId)
 		
 			--Unposting Process
@@ -1056,7 +1058,7 @@ BEGIN
 			
 			-- Insert Zero Payments for updating
 			INSERT INTO #tmpARReceivablePostData
-			SELECT Z.intPaymentId FROM #tmpZeroPayment Z
+			SELECT Z.intPaymentId, Z.strTransactionId FROM #tmpZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM #tmpARReceivablePostData WHERE intPaymentId = Z.intPaymentId)			
 			
 			--update payment record
@@ -1095,7 +1097,7 @@ BEGIN
 		
 			-- Insert Zero Payments for updating
 			INSERT INTO #tmpARReceivablePostData
-			SELECT Z.intPaymentId FROM #tmpZeroPayment Z
+			SELECT Z.intPaymentId, Z.strTransactionId FROM #tmpZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM #tmpARReceivablePostData WHERE intPaymentId = Z.intPaymentId)		
 
 			-- Update the posted flag in the transaction table
@@ -1241,7 +1243,7 @@ BEGIN
 					
 			-- Insert Zero Payments for updating
 			INSERT INTO #tmpARReceivablePostData
-			SELECT Z.intPaymentId FROM #tmpZeroPayment Z
+			SELECT Z.intPaymentId, Z.strTransactionId FROM #tmpZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM #tmpARReceivablePostData WHERE intPaymentId = Z.intPaymentId)						
 
 			--Insert Successfully posted transactions.
