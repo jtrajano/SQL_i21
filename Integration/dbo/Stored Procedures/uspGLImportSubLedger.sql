@@ -170,34 +170,37 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT
 
     		-- INSERTS INTO THE tblGLJournal GROUPED BY glije_postdate COLUMN in tblGLIjemst
-    		DECLARE cursor_postdate CURSOR LOCAL FOR  SELECT glije_postdate FROM tblGLIjemst WHERE glije_uid =@uid GROUP BY glije_postdate
+    		DECLARE cursor_postdate CURSOR LOCAL FOR  SELECT glije_postdate,glije_src_sys,glije_src_no FROM tblGLIjemst WHERE glije_uid =@uid
+    			GROUP BY glije_postdate,glije_src_sys,glije_src_no
     		OPEN cursor_postdate
-    		FETCH NEXT FROM cursor_postdate INTO @postdate
+    		FETCH NEXT FROM cursor_postdate INTO @postdate,@glije_src_sys,@glije_src_no
     		WHILE @@FETCH_STATUS =0
     		BEGIN
 
     			EXEC  dbo.uspGLGetNewID 2, @strJournalId  OUTPUT
 
-    			INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted)
-    			SELECT @strJournalId,@postdate, ''Imported from SubLedger'' ,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0
+    			INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted,
+    			strSourceId, strSourceType)
+    			SELECT @strJournalId,@postdate, ''Imported from SubLedger'' ,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0,
+    				@glije_src_no,@glije_src_sys
 
 
     			SELECT @intJournalId = @@IDENTITY
     			select @totalCredit =0, @totalDebit = 0,@isValid =1
 
     			--INSERTS INTO THE tblGLJournalDetail then logs all the error to tblGLCOAImportLog INCLUDING THE ERROR COLLECTED ABOVE
-    			--TALLY THE DEBIT /CREDIT
-    			SELECT glije_id,glije_acct_no,CONVERT(VARCHAR(20),glije_date),
-    			glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period,glije_src_sys,glije_src_no
-    			 FROM tblGLIjemst WHERE glije_uid=@uid AND glije_postdate = @postdate
+    			----TALLY THE DEBIT /CREDIT
+    			--SELECT glije_id,glije_acct_no,CONVERT(VARCHAR(20),glije_date),
+    			--glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period,glije_src_sys,glije_src_no
+    			-- FROM tblGLIjemst WHERE glije_uid=@uid AND glije_postdate = @postdate and glije_src_sys = @glije_src_sys and glije_src_no= @glije_src_no
 
 
     			DECLARE cursor_gldetail CURSOR LOCAL FOR SELECT glije_id,glije_acct_no,CONVERT(VARCHAR(20),glije_date),
-    			glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period,glije_src_sys,glije_src_no
-    			 FROM tblGLIjemst WHERE glije_uid=@uid AND glije_postdate = @postdate
+    			glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period
+    			 FROM tblGLIjemst WHERE glije_uid=@uid AND glije_postdate = @postdate and glije_src_sys = @glije_src_sys and glije_src_no= @glije_src_no
     			OPEN cursor_gldetail
     			FETCH NEXT FROM cursor_gldetail INTO @id,@glije_acct_no,@glije_date,@glije_amt,@glije_units,@glije_dr_cr_ind,
-    			@glije_correcting,@glije_error_desc,@glije_period,@glije_src_sys,@glije_src_no
+    			@glije_correcting,@glije_error_desc,@glije_period
     			WHILE @@FETCH_STATUS = 0
     			BEGIN
 
@@ -247,9 +250,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				SELECT @totalCredit += @credit, @totalDebit +=@debit
 
     				INSERT INTO tblGLJournalDetail (intAccountId,strDescription,dtmDate,intJournalId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,
-    				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo)
+    				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument)
     				SELECT @intAccountId1,@strDescription1,@dtmDate,@intJournalId,@debit,@credit,@debitUnit,@creditUnit,
-    				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no
+    				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no,glije_doc
     				 FROM tblGLIjemst WHERE glije_id=@id
 
     				IF @glije_error_desc IS NOT NULL
@@ -262,7 +265,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				END
 
     				FETCH NEXT FROM cursor_gldetail INTO @id,@glije_acct_no,@glije_date,@glije_amt,@glije_units,@glije_dr_cr_ind,@glije_correcting,
-    				@glije_error_desc,@glije_period,@glije_src_sys,@glije_src_no
+    				@glije_error_desc,@glije_period
     			END
     			CLOSE cursor_gldetail
     			DEALLOCATE cursor_gldetail
@@ -272,7 +275,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     			BEGIN
     				IF @importLogId = 0
     					EXEC  dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
-    				EXEC dbo.uspGLCreateImportLogDetail @importLogId,''Unable to Post because transaction is out of balance.'', @postdate,@strJournalId,@glije_period
+    				--EXEC dbo.uspGLCreateImportLogDetail @importLogId,''Unable to Post because transaction is out of balance.'', @postdate,@strJournalId,@glije_period
+    				EXEC uspGLCreateImportLogDetail @importLogId,''Unable to Post because transaction is out of balance.'',@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
     				SET @isValid = 0
     			END
     			IF @isCOAPresent = 0 SET @isValid = 0
@@ -292,16 +296,16 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     					UPDATE tblGLJournal SET strJournalType = ''Origin Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId
     					IF @importLogId = 0
     						EXEC dbo.uspGLCreateImportLogHeader ''Successful Transaction'', @intUserId,@version ,@importLogId OUTPUT
-    					EXEC dbo.uspGLCreateImportLogDetail @importLogId,''Posted'',@postdate,@strJournalId,@glije_period
-
+    					--EXEC dbo.uspGLCreateImportLogDetail @importLogId,''Posted'',@postdate,@strJournalId,@glije_period
+						EXEC uspGLCreateImportLogDetail @importLogId,''Posted'',@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
     					UPDATE tblGLCOAImportLog SET strEvent = ''Successful Transaction'' WHERE intImportLogId = @importLogId
     				END
     				ELSE
     				BEGIN
     					IF @importLogId = 0
     						EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version ,@importLogId OUTPUT
-    					EXEC dbo.uspGLCreateImportLogDetail @importLogId,@strBatchId,@postdate,@strJournalId,@glije_period
-
+    					--EXEC dbo.uspGLCreateImportLogDetail @importLogId,@strBatchId,@postdate,@strJournalId,@glije_period
+						EXEC uspGLCreateImportLogDetail @importLogId,@strBatchId,@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
     					UPDATE tblGLCOAImportLog SET strEvent = ''Failed Transaction'' WHERE intImportLogId = @importLogId
     				END
 
@@ -313,7 +317,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     					UPDATE tblGLCOAImportLog SET strEvent = ''Failed Transaction'' WHERE intImportLogId = @importLogId
     				END
 
-    			FETCH NEXT FROM cursor_postdate INTO @postdate
+    			FETCH NEXT FROM cursor_postdate INTO @postdate,@glije_src_sys,@glije_src_no
     			END
     			CLOSE cursor_postdate
 				DEALLOCATE cursor_postdate
