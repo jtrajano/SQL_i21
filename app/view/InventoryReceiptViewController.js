@@ -955,6 +955,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onEditItem: function (editor, context, eOpts) {
         var win = editor.grid.up('window');
         var me = win.controller;
+        var win = context.grid.up('window');
+        var vw = win.viewModel;
+
         if (context.field === 'dblOpenReceive' || context.field === 'dblUnitCost')
         {
             if (context.record) {
@@ -962,9 +965,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var record = context.record;
                 if (context.field === 'dblOpenReceive'){
                     value = context.value * (record.get('dblUnitCost'));
-
-                    var win = context.grid.up('window');
-                    var vw = win.viewModel;
 
                     if (!vw.data.currentReceiptItem) {
                         vw.data.currentReceiptItem = context.record;
@@ -984,9 +984,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
         else if (context.field === 'strWeightUOM') {
-            if (iRely.Functions.isEmpty(context.oldValue)) return false;
-            if (context.newValue === '') {
+            if (iRely.Functions.isEmpty(context.value)) {
                 context.record.set('intWeightUOMId', null);
+                context.record.set('dblWeightUOMConvFactor', 0);
+                context.record.set('dblItemUOMConvFactor', 0);
+
+                var tblICInventoryReceiptItemLots = vw.data.currentReceiptItem.tblICInventoryReceiptItemLots().data.items;
+                Ext.Array.each(tblICInventoryReceiptItemLots, function(lot) {
+                    lot.set('strWeightUOM', '');
+                });
+                win.controller.calculateGrossWeight(context.record);
             }
         }
     },
