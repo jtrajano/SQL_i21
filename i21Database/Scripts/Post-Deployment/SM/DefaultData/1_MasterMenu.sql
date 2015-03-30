@@ -1594,13 +1594,8 @@ GO
 			SET strCommand = 'Grain.view.DiscountSchedule', intSort = 2
 			WHERE strMenuName = 'Discount Schedule' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId
 		
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount Code' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId)
-			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES ('Discount Code', 'Grain', @GrainMaintenanceId, 'Discount Code', 'Screen', 'Grain.view.DiscountCode', 'small-screen', 0, 0, 0, 1, 3, 1)
-		ELSE
-			UPDATE tblSMMasterMenu
-			SET strCommand = 'Grain.view.DiscountCode', intSort = 3
-			WHERE strMenuName = 'Discount Code' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount Code' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId)
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Discount Code' AND strModuleName = 'Grain' AND intParentMenuID = @GrainMaintenanceId
 	
 	/* ---------------------------------------- */
 	/* --  End of Create Grain Module Menu   -- */
