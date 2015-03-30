@@ -7,7 +7,7 @@ BEGIN
 			DROP PROCEDURE [dbo].[uspGLImportSubLedger];
 	')
 
-	EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
+EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		( @startingPeriod INT,@endingPeriod INT,@intCurrencyId INT, @intUserId INT, @version VARCHAR(20),@importLogId INT OUTPUT)
     	AS
     	BEGIN
@@ -38,42 +38,39 @@ BEGIN
     				WHERE stri21IdNumber is NULL
     	END
 
-    	CREATE TABLE #tmpID(
+    	DECLARE @tmpID TABLE(
     			ID int,
     			glije_date int,
     			glije_acct_no decimal(16,8),
     			glije_period int,
     			glije_src_no char(5)
     		)
-    		INSERT INTO  #tmpID (ID,glije_date,glije_acct_no,glije_period,glije_src_no)
-    			SELECT A4GLIdentity,glije_date,glije_acct_no,glije_period,glije_src_no FROM glijemst where glije_period between @startingPeriod and @endingPeriod
 
 
-    		IF EXISTS (SELECT * FROM #tmpID WHERE glije_date = 0)
+
+    		IF EXISTS (SELECT * FROM @tmpID WHERE glije_date = 0)
     		BEGIN
     			EXEC  dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
     			DECLARE @a int,@b decimal(16,8),@c char(5),@d int
-    			WHILE EXISTS (SELECT * FROM #tmpID WHERE glije_date = 0)
+    			WHILE EXISTS (SELECT * FROM @tmpID WHERE glije_date = 0)
     			BEGIN
-    				SELECT TOP 1 @a = ID, @b= glije_acct_no,@c = glije_src_no,@d=glije_period FROM #tmpID WHERE glije_date = 0  ORDER BY ID
+    				SELECT TOP 1 @a = ID, @b= glije_acct_no,@c = glije_src_no,@d=glije_period FROM @tmpID WHERE glije_date = 0  ORDER BY ID
     				INSERT INTO tblGLCOAImportLogDetail (strEventDescription,strPeriod,strSourceNumber,strJournalId,intImportLogId)
     					VALUES(''Invalid Date (glije_date) in Origin Table'',@d,@c,@b,@importLogId)
-    				DELETE FROM #tmpID where ID = @a
+    				DELETE FROM @tmpID where ID = @a
     			END
     			RETURN
     		END
-
-
 
     		BEGIN TRY
     		BEGIN TRANSACTION
     		DECLARE @uid UNIQUEIDENTIFIER
     		SELECT @uid =NEWID()
+    		INSERT INTO  @tmpID (ID,glije_date,glije_acct_no,glije_period,glije_src_no)
+    			SELECT A4GLIdentity,glije_date,glije_acct_no,glije_period,glije_src_no FROM glijemst WITH (HOLDLOCK)
+    			WHERE glije_period between @startingPeriod and @endingPeriod
 
-
-
-
-    		INSERT INTO tblGLIjemst(glije_period,glije_acct_no,glije_src_sys,glije_src_no, glije_line_no,glije_date,glije_time,glije_ref,glije_doc,glije_comments,
+			INSERT INTO tblGLIjemst(glije_period,glije_acct_no,glije_src_sys,glije_src_no, glije_line_no,glije_date,glije_time,glije_ref,glije_doc,glije_comments,
     		glije_dr_cr_ind,glije_amt,glije_units,glije_correcting,glije_source_pgm,glije_work_area,glije_cbk_no,glije_user_id,glije_user_rev_dt,A4GLIdentity,glije_uid)
     		SELECT ISNULL(a.glije_period, ''0'')
     				   ,ISNULL(a.glije_acct_no, ''0'')
@@ -97,12 +94,12 @@ BEGIN
     				   ,ISNULL(A4GLIdentity, ''0'')
     				   ,@uid
     								  FROM glijemst a JOIN
-    								  #tmpID b on a.A4GLIdentity = b.ID
+    								  @tmpID b on a.A4GLIdentity = b.ID
     								   --where glije_period between @startingPeriod and @endingPeriod
 
-    		DELETE a FROM glijemst a  JOIN #tmpID b on a.A4GLIdentity = b.ID --  WHERE glije_period between @startingPeriod and @endingPeriod
+    		DELETE a FROM glijemst a  JOIN @tmpID b on a.A4GLIdentity = b.ID --  WHERE glije_period between @startingPeriod and @endingPeriod
 
-    		DROP TABLE #tmpID
+    		DELETE FROM  @tmpID
     		-- CONVERTS glije_date to DATETIME for easy COMPARISON later
 
     		UPDATE tblGLIjemst
@@ -166,46 +163,46 @@ BEGIN
     		CLOSE cursor_tbl
     		DEALLOCATE cursor_tbl
 
-
     		DECLARE @postdate DATE,@intJournalId INT,@strJournalId VARCHAR(10),
     				@glije_date VARCHAR(20),@intAccountId INT,@intAccountId1 INT, @strDescription VARCHAR(50),@strDescription1 VARCHAR(50),@dtmDate DATE,
-    				@glije_amt DECIMAL(12,2) ,@glije_units DECIMAL(10,2),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(12,2),@credit DECIMAL(10,2),
-    				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),@totalDebit DECIMAL(12,2),@totalCredit DECIMAL(12,2),
+    				@glije_amt DECIMAL(12,2) ,@glije_units DECIMAL(10,2),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(12,2),@credit DECIMAL(12,2),
+    				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),@totalDebit DECIMAL(18,2),@totalCredit DECIMAL(18,2),
     				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT
 
     		-- INSERTS INTO THE tblGLJournal GROUPED BY glije_postdate COLUMN in tblGLIjemst
-    		DECLARE cursor_postdate CURSOR FOR  SELECT glije_postdate FROM tblGLIjemst WHERE glije_uid =@uid GROUP BY glije_postdate
+    		DECLARE cursor_postdate CURSOR LOCAL FOR  SELECT glije_postdate,glije_src_sys,glije_src_no FROM tblGLIjemst WHERE glije_uid =@uid
+    			GROUP BY glije_postdate,glije_src_sys,glije_src_no
     		OPEN cursor_postdate
-    		FETCH NEXT FROM cursor_postdate INTO @postdate
+    		FETCH NEXT FROM cursor_postdate INTO @postdate,@glije_src_sys,@glije_src_no
     		WHILE @@FETCH_STATUS =0
     		BEGIN
 
     			EXEC  dbo.uspGLGetNewID 2, @strJournalId  OUTPUT
 
-    			INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted)
-    			SELECT @strJournalId,@postdate, ''Imported from SubLedger'' ,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0
+    			INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted,
+    			strSourceId, strSourceType)
+    			SELECT @strJournalId,@postdate, ''Imported from SubLedger'' ,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0,
+    				@glije_src_no,@glije_src_sys
 
 
     			SELECT @intJournalId = @@IDENTITY
     			select @totalCredit =0, @totalDebit = 0,@isValid =1
 
     			--INSERTS INTO THE tblGLJournalDetail then logs all the error to tblGLCOAImportLog INCLUDING THE ERROR COLLECTED ABOVE
-    			--TALLY THE DEBIT /CREDIT
-    			SELECT glije_id,glije_acct_no,CONVERT(VARCHAR(20),glije_date),
-    			glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period,glije_src_sys,glije_src_no
-    			 FROM tblGLIjemst WHERE glije_uid=@uid AND glije_postdate = @postdate
+    			----TALLY THE DEBIT /CREDIT
+    			--SELECT glije_id,glije_acct_no,CONVERT(VARCHAR(20),glije_date),
+    			--glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period,glije_src_sys,glije_src_no
+    			-- FROM tblGLIjemst WHERE glije_uid=@uid AND glije_postdate = @postdate and glije_src_sys = @glije_src_sys and glije_src_no= @glije_src_no
 
 
-    			DECLARE cursor_gldetail CURSOR FOR SELECT glije_id,glije_acct_no,CONVERT(VARCHAR(20),glije_date),
-    			glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period,glije_src_sys,glije_src_no
-    			 FROM tblGLIjemst WHERE glije_uid=@uid AND glije_postdate = @postdate
+    			DECLARE cursor_gldetail CURSOR LOCAL FOR SELECT glije_id,glije_acct_no,CONVERT(VARCHAR(20),glije_date),
+    			glije_amt,glije_units,UPPER(glije_dr_cr_ind),UPPER(glije_correcting),glije_error_desc,glije_period
+    			 FROM tblGLIjemst WHERE glije_uid=@uid AND glije_postdate = @postdate and glije_src_sys = @glije_src_sys and glije_src_no= @glije_src_no
     			OPEN cursor_gldetail
     			FETCH NEXT FROM cursor_gldetail INTO @id,@glije_acct_no,@glije_date,@glije_amt,@glije_units,@glije_dr_cr_ind,
-    			@glije_correcting,@glije_error_desc,@glije_period,@glije_src_sys,@glije_src_no
+    			@glije_correcting,@glije_error_desc,@glije_period
     			WHILE @@FETCH_STATUS = 0
     			BEGIN
-
-
 
     				SELECT @debit = 0,@credit = 0,@debitUnit = 0,@creditUnit = 0, @creditUnitInLBS = 0 , @debitUnitInLBS = 0
     				IF NOT EXISTS (
@@ -253,9 +250,9 @@ BEGIN
     				SELECT @totalCredit += @credit, @totalDebit +=@debit
 
     				INSERT INTO tblGLJournalDetail (intAccountId,strDescription,dtmDate,intJournalId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,
-    				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo)
+    				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument)
     				SELECT @intAccountId1,@strDescription1,@dtmDate,@intJournalId,@debit,@credit,@debitUnit,@creditUnit,
-    				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no
+    				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no,glije_doc
     				 FROM tblGLIjemst WHERE glije_id=@id
 
     				IF @glije_error_desc IS NOT NULL
@@ -267,12 +264,8 @@ BEGIN
     					SET @isValid = 0
     				END
 
-
-
-
-
     				FETCH NEXT FROM cursor_gldetail INTO @id,@glije_acct_no,@glije_date,@glije_amt,@glije_units,@glije_dr_cr_ind,@glije_correcting,
-    				@glije_error_desc,@glije_period,@glije_src_sys,@glije_src_no
+    				@glije_error_desc,@glije_period
     			END
     			CLOSE cursor_gldetail
     			DEALLOCATE cursor_gldetail
@@ -282,7 +275,8 @@ BEGIN
     			BEGIN
     				IF @importLogId = 0
     					EXEC  dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId, @version,@importLogId OUTPUT
-    				EXEC dbo.uspGLCreateImportLogDetail @importLogId,''Unable to Post because transaction is out of balance.'', @postdate,@strJournalId,@glije_period
+    				--EXEC dbo.uspGLCreateImportLogDetail @importLogId,''Unable to Post because transaction is out of balance.'', @postdate,@strJournalId,@glije_period
+    				EXEC uspGLCreateImportLogDetail @importLogId,''Unable to Post because transaction is out of balance.'',@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
     				SET @isValid = 0
     			END
     			IF @isCOAPresent = 0 SET @isValid = 0
@@ -292,29 +286,26 @@ BEGIN
     				DECLARE @RC int
     				DECLARE @Param nvarchar(max) =''SELECT intJournalId FROM tblGLJournal WHERE intJournalId = '' + CONVERT (VARCHAR(10), @intJournalId)
     				DECLARE @strBatchId nvarchar(100)
-
-    				DECLARE @successfulCount int
+					DECLARE @successfulCount int
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
-    				-- TODO: Set parameter values here.
 
     				EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,@successfulCount OUTPUT
-
 
     				IF @successfulCount > 0
     				BEGIN
     					UPDATE tblGLJournal SET strJournalType = ''Origin Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId
     					IF @importLogId = 0
     						EXEC dbo.uspGLCreateImportLogHeader ''Successful Transaction'', @intUserId,@version ,@importLogId OUTPUT
-    					EXEC dbo.uspGLCreateImportLogDetail @importLogId,''Posted'',@postdate,@strJournalId,@glije_period
-
+    					--EXEC dbo.uspGLCreateImportLogDetail @importLogId,''Posted'',@postdate,@strJournalId,@glije_period
+						EXEC uspGLCreateImportLogDetail @importLogId,''Posted'',@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
     					UPDATE tblGLCOAImportLog SET strEvent = ''Successful Transaction'' WHERE intImportLogId = @importLogId
     				END
     				ELSE
     				BEGIN
     					IF @importLogId = 0
     						EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version ,@importLogId OUTPUT
-    					EXEC dbo.uspGLCreateImportLogDetail @importLogId,@strBatchId,@postdate,@strJournalId,@glije_period
-
+    					--EXEC dbo.uspGLCreateImportLogDetail @importLogId,@strBatchId,@postdate,@strJournalId,@glije_period
+						EXEC uspGLCreateImportLogDetail @importLogId,@strBatchId,@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
     					UPDATE tblGLCOAImportLog SET strEvent = ''Failed Transaction'' WHERE intImportLogId = @importLogId
     				END
 
@@ -326,15 +317,12 @@ BEGIN
     					UPDATE tblGLCOAImportLog SET strEvent = ''Failed Transaction'' WHERE intImportLogId = @importLogId
     				END
 
+    			FETCH NEXT FROM cursor_postdate INTO @postdate,@glije_src_sys,@glije_src_no
+    			END
+    			CLOSE cursor_postdate
+				DEALLOCATE cursor_postdate
 
-
-    			FETCH NEXT FROM cursor_postdate INTO @postdate
-    		END
-    		CLOSE cursor_postdate
-    		DEALLOCATE cursor_postdate
-
-    		COMMIT TRANSACTION
-
+	    		COMMIT TRANSACTION
     		END TRY
 
     		BEGIN CATCH
