@@ -34,6 +34,7 @@ BEGIN TRANSACTION
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #tmpPostInvoiceData (
 	intInvoiceId int PRIMARY KEY,
+	strTransactionId NVARCHAR(50),
 	UNIQUE (intInvoiceId)
 );
 
@@ -66,11 +67,11 @@ IF (@param IS NOT NULL)
 BEGIN
 	IF(@param = 'all')
 	BEGIN
-		INSERT INTO #tmpPostInvoiceData SELECT intInvoiceId FROM tblARInvoice WHERE ysnPosted = 0 AND (strTransactionType = @transType OR @transType = 'all')
+		INSERT INTO #tmpPostInvoiceData SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice WHERE ysnPosted = 0 AND (strTransactionType = @transType OR @transType = 'all')
 	END
 	ELSE
 	BEGIN
-		INSERT INTO #tmpPostInvoiceData SELECT intID FROM fnGetRowsFromDelimitedValues(@param)
+		INSERT INTO #tmpPostInvoiceData SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@param))
 	END
 END
 
@@ -82,7 +83,8 @@ IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
 			tblGLDetailRecap GL
 		INNER JOIN 
 			#tmpPostInvoiceData I
-				ON GL.intTransactionId = I.intInvoiceId 
+				ON GL.intTransactionId = I.intInvoiceId
+				AND GL.strTransactionId = I.strTransactionId 
 		WHERE
 			GL.strTransactionType IN ('Credit Memo','Invoice', 'Overpayment')
 			AND	GL.strModuleName = @MODULE_NAME
@@ -105,7 +107,7 @@ SET @batchIdUsed = @batchId
 IF(@beginDate IS NOT NULL)
 BEGIN
 	INSERT INTO #tmpPostInvoiceData
-	SELECT intInvoiceId FROM tblARInvoice
+	SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice
 	WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @beginDate AND @endDate AND ysnPosted = 0
 	AND (strTransactionType = @transType OR @transType = 'all')
 END
@@ -113,7 +115,7 @@ END
 IF(@beginTransaction IS NOT NULL)
 BEGIN
 	INSERT INTO #tmpPostInvoiceData
-	SELECT intInvoiceId FROM tblARInvoice
+	SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice
 	WHERE intInvoiceId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
 	AND (strTransactionType = @transType OR @transType = 'all')
 END
@@ -934,10 +936,13 @@ BEGIN
 									WHEN dblDebitUnit < 0 THEN 0
 									ELSE dblDebitUnit END
 		FROM
-			tblGLDetail A 
+			tblGLDetail A
+		INNER JOIN
+			#tmpPostInvoiceData PID
+				On A.intTransactionId = PID.intInvoiceId
+				AND A.strTransactionId = PID.strTransactionId
 		WHERE
-			A.intTransactionId IN (SELECT intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData))
-			AND ysnIsUnposted = 0 AND strCode = 'AR'
+			ysnIsUnposted = 0 AND strCode = 'AR'
 	)
 	
 	UPDATE
@@ -1000,8 +1005,11 @@ END
 			tblGLDetail
 		SET
 			ysnIsUnposted = 1
+		FROM
+			#tmpPostInvoiceData
 		WHERE
-			intTransactionId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
+			tblGLDetail.intTransactionId = #tmpPostInvoiceData.intInvoiceId
+			AND tblGLDetail.intTransactionId = #tmpPostInvoiceData.strTransactionId
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblARPostResult(
@@ -1057,10 +1065,10 @@ ELSE
 	BEGIN
 		--TODO:
 		--DELETE TABLE PER Session
-		DELETE FROM 
-			tblGLDetailRecap
-		WHERE 
-			intTransactionId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData);
+		DELETE FROM tblGLDetailRecap
+		FROM tblGLDetailRecap A
+		INNER JOIN #tmpPostInvoiceData B
+			ON A.intTransactionId = B.intInvoiceId AND A.intTransactionId = B.strTransactionId;
 
 		WITH Units 
 		AS 
@@ -1490,7 +1498,8 @@ Post_Cleanup:
 			--clean gl detail recap after posting
 			DELETE FROM tblGLDetailRecap
 			FROM tblGLDetailRecap A
-			INNER JOIN #tmpPostInvoiceData B ON A.intTransactionId = B.intInvoiceId 
+			INNER JOIN #tmpPostInvoiceData B 
+				ON A.intTransactionId = B.intInvoiceId AND A.intTransactionId = B.strTransactionId
 		END
 
 	END
