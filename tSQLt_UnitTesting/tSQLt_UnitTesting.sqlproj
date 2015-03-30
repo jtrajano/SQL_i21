@@ -918,6 +918,7 @@
     <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to 20 KG BAG.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting LB to LB.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to 50 LB BAG.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting KG to KG.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

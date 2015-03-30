@@ -63,7 +63,10 @@ BEGIN
 
 	-- Calculate the Unit Qty
 	SET @result = 
-			CASE	WHEN @dblUnitQtyFrom = 1 THEN 
+			CASE	WHEN @dblUnitQtyFrom = @dblUnitQtyTo THEN 
+						@dblQty
+
+					WHEN @dblUnitQtyFrom = 1 THEN 
 						CASE	WHEN FLOOR(@dblUnitQtyTo) = 0 THEN 
 									@dblQty * @dblUnitQtyTo
 								ELSE 
