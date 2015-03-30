@@ -173,6 +173,35 @@ GO
 
 GO
 	PRINT N'End normalize Versions intSort..'
+	PRINT N'Begin normalize Milestones intSort..'
+GO
+
+	IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tmpHDSortTable]') AND type in (N'U'))
+	DROP TABLE [dbo].[tmpHDSortTable]
+
+	CREATE TABLE [dbo].[tmpHDSortTable](
+		[Id] [int] identity not null,
+		[intId] [int] NULL,
+		[intSort] [int] NULL
+	)
+
+	insert into [dbo].[tmpHDSortTable] 
+		select
+			intId = intMilestoneId
+			,intSort = intSort
+		from 
+			[dbo].[tblHDMilestone]
+		order by
+			intSort
+			
+			
+	update tblHDMilestone set intSort = (select Id from [dbo].[tmpHDSortTable] where intId = intMilestoneId)
+	
+	IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tmpHDSortTable]') AND type in (N'U'))
+	DROP TABLE [dbo].[tmpHDSortTable]
+
+GO
+	PRINT N'End normalize Milestones intSort..'
 	PRINT N'Begin normalize Help Desk Group and User Configuration.'
 GO
 
