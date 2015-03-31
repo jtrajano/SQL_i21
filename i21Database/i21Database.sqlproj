@@ -1269,6 +1269,7 @@
     <Build Include="dbo\Stored Procedures\uspICProcessToItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspPOValidateStatus.sql" />
     <Build Include="dbo\Views\vyuPOStatus.sql" />
+    <Build Include="dbo\Views\vyuEMSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
