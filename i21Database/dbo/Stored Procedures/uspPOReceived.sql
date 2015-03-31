@@ -118,9 +118,8 @@ BEGIN
 				,intItemLocationId		= ItemLocation.intItemLocationId
 				,intItemUOMId			= ReceiptItem.intUnitMeasureId
 				,intSubLocationId		= ReceiptItem.intSubLocationId
-				,dblQty					= dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
-										  * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END 
-				,dblUOMQty				= 1 -- Keep value as one (1). The dblQty is converted manually by using the fnCalculateQtyBetweenUOM function.
+				,dblQty					= ReceiptItem.dblOpenReceive * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END -- dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
+				,dblUOMQty				= ItemUOM.dblUnitQty   --1 -- Keep value as one (1). The dblQty is converted manually by using the fnCalculateQtyBetweenUOM function.
 				,intTransactionId		= Receipt.intInventoryReceiptId
 				,strTransactionId		= Receipt.strReceiptNumber
 				,intTransactionTypeId	= -1 -- any value
