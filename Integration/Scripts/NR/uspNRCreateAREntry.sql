@@ -23,7 +23,8 @@ BEGIN
 				  , @strPayType nvarchar(50), @strUserID nvarchar(50)
 			DECLARE @intSeqNo int, @strRevDate nvarchar(50), @strSysRevTime nvarchar(20), @strRevTime nvarchar(20)	
 			DECLARE @intCustomerId int, @blnSwitchOrigini21 bit, @strOriginSystem nvarchar(5), @strVersionNumber nvarchar(6)
-				  , @intCreditAccountId int, @strAccountId nvarchar(30)
+				  , @intCashAccountId int, @intCreditAccountId int, @strAccountId nvarchar(30), @intCurrencyId Int
+				  , @strPaymentInfo nvarchar(50)
 			
 			SELECT @intNoteId = intNoteId 
 			, @strInvoiceNumber = strInvoiceNo
@@ -38,7 +39,7 @@ BEGIN
 			SELECT @blnSwitchOrigini21 = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''nrSwitchOrigini21''
 			SELECT @strOriginSystem = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''nrOriginSystem''			
 			SELECT @strVersionNumber = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''nrVersionNumber''						
-			SELECT @intCustomerId = intCustomerId FROM dbo.tblNRNote WHERE intNoteId = @intNoteId
+			SELECT @intCustomerId = intCustomerId, @strPaymentInfo = strNoteNumber FROM dbo.tblNRNote WHERE intNoteId = @intNoteId
 			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''NRGLNotesReceivableAccount''
 			SELECT @strAccountId = REPLACE(strAccountId, ''-'', ''.0000'') FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 			SELECT @strInvoiceLocationNo = ISNULL(strLocationNumber, strLocationName) FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = @strInvoiceLocation
@@ -143,8 +144,99 @@ BEGIN
 					END -- 15.1 END
 				END
 			END -- Origin END
+			ELSE
+			BEGIN			
+				DECLARE @intPaymentMethodId Int, @intLocationId Int, @strRecordNumber nvarchar(25), @intEntityId Int
+				, @intPaymentId Int, @intInvoiceId int, @intTermId int, @intAccountId int, @dblDiscount numeric(18,6)
+				, @dblPayment numeric(18,6)
+				
+				SET @intCurrencyId = (
+                              SELECT TOP 1 intCurrencyID FROM tblSMCurrency 
+                              WHERE intCurrencyID = (CASE WHEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = ''defaultCurrency'') > 0 
+                              THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = ''defaultCurrency'')
+                                ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'') END)
+                                )                                
+				SELECT @intCashAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''NRCashAccount''
+				
+				SET @intPaymentMethodId = (Select top 1 intPaymentMethodID From dbo.tblSMPaymentMethod Order By 1 DESC) 
+				--******  To be changed when real payment method added  CAST(@strPayType As Int)
+				SET @intLocationId = CAST(@strInvoiceLocation As Int)
+								
+				Select @intEntityId = intEntityId from dbo.tblSMUserSecurity Where intUserSecurityID = CAST(@strUserID As Int)
+				
+				Select @intInvoiceId = intInvoiceId, @intTermId = intTermId, @intAccountId = intAccountId, @dblDiscount = dblDiscount
+				, @dblPayment = dblInvoiceTotal 
+				From dbo.tblARInvoice Where RTRIM(strInvoiceNumber) = RTRIM(@strInvoiceNumber)
+				
 			
+				INSERT INTO [dbo].[tblARPayment]
+				   ([intCustomerId]			   ,[intCurrencyId]			   ,[dtmDatePaid]			   ,[intAccountId]
+				   ,[intPaymentMethodId]	   ,[intLocationId]			   ,[dblAmountPaid]			   ,[dblUnappliedAmount]
+				   ,[dblOverpayment]		   ,[dblBalance]			   ,[strRecordNumber]		   ,[strPaymentInfo]
+				   ,[strNotes]				   ,[ysnPosted]				   ,[intEntityId]				   ,[intConcurrencyId])
+				VALUES
+				   (@intCustomerId			   ,@intCurrencyId			   ,GETDATE()				   ,@intCashAccountId
+				   ,@intPaymentMethodId		   ,@intLocationId			   ,@dblAmount				   ,0
+				   ,0						   ,0						   ,@strRecordNumber		   ,@strPaymentInfo
+				   ,''''						   ,0						   ,@intEntityId			   ,1
+				   )
+				   
+				SET @intPaymentId = @@IDENTITY
+				
+				INSERT INTO [dbo].[tblARPaymentDetail]
+				   ([intPaymentId]			   ,[intInvoiceId]			   ,[intTermId]				   ,[intAccountId]
+				   ,[dblInvoiceTotal]		   ,[dblDiscount]			   ,[dblAmountDue]			   ,[dblPayment]
+				   ,[intConcurrencyId])
+				VALUES
+				   (@intPaymentId			   ,@intInvoiceId			   ,@intTermId				   ,@intAccountId
+				   ,@dblAmount				   ,@dblDiscount			   ,0						   ,@dblPayment
+				   ,1)
+				   
+				
+				DECLARE @batchId			AS NVARCHAR(20)		= NULL,
+				@transactionType	AS NVARCHAR(30)		= NULL,
+				@post				AS BIT				= 1,------------For posting value should be 1  
+				@recap				AS BIT				= 0,
+				@isBatch			AS BIT				= 0,
+				@param				AS NVARCHAR(MAX)	= NULL,
+				@userId				AS INT				= 1,
+				@beginDate			AS DATE				= NULL,
+				@endDate			AS DATE				= NULL,
+				@beginTransaction	AS NVARCHAR(50)		= NULL,
+				@endTransaction		AS NVARCHAR(50)		= NULL,
+				@exclude			AS NVARCHAR(MAX)	= NULL,
+				@successfulCount	AS INT				= 0 ,
+				@invalidCount		AS INT				= 0 ,
+				@success			AS BIT				= 0 ,
+				@batchIdUsed		AS NVARCHAR(20)		= NULL ,
+				@recapId			AS NVARCHAR(250)	
+				
+				SET @param = @intPaymentId
+				SET @userId = @strUserID
+				
+				EXEC uspAPPostPayment @post=@post,
+					@recap=@recap,
+					@isBatch=@isBatch,
+					@param=@param,
+					@transactionType=@transactionType,
+					@beginDate=@beginDate,
+					@endDate=@endDate,
+					@beginTransaction=@beginTransaction,
+					@endTransaction=@endTransaction,
+					@exclude=@exclude,
+					@userId=@userId,
+					@batchId=@batchId,
+					@success=@success OUTPUT,
+					@successfulCount=@successfulCount OUTPUT,
+					@invalidCount=@invalidCount OUTPUT,
+					@batchIdUsed=@batchIdUsed OUTPUT,
+					@recapId=@recapId OUTPUT
+	
+				
+			
+			END
 		END
+
 	')
 
 END
