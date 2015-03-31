@@ -1270,6 +1270,7 @@
     <Build Include="dbo\Stored Procedures\uspPOValidateStatus.sql" />
     <Build Include="dbo\Views\vyuPOStatus.sql" />
     <Build Include="dbo\Views\vyuEMSearch.sql" />
+    <Build Include="dbo\Views\vyuARCustomerSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
