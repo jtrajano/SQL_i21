@@ -7,6 +7,7 @@ BEGIN
 	DECLARE @purchaseId INT, @lineNo INT, @itemId INT;
 	DECLARE @purchaseOrderNumber NVARCHAR(50), @strItemNo NVARCHAR(50);
 	DECLARE @posted BIT;
+	DECLARE @count INT;
 	DECLARE @receivedNum DECIMAL(18,6);
 
 	SELECT	B.intSourceId
@@ -139,4 +140,23 @@ BEGIN
 		-- Call the stored procedure that updates the on order qty. 
 		EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
 	END 
+
+	
+	UPDATE	A
+	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.dblOpenReceive) 
+									ELSE (	dblQtyReceived - B.dblOpenReceive) 
+							END
+	FROM	tblPOPurchaseDetail A INNER JOIN #receivedItems B 
+				ON A.intItemId = B.intItemId 
+				AND A.intPurchaseDetailId = B.intLineNo
+				AND intPurchaseId = B.intSourceId
+				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
+
+	WHILE @count != (SELECT COUNT(*) FROM #receivedItems)
+	BEGIN
+		SET @count = @count + 1;
+		SET @purchaseId = (SELECT TOP(@count) intSourceId FROM #receivedItems)
+		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
+	END
+
 END

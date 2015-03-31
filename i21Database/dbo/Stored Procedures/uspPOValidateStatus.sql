@@ -24,9 +24,11 @@ BEGIN
 
 	SET @hasBill  = CASE WHEN 
 								EXISTS(SELECT 1 
-									FROM   tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
-														ON A.intInventoryReceiptId = B.intInventoryReceiptId
-									WHERE  B.intSourceId = @poId)
+									FROM   tblAPBill A INNER JOIN tblAPBillDetail B
+														ON A.intBillId = B.intBillId
+														INNER JOIN tblPOPurchaseDetail C
+														ON B.intItemReceiptId = C.intPurchaseDetailId
+									WHERE  C.intPurchaseId = @poId)
 								THEN 1
 								ELSE 0
 							END
@@ -44,11 +46,10 @@ BEGIN
 
 	IF @statusId = 1
 	BEGIN
-		IF @hasItemReceipt = 1 AND EXISTS(SELECT 1 FROM (
-																	SELECT intOrderStatusId FROM tblPOOrderStatus WHERE intOrderStatusId IN (4,6)) POStatus 
+		--Allow to open if no item receipt or bill or from cancelled or short closed status
+		IF (@hasItemReceipt = 0 AND @hasBill = 0) OR EXISTS(SELECT 1 FROM (SELECT intOrderStatusId FROM tblPOOrderStatus WHERE intOrderStatusId IN (4,6)) POStatus 
 																	WHERE intOrderStatusId = @currentStatus)
 		BEGIN
-			--Do not allow to set to open when current status is not equal to 'Cancelled' or 'Short Closed'
 			SET @success = 0;
 			SET @errorMsg = 'You cannot open a purchase order with created item receipt.';
 		END
@@ -79,10 +80,10 @@ BEGIN
 	END
 	ELSE IF @statusId = 7
 	BEGIN
-		IF @hasItemReceipt = 0
+		IF @hasItemReceipt = 0 AND @hasBill = 0
 		BEGIN
 			SET @success = 0;
-			SET @errorMsg = 'This purchase order will automatically set to ''Pending'' after processing to item receipt.';
+			SET @errorMsg = 'This purchase order will automatically set to ''Pending'' after processing to item receipt or bill.';
 		END
 	END
 	ELSE

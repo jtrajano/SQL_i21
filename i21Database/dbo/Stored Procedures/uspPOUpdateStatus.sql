@@ -14,8 +14,10 @@ BEGIN
 											AND NOT EXISTS(SELECT 1 FROM tblICInventoryReceiptItem WHERE intLineNo = B.intPurchaseDetailId)
 									THEN 1 --Open
 									WHEN 
-										EXISTS(SELECT 1 FROM tblAPBillDetail WHERE intItemReceiptId = B.intPurchaseDetailId) OR 
-													EXISTS(SELECT 1 FROM tblICInventoryReceiptItem WHERE intLineNo = B.intPurchaseDetailId)
+										EXISTS(SELECT 1 FROM tblAPBill A INNER JOIN tblAPBillDetail ON A.intBillId = tblAPBillDetail.intBillId
+															WHERE intItemReceiptId = B.intPurchaseDetailId AND A.ysnPosted = 0) OR 
+													EXISTS(SELECT 1 FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem ON A.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+														WHERE intLineNo = B.intPurchaseDetailId AND A.ysnPosted = 0)
 									THEN 7 --Pending
 									WHEN 
 										EXISTS(SELECT 1 FROM tblAPBill A INNER JOIN tblAPBillDetail ON A.intBillId = tblAPBillDetail.intBillId
