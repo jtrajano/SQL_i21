@@ -2331,4 +2331,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="cf8a3508-8db5-4a22-a693-9485f0615fcc" ChangeDateTime="03/31/2015 09:01:13">
+    <Property Name="ElementName" Value="[dbo].[tblSCDeviceInterfaceFile].[intDeviceInterfaceFileID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCDeviceInterfaceFile]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDeviceInterfaceFileId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="97c2f32a-1e14-4db8-895a-863ea09dfdcc" ChangeDateTime="03/31/2015 09:01:26">
+    <Property Name="ElementName" Value="[dbo].[tblSCDeviceInterfaceFile].[intConcurrencyID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCDeviceInterfaceFile]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ae4569ad-d1ba-4a42-9703-e302cb25db22" ChangeDateTime="03/31/2015 09:01:31">
+    <Property Name="ElementName" Value="[dbo].[tblSCDeviceInterfaceFile].[intScaleDeviceID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCDeviceInterfaceFile]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intScaleDeviceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="426b9b17-245b-41ab-a8f9-64836a51f307" ChangeDateTime="03/31/2015 09:02:17">
+    <Property Name="ElementName" Value="[dbo].[PK_tblSCDeviceInterfaceFile_intDeviceInterfaceFileID]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCDeviceInterfaceFile]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblSCDeviceInterfaceFile_intDeviceInterfaceFileId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="92101b13-7451-428b-9247-c66da94d29eb" ChangeDateTime="03/31/2015 09:03:04">
+    <Property Name="ElementName" Value="[dbo].[FK_tblSCDeviceInterfaceFile_tblSCScaleDevice_intScaleDeviceID]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCDeviceInterfaceFile]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblSCDeviceInterfaceFile_tblSCScaleDevice_intScaleDeviceId]" />
+  </Operation>
 </Operations>

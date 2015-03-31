@@ -1251,6 +1251,12 @@
     <Build Include="dbo\Functions\fnGetItemUnitType.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateStatusFromInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateInventoryRecieptwithPO.sql" />
+    <Build Include="dbo\Tables\tblSCDeviceInterfaceFile.sql" />
+    <Build Include="dbo\Tables\tblMFMachine.sql" />
+    <Build Include="dbo\Tables\tblMFMachineMeasurement.sql" />
+    <Build Include="dbo\Tables\tblMFMachinePackType.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUnsentTickets.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetItemPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

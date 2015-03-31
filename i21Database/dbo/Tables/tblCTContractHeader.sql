@@ -23,6 +23,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intAssociationId] INT NULL, 
     [intTermId] INT NOT NULL, 
     [intPricingType] INT NOT NULL, 
+    [strRemark] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intPurchaseSale_intContractNumber] UNIQUE ([intPurchaseSale], [intContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
