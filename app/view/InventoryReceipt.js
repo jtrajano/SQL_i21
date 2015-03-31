@@ -1199,6 +1199,18 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 }
                                                                             },
                                                                             {
+                                                                                xtype: 'numbercolumn',
+                                                                                dataType: 'numeric',
+                                                                                itemId: 'colLotQuantity',
+                                                                                width: 70,
+                                                                                align: 'right',
+                                                                                dataIndex: 'dblQuantity',
+                                                                                text: 'Quantity',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
+                                                                                }
+                                                                            },
+                                                                            {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colLotUOM',
                                                                                 modelValidation: true,
@@ -1247,18 +1259,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 dataType: 'numeric',
-                                                                                itemId: 'colLotQuantity',
-                                                                                width: 70,
-                                                                                align: 'right',
-                                                                                dataIndex: 'dblQuantity',
-                                                                                text: 'Quantity',
-                                                                                editor: {
-                                                                                    xtype: 'numberfield'
-                                                                                }
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numbercolumn',
-                                                                                dataType: 'numeric',
                                                                                 itemId: 'colLotGrossWeight',
                                                                                 width: 65,
                                                                                 align: 'right',
@@ -1297,9 +1297,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colLotWeightUOM',
                                                                                 modelValidation: true,
-                                                                                width: 75,
+                                                                                width: 100,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Weight UOM'
+                                                                                text: 'Lot Wgt UOM'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',

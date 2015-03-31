@@ -485,7 +485,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('dblGrossWeight', 0.00);
         record.set('dblTareWeight', 0.00);
         record.set('dblNetWeight', 0.00);
-        record.set('dblQuantity', 0.00);
+        record.set('dblQuantity', config.dummy.get('dblQuantity'));
+
+        var qty = config.dummy.get('dblQuantity');
+        var lotCF = currentReceiptItem.get('dblItemUOMConvFactor');
+        var itemUOMCF = currentReceiptItem.get('dblItemUOMConvFactor');
+        var weightCF = currentReceiptItem.get('dblWeightUOMConvFactor');
+
+        if (iRely.Functions.isEmpty(qty)) qty = 0.00;
+        if (iRely.Functions.isEmpty(lotCF)) lotCF = 0.00;
+        if (iRely.Functions.isEmpty(itemUOMCF)) itemUOMCF = 0.00;
+        if (iRely.Functions.isEmpty(weightCF)) weightCF = 0.00;
+
+        if (currentReceiptItem.get('intWeightUOMId') === null || currentReceiptItem.get('intWeightUOMId') === undefined) {
+            weightCF = itemUOMCF;
+        }
+
+        var total = (lotCF * qty) * weightCF;
+        record.set('dblGrossWeight', total);
+        var tare = config.dummy.get('dblTareWeight');
+        var netTotal = total - tare;
+        record.set('dblNetWeight', netTotal);
+
         action(record);
     },
 
@@ -1806,9 +1827,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#colItemNo": {
                 beforerender: this.onItemGridColumnBeforeRender
             },
-            "#colUOM": {
-                beforerender: this.onItemGridColumnBeforeRender
-            },
+//            "#colUOM": {
+//                beforerender: this.onItemGridColumnBeforeRender
+//            },
             "#colLotUOM": {
                 beforerender: this.onLotGridColumnBeforeRender
             },
