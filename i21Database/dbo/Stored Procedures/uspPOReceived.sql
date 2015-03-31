@@ -1,115 +1,44 @@
 ﻿CREATE PROCEDURE [dbo].[uspPOReceived]
 	@receiptItemId INT
-	,@tranType INT
+	,@ysnPost BIT 
 AS
 BEGIN
 
 	DECLARE @purchaseId INT, @lineNo INT, @itemId INT;
-	DECLARE @strItemNo NVARCHAR(50);
+	DECLARE @purchaseOrderNumber NVARCHAR(50), @strItemNo NVARCHAR(50);
 	DECLARE @posted BIT;
 	DECLARE @receivedNum DECIMAL(18,6);
-	DECLARE @itemFull NVARCHAR(200);
-	DECLARE @errMsg NVARCHAR(200);
 
-	IF OBJECT_ID('tempdb..#receivedItems') IS NOT NULL
-		DROP TABLE #receivedItems
+	SELECT	B.intSourceId
+			,B.intLineNo
+			,B.dblOpenReceive
+			,B.intItemId
+			,A.ysnPosted
+	INTO	#tmpReceivedPOItems
+	FROM	tblICInventoryReceipt A LEFT JOIN tblICInventoryReceiptItem B 
+				ON A.intInventoryReceiptId = B.intInventoryReceiptId
+	WHERE	A.intInventoryReceiptId = @receiptItemId
 
-	CREATE TABLE #receivedItems(intSourceId INT, intLineNo INT, dblOpenReceive DECIMAL(18,6), intItemId INT, ysnPosted BIT)
-
-	IF (@tranType = 1) --Inventory Receipt
-	BEGIN
-		INSERT INTO	#receivedItems
-		SELECT	B.intSourceId
-				,B.intLineNo
-				,B.dblOpenReceive
-				,B.intItemId
-				,A.ysnPosted
-		FROM	tblICInventoryReceipt A LEFT JOIN tblICInventoryReceiptItem B 
-					ON A.intInventoryReceiptId = B.intInventoryReceiptId
-		WHERE	A.intInventoryReceiptId = @receiptItemId
-	END
-	ELSE IF(@tranType = 2) --Bill
-	BEGIN
-		INSERT INTO	#receivedItems
-		SELECT	B.intPurchaseId
-				,B.intPurchaseDetailId
-				,A.dblQtyReceived
-				,B.intItemId
-				,A1.ysnPosted
-		FROM	tblAPBill A1 
-				INNER JOIN tblAPBillDetail A
-					ON A1.intBillId = A.intBillId
-				INNER JOIN tblPOPurchaseDetail B 
-					ON A.intItemReceiptId = B.intPurchaseDetailId
-		WHERE	A.intBillId = @receiptItemId
-	END
-	ELSE
-	BEGIN
-		RAISERROR('Invalid transaction type.', 16, 1);
-	END
-
-	SELECT TOP (1) @posted = ysnPosted FROM #receivedItems
-
-	--VALIDATIONS
-
-	IF(@tranType = 1)
-	BEGIN
-		SELECT @itemFull = C.strItemNo FROM tblPOPurchaseDetail A 
-						INNER JOIN #receivedItems B ON A.intPurchaseDetailId = B.intLineNo 
-															AND A.intItemId = B.intItemId 
-															AND intPurchaseId = intSourceId 
-						INNER JOIN tblICItem C ON B.intItemId = C.intItemId
-						INNER JOIN tblICInventoryReceiptItem D ON B.intLineNo = D.intLineNo
-						WHERE C.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')
-						AND D.dblBillQty = D.dblReceived AND dblReceived != 0
-
-		IF @itemFull IS NOT NULL AND @posted = 1
-		BEGIN
-			--fully billed item
-			SET @errMsg = '''' + @itemFull + ''' item was fully billed.'
-			RAISERROR(@errMsg, 16, 1); 
-			RETURN;
-		END
-	END
-
-	IF(@tranType = 2)
-	BEGIN
-		SELECT @itemFull = C.strItemNo FROM tblPOPurchaseDetail A 
-						INNER JOIN #receivedItems B ON A.intPurchaseDetailId = B.intLineNo 
-															AND A.intItemId = B.intItemId 
-															AND intPurchaseId = intSourceId 
-															AND dblQtyReceived = dblQtyOrdered
-						INNER JOIN tblICItem C ON B.intItemId = C.intItemId
-						WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
-
-		IF @itemFull IS NOT NULL AND @posted = 1
-		BEGIN
-			--fully billed item
-			SET @errMsg = '''' + @itemFull + ''' item was fully billed.'
-			RAISERROR(@errMsg, 16, 1); 
-			RETURN;
-		END
-	END
+	SELECT TOP 1 @posted = ysnPosted FROM #tmpReceivedPOItems
 
 	--Validate if purchase order exists..
-	DECLARE @purchaseOrderNumber NVARCHAR(50);
 	SELECT	TOP 1 
 			@purchaseOrderNumber = strPurchaseOrderNumber
-	FROM	#receivedItems A OUTER APPLY  (
+	FROM	#tmpReceivedPOItems A OUTER APPLY  (
 				SELECT strPurchaseOrderNumber FROM tblPOPurchase B WHERE A.intSourceId = B.intPurchaseId
 			) PurchaseOrders
 	WHERE	PurchaseOrders.strPurchaseOrderNumber IS NULL
 
 	IF(@purchaseOrderNumber <> NULL)
 	BEGIN
-		RAISERROR(51033, 16, 1); --Not Exists
+		RAISERROR(51033, 11, 1); --Not Exists
 		RETURN;
 	END
 
 	--Validate if item exists on PO
 	SELECT  TOP 1 
 			@strItemNo = (SELECT strItemNo FROM tblICItem WHERE intItemId = A.intItemId)
-	FROM	#receivedItems A OUTER APPLY (
+	FROM	#tmpReceivedPOItems A OUTER APPLY (
 				SELECT	intItemId 
 				FROM	tblPOPurchaseDetail B 
 				WHERE	A.intSourceId = B.intPurchaseId
@@ -121,21 +50,33 @@ BEGIN
 	IF(@strItemNo <> NULL)
 	BEGIN
 		--PO item not exists
-		RAISERROR(51034, 16, 1); 
+		RAISERROR(51034, 11, 1); 
 		RETURN;
 	END
 
-	IF EXISTS(SELECT 1 FROM tblPOPurchaseDetail A 
-					INNER JOIN #receivedItems B ON A.intPurchaseDetailId = B.intLineNo 
-														AND A.intItemId = B.intItemId 
-														AND intPurchaseId = intSourceId 
-														AND (dblQtyReceived + B.dblOpenReceive) > dblQtyOrdered)
-					AND @posted = 1
+	IF EXISTS(SELECT 1 FROM tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B ON A.intPurchaseDetailId = B.intLineNo AND A.intItemId = B.intItemId AND intPurchaseId = intSourceId AND (dblQtyReceived + B.dblOpenReceive) > dblQtyOrdered ) AND @posted = 1
 	BEGIN
 		--Received item exceeds
-		RAISERROR(51035, 16, 1); 
+		RAISERROR(51035, 11, 1); 
 		RETURN;
 	END
+
+	UPDATE	A
+	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.dblOpenReceive) 
+									ELSE (	dblQtyReceived - B.dblOpenReceive) 
+							END
+	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
+				ON A.intItemId = B.intItemId 
+				AND A.intPurchaseDetailId = B.intLineNo
+				AND intPurchaseId = B.intSourceId
+				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
+
+	UPDATE	A
+	SET		intOrderStatusId =	CASE	WHEN (SELECT SUM(dblQtyReceived) - SUM(dblQtyOrdered) FROM tblPOPurchaseDetail WHERE intPurchaseId = B.intSourceId) = 0 THEN 3 
+										ELSE 2 
+								END
+	FROM	tblPOPurchase A INNER JOIN #tmpReceivedPOItems B 
+				ON A.intPurchaseId = B.intSourceId
 
 
 	-- Update the On Order Qty
@@ -160,14 +101,17 @@ BEGIN
 				,intItemLocationId		= ItemLocation.intItemLocationId
 				,intItemUOMId			= ReceiptItem.intUnitMeasureId
 				,intSubLocationId		= ReceiptItem.intSubLocationId
-				,dblQty					= ReceiptItem.dblOpenReceive * CASE WHEN @posted = 1 THEN -1 ELSE 1 END 
-				,dblUOMQty				= ItemUOM.dblUnitQty 
+				,dblQty					= dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
+										  * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END 
+				,dblUOMQty				= 1 -- Keep value as one (1). The dblQty is converted manually by using the fnCalculateQtyBetweenUOM function.
 				,intTransactionId		= Receipt.intInventoryReceiptId
 				,strTransactionId		= Receipt.strReceiptNumber
 				,intTransactionTypeId	= -1 -- any value
-
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				INNER JOIN dbo.tblPOPurchaseDetail PODetail
+					ON ReceiptItem.intSourceId = PODetail.intPurchaseId
+					AND ReceiptItem.intLineNo = PODetail.intPurchaseDetailId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = ReceiptItem.intItemId
 					AND ItemLocation.intLocationId = Receipt.intLocationId				
@@ -179,23 +123,4 @@ BEGIN
 		-- Call the stored procedure that updates the on order qty. 
 		EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
 	END 
-
-	
-	UPDATE	A
-	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.dblOpenReceive) 
-									ELSE (	dblQtyReceived - B.dblOpenReceive) 
-							END
-	FROM	tblPOPurchaseDetail A INNER JOIN #receivedItems B 
-				ON A.intItemId = B.intItemId 
-				AND A.intPurchaseDetailId = B.intLineNo
-				AND intPurchaseId = B.intSourceId
-				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
-
-	UPDATE	A
-	SET		intOrderStatusId =	CASE	WHEN (SELECT SUM(dblQtyReceived) - SUM(dblQtyOrdered) FROM tblPOPurchaseDetail WHERE intPurchaseId = B.intSourceId) = 0 THEN 3 
-										ELSE 2 
-								END
-	FROM	tblPOPurchase A INNER JOIN #receivedItems B 
-				ON A.intPurchaseId = B.intSourceId
-
 END

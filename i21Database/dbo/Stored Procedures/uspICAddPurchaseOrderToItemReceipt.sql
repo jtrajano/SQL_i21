@@ -125,6 +125,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 	,dblOpenReceive
 	,dblReceived
     ,intUnitMeasureId
+	,intWeightUOMId
     ,dblUnitCost
 	,dblLineTotal
     ,intSort
@@ -139,6 +140,16 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,dblOpenReceive			= ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)
 		,dblReceived			= ISNULL(PODetail.dblQtyReceived, 0)
 		,intUnitMeasureId		= ItemUOM.intItemUOMId
+		,intWeightUOMId			=	(
+										SELECT	TOP 1 
+												tblICItemUOM.intItemUOMId 
+										FROM	dbo.tblICItemUOM INNER JOIN dbo.tblICUnitMeasure
+													ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
+										WHERE	tblICItemUOM.intItemId = PODetail.intItemId 
+												AND tblICItemUOM.ysnStockUnit = 1 
+												AND tblICUnitMeasure.strUnitType = 'Weight'
+												AND dbo.fnGetItemLotType(PODetail.intItemId) IN (1,2)
+									)
 		,dblUnitCost			= PODetail.dblCost
 		,dblLineTotal			= (ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)) * PODetail.dblCost
 		,intSort				= PODetail.intLineNo

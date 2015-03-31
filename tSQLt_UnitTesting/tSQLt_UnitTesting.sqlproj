@@ -908,6 +908,17 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt to raise error 51038.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for item uom table.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting LB to KG.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting KG to LB.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting LB to 50 LB BAG.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to LB.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to KG.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to 20 KG BAG.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting LB to LB.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to 50 LB BAG.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting KG to KG.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

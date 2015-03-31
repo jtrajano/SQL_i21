@@ -26,86 +26,103 @@ CREATE TABLE #GeneratedLotItems (
 -- Validation 
 ------------------------------------------------------------------------------
 BEGIN 
-	-- Check if all lot items and their quantities are valid. 
-	-- Get the top record and tell the user about it. 
-	-- Msg: The lot Quantity(ies) on %s must match its Open Receive Quantity.
 	DECLARE @strItemNo AS NVARCHAR(50)
+	DECLARE @strUnitMeasure AS NVARCHAR(50)
+	DECLARE @intItemId AS INT
 	DECLARE @OpenReceiveQty AS NUMERIC(18,6)
 	DECLARE @LotQty AS NUMERIC(18,6)
+	DECLARE @OpenReceiveQtyInItemUOM AS NUMERIC(18,6)
+	DECLARE @LotQtyInItemUOM AS NUMERIC(18,6)
 
 	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
 	DECLARE @FormattedLotQty AS NVARCHAR(50)
+	DECLARE @FormattedDifference AS NVARCHAR(50)
 
+	-- Check if the unit quantities on the UOM table are valid. 
+	BEGIN 
+		SELECT	TOP 1 
+				@strItemNo = Item.strItemNo
+				,@intItemId = Item.intItemId
+				,@strUnitMeasure = UOM.strUnitMeasure
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				INNER JOIN dbo.tblICItem Item
+					ON ReceiptItem.intItemId = Item.intItemId
+				INNER JOIN dbo.tblICItemUOM ItemUOM
+					ON ItemUOM.intItemId = ReceiptItem.intItemId
+				INNER JOIN dbo.tblICUnitMeasure UOM
+					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+		WHERE	ISNULL(ItemUOM.dblUnitQty, 0) <= 0
+
+		IF @intItemId IS NOT NULL 
+		BEGIN 
+			IF ISNULL(@strItemNo, '') = '' 
+				SET @strItemNo = 'an item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+			-- 'Please correct the unit qty in UOM {UOM} on {Item}.'
+			RAISERROR(51050, 11, 1, @strUnitMeasure, @strItemNo) 
+			RETURN -1; 			 
+		END 
+	END 
+		
+	-- Check if the Item Receipt quantity matches the total Quantity in the Lot
 	SET @strItemNo = NULL 
+	SET @intItemId = NULL 
 
-	-- Check quantity if Weight UOM is not specified
 	SELECT	TOP 1 
-			@strItemNo = Item.strItemNo
-			,@OpenReceiveQty = ReceiptItem.dblOpenReceive
-			,@LotQty = SUM(ISNULL(ItemLot.dblQuantity, 0))
+			@strItemNo					= Item.strItemNo
+			,@intItemId					= Item.intItemId
+			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
+			,@LotQty					= ItemLot.TotalLotQty
+			,@LotQtyInItemUOM			= ItemLot.TotalLotQtyInItemUOM
+			,@OpenReceiveQtyInItemUOM	= dbo.fnCalculateQtyBetweenUOM (
+											ReceiptItem.intUnitMeasureId
+											,ReceiptItem.intUnitMeasureId
+											,ReceiptItem.dblOpenReceive
+										)
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = ReceiptItem.intItemId
-			LEFT JOIN dbo.tblICInventoryReceiptItemLot ItemLot
-				ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId	
+			LEFT JOIN (
+				SELECT  AggregrateLot.intInventoryReceiptItemId
+						,TotalLotQtyInItemUOM = SUM(
+							dbo.fnCalculateQtyBetweenUOM(
+								ISNULL(AggregrateLot.intItemUnitMeasureId, tblICInventoryReceiptItem.intUnitMeasureId)
+								,tblICInventoryReceiptItem.intUnitMeasureId
+								,AggregrateLot.dblQuantity
+							)
+						)
+						,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantity, 0))
+				FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
+							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
+							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
+				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
+				GROUP BY AggregrateLot.intInventoryReceiptItemId
+			) ItemLot
+				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ISNULL(ReceiptItem.intWeightUOMId, 0) = 0
-	GROUP BY  ReceiptItem.intInventoryReceiptItemId, Item.strItemNo, ReceiptItem.dblOpenReceive
-	HAVING SUM(ISNULL(ItemLot.dblQuantity, 0)) <> ReceiptItem.dblOpenReceive
+			AND ItemLot.TotalLotQtyInItemUOM <>
+				dbo.fnCalculateQtyBetweenUOM (
+					ReceiptItem.intUnitMeasureId
+					,ReceiptItem.intUnitMeasureId
+					,ReceiptItem.dblOpenReceive
+				)
 
-	IF @strItemNo IS NOT NULL 
+	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- The expected qty to receive for %s is %s. Lot Quantity is %s. These quantities must be the same.'
+		IF ISNULL(@strItemNo, '') = '' 
+			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+		-- The expected qty to receive for {Item} is {Open Receive Qty}. Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
 		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@OpenReceiveQty AS MONEY), 1)
-		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQty AS MONEY), 1)
+		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
+		SET @FormattedDifference =  CAST(ABS(@OpenReceiveQty - @LotQtyInItemUOM) AS NVARCHAR(50))
 
-		RAISERROR(51038, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty)  
-		RETURN; 
-	END 
-
-	-- Check weight if Weight UOM is specified. 
-	SELECT @strItemNo = ItemSubQuery.strItemNo
-			,@OpenReceiveQty = ItemSubQuery.OpenReceiveQty
-			,@LotQty = LotSubQuery.LotReceiveQty
-	FROM	(
-				SELECT	Item.strItemNo
-						,ReceiptItem.intInventoryReceiptItemId
-						,OpenReceiveQty = dbo.fnCalculateItemUnitQty(ReceiptItem.intWeightUOMId, ReceiptItem.dblOpenReceive)
-				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-						INNER JOIN dbo.tblICItem Item
-							ON Item.intItemId = ReceiptItem.intItemId
-				WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
-						AND Receipt.strReceiptNumber = @strTransactionId
-						AND ISNULL(ReceiptItem.intWeightUOMId, 0) <> 0				
-			
-			) ItemSubQuery LEFT JOIN 	
-			(
-				SELECT	ItemLot.intInventoryReceiptItemId
-						,LotReceiveQty = ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0) 
-				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-						INNER JOIN dbo.tblICItem Item
-							ON Item.intItemId = ReceiptItem.intItemId
-						LEFT JOIN dbo.tblICInventoryReceiptItemLot ItemLot
-							ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
-				WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
-						AND Receipt.strReceiptNumber = @strTransactionId
-						AND ISNULL(ReceiptItem.intWeightUOMId, 0) <> 0
-			) LotSubQuery	
-				ON ItemSubQuery.intInventoryReceiptItemId = LotSubQuery.intInventoryReceiptItemId
-	WHERE	ItemSubQuery.OpenReceiveQty <> LotSubQuery.LotReceiveQty
-
-	IF @strItemNo IS NOT NULL 
-	BEGIN 
-		-- The expected qty to receive for %s is %s. Lot Quantity is %s. These quantities must be the same.'
-		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@OpenReceiveQty AS MONEY), 1)
-		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQty AS MONEY), 1)
-
-		RAISERROR(51038, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty)  
-		RETURN; 
+		RAISERROR(51038, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		RETURN -1; 
 	END 
 END
 
@@ -176,9 +193,14 @@ END
 
 -- Call the common stored procedure that will create or updat the lot master table
 BEGIN 
-	EXEC dbo.uspICCreateUpdateLotNumber 
+	DECLARE @intErrorFoundOnCreateUpdateLotNumber AS INT
+
+	EXEC @intErrorFoundOnCreateUpdateLotNumber = dbo.uspICCreateUpdateLotNumber 
 		@ItemsThatNeedLotId
 		,@intUserId
+
+	IF @intErrorFoundOnCreateUpdateLotNumber <> 0
+		RETURN @intErrorFoundOnCreateUpdateLotNumber;
 END
 
 -- Assign the generated lot id's back to the inventory receipt item-lot table. 
@@ -192,3 +214,5 @@ END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
 	DROP TABLE #GeneratedLotItems
+
+RETURN 0; 

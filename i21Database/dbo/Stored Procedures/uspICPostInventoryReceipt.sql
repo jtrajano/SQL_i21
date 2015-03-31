@@ -116,6 +116,18 @@ BEGIN
 	END  
 END   
 
+-- Check the UOM
+--IF @ysnPost = 1 
+--BEGIN 
+--	DECLARE @intUOMError AS INT
+
+--	EXEC @intUOMError = dbo.uspICValidateInventoryRecieptwithPO
+--		@strTransactionId
+
+--	IF @intUOMError <> 0 
+--		GOTO Post_Exit    
+--END 
+
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
@@ -125,10 +137,19 @@ SAVE TRAN @TransactionName
 -- Create and validate the lot numbers
 IF @ysnPost = 1
 BEGIN 	
-	EXEC dbo.uspICCreateLotNumberOnInventoryReceipt 
-		@strTransactionId
-		,@intUserId
-		,@ysnPost
+	DECLARE @intCreateUpdateLotError AS INT 
+
+	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryReceipt 
+			@strTransactionId
+			,@intUserId
+			,@ysnPost
+
+	IF @intCreateUpdateLotError <> 0
+	BEGIN 
+		ROLLBACK TRAN @TransactionName
+		COMMIT TRAN @TransactionName
+		GOTO Post_Exit;
+	END
 END
 
 -- Get the next batch number
@@ -168,8 +189,9 @@ BEGIN
 						END 
 			,dtmDate = Header.dtmReceiptDate  
 			,dblQty =	
-						CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 THEN 
-									CASE	WHEN ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN DetailItemLot.dblQuantity
+						CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+									CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN DetailItemLot.dblQuantity
+											WHEN ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN DetailItemLot.dblQuantity
 											ELSE ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
 									END 									
 								ELSE	

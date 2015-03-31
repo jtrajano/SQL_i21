@@ -38,6 +38,11 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemUOM_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItemUOM_VolumeUOM] FOREIGN KEY ([intVolumeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	)
+	GO
+
+		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemUOMId_intUnitMeasureId_intItemId]
+		ON [dbo].[tblICItemUOM]([intItemUOMId] ASC, [intUnitMeasureId] ASC, [intItemId] ASC);
+	GO
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
