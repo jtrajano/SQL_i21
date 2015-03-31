@@ -1251,6 +1251,7 @@
     <Build Include="dbo\Functions\fnGetItemUnitType.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateStatusFromInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateInventoryRecieptwithPO.sql" />
+    <Build Include="dbo\Tables\tblSCDeviceInterfaceFile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
