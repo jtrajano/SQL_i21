@@ -49,7 +49,7 @@ BEGIN
 				INNER JOIN dbo.tblICItem Item
 					ON ReceiptItem.intItemId = Item.intItemId
 				INNER JOIN dbo.tblICItemUOM ItemUOM
-					ON ReceiptItem.intItemId = ReceiptItem.intItemId
+					ON ItemUOM.intItemId = ReceiptItem.intItemId
 				INNER JOIN dbo.tblICUnitMeasure UOM
 					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		WHERE	ISNULL(ItemUOM.dblUnitQty, 0) <= 0
