@@ -17,7 +17,7 @@ GO
 		DELETE FROM tblSMMasterMenu
 
 		SET IDENTITY_INSERT tblSMMasterMenu ON
-		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (1, N'Admin', N'System Manager', 0, N'Admin', N'Folder', N'i21', N'small-folder', 1, 0, 0, 0, NULL, 1)
+		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (1, N'System Manager', N'System Manager', 0, N'System Manager', N'Folder', N'i21', N'small-folder', 1, 0, 0, 0, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (2, N'User Security', N'System Manager', 1, N'User Security', N'Screen', N'i21.controller.UserSecurity', N'small-screen', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (3, N'User Roles', N'System Manager', 1, N'User Roles', N'Screen', N'i21.controller.UserRole', N'small-screen', 0, 0, 0, 1, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) VALUES (4, N'Report Manager', N'System Manager', 1, N'Report Manager', N'Screen', N'Reports.controller.ReportManager', N'small-screen', 0, 0, 0, 1, NULL, 1)
@@ -1381,13 +1381,21 @@ GO
 			WHERE strMenuName = 'Futures Market' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceId
 
 GO
+	/* --------------------------------------- */
+	/* - Update Admin to System Manager Menu - */
+	/* --------------------------------------- */
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0)
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'System Manager', strDescription = 'System Manager'
+	WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+GO
 
-	/* --------------------------- */
-    /* ------- ADMIN MENUS ------- */
-	/* --------------------------- */
+	/* ------------------------------------ */
+    /* ------- SYSTEM MANAGER MENUS ------- */
+	/* ------------------------------------ */
 
 	DECLARE @SystemManagerAdminMenuId INT
-    SELECT @SystemManagerAdminMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+    SELECT @SystemManagerAdminMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'System Manager' AND strModuleName = 'System Manager' AND intParentMenuID = 0
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User Security' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
 	UPDATE tblSMMasterMenu SET intSort = 0 WHERE strMenuName = 'User Security' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId
@@ -1455,9 +1463,9 @@ GO
     /*-- End Announcements Menu Folder --*/
     /* --------------------------------- */
     
-	/* --------------------------- */
-    /* ----- END ADMIN MENUS ----- */
-	/* --------------------------- */
+	/* ------------------------------------ */
+    /* ----- END SYSTEM MANAGER MENUS ----- */
+	/* ------------------------------------ */
 
 GO
 	/* ---------------------------------------- */
@@ -1918,7 +1926,6 @@ GO
 		SET intSort = 9
 		WHERE strMenuName = 'Paid Bills History' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableActivitiesId
 GO
-
 	/* ------------------------------------------------- */
 	/* - Update Cash Management Menu Commands for MVVM - */
 	/* ------------------------------------------------- */
@@ -2179,16 +2186,16 @@ GO
 	/* ------------------------------------------------- */
 
 GO
-	/*----------------------------------  */
-	/*-- Start Update System Manager Menu */
-	/*----------------------------------  */
+	/*  ----------------------------------  */
+	/*  -- Start Update System Manager Menu */
+	/*  ----------------------------------  */
 
 	DECLARE @SystemManagerAdminMenuId INT
-	SELECT @SystemManagerAdminMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+	SELECT @SystemManagerAdminMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'System Manager' AND strModuleName = 'System Manager' AND intParentMenuID = 0
 
-		/* ------------------------ */
-		/* -- Update Admin Menu  -- */
-		/* ------------------------ */
+		/* --------------------------------- */
+		/* -- Update System Manager Menu  -- */
+		/* --------------------------------- */
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User Security' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerAdminMenuId)
 		UPDATE tblSMMasterMenu SET strCommand = REPLACE (strCommand,'controller', 'view') 
 		WHERE strMenuName = 'User Security' AND strModuleName = 'System Manager' AND strCommand = 'i21.controller.UserSecurity'
