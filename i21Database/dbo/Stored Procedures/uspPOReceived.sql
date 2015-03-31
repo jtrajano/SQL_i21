@@ -101,14 +101,17 @@ BEGIN
 				,intItemLocationId		= ItemLocation.intItemLocationId
 				,intItemUOMId			= ReceiptItem.intUnitMeasureId
 				,intSubLocationId		= ReceiptItem.intSubLocationId
-				,dblQty					= ReceiptItem.dblOpenReceive * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END 
-				,dblUOMQty				= ItemUOM.dblUnitQty 
+				,dblQty					= dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
+										  * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END 
+				,dblUOMQty				= 1 -- Keep value as one (1). The dblQty is converted manually by using the fnCalculateQtyBetweenUOM function.
 				,intTransactionId		= Receipt.intInventoryReceiptId
 				,strTransactionId		= Receipt.strReceiptNumber
 				,intTransactionTypeId	= -1 -- any value
-
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				INNER JOIN dbo.tblPOPurchaseDetail PODetail
+					ON ReceiptItem.intSourceId = PODetail.intPurchaseId
+					AND ReceiptItem.intLineNo = PODetail.intPurchaseDetailId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = ReceiptItem.intItemId
 					AND ItemLocation.intLocationId = Receipt.intLocationId				
