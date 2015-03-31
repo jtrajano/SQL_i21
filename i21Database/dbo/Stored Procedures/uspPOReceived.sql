@@ -63,20 +63,20 @@ BEGIN
 				ON POItems.intSourceId = PODetail.intPurchaseId
 				AND POItems.intLineNo = PODetail.intPurchaseDetailId
 
-	IF EXISTS(
-			SELECT	1 
-			FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
-						ON A.intPurchaseDetailId = B.intLineNo 
-						AND A.intItemId = B.intItemId 
-						AND intPurchaseId = intSourceId 
-						AND (dblQtyReceived + B.CalculatedOpenReceive) > dblQtyOrdered 
-			) 
-		AND @posted = 1
-	BEGIN
-		--Received item exceeds
-		RAISERROR(51035, 11, 1); 
-		RETURN;
-	END
+	--IF EXISTS(
+	--		SELECT	1 
+	--		FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
+	--					ON A.intPurchaseDetailId = B.intLineNo 
+	--					AND A.intItemId = B.intItemId 
+	--					AND intPurchaseId = intSourceId 
+	--					AND (dblQtyReceived + B.CalculatedOpenReceive) > dblQtyOrdered 
+	--		) 
+	--	AND @posted = 1
+	--BEGIN
+	--	--Received item exceeds
+	--	RAISERROR(51035, 11, 1); 
+	--	RETURN;
+	--END
 
 	UPDATE	A
 	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.CalculatedOpenReceive) 
