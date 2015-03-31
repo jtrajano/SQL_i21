@@ -1,4 +1,4 @@
-﻿GO
+﻿﻿GO
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glijemst]') AND type IN (N'U'))
 BEGIN 
 
@@ -45,7 +45,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     			glije_period int,
     			glije_src_no char(5)
     		)
-
+    		
 
 
     		IF EXISTS (SELECT * FROM @tmpID WHERE glije_date = 0)
@@ -61,7 +61,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     			END
     			RETURN
     		END
-
+			
     		BEGIN TRY
     		BEGIN TRANSACTION
     		DECLARE @uid UNIQUEIDENTIFIER
@@ -69,7 +69,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		INSERT INTO  @tmpID (ID,glije_date,glije_acct_no,glije_period,glije_src_no)
     			SELECT A4GLIdentity,glije_date,glije_acct_no,glije_period,glije_src_no FROM glijemst WITH (HOLDLOCK)
     			WHERE glije_period between @startingPeriod and @endingPeriod
-
+			
 			INSERT INTO tblGLIjemst(glije_period,glije_acct_no,glije_src_sys,glije_src_no, glije_line_no,glije_date,glije_time,glije_ref,glije_doc,glije_comments,
     		glije_dr_cr_ind,glije_amt,glije_units,glije_correcting,glije_source_pgm,glije_work_area,glije_cbk_no,glije_user_id,glije_user_rev_dt,A4GLIdentity,glije_uid)
     		SELECT ISNULL(a.glije_period, ''0'')
@@ -290,7 +290,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				EXEC dbo.uspGLGetNewID 3, @strBatchId OUTPUT
 
     				EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,@successfulCount OUTPUT
-
+					
     				IF @successfulCount > 0
     				BEGIN
     					UPDATE tblGLJournal SET strJournalType = ''Origin Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId

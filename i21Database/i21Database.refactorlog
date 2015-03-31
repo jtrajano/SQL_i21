@@ -1974,4 +1974,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnSeparateOnInvoice" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8808bc0f-a580-474e-89d5-bea2e6e5d2ef" ChangeDateTime="03/19/2015 07:08:46">
+    <Property Name="ElementName" Value="[dbo].[tblTMSite].[intRecurringPONumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMSite]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strRecurringPONumber" />
+  </Operation>
 </Operations>
