@@ -44,7 +44,7 @@ BEGIN
 									THEN (isnull(a.ptivc_bal_due,0) ) --  - isnull(b.ptpye_amt,0)) 
 									ELSE (isnull(c.ptcrd_amt,0) - isnull(c.ptcrd_amt_used,0) ) --  - isnull(b.ptpye_amt,0)) 
 							  END  [dblAmount] 
-							, CAST(a.ptivc_loc_no as int)  AS intCompanyLocationId
+							, ISNULL(CL.intCompanyLocationId,0)  AS intCompanyLocationId
 							, l.ptloc_name [strLocationName]
 							, CASE WHEN a.ptivc_type = ''I'' 
 									THEN ''Invoice'' 
@@ -57,6 +57,7 @@ BEGIN
 							--LEFT OUTER JOIN ptpyemst b ON a.ptivc_cus_no = b.ptpye_cus_no AND a.ptivc_invc_no = b.ptpye_inc_ref 
 							--		AND a.ptivc_loc_no = b.ptpye_ivc_loc_no 
 							LEFT JOIN ptlocmst l ON l.ptloc_loc_no = a.ptivc_loc_no					
+							LEFT JOIN dbo.tblSMCompanyLocation CL ON CL.strLocationNumber COLLATE DATABASE_DEFAULT = a.ptivc_loc_no	COLLATE DATABASE_DEFAULT		
 							WHERE (a.ptivc_type IN (''I'', ''C'')) AND (a.ptivc_cus_no= @strCustomerNumber)
 							AND a.ptivc_invc_no not in (Select ptpye_inc_ref FROM ptpyemst)
 						) x WHERE x.dblAmount <> 0
@@ -77,7 +78,7 @@ BEGIN
 									THEN (isnull(a.agivc_bal_due,0) ) --    - isnull(b.agpye_amt,0)) 
 									ELSE (isnull(c.agcrd_amt,0) - isnull(c.agcrd_amt_used,0) ) --  - isnull(b.agpye_amt,0)) 
 							  END  [dblAmount] 
-							, CAST(a.agivc_loc_no as int)  AS intCompanyLocationId
+							, ISNULL(CL.intCompanyLocationId,0)  AS intCompanyLocationId
 							, l.agloc_name [strLocationName]
 							, CASE WHEN a.agivc_type = ''I'' 
 									THEN ''Invoice'' 
@@ -89,7 +90,8 @@ BEGIN
 									AND a.agivc_loc_no = c.agcrd_loc_no   
 							--LEFT OUTER JOIN agpyemst b ON a.agivc_bill_to_cus = b.agpye_cus_no AND a.agivc_ivc_no = b.agpye_inc_ref 
 							--		AND a.agivc_loc_no = b.agpye_ivc_loc_no 
-							LEFT JOIN aglocmst l ON l.agloc_loc_no = a.agivc_loc_no					
+							LEFT JOIN aglocmst l ON l.agloc_loc_no = a.agivc_loc_no		
+							LEFT JOIN dbo.tblSMCompanyLocation CL ON CL.strLocationNumber COLLATE DATABASE_DEFAULT = a.agivc_loc_no	COLLATE DATABASE_DEFAULT		
 							WHERE (a.agivc_type IN (''I'', ''C'')) AND (a.agivc_bill_to_cus= @strCustomerNumber)
 							AND a.agivc_ivc_no not in (Select agpye_inc_ref From agpyemst)
 						)  x WHERE x.dblAmount <> 0
@@ -146,6 +148,7 @@ BEGIN
 			SELECT TOP 1 dtmNoteTranDate FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId AND intNoteTransTypeId = 3 ORDER BY intNoteTransId DESC
 			
 		END
+
 	')
 
 END
