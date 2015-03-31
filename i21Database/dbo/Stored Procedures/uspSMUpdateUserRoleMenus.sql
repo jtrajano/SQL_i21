@@ -49,7 +49,7 @@ BEGIN TRY
 			DELETE FROM tblSMUserRoleMenu
 			WHERE intUserRoleId = @UserRoleID
 			AND intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu
-								WHERE ((strMenuName = 'Admin' 
+								WHERE ((strMenuName = 'System Manager' 
 										AND strCommand = 'i21' 
 										AND intParentMenuID = 0)
 										OR intParentMenuID IN (1, 10, (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND intParentMenuID = 1))))

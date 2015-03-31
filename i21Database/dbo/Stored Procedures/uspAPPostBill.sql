@@ -635,7 +635,7 @@ IF(ISNULL(@post,0) = 0)
 	END
 
 --UPDATE PO IF THERE ARE INVENTORY ITEMS
-IF EXISTS(SELECT 1 FROM tblAPBillDetail WHERE intItemReceiptId > 0 AND intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+IF EXISTS(SELECT 1 FROM tblAPBillDetail WHERE intItemId > 0 AND intBillId IN (SELECT intBillId FROM #tmpPostBillData))
 BEGIN
 	
 	DECLARE @count INT = 0, @id INT;

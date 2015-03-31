@@ -2275,6 +2275,55 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strRecurringPONumber" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e33534ec-1e3e-4fb1-a4c7-fd1a933f7936" ChangeDateTime="03/26/2015 17:38:52">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryAdjustment].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryAdjustment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryAdjustmentId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="75912ad2-ccc8-4196-a0b3-32e7a7941aea" ChangeDateTime="03/26/2015 17:44:27">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryAdjustmentDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryAdjustmentDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryAdjustmentDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="90b6458c-a6a9-42ad-876e-7899b26d3333" ChangeDateTime="03/26/2015 17:45:28">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryAdjustmentDetail].[intItemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryAdjustmentDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryAdjustmentId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1f1a1dc5-f603-4be5-8acb-4a0344c02b7c" ChangeDateTime="03/26/2015 17:46:36">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryAdjustmentDetail].[intSub]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryAdjustmentDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d343d27b-f08e-4c8e-9f95-6ece6a015a10" ChangeDateTime="03/26/2015 17:56:29">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryAdjustmentDetail].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryAdjustmentDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAccountCategoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5519aa76-1c56-4e91-92ee-33eaa651764b" ChangeDateTime="03/26/2015 18:05:00">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryAdjustmentDetail].[intNewUnitMeasureId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryAdjustmentDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intNewItemUOMId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e8078b1a-eb3f-4808-8a16-fa0060da23f8" ChangeDateTime="03/26/2015 18:10:31">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryAdjustmentNote].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryAdjustmentNote]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryAdjustmentNoteId" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="d3c94db7-ae8e-434b-9349-e0278bc1ab49" ChangeDateTime="03/26/2015 10:25:46">
     <Property Name="ElementName" Value="[dbo].[tblSCTruckDriverReference].[intCustomerId]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />

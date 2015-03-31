@@ -41,7 +41,10 @@ BEGIN
 					ON A1.intBillId = A.intBillId
 				INNER JOIN tblPOPurchaseDetail B 
 					ON A.intItemReceiptId = B.intPurchaseDetailId
+				INNER JOIN tblICItem C
+					ON B.intItemId = C.intItemId
 		WHERE	A.intBillId = @receiptItemId
+		AND strType IN ('Service','Software','Non-Inventory','Other Charge')
 	END
 	ELSE
 	BEGIN
@@ -191,11 +194,6 @@ BEGIN
 				AND intPurchaseId = B.intSourceId
 				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
 
-	UPDATE	A
-	SET		intOrderStatusId =	CASE	WHEN (SELECT SUM(dblQtyReceived) - SUM(dblQtyOrdered) FROM tblPOPurchaseDetail WHERE intPurchaseId = B.intSourceId) = 0 THEN 3 
-										ELSE 2 
-								END
-	FROM	tblPOPurchase A INNER JOIN #receivedItems B 
-				ON A.intPurchaseId = B.intSourceId
+	EXEC uspPOUpdateStatus @receiptItemId, DEFAULT
 
 END
