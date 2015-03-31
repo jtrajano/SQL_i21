@@ -44,18 +44,18 @@ namespace iRely.Inventory.BRL
 
         public IQueryable<tblICItemUOM> GetItemUnitMeasures(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICItemUOM, bool>> predicate)
         {
-            var query = GetSearchQuery(); //Get Search Query
-            return _db.GetQuery<tblICItemUOM>()
+            var finalquery = _db.GetQuery<tblICItemUOM>()
                 .Include(p => p.tblICUnitMeasure)
                 .Include(p => p.WeightUOM)
                 .Include(p => p.DimensionUOM)
                 .Include(p => p.VolumeUOM)
                 .Include(p => p.tblICUnitMeasure.vyuICGetUOMConversions)
-                .Where(w => query.Where(predicate).Any(a => a.intItemUOMId == w.intItemUOMId)) //Filter the Main DataSource Based on Search Query
+                .Where(predicate)
                 .OrderBySelector(sortSelector)
                 .Skip(start)
                 .Take(limit)
                 .AsNoTracking();
+            return finalquery;
         }
 
         public void AddItemUnitMeasure(tblICItemUOM uom)

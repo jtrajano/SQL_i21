@@ -68,6 +68,32 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
+        [HttpGet]
+        [ActionName("GetWeightUOMs")]
+        public HttpResponseMessage GetWeightUOMs(int start = 0, int limit = 1, int page = 0, string sort = "", string filter = "")
+        {
+            filter = string.IsNullOrEmpty(filter) ? "" : filter;
+
+            var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+            var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
+            var predicate = ExpressionBuilder.True<tblICItemUOM>();
+            var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemUOMId", "DESC");
+
+            if (searchFilters != null)
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItemUOM>(searchFilters, true);
+            
+            var total = _ItemUnitMeasureBRL.GetCount(predicate);
+            var data = _ItemUnitMeasureBRL.GetItemUnitMeasures(page, start, page == 0 ? total : limit, sortSelector, predicate);
+
+            var finalData = data.ToList().Where(p=> p.strUnitType == "Weight").ToList();
+
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                data = finalData,
+                total = finalData.Count
+            });
+        }
+
         [HttpPost]
         public HttpResponseMessage PostItemUnitMeasures(IEnumerable<tblICItemUOM> uoms, bool continueOnConflict = false)
         {

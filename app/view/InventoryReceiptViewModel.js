@@ -8,6 +8,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedItemStockDetailView',
         'Inventory.store.BufferedItemPricingView',
         'Inventory.store.BufferedItemUnitMeasure',
+        'Inventory.store.BufferedItemWeightUOM',
         'Inventory.store.BufferedPackedUOM',
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedLot',
@@ -157,6 +158,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'icbufferedlot'
         },
         weightUOM: {
+            type: 'icbuffereditemweightuom'
+        },
+        lotUOM: {
             type: 'icbuffereditemunitmeasure'
         },
         storageLocation: {
@@ -236,6 +240,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 else { return false; }
             }
         }
+
     }
 
 });

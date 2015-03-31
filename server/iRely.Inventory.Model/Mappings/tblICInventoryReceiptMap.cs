@@ -59,6 +59,10 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblSMCompanyLocation)
                 .WithMany(p => p.tblICInventoryReceipts)
                 .HasForeignKey(p => p.intLocationId);
+            this.HasMany(p => p.tblICInventoryReceiptItems)
+                .WithRequired(p => p.tblICInventoryReceipt)
+                .HasForeignKey(p => p.intInventoryReceiptId);
+                
         }
     }
 
@@ -81,9 +85,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblOpenReceive).HasColumnName("dblOpenReceive").HasPrecision(18, 6);
             this.Property(t => t.dblReceived).HasColumnName("dblReceived").HasPrecision(18, 6);
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
-            this.Property(t => t.intNoPackages).HasColumnName("intNoPackages");
-            this.Property(t => t.intPackageTypeId).HasColumnName("intPackageTypeId");
-            this.Property(t => t.dblExpPackageWeight).HasColumnName("dblExpPackageWeight").HasPrecision(18, 6);
+            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost").HasPrecision(18, 6);
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
@@ -94,14 +96,17 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICInventoryReceiptItems)
                 .HasForeignKey(p => p.intUnitMeasureId);
-            this.HasOptional(p => p.PackageType)
-                .WithMany(p => p.tblICInventoryReceiptItemPacks)
-                .HasForeignKey(p => p.intPackageTypeId);
             this.HasOptional(p => p.vyuICGetReceiptItemSource)
                 .WithRequired(p => p.tblICInventoryReceiptItem);
             this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
                 .WithMany(p => p.tblICInventoryReceiptItems)
                 .HasForeignKey(p => p.intSubLocationId);
+            this.HasOptional(p => p.WeightUOM)
+                .WithMany(p => p.WeightUOMs)
+                .HasForeignKey(p => p.intWeightUOMId);
+            this.HasMany(p => p.tblICInventoryReceiptItemLots)
+                .WithRequired(p => p.tblICInventoryReceiptItem)
+                .HasForeignKey(p => p.intInventoryReceiptItemId);
         }
     }
 
@@ -137,10 +142,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.intItemUnitMeasureId).HasColumnName("intItemUnitMeasureId");
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
             this.Property(t => t.dblGrossWeight).HasColumnName("dblGrossWeight").HasPrecision(18, 6);
             this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight").HasPrecision(18, 6);
-            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(18, 6);
             this.Property(t => t.intUnitPallet).HasColumnName("intUnitPallet");
             this.Property(t => t.dblStatedGrossPerUnit).HasColumnName("dblStatedGrossPerUnit").HasPrecision(18, 6);
@@ -164,9 +169,13 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICLot)
                 .WithRequired(p => p.tblICInventoryReceiptItemLot)
                 .WillCascadeOnDelete(false);
-            this.HasOptional(p => p.WeightUOM)
-                .WithMany(p => p.WeightUOMs)
-                .HasForeignKey(p => p.intWeightUOMId);
+            this.HasOptional(p => p.tblICItemUOM)
+                .WithMany(p => p.tblICInventoryReceiptItemLots)
+                .HasForeignKey(p => p.intItemUnitMeasureId);
+            this.HasOptional(p => p.tblICStorageLocation)
+                .WithMany(p => p.tblICInventoryReceiptItemLots)
+                .HasForeignKey(p => p.intStorageLocationId);
+            
         }
     }
 

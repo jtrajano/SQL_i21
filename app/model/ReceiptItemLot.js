@@ -15,6 +15,7 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'intInventoryReceiptItemId', type: 'int',
             reference: {
                 type: 'Inventory.model.ReceiptItem',
+                role: 'tblICInventoryReceiptItem',
                 inverse: {
                     role: 'tblICInventoryReceiptItemLots',
                     storeConfig: {
@@ -36,7 +37,6 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'dblQuantity', type: 'float' },
         { name: 'dblGrossWeight', type: 'float' },
         { name: 'dblTareWeight', type: 'float' },
-        { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'dblCost', type: 'float' },
         { name: 'intUnitPallet', type: 'int', allowNull: true },
         { name: 'dblStatedGrossPerUnit', type: 'float' },
@@ -57,7 +57,8 @@ Ext.define('Inventory.model.ReceiptItemLot', {
         { name: 'dtmExpiryDate', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'dblNetWeight', type: 'float' }
+        { name: 'dblNetWeight', type: 'float' },
+        { name: 'strWeightUOM', type: 'string' }
     ],
 
     validate: function(options){

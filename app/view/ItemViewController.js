@@ -820,7 +820,7 @@ Ext.define('Inventory.view.ItemViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
-            validateRecord: me.validateRecord,
+            onSaveClick: me.onSaveClick,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
@@ -1056,17 +1056,15 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    validateRecord: function(config, action) {
-        var me = this;
-        if (config.viewModel.data.current.dirty && config.viewModel.data.current.phantom) {
+    onSaveClick: function(button, e, options) {
+        var win = button.up('window');
+        if (win.viewModel.data.current.dirty && win.viewModel.data.current.phantom) {
             var buttonAction = function(button) {
                 if (button === 'yes') {
-                    me.validateRecord(config, function(result) {
-                        if (result) { action(true); }
-                    });
+                    this.onSaveClick(button, e, options);
                 }
             };
-            var current = config.viewModel.data.current;
+            var current = win.viewModel.data.current;
             var accounts = current.tblICItemAccounts().data.items;
 
             if (i21.ModuleMgr.Inventory.checkEmptyStore(accounts) && current.get('intCategoryId') !== null){
@@ -1076,15 +1074,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 iRely.Functions.showCustomDialog('warning', 'yesno', 'GL Accounts has to be setup for the item. Continue without setting up your GL Accounts?', buttonAction);
             }
             else {
-                this.validateRecord(config, function(result) {
-                    if (result) { action(true); }
-                });
+                this.onSaveClick(button, e, options);
             }
         }
         else {
-            this.validateRecord(config, function(result) {
-                if (result) { action(true); }
-            });
+            this.onSaveClick(button, e, options);
         }
     },
 

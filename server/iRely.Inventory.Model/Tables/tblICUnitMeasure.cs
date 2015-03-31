@@ -40,7 +40,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICManufacturingCellPackType> CapacityManufacturingCellPackTypes { get; set; }
 
         public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
-        public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItemPacks { get; set; }
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public ICollection<tblICInventoryShipmentItem> WeightInventoryShipmentItems { get; set; }
 
