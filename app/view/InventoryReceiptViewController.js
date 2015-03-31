@@ -481,6 +481,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('strUnitMeasure', currentReceiptItem.get('strUnitMeasure'));
         record.set('intItemUnitMeasureId', currentReceiptItem.get('intUnitMeasureId'));
         record.set('dblLotUOMConvFactor', currentReceiptItem.get('dblItemUOMConvFactor'));
+        record.set('strWeightUOM', currentReceiptItem.get('strWeightUOM'));
         record.set('dblGrossWeight', 0.00);
         record.set('dblTareWeight', 0.00);
         record.set('dblNetWeight', 0.00);
@@ -1118,6 +1119,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('intStorageLocationId', po.get('intStorageLocationId'));
         current.set('strSubLocationName', po.get('strSubLocationName'));
         current.set('strStorageLocationName', po.get('strStorageName'));
+        current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
+        current.set('strUnitType', po.get('strStockUOMType'));
+
+        if (po.get('strStockUOMType') === 'Weight') {
+            current.set('intWeightUOMId', po.get('intStockUOM'));
+            current.set('strWeightUOM', po.get('strStockUOM'));
+            current.set('dblWeightUOMConvFactor', po.get('dblStockUOMCF'));
+        }
 
         switch(po.get('strLotTracking')) {
             case 'Yes - Serial Number':
@@ -1231,33 +1240,59 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                 dataType: 'string',
                                                 text: 'Lot Tracking',
                                                 hidden: true
-                                            }
-                                            ,
+                                            },
                                             {
                                                 dataIndex: 'intStorageLocationId',
                                                 dataType: 'numeric',
                                                 text: 'Storage Location Id',
                                                 hidden: true
-                                            }
-                                            ,
+                                            },
                                             {
                                                 dataIndex: 'intSubLocationId',
                                                 dataType: 'numeric',
                                                 text: 'Sub Location Id',
                                                 hidden: true
-                                            }
-                                            ,
+                                            },
                                             {
                                                 dataIndex: 'strSubLocationName',
                                                 dataType: 'string',
                                                 text: 'Sub Location Name',
                                                 hidden: true
-                                            }
-                                            ,
+                                            },
                                             {
                                                 dataIndex: 'strStorageName',
                                                 dataType: 'string',
                                                 text: 'Storage Location Name',
+                                                hidden: true
+                                            },
+                                            {
+                                                dataIndex: 'dblItemUOMCF',
+                                                dataType: 'float',
+                                                text: 'Unit Qty',
+                                                hidden: true
+                                            },
+                                            {
+                                                dataIndex: 'intStockUOM',
+                                                dataType: 'numeric',
+                                                text: 'Stock UOM Id',
+                                                hidden: true
+                                            },
+                                            {
+                                                dataIndex: 'strStockUOM',
+                                                dataType: 'string',
+                                                text: 'Stock UOM',
+                                                hidden: true
+                                            },
+                                            {
+                                                dataIndex: 'strStockUOMType',
+                                                dataType: 'string',
+                                                text: 'Stock UOM Type',
+                                                hidden: true
+                                            },
+                                            {
+                                                dataIndex: 'dblStockUOMCF',
+                                                dataType: 'float',
+                                                text: 'Stock UOM Conversion Factor',
                                                 hidden: true
                                             }
                                         ],

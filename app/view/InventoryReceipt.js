@@ -797,7 +797,36 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     text: 'Unit of Measure',
                                                                                     hidden: true
                                                                                 },
-                                                                                
+                                                                                {
+                                                                                    dataIndex: 'dblUnitQty',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Unit Qty',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intStockUOM',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Stock UOM Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strStockUOM',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Stock UOM',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strStockUOMType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Stock UOM Type',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblStockUOMCF',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Stock UOM Conversion Factor',
+                                                                                    hidden: true
+                                                                                }
                                                                             ],
                                                                             itemId: 'cboSource',
                                                                             displayField: 'strPurchaseOrderNumber',
@@ -933,9 +962,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colWeightUOM',
                                                                         modelValidation: true,
-                                                                        width: 75,
+                                                                        width: 100,
                                                                         dataIndex: 'strWeightUOM',
-                                                                        text: 'Weight UOM',
+                                                                        text: 'Lot Wgt UOM',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -1266,10 +1295,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                dataIndex: 'string',
                                                                                 itemId: 'colLotWeightUOM',
                                                                                 modelValidation: true,
                                                                                 width: 75,
+                                                                                dataIndex: 'string',
                                                                                 text: 'Weight UOM'
                                                                             },
                                                                             {
