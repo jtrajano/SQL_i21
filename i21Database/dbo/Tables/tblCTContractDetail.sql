@@ -35,6 +35,14 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblBalance] NUMERIC(12, 4) NULL, 
     [dblIntransitQty] NUMERIC(12, 4) NULL, 
     [dblScheduleQty] NUMERIC(12, 4) NULL, 
+    [intPriceUOMId] INT NULL, 
+    [intLoadingPortId] INT NULL, 
+    [intDestinationPortId] INT NULL, 
+    [strShippingTerm] NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
+    [intShippingLineId] INT NULL, 
+	[strVessel] NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
+    [intDestinationCityId] INT NULL, 
+    [intShipperId] INT NULL, 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
@@ -51,5 +59,11 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblAPVendor_intVendorId] FOREIGN KEY ([intBillTo]) REFERENCES [tblAPVendor]([intVendorId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblCTDiscount_intDiscountType] FOREIGN KEY ([intDiscountType]) REFERENCES [tblCTDiscount]([Value])
+	CONSTRAINT [FK_tblCTContractDetail_tblCTDiscount_intDiscountType] FOREIGN KEY ([intDiscountType]) REFERENCES [tblCTDiscount]([Value]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intPriceUOMId_intUnitMeasureId] FOREIGN KEY ([intPriceUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intLoadingPortId_intCityId] FOREIGN KEY ([intLoadingPortId]) REFERENCES [tblSMCity]([intCityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationPortId_intCityId] FOREIGN KEY ([intDestinationPortId]) REFERENCES [tblSMCity]([intCityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationCityId_intCityId] FOREIGN KEY ([intDestinationCityId]) REFERENCES [tblSMCity]([intCityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShippingLineId_intEntityId] FOREIGN KEY ([intShippingLineId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShipperId_intEntityId] FOREIGN KEY ([intShipperId]) REFERENCES [tblEntity]([intEntityId])
 ) 

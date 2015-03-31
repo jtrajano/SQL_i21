@@ -83,8 +83,8 @@ IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
 			tblGLDetailRecap GL
 		INNER JOIN 
 			#tmpPostInvoiceData I
-				ON GL.intTransactionId = I.intInvoiceId
-				AND GL.strTransactionId = I.strTransactionId 
+				ON GL.intTransactionId = I.intInvoiceId 
+				AND GL.strTransactionId = I.strTransactionId
 		WHERE
 			GL.strTransactionType IN ('Credit Memo', 'Invoice', 'Overpayment', 'Prepayment')
 			AND	GL.strModuleName = @MODULE_NAME
@@ -956,7 +956,7 @@ BEGIN
 		INNER JOIN
 			#tmpPostInvoiceData PID
 				On A.intTransactionId = PID.intInvoiceId
-				AND A.strTransactionId = PID.strTransactionId
+				AND A.strTransactionId = PID.strTransactionId			 
 		WHERE
 			ysnIsUnposted = 0 AND strCode = 'AR'
 	)

@@ -82,7 +82,7 @@ IF (@param IS NOT NULL)
 			END
 		ELSE
 			BEGIN
-				INSERT INTO #tmpARReceivablePostData SELECT intPaymentId, strRecordNumber FROM tblARPayment WHERE intPaymentId in (SELECT intID FROM fnGetRowsFromDelimitedValues(@param))
+				INSERT INTO #tmpARReceivablePostData SELECT intPaymentId, strRecordNumber FROM tblARPayment WHERE intPaymentId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@param))
 			END
 	END
 	
@@ -1038,12 +1038,11 @@ BEGIN
 						,dblCreditUnit    = CASE  WHEN dblCreditUnit < 0 THEN ABS(dblCreditUnit)
 												WHEN dblDebitUnit < 0 THEN 0
 												ELSE dblDebitUnit END
-				FROM tblGLDetail A
+				FROM tblGLDetail A 
 				INNER JOIN #tmpARReceivablePostData RID
 					ON A.intTransactionId = RID.intPaymentId
 					AND A.strTransactionId = RID.strTransactionId
-				 WHERE 
-					ysnIsUnposted = 0 AND strCode = 'AR'
+				WHERE ysnIsUnposted = 0 AND strCode = 'AR'
 			)
 			UPDATE  tblGLSummary
 			SET      dblDebit = ISNULL(tblGLSummary.dblDebit, 0) - ISNULL(GLDetailGrouped.dblDebit, 0)

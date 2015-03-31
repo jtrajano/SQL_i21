@@ -26,10 +26,13 @@ select
 	,ysnProjectCompleted = p.ysnCompleted
 	,strMilestone = ms.strDescription
 	,ms.intPriority
+	,ts.strBackColor
+	,ts.strFontColor
 from
 	tblHDProjectTask pt
 	left outer join tblHDProject p on p.intProjectId = pt.intProjectId
 	left outer join tblHDTicket t on t.intTicketId = pt.intTicketId
+	left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
 	left outer join tblHDModule m on m.intModuleId = t.intModuleId
 	left outer join tblEntity conEntity on conEntity.intEntityId = t.intCustomerContactId
 	left outer join tblEntityContact con on con.intEntityId = conEntity.intEntityId

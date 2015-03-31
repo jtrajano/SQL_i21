@@ -1238,6 +1238,14 @@
     <Build Include="dbo\Tables\tblRKElectronicPricingHistory.sql" />
     <Build Include="dbo\Tables\tblRKElectronicPricingPreferences.sql" />
     <Build Include="dbo\Tables\tblLGEquipmentType.sql" />
+    <Build Include="dbo\Tables\tblICInventoryAdjustment.sql" />
+    <Build Include="dbo\Tables\tblICInventoryAdjustmentDetail.sql" />
+    <Build Include="dbo\Tables\tblICInventoryAdjustmentNote.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessToItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOValidateStatus.sql" />
+    <Build Include="dbo\Views\vyuPOStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateFuturesMonthList.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFuturesMonthList.sql" />
     <None Include="Scripts\Post-Deployment\IC\PatchFor_1510_RemoveOn_1520.sql" />
     <Build Include="dbo\Functions\fnCalculateQtyBetweenUOM.sql" />
     <Build Include="dbo\Functions\fnGetItemUnitType.sql" />

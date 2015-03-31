@@ -20,7 +20,7 @@
 	[dblShipping] NUMERIC(18, 6) NOT NULL DEFAULT 0,
 	[dblTax] NUMERIC(18, 6) NOT NULL DEFAULT 0,
 	[dblExchangeRate] NUMERIC(18, 6) NOT NULL DEFAULT 0,
-	[intOrderStatusId] INT NOT NULL CONSTRAINT CK_PO_OrderStatus CHECK (dbo.[fnAPCheckPOOrderStatus](intOrderStatusId, intPurchaseId) = 1), 
+	[intOrderStatusId] INT NOT NULL, 
     [strPurchaseOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strVendorOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipToAttention] NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
