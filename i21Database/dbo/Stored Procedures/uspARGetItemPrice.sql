@@ -2,10 +2,9 @@
 	@ItemId				INT
 	,@CustomerId		INT	
 	,@LocationId		INT
-	,@ItemUOMId			INT
-	,@TransactionDate	DATETIME
+	,@ItemUOMId			INT				= NULL
+	,@TransactionDate	DATETIME		= NULL
 	,@Quantity			NUMERIC(18,6)
-	,@CustomerPricing	NVARCHAR(250)
 	,@Price				NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing			NVARCHAR(250)	= NULL OUTPUT
 AS
@@ -419,8 +418,8 @@ AS
 
 
 		--Customer - Vendor + Item
-		SET @CustomerPricing =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @VendorId)
-		IF(@CustomerPricing IS NOT NULL)
+		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @VendorId)
+		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Vendor + Item'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
@@ -470,14 +469,14 @@ AS
 
 	--Item Special Pricing
 	SET @Price =	(	SELECT 
-									dblDiscount
-								FROM
-									tblICItemSpecialPricing 
-								WHERE
-									intItemId = @ItemId 
-									AND intItemLocationId = @ItemLocationyId 
-									AND (@ItemUOMId IS NULL OR intItemUnitMeasureId = @ItemUOMId)
-									AND @TransactionDate BETWEEN dtmBeginDate AND dtmEndDate
+							dblUnitAfterDiscount
+						FROM
+							tblICItemSpecialPricing 
+						WHERE
+							intItemId = @ItemId 
+							AND intItemLocationId = @ItemLocationyId 
+							AND (@ItemUOMId IS NULL OR intItemUnitMeasureId = @ItemUOMId)
+							AND @TransactionDate BETWEEN dtmBeginDate AND dtmEndDate
 							)
 	IF(@Price IS NOT NULL)
 		BEGIN
