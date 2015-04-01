@@ -56,7 +56,7 @@ END TRY
 BEGIN CATCH
 
 	 SET @ErrMsg = ERROR_MESSAGE()
-	 SET @ErrMsg = 'Report_ScaleActivity: ' + @ErrMsg
+	 SET @ErrMsg = 'uspSCUnsentTickets: ' + @ErrMsg
 	 RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')
 
 END CATCH
