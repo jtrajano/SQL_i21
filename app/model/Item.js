@@ -142,7 +142,7 @@ Ext.define('Inventory.model.Item', {
                 'Assembly/Blend',
                 'Bundle',
                 'Kit',
-                'Manufacturing',
+                'Finished Good',
                 'Raw Material',
                 'Other Charge',
                 'Service',

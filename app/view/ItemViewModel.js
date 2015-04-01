@@ -56,7 +56,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strType: 'Kit'
                 },
                 {
-                    strType: 'Manufacturing'
+                    strType: 'Finished Good'
                 },
                 {
                     strType: 'Non-Inventory'

@@ -1363,6 +1363,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 break;
             case 'Manufacturing Item':
             case 'Manufacturing':
+            case 'Finished Good':
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
