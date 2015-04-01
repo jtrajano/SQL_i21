@@ -635,19 +635,19 @@ IF(ISNULL(@post,0) = 0)
 	END
 
 --UPDATE PO IF THERE ARE INVENTORY ITEMS
---IF EXISTS(SELECT 1 FROM tblAPBillDetail WHERE intItemId > 0 AND intBillId IN (SELECT intBillId FROM #tmpPostBillData))
---BEGIN
+IF EXISTS(SELECT 1 FROM tblAPBillDetail WHERE intItemId > 0 AND intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+BEGIN
 	
---	DECLARE @count INT = 0, @id INT;
+	DECLARE @count INT = 0, @id INT;
 
---	WHILE @count != (SELECT COUNT(*) FROM #tmpPostBillData)
---	BEGIN
---		SET @count = @count + 1
---		SELECT TOP (@count) @id = intBillId FROM #tmpPostBillData
---		EXEC uspPOReceived @id, 2
---	END
+	WHILE @count != (SELECT COUNT(*) FROM #tmpPostBillData)
+	BEGIN
+		SET @count = @count + 1
+		SELECT TOP (@count) @id = intBillId FROM #tmpPostBillData
+		EXEC uspPOReceived @id, 2
+	END
 
---END
+END
 
 END
 ELSE
