@@ -65,9 +65,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             dtmFreeTime: '{current.dtmFreeTime}',
             txtReceivedBy: '{current.strReceivedBy}',
 
-
             grdInventoryShipment: {
-                colReferenceNumber: 'strReferenceNumber',
+                colOrderNumber: 'strReferenceNumber',
                 colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -88,20 +87,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
 //                colDifference: '',
-                colWeightUOM: {
-                    dataIndex: 'strWeightUnitMeasure',
-                    editor: {
-                        store: '{weightUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryReceipt.selection.intItemId}'
-                        }]
-                    }
-                },
-//                colGrossWeight: '',
-                colTareWeight: 'dblTareWeight',
-                colNetWeight: 'dbNetWeight',
                 colUnitPrice: 'dblUnitPrice',
+//                colTaxCode: '',
+//                colTaxAmount: '',
 //                colDockDoor: {
 //                    dataIndex: 'strDockDoor',
 //                    editor: {
@@ -113,7 +101,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
-    setupContext : function(options){
+    setupContext : function(options) {
         "use strict";
         var me = this,
             win = options.window,
@@ -122,9 +110,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var grdInventoryShipment = win.down('#grdInventoryShipment');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
-            window : win,
-            store  : store,
-            createRecord : me.createRecord,
+            window: win,
+            store: store,
+            createRecord: me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Shipment',
@@ -135,9 +123,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     key: 'tblICInventoryShipmentItems',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdInventoryShipment,
-                        deleteButton : grdInventoryShipment.down('#btnRemoveItem')
+                        deleteButton: grdInventoryShipment.down('#btnRemoveItem')
                     })
-        }
+                }
             ]
         });
 
