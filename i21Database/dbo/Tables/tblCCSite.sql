@@ -12,7 +12,7 @@
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblCCSite] PRIMARY KEY ([intSiteId]),
 	CONSTRAINT [AK_tblCCSite] UNIQUE ([strSite]),
-	CONSTRAINT [FK_tblCCSite_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intCustomerId]),
+	CONSTRAINT [FK_tblCCSite_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
 	CONSTRAINT [FK_tblCCSite_tblCCDealerSite_intDealerSiteId] FOREIGN KEY ([intDealerSiteId]) REFERENCES [dbo].[tblCCDealerSite] ([intDealerSiteId]),
 	CONSTRAINT [FK_tblCCSite_tblCCDealerSite_intCompanyOwnedSiteId] FOREIGN KEY ([intCompanyOwnedSiteId]) REFERENCES [dbo].[tblCCCompanyOwnedSite] ([intCompanyOwnedSiteId]),
 	CONSTRAINT [FK_tblCCSite_tblSMPaymentMethod_intPaymentMethodId] FOREIGN KEY (intPaymentMethodId) REFERENCES [dbo].[tblSMPaymentMethod] ([intPaymentMethodID]),

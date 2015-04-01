@@ -6,14 +6,18 @@ SELECT
     A.intVendorDefaultId,
 	B.intEntityId,	
 	B.intVendorId,
-	B.intDefaultLocationId,
-	D.strLocationName,
+	G.intCompanyLocationId,
+	G.strLocationName,
 	B.intPaymentMethodId,
     F.strPaymentMethod,
 	B.strVendorId,	
 	C.strName, 
 	E.strTerm,
-    E.intTermID
+    E.intTermID,
+	A.intBankAccountId,
+	H.strCbkNo,
+	A.strApType,
+	A.strEnterTotalsAsGrossOrNet
 
 FROM
      dbo.tblCCVendorDefault A
@@ -22,11 +26,15 @@ FROM
 	INNER JOIN dbo.tblEntity C
 		ON B.intEntityId = C.intEntityId
 	LEFT JOIN dbo.tblEntityLocation D
-		ON B.intDefaultLocationId = D.intEntityLocationId
+		ON B.intDefaultLocationId = D.intEntityLocationId    
     LEFT Join dbo.tblSMTerm E
 	    on D.intTermsId = E.intTermID
     LEFT Join dbo.tblSMPaymentMethod F
 	    on B.intPaymentMethodId = F.intPaymentMethodID
+	LEFT JOIN dbo.tblSMCompanyLocation G
+		ON A.intCompanyLocationId = G.intCompanyLocationId
+    LEFT JOIN dbo.tblCMBankAccount H
+		ON A.intBankAccountId = H.intBankAccountId
 	
 	
 	
