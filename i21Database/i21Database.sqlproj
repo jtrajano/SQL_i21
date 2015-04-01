@@ -1257,6 +1257,7 @@
     <Build Include="dbo\Tables\tblMFMachinePackType.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUnsentTickets.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemPrice.sql" />
+    <Build Include="dbo\Tables\tblRKFuturesBroker.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
