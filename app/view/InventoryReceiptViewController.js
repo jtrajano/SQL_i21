@@ -348,7 +348,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         "use strict";
         var me = this,
             win = options.window,
-            store = Ext.create('Inventory.store.Receipt', { pageSize: 1 });
+            store = Ext.create('Inventory.store.Receipt', { pageSize: 1, window : options.window });
 
         var grdInventoryReceipt = win.down('#grdInventoryReceipt'),
             grdIncomingInspection = win.down('#grdIncomingInspection'),
@@ -564,7 +564,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onStoreLoad: function(store, records, success, eOpts) {
         if (success === true){
-            var win = Ext.WindowManager.getActive();
+            var win = store.window;
+            if (!win) return;
             var grdInventoryReceipt = win.down('#grdInventoryReceipt');
             var grdLotTracking = win.down('#grdLotTracking');
             var itemPlugin = grdInventoryReceipt.plugins[0];
