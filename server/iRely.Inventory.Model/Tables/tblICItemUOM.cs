@@ -175,6 +175,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
         public ICollection<tblICInventoryReceiptItem> WeightUOMs { get; set; }
         public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
+        public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
     }
 
 }
