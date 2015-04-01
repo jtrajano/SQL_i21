@@ -1199,18 +1199,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 }
                                                                             },
                                                                             {
-                                                                                xtype: 'numbercolumn',
-                                                                                dataType: 'numeric',
-                                                                                itemId: 'colLotQuantity',
-                                                                                width: 70,
-                                                                                align: 'right',
-                                                                                dataIndex: 'dblQuantity',
-                                                                                text: 'Quantity',
-                                                                                editor: {
-                                                                                    xtype: 'numberfield'
-                                                                                }
-                                                                            },
-                                                                            {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colLotUOM',
                                                                                 modelValidation: true,
@@ -1254,6 +1242,18 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     itemId: 'cboLotUOM',
                                                                                     displayField: 'strUnitMeasure',
                                                                                     valueField: 'strUnitMeasure'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numbercolumn',
+                                                                                dataType: 'numeric',
+                                                                                itemId: 'colLotQuantity',
+                                                                                width: 70,
+                                                                                align: 'right',
+                                                                                dataIndex: 'dblQuantity',
+                                                                                text: 'Quantity',
+                                                                                editor: {
+                                                                                    xtype: 'numberfield'
                                                                                 }
                                                                             },
                                                                             {
