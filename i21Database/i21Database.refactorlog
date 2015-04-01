@@ -2366,4 +2366,60 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblSCDeviceInterfaceFile_tblSCScaleDevice_intScaleDeviceId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8013916d-8b6f-4f4e-947f-c3c6592c2136" ChangeDateTime="04/01/2015 08:00:19">
+    <Property Name="ElementName" Value="[dbo].[tblRKMarketExchange].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKMarketExchange]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMarketExchangeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d19dd03d-e735-4a35-a338-2dc529f77170" ChangeDateTime="04/01/2015 08:01:52">
+    <Property Name="ElementName" Value="[dbo].[tblRKMarketExchange].[strExtchangeCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKMarketExchange]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strExchangeCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4b175274-2f3f-4d58-905a-1a2ee6eabaa0" ChangeDateTime="04/01/2015 08:03:04">
+    <Property Name="ElementName" Value="[dbo].[PK_tblRKMarketExchange]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKMarketExchange]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblRKMarketExchange_intMarketExchangeId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ee88014c-8b06-4c46-969a-26c5e5ca06b0" ChangeDateTime="04/01/2015 09:01:12">
+    <Property Name="ElementName" Value="[dbo].[FK_tblRKElectonicPricing_tblRKFutureMarket_intFutureMarketId]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectonicPricing]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblRKElectronicPricing_tblRKFutureMarket_intFutureMarketId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="73bddeaf-2f6c-479e-8f9c-93081f3c12ba" ChangeDateTime="04/01/2015 09:02:57">
+    <Property Name="ElementName" Value="[dbo].[PK_tblRKElectonicPricing_intElectronicPricingId]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectonicPricing]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblRKElectronicPricing_intElectronicPricingId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6fb7c5bb-d155-43df-9088-ec00c9eeadfc" ChangeDateTime="04/01/2015 09:08:57">
+    <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricing].[strMarketSymbol]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricing]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intMarketExchangeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6fad5910-2c9a-4d4c-9535-8f55a0d60984" ChangeDateTime="04/01/2015 09:10:30">
+    <Property Name="ElementName" Value="[dbo].[FK_tblRKElectronicPricing_ToTable]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricing]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblRKElectronicPricing_tblRKMarketExchange_]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="091e09c0-6e64-4192-82cb-9e9a656a9433" ChangeDateTime="04/01/2015 09:11:21">
+    <Property Name="ElementName" Value="[dbo].[FK_tblRKElectronicPricing_tblRKMarketExchange_]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricing]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblRKElectronicPricing_tblRKMarketExchange_intMarketExchangeId]" />
+  </Operation>
 </Operations>

@@ -1234,7 +1234,7 @@
     <Build Include="dbo\Views\vyuLGShippingInstructionOpenContracts.sql" />
     <Build Include="dbo\Views\vyuLGNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserPermissions.sql" />
-    <Build Include="dbo\Tables\tblRKElectonicPricing.sql" />
+    <Build Include="dbo\Tables\tblRKElectronicPricing.sql" />
     <Build Include="dbo\Tables\tblRKElectronicPricingHistory.sql" />
     <Build Include="dbo\Tables\tblRKElectronicPricingPreferences.sql" />
     <Build Include="dbo\Tables\tblLGEquipmentType.sql" />
@@ -1259,6 +1259,7 @@
     <Build Include="dbo\Stored Procedures\uspARGetItemPrice.sql" />
     <Build Include="dbo\Tables\tblRKFuturesBroker.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScaleActivity.sql" />
+    <Build Include="dbo\Tables\tblRKMarketExchange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
