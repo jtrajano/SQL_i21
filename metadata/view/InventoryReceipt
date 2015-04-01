@@ -2468,43 +2468,6 @@
                                                                     ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.grid.column.Number",
-                                                                    "reference": {
-                                                                        "name": "columns",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "align": "right",
-                                                                        "dataIndex": "dblQuantity",
-                                                                        "dataType": "numeric",
-                                                                        "itemId": "colLotQuantity",
-                                                                        "text": "Quantity",
-                                                                        "width": 70
-                                                                    },
-                                                                    "name": "MyNumberColumn",
-                                                                    "designerId": "7007e315-3eb0-4e54-b423-9bd416b79fe2",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "dataType",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ],
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.form.field.Number",
-                                                                            "reference": {
-                                                                                "name": "editor",
-                                                                                "type": "object"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "name": "MyNumberField44",
-                                                                            "designerId": "a1f57ed2-6965-4714-baf6-8fe3c07224f3"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
                                                                     "type": "Ext.grid.column.Column",
                                                                     "reference": {
                                                                         "name": "columns",
@@ -2580,6 +2543,43 @@
                                                                                     "type": "string"
                                                                                 }
                                                                             ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Number",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "align": "right",
+                                                                        "dataIndex": "dblQuantity",
+                                                                        "dataType": "numeric",
+                                                                        "itemId": "colLotQuantity",
+                                                                        "text": "Quantity",
+                                                                        "width": 70
+                                                                    },
+                                                                    "name": "MyNumberColumn",
+                                                                    "designerId": "7007e315-3eb0-4e54-b423-9bd416b79fe2",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "dataType",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ],
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Number",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyNumberField44",
+                                                                            "designerId": "a1f57ed2-6965-4714-baf6-8fe3c07224f3"
                                                                         }
                                                                     ]
                                                                 },
