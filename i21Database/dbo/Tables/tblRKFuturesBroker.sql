@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblEMFuturesBroker]
+﻿CREATE TABLE [dbo].[tblRKFuturesBroker]
 (
 	[intEntityId] INT NOT NULL PRIMARY KEY, 
     [intVendorNumber] INT NOT NULL,
