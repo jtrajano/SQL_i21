@@ -11,6 +11,9 @@
 )
 
 GO
+CREATE INDEX [IX_tblHDTicketWatcher_intTicketId] ON [dbo].[tblHDTicketWatcher] ([intTicketId])
+
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

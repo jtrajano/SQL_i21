@@ -36,6 +36,16 @@ BEGIN
 		----------------------------------------
 		EXEC testi21Database.[Fake inventory items];
 
+		-- Set a dummy value for the On Order qty. 
+		INSERT INTO tblICItemStock (
+			intItemId
+			,intItemLocationId
+			,dblOnOrder
+		)
+		SELECT	@WetGrains
+				,@Default_Location
+				,300
+
 		-----------------------------------
 		-- Create the test tables
 		-----------------------------------
@@ -52,7 +62,7 @@ BEGIN
 		)
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
-				,dblOnOrder = -200
+				,dblOnOrder = (300 - 200)
 
 		CREATE TABLE actual (
 			intItemId INT

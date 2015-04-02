@@ -23,6 +23,9 @@
 )
 
 GO
+CREATE INDEX [IX_tblHDTicketHoursWorked_intTicketId] ON [dbo].[tblHDTicketHoursWorked] ([intTicketId])
+
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

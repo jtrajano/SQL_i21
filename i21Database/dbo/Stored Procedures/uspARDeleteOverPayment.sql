@@ -42,30 +42,30 @@ WHILE EXISTS(
 			I.strTransactionType = 'Overpayment'
 			AND P.intPaymentId = @PaymentId
 
-		IF @UnPost = 1
-			BEGIN
-				DECLARE	@successfulCount int,
-						@invalidCount int,
-						@success bit
+		--IF @UnPost = 1
+		--	BEGIN
+		--		DECLARE	@successfulCount int,
+		--				@invalidCount int,
+		--				@success bit
 
-				EXEC	[dbo].[uspARPostInvoice]
-						@batchId = @BatchId,
-						@post = 0,
-						@recap = 0,
-						@param = @invoiceId,
-						@userId = @UserId,
-						@beginDate = NULL,
-						@endDate = NULL,
-						@beginTransaction = NULL,
-						@endTransaction = NULL,
-						@exclude = NULL,
-						@successfulCount = @successfulCount OUTPUT,
-						@invalidCount = @invalidCount OUTPUT,
-						@success = @success OUTPUT,
-						@batchIdUsed = NULL,
-						@recapId = NULL,
-						@transType = N'Overpayment'
-			END 
+		--		EXEC	[dbo].[uspARPostInvoice]
+		--				@batchId = @BatchId,
+		--				@post = 0,
+		--				@recap = 0,
+		--				@param = @invoiceId,
+		--				@userId = @UserId,
+		--				@beginDate = NULL,
+		--				@endDate = NULL,
+		--				@beginTransaction = NULL,
+		--				@endTransaction = NULL,
+		--				@exclude = NULL,
+		--				@successfulCount = @successfulCount OUTPUT,
+		--				@invalidCount = @invalidCount OUTPUT,
+		--				@success = @success OUTPUT,
+		--				@batchIdUsed = NULL,
+		--				@recapId = NULL,
+		--				@transType = N'Overpayment'
+		--	END 
 
 		DELETE FROM tblARInvoiceDetail 
 		WHERE intInvoiceId = @invoiceId

@@ -53,7 +53,6 @@ BEGIN TRY
 	IF @strSourceType = @SourceType_PurchaseOrder
 	BEGIN 
 		EXEC dbo.uspICAddPurchaseOrderToItemReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
-		-- EXEC dbo.uspICIncreaseOnOrderQty @ItemsForItemReceipt; -- Remove this. This stored procedure is not handled by PO's CRUD. 
 	END
 
 END TRY

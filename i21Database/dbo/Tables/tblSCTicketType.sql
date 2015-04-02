@@ -14,7 +14,6 @@
     [intContractRequired] INT NOT NULL, 
     [intOverrideTicketCopies] INT NOT NULL, 
     [ysnPrintAtKiosk] BIT NOT NULL, 
-    [intDistributionOverride] INT NOT NULL, 
     [ynsVerifySplitMethods] BIT NOT NULL, 
     [ysnOverrideSingleTicketSeries] BIT NOT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
@@ -133,14 +132,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'ysnPrintAtKiosk'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Distribution Override',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicketType',
-    @level2type = N'COLUMN',
-    @level2name = N'intDistributionOverride'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Validate Split',

@@ -4,7 +4,8 @@
     [intDistributionMethod] INT NOT NULL, 
     [intTicketPoolId] INT NOT NULL, 
     [intTicketTypeId] INT NOT NULL, 
-    [ysnDistributionAllowed] BIT NOT NULL, 
+    [ysnDistributionAllowed] BIT NOT NULL,
+	[ysnDefaultDistribution] BIT NOT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCDistributionOption_intDistributionOptionId] PRIMARY KEY ([intDistributionOptionId]), 
     CONSTRAINT [FK_tblSCDistributionOption_tblSCTicketPool_intTicketPoolId] FOREIGN KEY (intTicketPoolId) REFERENCES tblSCTicketPool(intTicketPoolId), 
@@ -66,3 +67,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCDistributionOption',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Default Distribution',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCDistributionOption',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnDefaultDistribution'

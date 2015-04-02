@@ -13,6 +13,9 @@
 )
 
 GO
+CREATE INDEX [IX_tblHDTicketNote_intTicketId] ON [dbo].[tblHDTicketNote] ([intTicketId])
+
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

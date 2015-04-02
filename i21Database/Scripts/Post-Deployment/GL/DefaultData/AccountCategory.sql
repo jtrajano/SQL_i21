@@ -284,5 +284,6 @@ BEGIN
 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Auto-Negative'
 END
 END
+
 EXEC dbo.[uspGLConvertAccountGroupToCategory]
 

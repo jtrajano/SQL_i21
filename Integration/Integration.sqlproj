@@ -68,6 +68,7 @@
     <Folder Include="Scripts\AP" />
     <Folder Include="dbo\Tables" />
     <Folder Include="Scripts\TM" />
+    <Folder Include="Scripts\NR" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dbo\Views\apchkmst.sql" />
@@ -136,9 +137,9 @@
     <None Include="dbo\Stored Procedures\uspARImportServiceCharge.sql" />
     <None Include="dbo\Stored Procedures\uspSMImportShipVia.sql" />
     <None Include="dbo\Stored Procedures\uspSMSyncShipVia.sql" />
-    <None Include="dbo\Stored Procedures\uspNRCreateAREntry.sql" />
-    <None Include="dbo\Stored Procedures\uspNRGetDetailsForInvoice.sql" />
-    <None Include="dbo\Stored Procedures\uspNRGenerateEFTSchedule.sql" />
+    <None Include="Scripts\NR\uspNRCreateAREntry.sql" />
+    <None Include="Scripts\NR\uspNRGenerateEFTSchedule.sql" />
+    <None Include="Scripts\NR\uspNRGetDetailsForInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
