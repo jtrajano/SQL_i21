@@ -205,7 +205,7 @@ END
 								dtmSpotDate,
 								ysnExpired)	
 SELECT 	intConcurrencyId,
-		strMonthName,
+		ltrim(rtrim(strMonthName))+' ' + Right(StrYear,2),
 		intFutureMarketId,
 		dtmFutureMonthsDate,
 		strSymbol,
