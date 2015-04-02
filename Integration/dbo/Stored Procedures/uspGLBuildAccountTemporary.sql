@@ -22,6 +22,7 @@ CREATE TABLE #TempResults
 	,strDescription				NVARCHAR(300)
 	,strAccountGroup			NVARCHAR(50)
     ,intAccountGroupId			INT
+    ,intAccountCategoryId		INT
     ,intAccountSegmentId		INT
     ,intAccountStructureId		INT
     ,strAccountSegmentId		NVARCHAR(100)
@@ -59,6 +60,7 @@ CREATE TABLE #ConstructAccount
 	,strDescription				NVARCHAR(300)
 	,strAccountGroup			NVARCHAR(50)
 	,intAccountGroupId			INT
+	,intAccountCategoryId		INT
 	,intAccountSegmentId		INT
 	,intAccountStructureId		INT
 	,strAccountSegmentId		NVARCHAR(100)
@@ -116,8 +118,10 @@ BEGIN
 								
 				INSERT INTO #TempResults
 				SELECT PA.strCode, REPLICATE(''0'',(select 8 - intLength from tblGLAccountStructure where strType = ''Primary'')) + PA.strCode AS strPrimary, '''' as strSegment, PA.strDescription,
-					PA.strAccountGroup, PA.intAccountGroupId, PA.intAccountStructureId, PA.intAccountSegmentId, PA.intAccountSegmentId AS strAccountSegmentId
+					PA.strAccountGroup, PA.intAccountGroupId,SE.intAccountCategoryId, PA.intAccountStructureId, PA.intAccountSegmentId, PA.intAccountSegmentId AS strAccountSegmentId
 				FROM #PrimaryAccounts PA
+				LEFT JOIN tblGLAccountSegment SE on
+					PA.intAccountSegmentId = SE.intAccountSegmentId
 			 END
 			ELSE
 			 BEGIN
@@ -127,8 +131,9 @@ BEGIN
 				
 					INSERT INTO #TempResults
 					SELECT CA.strCode + @strDivider + PA.strCode AS strCode, CA.strPrimary + @strDivider + PA.strCode AS strPrimary, '''' as strSegment, CA.strDescription + @strDivider + PA.strDescription AS strDescription,
-						PA.strAccountGroup, PA.intAccountGroupId, PA.intAccountStructureId, PA.intAccountSegmentId, PA.intAccountSegmentId AS strAccountSegmentId
-					FROM #ConstructAccount CA, #PrimaryAccounts PA
+						PA.strAccountGroup, PA.intAccountGroupId, SE.intAccountCategoryId, PA.intAccountStructureId, PA.intAccountSegmentId, PA.intAccountSegmentId AS strAccountSegmentId
+					FROM #ConstructAccount CA , #PrimaryAccounts PA LEFT JOIN tblGLAccountSegment SE on
+					PA.intAccountSegmentId = SE.intAccountSegmentId
 					WHERE PA.intAccountStructureId = @iStructureType
 				END
 			 END
@@ -169,7 +174,7 @@ BEGIN
 	TRUNCATE TABLE #ConstructAccount
 
 	INSERT INTO #ConstructAccount
-	SELECT strCode,strPrimary,strSegment,strDescription,strAccountGroup,intAccountGroupId,intAccountSegmentId,intAccountStructureId,strAccountSegmentId FROM #TempResults
+	SELECT strCode,strPrimary,strSegment,strDescription,strAccountGroup,intAccountGroupId,intAccountCategoryId, intAccountSegmentId,intAccountStructureId,strAccountSegmentId FROM #TempResults
 
 	DELETE FROM #Structure WHERE intAccountStructureId = @iStructureType	
 END
@@ -182,17 +187,20 @@ IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[dbo].[g
         	SELECT * INTO glactmst_bak FROM glactmst
 
 INSERT INTO tblGLTempAccount
-SELECT strCode AS strAccountId, 
+(strAccountId,strPrimary,strSegment,strDescription,strAccountGroup,intAccountGroupId, intAccountCategoryId,
+strAccountSegmentId,intAccountUnitId,ysnSystem,ysnActive,intUserId,dtmCreated)
+SELECT strCode AS strAccountId,
 	   strPrimary, 
 	   strSegment,
 	   REPLACE(strDescription, @strDivider + ''REMOVE_DIVIDER'',''''),
 	   strAccountGroup,
 	   intAccountGroupId,
+	   intAccountCategoryId,
 	   strAccountSegmentId,	   
-	   ( select top 1 intAccountUnitId from tblGLAccountUnit a join 
+       	  ( select top 1 intAccountUnitId from tblGLAccountUnit a join
 			gluommst c on a.strUOMCode =  CAST(c.gluom_code AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			join glactmst_bak b on CAST(c.gluom_code AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(b.glact_uom AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-			where REPLACE(LTRIM(REPLACE(strPrimary,''0'','' '')),'' '',''0'')  = b.glact_acct1_8 and REPLACE(LTRIM(REPLACE(strSegment,''0'','' '')),'' '',''0'') = b.glact_acct9_16
+			where REPLACE(LTRIM(REPLACE(strPrimary,''0'','' '')),'' '',''0'')  = b.glact_acct1_8 and REPLACE(LTRIM(REPLACE(strSegment,''0'','' '')),'' '',''0'')    = b.glact_acct9_16
        	   ) as intAccountUnitId ,
 	   ysnSystem = 0,
 	   ysnActive = 1,

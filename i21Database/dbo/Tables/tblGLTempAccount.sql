@@ -12,6 +12,7 @@
     [ysnActive]           BIT            NULL,
     [intUserId]           INT            NULL,
     [dtmCreated]          DATETIME       CONSTRAINT [DF_tblTempGLAccount_dtmCreated] DEFAULT (getdate()) NOT NULL,
+    [intAccountCategoryId] INT NULL, 
     CONSTRAINT [PK_tblTempGLAccount] PRIMARY KEY CLUSTERED ([cntId] ASC)
 );
 
