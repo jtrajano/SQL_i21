@@ -10,6 +10,7 @@
     [ysnIsNotExisting]      BIT            CONSTRAINT [DF_tblGLAccountSegment_ysnIsNotExisting] DEFAULT ((0)) NULL,
     [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
     [intAccountCategoryId] INT NULL, 
+    [intEntityIdLastModified] INT NULL, 
     CONSTRAINT [PK_GLAccountSegment_AccountSegmentId] PRIMARY KEY CLUSTERED ([intAccountSegmentId] ASC),
     CONSTRAINT [FK_tblGLAccountSegment_tblGLAccountGroup] FOREIGN KEY ([intAccountGroupId]) REFERENCES [dbo].[tblGLAccountGroup] ([intAccountGroupId]),
     CONSTRAINT [FK_tblGLAccountSegment_tblGLAccountStructure] FOREIGN KEY ([intAccountStructureId]) REFERENCES [dbo].[tblGLAccountStructure] ([intAccountStructureId])
