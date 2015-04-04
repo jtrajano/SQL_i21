@@ -36,8 +36,7 @@ FROM tblPOPurchase A
 			INNER JOIN tblICItemLocation loc ON B.intItemId = loc.intItemId AND A.intLocationId = loc.intLocationId
 		WHERE A.ysnPosted = 1 AND B.dblReceived != B.dblBillQty
 		GROUP BY
-			B.intInventoryReceiptItemId
-			,B.intItemId 
+			B.intItemId 
 			,B.dblUnitCost
 			,intLineNo
 			,dblOrderQty
