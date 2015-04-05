@@ -104,12 +104,12 @@ BEGIN
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ItemLot.TotalLotQtyInItemUOM <>
-				dbo.fnCalculateQtyBetweenUOM (
+			AND ROUND(ItemLot.TotalLotQtyInItemUOM, 2) <>
+				ROUND(dbo.fnCalculateQtyBetweenUOM (
 					ReceiptItem.intUnitMeasureId
 					,ReceiptItem.intUnitMeasureId
 					,ReceiptItem.dblOpenReceive
-				)
+				), 2)
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
