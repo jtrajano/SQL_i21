@@ -1263,7 +1263,6 @@
     <Build Include="dbo\Tables\tblGLAccountAdjustmentLog.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccount.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
-    <Build Include="dbo\Triggers\trgAfterDeletetblGLAccountGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
