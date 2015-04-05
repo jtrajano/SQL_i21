@@ -4,6 +4,7 @@
 -- Description:	Updates the GL account structure
 -- =============================================
 CREATE PROCEDURE [dbo].[uspGLUpdateAccountIDStructure] 
+@intEntityId INT
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -47,7 +48,7 @@ BEGIN
 					SELECT @newAccountId = SUBSTRING(@newAccountId,0, LEN(@newAccountId)),
 					@newAccountDesc = SUBSTRING(@newAccountDesc,0, LEN(@newAccountDesc))
 					
-				UPDATE tblGLAccount SET strAccountId = @newAccountId, strDescription =@newAccountDesc  WHERE intAccountId = @_accountId
+				UPDATE tblGLAccount SET strAccountId = @newAccountId, strDescription =@newAccountDesc , intEntityIdLastModified= @intEntityId WHERE intAccountId = @_accountId
 				FETCH NEXT FROM cursor_accountId INTO @_accountId
 			END
 			CLOSE cursor_accountId
