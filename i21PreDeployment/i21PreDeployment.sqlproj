@@ -74,6 +74,7 @@
     <Folder Include="Scripts\Pre-Deployment\9_FRD" />
     <Folder Include="Scripts\Pre-Deployment\10_RPT" />
     <Folder Include="Scripts\Pre-Deployment\11_IC" />
+    <Folder Include="Scripts\Pre-Deployment\12_EM" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -92,6 +93,7 @@
     <None Include="Scripts\Pre-Deployment\9_FRD\2_1440_to_1510.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\Account_Category_Change_14_4.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\FixARTransactionsAccounts.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\01_EntitySchemaUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

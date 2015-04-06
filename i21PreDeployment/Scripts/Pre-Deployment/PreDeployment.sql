@@ -74,3 +74,5 @@
 
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql
+-- EM
+:r .\12_EM\01_EntitySchemaUpdate.sql
