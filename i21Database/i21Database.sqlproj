@@ -1262,6 +1262,9 @@
     <Build Include="dbo\Tables\tblGLAccountAdjustmentLog.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccount.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
+    <Build Include="dbo\Tables\tblLGLoadCost.sql" />
+    <Build Include="dbo\Tables\tblLGLoad.sql" />
+    <Build Include="dbo\Views\vyuLGLoadOpenContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

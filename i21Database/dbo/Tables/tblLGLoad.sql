@@ -1,0 +1,36 @@
+﻿CREATE TABLE [dbo].[tblLGLoad]
+(
+[intLoadId] INT NOT NULL IDENTITY (1, 1),
+[intConcurrencyId] INT NOT NULL, 
+[intLoadNumber] INT NOT NULL, 
+[intCompanyLocationId] INT NOT NULL,
+[intPurchaseSale] INT NOT NULL,
+[intItemId] INT NOT NULL,
+[dblQuantity] NUMERIC(18, 6) NOT NULL,
+[intUnitMeasureId] INT NOT NULL,
+[dtmScheduledDate] DATETIME NOT NULL,
+[strCustomerReference] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[intEquipmentTypeId] INT NOT NULL,
+[intEntityId] INT NOT NULL,
+[intEntityLocationId] INT NOT NULL,
+[intContractDetailId] INT NOT NULL,
+[strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
+[intHaulerEntityId] INT NOT NULL,
+[intTicketId] INT NULL,
+[ysnInProgress] [bit] NULL,
+[dblDeliveredQuantity] NUMERIC(18, 6) NULL,
+[dtmDeliveredDate] DATETIME NULL,
+
+CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
+CONSTRAINT [UK_tblLGLoad_intLoadNumber] UNIQUE ([intLoadNumber]),
+CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
+CONSTRAINT [FK_tblLGLoad_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+CONSTRAINT [FK_tblLGLoad_tblLGEquipmentType_intEquipmentTypeId] FOREIGN KEY ([intEquipmentTypeId]) REFERENCES [tblLGEquipmentType]([intEquipmentTypeId]),
+CONSTRAINT [FK_tblLGLoad_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),
+CONSTRAINT [FK_tblLGLoad_tblEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
+CONSTRAINT [FK_tblLGLoad_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
+CONSTRAINT [FK_tblLGLoad_tblEntity_intHaulerEntityId] FOREIGN KEY ([intHaulerEntityId]) REFERENCES [tblEntity]([intEntityId]),
+
+CONSTRAINT [FK_tblLGLoad_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId])
+)
