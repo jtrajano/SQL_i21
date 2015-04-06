@@ -1273,6 +1273,7 @@
     <Build Include="dbo\Views\vyuARCustomerSearch.sql" />
     <Build Include="dbo\Tables\tblEntityPortalPermission.sql" />
     <Build Include="dbo\Tables\tblEntityPortalMenu.sql" />
+    <Build Include="dbo\Views\vyuEPContactMenu.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
