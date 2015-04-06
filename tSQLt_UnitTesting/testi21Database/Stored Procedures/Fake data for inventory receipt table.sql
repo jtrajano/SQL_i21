@@ -651,21 +651,20 @@ BEGIN
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 2
 		UNION ALL 
-		SELECT	intInventoryReceiptItemId	= 15
-				,strLotNumber				= 'MANUAL-22X-10000'
-				,dblQuantity				= 3
-				,dblCost					= 5.90
-				,intSort					= 2
-				,intConcurrencyId			= 1
-		-- intInventoryReceiptItemLotId: 3
-		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 16
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
 				,intSort					= 1
 				,intConcurrencyId			= 1
-	
+		-- intInventoryReceiptItemLotId: 3
+		UNION ALL 
+		SELECT	intInventoryReceiptItemId	= 15
+				,strLotNumber				= 'MANUAL-23X-10000'
+				,dblQuantity				= 3
+				,dblCost					= 5.90
+				,intSort					= 2
+				,intConcurrencyId			= 1			
 	END
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXXX6

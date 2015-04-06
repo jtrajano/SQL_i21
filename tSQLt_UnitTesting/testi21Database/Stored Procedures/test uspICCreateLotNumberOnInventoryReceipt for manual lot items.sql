@@ -97,6 +97,12 @@ BEGIN
 				,intItemLocationId  = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_PoundUOMId
 				,strLotNumber = 'LOT DE MANUAL X 113-133.108985'
+		UNION ALL 
+		SELECT	intLotId = 3
+				,intItemLocationId  = @ManualLotGrains_DefaultLocation
+				,intItemUOMId = @ManualLotGrains_BushelUOMId
+				,strLotNumber = 'MANUAL-23X-10000'
+
 
 		-- Setup expected data for Receipt Item Lot
 		INSERT INTO expectedReceiptItemLot (
@@ -108,9 +114,9 @@ BEGIN
 				,intInventoryReceiptItemId = 15
 				,strLotNumber = 'MANUAL-22X-10000' 
 		UNION ALL
-		SELECT	intLotId = 1 
+		SELECT	intLotId = 3 
 				,intInventoryReceiptItemId = 15
-				,strLotNumber = 'MANUAL-22X-10000' 
+				,strLotNumber = 'MANUAL-23X-10000' 
 		UNION ALL 
 		SELECT	intLotId = 2
 				,intInventoryReceiptItemId = 16

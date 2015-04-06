@@ -57,7 +57,7 @@ BEGIN
 
 		-- @ManualLotGrains: 1
 		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (1, 1, 'ManualLot-0001', 3)
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (1, 1, 'ManualLot-0001', 7)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (1, 1, 'ManualLot-0002', 7)
 		
 		-- @SerializedLotGrains: 2
 		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (2, 2, 'SerialLot-0001', 12)
@@ -65,6 +65,7 @@ BEGIN
 
 		-- Fake data for the lot numbers
 		INSERT INTO tblICLot (intItemLocationId, intItemUOMId, strLotNumber) VALUES (@ManualLotGrains_DefaultLocation, @ManualLotGrains_BushelUOMId, 'ManualLot-0001')
+		INSERT INTO tblICLot (intItemLocationId, intItemUOMId, strLotNumber) VALUES (@ManualLotGrains_DefaultLocation, @ManualLotGrains_BushelUOMId, 'ManualLot-0002')
 		INSERT INTO tblICLot (intItemLocationId, intItemUOMId, strLotNumber) VALUES (@SerializedLotGrains_DefaultLocation, @SerializedLotGrains_BushelUOMId, 'SerialLot-0001')
 		INSERT INTO tblICLot (intItemLocationId, intItemUOMId, strLotNumber) VALUES (@SerializedLotGrains_DefaultLocation, @SerializedLotGrains_BushelUOMId, 'SerialLot-0002')
 
@@ -85,7 +86,7 @@ BEGIN
 		INSERT INTO expected VALUES (@amount, 0)
 		INSERT INTO expected VALUES (0, @amount)
 
-		-- ManualLot-0001
+		-- ManualLot-0002
 		SET @amount = 7 * 12.50
 		INSERT INTO expected VALUES (@amount, 0)
 		INSERT INTO expected VALUES (0, @amount)
@@ -133,5 +134,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-
 END 
