@@ -12,6 +12,7 @@ A.intVendorId
 ,tblReceived.dblOrderQty
 ,tblReceived.dblOpenReceive
 ,tblReceived.intLineNo
+,tblReceived.intInventoryReceiptItemId
 ,tblReceived.dblUnitCost
 ,tblReceived.intAccountId
 ,tblReceived.strAccountId
@@ -24,7 +25,8 @@ FROM tblPOPurchase A
 	INNER JOIN 
 	(
 		SELECT
-			B.intItemId
+			B.intInventoryReceiptItemId
+			,B.intItemId
 			,B.intLineNo
 			,B.dblOrderQty
 			,B.dblUnitCost
@@ -36,7 +38,8 @@ FROM tblPOPurchase A
 			INNER JOIN tblICItemLocation loc ON B.intItemId = loc.intItemId AND A.intLocationId = loc.intLocationId
 		WHERE A.ysnPosted = 1 AND B.dblOpenReceive != B.dblBillQty
 		GROUP BY
-			B.intItemId 
+			B.intInventoryReceiptItemId
+			,B.intItemId 
 			,B.dblUnitCost
 			,intLineNo
 			,dblOrderQty
@@ -61,6 +64,7 @@ A.intVendorId
 ,B.dblQtyOrdered
 ,B.dblQtyOrdered
 ,B.intPurchaseDetailId
+,NULL
 ,B.dblCost
 ,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
 ,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
