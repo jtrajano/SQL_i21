@@ -3,7 +3,7 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[
 BEGIN
 	PRINT('RESTORING VENDOR ID OF tblAPBill')
 	UPDATE tblAPBill
-	SET intVendorId = C.intEntityId
+	SET intVendorId = C.[intEntityVendorId]
 	FROM tblAPBill A
 		INNER JOIN tblAPTempBillData B
 			ON A.intBillId = B.intBillId
@@ -19,7 +19,7 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[
 BEGIN
 	PRINT('RESTORING VENDOR ID OF tblAPPayment')
 	UPDATE tblAPPayment
-	SET intVendorId = C.intEntityId
+	SET intVendorId = C.[intEntityVendorId]
 	FROM tblAPPayment A
 		INNER JOIN tblAPTempPaymentData B
 			ON A.intPaymentId = B.intPaymentId

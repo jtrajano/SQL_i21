@@ -76,14 +76,14 @@ AS
 	JOIN	tblCTFreightRate		FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
 	JOIN	tblCTRailGrade			RG	ON	RG.Value					=	CD.intGrade					LEFT
 	JOIN	tblRKFutureMarket		FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
-	JOIN	tblAPVendor				VR	ON	VR.intVendorId				=	CD.intBillTo
+	JOIN	tblAPVendor				VR	ON	VR.[intEntityVendorId]				=	CD.intBillTo
 	
 	JOIN	tblEntity				EY	ON	EY.intEntityId				=	CH.intEntityId
 	JOIN	tblICCommodity			CY	ON	CY.intCommodityId			=	CH.intCommodityId
 	JOIN	tblCTContractType		TP	ON	TP.Value					=	CH.intPurchaseSale
 	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	CH.intCommodityUnitMeasureId
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId		=	CH.intContractTextId
-	JOIN	tblARSalesperson		SP	ON	SP.intSalespersonId			=	CH.intSalespersonId
+	JOIN	tblARSalesperson		SP	ON	SP.intEntitySalespersonId   =	CH.intSalespersonId
 	JOIN	tblCTWeightGrade		W1	ON	W1.intWeightGradeId			=	CH.intGradeId
 	JOIN	tblCTWeightGrade		W2	ON	W2.intWeightGradeId			=	CH.intWeightId
 	JOIN	tblCTAssociation		AN	ON	AN.intAssociationId			=	CH.intAssociationId

@@ -5,7 +5,7 @@ Inv.intInvoiceId,
 Inv.strInvoiceNumber,
 NTT.strName AS strCustomerName, 
 Cus.strCustomerNumber, 
-Cus.intCustomerId, 
+Cus.[intEntityCustomerId], 
 Inv.strTransactionType, 
 Term.strTerm,
 Inv.intTermId, 
@@ -27,8 +27,8 @@ PayMthd.strPaymentMethod,
 0.000000 AS dblPaymentAmount
 FROM         
 dbo.tblARInvoice AS Inv INNER JOIN
-dbo.tblARCustomer AS Cus ON Inv.intCustomerId = Cus.intCustomerId INNER JOIN
-dbo.tblEntity AS NTT ON Cus.intEntityId = NTT.intEntityId LEFT OUTER JOIN
+dbo.tblARCustomer AS Cus ON Inv.intCustomerId = Cus.[intEntityCustomerId] INNER JOIN
+dbo.tblEntity AS NTT ON Cus.[intEntityCustomerId] = NTT.intEntityId LEFT OUTER JOIN
 dbo.tblSMTerm AS Term ON Inv.intTermId = Term.intTermID LEFT OUTER JOIN
 dbo.tblSMCompanyLocation AS CompLoc ON Inv.intCompanyLocationId  = CompLoc.intCompanyLocationId LEFT OUTER JOIN
 dbo.tblSMPaymentMethod AS PayMthd ON Inv.intPaymentMethodId = PayMthd.intPaymentMethodID

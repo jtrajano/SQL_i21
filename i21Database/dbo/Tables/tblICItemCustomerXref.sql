@@ -24,7 +24,7 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICItemCustomerXref] PRIMARY KEY ([intItemCustomerXrefId]), 
 		CONSTRAINT [FK_tblICItemCustomerXref_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemCustomerXref_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
-		CONSTRAINT [FK_tblICItemCustomerXref_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intCustomerId])
+		CONSTRAINT [FK_tblICItemCustomerXref_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId])
 	)
 
 	GO

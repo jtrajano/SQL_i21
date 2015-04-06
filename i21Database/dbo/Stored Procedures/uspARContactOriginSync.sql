@@ -26,7 +26,7 @@
 
 				sscon_email = E.strEmail
 			FROM tblEntityContact Contact
-				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityId
+				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityContactId
 				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND UPPER(sscon_contact_id) = UPPER(@ContactNumber)
 
 		END
@@ -68,9 +68,9 @@
 				'',
 				''
 			FROM tblEntityContact Contact
-				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityId
-				INNER JOIN tblARCustomerToContact  CusToCon ON Contact.intContactId = CusToCon.intContactId
-				INNER JOIN tblARCustomer Cus ON CusToCon.intCustomerId = Cus.intCustomerId
+				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityContactId
+				INNER JOIN tblARCustomerToContact  CusToCon ON Contact.intEntityContactId = CusToCon.intEntityContactId
+				INNER JOIN tblARCustomer Cus ON CusToCon.intEntityContactId = Cus.[intEntityCustomerId]
 				WHERE Contact.strContactNumber = @ContactNumber
 	
 

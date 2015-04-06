@@ -25,7 +25,7 @@ SELECT
  ,B.strPONumber
  ,B.intLineNo
  ,C.strVendorId
- ,C.intVendorId
+ ,C.intEntityVendorId
  ,D.strItemNo
  ,D.strLotTracking
  ,H.strUnitMeasure AS strUOM
@@ -38,7 +38,7 @@ SELECT
  ,G.strName AS strStorageName
 FROM tblPOPurchase A
  INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
- INNER JOIN tblAPVendor C ON A.intVendorId = C.intVendorId
+ INNER JOIN tblAPVendor C ON A.intVendorId = C.intEntityVendorId
  LEFT JOIN tblICItem D ON B.intItemId = D.intItemId
  LEFT JOIN tblICItemUOM E ON B.intUnitOfMeasureId = E.intItemUOMId
  LEFT JOIN tblICUnitMeasure H ON E.intUnitMeasureId = H.intUnitMeasureId

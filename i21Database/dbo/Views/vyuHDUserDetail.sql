@@ -33,33 +33,37 @@
 
 		select
 			strCustomer = cus.strCustomerNumber
-			,intCustomerId = cus.intCustomerId
-			,strCompanyName = (select top 1 strName from tblEntity where intEntityId = cus.intEntityId)
-			,strFullName = en.strEmail
+			,intCustomerId = cus.[intEntityCustomerId]
+			,strCompanyName = (select top 1 strName from tblEntity where intEntityId = cus.[intEntityCustomerId])
+			--,strFullName = en.strEmail
+			,strFullName = ec.strEmail
 			,strPhone = ec.strPhone
 			,strMobile = ec.strMobile
 			,strTimeZone = ec.strTimezone
 			,strLocation = el.strLocationName
 			,strSLAPlan = ''
 			,strReplyDue = ''
-			,intUserId = ec.intEntityId
-			,intEntityId = ec.intEntityId
-			,strName = en.strEmail
+			--,intUserId = ec.[intEntityContactId]
+			,intUserId = ec.[intEntityId]
+			--,intEntityId = ec.[intEntityContactId]
+			,intEntityId = ec.[intEntityId]
+			,strName = ec.strEmail
 			--,strUserName = (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId)
-			,strUserName = case when (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId) is null then 'Contact_'+convert(nvarchar(50),ec.intContactId) else (select top 1 strUserName from tblEntityCredential where intEntityId = ec.intEntityId) end
-			,strFirstName = en.strEmail
-			,strMiddleName = en.strEmail
-			,strLastName = en.strEmail
-			,strEmail = en.strEmail
+			,strUserName = case when (select top 1 strUserName from tblEntityCredential where intEntityId = ec.[intEntityId]) is null then 'Contact_'+convert(nvarchar(50),ec.[intEntityId]) else (select top 1 strUserName from tblEntityCredential where intEntityId = ec.[intEntityId]) end
+			,strFirstName = ec.strEmail
+			,strMiddleName = ec.strEmail
+			,strLastName = ec.strEmail
+			,strEmail = ec.strEmail
 			,ysni21User = 0
-			,imgPhoto = en.imgPhoto
+			,imgPhoto = ec.imgPhoto
 			,intConcurrencyId = 1
-			,strFullName2 = en.strName
+			,strFullName2 = ec.strName
 		from
-			tblEntityContact ec
-			left outer join tblARCustomer cus on cus.intCustomerId = (select top 1 et.intCustomerId from tblARCustomerToContact et where et.intContactId = ec.intContactId)
-			left outer join tblEntity en on en.intEntityId = ec.intEntityId
-			left outer join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblARCustomerToContact et where et.intContactId = ec.intContactId)
+			--tblEntityContact ec
+			tblEntity ec
+			left outer join tblARCustomer cus on cus.[intEntityCustomerId] = (select top 1 et.[intEntityCustomerId] from tblARCustomerToContact et where et.[intEntityContactId] = ec.[intEntityId])
+			--left outer join tblEntity en on en.intEntityId = ec.[intEntityContactId]
+			left outer join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblARCustomerToContact et where et.[intEntityContactId] = ec.[intEntityId])
 	--select
 	--		strCustomer = 'i21 User'
 	--		,strCompanyName = 'iRely'

@@ -43,8 +43,8 @@ SELECT
  ,D.strDescription
  ,E.strUnitMeasure
 FROM dbo.tblPOPurchase A
-	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEntity C1 ON C.intEntityId = C1.intEntityId)
-			ON A.intVendorId = C.intVendorId
+	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEntity C1 ON C.intEntityVendorId = C1.intEntityId)
+			ON A.intVendorId = C.intEntityVendorId
 	LEFT JOIN dbo.tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN dbo.tblICItem D ON B.intItemId = D.intItemId
 	INNER JOIN (dbo.tblICItemUOM E1 

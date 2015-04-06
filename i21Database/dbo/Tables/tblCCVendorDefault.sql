@@ -13,7 +13,7 @@
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblCCVendorDefault] PRIMARY KEY ([intVendorDefaultId]),
-	CONSTRAINT [FK_tblCCVendorDefault_tblAPVendor_intVendorId] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intVendorId]),
+	CONSTRAINT [FK_tblCCVendorDefault_tblAPVendor_intVendorId] FOREIGN KEY ([intVendorId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]),
 	CONSTRAINT [FK_tblCCVendorDefault_tblCMBankAccount_intBankAccountId] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
 	CONSTRAINT [FK_tblCCVendorDefault_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId])  
 

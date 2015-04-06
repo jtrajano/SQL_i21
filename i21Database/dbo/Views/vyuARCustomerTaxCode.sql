@@ -3,7 +3,7 @@
 	
 
 SELECT 
-	 C.intCustomerId
+	 C.intEntityCustomerId
 	,C.strCustomerNumber 
 	,C.ysnApplySalesTax
 	,L.intEntityLocationId
@@ -20,7 +20,7 @@ FROM
 	tblEntityLocation L
 INNER JOIN
 	tblARCustomer C
-		ON L.intEntityId = C.intEntityId 
+		ON L.intEntityId = C.intEntityCustomerId 
 		AND L.intEntityLocationId = C.intDefaultLocationId
 INNER JOIN
 	tblSMTaxGroup G

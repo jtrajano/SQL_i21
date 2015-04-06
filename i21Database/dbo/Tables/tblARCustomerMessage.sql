@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARCustomerMessage] (
     [intMessageId]     INT            IDENTITY (1, 1) NOT NULL,
-    [intCustomerId]      INT            NOT NULL,
+    [intEntityCustomerId]      INT            NOT NULL,
     [strMessageType]   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strAction]        NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strMessage]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,

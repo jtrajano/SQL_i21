@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARSalesperson] (
-    [intEntityId]             INT             NOT NULL,
-    [intSalespersonId]        INT             IDENTITY (1, 1) NOT NULL,
+    [intEntitySalespersonId]             INT             NOT NULL,
+    --[intSalespersonId]        INT             IDENTITY (1, 1) NOT NULL,
     [strSalespersonId]        NVARCHAR (3)    COLLATE Latin1_General_CI_AS NULL,
     [dtmBirthDate]            DATETIME        NULL,
     [strGender]               NVARCHAR (6)    COLLATE Latin1_General_CI_AS NULL,
@@ -28,10 +28,10 @@
     [strDispatchNotification] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTextMessage]          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblARSalesperson_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblARSalesperson_intEntityId] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
+    CONSTRAINT [PK_tblARSalesperson_intEntityId] PRIMARY KEY CLUSTERED ([intEntitySalespersonId] ASC),
     CONSTRAINT [FK_tblARSalesperson_tblARTerritory_intTerritoryId] FOREIGN KEY ([intTerritoryId]) REFERENCES [dbo].[tblARTerritory] ([intTerritoryId]),
-    CONSTRAINT [FK_tblARSalesperson_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-    CONSTRAINT [UQ_tblARSalesperson_intSalespersonId] UNIQUE NONCLUSTERED ([intSalespersonId] ASC),
+    CONSTRAINT [FK_tblARSalesperson_tblEntity_intEntityId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+    --CONSTRAINT [UQ_tblARSalesperson_intSalespersonId] UNIQUE NONCLUSTERED ([intSalespersonId] ASC),
     CONSTRAINT [UQ_tblARSalesperson_strSalespersonId] UNIQUE NONCLUSTERED ([strSalespersonId] ASC)
 
 );

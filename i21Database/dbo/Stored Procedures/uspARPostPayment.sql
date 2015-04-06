@@ -639,7 +639,7 @@ BEGIN
 				ON A.intAccountId = GLAccnt.intAccountId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -775,7 +775,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -838,7 +838,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN 
 			tblARCustomer D 
-				ON A.intCustomerId = D.intCustomerId
+				ON A.intCustomerId = D.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -888,7 +888,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1312,8 +1312,8 @@ BEGIN
 				intCurrencyID = A.intCurrencyId,
 				dblExchangeRate = 0,
 				dtmDate = A.dtmDatePaid,
-				strPayee = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityId),
-				intPayeeID = B.intEntityId,
+				strPayee = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.[intEntityCustomerId]),
+				intPayeeID = B.[intEntityCustomerId],
 				strAddress = '',
 				strZipCode = '',
 				strCity = '',
@@ -1337,7 +1337,7 @@ BEGIN
 				intConcurrencyId = 1
 				FROM tblARPayment A
 					INNER JOIN tblARCustomer B
-						ON A.intCustomerId = B.intCustomerId
+						ON A.intCustomerId = B.[intEntityCustomerId]
 				INNER JOIN
 					tblGLAccount GL
 						ON A.intAccountId = GL.intAccountId 
@@ -1510,7 +1510,7 @@ ELSE
 				ON A.intAccountId = GLAccnt.intAccountId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1642,7 +1642,7 @@ ELSE
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1704,7 +1704,7 @@ ELSE
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN 
 			tblARCustomer D 
-				ON A.intCustomerId = D.intCustomerId
+				ON A.intCustomerId = D.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1753,7 +1753,7 @@ ELSE
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId

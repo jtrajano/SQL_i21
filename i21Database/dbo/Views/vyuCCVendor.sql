@@ -4,8 +4,8 @@ WITH SCHEMABINDING
 	AS 
 SELECT 
     A.intVendorDefaultId,
-	B.intEntityId,	
-	B.intVendorId,
+	B.intEntityVendorId intEntityId,	
+	B.intEntityVendorId intVendorId,
 	G.intCompanyLocationId,
 	G.strLocationName,
 	B.intPaymentMethodId,
@@ -22,9 +22,9 @@ SELECT
 FROM
      dbo.tblCCVendorDefault A
 	INNER JOIN dbo.tblAPVendor B
-		ON A.intVendorId = B.intVendorId
+		ON A.intVendorId = B.intEntityVendorId
 	INNER JOIN dbo.tblEntity C
-		ON B.intEntityId = C.intEntityId
+		ON B.intEntityVendorId = C.intEntityId
 	LEFT JOIN dbo.tblEntityLocation D
 		ON B.intDefaultLocationId = D.intEntityLocationId    
     LEFT Join dbo.tblSMTerm E

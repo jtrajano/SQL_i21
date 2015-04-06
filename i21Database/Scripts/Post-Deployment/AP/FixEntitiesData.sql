@@ -13,65 +13,65 @@ BEGIN
 	BEGIN TRANSACTION
 
 	PRINT 'BEGIN Inserting data to tblAPVendorToContact'
-	INSERT INTO tblAPVendorToContact(intVendorId, intContactId, intEntityLocationId)
-	SELECT B.intVendorId, C.intContactId, intLocationId 
+	INSERT INTO tblAPVendorToContact([intEntityVendorId], [intEntityContactId], intEntityLocationId)
+	SELECT B.[intEntityVendorId], C.[intEntityContactId], intLocationId 
 		FROM tblEntityToContact A
 		INNER JOIN tblAPVendor B
-			ON A.intEntityId = B.intEntityId
+			ON A.intEntityId = B.[intEntityVendorId]
 		INNER JOIN tblEntityContact C
-			ON A.intContactId = C.intEntityId
+			ON A.[intEntityContactId] = C.[intEntityContactId]
 	PRINT 'END Inserting data to tblAPVendorToContact'		
 
 	PRINT 'BEGIN Updating tblAPVendor default contact and location'		
 	UPDATE tblAPVendor
-	SET intDefaultContactId = B.intContactId
+	SET intDefaultContactId = B.[intEntityContactId]
 	FROM tblAPVendor A
 	INNER JOIN tblEntityContact B
-		ON A.intDefaultContactId = B.intEntityId
+		ON A.intDefaultContactId = B.[intEntityContactId]
 	PRINT 'END Updating tblAPVendor default contact and location'	
 
 
 	PRINT 'BEGIN updating intVendorId from tblAPBill'
 	UPDATE tblAPBill
-	SET intVendorId = B.intVendorId
+	SET intVendorId = B.[intEntityVendorId]
 	FROM tblAPBill A
 		INNER JOIN tblAPVendor B
-		ON A.intVendorId = B.intEntityId
+		ON A.intVendorId = B.[intEntityVendorId]
 	PRINT 'END updating intVendorId from tblAPBill'
 
 	PRINT 'BEGIN updating intVendorId from tblAPPayment'
 	UPDATE tblAPPayment
-	SET intVendorId = B.intVendorId
+	SET intVendorId = B.[intEntityVendorId]
 	FROM tblAPPayment A
 		INNER JOIN tblAPVendor B
-		ON A.intVendorId = B.intEntityId
+		ON A.intVendorId = B.[intEntityVendorId]
 	PRINT 'END updating intVendorId from tblAPPayment'
 
 	--Verify the data integrity
 	DECLARE @invalidVendor INT
 	SELECT @invalidVendor = COUNT(*)
 	FROM tblAPVendorToContact A
-		WHERE A.intVendorId NOT IN (SELECT intVendorId FROM tblAPVendor)
+		WHERE A.[intEntityVendorId] NOT IN (SELECT [intEntityVendorId] FROM tblAPVendor)
 
 	DECLARE @invalidContact INT
 	SELECT @invalidContact = COUNT(*)
 	FROM tblAPVendorToContact A
-		WHERE A.intContactId NOT IN (SELECT intContactId FROM tblEntityContact)
+		WHERE A.[intEntityContactId] NOT IN (SELECT [intEntityContactId] FROM tblEntityContact)
 
 	DECLARE @invalidDefaultContact INT
 	SELECT @invalidDefaultContact = COUNT(*)
 	FROM tblAPVendor A
-		WHERE A.intDefaultContactId NOT IN (SELECT intContactId FROM tblEntityContact)
+		WHERE A.intDefaultContactId NOT IN (SELECT [intEntityContactId] FROM tblEntityContact)
 
 	DECLARE @invalidBillVendor INT
 	SELECT @invalidBillVendor = COUNT(*)
 	FROM tblAPBill A
-		WHERE A.intVendorId NOT IN (SELECT intVendorId FROM tblAPVendor)
+		WHERE A.intVendorId NOT IN (SELECT [intEntityVendorId] FROM tblAPVendor)
 
 	DECLARE @invalidPaymentVendor INT
 	SELECT @invalidPaymentVendor = COUNT(*)
 	FROM tblAPPayment A
-		WHERE A.intVendorId NOT IN (SELECT intVendorId FROM tblAPVendor)
+		WHERE A.intVendorId NOT IN (SELECT [intEntityVendorId] FROM tblAPVendor)
 
 	--Re-enable check constraint
 	ALTER TABLE dbo.tblAPPayment

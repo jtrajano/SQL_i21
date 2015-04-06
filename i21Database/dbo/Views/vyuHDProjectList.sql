@@ -5,7 +5,7 @@ select
 	,t.strTicketNumber
 	,t.strCustomerNumber
 	,strContactName = conEntity.strName
-	,con.strPhone
+	,conEntity.strPhone
 	,m.strModule
 	,strAssignedToName = assEntity.strName
 	,p.dtmGoLive
@@ -20,7 +20,8 @@ select
 	,pt.intProjectTaskId
 	,m.intModuleId
 	,intContactEntityId = t.intCustomerContactId
-	,intContactId = con.intContactId
+	--,intContactId = con.intEntityContactId
+	,intContactId = conEntity.intEntityId
 	,intAssignedToEntityId = t.intAssignedToEntity
 	,t.intCustomerId
 	,ysnProjectCompleted = p.ysnCompleted
@@ -35,6 +36,6 @@ from
 	left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
 	left outer join tblHDModule m on m.intModuleId = t.intModuleId
 	left outer join tblEntity conEntity on conEntity.intEntityId = t.intCustomerContactId
-	left outer join tblEntityContact con on con.intEntityId = conEntity.intEntityId
+	--left outer join tblEntityContact con on con.intEntityContactId = conEntity.intEntityId
 	left outer join tblEntity assEntity on assEntity.intEntityId = t.intAssignedToEntity
 	left outer join tblHDMilestone ms on ms.intMilestoneId = t.intMilestoneId

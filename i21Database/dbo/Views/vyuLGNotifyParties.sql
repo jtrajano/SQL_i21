@@ -5,7 +5,7 @@ SELECT	E.intEntityId,
 		'Customer' 				AS strEntity
 FROM	tblEntity				E
 JOIN	tblARCustomer			C
-ON		C.intEntityId = E.intEntityId
+ON		C.intEntityCustomerId = E.intEntityId
 
 UNION ALL
 

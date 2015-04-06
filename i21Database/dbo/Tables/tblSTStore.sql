@@ -108,10 +108,10 @@
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC), 
-	CONSTRAINT [FK_tblSTStore_tblAPVendor_intDefaultVendorId] FOREIGN KEY ([intDefaultVendorId]) REFERENCES [tblAPVendor]([intVendorId]), 
+	CONSTRAINT [FK_tblSTStore_tblAPVendor_intDefaultVendorId] FOREIGN KEY ([intDefaultVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
 	CONSTRAINT [FK_tblSTStore_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
-    CONSTRAINT [FK_tblSTStore_tblAPVendor_intBegVendorNumberId] FOREIGN KEY ([intBegVendorNumberId]) REFERENCES [tblAPVendor]([intVendorId]), 
-    CONSTRAINT [FK_tblSTStore_tblAPVendor_intEndVendorNumberId] FOREIGN KEY ([intEndVendorNumberId]) REFERENCES [tblAPVendor]([intVendorId]), 
+    CONSTRAINT [FK_tblSTStore_tblAPVendor_intBegVendorNumberId] FOREIGN KEY ([intBegVendorNumberId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
+    CONSTRAINT [FK_tblSTStore_tblAPVendor_intEndVendorNumberId] FOREIGN KEY ([intEndVendorNumberId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
 	CONSTRAINT [FK_tblSTStore_tblICCategory_intLoyaltyDiscountCategoryId] FOREIGN KEY ([intLoyaltyDiscountCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
 	CONSTRAINT [FK_tblSTStore_tblSTRegister] FOREIGN KEY ([intRegisterId]) REFERENCES [tblSTRegister]([intRegisterId]), 
    );

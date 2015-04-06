@@ -16,8 +16,8 @@ SELECT
 	, A.ysnPosted 
 	, A.ysnPaid
 FROM dbo.tblAPBill A
-LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEntity C2 ON C1.intEntityId = C2.intEntityId)
-	ON C1.intVendorId = A.intVendorId
+LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEntity C2 ON C1.[intEntityVendorId] = C2.intEntityId)
+	ON C1.[intEntityVendorId] = A.intVendorId
 WHERE A.ysnPosted = 1
 UNION ALL   
 SELECT A.dtmDatePaid AS dtmDate,   
@@ -36,7 +36,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 FROM dbo.tblAPPayment  A
  LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
  LEFT JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
- LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEntity D2 ON D.intEntityId = D2.intEntityId)
-	ON A.intVendorId = D.intVendorId
+ LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEntity D2 ON D.[intEntityVendorId] = D2.intEntityId)
+	ON A.intVendorId = D.[intEntityVendorId]
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
