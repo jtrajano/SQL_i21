@@ -23,6 +23,7 @@
 	[intOrderStatusId] INT NOT NULL CONSTRAINT CK_PO_OrderStatus CHECK (dbo.[fnAPCheckPOOrderStatus](intOrderStatusId, intPurchaseId) = 1), 
     [strPurchaseOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strVendorOrderNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[strAdditionalInfo] NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipToAttention] NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipToAddress] NVARCHAR (200) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipToCity] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 

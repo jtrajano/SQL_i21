@@ -36,6 +36,8 @@ SELECT
  ,dblStockUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId),0)
  ,F.strSubLocationName
  ,G.strName AS strStorageName
+ ,ysnCompleted = (CASE WHEN B.dblQtyOrdered != B.dblQtyReceived THEN 0 ELSE 1 END)
+ ,D.strType
 FROM tblPOPurchase A
  INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
  INNER JOIN tblAPVendor C ON A.intVendorId = C.intVendorId
