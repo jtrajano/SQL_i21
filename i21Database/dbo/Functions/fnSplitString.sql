@@ -1,4 +1,21 @@
-﻿CREATE FUNCTION [dbo].[fnSplitString]
+﻿
+/*
+fnSplitString: This ia a genric function for splitting the string with any delimiter into a table of string field.
+Eg. @Input = 'abc, S78, jk5L, 8900'
+    @Character = ','
+
+	Will return a table as shown below
+	|Item	|
+	|-------|
+	|abc    |
+	|S78	|
+	|jk5L	|
+	|8900	|
+	
+	You can use any delimeter insetad of "," such as "|", ":", ";", etc.
+*/
+
+CREATE FUNCTION [dbo].[fnSplitString]
 (
 	@Input NVARCHAR(MAX),
     @Character CHAR(1)
