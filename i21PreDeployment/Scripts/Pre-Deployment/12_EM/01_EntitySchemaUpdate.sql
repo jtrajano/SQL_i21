@@ -5,36 +5,48 @@ BEGIN
 	
 	
 	declare @constraint varchar(500)
+	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblAPVendor' and OBJECT_NAME(referenced_object_id) = 'tblEntityContact' 
 		
 	if(@constraint <> '')
 		exec('ALTER TABLE tblAPVendor DROP CONSTRAINT [' + @constraint +']' )
-	
+
+	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblAPVendorToContact' and OBJECT_NAME(referenced_object_id) = 'tblAPVendor' 
 	if(@constraint <> '')
 		exec('ALTER TABLE tblAPVendorToContact DROP CONSTRAINT [' + @constraint +']' )
 	
+	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblAPBill' and OBJECT_NAME(referenced_object_id) = 'tblAPVendor' 
 	if(@constraint <> '')
 		exec('ALTER TABLE tblAPBill DROP CONSTRAINT [' + @constraint +']' )
 	
+	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblHDTicket' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer' 
 	if(@constraint <> '')
 		exec('ALTER TABLE tblHDTicket DROP CONSTRAINT [' + @constraint +']' )
 	
+	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARCustomerToContact' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer' 
 	if(@constraint <> '')
 		exec('ALTER TABLE tblARCustomerToContact DROP CONSTRAINT [' + @constraint +']' )
 	
+	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblAPVendorToContact' and OBJECT_NAME(referenced_object_id) = 'tblEntityContact' 
 	if(@constraint <> '')
 		exec('ALTER TABLE tblAPVendorToContact DROP CONSTRAINT [' + @constraint +']' )
 	
+	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARCustomerToContact' and OBJECT_NAME(referenced_object_id) = 'tblEntityContact' 
 	if(@constraint <> '')
 		exec('ALTER TABLE tblARCustomerToContact DROP CONSTRAINT [' + @constraint +']' )
 		
-	
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblMFRecipe' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblMFRecipe DROP CONSTRAINT [' + @constraint +']' )
+
+
 	print 'Adding tblEntityContact columns to tblEntity'
 	exec(N'	
 	alter table tblEntity
@@ -110,11 +122,14 @@ BEGIN
 
 
 	print 'Moving linking to entity id instead of vendor id'
-	exec(N'	
-			update a set a.intVendorId = b.intEntityId
-				from tblAPVendorToContact a
-					join tblAPVendor b
-						on a.intVendorId = b.intVendorId')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		exec(N'	
+				update a set a.intVendorId = b.intEntityId
+					from tblAPVendorToContact a
+						join tblAPVendor b
+							on a.intVendorId = b.intVendorId')
+	END
 
 	
 	print 'Adding Default Contact to Vendor To Contact'
@@ -126,78 +141,112 @@ BEGIN
 			add strUserType [nvarchar](20) NOT NULL Default('''')')
 		
 	print 'Update vendor to contact default contact column'
-	exec(N' update b set b.ysnDefaultContact = 1 
-				from tblAPVendor a
-					join tblAPVendorToContact b
-						on a.intDefaultContactId = b.intContactId ')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendor' AND [COLUMN_NAME] = 'ysnDefaultContact') 
+	BEGIN
+		exec(N' update b set b.ysnDefaultContact = 1 
+					from tblAPVendor a
+						join tblAPVendorToContact b
+							on a.intDefaultContactId = b.intContactId ')
+	END
 
 	
 	print 'Update Linking of tblAPBill from vendor id to entity id'
-	exec(N' update a set a.intVendorId = b.intEntityId
-			from tblAPBill a
-				join tblAPVendor b
-					on a.intVendorId =  b.intVendorId ')
-					
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPBill' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		exec(N' update a set a.intVendorId = b.intEntityId
+				from tblAPBill a
+					join tblAPVendor b
+						on a.intVendorId =  b.intVendorId ')
+	END
+	
+			
 	print 'Update Linking of tblHDTicket from customer id to entity id'
-	exec(N' UPDATE a set a.intCustomerId = b.intEntityId
-				from tblHDTicket a 
-					join tblARCustomer b 
-						on a.intCustomerId = b.intCustomerId')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblHDTicket' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N' UPDATE a set a.intCustomerId = b.intEntityId
+					from tblHDTicket a 
+						join tblARCustomer b 
+							on a.intCustomerId = b.intCustomerId')
+	END
 			
 	print 'Update Linking of tblARInvoice from customer id to entity id'
-	exec(N'
-			UPDATE a set a.intCustomerId = b.intEntityId
-				from tblARInvoice a 
-					join tblARCustomer b 
-						on a.intCustomerId = b.intCustomerId')
-						
-			
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARInvoice' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N'
+				UPDATE a set a.intCustomerId = b.intEntityId
+					from tblARInvoice a 
+						join tblARCustomer b 
+							on a.intCustomerId = b.intCustomerId')						
+	END
+		
 	print 'Update Linking of tblCCSite from customer id to entity id'
-	exec(N'	UPDATE a set a.intCustomerId = b.intEntityId
-			from tblCCSite a 
-				join tblARCustomer b 
-					on a.intCustomerId = b.intCustomerId')
-			
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblCCSite' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N'	UPDATE a set a.intCustomerId = b.intEntityId
+				from tblCCSite a 
+					join tblARCustomer b 
+						on a.intCustomerId = b.intCustomerId')
+	END
+
+	
 	print 'Update Linking of tblHDProject from customer id to entity id'
-	exec(N'
-			UPDATE a set a.intCustomerId = b.intEntityId
-				from tblHDProject a 
-					join tblARCustomer b 
-						on a.intCustomerId = b.intCustomerId')
-			
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblHDProject' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N'
+				UPDATE a set a.intCustomerId = b.intEntityId
+					from tblHDProject a 
+						join tblARCustomer b 
+							on a.intCustomerId = b.intCustomerId')
+	END
+	
 	print 'Update Linking of tblMFRecipe from customer id to entity id'
-	exec(N' UPDATE a set a.intCustomerId = b.intEntityId
-			from tblMFRecipe a 
-				join tblARCustomer b 
-					on a.intCustomerId = b.intCustomerId')
-
-
-	print 'Update Linking of tblSOSalesOrder from customer id to entity id'
-	exec(N'
-			UPDATE a set a.intCustomerId = b.intEntityId
-				from tblSOSalesOrder a 
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblMFRecipe' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N' UPDATE a set a.intCustomerId = b.intEntityId
+				from tblMFRecipe a 
 					join tblARCustomer b 
 						on a.intCustomerId = b.intCustomerId')
+	END
+		
+	print 'Update Linking of tblSOSalesOrder from customer id to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSOSalesOrder' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N'
+				UPDATE a set a.intCustomerId = b.intEntityId
+					from tblSOSalesOrder a 
+						join tblARCustomer b 
+							on a.intCustomerId = b.intCustomerId')
+	END
 
 	print 'Update Linking of tblICItemCustomerXref from customer id to entity id'
-	exec(N'
-			UPDATE a set a.intCustomerId = b.intEntityId
-				from tblICItemCustomerXref a 
-					join tblARCustomer b 
-						on a.intCustomerId = b.intCustomerId')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICItemCustomerXref' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N'
+				UPDATE a set a.intCustomerId = b.intEntityId
+					from tblICItemCustomerXref a 
+						join tblARCustomer b 
+							on a.intCustomerId = b.intCustomerId')
+	END
 
 	print 'Update Linking of tblARPayment from customer id to entity id'
-	exec(N'
-			UPDATE a set a.intCustomerId = b.intEntityId
-				from tblARPayment a 
-					join tblARCustomer b 
-						on a.intCustomerId = b.intCustomerId')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARPayment' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N'
+				UPDATE a set a.intCustomerId = b.intEntityId
+					from tblARPayment a 
+						join tblARCustomer b 
+							on a.intCustomerId = b.intCustomerId')
+	END
+
 
 	print 'Update Linking of tblARCustomerToContact from customer id to entity id'
-	exec(N'	UPDATE a set a.intCustomerId = b.intEntityId
-				from tblARCustomerToContact a 
-					join tblARCustomer b 
-						on a.intCustomerId = b.intCustomerId')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerToContact' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N'	UPDATE a set a.intCustomerId = b.intEntityId
+					from tblARCustomerToContact a 
+						join tblARCustomer b 
+							on a.intCustomerId = b.intCustomerId')
+	END
 
 	print 'Add ysnDefault column to ARCustomerToContact'
 	exec(N'	
@@ -206,74 +255,107 @@ BEGIN
 
 
 	print 'Update ysnDefaultContact'
-	exec(N'	update 
-				b set b.ysnDefaultContact = 1 
-			from tblARCustomer a
-				join tblARCustomerToContact b
-					on a.intDefaultContactId = b.intARCustomerToContactId	')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerToContact' AND [COLUMN_NAME] = 'ysnDefaultContact') 
+	BEGIN
+		exec(N'	update 
+					b set b.ysnDefaultContact = 1 
+				from tblARCustomer a
+					join tblARCustomerToContact b
+						on a.intDefaultContactId = b.intARCustomerToContactId	')
+	END
 		
 	print 'Update Linking of tblICItemOwner from customer id to entity idt'
-	exec(N'
-			UPDATE a set a.intOwnerId = b.intEntityId
-				from tblICItemOwner a 
-					join tblARCustomer b 
-						on a.intOwnerId = b.intCustomerId')
-
-
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICItemOwner' AND [COLUMN_NAME] = 'intOwnerId') 
+	BEGIN
+		exec(N'
+				UPDATE a set a.intOwnerId = b.intEntityId
+					from tblICItemOwner a 
+						join tblARCustomer b 
+							on a.intOwnerId = b.intCustomerId')
+	END	
+		
 	print 'Update Linking of tblHDProject from entity contact to entity id'
-	exec(N' UPDATE a set a.intCustomerContactId = b.intEntityId
-	from tblHDProject a 
-		join tblEntityContact b 
-			on a.intCustomerContactId = b.intContactId')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblHDProject' AND [COLUMN_NAME] = 'intCustomerContactId') 
+	BEGIN
+		exec(N' UPDATE a set a.intCustomerContactId = b.intEntityId
+		from tblHDProject a 
+			join tblEntityContact b 
+				on a.intCustomerContactId = b.intContactId')
+	END
+
 	
 	print 'Update Linking of tblHDProject intCustomerLeadershipSponsor from entity contact to entity id'
-	exec(N'		
-			UPDATE a set a.intCustomerLeadershipSponsor = b.intEntityId
-				from tblHDProject a 
-					join tblEntityContact b 
-						on a.intCustomerLeadershipSponsor = b.intContactId')
-						
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblHDProject' AND [COLUMN_NAME] = 'intCustomerLeadershipSponsor') 
+	BEGIN
+		exec(N'		
+				UPDATE a set a.intCustomerLeadershipSponsor = b.intEntityId
+					from tblHDProject a 
+						join tblEntityContact b 
+							on a.intCustomerLeadershipSponsor = b.intContactId')
+	END
+	
+					
 	print 'Update Linking of tblHDProject intCustomerProjectManager from entity contact to entity id'
-	exec(N'	
-			UPDATE a set a.intCustomerProjectManager = b.intEntityId
-				from tblHDProject a 
-					join tblEntityContact b 
-						on a.intCustomerProjectManager = b.intContactId	')	
-
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblHDProject' AND [COLUMN_NAME] = 'intCustomerProjectManager') 
+	BEGIN
+		exec(N'	
+				UPDATE a set a.intCustomerProjectManager = b.intEntityId
+					from tblHDProject a 
+						join tblEntityContact b 
+							on a.intCustomerProjectManager = b.intContactId	')
+	END		
+							
+	
 	print 'Update Linking of tblHDProjectModule from entity contact to entity id'
-	exec(N'
-			UPDATE a set a.intContactId = b.intEntityId
-				from tblHDProjectModule a 
-					join tblEntityContact b 
-						on a.intContactId = b.intContactId	')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblHDProjectModule' AND [COLUMN_NAME] = 'intContactId') 
+	BEGIN
+		exec(N'
+				UPDATE a set a.intContactId = b.intEntityId
+					from tblHDProjectModule a 
+						join tblEntityContact b 
+							on a.intContactId = b.intContactId	')
+	END
 	
 	print 'Update Linking of tblAPVendorToContact from entity contact to entity id'
-	exec(N'
-			UPDATE a set a.intContactId = b.intEntityId
-				from tblAPVendorToContact a 
-					join tblEntityContact b 
-						on a.intContactId = b.intContactId	')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact' AND [COLUMN_NAME] = 'intContactId') 
+	BEGIN
+		exec(N'
+				UPDATE a set a.intContactId = b.intEntityId
+					from tblAPVendorToContact a 
+						join tblEntityContact b 
+							on a.intContactId = b.intContactId	')
+	END
 
 	print 'Update Linking of tblARCustomerToContact from entity contact to entity id'
-	exec(N'
-			UPDATE a set a.intContactId = b.intEntityId
-				from tblARCustomerToContact a 
-					join tblEntityContact b 
-						on a.intContactId = b.intContactId		')		
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerToContact' AND [COLUMN_NAME] = 'intContactId') 
+	BEGIN
+		exec(N'
+				UPDATE a set a.intContactId = b.intEntityId
+					from tblARCustomerToContact a 
+						join tblEntityContact b 
+							on a.intContactId = b.intContactId		')		
+	END
+
 
 	print 'Update Linking of tblAPVendor default contact from entity contact to entity id'
-	exec(N'						
-			UPDATE a set a.intDefaultContactId = b.intEntityId
-				from tblAPVendor a 
-					join tblEntityContact b 
-						on a.intDefaultContactId = b.intContactId		')	
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendor' AND [COLUMN_NAME] = 'intDefaultContactId') 
+	BEGIN
+		exec(N'						
+				UPDATE a set a.intDefaultContactId = b.intEntityId
+					from tblAPVendor a 
+						join tblEntityContact b 
+							on a.intDefaultContactId = b.intContactId		')	
+	END
 
 	print 'Update Linking of tblARCustomer salesperson from salespersonid to entityid '
-	exec(N'		
-			UPDATE a set a.intSalespersonId = b.intEntityId
-				from tblARCustomer a 
-					join tblARSalesperson b 
-						on a.intSalespersonId = b.intSalespersonId	')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomer' AND [COLUMN_NAME] = 'intSalespersonId') 
+	BEGIN
+		exec(N'		
+				UPDATE a set a.intSalespersonId = b.intEntityId
+					from tblARCustomer a 
+						join tblARSalesperson b 
+							on a.intSalespersonId = b.intSalespersonId	')
+	END
 
 	print 'add locationid to tblEntityToContact'
 	exec(N'		
