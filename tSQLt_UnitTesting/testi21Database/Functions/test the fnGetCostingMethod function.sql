@@ -54,7 +54,7 @@ BEGIN
 			intItemId
 			,intItemLocationId
 			,intCostingMethod
-			,intCategoryId
+			--,intCategoryId
 			,intLocationId
 		)
 		-- Add location for Item 1
@@ -62,28 +62,28 @@ BEGIN
 		SELECT	intItemId = @Item1
 				,intItemLocationId = @LocationA
 				,intCostingMethod = @AverageCost
-				,intCategoryId = NULL
+				--,intCategoryId = NULL
 				,intLocationId = @LocationA * 100
 		-- Add costing method for FIFO			
 		UNION ALL
 		SELECT	intItemId = @Item1
 				,intItemLocationId = @LocationB
 				,intCostingMethod = @FIFO	
-				,intCategoryId = NULL
+				--,intCategoryId = NULL
 				,intLocationId = @LocationB * 100
 		-- Add costing method for LIFO
 		UNION ALL
 		SELECT	intItemId = @Item1
 				,intItemLocationId = @LocationC
 				,intCostingMethod = @LIFO	
-				,intCategoryId = NULL
+				--,intCategoryId = NULL
 				,intLocationId = @LocationC * 100
 		-- Add costing method for Standard Cost
 		UNION ALL
 		SELECT	intItemId = @Item1
 				,intItemLocationId = @LocationD
 				,intCostingMethod = @StandardCost
-				,intCategoryId = NULL
+				--,intCategoryId = NULL
 				,intLocationId = @LocationD * 100
 
 		-- Add location for Item 2		
@@ -93,28 +93,28 @@ BEGIN
 		SELECT	intItemId = @Item2
 				,intItemLocationId = @LocationA
 				,intCostingMethod = NULL
-				,intCategoryId = @Category_On_FIFO
+				--,intCategoryId = @Category_On_FIFO
 				,intLocationId = @LocationA * 100
 		-- Add costing method for FIFO			
 		UNION ALL
 		SELECT	intItemId = @Item2
 				,intItemLocationId = @LocationB
 				,intCostingMethod = NULL
-				,intCategoryId = @Category_On_FIFO
+				--,intCategoryId = @Category_On_FIFO
 				,intLocationId = @LocationB * 100
 		-- Add costing method for LIFO
 		UNION ALL
 		SELECT	intItemId = @Item2
 				,intItemLocationId = @LocationC
 				,intCostingMethod = NULL
-				,intCategoryId = @Category_On_FIFO
+				--,intCategoryId = @Category_On_FIFO
 				,intLocationId = @LocationC * 100
 		-- Add costing method for Standard Cost
 		UNION ALL
 		SELECT	intItemId = @Item2
 				,intItemLocationId = @LocationD
 				,intCostingMethod = NULL
-				,intCategoryId = @Category_On_FIFO
+				--,intCategoryId = @Category_On_FIFO
 				,intLocationId = @LocationD * 100
 
 		-- Add location for Item 3
@@ -124,28 +124,28 @@ BEGIN
 		SELECT	intItemId = @Item3
 				,intItemLocationId = @LocationA
 				,intCostingMethod = @AverageCost
-				,intCategoryId = @Category_On_LIFO
+				--,intCategoryId = @Category_On_LIFO
 				,intLocationId = @LocationA * 100
 		-- Add costing method for FIFO			
 		UNION ALL
 		SELECT	intItemId = @Item3
 				,intItemLocationId = @LocationB
 				,intCostingMethod = @AverageCost
-				,intCategoryId = @Category_On_LIFO
+				--,intCategoryId = @Category_On_LIFO
 				,intLocationId = @LocationB * 100
 		-- Add costing method for LIFO
 		UNION ALL
 		SELECT	intItemId = @Item3
 				,intItemLocationId = @LocationC
 				,intCostingMethod = @AverageCost 
-				,intCategoryId = @Category_On_LIFO
+				--,intCategoryId = @Category_On_LIFO
 				,intLocationId = @LocationC * 100
 		-- Add costing method for Standard Cost
 		UNION ALL
 		SELECT	intItemId = @Item3
 				,intItemLocationId = @LocationD
 				,intCostingMethod = @AverageCost 
-				,intCategoryId = @Category_On_LIFO
+				--,intCategoryId = @Category_On_LIFO
 				,intLocationId = @LocationD * 100
 		
 		-- Setup a fake table and data for tblICCategory
@@ -160,19 +160,20 @@ BEGIN
 		
 		-- Setup a fake table and data for tblICItem
 		DROP VIEW vyuAPRptPurchase
-		EXEC tSQLt.FakeTable 'dbo.tblICItem', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICItem';
 		INSERT tblICItem (
-			strDescription
+			intItemId
+			,strDescription
 			,strLotTracking
+			,intCategoryId
 		)
-		SELECT strDescription = 'I am item 1', strLotTracking = 'No'
-		UNION ALL SELECT strDescription = 'I am item 2', strLotTracking = NULL
-		UNION ALL SELECT strDescription = 'I am item 3', strLotTracking = 'No'
-		UNION ALL SELECT strDescription = 'I am item 4', strLotTracking = 'No'
-		UNION ALL SELECT strDescription = 'I am item 5', strLotTracking = 'Yes - Manual'
-		UNION ALL SELECT strDescription = 'I am item 6', strLotTracking = 'Yes - Serial Number'
+		SELECT intItemId = @Item1, strDescription = 'I am item 1', strLotTracking = 'No', intCategoryId = NULL 
+		UNION ALL SELECT intItemId = @Item2, strDescription = 'I am item 2', strLotTracking = NULL, intCategoryId = @FIFO 
+		UNION ALL SELECT intItemId = @Item3, strDescription = 'I am item 3', strLotTracking = 'No', intCategoryId = NULL 
+		UNION ALL SELECT intItemId = @Item4, strDescription = 'I am item 4', strLotTracking = 'No', intCategoryId = NULL 
+		UNION ALL SELECT intItemId = @LotItem1, strDescription = 'I am item 5', strLotTracking = 'Yes - Manual', intCategoryId = NULL 
+		UNION ALL SELECT intItemId = @LotItem2, strDescription = 'I am item 6', strLotTracking = 'Yes - Serial Number', intCategoryId = NULL 
 	END
-
 
 	-- Test average cost
 	BEGIN		
