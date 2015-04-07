@@ -106,7 +106,7 @@ FROM
 	[tblARPayment] A
 INNER JOIN
 	[tblARCustomer] C
-		ON A.[intCustomerId] = C.[intCustomerId]
+		ON A.[intCustomerId] = C.[intEntityCustomerId]
 INNER JOIN
 	[tblEntityLocation] EL
 		ON C.[intDefaultLocationId] = EL.[intEntityLocationId] 
@@ -161,7 +161,7 @@ FROM
 	[tblARPayment] A
 INNER JOIN
 	[tblARCustomer] C
-		ON A.[intCustomerId] = C.[intCustomerId]
+		ON A.[intCustomerId] = C.[intEntityCustomerId]
 INNER JOIN
 	[tblSMCompanyLocation] CL
 		ON A.[intLocationId] = CL.[intCompanyLocationId] 

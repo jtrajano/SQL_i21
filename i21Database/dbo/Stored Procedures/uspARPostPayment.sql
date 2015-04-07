@@ -690,7 +690,7 @@ BEGIN
 				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -734,7 +734,7 @@ BEGIN
 				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1560,7 +1560,7 @@ ELSE
 				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1603,7 +1603,7 @@ ELSE
 				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId

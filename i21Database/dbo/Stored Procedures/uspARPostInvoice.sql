@@ -502,7 +502,7 @@ BEGIN
 			ON A.intInvoiceId = B.intInvoiceId
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.intCustomerId = C.intCustomerId
+			ON A.intCustomerId = C.intEntityCustomerId
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId
 	LEFT JOIN
@@ -573,7 +573,7 @@ BEGIN
 			ON A.intInvoiceId = B.intInvoiceId
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.intCustomerId = C.intCustomerId
+			ON A.intCustomerId = C.intEntityCustomerId
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId 
 	LEFT JOIN
@@ -641,7 +641,7 @@ BEGIN
 		tblARInvoice A
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.intCustomerId = C.intCustomerId
+			ON A.intCustomerId = C.intEntityCustomerId
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId 			
 	INNER JOIN 
@@ -687,7 +687,7 @@ BEGIN
 			ON A.intInvoiceId = B.intInvoiceId
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.intCustomerId = C.intCustomerId
+			ON A.intCustomerId = C.intEntityCustomerId
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId 			
 	INNER JOIN 
@@ -729,7 +729,7 @@ BEGIN
 			ON A.intInvoiceId = B.intInvoiceId
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.intCustomerId = C.intCustomerId
+			ON A.intCustomerId = C.intEntityCustomerId
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId 			
 	INNER JOIN 
@@ -770,7 +770,7 @@ BEGIN
 		tblARInvoice A 
 	LEFT JOIN 
 		tblARCustomer C
-			ON A.intCustomerId = C.intCustomerId
+			ON A.intCustomerId = C.intEntityCustomerId
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId 	
 	INNER JOIN
@@ -811,10 +811,10 @@ UNION ALL
 		tblARInvoice A 
 	INNER JOIN 
 		tblARCustomer C
-			ON A.intCustomerId = C.intCustomerId
+			ON A.intCustomerId = C.intEntityCustomerId
 	LEFT OUTER JOIN
 		vyuARCustomerTaxCode TC
-			ON C.intCustomerId = TC.intCustomerId 			
+			ON C.intEntityCustomerId = TC.intEntityCustomerId 			
 	LEFT JOIN Units U
 			ON A.intAccountId = U.intAccountId 		
 	INNER JOIN 
@@ -1148,7 +1148,7 @@ ELSE
 				ON A.intInvoiceId = B.intInvoiceId
 		LEFT JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId 	
@@ -1220,7 +1220,7 @@ ELSE
 				ON A.intInvoiceId = B.intInvoiceId
 		LEFT JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId 				
+				ON A.intCustomerId = C.intEntityCustomerId 				
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId 	
@@ -1289,7 +1289,7 @@ ELSE
 			tblARInvoice A
 		LEFT JOIN 
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId 			
@@ -1336,7 +1336,7 @@ ELSE
 				ON A.intInvoiceId = B.intInvoiceId
 		LEFT JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId 			
@@ -1379,7 +1379,7 @@ ELSE
 				ON A.intInvoiceId = B.intInvoiceId
 		LEFT JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId 			
@@ -1422,7 +1422,7 @@ ELSE
 			tblARInvoice A 
 		LEFT JOIN 
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		LEFT JOIN Units U
 				ON A.intAccountId = U.intAccountId 	
 		INNER JOIN
@@ -1464,10 +1464,10 @@ ELSE
 			tblARInvoice A 
 		INNER JOIN 
 			tblARCustomer C
-				ON A.intCustomerId = C.intCustomerId
+				ON A.intCustomerId = C.intEntityCustomerId
 		INNER JOIN
 			vyuARCustomerTaxCode TC
-				ON C.intCustomerId = TC.intCustomerId 				
+				ON C.intEntityCustomerId = TC.intEntityCustomerId 				
 		LEFT JOIN Units U
 				ON A.intAccountId = U.intAccountId 		
 		INNER JOIN 

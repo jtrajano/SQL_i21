@@ -83,9 +83,9 @@ AS
 		tblARCustomerSpecialPrice SP
 	INNER JOIN
 		tblARCustomer C
-			ON SP.intEntityId = C.intEntityId
+			ON SP.intEntityId = C.intEntityCustomerId
 	WHERE
-		C.intCustomerId = @CustomerId
+		C.intEntityCustomerId = @CustomerId
 		AND @TransactionDate BETWEEN SP.dtmBeginDate AND SP.dtmEndDate
 
 
@@ -277,7 +277,7 @@ AS
 			,CG.strGroupName
 			,CGD.ysnSpecialPricing 
 			,CGD.intEntityId
-			,C.intCustomerId 
+			,C.intEntityCustomerId 
 			,C.strPricing
 			,C.ysnSpecialPriceGroup
 		FROM 
@@ -287,9 +287,9 @@ AS
 				ON CG.intCustomerGroupId = CGD.intCustomerGroupId
 		INNER JOIN
 			tblARCustomer C
-				ON CGD.intEntityId = C.intEntityId					
+				ON CGD.intEntityId = C.intEntityCustomerId					
 		WHERE
-			C.intCustomerId = @CustomerId
+			C.intEntityCustomerId = @CustomerId
 			AND CGD.ysnSpecialPricing = 1
 
 
@@ -513,12 +513,12 @@ AS
 									ON PL.strPriceLevel = CL.strPricingLevel
 							INNER JOIN
 								tblARCustomer C									
-									ON CL.intEntityId = C.intEntityId																
+									ON CL.intEntityId = C.intEntityCustomerId																
 							INNER JOIN vyuICGetItemStock VIS
 									ON PL.intItemId = VIS.intItemId
 									AND PL.intItemLocationId = VIS.intItemLocationId															
 							WHERE
-								C.intCustomerId = @CustomerId
+								C.intEntityCustomerId = @CustomerId
 								AND PL.intItemId = @ItemId
 								AND PL.intItemLocationId = @ItemLocationyId
 								AND PL.intItemUnitMeasureId = @ItemUOMId
