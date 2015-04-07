@@ -14,6 +14,10 @@ SELECT
 	ItemLocation.intLocationId,
 	ItemLocation.intItemLocationId,
 	ItemLocation.intSubLocationId,
+	Item.intCategoryId,
+	Category.strCategoryCode,
+	Item.intCommodityId,
+	Commodity.strCommodityCode,
 	StorageLocation.strName AS strStorageLocationName,
 	SubLocation.strSubLocationName AS strSubLocationName,
 	ItemLocation.intStorageLocationId,
@@ -74,3 +78,5 @@ LEFT JOIN tblICStorageLocation StorageLocation ON ItemLocation.intStorageLocatio
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblICItemStock ItemStock ON ItemStock.intItemId = Item.intItemId AND ItemLocation.intItemLocationId = ItemStock.intItemLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON ItemLocation.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
+LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
+LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
