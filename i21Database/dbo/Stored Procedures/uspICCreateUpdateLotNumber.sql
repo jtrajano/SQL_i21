@@ -333,7 +333,7 @@ BEGIN
 				,strReceiptNumber		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
 				,strMarkings			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strMarkings ELSE LotMaster.strMarkings END 
 				,strNotes				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strNotes ELSE LotMaster.strNotes END 
-				,intVendorId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorId ELSE LotMaster.intVendorId END 
+				,intEntityVendorId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorId ELSE LotMaster.intEntityVendorId END 
 				,strVendorLotNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLotNo ELSE LotMaster.strVendorLotNo END 
 				,intVendorLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorLocationId ELSE LotMaster.intVendorLocationId END
 				,strVendorLocation		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLocation ELSE LotMaster.strVendorLocation END 
@@ -442,7 +442,7 @@ BEGIN
 				,strReceiptNumber
 				,strMarkings
 				,strNotes
-				,intVendorId
+				,intEntityVendorId
 				,strVendorLotNo
 				,intVendorLocationId
 				,strVendorLocation
