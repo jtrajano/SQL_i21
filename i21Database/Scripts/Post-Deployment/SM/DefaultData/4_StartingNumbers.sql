@@ -281,6 +281,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Sales Order')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 30
+			,[strTransactionType]	= N'Inventory Adjustment'
+			,[strPrefix]			= N'ADJ-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Inventory'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inventory Adjustment')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
