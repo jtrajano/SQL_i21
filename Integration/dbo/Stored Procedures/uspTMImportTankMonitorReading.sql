@@ -222,6 +222,11 @@ EXEC('
 														AND dtmDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)),0.0)
 											+ dblDegreeDayBetweenDelivery) AS INT)
 			WHERE intSiteID = @siteId
+
+			--update intConcurrencyId
+			UPDATE tblTMSite
+			SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+			WHERE intSiteID = @siteId
 		
 			PRINT @ta_ltankcrit
 			IF(@ta_ltankcrit = 1)
