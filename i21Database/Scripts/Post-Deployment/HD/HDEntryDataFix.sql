@@ -221,7 +221,7 @@ GO
 GO
 
 	update tblHDTicket set intCustomerId = (
-		select tblARCustomer.intCustomerId from tblARCustomer where strCustomerNumber = tblHDTicket.strCustomerNumber
+		select tblARCustomer.intEntityCustomerId from tblARCustomer where strCustomerNumber = tblHDTicket.strCustomerNumber
 	)
 
 GO
