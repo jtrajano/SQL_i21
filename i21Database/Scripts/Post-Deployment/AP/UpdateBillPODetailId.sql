@@ -1,7 +1,8 @@
-﻿IF EXISTS(SELECT 1 FROM tblAPBillDetail WHERE A.intPODetail IS NULL AND A.intItemReceiptId IS NOT NULL)
+﻿
+EXEC
+('
+IF EXISTS(SELECT 1 FROM tblAPBillDetail A WHERE A.intPODetailId IS NULL AND A.intItemReceiptId IS NOT NULL)
 BEGIN
-	EXEC
-	('
 	--SET the new intPODetailId field to track the po item
 	UPDATE A
 		SET A.intPODetailId = A.intItemReceiptId
@@ -31,8 +32,32 @@ BEGIN
 		WHERE A.intInventoryReceiptItemId = C.intItemReceiptId
 		AND ysnPosted = 1
 	)
-	')
+
+	--SET update PO qty received item
+	UPDATE A
+		SET A.dblQtyReceived = ISNULL(Received.dblTotalReceived, 0)
+	FROM tblPOPurchaseDetail A
+	OUTER APPLY
+	(
+		SELECT 
+			SUM(dblTotalReceived) dblTotalReceived
+			,intLineNo
+		FROM (
+			SELECT 
+				dbo.[fnCalculateQtyBetweenUOM](A.intUnitOfMeasureId, C.intUnitMeasureId, SUM(C.dblOpenReceive)) dblTotalReceived
+				,C.intLineNo
+			FROM tblICInventoryReceipt B
+				INNER JOIN tblICInventoryReceiptItem C
+					ON B.intInventoryReceiptId = C.intInventoryReceiptId
+			WHERE B.ysnPosted = 1 
+			AND C.intLineNo = A.intPurchaseDetailId
+			GROUP BY C.intLineNo, C.intUnitMeasureId
+		) TotalReceived
+		GROUP BY intLineNo
+	) Received
 END
+')
+
 
 
 
