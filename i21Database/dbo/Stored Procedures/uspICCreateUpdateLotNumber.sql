@@ -147,7 +147,7 @@ SELECT  intId
 		,strReceiptNumber
 		,strMarkings
 		,strNotes
-		,intVendorId
+		,intEntityVendorId
 		,strVendorLotNo
 		,intVendorLocationId
 		,strVendorLocation 
