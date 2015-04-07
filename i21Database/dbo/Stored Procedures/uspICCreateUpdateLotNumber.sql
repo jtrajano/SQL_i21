@@ -66,7 +66,7 @@ DECLARE
 	,@strReceiptNumber			AS NVARCHAR(50)
 	,@strMarkings				AS NVARCHAR(MAX)
 	,@strNotes					AS NVARCHAR(MAX)
-	,@intVendorId				AS INT 
+	,@intEntityVendorId			AS INT 
 	,@strVendorLotNo			AS NVARCHAR(50)
 	,@intVendorLocationId		AS INT
 	,@strVendorLocation			AS NVARCHAR(100)
@@ -103,7 +103,7 @@ SELECT  intId
 		,strReceiptNumber
 		,strMarkings
 		,strNotes
-		,intVendorId
+		,intEntityVendorId
 		,strVendorLotNo
 		,intVendorLocationId
 		,strVendorLocation 
@@ -137,7 +137,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strReceiptNumber
 		,@strMarkings
 		,@strNotes
-		,@intVendorId
+		,@intEntityVendorId
 		,@strVendorLotNo
 		,@intVendorLocationId
 		,@strVendorLocation
@@ -289,7 +289,7 @@ BEGIN
 				,strReceiptNumber		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
 				,strMarkings			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strMarkings ELSE LotMaster.strMarkings END 
 				,strNotes				= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strNotes ELSE LotMaster.strNotes END 
-				,intVendorId			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @intVendorId ELSE LotMaster.intVendorId END 
+				,intEntityVendorId		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @intEntityVendorId ELSE LotMaster.intEntityVendorId END 
 				,strVendorLotNo			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strVendorLotNo ELSE LotMaster.strVendorLotNo END 
 				,intVendorLocationId	= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @intVendorLocationId ELSE LotMaster.intVendorLocationId END
 				,strVendorLocation		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strVendorLocation ELSE LotMaster.strVendorLocation END 
@@ -398,7 +398,7 @@ BEGIN
 				,strReceiptNumber
 				,strMarkings
 				,strNotes
-				,intVendorId
+				,intEntityVendorId
 				,strVendorLotNo
 				,intVendorLocationId
 				,strVendorLocation
@@ -430,7 +430,7 @@ BEGIN
 				,@strReceiptNumber
 				,@strMarkings
 				,@strNotes
-				,@intVendorId
+				,@intEntityVendorId
 				,@strVendorLotNo
 				,@intVendorLocationId
 				,@strVendorLocation
@@ -561,7 +561,7 @@ BEGIN
 		,@strReceiptNumber
 		,@strMarkings
 		,@strNotes
-		,@intVendorId
+		,@intEntityVendorId
 		,@strVendorLotNo
 		,@intVendorLocationId
 		,@strVendorLocation

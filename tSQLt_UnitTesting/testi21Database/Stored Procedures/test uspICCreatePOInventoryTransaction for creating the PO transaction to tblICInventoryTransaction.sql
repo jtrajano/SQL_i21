@@ -54,7 +54,7 @@ BEGIN
 		DECLARE @dtmDate AS DATETIME = '01/06/2014'
 
 		-- Fake PO Header data
-		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightTermId, dblShipping, dblTotal, intVendorId, dtmDate) VALUES (@intPurchaseId, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish, @dtmDate)
+		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightTermId, dblShipping, dblTotal, intEntityVendorId, dtmDate) VALUES (@intPurchaseId, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish, @dtmDate)
 
 		-- Fake PO Detail data
 		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (@intPurchaseId, 1, @WetGrains, 10, 0, @WetGrains_BushelUOMId, 50.00)

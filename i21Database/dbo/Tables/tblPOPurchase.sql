@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPOPurchase]
 (
 	[intPurchaseId] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY, 
-    [intVendorId] INT NOT NULL, 
+    [intEntityVendorId] INT NOT NULL, 
     [intAccountId] INT NULL, 
     [intFreightTermId] INT NULL, 
     [intCurrencyId] INT NOT NULL, 
@@ -58,5 +58,5 @@ CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_strPurchaseOrderNumber]
     ON [dbo].[tblPOPurchase]([strPurchaseOrderNumber] ASC);
 GO
 CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_intVendorId]
-    ON [dbo].[tblPOPurchase]([intVendorId] ASC)
+    ON [dbo].[tblPOPurchase]([intEntityVendorId] ASC)
 	INCLUDE ([intPurchaseId],[strVendorOrderNumber]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

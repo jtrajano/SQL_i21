@@ -92,7 +92,7 @@ BEGIN
 		DECLARE @Vendor_CoolAmish AS INT = 1
 
 		-- Fake PO Header data
-		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightTermId, dblShipping, dblTotal, intVendorId) VALUES (1, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish)
+		INSERT INTO dbo.tblPOPurchase (intPurchaseId, strPurchaseOrderNumber, intShipToId, strReference, intShipViaId, intCurrencyId, intFreightTermId, dblShipping, dblTotal, intEntityVendorId) VALUES (1, N'PO-10001', @ShipTo_DefaultLocation, N'This is a reference', @ShipVia_UPS, @Currency_USD, @FreightTerm, 100.00, 2000.00, @Vendor_CoolAmish)
 
 		-- Fake PO Detail data
 		INSERT INTO dbo.tblPOPurchaseDetail(intPurchaseId, intLineNo, intItemId, dblQtyOrdered, dblQtyReceived, intUnitOfMeasureId, dblCost) VALUES (1, 11, @WetGrains, 10, 0, @WetGrains_BushelUOMId, 50.00)
@@ -110,7 +110,7 @@ BEGIN
 		-- Assert table for tblICInventoryReceipt
 		SELECT	strReceiptNumber
 				,dtmReceiptDate
-				,intVendorId
+				,intEntityVendorId
 				,strReceiptType
 				,intLocationId
 				,strVendorRefNo
@@ -154,7 +154,7 @@ BEGIN
 		INSERT INTO expected_tblICInventoryReceipt 
 		SELECT strReceiptNumber = 'INVRCT-1000'
 				,dtmReceiptDate = dbo.fnRemoveTimeOnDate(GETDATE())
-				,intVendorId = @Vendor_CoolAmish
+				,intEntityVendorId = @Vendor_CoolAmish
 				,strReceiptType = @ReceiptType_PurchaseOrder
 				,intItemLocationId = @Default_Location
 				,strVendorRefNo = N'This is a reference'
@@ -242,7 +242,7 @@ BEGIN
 			
 		SELECT	strReceiptNumber
 				,dtmReceiptDate
-				,intVendorId
+				,intEntityVendorId
 				,strReceiptType
 				,intLocationId
 				,strVendorRefNo

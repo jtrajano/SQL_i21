@@ -6,7 +6,7 @@ SELECT
 ,A.intPurchaseId
 ,A.dtmDate
 ,A.dtmExpectedDate
-,A.intVendorId
+,A.intEntityVendorId
 ,A.strPurchaseOrderNumber
 ,A.strVendorOrderNumber
 ,A.strReference
@@ -44,7 +44,7 @@ SELECT
  ,E.strUnitMeasure
 FROM dbo.tblPOPurchase A
 	INNER JOIN (dbo.tblAPVendor C INNER JOIN dbo.tblEntity C1 ON C.intEntityVendorId = C1.intEntityId)
-			ON A.intVendorId = C.intEntityVendorId
+			ON A.intEntityVendorId = C.intEntityVendorId
 	LEFT JOIN dbo.tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN dbo.tblICItem D ON B.intItemId = D.intItemId
 	INNER JOIN (dbo.tblICItemUOM E1 

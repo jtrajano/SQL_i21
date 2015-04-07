@@ -51,7 +51,7 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-		[intVendorId]				INT NULL,		
+		[intEntityVendorId]			INT NULL,		
 		[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intVendorLocationId]		INT NULL, 
 		[strVendorLocation]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 

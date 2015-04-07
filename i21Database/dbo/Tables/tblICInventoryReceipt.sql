@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intInventoryReceiptId] [int] IDENTITY NOT NULL,
 		[strReceiptType] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
-		[intVendorId] [int] NULL,
+		[intEntityVendorId] [int] NULL,
 		[intTransferorId] [int] NULL,
 		[intLocationId] [int] NULL,
 		[strReceiptNumber] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -52,7 +52,7 @@ Type the overview for the table here.
 		[intConcurrencyId] [int] NULL DEFAULT ((0)),
 		CONSTRAINT [PK_tblICInventoryReceipt] PRIMARY KEY ([intInventoryReceiptId]), 
 		CONSTRAINT [AK_tblICInventoryReceipt_strReceiptNumber] UNIQUE ([strReceiptNumber]), 
-		CONSTRAINT [FK_tblICInventoryReceipt_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
+		CONSTRAINT [FK_tblICInventoryReceipt_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_Transferor] FOREIGN KEY ([intTransferorId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [FK_tblICInventoryReceipt_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
@@ -96,7 +96,7 @@ Type the overview for the table here.
 		@level1type = N'TABLE',
 		@level1name = N'tblICInventoryReceipt',
 		@level2type = N'COLUMN',
-		@level2name = N'intVendorId'
+		@level2name = N'intEntityVendorId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Receipt Type',
