@@ -47,6 +47,12 @@ BEGIN
 		exec('ALTER TABLE tblMFRecipe DROP CONSTRAINT [' + @constraint +']' )
 
 
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblICInventoryReceipt' and OBJECT_NAME(referenced_object_id) = 'tblAPVendor'
+
+	 if(@constraint <> '')
+	  exec('ALTER TABLE tblICInventoryReceipt DROP CONSTRAINT [' + @constraint +']' )
+
 	print 'Adding tblEntityContact columns to tblEntity'
 	exec(N'	
 	alter table tblEntity
@@ -356,6 +362,15 @@ BEGIN
 						join tblARSalesperson b 
 							on a.intSalespersonId = b.intSalespersonId	')
 	END
+
+	print 'Update Linking of tblICInventoryReceipt intVendorId from intVendorId to entityid '
+	 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
+	 BEGIN
+		  exec(N' UPDATE a set a.intVendorId = b.intEntityId
+					 from tblICInventoryReceipt a 
+						  join tblAPVendor b 
+							on a.intVendorId = b.intVendorId')
+	 END
 
 	print 'add locationid to tblEntityToContact'
 	exec(N'		
