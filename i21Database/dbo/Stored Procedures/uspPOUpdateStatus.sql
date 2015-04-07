@@ -31,14 +31,14 @@ BEGIN
 															 FROM tblPOPurchaseDetail WHERE intPurchaseId = A.intPurchaseId
 														) PODetails WHERE ysnFull = 0
 													)
-									THEN 3 --Closed
-									WHEN dbo.fnPOHasItemReceipt(A.intPurchaseId, 0) = 0 AND dbo.fnPOHasBill(A.intPurchaseId, 0) = 0
-									THEN 1 --Open
+										THEN 3 --Closed
+									WHEN dbo.fnPOHasItemReceipt(A.intPurchaseId, NULL) = 0 AND dbo.fnPOHasBill(A.intPurchaseId, NULL) = 0
+										THEN 1 --Open
 									WHEN dbo.fnPOHasItemReceipt(A.intPurchaseId, 0) = 1 OR dbo.fnPOHasBill(A.intPurchaseId, 0) = 1
-									THEN 7 --Pending
+										THEN 7 --Pending
 									WHEN dbo.fnPOHasItemReceipt(A.intPurchaseId, 1) = 1 OR dbo.fnPOHasBill(A.intPurchaseId, 1) = 1
-									THEN 2 --Partial
-									ELSE NULL 
+										THEN 2 --Partial
+									ELSE NULL
 							END)
 	FROM #tmpPO A
 		INNER JOIN tblPOPurchase B
