@@ -148,7 +148,7 @@ BEGIN
 			,strReceiptNumber
 			,strMarkings
 			,strNotes
-			,intVendorId
+			,intEntityVendorId
 			,strVendorLotNo
 			,intVendorLocationId
 			,strVendorLocation
@@ -173,7 +173,7 @@ BEGIN
 			,strReceiptNumber		= Receipt.strReceiptNumber
 			,strMarkings			= ItemLot.strMarkings
 			,strNotes				= ItemLot.strRemarks
-			,intVendorId			= ISNULL(ItemLot.intVendorId, Receipt.intVendorId)  
+			,intEntityVendorId		= ISNULL(ItemLot.intEntityVendorId, Receipt.intEntityVendorId)  
 			,strVendorLotNo			= ItemLot.strVendorLotId
 			,intVendorLocationId	= ItemLot.intVendorLocationId
 			,strVendorLocation		= ItemLot.strVendorLocation

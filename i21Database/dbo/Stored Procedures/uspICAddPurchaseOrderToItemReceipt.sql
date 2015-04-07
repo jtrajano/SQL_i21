@@ -32,7 +32,7 @@ END
 INSERT INTO dbo.tblICInventoryReceipt (
 		strReceiptNumber
 		,dtmReceiptDate
-		,intVendorId
+		,intEntityVendorId
 		,strReceiptType
 		,intBlanketRelease
 		,intLocationId
@@ -68,7 +68,7 @@ INSERT INTO dbo.tblICInventoryReceipt (
 )
 SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
-		,intVendorId			= PO.intVendorId
+		,intEntityVendorId		= PO.intEntityVendorId
 		,strReceiptType			= @ReceiptType_PurchaseOrder
 		,intBlanketRelease		= NULL
 		,intLocationId			= PO.intShipToId

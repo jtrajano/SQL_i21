@@ -28,7 +28,7 @@ Type the overview for the table here.
 		[dblStatedGrossPerUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblStatedTarePerUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[strContainerNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[intVendorId] INT NULL,
+		[intEntityVendorId] INT NULL,
 		[intVendorLocationId] INT NULL, 
 		[strVendorLocation] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 		[strMarkings] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 

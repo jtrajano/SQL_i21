@@ -97,7 +97,7 @@ BEGIN
 			,strReceiptNumber
 			,strMarkings
 			,strNotes
-			,intVendorId
+			,intEntityVendorId
 			,strVendorLotNo
 			,intVendorLocationId
 			,strVendorLocation
@@ -129,7 +129,7 @@ BEGIN
 			,strReceiptNumber			= 'INVRCT-10009'
 			,strMarkings				= 'Markings'
 			,strNotes					= 'Notes'
-			,intVendorId				= NULL
+			,intEntityVendorId			= NULL
 			,strVendorLotNo				= 'Vendor Lot No'
 			,intVendorLocationId		= NULL
 			,strVendorLocation			= 'Vendor Location'

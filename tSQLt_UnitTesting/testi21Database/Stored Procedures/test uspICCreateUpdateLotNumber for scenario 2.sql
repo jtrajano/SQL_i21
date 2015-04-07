@@ -79,7 +79,7 @@ BEGIN
 				,@strReceiptNumber			AS NVARCHAR(50)
 				,@strMarkings				AS NVARCHAR(MAX)
 				,@strNotes					AS NVARCHAR(MAX)
-				,@intVendorId				AS INT 
+				,@intEntityVendorId			AS INT 
 				,@strVendorLotNo			AS NVARCHAR(50)
 				,@intVendorLocationId		AS INT
 				,@strVendorLocation			AS NVARCHAR(100)
@@ -113,7 +113,7 @@ BEGIN
 			,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 			,[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-			,[intVendorId]				INT 
+			,[intEntityVendorId]				INT 
 			,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,[intVendorLocationId]		INT 
 			,[strVendorLocation]		NVARCHAR(100) COLLATE Latin1_General_CI_AS 
@@ -150,7 +150,7 @@ BEGIN
 				,@strReceiptNumber			= 'INVRPT-10001'
 				,@strMarkings				= 'Markings'
 				,@strNotes					= 'Add notes for a lot number'
-				,@intVendorId				= 1
+				,@intEntityVendorId			= 1
 				,@strVendorLotNo			= 'Vendor lot number is 1abc-049843'
 				,@intVendorLocationId		= 1
 				,@strVendorLocation			= 'Vendor location can be used as the garden.'
@@ -181,7 +181,7 @@ BEGIN
 			,strReceiptNumber
 			,strMarkings
 			,strNotes
-			,intVendorId
+			,intEntityVendorId
 			,strVendorLotNo
 			,intVendorLocationId
 			,strVendorLocation
@@ -206,7 +206,7 @@ BEGIN
 			,strReceiptNumber		= @strReceiptNumber
 			,strMarkings			= @strMarkings
 			,strNotes				= @strNotes
-			,intVendorId			= @intVendorId
+			,intEntityVendorId		= @intEntityVendorId
 			,strVendorLotNo			= @strVendorLotNo
 			,intVendorLocationId	= @intVendorLocationId
 			,strVendorLocation		= @strVendorLocation
@@ -236,7 +236,7 @@ BEGIN
 				,strReceiptNumber
 				,strMarkings
 				,strNotes
-				,intVendorId
+				,intEntityVendorId
 				,strVendorLotNo
 				,intVendorLocationId
 				,strVendorLocation
@@ -262,7 +262,7 @@ BEGIN
 				,strReceiptNumber		= @strReceiptNumber
 				,strMarkings			= @strMarkings
 				,strNotes				= @strNotes
-				,intVendorId			= @intVendorId
+				,intEntityVendorId		= @intEntityVendorId
 				,strVendorLotNo			= @strVendorLotNo
 				,intVendorLocationId	= @intVendorLocationId
 				,strVendorLocation		= @strVendorLocation
@@ -300,7 +300,7 @@ BEGIN
 				,strReceiptNumber
 				,strMarkings
 				,strNotes
-				,intVendorId
+				,intEntityVendorId
 				,strVendorLotNo
 				,intVendorLocationId
 				,strVendorLocation				
@@ -326,7 +326,7 @@ BEGIN
 				,strReceiptNumber		
 				,strMarkings			
 				,strNotes				
-				,intVendorId			
+				,intEntityVendorId			
 				,strVendorLotNo			
 				,intVendorLocationId	
 				,strVendorLocation		

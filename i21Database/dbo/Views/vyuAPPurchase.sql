@@ -4,8 +4,8 @@ AS
 SELECT 
 A.intPurchaseId
 ,A.dtmDate
-,A.intVendorId
+,A.intEntityVendorId
 ,A.strPurchaseOrderNumber
 ,B.strVendorId 
 FROM dbo.tblPOPurchase A
-	INNER JOIN dbo.tblAPVendor B ON A.intVendorId = B.[intEntityVendorId]
+	INNER JOIN dbo.tblAPVendor B ON A.intEntityVendorId = B.[intEntityVendorId]

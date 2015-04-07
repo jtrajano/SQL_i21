@@ -46,6 +46,37 @@ BEGIN
 	if(@constraint <> '')
 		exec('ALTER TABLE tblMFRecipe DROP CONSTRAINT [' + @constraint +']' )
 
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblPOPurchase' and OBJECT_NAME(referenced_object_id) = 'tblAPVendor'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblPOPurchase DROP CONSTRAINT [' + @constraint +']' )
+
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblICInventoryReceipt' and OBJECT_NAME(referenced_object_id) = 'tblAPVendor'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblICInventoryReceipt DROP CONSTRAINT [' + @constraint +']' )
+
+
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblICInventoryReceipt' and OBJECT_NAME(referenced_object_id) = 'tblAPVendor'
+
+	 if(@constraint <> '')
+	  exec('ALTER TABLE tblICInventoryReceipt DROP CONSTRAINT [' + @constraint +']' )
+
+
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblICItemLocation' and OBJECT_NAME(referenced_object_id) = 'tblAPVendor'
+
+	 if(@constraint <> '')
+	  exec('ALTER TABLE tblICItemLocation DROP CONSTRAINT [' + @constraint +']' )
+
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARCustomer' and OBJECT_NAME(referenced_object_id) = 'tblARSalesperson'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblARCustomer DROP CONSTRAINT [' + @constraint +']' )
+
+	
+	
 
 	print 'Adding tblEntityContact columns to tblEntity'
 	exec(N'	
@@ -357,6 +388,15 @@ BEGIN
 							on a.intSalespersonId = b.intSalespersonId	')
 	END
 
+	print 'Update Linking of tblICInventoryReceipt intVendorId from intVendorId to entityid '
+	 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
+	 BEGIN
+		  exec(N' UPDATE a set a.intVendorId = b.intEntityId
+					 from tblICInventoryReceipt a 
+						  join tblAPVendor b 
+							on a.intVendorId = b.intVendorId')
+	 END
+
 	print 'add locationid to tblEntityToContact'
 	exec(N'		
 			alter table tblEntityToContact
@@ -443,5 +483,41 @@ BEGIN
 				join tblEntity b
 					on a.intEntityId = b.intEntityId
 				where b.intEntityId not in (select intEntityId from tblEntityType)	')
+
+	print 'Update Linking of tblPOPurchase from vendor id to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPOPurchase' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		exec(N' update a set a.intVendorId = b.intEntityId
+				from tblPOPurchase a
+					join tblAPVendor b
+						on a.intVendorId =  b.intVendorId ')
+	END
+
+	print 'Update Linking of tblICInventoryReceipt from vendor id to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		exec(N' update a set a.intVendorId = b.intEntityId
+				from tblICInventoryReceipt a
+					join tblAPVendor b
+						on a.intVendorId =  b.intVendorId ')
+	END
+
+	print 'Update Linking of tblICLot from vendor id to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICLot' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		exec(N' update a set a.intVendorId = b.intEntityId
+				from tblICLot a
+					join tblAPVendor b
+						on a.intVendorId =  b.intVendorId ')
+	END	
+
+	print 'Update Linking of tblICItemLocation from vendor id to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICItemLocation' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		exec(N' update a set a.intVendorId = b.intEntityId
+				from tblICItemLocation a
+					join tblAPVendor b
+						on a.intVendorId =  b.intVendorId ')
+	END	
 
 END
