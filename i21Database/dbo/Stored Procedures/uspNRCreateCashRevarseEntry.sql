@@ -7,7 +7,7 @@ BEGIN
 	, @intEntityId int, @intNoteId int, @strTransactionId nvarchar(50)
 	SELECT @strCheckNumber = strCheckNumber, @dblTransAmount = dblTransAmount, @userId = intLastModifiedUserId , @intNoteId = intNoteId
 	FROM dbo.tblNRNoteTransaction Where intNoteTransId = @intNoteTransId
-	SELECT @strParam = strTransComments FROM dbo.tblNRNoteTransaction Where strCheckNumber = @strCheckNumber AND intNoteTransTypeId = 4 AND dblTransAmount = @dblTransAmount
+	SELECT @strParam = strTransComments FROM dbo.tblNRNoteTransaction Where strCheckNumber = @strCheckNumber AND intNoteTransTypeId = 4 AND dblTransAmount = (@dblTransAmount * (-1))
 	
 	SELECT @intEntityId = C.intEntityCustomerId	
 		From dbo.tblNRNote N
@@ -21,7 +21,7 @@ BEGIN
 
 	--INSERT INTO #tmpPostBillData 
 	INSERT INTO @tblNRCMBankTransaction
-	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@strParam)
+	SELECT * FROM [dbo].fnSplitString(@strParam, ',')
 	
 		-- Get the number of rows in the looping table
 	DECLARE @RowCount INT
@@ -44,28 +44,9 @@ BEGIN
 		SET @ysnRecap = 0 -- Recap
 		EXEC dbo.uspCMPostBankDeposit @ysnPost, @ysnRecap, @strTransactionId, @userId, @intEntityId, @isSuccessful, @message_id
 	
+		SET @I = @I + 1
 
 	END
 
 	
-	--If @strParam = ''
-	--	Return
-
-	--DECLARE @isSuccessful BIT
-	       
-	---- Creating the temp table:       
-	--CREATE TABLE #tmpCMBankTransaction (
-	--strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
-	--UNIQUE (strTransactionId))
-
-	----INSERT INTO #tmpPostBillData 
-	--INSERT INTO #tmpCMBankTransaction
-	--SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@strParam)
-
-	----select * from #tmpCMBankTransaction
-	---- Calling the stored procedure
-	--EXEC uspCMBankTransactionReversal @userId, @isSuccessful OUTPUT
-
-	--SELECT @isSuccessful
-
 END

@@ -1279,6 +1279,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemShipment.sql" />
     <Build Include="dbo\Functions\fnGetProcessToItemShipmentErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddSalesOrderToItemShipment.sql" />
+    <Build Include="dbo\Functions\fnSplitString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
