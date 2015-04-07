@@ -1274,7 +1274,7 @@
     <Build Include="dbo\Tables\tblLGAllocationDetail.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenSContracts.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenPContracts.sql" />
-	<Build Include="dbo\Stored Procedures\uspICGetItemsForItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemsForItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemShipment.sql" />
     <Build Include="dbo\Functions\fnGetProcessToItemShipmentErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddSalesOrderToItemShipment.sql" />
@@ -1284,6 +1284,8 @@
     <Build Include="dbo\Views\vyuPOStatus.sql" />
     <Build Include="dbo\Functions\fnPOHasItemReceipt.sql" />
     <Build Include="dbo\Functions\fnPOHasBill.sql" />
+    <Build Include="dbo\Tables\tblSTRetailPriceAdjustment.sql" />
+    <Build Include="dbo\Tables\tblSTRetailPriceAdjustmentDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
