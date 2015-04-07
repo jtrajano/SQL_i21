@@ -6,7 +6,7 @@ DECLARE @intAccountCategoryId int
 DECLARE @intIndex INT
 DECLARE @strAccountGroup varchar(100)--= 'Cash Accounts'-- 'Receivables' --'Payables'
 DECLARE @strAccountCategory varchar(100)
-
+SET NOCOUNT ON
 CREATE TABLE #catGroup(
 	strAccountGroup varchar(50),
 	strAccountCategory varchar(50),
@@ -78,7 +78,7 @@ DEALLOCATE cursortbl
 DELETE FROM #tmpTbl1 WHERE intAccountGroupId = @x
 
 UPDATE s SET intAccountCategoryId = @intAccountCategoryId
-FROM tblGLAccountSegment s join #tmpTbl1 b
+FROM tblGLAccount s join #tmpTbl1 b
 on s.intAccountGroupId = b.intAccountGroupId
 
 
@@ -93,4 +93,4 @@ END
 DROP TABLE #tmpTbl
 DROP TABLE #tmpTbl1
 DROP TABLE #catGroup
-RETURN 0
+--RETURN 0
