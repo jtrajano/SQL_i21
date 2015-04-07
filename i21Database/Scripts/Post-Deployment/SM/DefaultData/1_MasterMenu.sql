@@ -1748,6 +1748,76 @@ GO
 			SET strCommand = 'Logistics.view.ShippingInstructions', intSort = 0
 			WHERE strMenuName = 'Shipping Instructions' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesId
 GO
+
+	/* ------------------------------------- */
+	/* -- Create Card Fueling Module Menu -- */
+	/* ------------------------------------- */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Card Fueling' AND strModuleName = 'Card Fueling' AND intParentMenuID = 0)
+	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	VALUES ('Card Fueling', 'Card Fueling', 0, 'Card Fueling', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+
+	DECLARE @CardFuelingModuleId INT
+	SELECT @CardFuelingModuleId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Card Fueling' AND strModuleName = 'Card Fueling' AND intParentMenuID = 0
+
+		/* ------------------------------------------ */
+		/* -- Create Card Fueling Maintenance Menu -- */
+		/* ------------------------------------------ */
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingModuleId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Maintenance', 'Card Fueling', @CardFuelingModuleId, 'Maintenance', 'Folder', '', 'small-folder', 1, 0, 0, 0, 0, 1)
+
+		DECLARE @CardFuelingMaintenanceId INT
+		SELECT @CardFuelingMaintenanceId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Accounts' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Accounts', 'Card Fueling', @CardFuelingMaintenanceId, 'Accounts', 'Screen', 'CardFueling.view.Account', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'CardFueling.view.Account', intSort = 0
+			WHERE strMenuName = 'Accounts' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount Schedule' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Discount Schedule', 'Card Fueling', @CardFuelingMaintenanceId, 'Discount Schedule', 'Screen', 'CardFueling.view.DiscountSchedule', 'small-screen', 0, 0, 0, 1, 1, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'CardFueling.view.DiscountSchedule', intSort = 1
+			WHERE strMenuName = 'Discount Schedule' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fee Profile' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Fee Profile', 'Card Fueling', @CardFuelingMaintenanceId, 'Fee Profile', 'Screen', 'CardFueling.view.FeeProfile', 'small-screen', 0, 0, 0, 1, 2, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'CardFueling.view.FeeProfile', intSort = 2
+			WHERE strMenuName = 'Fee Profile' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Network' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Network', 'Card Fueling', @CardFuelingMaintenanceId, 'Network', 'Screen', 'CardFueling.view.Network ', 'small-screen', 0, 0, 0, 1, 3, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'CardFueling.view.Network', intSort = 3
+			WHERE strMenuName = 'Network' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Price Profile' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Price Profile', 'Card Fueling', @CardFuelingMaintenanceId, 'Price Profile', 'Screen', 'CardFueling.view.PriceProfile ', 'small-screen', 0, 0, 0, 1, 4, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'CardFueling.view.PriceProfile', intSort = 4
+			WHERE strMenuName = 'Price Profile' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sites' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Sites', 'Card Fueling', @CardFuelingMaintenanceId, 'Sites', 'Screen', 'CardFueling.view.Site', 'small-screen', 0, 0, 0, 1, 5, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'CardFueling.view.Site', intSort = 5
+			WHERE strMenuName = 'Sites' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingMaintenanceId
+
+GO
 	/* --------------------------------- */
 	/* -- Tank Management Module Menu -- */
 	/* --------------------------------- */
