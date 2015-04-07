@@ -6,6 +6,7 @@ BEGIN
 	CREATE TABLE #tmpPO(intPurchaseId INT)
 
 	IF @poId > 0
+	BEGIN
 		INSERT INTO #tmpPO
 		SELECT 
 			A.intPurchaseId 

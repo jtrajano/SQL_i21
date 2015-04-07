@@ -33,7 +33,7 @@ BEGIN
 								ELSE 0
 							END
 	SET @fullyReceived = CASE WHEN
-								(SELECT SUM(dblItemQtyReceived) FROM vyuPOStatus WHERE intPurchaseId = @poId) = (SELECT SUM(dblQtyOrdered) FROM vyuPOStatus WHERE intPurchaseId = @poId)
+								(SELECT SUM(dblPOItemQtyReceive) FROM vyuPOStatus WHERE intPurchaseId = @poId) = (SELECT SUM(dblQtyOrdered) FROM vyuPOStatus WHERE intPurchaseId = @poId)
 								THEN 1
 								ELSE 0
 							END 
