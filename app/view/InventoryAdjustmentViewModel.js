@@ -3,7 +3,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
     alias: 'viewmodel.icinventoryadjustment',
 
     requires: [
-        'i21.store.CompanyLocationBuffered'
+        'i21.store.CompanyLocationBuffered',
+        'i21.store.CompanyLocationSubLocationBuffered',
+        'GeneralLedger.store.BufAccountId',
+        'GeneralLedger.store.BufAccountCategoryGroup',
+        'Inventory.store.BufferedItemStockView',
+        'Inventory.store.BufferedStorageLocation',
+        'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedItemUnitMeasure',
+        'Inventory.store.BufferedItemWeightUOM',
+        'Inventory.store.BufferedLotStatus'
     ],
 
     stores: {
@@ -41,6 +50,43 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+
+        item: {
+            type: 'icbuffereditemstockview'
+        },
+        subLocation: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
+        storageLocation: {
+            type: 'icbufferedstoragelocation'
+        },
+        lot: {
+            type: 'icbufferedlot'
+        },
+        newLot: {
+            type: 'icbufferedlot'
+        },
+        newItemUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+        weightUOM: {
+            type: 'icbuffereditemweightuom'
+        },
+        newItem: {
+            type: 'icbuffereditemstockview'
+        },
+        newLotStatus: {
+            type: 'icbufferedlotstatus'
+        },
+        accountCategory: {
+            type: 'glbufaccountcategorygroup'
+        },
+        creditGLAccount: {
+            type: 'glbufaccountid'
+        },
+        debitGLAccount: {
+            type: 'glbufaccountid'
         }
     },
 

@@ -19,13 +19,11 @@ Ext.define('Inventory.model.Adjustment', {
         { name: 'intAdjustmentType', type: 'int', allowNull: true },
         { name: 'strAdjustmentNo', type: 'string' },
         { name: 'strDescription', type: 'string' },
-        { name: 'intSort', type: 'int', allowNull: true },
-
-        { name: 'strLocationName', type: 'string' }
+        { name: 'intSort', type: 'int', allowNull: true }
     ],
 
     validators: [
-        { type: 'presence', field: 'strLocationName' },
+        { type: 'presence', field: 'intLocationId' },
         { type: 'presence', field: 'dtmAdjustmentDate' },
         { type: 'presence', field: 'intAdjustmentType' }
     ]

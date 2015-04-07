@@ -76,6 +76,10 @@ namespace iRely.Inventory.Model
         public int? intNewLotId { get; set; }
         public decimal? dblNewQuantity { get; set; }
         public int? intNewItemUOMId { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public decimal? dblGrossWeight { get; set; }
+        public decimal? dblTareWeight { get; set; }
+        public decimal? dblNewWeightPerUnit { get; set; }
         public int? intNewItemId { get; set; }
         public decimal? dblNewPhysicalCount { get; set; }
         public DateTime? dtmNewExpiryDate { get; set; }
@@ -285,6 +289,44 @@ namespace iRely.Inventory.Model
                 _newLotNumber = value;
             }
         }
+        private string _itemUOM;
+        [NotMapped]
+        public string strItemUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemUOM))
+                    if (tblICLot != null)
+                        return tblICLot.strItemUOM;
+                    else
+                        return null;
+                else
+                    return _itemUOM;
+            }
+            set
+            {
+                _itemUOM = value;
+            }
+        }
+        private string _itemWeightUOM;
+        [NotMapped]
+        public string strItemWeightUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemWeightUOM))
+                    if (tblICLot != null)
+                        return tblICLot.strItemWeightUOM;
+                    else
+                        return null;
+                else
+                    return _itemWeightUOM;
+            }
+            set
+            {
+                _itemWeightUOM = value;
+            }
+        }
         private string _newItemUOM;
         [NotMapped]
         public string strNewItemUOM
@@ -428,6 +470,7 @@ namespace iRely.Inventory.Model
         public tblICLot tblICLot { get; set; }
         public tblICLot NewLot { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
+        public tblICItemUOM WeightUOM { get; set; }
         public tblICLotStatus tblICLotStatus { get; set; }
         public tblGLAccountCategory tblGLAccountCategory { get; set; }
         public tblGLAccount DebitAccount { get; set; }

@@ -16,7 +16,7 @@ Ext.define('Inventory.model.AdjustmentDetail', {
             reference: {
                 type: 'Inventory.model.Adjustment',
                 inverse: {
-                    role: 'tblICInventoryAdjustmentNotes',
+                    role: 'tblICInventoryAdjustmentDetails',
                     storeConfig: {
                         complete: true,
                         sortOnLoad: true,
