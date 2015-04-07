@@ -83,6 +83,7 @@ DECLARE
 	,@AR_PAYMENT AS INT = 18
 	,@VOID_CHECK AS INT = 19
 	,@AP_ECHECK AS INT = 20
+	,@PAYCHECK AS INT = 21
 	
 	-- Local Variables
 	,@intTransactionId AS INT

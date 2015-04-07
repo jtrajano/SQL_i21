@@ -31,6 +31,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@AR_PAYMENT AS INT = 18
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
+		,@PAYCHECK AS INT = 21
 
 -- Sample XML string structure:
 --SET @xmlparam = '

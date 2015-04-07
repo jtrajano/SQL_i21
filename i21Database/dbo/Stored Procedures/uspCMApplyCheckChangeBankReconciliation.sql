@@ -32,6 +32,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@AR_PAYMENT AS INT = 18
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
+		,@PAYCHECK AS INT = 21
 
 -- Bulk update the ysnClr
 UPDATE	tblCMBankTransaction 
@@ -44,7 +45,7 @@ WHERE	ysnPosted = 1
 		AND 1 = 
 			CASE	WHEN	@strSide = 'DEBIT' 
 							AND (
-								intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK)
+								intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
 								OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 							) THEN 1 					
 					WHEN	@strSide = 'CREDIT' 

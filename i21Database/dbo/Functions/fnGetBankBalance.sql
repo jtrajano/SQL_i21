@@ -27,6 +27,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@AR_PAYMENT AS INT = 18
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
+		,@PAYCHECK AS INT = 21
 		
 DECLARE @openingBalance AS NUMERIC(18,6)		
 DECLARE @returnBalance AS NUMERIC(18,6)	
@@ -44,7 +45,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK)
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
 
 -- Get bank amounts from Bank Transactions 	
 -- Note: The computations are based on the detail table (tblCMBankTransactionDetail). 
@@ -54,7 +55,7 @@ FROM	[dbo].[tblCMBankTransaction] A INNER JOIN [dbo].[tblCMBankTransactionDetail
 WHERE	A.ysnPosted = 1
 		AND A.intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, A.dtmDate) AS FLOAT)) AS DATETIME)		
-		AND A.intBankTransactionTypeId IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL)
+		AND A.intBankTransactionTypeId IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL, @PAYCHECK)
 HAVING	ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0) <> 0
 
 -- Get bank amounts for the rest of the transactions like deposits, transfer (dep), and etc.
@@ -64,7 +65,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK)
+		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
 
 -- Add the opening balance to the return balance. 
 SET @returnBalance = ISNULL(@openingBalance, 0) + @returnBalance

@@ -51,6 +51,7 @@ BEGIN
 			,@AR_PAYMENT AS INT = 18
 			,@VOID_CHECK AS INT = 19
 			,@AP_ECHECK AS INT = 20
+			,@PAYCHECK AS INT = 21
 
 	-- Try to find the origin transaction to void. 
 	UPDATE	apchkmst_origin

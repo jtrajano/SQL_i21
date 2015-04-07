@@ -42,6 +42,7 @@ DECLARE -- Constant variables for bank account types:
 		,@AR_PAYMENT AS INT = 18
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
+		,@PAYCHECK AS INT = 21
 
 		-- Constant variables for Check number status. 
 		,@CHECK_NUMBER_STATUS_UNUSED AS INT = 1

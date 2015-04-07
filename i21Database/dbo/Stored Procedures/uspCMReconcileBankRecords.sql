@@ -34,6 +34,7 @@ DECLARE @BANK_DEPOSIT AS INT = 1
 		,@AR_PAYMENT AS INT = 18
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
+		,@PAYCHECK AS INT = 21
 
 		-- Declare the local variables. 
 		,@dtmLog AS DATETIME 

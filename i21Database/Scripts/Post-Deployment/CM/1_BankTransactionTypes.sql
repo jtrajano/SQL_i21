@@ -137,10 +137,17 @@ SELECT
 	,[strBankTransactionTypeName]	= 'Void Check'
 	,[intConcurrencyId]				= 1			
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 19)
+UNION ALL
 SELECT 
 	[intBankTransactionTypeId]		= 20
 	,[strBankTransactionTypeName]	= 'AP eCheck'
 	,[intConcurrencyId]				= 1			
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 20)
+UNION ALL
+SELECT 
+	[intBankTransactionTypeId]		= 21
+	,[strBankTransactionTypeName]	= 'Paycheck'
+	,[intConcurrencyId]				= 1			
+WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblCMBankTransactionType] WHERE [intBankTransactionTypeId] = 21)
 
 print('/*******************  END Populate Bank Transaction Types *******************/')
