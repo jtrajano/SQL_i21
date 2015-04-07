@@ -299,6 +299,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inventory Shipment')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 32
+			,[strTransactionType]	= N'Paycheck'
+			,[strPrefix]			= N'PCHK-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Payroll'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Paycheck')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
