@@ -37,7 +37,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				agsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				agsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
-				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
+				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId AND agsls_slsmn_id = UPPER(@SalespersonId)
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
@@ -72,7 +72,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''E'' WHEN S.strDispatchNotification = ''Text'' THEN ''T'' WHEN S.strDispatchNotification = ''Both'' THEN ''B'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
-				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
+				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId
 	
 
@@ -145,7 +145,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		
 			--INSERT Salesperson
 			INSERT INTO [dbo].[tblARSalesperson]
-			   ([intEntityId]
+			   ([intEntitySalespersonId]
 			   ,[strSalespersonId]
 			   ,[strType]
 			   ,[strPhone]
@@ -256,7 +256,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				ptsls_dispatch_email = CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				ptsls_textmsg_email = SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
-				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
+				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId AND ptsls_slsmn_id = UPPER(@SalespersonId)
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
@@ -291,7 +291,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 				CASE WHEN S.strDispatchNotification = ''Email'' THEN ''Y'' ELSE ''N'' END,
 				SUBSTRING(S.strTextMessage,1,50)
 			FROM tblEntity E
-				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntityId
+				INNER JOIN tblARSalesperson S ON E.intEntityId = S.intEntitySalespersonId
 				WHERE S.strSalespersonId = @SalespersonId
 	
 
@@ -364,7 +364,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		
 			--INSERT Salesperson
 			INSERT INTO [dbo].[tblARSalesperson]
-			   ([intEntityId]
+			   ([intEntitySalespersonId]
 			   ,[strSalespersonId]
 			   ,[strType]
 			   ,[strPhone]

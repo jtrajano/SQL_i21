@@ -45,7 +45,7 @@ IF(@Checking = 1)
 		INNER JOIN
 			[tblARCustomer] C
 				ON P1.[agpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
-				AND I.[intCustomerId] = C.[intCustomerId] 
+				AND I.[intCustomerId] = C.[intEntityCustomerId] 
 		INNER JOIN
 			[tblSMCurrency] CUR
 				ON P1.[agpay_currency] COLLATE Latin1_General_CI_AS = CUR.[strCurrency] COLLATE Latin1_General_CI_AS
@@ -103,7 +103,7 @@ IF(@Checking = 1)
 		INNER JOIN
 			[tblARCustomer] C
 				ON P1.[agpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
-				AND I.[intCustomerId] = C.[intCustomerId] 
+				AND I.[intCustomerId] = C.[intEntityCustomerId] 
 		INNER JOIN
 			[tblSMCurrency] CUR
 				ON P1.[agpye_currency] COLLATE Latin1_General_CI_AS = CUR.[strCurrency] COLLATE Latin1_General_CI_AS
@@ -203,7 +203,7 @@ IF(@Checking = 1)
 	INNER JOIN
 		[tblARCustomer] C
 			ON P1.[agpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 	INNER JOIN
 		[tblSMCurrency] CUR
 			ON P1.[agpay_currency] COLLATE Latin1_General_CI_AS = CUR.[strCurrency] COLLATE Latin1_General_CI_AS
@@ -296,8 +296,8 @@ IF(@Checking = 1)
 			AND P1.[agpay_ivc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON P.[intCustomerId] = C.[intCustomerId]
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			ON P.[intCustomerId] = C.[intEntityCustomerId]
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[agpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	INNER JOIN
 		[tblSMCurrency] CUR
@@ -367,8 +367,8 @@ IF(@Checking = 1)
 			AND P1.[agpay_ivc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON P.[intCustomerId] = C.[intCustomerId]
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			ON P.[intCustomerId] = C.[intEntityCustomerId]
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[agpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	INNER JOIN
 		[tblSMCurrency] CUR
@@ -409,7 +409,7 @@ IF(@Checking = 1)
 			AND P1.[agpay_ivc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON  I.[intCustomerId] = C.[intCustomerId] 
+			ON  I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[agpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	INNER JOIN
 		[tblSMCurrency] CUR
@@ -423,7 +423,7 @@ IF(@Checking = 1)
 	WHERE
 		(P1.[agpay_note] IS NOT NULL OR P1.[agpay_note] = '''')
 		AND tblARPayment.[intPaymentId] > @MaxPaymentID
-		AND tblARPayment.[intCustomerId] = C.[intCustomerId]
+		AND tblARPayment.[intCustomerId] = C.[intEntityCustomerId]
 		AND tblARPayment.[intCurrencyId] = CUR.[intCurrencyID]
 		AND tblARPayment.[intAccountId] = GL.[inti21Id]
 		AND tblARPayment.[intPaymentId] = PM.[intPaymentMethodID]
@@ -484,7 +484,7 @@ IF(@Checking = 1)
 	INNER JOIN
 		[tblARCustomer] C
 			ON P1.[agpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 	INNER JOIN
 		[tblSMCurrency] CUR
 			ON P1.[agpye_currency] COLLATE Latin1_General_CI_AS = CUR.[strCurrency] COLLATE Latin1_General_CI_AS
@@ -577,8 +577,8 @@ IF(@Checking = 1)
 			AND P1.[agpye_inc_ref] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON P.[intCustomerId] = C.[intCustomerId]
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			ON P.[intCustomerId] = C.[intEntityCustomerId]
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[agpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	INNER JOIN
 		[tblSMCurrency] CUR
@@ -648,8 +648,8 @@ IF(@Checking = 1)
 			AND P1.[agpye_inc_ref] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON P.[intCustomerId] = C.[intCustomerId]
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			ON P.[intCustomerId] = C.[intEntityCustomerId]
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[agpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	INNER JOIN
 		[tblSMCurrency] CUR
@@ -689,7 +689,7 @@ IF(@Checking = 1)
 			AND P1.[agpye_inc_ref] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON  I.[intCustomerId] = C.[intCustomerId] 
+			ON  I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[agpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	INNER JOIN
 		[tblSMCurrency] CUR
@@ -703,7 +703,7 @@ IF(@Checking = 1)
 	WHERE
 		(P1.[agpye_note] IS NOT NULL OR P1.[agpye_note] = '''')
 		AND tblARPayment.[intPaymentId] > @MaxPaymentID
-		AND tblARPayment.[intCustomerId] = C.[intCustomerId]
+		AND tblARPayment.[intCustomerId] = C.[intEntityCustomerId]
 		AND tblARPayment.[intCurrencyId] = CUR.[intCurrencyID]
 		AND tblARPayment.[intAccountId] = GL.[inti21Id]
 		AND tblARPayment.[intPaymentId] = PM.[intPaymentMethodID]
@@ -783,7 +783,7 @@ IF(@Checking = 1)
 		INNER JOIN
 			[tblARCustomer] C
 				ON P1.[ptpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
-				AND I.[intCustomerId] = C.[intCustomerId] 
+				AND I.[intCustomerId] = C.[intEntityCustomerId] 
 		LEFT OUTER JOIN
 			[tblGLCOACrossReference] GL
 				ON P1.[ptpay_acct_no] = GL.[strExternalId]
@@ -838,7 +838,7 @@ IF(@Checking = 1)
 		INNER JOIN
 			[tblARCustomer] C
 				ON P1.[ptpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
-				AND I.[intCustomerId] = C.[intCustomerId] 
+				AND I.[intCustomerId] = C.[intEntityCustomerId] 
 		LEFT OUTER JOIN
 			[tblGLCOACrossReference] GL
 				ON P1.[ptpye_acct_no] = GL.[strExternalId]
@@ -935,7 +935,7 @@ IF(@Checking = 1)
 	INNER JOIN
 		[tblARCustomer] C
 			ON P1.[ptpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL
 			ON P1.[ptpay_acct_no] = GL.[strExternalId]
@@ -1025,8 +1025,8 @@ IF(@Checking = 1)
 			AND P1.[ptpay_invc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON P.[intCustomerId] = C.[intCustomerId]
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			ON P.[intCustomerId] = C.[intEntityCustomerId]
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[ptpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL
@@ -1092,8 +1092,8 @@ IF(@Checking = 1)
 			AND P1.[ptpay_invc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON P.[intCustomerId] = C.[intCustomerId]
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			ON P.[intCustomerId] = C.[intEntityCustomerId]
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[ptpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL
@@ -1130,7 +1130,7 @@ IF(@Checking = 1)
 			AND P1.[ptpay_invc_no] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON  I.[intCustomerId] = C.[intCustomerId] 
+			ON  I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[ptpay_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL
@@ -1141,7 +1141,7 @@ IF(@Checking = 1)
 	WHERE
 		(P1.[ptpay_note] IS NOT NULL OR P1.[ptpay_note] = '''')
 		AND tblARPayment.[intPaymentId] > @MaxPaymentID
-		AND tblARPayment.[intCustomerId] = C.[intCustomerId]
+		AND tblARPayment.[intCustomerId] = C.[intEntityCustomerId]
 		AND tblARPayment.[intCurrencyId] = I.[intCurrencyId]
 		AND tblARPayment.[intAccountId] = GL.[inti21Id]
 		AND tblARPayment.[intPaymentId] = PM.[intPaymentMethodID]
@@ -1202,7 +1202,7 @@ IF(@Checking = 1)
 	INNER JOIN
 		[tblARCustomer] C
 			ON P1.[ptpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 		
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL
 			ON P1.[ptpye_acct_no] = GL.[strExternalId]
@@ -1292,8 +1292,8 @@ IF(@Checking = 1)
 			AND P1.[ptpye_inc_ref] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON P.[intCustomerId] = C.[intCustomerId]
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			ON P.[intCustomerId] = C.[intEntityCustomerId]
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[ptpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL
@@ -1359,8 +1359,8 @@ IF(@Checking = 1)
 			AND P1.[ptpye_inc_ref] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON P.[intCustomerId] = C.[intCustomerId]
-			AND I.[intCustomerId] = C.[intCustomerId] 
+			ON P.[intCustomerId] = C.[intEntityCustomerId]
+			AND I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[ptpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL
@@ -1396,7 +1396,7 @@ IF(@Checking = 1)
 			AND P1.[ptpye_inc_ref] COLLATE Latin1_General_CI_AS  = I.[strInvoiceOriginId] COLLATE Latin1_General_CI_AS  						
 	INNER JOIN
 		[tblARCustomer] C
-			ON  I.[intCustomerId] = C.[intCustomerId] 
+			ON  I.[intCustomerId] = C.[intEntityCustomerId] 
 			AND P1.[ptpye_cus_no] COLLATE Latin1_General_CI_AS = C.[strCustomerNumber] COLLATE Latin1_General_CI_AS 
 	LEFT OUTER JOIN
 		[tblGLCOACrossReference] GL
@@ -1407,7 +1407,7 @@ IF(@Checking = 1)
 	WHERE
 		(P1.[ptpye_note] IS NOT NULL OR P1.[ptpye_note] = '''')
 		AND tblARPayment.[intPaymentId] > @MaxPaymentID
-		AND tblARPayment.[intCustomerId] = C.[intCustomerId]
+		AND tblARPayment.[intCustomerId] = C.[intEntityCustomerId]
 		AND tblARPayment.[intCurrencyId] = I.[intCurrencyId]
 		AND tblARPayment.[intAccountId] = GL.[inti21Id]
 		AND tblARPayment.[intPaymentId] = PM.[intPaymentMethodID]
