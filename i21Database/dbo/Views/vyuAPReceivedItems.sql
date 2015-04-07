@@ -10,6 +10,7 @@ A.intVendorId
 ,C.strItemNo
 ,C.strDescription
 ,tblReceived.dblOrderQty
+,tblReceived.dblPOOpenReceive
 ,tblReceived.dblOpenReceive
 ,tblReceived.intLineNo
 ,tblReceived.intInventoryReceiptItemId
@@ -30,7 +31,8 @@ FROM tblPOPurchase A
 			,B1.intLineNo
 			,B1.dblOrderQty
 			,B1.dblUnitCost
-			,dbo.fnCalculateQtyBetweenUOM(B.intUnitOfMeasureId, B1.intUnitMeasureId, SUM(ISNULL(B1.dblOpenReceive,0))) dblOpenReceive
+			,dbo.fnCalculateQtyBetweenUOM(B1.intUnitMeasureId, B.intUnitOfMeasureId, SUM(ISNULL(B1.dblOpenReceive,0))) dblPOOpenReceive
+			,SUM(ISNULL(B1.dblOpenReceive,0)) dblOpenReceive
 			,intAccountId = [dbo].[fnGetItemGLAccount](B1.intItemId, loc.intItemLocationId, 'AP Clearing')
 			,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
 		FROM tblICInventoryReceipt A1
@@ -45,6 +47,8 @@ FROM tblPOPurchase A
 			,intLineNo
 			,dblOrderQty
 			,loc.intItemLocationId
+			,B1.intUnitMeasureId
+
 	) as tblReceived
 	--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -62,6 +66,7 @@ A.intVendorId
 ,B.intItemId
 ,C.strItemNo
 ,C.strDescription
+,B.dblQtyOrdered
 ,B.dblQtyOrdered
 ,B.dblQtyOrdered
 ,B.intPurchaseDetailId
