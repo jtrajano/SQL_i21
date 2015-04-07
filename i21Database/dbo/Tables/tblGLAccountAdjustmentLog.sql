@@ -10,6 +10,5 @@
     [strNewValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intEntityId] INT NULL, 
     [intConcurrencyId] INT NULL, 
-    [strName] NVARCHAR(50) NULL
-    
+    [strName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL    
 )
