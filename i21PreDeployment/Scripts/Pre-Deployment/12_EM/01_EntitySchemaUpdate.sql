@@ -93,11 +93,11 @@ BEGIN
 	exec(N'				
 			update a set a.intDefaultLocationId = b.intDefaultLocationId from tblEntity  a
 				join tblAPVendor b
-					on a.intEntityId = b.intVendorId				
+					on a.intEntityId = b.intEntityId				
 					
 			update a set a.intDefaultLocationId=b.intDefaultLocationId from tblEntity  a
 				join tblARCustomer b
-					on a.intEntityId = b.intCustomerId
+					on a.intEntityId = b.intEntityId
 		')
 
 	print 'Moving Entity Contact Data to Entity'
@@ -141,7 +141,7 @@ BEGIN
 			add strUserType [nvarchar](20) NOT NULL Default('''')')
 		
 	print 'Update vendor to contact default contact column'
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendor' AND [COLUMN_NAME] = 'ysnDefaultContact') 
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact' AND [COLUMN_NAME] = 'ysnDefaultContact') 
 	BEGIN
 		exec(N' update b set b.ysnDefaultContact = 1 
 					from tblAPVendor a
