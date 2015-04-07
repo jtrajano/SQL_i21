@@ -17,7 +17,8 @@ namespace iRely.Inventory.BRL
         public enum StartingNumber
         {
             InventoryReceipt = 23,
-            LotNumber = 24
+            LotNumber = 24,
+            InventoryAdjustment = 30,
         }
 
         public class Posting_RequestModel

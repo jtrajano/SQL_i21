@@ -45,30 +45,6 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
-        [NotMapped]
-        public string strAdjustmentType
-        {
-            get
-            {
-                switch (intAdjustmentType)
-                {
-                    case 1:
-                        return "Quantity Change";
-                    case 2:
-                        return "UOM Change";
-                    case 3:
-                        return "Item Change";
-                    case 4:
-                        return "Lot Status Change";
-                    case 5:
-                        return "Lot Id Change";
-                    case 6:
-                        return "Expiry Date Change";
-                    default :
-                        return "";
-                }
-            }
-        }
 
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
@@ -86,7 +62,6 @@ namespace iRely.Inventory.Model
         public string strDescription { get; set; }
         public int? intSort { get; set; }
         public string strLocationName{ get; set; }
-        public string strAdjustmentType { get; set; }
     
     }
 

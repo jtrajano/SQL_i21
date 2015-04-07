@@ -25,7 +25,8 @@ namespace iRely.Inventory.BRL
         {
             return _db.GetQuery<tblICInventoryAdjustment>()
                 .Include(p => p.tblSMCompanyLocation)
-                .Select(p => new AdjustmentVM { 
+                .Select(p => new AdjustmentVM
+                {
                     intInventoryAdjustmentId = p.intInventoryAdjustmentId,
                     intLocationId = p.intLocationId,
                     dtmAdjustmentDate = p.dtmAdjustmentDate,
@@ -33,8 +34,7 @@ namespace iRely.Inventory.BRL
                     strAdjustmentNo = p.strAdjustmentNo,
                     strDescription = p.strDescription,
                     intSort = p.intSort,
-                    strLocationName = p.tblSMCompanyLocation.strLocationName,
-                    strAdjustmentType = p.strAdjustmentType,
+                    strLocationName = p.tblSMCompanyLocation.strLocationName
                 });
         }
 
@@ -79,6 +79,9 @@ namespace iRely.Inventory.BRL
 
         public void AddAdjustment(tblICInventoryAdjustment adjustment)
         {
+            adjustment.strAdjustmentNo = Common.GetStartingNumber(Common.StartingNumber.InventoryAdjustment);
+            //adjustment.intCreatedUserId = iRely.Common.Security.GetUserId();
+            //adjustment.intEntityId = iRely.Common.Security.GetEntityId();
             _db.AddNew<tblICInventoryAdjustment>(adjustment);
         }
 

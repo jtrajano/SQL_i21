@@ -14,7 +14,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 {dataIndex: 'strAdjustmentNo', text: 'Adjustment No', flex: 1, dataType: 'string'},
                 {dataIndex: 'strLocationName', text: 'Location Id', flex: 1, dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
-                {dataIndex: 'strAdjustmentType', text: 'Adjustment Type', flex: 1, dataType: 'string'},
+//                {dataIndex: 'strAdjustmentType', text: 'Adjustment Type', flex: 1, dataType: 'string'},
                 {dataIndex: 'dtmAdjustmentDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn'}
             ]
         },

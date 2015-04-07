@@ -27,7 +27,6 @@ Ext.define('Inventory.model.Adjustment', {
     validators: [
         { type: 'presence', field: 'strLocationName' },
         { type: 'presence', field: 'dtmAdjustmentDate' },
-        { type: 'presence', field: 'intAdjustmentType' },
-        { type: 'presence', field: 'strAdjustmentNo' }
+        { type: 'presence', field: 'intAdjustmentType' }
     ]
 });

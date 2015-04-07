@@ -232,7 +232,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         items: [
                                                             {
                                                                 xtype: 'gridcombobox',
-                                                                flex: 1,
                                                                 columns: [
                                                                     {
                                                                         dataIndex: 'intCompanyLocationId',
@@ -253,6 +252,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                flex: 1,
                                                                 itemId: 'cboLocation',
                                                                 fieldLabel: 'Location',
                                                                 labelWidth: 70,
@@ -282,7 +282,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 itemId: 'txtAdjustmentNumber',
                                                                 margin: '0 0 0 5',
                                                                 fieldLabel: 'Adjustment No',
-                                                                labelWidth: 90
+                                                                labelWidth: 90,
+                                                                readOnly: true,
+                                                                blankText: 'Created on Save',
+                                                                emptyText: 'Created on Save'
                                                             }
                                                         ]
                                                     },
