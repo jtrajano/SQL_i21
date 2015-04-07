@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAPReceivedItems]
 AS
 SELECT
-A.intVendorId
+A.intEntityVendorId
 ,A.dtmDate
 ,A.strReference
 ,A.strPurchaseOrderNumber
@@ -44,13 +44,13 @@ FROM tblPOPurchase A
 	) as tblReceived
 	ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.intVendorId = D1.intEntityVendorId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.intEntityVendorId = D1.intEntityVendorId
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 UNION ALL
 --Miscellaneous items
 SELECT
-A.intVendorId
+A.intEntityVendorId
 ,A.dtmDate
 ,A.strReference
 ,A.strPurchaseOrderNumber
@@ -72,7 +72,7 @@ FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intShipToId
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.intVendorId = D1.intEntityVendorId
+	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.intEntityVendorId = D1.intEntityVendorId
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
