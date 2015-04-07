@@ -10,8 +10,10 @@ A.intVendorId
 ,C.strItemNo
 ,C.strDescription
 ,tblReceived.dblOrderQty
+,tblReceived.dblPOOpenReceive
 ,tblReceived.dblOpenReceive
 ,tblReceived.intLineNo
+,tblReceived.intInventoryReceiptItemId
 ,tblReceived.dblUnitCost
 ,tblReceived.intAccountId
 ,tblReceived.strAccountId
@@ -21,28 +23,34 @@ A.intVendorId
 ,F.strTerm
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
-	INNER JOIN 
+	CROSS APPLY 
 	(
 		SELECT
-			B.intItemId
-			,B.intLineNo
-			,B.dblOrderQty
-			,B.dblUnitCost
-			,SUM(ISNULL(B.dblOpenReceive,0)) dblOpenReceive
-			,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
-			,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing'))
-		FROM tblICInventoryReceipt A
-			INNER JOIN tblICInventoryReceiptItem B ON A.intInventoryReceiptId = B.intInventoryReceiptId
-			INNER JOIN tblICItemLocation loc ON B.intItemId = loc.intItemId AND A.intLocationId = loc.intLocationId
-		WHERE A.ysnPosted = 1 AND B.dblReceived != B.dblBillQty
+			B1.intInventoryReceiptItemId
+			,B1.intItemId
+			,B1.intLineNo
+			,B1.dblOrderQty
+			,B1.dblUnitCost
+			,dbo.fnCalculateQtyBetweenUOM(B1.intUnitMeasureId, B.intUnitOfMeasureId, SUM(ISNULL(B1.dblOpenReceive,0))) dblPOOpenReceive
+			,SUM(ISNULL(B1.dblOpenReceive,0)) dblOpenReceive
+			,intAccountId = [dbo].[fnGetItemGLAccount](B1.intItemId, loc.intItemLocationId, 'AP Clearing')
+			,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
+		FROM tblICInventoryReceipt A1
+			INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
+			INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
+		WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty
+		AND B.intPurchaseDetailId = B1.intLineNo
 		GROUP BY
-			B.intItemId 
-			,B.dblUnitCost
+			B1.intInventoryReceiptItemId
+			,B1.intItemId 
+			,B1.dblUnitCost
 			,intLineNo
 			,dblOrderQty
 			,loc.intItemLocationId
+			,B1.intUnitMeasureId
+
 	) as tblReceived
-	ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
+	--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.intVendorId = D1.intEntityVendorId
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
@@ -60,7 +68,9 @@ A.intVendorId
 ,C.strDescription
 ,B.dblQtyOrdered
 ,B.dblQtyOrdered
+,B.dblQtyOrdered
 ,B.intPurchaseDetailId
+,NULL
 ,B.dblCost
 ,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
 ,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))

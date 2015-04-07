@@ -1,31 +1,20 @@
 ﻿/*
 	This function convert the qty to the stock unit qty. 
+	Remember, the unit conversions are taken from the Item UOM table and NOT from the Unit of Measure table. 
 
-	Formula used:
+	Parameters: 
+		@intItemUOMIdFrom
+			- The Item UOM id where to start the conversion. 
 
-	If dblUnitQtyFrom is one (1), then divide dblQty by dblUnitQtyTo
-		Sample 1. From LB (1) to KG (0.453592)
-		Sample 2. From LB (1) to 50-LB-Bag (50)
-		Formula is: dblQty / dblUnitQtyTo	
+		@intItemUOMIdTo
+			- The target Item UOM. 
+
+		@dblQty
+			- The quantity of the @intItemUOMIdFrom. 
 	
-	If dblUnitQtyTo is one (1), then multiply dblQty with dblUnitQtyFrom 
-		Sample 1. From KG (0.453592) to LB (1) 
-		Sample 2. From 50-LB-Bag (50) to LB (1)
-		Formula is: dblQty * dblUnitQtyFrom 
-
-	If dblUnitQtyFrom is not one (1) and dblUnitQtyTo is not one (1), then multiply dblQty with dblUnitQtyFrom first and then:
-		If FLOOR(dblUnitQtyTo) = 0 then multiply with dblUnitQtyTo
-		ELSE divide by dblUnitQtyTo
-
-		Sample 1. From 50-LB-Bag (50) to KG (0.453592). Qty is 10. 	FLOOR of 0.453592 is 0.
-		Using this formula: dblQty x dblUnitQtyFrom x dblUnitQtyTo
-		10 x 50 = 500 lb
-		500 lb x 0.453592 = 226.796 kg
-
-		Sample 2: From 50-LB bag (50) to 20-KG bag (44.0925). Qty is 10. FLOOR of 44.0925 is 44.
-		Using this formula: dblQty x dblUnitQtyFrom / dblUnitQtyTo
-		10 x 50 = 500 lb
-		500 lb / 44.0925 = 11.339797 20-kg bag
+	Sample:
+		Let's say @intItemUOMIdFrom is 25 kg bags, @intItemUOMIdTo is Pound, and then @dblQty is 10. 
+		Using this function will convert 10 bags, in 25 kg bag, to Pounds. 
 */
 
 CREATE FUNCTION [dbo].[fnCalculateQtyBetweenUOM](

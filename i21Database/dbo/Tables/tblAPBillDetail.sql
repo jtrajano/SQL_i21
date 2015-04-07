@@ -6,6 +6,7 @@
     [intAccountId]    INT             NOT NULL DEFAULT 0,
 	[intItemId]    INT             NULL,
 	[intItemReceiptId]    INT             NULL,
+	[intPODetailId]    INT             NULL,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dblQtyOrdered] DECIMAL(18, 6) NOT NULL DEFAULT 0, 

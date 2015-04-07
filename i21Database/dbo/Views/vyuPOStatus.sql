@@ -12,9 +12,9 @@ SELECT
 	,D.strType
 	,ISNULL(BillItems.dblItemQtyBilled,0) AS dblItemQtyBilled
 	,ISNULL(BillItems.dblItemQtyForBill,0) AS dblItemQtyForBill
-	,ISNULL(ReceivedItems.dblItemQtyReceived,0) AS dblItemQtyReceived
-	,ISNULL(ReceivedItems.dblItemQtyForReceive,0) AS dblItemForReceive
-	,ysnItemReceived = CASE WHEN (B.dblQtyOrdered = ISNULL(ReceivedItems.dblItemQtyReceived,0)) AND A.intOrderStatusId <> 1 THEN 1 ELSE 0 END
+	,ISNULL(ReceivedItems.dblIRItemQtyReceive,0) AS dblIRItemQtyReceive
+	,ISNULL(ReceivedItems.dblPOItemQtyReceive,0) AS dblPOItemQtyReceive
+	,ysnItemReceived = CASE WHEN (B.dblQtyOrdered = ISNULL(ReceivedItems.dblPOItemQtyReceive,0)) AND A.intOrderStatusId <> 1 THEN 1 ELSE 0 END
 	,ysnItemBilled = CASE WHEN (B.dblQtyOrdered = ISNULL(BillItems.dblItemQtyBilled,0)) AND A.intOrderStatusId <> 1 THEN 1 ELSE 0 END
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B
@@ -24,16 +24,26 @@ FROM tblPOPurchase A
 	INNER JOIN tblICItem D
 		ON B.intItemId = D.intItemId
 	OUTER APPLY (
-		SELECT
-			F2.intItemId
-			,F2.intLineNo
-			,SUM(F2.dblReceived) dblItemQtyReceived
-			,SUM(F2.dblOpenReceive) dblItemQtyForReceive
-		FROM tblICInventoryReceipt F1
-			INNER JOIN tblICInventoryReceiptItem F2
-				ON F1.intInventoryReceiptId = F2.intInventoryReceiptId
-		WHERE F2.intLineNo = B.intPurchaseDetailId
-		GROUP BY F2.intItemId, F2.intLineNo
+		SELECT 
+			SUM(dblIRItemQtyReceive) dblIRItemQtyReceive
+			,SUM(dblPOItemQtyReceive) dblPOItemQtyReceive
+			,intLineNo
+		FROM
+		(
+			SELECT
+				F2.intItemId
+				,F2.intLineNo
+				,SUM(F2.dblOpenReceive) dblIRItemQtyReceive
+				,dbo.fnCalculateQtyBetweenUOM(F2.intUnitMeasureId, B.intUnitOfMeasureId, SUM(F2.dblOpenReceive)) dblPOItemQtyReceive
+			FROM tblICInventoryReceipt F1
+				INNER JOIN tblICInventoryReceiptItem F2
+					ON F1.intInventoryReceiptId = F2.intInventoryReceiptId
+			WHERE F1.ysnPosted = 1
+			AND F2.intLineNo = B.intPurchaseDetailId
+			GROUP BY F2.intItemId, F2.intLineNo, F2.intUnitMeasureId
+		) TotalReceivedItems
+		WHERE TotalReceivedItems.intLineNo = B.intPurchaseDetailId
+		GROUP BY intLineNo
 	) ReceivedItems
 	OUTER APPLY (
 		SELECT 
@@ -48,3 +58,4 @@ FROM tblPOPurchase A
 	) BillItems
 
 	
+

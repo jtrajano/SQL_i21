@@ -90,7 +90,7 @@ BEGIN
 				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
 
 	UPDATE	A
-	SET		intOrderStatusId =	CASE	WHEN (SELECT SUM(dblQtyReceived) - SUM(dblQtyOrdered) FROM tblPOPurchaseDetail WHERE intPurchaseId = B.intSourceId) = 0 THEN 3 
+	SET		intOrderStatusId =	CASE	WHEN (SELECT SUM(dblQtyReceived) - SUM(dblQtyOrdered) FROM tblPOPurchaseDetail WHERE intPurchaseId = B.intSourceId) >= 0 THEN 3 
 										ELSE 2 
 								END
 	FROM	tblPOPurchase A INNER JOIN #tmpReceivedPOItems B 

@@ -75,6 +75,50 @@ DECLARE
 	,@ysnProduced				AS BIT 
 	,@intDetailId				AS INT 
 
+
+-- Check for UNIQUE errors. 
+BEGIN
+	SELECT	TOP 1 
+			@strReceiptNumber = LotMaster.strReceiptNumber
+			,@strLotNumber = LotMaster.strLotNumber
+	FROM	tblICLot LotMaster INNER JOIN @ItemsForLot LotFromTransaction
+				ON LotMaster.intItemId = LotFromTransaction.intItemId
+				AND LotMaster.strLotNumber = LotFromTransaction.strLotNumber
+			INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intItemLocationId = LotFromTransaction.intItemLocationId
+				AND LotMaster.intLocationId = ItemLocation.intLocationId
+	WHERE	ISNULL(LotMaster.dblQty, 0) <> 0
+
+	IF ISNULL(@strReceiptNumber, '') <> ''
+	BEGIN 
+		-- 'The lot number {Lot Number} is already used in {Transaction Id}.'
+		RAISERROR(51051, 11, 1, @strLotNumber, @strReceiptNumber);
+		RETURN -9
+	END 
+END			
+
+-- Check for redundant lot numbers 
+BEGIN 
+	SET @strReceiptNumber = NULL
+	SET @strLotNumber = NULL 
+	SET @strItemNo = NULL 
+	SELECT	TOP 1
+			@strLotNumber = LotFromTransaction.strLotNumber
+			,@strReceiptNumber = LotFromTransaction.strReceiptNumber
+			,@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+	FROM	@ItemsForLot LotFromTransaction INNER JOIN dbo.tblICItem Item
+				ON LotFromTransaction.intItemId = Item.intItemId
+	GROUP BY LotFromTransaction.strLotNumber, LotFromTransaction.strReceiptNumber, Item.strItemNo, Item.intItemId
+	HAVING COUNT(1) > 1
+
+	IF ISNULL(@strReceiptNumber, '') <> '' AND ISNULL(@strLotNumber, '') <> '' AND ISNULL(@strItemNo, '') <> ''
+	BEGIN 
+		-- 'Please check for duplicate lot numbers. The lot number {Lot Number} is used more than once in item {Item No} on {Transaction Id}.'
+		RAISERROR(51052, 11, 1, @strLotNumber, @strItemNo, @strReceiptNumber);
+		RETURN -9
+	END
+END 
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Create the cursor
 -- Make sure the following options are used: 
@@ -281,23 +325,23 @@ BEGIN
 			UPDATE 
 			SET		
 				-- The following fields are updated if it is changed from the source transaction. 
-				dtmExpiryDate			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @dtmExpiryDate ELSE LotMaster.dtmExpiryDate END 
-				,strLotAlias			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strLotAlias ELSE LotMaster.strLotAlias END 				
-				,intOriginId			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @intOriginId ELSE LotMaster.intOriginId END  
-				,strBOLNo				= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strBOLNo ELSE LotMaster.strBOLNo END 
-				,strVessel				= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strVessel ELSE LotMaster.strVessel END 
-				,strReceiptNumber		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
-				,strMarkings			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strMarkings ELSE LotMaster.strMarkings END 
-				,strNotes				= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strNotes ELSE LotMaster.strNotes END 
-				,intVendorId			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @intVendorId ELSE LotMaster.intVendorId END 
-				,strVendorLotNo			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strVendorLotNo ELSE LotMaster.strVendorLotNo END 
-				,intVendorLocationId	= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @intVendorLocationId ELSE LotMaster.intVendorLocationId END
-				,strVendorLocation		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strVendorLocation ELSE LotMaster.strVendorLocation END 
-				,strContractNo			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @strContractNo ELSE LotMaster.strContractNo END 
-				,dtmManufacturedDate	= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber THEN @dtmManufacturedDate ELSE LotMaster.dtmManufacturedDate END 
+				dtmExpiryDate			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dtmExpiryDate ELSE LotMaster.dtmExpiryDate END 
+				,strLotAlias			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strLotAlias ELSE LotMaster.strLotAlias END 				
+				,intOriginId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intOriginId ELSE LotMaster.intOriginId END  
+				,strBOLNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strBOLNo ELSE LotMaster.strBOLNo END 
+				,strVessel				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVessel ELSE LotMaster.strVessel END 
+				,strReceiptNumber		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
+				,strMarkings			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strMarkings ELSE LotMaster.strMarkings END 
+				,strNotes				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strNotes ELSE LotMaster.strNotes END 
+				,intVendorId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorId ELSE LotMaster.intVendorId END 
+				,strVendorLotNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLotNo ELSE LotMaster.strVendorLotNo END 
+				,intVendorLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorLocationId ELSE LotMaster.intVendorLocationId END
+				,strVendorLocation		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLocation ELSE LotMaster.strVendorLocation END 
+				,strContractNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContractNo ELSE LotMaster.strContractNo END 
+				,dtmManufacturedDate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dtmManufacturedDate ELSE LotMaster.dtmManufacturedDate END 
 								
 				-- Find out if there any possible errors when updating an existing lot record. 
-				,@errorFoundOnUpdate	= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
+				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
 													CASE	WHEN ISNULL(LotMaster.intItemUOMId, 0) <> LotToUpdate.intItemUOMId THEN 1 
 															WHEN ISNULL(LotMaster.intWeightUOMId, 0) <> LotToUpdate.intWeightUOMId THEN 2
 															WHEN ISNULL(LotMaster.intSubLocationId, 0) <> ISNULL(LotToUpdate.intSubLocationId, 0) THEN 3
@@ -306,17 +350,17 @@ BEGIN
 													END 
 												ELSE 0
 										  END
-				-- Allow update on the following fields if it is changed from the source transaction. 
-				,dblWeightPerQty		=	CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN 														
+				-- Allow update on the following fields if dblQty is zero.  
+				,dblWeightPerQty		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 														
 														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight) 
 																ELSE 0 
 														END 
 													ELSE LotMaster.dblWeightPerQty 
 											END
-				,intItemUOMId			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemUOMId ELSE LotMaster.intItemUOMId END
-				,intWeightUOMId			= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intWeightUOMId ELSE LotMaster.intWeightUOMId END
-				,intSubLocationId		= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intSubLocationId ELSE LotMaster.intSubLocationId END
-				,intStorageLocationId	= CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intStorageLocationId ELSE LotMaster.intStorageLocationId END
+				,intItemUOMId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemUOMId ELSE LotMaster.intItemUOMId END
+				,intWeightUOMId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intWeightUOMId ELSE LotMaster.intWeightUOMId END
+				,intSubLocationId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intSubLocationId ELSE LotMaster.intSubLocationId END
+				,intStorageLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intStorageLocationId ELSE LotMaster.intStorageLocationId END
 
 				-- The following fields are always updated if it has the same: 
 				-- 1. Quantity UOM
@@ -356,7 +400,7 @@ BEGIN
 				-- 1. It is editing from the source transaction id
 				-- 2. The item UOM, Weight UOM, Sub Location, and Storage Location matches exactly. 
 				-- Otherwise, it returns zero. 
-				,@intInsertedLotId		=	CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotMaster.intLotId
+				,@intInsertedLotId		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
 														AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
@@ -365,7 +409,7 @@ BEGIN
 													) THEN LotMaster.intLotId 
 													ELSE 0 
 											END
-				,@intLotId				=	CASE	WHEN LotMaster.strReceiptNumber = @strReceiptNumber AND ISNULL(LotMaster.dblQty, 0) = 0 THEN LotMaster.intLotId
+				,@intLotId				=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotMaster.intLotId
 													WHEN (
 														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
 														AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)

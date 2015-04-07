@@ -104,12 +104,12 @@ BEGIN
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ItemLot.TotalLotQtyInItemUOM <>
-				dbo.fnCalculateQtyBetweenUOM (
+			AND ROUND(ItemLot.TotalLotQtyInItemUOM, 2) <>
+				ROUND(dbo.fnCalculateQtyBetweenUOM (
 					ReceiptItem.intUnitMeasureId
 					,ReceiptItem.intUnitMeasureId
 					,ReceiptItem.dblOpenReceive
-				)
+				), 2)
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
@@ -162,7 +162,7 @@ BEGIN
 			,intSubLocationId		= ItemLot.intSubLocationId
 			,intStorageLocationId	= ItemLot.intStorageLocationId
 			,dblQty					= ItemLot.dblQuantity * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
-			,intItemUOMId			= ReceiptItem.intUnitMeasureId
+			,intItemUOMId			= ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId) 
 			,dblWeight				= ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0) * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
 			,intWeightUOMId			= ReceiptItem.intWeightUOMId
 			,dtmExpiryDate			= ItemLot.dtmExpiryDate
