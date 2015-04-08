@@ -379,7 +379,7 @@ BEGIN
 	-- Update the received quantities from the Purchase Order
 	EXEC dbo.[uspPOReceived] 
 		@intTransactionId 
-		,1
+		,@ysnPost
 
 	COMMIT TRAN @TransactionName
 END 

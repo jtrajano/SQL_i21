@@ -66,7 +66,7 @@ DECLARE
 	,@strReceiptNumber			AS NVARCHAR(50)
 	,@strMarkings				AS NVARCHAR(MAX)
 	,@strNotes					AS NVARCHAR(MAX)
-	,@intVendorId				AS INT 
+	,@intEntityVendorId				AS INT 
 	,@strVendorLotNo			AS NVARCHAR(50)
 	,@intVendorLocationId		AS INT
 	,@strVendorLocation			AS NVARCHAR(100)
@@ -181,7 +181,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strReceiptNumber
 		,@strMarkings
 		,@strNotes
-		,@intVendorId
+		,@intEntityVendorId
 		,@strVendorLotNo
 		,@intVendorLocationId
 		,@strVendorLocation
@@ -333,7 +333,7 @@ BEGIN
 				,strReceiptNumber		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
 				,strMarkings			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strMarkings ELSE LotMaster.strMarkings END 
 				,strNotes				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strNotes ELSE LotMaster.strNotes END 
-				,intEntityVendorId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorId ELSE LotMaster.intEntityVendorId END 
+				,intEntityVendorId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intEntityVendorId ELSE LotMaster.intEntityVendorId END 
 				,strVendorLotNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLotNo ELSE LotMaster.strVendorLotNo END 
 				,intVendorLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorLocationId ELSE LotMaster.intVendorLocationId END
 				,strVendorLocation		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLocation ELSE LotMaster.strVendorLocation END 
@@ -491,7 +491,7 @@ BEGIN
 				,@strReceiptNumber
 				,@strMarkings
 				,@strNotes
-				,@intVendorId
+				,@intEntityVendorId
 				,@strVendorLotNo
 				,@intVendorLocationId
 				,@strVendorLocation
@@ -622,7 +622,7 @@ BEGIN
 		,@strReceiptNumber
 		,@strMarkings
 		,@strNotes
-		,@intVendorId
+		,@intEntityVendorId
 		,@strVendorLotNo
 		,@intVendorLocationId
 		,@strVendorLocation
