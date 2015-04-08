@@ -2226,7 +2226,6 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntitySalespersonId]" />
   </Operation>
-
   <Operation Name="Rename Refactor" Key="9d3eaf3c-0aaf-4642-99b1-b83557857fe2" ChangeDateTime="03/04/2015 13:38:08">
     <Property Name="ElementName" Value="[dbo].[tblCTWeightGrade].[dblFrainchise]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
@@ -2450,5 +2449,19 @@
     <Property Name="ParentElementName" Value="[dbo].[tblSCDeviceInterfaceFile]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblSCDeviceInterfaceFile_tblSCScaleDevice_intScaleDeviceId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9a272f90-594e-48b3-9ba7-214e60c8f763" ChangeDateTime="04/08/2015 15:08:00">
+    <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricingPreferences].[intHistoryStartTime]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricingPreferences]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strHistoryStartTime" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5f56d392-d248-4362-be64-30f6fd2a0027" ChangeDateTime="04/08/2015 15:08:06">
+    <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricingPreferences].[intHisotryEndTime]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricingPreferences]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strHisotryEndTime" />
   </Operation>
 </Operations>

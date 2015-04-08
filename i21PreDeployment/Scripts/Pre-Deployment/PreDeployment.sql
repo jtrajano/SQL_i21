@@ -76,3 +76,6 @@
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql
+
+--RK
+:r .\13_RK\01_DropTableScript.sql

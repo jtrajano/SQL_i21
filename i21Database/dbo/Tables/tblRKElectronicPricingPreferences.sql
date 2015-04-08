@@ -14,8 +14,8 @@
     [strWebSericePassword] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL, 
     [intUpdateDelayMinutes] INT NOT NULL DEFAULT 5, 
     [intHistorySaveInterval] INT NOT NULL DEFAULT 6, 
-    [intHistoryStartTime] NVARCHAR(4) NOT NULL DEFAULT 0800, 
-    [intHisotryEndTime] NVARCHAR(4) NOT NULL DEFAULT 1400, 
+    [strHistoryStartTime] NVARCHAR(4) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 0800, 
+    [strHisotryEndTime] NVARCHAR(4) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 1400, 
     [ysnHistoryByCloseDate] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblRKElectronicPricingPreferences_intElectronicPricingControlId] PRIMARY KEY ([intElectronicPricingControlId]) 
 )

@@ -75,6 +75,7 @@
     <Folder Include="Scripts\Pre-Deployment\10_RPT" />
     <Folder Include="Scripts\Pre-Deployment\11_IC" />
     <Folder Include="Scripts\Pre-Deployment\12_EM" />
+    <Folder Include="Scripts\Pre-Deployment\13_RK" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -101,6 +102,7 @@
     <PreDeploy Include="Scripts\Pre-Deployment\PreDeployment.sql" />
     <None Include="Scripts\Pre-Deployment\10_RPT\1_1430_to_1430.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\3_DataMigration.sql" />
+    <None Include="Scripts\Pre-Deployment\13_RK\01_DropTableScript.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\1_1320_to_1340.sql" />

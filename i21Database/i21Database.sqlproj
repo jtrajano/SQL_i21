@@ -1233,7 +1233,6 @@
     <Build Include="dbo\Views\vyuLGShippingInstructionOpenContracts.sql" />
     <Build Include="dbo\Views\vyuLGNotifyParties.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserPermissions.sql" />
-    <Build Include="dbo\Tables\tblRKElectonicPricing.sql" />
     <Build Include="dbo\Tables\tblRKElectronicPricingHistory.sql" />
     <Build Include="dbo\Tables\tblRKElectronicPricingPreferences.sql" />
     <Build Include="dbo\Tables\tblLGEquipmentType.sql" />
@@ -1295,6 +1294,8 @@
     <Build Include="dbo\Tables\tblSMControlStage.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateStageListing.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCommitListing.sql" />
+    <Build Include="dbo\Tables\tblRKMarketExchange.sql" />
+    <Build Include="dbo\Tables\tblRKElectronicPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1323,7 +1324,7 @@
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\1_TaxStatesAndLocalities.sql" />
     <None Include="Scripts\Post-Deployment\AP\DateCreatedValueDefault.sql" />
-	<Build Include="dbo\Stored Procedures\uspMFGetIngredientLotByProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetIngredientLotByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetProductByProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShift.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainer.sql" />
