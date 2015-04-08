@@ -218,7 +218,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotStorageLocation: {
                     dataIndex: 'strStorageLocation',
                     editor: {
-                        store: '{storageLocation}'
+                        store: '{storageLocation}',
+                        defaultFilters: [{
+                            column: 'intLocationId',
+                            value: '{current.intLocationId}',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colLotUnitsPallet: 'intUnitPallet',
