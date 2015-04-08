@@ -1689,13 +1689,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if(sel && gridObj){
                     gridObj.setSelection(sel);
 
+                    var column = 1;
+                    if(win.viewModel.data.current.get('strReceiptType') === 'Direct'){
+                        column = 2
+                    }
+
                     var task = new Ext.util.DelayedTask(function(){
                         gridObj.plugins[0].startEditByPosition({
                             row: 0,
-                            column: 1
+                            column: column
                         });
-                        var txtNotes = gridObj.query('#txtNotes')[0];
-                        txtNotes.focus();
+//                        var txtNotes = gridObj.query('#txtNotes')[0];
+//                        txtNotes.focus();
                     });
 
                     task.delay(10);
