@@ -127,14 +127,11 @@ BEGIN TRANSACTION
 	DELETE FROM tblSMControlStage WHERE ISNULL(strChange, '') = ''
 	
 	-- Delete screen(s) staging that doesn't have conflicts
-	DELETE FROM tblSMScreenStage WHERE intScreenStageId NOT IN (
-		SELECT tblSMScreenStage.intScreenStageId
-		FROM tblSMControlStage 
-		INNER JOIN tblSMScreenStage 
-			ON tblSMControlStage.intScreenStageId = tblSMScreenStage.intScreenStageId
-		GROUP BY tblSMScreenStage.intScreenStageId
-		HAVING COUNT(*) > 0
-	) AND ISNULL(strChange, '') = ''
+	DELETE FROM tblSMScreenStage
+	WHERE ISNULL(
+			(SELECT COUNT(*) 
+				FROM tblSMControlStage 
+				WHERE tblSMControlStage.intScreenStageId = tblSMScreenStage.intScreenStageId), 0) = 0
+	AND ISNULL(tblSMScreenStage.strChange, '') = ''
 
- 
 COMMIT TRANSACTION

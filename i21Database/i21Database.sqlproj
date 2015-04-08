@@ -1249,6 +1249,7 @@
     <Build Include="dbo\Tables\tblSMScreenStage.sql" />
     <Build Include="dbo\Tables\tblSMControlStage.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateStageListing.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCommitListing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
