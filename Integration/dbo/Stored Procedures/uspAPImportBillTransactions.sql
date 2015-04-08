@@ -125,13 +125,13 @@ BEGIN
 			OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber, inserted.intTransactionType INTO #InsertedData
 			--Unposted
 			SELECT
-				[intVendorId]			=	D.intVendorId,
+				[intVendorId]			=	D.intEntityVendorId,
 				--[strVendorId]			=	A.aptrx_vnd_no,
 				--[strBillId] 			=	A.aptrx_ivc_no,
 				[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-				[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
-													WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
-														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+				[intTermsId] 			=	NULL, --ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
+													--WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
+														--WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 				[intTaxId] 			=	NULL,
 				[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -163,13 +163,13 @@ BEGIN
 			--Posted
 			UNION
 			SELECT
-				[intVendorId]			=	D.intVendorId, 
+				[intVendorId]			=	D.intEntityVendorId, 
 				--[strVendorId]			=	A.apivc_vnd_no,
 				--[strBillId] 			=	A.apivc_ivc_no,
 				[strVendorOrderNumber] 	=	A.apivc_ivc_no,
-				[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
-													WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
-														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+				[intTermsId] 			=	NULL, --ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
+													--WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
+														--WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 				[intTaxId] 			=	NULL,
 				[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -224,7 +224,7 @@ BEGIN
 				C.apegl_dist_no
 			FROM tblAPBill A
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intVendorId
+					ON A.intVendorId = B.intEntityVendorId
 				INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
 								ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 								AND C2.aptrx_vnd_no = C.apegl_vnd_no
@@ -255,7 +255,7 @@ BEGIN
 				C.aphgl_dist_no
 				FROM tblAPBill A
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intVendorId
+					ON A.intVendorId = B.intEntityVendorId
 				INNER JOIN (apivcmst C2 INNER JOIN aphglmst C 
 							ON C2.apivc_ivc_no = C.aphgl_ivc_no 
 							AND C2.apivc_vnd_no = C.aphgl_vnd_no
@@ -346,7 +346,7 @@ BEGIN
 				AND A.apchk_rev_dt = B.apivc_chk_rev_dt
 				AND A.apchk_cbk_no = B.apivc_cbk_no
 			AND A.apchk_trx_ind <> ''O'' AND A.apchk_chk_amt <> 0
-				INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intVendorId = D.intVendorId)
+				INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intVendorId = D.intEntityVendorId)
 					ON B.apivc_ivc_no = C.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 					AND B.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 			)
@@ -399,7 +399,7 @@ BEGIN
 
 				SELECT TOP(1)
 					@bankAccount = C.intBankAccountId,
-					@intVendorId = B.intVendorId,
+					@intVendorId = B.intEntityVendorId,
 					@paymentInfo = A.strCheckNo,
 					@payment = A.dblAmount,
 					@datePaid = A.dtmDate,
@@ -473,15 +473,15 @@ BEGIN
 			--UPDATE strTransactionId from tblCMBankTransaction
 			UPDATE tblCMBankTransaction
 			SET strTransactionId = B.strPaymentRecordNum,
-				intPayeeId = C.intEntityId
+				intPayeeId = C.intEntityVendorId
 			FROM tblCMBankTransaction A
 			INNER JOIN tblAPPayment B
 				ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
 				AND A.dtmDate = B.dtmDatePaid
 				AND A.intBankAccountId = B.intBankAccountId
 				AND A.strReferenceNo = B.strPaymentInfo
-			INNER JOIN (tblAPVendor C INNER JOIN tblEntity D ON C.intEntityId = D.intEntityId)
-				ON B.intVendorId = C.intVendorId 
+			INNER JOIN (tblAPVendor C INNER JOIN tblEntity D ON C.intEntityVendorId = D.intEntityId)
+				ON B.intVendorId = C.intEntityVendorId 
 				--AND A.strPayee = D.strName
 			WHERE A.strSourceSystem = ''AP''
 		
@@ -516,13 +516,13 @@ BEGIN
 			OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber, inserted.intTransactionType INTO #InsertedData
 			--Unposted
 			SELECT
-				[intVendorId]			=	D.intVendorId,
+				[intVendorId]			=	D.intEntityVendorId,
 				--[strVendorId]			=	A.aptrx_vnd_no,
 				--[strBillId] 			=	A.aptrx_ivc_no,
 				[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-				[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
-													WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
-														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+				[intTermsId] 			=	NULL,--ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
+													--WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
+														--WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 				[intTaxId] 			=	NULL,
 				[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -578,7 +578,7 @@ BEGIN
 				C.apegl_dist_no
 				FROM tblAPBill A
 					INNER JOIN tblAPVendor B
-						ON A.intVendorId = B.intVendorId
+						ON A.intVendorId = B.intEntityVendorId
 					INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
 								ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 								AND C2.aptrx_vnd_no = C.apegl_vnd_no

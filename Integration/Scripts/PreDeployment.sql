@@ -112,14 +112,14 @@
 :r "..\Scripts\TM\Customer.sql"
 :r "..\dbo\Views\vyuTMConsumptionSiteSearch.sql"
 
-:r "..\dbo\Functions\fnGetVendorLastName.sql"
+--:r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
 :r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
-:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
+--:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 :r "..\dbo\Stored Procedures\uspAPPostOriginPayment.sql"
 :r "..\Scripts\AP\FixPaymentCMRecords.sql"
 :r "..\Scripts\AP\FixBillData.sql"
-:r "..\Scripts\AP\UpdateBillPONumber.sql"
+--:r "..\Scripts\AP\UpdateBillPONumber.sql"
 
 -- TAX FORMS
 :r ..\dbo\Views\vyuTFTaxCycle.sql
