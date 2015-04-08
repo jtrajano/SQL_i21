@@ -8,12 +8,22 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF  
   
 BEGIN TRANSACTION  
+	-- Create a table for storing updated screens
+	DECLARE @newScreens TABLE (intScreenStageId int);
+
 	-- Set change to Added to all new screen(s)
-	UPDATE A 
+	UPDATE A
 	SET A.strChange = 'Added'
+	OUTPUT INSERTED.intScreenStageId INTO @newScreens
 	FROM tblSMScreenStage A
 		LEFT OUTER JOIN tblSMScreen B ON A.strNamespace = B.strNamespace
 	WHERE ISNULL(B.strScreenName, '') = '' 
+
+	-- Set change to Added to all control(s) inside of new screen(s)
+	UPDATE A 
+	SET A.strChange = 'Added'
+	FROM tblSMControlStage A
+		INNER JOIN @newScreens B ON B.intScreenStageId = A.intScreenStageId;
 
 	-- Add entry to deleted screen(s)
 	INSERT INTO tblSMScreenStage (
@@ -114,21 +124,17 @@ BEGIN TRANSACTION
 	WHERE ISNULL(B.strControlName, '') = '' 
 
 	-- Delete control(s) staging that doesn't have conflicts
-	DELETE FROM tblSMControlStage WHERE intControlStageId IN (
-		SELECT tblSMControlStage.intControlStageId 
-		FROM tblSMControlStage 
-		INNER JOIN tblSMScreenStage 
-			ON tblSMControlStage.intScreenStageId = tblSMScreenStage.intScreenStageId
-		WHERE ISNULL(tblSMScreenStage.strChange, '') = '' AND ISNULL(tblSMControlStage.strChange, '') = ''
-	)
-
+	DELETE FROM tblSMControlStage WHERE ISNULL(strChange, '') = ''
+	
 	-- Delete screen(s) staging that doesn't have conflicts
-	DELETE FROM tblSMScreenStage WHERE intScreenStageId IN (
-		SELECT tblSMControlStage.intControlStageId 
+	DELETE FROM tblSMScreenStage WHERE intScreenStageId NOT IN (
+		SELECT tblSMScreenStage.intScreenStageId
 		FROM tblSMControlStage 
 		INNER JOIN tblSMScreenStage 
 			ON tblSMControlStage.intScreenStageId = tblSMScreenStage.intScreenStageId
-		WHERE ISNULL(tblSMControlStage.strChange, '') <> ''
+		GROUP BY tblSMScreenStage.intScreenStageId
+		HAVING COUNT(*) > 0
 	) AND ISNULL(strChange, '') = ''
+
  
 COMMIT TRANSACTION
