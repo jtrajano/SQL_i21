@@ -1296,6 +1296,8 @@
     <Build Include="dbo\Stored Procedures\uspSMCommitListing.sql" />
     <Build Include="dbo\Tables\tblRKMarketExchange.sql" />
     <Build Include="dbo\Tables\tblRKElectronicPricing.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeSupervisor.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeDepartment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

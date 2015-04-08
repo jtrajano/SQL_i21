@@ -33,6 +33,7 @@
 	[ysnRetirementPlan] [bit] NOT NULL DEFAULT ((0)),
 	[ysnThirdPartySickPay] [bit] NOT NULL DEFAULT ((0)),
 	[ysnDirectDeposit] [bit] NOT NULL DEFAULT ((0)),
+	[strTimeEntryPassword] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
 	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
@@ -378,3 +379,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'strType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Time Entry Password',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployee',
+    @level2type = N'COLUMN',
+    @level2name = N'strTimeEntryPassword'
