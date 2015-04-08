@@ -79,6 +79,7 @@
     [intDiscountLocationId] INT NULL,
 	[intItemId] INT NULL,
 	[intEntityId] INT NULL,
+	[intLoadId] INT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),
@@ -91,7 +92,8 @@
     CONSTRAINT [FK_tblSCTicket_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
 	CONSTRAINT [FK_tblSCTicket_tblSMCompanyLocation_intDiscountLocationId] FOREIGN KEY ([intDiscountLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblSCTicket_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblSCTicket_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId])
+	CONSTRAINT [FK_tblSCTicket_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblSCTicket_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId])
 )
 
 GO
