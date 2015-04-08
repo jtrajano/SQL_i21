@@ -1323,6 +1323,24 @@
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\1_TaxStatesAndLocalities.sql" />
     <None Include="Scripts\Post-Deployment\AP\DateCreatedValueDefault.sql" />
+	<Build Include="dbo\Stored Procedures\uspMFGetIngredientLotByProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductByProcess.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShift.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetContainer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSourceStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetDestinationStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetManufacturingProcessDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseLot.sql" />
+    <Build Include="dbo\Tables\tblMFReleaseStatus.sql" />
+    <Build Include="dbo\Tables\tblMFShift.sql" />
+    <Build Include="dbo\Tables\tblMFShiftBreakType.sql" />
+    <Build Include="dbo\Tables\tblMFShiftDetail.sql" />
+    <Build Include="dbo\Tables\tblMFFloorMovementType.sql" />
+    <Build Include="dbo\Tables\tblMFStationType.sql" />
+    <Build Include="dbo\Tables\tblMFFloorMovement.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCompleteWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPickWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWarhouseReleaseLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

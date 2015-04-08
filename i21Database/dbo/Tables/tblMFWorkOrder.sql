@@ -54,6 +54,7 @@
     [strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intBatchID] INT NULL,
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrder_intConcurrencyId] DEFAULT 0,
+	intManufacturingProcessId INT CONSTRAINT FK_tblMFWorkOrder_tblMFManufacturingProcess_intManufacturingProcessId_intManufacturingProcessId REFERENCES dbo.tblMFManufacturingProcess (intManufacturingProcessId),
 	CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

@@ -308,6 +308,25 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Paycheck')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 33
+			,[strTransactionType]	= N'Batch Production'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch Production')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 34
+			,[strTransactionType]	= N'Work Order'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Work Order')
+
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
