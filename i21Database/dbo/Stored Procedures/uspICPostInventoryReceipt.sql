@@ -216,8 +216,25 @@ BEGIN
 						END 
 
 			,dblCost =	-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
-						CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN dbo.fnCalculateCostPerWeight(DetailItemLot.dblQuantity, DetailItem.dblUnitCost, ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)) 
-								ELSE DetailItem.dblUnitCost  
+						CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
+									--dbo.fnCalculateCostPerWeight (
+									--	DetailItemLot.dblQuantity, 
+									--	DetailItem.dblUnitCost, 
+									--	ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+									--) 
+
+									dbo.fnCalculateCostPerWeight (
+										dbo.fnCalculateCostPerLot ( 
+											DetailItem.intUnitMeasureId
+											,DetailItem.intWeightUOMId
+											,DetailItemLot.intItemUnitMeasureId
+											,DetailItem.dblUnitCost
+										) * DetailItemLot.dblQuantity
+										,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+									) 
+
+								ELSE 
+									DetailItem.dblUnitCost  
 						END 
 
 			,dblSalesPrice = 0  

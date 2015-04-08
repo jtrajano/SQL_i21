@@ -87,7 +87,7 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON ItemLocation.intItemLocationId = LotFromTransaction.intItemLocationId
 				AND LotMaster.intLocationId = ItemLocation.intLocationId
-	WHERE	ISNULL(LotMaster.dblQty, 0) <> 0
+	WHERE	ISNULL(LotMaster.dblQty, 0) > 0
 
 	IF ISNULL(@strReceiptNumber, '') <> ''
 	BEGIN 
