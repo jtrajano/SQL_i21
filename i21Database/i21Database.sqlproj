@@ -1287,6 +1287,10 @@
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustment.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuICGetLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTPurgePromotions.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateRebateOrDiscount.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateItemData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
