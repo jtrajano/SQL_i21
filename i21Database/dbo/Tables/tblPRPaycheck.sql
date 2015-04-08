@@ -8,6 +8,7 @@
 	[dtmDateTo] [datetime] NOT NULL,
 	[intBankAccountId] INT NULL,
 	[strReferenceNo] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+	[dblTotalHours] [numeric](18, 6) NULL DEFAULT ((0)),
 	[dblGross] [numeric](18, 6) NULL,
 	[dblAdjustedGross] [numeric](18, 6) NULL,
 	[dblTaxTotal] [numeric](18, 6) NULL,
@@ -273,3 +274,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheck',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Total Hours',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheck',
+    @level2type = N'COLUMN',
+    @level2name = N'dblTotalHours'

@@ -1342,6 +1342,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCompleteWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWarhouseReleaseLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
