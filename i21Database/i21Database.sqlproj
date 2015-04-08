@@ -1096,6 +1096,8 @@
     <Build Include="dbo\Stored Procedures\uspNRGetPaymentType.sql" />
     <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_intAccountId_ysnIsUnposted.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_ysnIsUnposted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
