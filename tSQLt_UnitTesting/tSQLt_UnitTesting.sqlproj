@@ -919,6 +919,12 @@
     <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting LB to LB.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to 50 LB BAG.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting KG to KG.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for LB-LB-25KgBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for 25KgBag-LB-25KgBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for Kg-LB-10LbBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for Lb-Kg-10LbBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for Kg-Ton-10LbBag.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -1156,6 +1156,7 @@
     <Build Include="dbo\Views\vyuPOStatus.sql" />
     <Build Include="dbo\Functions\fnPOHasItemReceipt.sql" />
     <Build Include="dbo\Functions\fnPOHasBill.sql" />
+    <Build Include="dbo\Functions\fnCalculateCostPerLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

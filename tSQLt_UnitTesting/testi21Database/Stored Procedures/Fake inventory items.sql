@@ -17,7 +17,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStockUOM', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemPricing', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure';
-	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM';	
 	EXEC tSQLt.FakeTable 'dbo.tblICLot', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICStockReservation', @Identity = 1;		
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
@@ -344,27 +344,75 @@ BEGIN
 	
 	-- Create the fake table and data for the unit of measure
 	BEGIN 
-		DECLARE @UOMBushel AS INT = 1
-		DECLARE @UOMPound AS INT = 2
+		DECLARE	@UOM_Bushel AS INT = 1
+				,@UOM_Pound AS INT = 2
+				,@UOM_Kg AS INT = 3
+				,@UOM_25KgBag AS INT = 4
+				,@UOM_10LbBag AS INT = 5
+				,@UOM_Ton AS INT = 6
+
+		DECLARE @BushelUnitQty AS NUMERIC(18,6) = 1
+				,@PoundUnitQty AS NUMERIC(18,6) = 1
+				,@KgUnitQty AS NUMERIC(18,6) = 2.20462
+				,@25KgBagUnitQty AS NUMERIC(18,6) = 55.1155
+				,@10LbBagUnitQty AS NUMERIC(18,6) = 10
+				,@TonUnitQty AS NUMERIC(18,6) = 2204.62
 
 		-- Unit of measure master table
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOMBushel, 'Bushel')
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOMPound, 'Pound')
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Bushel, 'Bushel')
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Pound, 'Pound')
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Kg, 'Kilogram')
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_25KgBag, '25 Kg Bag')
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_10LbBag, '10 Lb Bag')
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Ton, 'Ton')
 		
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@WetGrains, @UOMBushel, 1) -- 1
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@StickyGrains, @UOMBushel, 1) -- 2
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@PremiumGrains, @UOMBushel, 1) -- 3
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ColdGrains, @UOMBushel, 1) -- 4
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@HotGrains, @UOMBushel, 1) -- 5
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ManualLotGrains, @UOMBushel, 1) -- 6
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SerializedLotGrains, @UOMBushel, 1)	-- 7
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (1, @WetGrains, @UOM_Bushel, @BushelUnitQty)			
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (2, @StickyGrains, @UOM_Bushel, @BushelUnitQty)		
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (3, @PremiumGrains, @UOM_Bushel, @BushelUnitQty)		
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (4, @ColdGrains, @UOM_Bushel, @BushelUnitQty)			
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (5, @HotGrains, @UOM_Bushel, @BushelUnitQty)			
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (6, @ManualLotGrains, @UOM_Bushel, @BushelUnitQty)	
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (7, @SerializedLotGrains, @UOM_Bushel, @BushelUnitQty)
 
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@WetGrains, @UOMPound, 1) -- 8
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@StickyGrains, @UOMPound, 1) -- 9
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@PremiumGrains, @UOMPound, 1) -- 10
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ColdGrains, @UOMPound, 1) -- 11
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@HotGrains, @UOMPound, 1) -- 12
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ManualLotGrains, @UOMPound, 1) -- 13
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SerializedLotGrains, @UOMPound, 1)	-- 14
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (8, @WetGrains, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (9, @StickyGrains, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (10, @PremiumGrains, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (11, @ColdGrains, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (12, @HotGrains, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (13, @ManualLotGrains, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (14, @SerializedLotGrains, @UOM_Pound, @PoundUnitQty)
+		
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (15, @WetGrains, @UOM_Kg, @KgUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (16, @StickyGrains, @UOM_Kg, @KgUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (17, @PremiumGrains, @UOM_Kg, @KgUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (18, @ColdGrains, @UOM_Kg, @KgUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (19, @HotGrains, @UOM_Kg, @KgUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (20, @ManualLotGrains, @UOM_Kg, @KgUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (21, @SerializedLotGrains, @UOM_Kg, @KgUnitQty)
+
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (22, @WetGrains, @UOM_25KgBag, @25KgBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (23, @StickyGrains, @UOM_25KgBag, @25KgBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (24, @PremiumGrains, @UOM_25KgBag, @25KgBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (25, @ColdGrains, @UOM_25KgBag, @25KgBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (26, @HotGrains, @UOM_25KgBag, @25KgBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (27, @ManualLotGrains, @UOM_25KgBag, @25KgBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (28, @SerializedLotGrains, @UOM_25KgBag, @25KgBagUnitQty)
+
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (29, @WetGrains, @UOM_10LbBag, @10LbBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (30, @StickyGrains, @UOM_10LbBag, @10LbBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (31, @PremiumGrains, @UOM_10LbBag, @10LbBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (32, @ColdGrains, @UOM_10LbBag, @10LbBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (33, @HotGrains, @UOM_10LbBag, @10LbBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (34, @ManualLotGrains, @UOM_10LbBag, @10LbBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (35, @SerializedLotGrains, @UOM_10LbBag, @10LbBagUnitQty)
+
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (36, @WetGrains, @UOM_Ton, @TonUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (37, @StickyGrains, @UOM_Ton, @TonUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (38, @PremiumGrains, @UOM_Ton, @TonUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (39, @ColdGrains, @UOM_Ton, @TonUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (40, @HotGrains, @UOM_Ton, @TonUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (41, @ManualLotGrains, @UOM_Ton, @TonUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (42, @SerializedLotGrains, @UOM_Ton, @TonUnitQty)
+
 	END 
 END 
