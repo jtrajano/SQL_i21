@@ -2533,13 +2533,13 @@ GO
 		DECLARE @StoreActivityId INT
 		SELECT @StoreActivityId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Store' AND intParentMenuID = @StoreModuleId
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Online Price/Cost' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-			VALUES ('Update Online Price/Cost', 'Store', @StoreActivityId, 'Update Online Price/Cost', 'Screen', 'Store.view.UpdateOnlinePrice', 'small-screen', 0, 0, 0, 1, 0, 1)
+			VALUES ('Update Item Pricing', 'Store', @StoreActivityId, 'Update Item Pricing', 'Screen', 'Store.view.UpdateItemPricing', 'small-screen', 0, 0, 0, 1, 0, 1)
 		ELSE
 			UPDATE tblSMMasterMenu
-			SET strCommand = 'Store.view.UpdateOnlinePrice', intSort = 0
-			WHERE strMenuName = 'Update Online Price/Cost' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId
+			SET strCommand = 'Store.view.UpdateItemPricing', intSort = 0
+			WHERE strMenuName = 'Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId
 
         IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Rebate/Discount' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId)
 			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
@@ -2548,6 +2548,30 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'Store.view.UpdateRebateDiscount', intSort = 0
 			WHERE strMenuName = 'Update Rebate/Discount' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId
+
+        IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Item Data' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Update Item Data', 'Store', @StoreActivityId, 'Update Item Data', 'Screen', 'Store.view.UpdateItemData', 'small-screen', 0, 0, 0, 1, 0, 1)
+	    ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.UpdateItemData', intSort = 0
+			WHERE strMenuName = 'Update Item Data' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId
+
+        IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Copy Promotions' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Copy Promotions', 'Store', @StoreActivityId, 'Copy Promotions', 'Screen', 'Store.view.CopyPromotion', 'small-screen', 0, 0, 0, 1, 0, 1)
+	    ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.CopyPromotion', intSort = 0
+			WHERE strMenuName = 'Copy Promotions' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId
+
+       IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purge Promotions' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Purge Promotions', 'Store', @StoreActivityId, 'Purge Promotions', 'Screen', 'Store.view.PurgePromotion', 'small-screen', 0, 0, 0, 1, 0, 1)
+	    ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.PurgePromotion', intSort = 0
+			WHERE strMenuName = 'Purge Promotions' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivityId
 		
 
 	/* ------------------------------------------------- */
@@ -2600,6 +2624,14 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'Store.view.PromotionSales', intSort = 0
 			WHERE strMenuName = 'Promotion Sales Maintenance' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId
+
+      IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Retail Price Adjustments' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Retail Price Adjustments', 'Store', @StoreMaintenanceId, 'Retail Price Adjustments', 'Screen', 'Store.view.RetailPriceAdjustment', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Store.view.RetailPriceAdjustment', intSort = 0
+			WHERE strMenuName = 'Retail Price Adjustments' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceId
 
 	/* --------------------------------------------------- */
 	/* -- End of Create Store Module Menu -- */
