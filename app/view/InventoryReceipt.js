@@ -24,7 +24,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
-        'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
         'Ext.form.field.Number',
         'Ext.grid.Panel',
@@ -37,6 +36,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.grid.column.Date',
         'Ext.grid.column.Check',
         'Ext.form.field.Checkbox',
+        'Ext.form.field.Time',
         'Ext.toolbar.Paging'
     ],
 
@@ -1743,25 +1743,25 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         valueField: 'strDescription'
                                                     },
                                                     {
-                                                        xtype: 'numberfield',
+                                                        xtype: 'numeric',
                                                         itemId: 'txtUnitsWeightMiles',
                                                         fieldLabel: 'Units / Weight / Miles',
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'numberfield',
+                                                        xtype: 'numeric',
                                                         itemId: 'txtFreightRate',
                                                         fieldLabel: 'Freight Rate',
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'numberfield',
+                                                        xtype: 'numeric',
                                                         itemId: 'txtFuelSurcharge',
                                                         fieldLabel: 'Fuel Surcharge %',
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'numberfield',
+                                                        xtype: 'numeric',
                                                         itemId: 'txtCalculatedFreight',
                                                         fieldLabel: 'Calculated Freight',
                                                         labelWidth: 130,
@@ -1782,20 +1782,20 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'numberfield',
+                                                        xtype: 'numeric',
                                                         itemId: 'txtCalculatedAmount',
                                                         fieldLabel: 'Calculated Amount',
                                                         labelWidth: 130,
                                                         readOnly: true
                                                     },
                                                     {
-                                                        xtype: 'numberfield',
+                                                        xtype: 'numeric',
                                                         itemId: 'txtInvoiceAmount',
                                                         fieldLabel: 'Invoice Amount',
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'numberfield',
+                                                        xtype: 'numeric',
                                                         itemId: 'txtDifference',
                                                         fieldLabel: 'Difference',
                                                         labelWidth: 130,
@@ -1826,7 +1826,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'numberfield',
+                                                        xtype: 'numeric',
                                                         itemId: 'txtInvoiceMargin',
                                                         fieldLabel: 'Invoice Margin %',
                                                         labelWidth: 130,
@@ -1894,7 +1894,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelWidth: 145
                                                     },
                                                     {
-                                                        xtype: 'datefield',
+                                                        xtype: 'timefield',
                                                         itemId: 'txtTrailerArrivalTime',
                                                         fieldLabel: 'Trailer Arrival Time',
                                                         labelWidth: 145
@@ -1914,7 +1914,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         valueField: 'strDescription'
                                                     },
                                                     {
-                                                        xtype: 'datefield',
+                                                        xtype: 'timefield',
                                                         itemId: 'txtReceiveTime',
                                                         fieldLabel: 'Receive Time',
                                                         labelWidth: 145

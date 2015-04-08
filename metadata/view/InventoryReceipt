@@ -1468,7 +1468,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter1",
+                                                                    "name": "filter16",
                                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2394,7 +2394,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter11",
+                                                                            "name": "filter17",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3662,7 +3662,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter18",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3810,6 +3810,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "designer|createAlias": "numeric",
                                                 "fieldLabel": "Units / Weight / Miles",
                                                 "itemId": "txtUnitsWeightMiles",
                                                 "labelWidth": 130,
@@ -3830,7 +3831,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": null,
+                                                "designer|createAlias": "numeric",
                                                 "fieldLabel": "Freight Rate",
                                                 "itemId": "txtFreightRate",
                                                 "labelWidth": 130,
@@ -3851,7 +3852,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": null,
+                                                "designer|createAlias": "numeric",
                                                 "fieldLabel": "Fuel Surcharge %",
                                                 "itemId": "txtFuelSurcharge",
                                                 "labelWidth": 130,
@@ -3872,7 +3873,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": null,
+                                                "designer|createAlias": "numeric",
                                                 "fieldLabel": "Calculated Freight",
                                                 "itemId": "txtCalculatedFreight",
                                                 "labelWidth": 130,
@@ -3916,6 +3917,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "designer|createAlias": "numeric",
                                                 "fieldLabel": "Calculated Amount",
                                                 "itemId": "txtCalculatedAmount",
                                                 "labelWidth": 130,
@@ -3936,6 +3938,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "designer|createAlias": "numeric",
                                                 "fieldLabel": "Invoice Amount",
                                                 "itemId": "txtInvoiceAmount",
                                                 "labelWidth": 130,
@@ -3956,7 +3959,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": null,
+                                                "designer|createAlias": "numeric",
                                                 "fieldLabel": "Difference",
                                                 "itemId": "txtDifference",
                                                 "labelWidth": 130,
@@ -4053,7 +4056,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": null,
+                                                "designer|createAlias": "numeric",
                                                 "fieldLabel": "Invoice Margin %",
                                                 "itemId": "txtInvoiceMargin",
                                                 "labelWidth": 130,
@@ -4205,7 +4208,7 @@
                                             "designerId": "2b5e2401-33b5-483c-9558-7e0f0bb9f534"
                                         },
                                         {
-                                            "type": "Ext.form.field.Date",
+                                            "type": "Ext.form.field.Time",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -4222,7 +4225,7 @@
                                                 "readOnly": null,
                                                 "width": null
                                             },
-                                            "name": "MyDateField7",
+                                            "name": "MyTimeField",
                                             "designerId": "563432a4-a8e5-4bda-9f3d-e907dba4a976"
                                         },
                                         {
@@ -4270,7 +4273,7 @@
                                             "designerId": "1575c512-eaad-4ed1-b2a8-4dc0cba6b6e3"
                                         },
                                         {
-                                            "type": "Ext.form.field.Date",
+                                            "type": "Ext.form.field.Time",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -4287,7 +4290,7 @@
                                                 "readOnly": null,
                                                 "width": null
                                             },
-                                            "name": "MyDateField6",
+                                            "name": "MyTimeField1",
                                             "designerId": "c1946276-f266-48a8-ae1b-85fe3d1ecd41"
                                         },
                                         {
@@ -4496,7 +4499,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter19",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4940,7 +4943,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging12",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
