@@ -15,7 +15,7 @@ Ext.define('Inventory.model.Receipt', {
     fields: [
         { name: 'intInventoryReceiptId', type: 'int'},
         { name: 'strReceiptType', type: 'string'},
-        { name: 'intVendorId', type: 'int', allowNull: true },
+        { name: 'intEntityVendorId', type: 'int', allowNull: true },
         { name: 'intTransferorId', type: 'int', allowNull: true },
         { name: 'intLocationId', type: 'int', allowNull: true },
         { name: 'strReceiptNumber', type: 'string'},
@@ -54,7 +54,7 @@ Ext.define('Inventory.model.Receipt', {
 
     validators: [
         {type: 'presence', field: 'dtmReceiptDate'},
-        {type: 'presence', field: 'intVendorId'},
+        {type: 'presence', field: 'intEntityVendorId'},
         {type: 'presence', field: 'strReceiptType'},
         {type: 'presence', field: 'intLocationId'}
     ]

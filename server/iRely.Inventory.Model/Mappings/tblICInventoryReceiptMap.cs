@@ -14,7 +14,7 @@ namespace iRely.Inventory.Model
             this.ToTable("tblICInventoryReceipt");
             this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
             this.Property(t => t.strReceiptType).HasColumnName("strReceiptType");
-            this.Property(t => t.intVendorId).HasColumnName("intVendorId");
+            this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.intTransferorId).HasColumnName("intTransferorId");
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");
             this.Property(t => t.strReceiptNumber).HasColumnName("strReceiptNumber");
@@ -52,7 +52,7 @@ namespace iRely.Inventory.Model
 
             this.HasOptional(p => p.vyuAPVendor)
                 .WithMany(p => p.tblICInventoryReceipts)
-                .HasForeignKey(p => p.intVendorId);
+                .HasForeignKey(p => p.intEntityVendorId);
             this.HasOptional(p => p.tblSMFreightTerm)
                 .WithMany(p => p.tblICInventoryReceipts)
                 .HasForeignKey(p => p.intFreightTermId);
@@ -151,7 +151,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblStatedGrossPerUnit).HasColumnName("dblStatedGrossPerUnit").HasPrecision(18, 6);
             this.Property(t => t.dblStatedTarePerUnit).HasColumnName("dblStatedTarePerUnit").HasPrecision(18, 6);
             this.Property(t => t.strContainerNo).HasColumnName("strContainerNo");
-            this.Property(t => t.intVendorId).HasColumnName("intVendorId");
+            this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.intVendorLocationId).HasColumnName("intVendorLocationId");
             this.Property(t => t.strVendorLocation).HasColumnName("strVendorLocation");
             this.Property(t => t.strMarkings).HasColumnName("strMarkings");

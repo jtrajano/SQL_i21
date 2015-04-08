@@ -20,7 +20,7 @@ namespace iRely.Inventory.Model
 
         public int intInventoryReceiptId { get; set; }
         public string strReceiptType { get; set; }
-        public int? intVendorId { get; set; }
+        public int? intEntityVendorId { get; set; }
         public int? intTransferorId { get; set; }
         public int? intLocationId { get; set; }
         public string strReceiptNumber { get; set; }
@@ -41,8 +41,8 @@ namespace iRely.Inventory.Model
         public decimal? dblFreightRate { get; set; }
         public decimal? dblFuelSurcharge { get; set; }
         public decimal? dblInvoiceAmount { get; set; }
-        public bool ysnPrepaid { get; set; }
-        public bool ysnInvoicePaid { get; set; }
+        public bool? ysnPrepaid { get; set; }
+        public bool? ysnInvoicePaid { get; set; }
         public int? intCheckNo { get; set; }
         public DateTime? dtmCheckDate { get; set; }
         public int? intTrailerTypeId { get; set; }
@@ -416,7 +416,7 @@ namespace iRely.Inventory.Model
         public decimal? dblStatedGrossPerUnit { get; set; }
         public decimal? dblStatedTarePerUnit { get; set; }
         public string strContainerNo { get; set; }
-        public int? intVendorId { get; set; }
+        public int? intEntityVendorId { get; set; }
         public int? intVendorLocationId { get; set; }
         public string strVendorLocation { get; set; }
         public string strMarkings { get; set; }

@@ -164,7 +164,7 @@ namespace iRely.Inventory.Model
     {
         public int intEntityId { get; set; }
         public string strName { get; set; }
-        public int intVendorId { get; set; }
+        public int intEntityVendorId { get; set; }
         public string strVendorAccountNum { get; set; }
         public string strVendorId { get; set; }
 

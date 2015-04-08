@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa43efc0c88eeb59242eb8f0c82f3e2d242a96d3ce71f05be085818c46885f808))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets71e1a27518b343070c20e6f8a363a67b50cd027573adacd65ff8171af54ce0fd))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsa43efc0c88eeb59242eb8f0c82f3e2d242a96d3ce71f05be085818c46885f808 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets71e1a27518b343070c20e6f8a363a67b50cd027573adacd65ff8171af54ce0fd : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "a43efc0c88eeb59242eb8f0c82f3e2d242a96d3ce71f05be085818c46885f808"; }
+            get { return "71e1a27518b343070c20e6f8a363a67b50cd027573adacd65ff8171af54ce0fd"; }
         }
 
         /// <summary>
@@ -2012,7 +2012,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItemLot
-        [CodeFirstDatabaseSchema.tblICInventoryReceiptItemLot](T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemLot_intLotId, T1.tblICInventoryReceiptItemLot_strLotNumber, T1.tblICInventoryReceiptItemLot_strLotAlias, T1.tblICInventoryReceiptItemLot_intSubLocationId, T1.tblICInventoryReceiptItemLot_intStorageLocationId, T1.tblICInventoryReceiptItemLot_intItemUnitMeasureId, T1.tblICInventoryReceiptItemLot_dblQuantity, T1.tblICInventoryReceiptItemLot_dblGrossWeight, T1.tblICInventoryReceiptItemLot_dblTareWeight, T1.tblICInventoryReceiptItemLot_dblCost, T1.tblICInventoryReceiptItemLot_intUnitPallet, T1.tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, T1.tblICInventoryReceiptItemLot_dblStatedTarePerUnit, T1.tblICInventoryReceiptItemLot_strContainerNo, T1.tblICInventoryReceiptItemLot_intVendorId, T1.tblICInventoryReceiptItemLot_intVendorLocationId, T1.tblICInventoryReceiptItemLot_strVendorLocation, T1.tblICInventoryReceiptItemLot_strMarkings, T1.tblICInventoryReceiptItemLot_strGrade, T1.tblICInventoryReceiptItemLot_intOriginId, T1.tblICInventoryReceiptItemLot_intSeasonCropYear, T1.tblICInventoryReceiptItemLot_strVendorLotId, T1.tblICInventoryReceiptItemLot_dtmManufacturedDate, T1.tblICInventoryReceiptItemLot_strRemarks, T1.tblICInventoryReceiptItemLot_strCondition, T1.tblICInventoryReceiptItemLot_dtmCertified, T1.tblICInventoryReceiptItemLot_dtmExpiryDate, T1.tblICInventoryReceiptItemLot_intSort, T1.tblICInventoryReceiptItemLot_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryReceiptItemLot](T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemLot_intLotId, T1.tblICInventoryReceiptItemLot_strLotNumber, T1.tblICInventoryReceiptItemLot_strLotAlias, T1.tblICInventoryReceiptItemLot_intSubLocationId, T1.tblICInventoryReceiptItemLot_intStorageLocationId, T1.tblICInventoryReceiptItemLot_intItemUnitMeasureId, T1.tblICInventoryReceiptItemLot_dblQuantity, T1.tblICInventoryReceiptItemLot_dblGrossWeight, T1.tblICInventoryReceiptItemLot_dblTareWeight, T1.tblICInventoryReceiptItemLot_dblCost, T1.tblICInventoryReceiptItemLot_intUnitPallet, T1.tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, T1.tblICInventoryReceiptItemLot_dblStatedTarePerUnit, T1.tblICInventoryReceiptItemLot_strContainerNo, T1.tblICInventoryReceiptItemLot_intEntityVendorId, T1.tblICInventoryReceiptItemLot_intVendorLocationId, T1.tblICInventoryReceiptItemLot_strVendorLocation, T1.tblICInventoryReceiptItemLot_strMarkings, T1.tblICInventoryReceiptItemLot_strGrade, T1.tblICInventoryReceiptItemLot_intOriginId, T1.tblICInventoryReceiptItemLot_intSeasonCropYear, T1.tblICInventoryReceiptItemLot_strVendorLotId, T1.tblICInventoryReceiptItemLot_dtmManufacturedDate, T1.tblICInventoryReceiptItemLot_strRemarks, T1.tblICInventoryReceiptItemLot_strCondition, T1.tblICInventoryReceiptItemLot_dtmCertified, T1.tblICInventoryReceiptItemLot_dtmExpiryDate, T1.tblICInventoryReceiptItemLot_intSort, T1.tblICInventoryReceiptItemLot_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemLotId AS tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, 
@@ -2031,7 +2031,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblStatedGrossPerUnit AS tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, 
             T.dblStatedTarePerUnit AS tblICInventoryReceiptItemLot_dblStatedTarePerUnit, 
             T.strContainerNo AS tblICInventoryReceiptItemLot_strContainerNo, 
-            T.intVendorId AS tblICInventoryReceiptItemLot_intVendorId, 
+            T.intEntityVendorId AS tblICInventoryReceiptItemLot_intEntityVendorId, 
             T.intVendorLocationId AS tblICInventoryReceiptItemLot_intVendorLocationId, 
             T.strVendorLocation AS tblICInventoryReceiptItemLot_strVendorLocation, 
             T.strMarkings AS tblICInventoryReceiptItemLot_strMarkings, 
@@ -2090,12 +2090,12 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceipt
-        [CodeFirstDatabaseSchema.tblICInventoryReceipt](T1.tblICInventoryReceipt_intInventoryReceiptId, T1.tblICInventoryReceipt_strReceiptType, T1.tblICInventoryReceipt_intVendorId, T1.tblICInventoryReceipt_intTransferorId, T1.tblICInventoryReceipt_intLocationId, T1.tblICInventoryReceipt_strReceiptNumber, T1.tblICInventoryReceipt_dtmReceiptDate, T1.tblICInventoryReceipt_intCurrencyId, T1.tblICInventoryReceipt_intBlanketRelease, T1.tblICInventoryReceipt_strVendorRefNo, T1.tblICInventoryReceipt_strBillOfLading, T1.tblICInventoryReceipt_intShipViaId, T1.tblICInventoryReceipt_intShipFromId, T1.tblICInventoryReceipt_intReceiverId, T1.tblICInventoryReceipt_strVessel, T1.tblICInventoryReceipt_intFreightTermId, T1.tblICInventoryReceipt_strAllocateFreight, T1.tblICInventoryReceipt_intShiftNumber, T1.tblICInventoryReceipt_strCalculationBasis, T1.tblICInventoryReceipt_dblUnitWeightMile, T1.tblICInventoryReceipt_dblFreightRate, T1.tblICInventoryReceipt_dblFuelSurcharge, T1.tblICInventoryReceipt_dblInvoiceAmount, T1.tblICInventoryReceipt_ysnPrepaid, T1.tblICInventoryReceipt_ysnInvoicePaid, T1.tblICInventoryReceipt_intCheckNo, T1.tblICInventoryReceipt_dtmCheckDate, T1.tblICInventoryReceipt_intTrailerTypeId, T1.tblICInventoryReceipt_dtmTrailerArrivalDate, T1.tblICInventoryReceipt_dtmTrailerArrivalTime, T1.tblICInventoryReceipt_strSealNo, T1.tblICInventoryReceipt_strSealStatus, T1.tblICInventoryReceipt_dtmReceiveTime, T1.tblICInventoryReceipt_dblActualTempReading, T1.tblICInventoryReceipt_ysnPosted, T1.tblICInventoryReceipt_intCreatedUserId, T1.tblICInventoryReceipt_intEntityId, T1.tblICInventoryReceipt_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryReceipt](T1.tblICInventoryReceipt_intInventoryReceiptId, T1.tblICInventoryReceipt_strReceiptType, T1.tblICInventoryReceipt_intEntityVendorId, T1.tblICInventoryReceipt_intTransferorId, T1.tblICInventoryReceipt_intLocationId, T1.tblICInventoryReceipt_strReceiptNumber, T1.tblICInventoryReceipt_dtmReceiptDate, T1.tblICInventoryReceipt_intCurrencyId, T1.tblICInventoryReceipt_intBlanketRelease, T1.tblICInventoryReceipt_strVendorRefNo, T1.tblICInventoryReceipt_strBillOfLading, T1.tblICInventoryReceipt_intShipViaId, T1.tblICInventoryReceipt_intShipFromId, T1.tblICInventoryReceipt_intReceiverId, T1.tblICInventoryReceipt_strVessel, T1.tblICInventoryReceipt_intFreightTermId, T1.tblICInventoryReceipt_strAllocateFreight, T1.tblICInventoryReceipt_intShiftNumber, T1.tblICInventoryReceipt_strCalculationBasis, T1.tblICInventoryReceipt_dblUnitWeightMile, T1.tblICInventoryReceipt_dblFreightRate, T1.tblICInventoryReceipt_dblFuelSurcharge, T1.tblICInventoryReceipt_dblInvoiceAmount, T1.tblICInventoryReceipt_ysnPrepaid, T1.tblICInventoryReceipt_ysnInvoicePaid, T1.tblICInventoryReceipt_intCheckNo, T1.tblICInventoryReceipt_dtmCheckDate, T1.tblICInventoryReceipt_intTrailerTypeId, T1.tblICInventoryReceipt_dtmTrailerArrivalDate, T1.tblICInventoryReceipt_dtmTrailerArrivalTime, T1.tblICInventoryReceipt_strSealNo, T1.tblICInventoryReceipt_strSealStatus, T1.tblICInventoryReceipt_dtmReceiveTime, T1.tblICInventoryReceipt_dblActualTempReading, T1.tblICInventoryReceipt_ysnPosted, T1.tblICInventoryReceipt_intCreatedUserId, T1.tblICInventoryReceipt_intEntityId, T1.tblICInventoryReceipt_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptId AS tblICInventoryReceipt_intInventoryReceiptId, 
             T.strReceiptType AS tblICInventoryReceipt_strReceiptType, 
-            T.intVendorId AS tblICInventoryReceipt_intVendorId, 
+            T.intEntityVendorId AS tblICInventoryReceipt_intEntityVendorId, 
             T.intTransferorId AS tblICInventoryReceipt_intTransferorId, 
             T.intLocationId AS tblICInventoryReceipt_intLocationId, 
             T.strReceiptNumber AS tblICInventoryReceipt_strReceiptNumber, 
@@ -2213,10 +2213,10 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuAPVendor
-        [CodeFirstDatabaseSchema.vyuAPVendor](T1.vyuAPVendor_intVendorId, T1.vyuAPVendor_intEntityId, T1.vyuAPVendor_strName, T1.vyuAPVendor_strVendorAccountNum, T1.vyuAPVendor_strVendorId)
+        [CodeFirstDatabaseSchema.vyuAPVendor](T1.vyuAPVendor_intEntityVendorId, T1.vyuAPVendor_intEntityId, T1.vyuAPVendor_strName, T1.vyuAPVendor_strVendorAccountNum, T1.vyuAPVendor_strVendorId)
     FROM (
         SELECT 
-            T.intVendorId AS vyuAPVendor_intVendorId, 
+            T.intEntityVendorId AS vyuAPVendor_intEntityVendorId, 
             T.intEntityId AS vyuAPVendor_intEntityId, 
             T.strName AS vyuAPVendor_strName, 
             T.strVendorAccountNum AS vyuAPVendor_strVendorAccountNum, 
@@ -4639,7 +4639,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItemLots
-        [iRely.Inventory.Model.tblICInventoryReceiptItemLot](T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemLot_intLotId, T1.tblICInventoryReceiptItemLot_strLotNumber, T1.tblICInventoryReceiptItemLot_strLotAlias, T1.tblICInventoryReceiptItemLot_intSubLocationId, T1.tblICInventoryReceiptItemLot_intStorageLocationId, T1.tblICInventoryReceiptItemLot_intItemUnitMeasureId, T1.tblICInventoryReceiptItemLot_dblQuantity, T1.tblICInventoryReceiptItemLot_dblGrossWeight, T1.tblICInventoryReceiptItemLot_dblTareWeight, T1.tblICInventoryReceiptItemLot_dblCost, T1.tblICInventoryReceiptItemLot_intUnitPallet, T1.tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, T1.tblICInventoryReceiptItemLot_dblStatedTarePerUnit, T1.tblICInventoryReceiptItemLot_strContainerNo, T1.tblICInventoryReceiptItemLot_intVendorId, T1.tblICInventoryReceiptItemLot_intVendorLocationId, T1.tblICInventoryReceiptItemLot_strVendorLocation, T1.tblICInventoryReceiptItemLot_strMarkings, T1.tblICInventoryReceiptItemLot_strGrade, T1.tblICInventoryReceiptItemLot_intOriginId, T1.tblICInventoryReceiptItemLot_intSeasonCropYear, T1.tblICInventoryReceiptItemLot_strVendorLotId, T1.tblICInventoryReceiptItemLot_dtmManufacturedDate, T1.tblICInventoryReceiptItemLot_strRemarks, T1.tblICInventoryReceiptItemLot_strCondition, T1.tblICInventoryReceiptItemLot_dtmCertified, T1.tblICInventoryReceiptItemLot_dtmExpiryDate, T1.tblICInventoryReceiptItemLot_intSort, T1.tblICInventoryReceiptItemLot_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryReceiptItemLot](T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, T1.tblICInventoryReceiptItemLot_intInventoryReceiptItemId, T1.tblICInventoryReceiptItemLot_intLotId, T1.tblICInventoryReceiptItemLot_strLotNumber, T1.tblICInventoryReceiptItemLot_strLotAlias, T1.tblICInventoryReceiptItemLot_intSubLocationId, T1.tblICInventoryReceiptItemLot_intStorageLocationId, T1.tblICInventoryReceiptItemLot_intItemUnitMeasureId, T1.tblICInventoryReceiptItemLot_dblQuantity, T1.tblICInventoryReceiptItemLot_dblGrossWeight, T1.tblICInventoryReceiptItemLot_dblTareWeight, T1.tblICInventoryReceiptItemLot_dblCost, T1.tblICInventoryReceiptItemLot_intUnitPallet, T1.tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, T1.tblICInventoryReceiptItemLot_dblStatedTarePerUnit, T1.tblICInventoryReceiptItemLot_strContainerNo, T1.tblICInventoryReceiptItemLot_intEntityVendorId, T1.tblICInventoryReceiptItemLot_intVendorLocationId, T1.tblICInventoryReceiptItemLot_strVendorLocation, T1.tblICInventoryReceiptItemLot_strMarkings, T1.tblICInventoryReceiptItemLot_strGrade, T1.tblICInventoryReceiptItemLot_intOriginId, T1.tblICInventoryReceiptItemLot_intSeasonCropYear, T1.tblICInventoryReceiptItemLot_strVendorLotId, T1.tblICInventoryReceiptItemLot_dtmManufacturedDate, T1.tblICInventoryReceiptItemLot_strRemarks, T1.tblICInventoryReceiptItemLot_strCondition, T1.tblICInventoryReceiptItemLot_dtmCertified, T1.tblICInventoryReceiptItemLot_dtmExpiryDate, T1.tblICInventoryReceiptItemLot_intSort, T1.tblICInventoryReceiptItemLot_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptItemLotId AS tblICInventoryReceiptItemLot_intInventoryReceiptItemLotId, 
@@ -4658,7 +4658,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblStatedGrossPerUnit AS tblICInventoryReceiptItemLot_dblStatedGrossPerUnit, 
             T.dblStatedTarePerUnit AS tblICInventoryReceiptItemLot_dblStatedTarePerUnit, 
             T.strContainerNo AS tblICInventoryReceiptItemLot_strContainerNo, 
-            T.intVendorId AS tblICInventoryReceiptItemLot_intVendorId, 
+            T.intEntityVendorId AS tblICInventoryReceiptItemLot_intEntityVendorId, 
             T.intVendorLocationId AS tblICInventoryReceiptItemLot_intVendorLocationId, 
             T.strVendorLocation AS tblICInventoryReceiptItemLot_strVendorLocation, 
             T.strMarkings AS tblICInventoryReceiptItemLot_strMarkings, 
@@ -4717,12 +4717,12 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceipts
-        [iRely.Inventory.Model.tblICInventoryReceipt](T1.tblICInventoryReceipt_intInventoryReceiptId, T1.tblICInventoryReceipt_strReceiptType, T1.tblICInventoryReceipt_intVendorId, T1.tblICInventoryReceipt_intTransferorId, T1.tblICInventoryReceipt_intLocationId, T1.tblICInventoryReceipt_strReceiptNumber, T1.tblICInventoryReceipt_dtmReceiptDate, T1.tblICInventoryReceipt_intCurrencyId, T1.tblICInventoryReceipt_intBlanketRelease, T1.tblICInventoryReceipt_strVendorRefNo, T1.tblICInventoryReceipt_strBillOfLading, T1.tblICInventoryReceipt_intShipViaId, T1.tblICInventoryReceipt_intShipFromId, T1.tblICInventoryReceipt_intReceiverId, T1.tblICInventoryReceipt_strVessel, T1.tblICInventoryReceipt_intFreightTermId, T1.tblICInventoryReceipt_strAllocateFreight, T1.tblICInventoryReceipt_intShiftNumber, T1.tblICInventoryReceipt_strCalculationBasis, T1.tblICInventoryReceipt_dblUnitWeightMile, T1.tblICInventoryReceipt_dblFreightRate, T1.tblICInventoryReceipt_dblFuelSurcharge, T1.tblICInventoryReceipt_dblInvoiceAmount, T1.tblICInventoryReceipt_ysnPrepaid, T1.tblICInventoryReceipt_ysnInvoicePaid, T1.tblICInventoryReceipt_intCheckNo, T1.tblICInventoryReceipt_dtmCheckDate, T1.tblICInventoryReceipt_intTrailerTypeId, T1.tblICInventoryReceipt_dtmTrailerArrivalDate, T1.tblICInventoryReceipt_dtmTrailerArrivalTime, T1.tblICInventoryReceipt_strSealNo, T1.tblICInventoryReceipt_strSealStatus, T1.tblICInventoryReceipt_dtmReceiveTime, T1.tblICInventoryReceipt_dblActualTempReading, T1.tblICInventoryReceipt_ysnPosted, T1.tblICInventoryReceipt_intCreatedUserId, T1.tblICInventoryReceipt_intEntityId, T1.tblICInventoryReceipt_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryReceipt](T1.tblICInventoryReceipt_intInventoryReceiptId, T1.tblICInventoryReceipt_strReceiptType, T1.tblICInventoryReceipt_intEntityVendorId, T1.tblICInventoryReceipt_intTransferorId, T1.tblICInventoryReceipt_intLocationId, T1.tblICInventoryReceipt_strReceiptNumber, T1.tblICInventoryReceipt_dtmReceiptDate, T1.tblICInventoryReceipt_intCurrencyId, T1.tblICInventoryReceipt_intBlanketRelease, T1.tblICInventoryReceipt_strVendorRefNo, T1.tblICInventoryReceipt_strBillOfLading, T1.tblICInventoryReceipt_intShipViaId, T1.tblICInventoryReceipt_intShipFromId, T1.tblICInventoryReceipt_intReceiverId, T1.tblICInventoryReceipt_strVessel, T1.tblICInventoryReceipt_intFreightTermId, T1.tblICInventoryReceipt_strAllocateFreight, T1.tblICInventoryReceipt_intShiftNumber, T1.tblICInventoryReceipt_strCalculationBasis, T1.tblICInventoryReceipt_dblUnitWeightMile, T1.tblICInventoryReceipt_dblFreightRate, T1.tblICInventoryReceipt_dblFuelSurcharge, T1.tblICInventoryReceipt_dblInvoiceAmount, T1.tblICInventoryReceipt_ysnPrepaid, T1.tblICInventoryReceipt_ysnInvoicePaid, T1.tblICInventoryReceipt_intCheckNo, T1.tblICInventoryReceipt_dtmCheckDate, T1.tblICInventoryReceipt_intTrailerTypeId, T1.tblICInventoryReceipt_dtmTrailerArrivalDate, T1.tblICInventoryReceipt_dtmTrailerArrivalTime, T1.tblICInventoryReceipt_strSealNo, T1.tblICInventoryReceipt_strSealStatus, T1.tblICInventoryReceipt_dtmReceiveTime, T1.tblICInventoryReceipt_dblActualTempReading, T1.tblICInventoryReceipt_ysnPosted, T1.tblICInventoryReceipt_intCreatedUserId, T1.tblICInventoryReceipt_intEntityId, T1.tblICInventoryReceipt_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryReceiptId AS tblICInventoryReceipt_intInventoryReceiptId, 
             T.strReceiptType AS tblICInventoryReceipt_strReceiptType, 
-            T.intVendorId AS tblICInventoryReceipt_intVendorId, 
+            T.intEntityVendorId AS tblICInventoryReceipt_intEntityVendorId, 
             T.intTransferorId AS tblICInventoryReceipt_intTransferorId, 
             T.intLocationId AS tblICInventoryReceipt_intLocationId, 
             T.strReceiptNumber AS tblICInventoryReceipt_strReceiptNumber, 
@@ -4840,10 +4840,10 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuAPVendors
-        [iRely.Inventory.Model.vyuAPVendor](T1.vyuAPVendor_intVendorId, T1.vyuAPVendor_intEntityId, T1.vyuAPVendor_strName, T1.vyuAPVendor_strVendorAccountNum, T1.vyuAPVendor_strVendorId)
+        [iRely.Inventory.Model.vyuAPVendor](T1.vyuAPVendor_intEntityVendorId, T1.vyuAPVendor_intEntityId, T1.vyuAPVendor_strName, T1.vyuAPVendor_strVendorAccountNum, T1.vyuAPVendor_strVendorId)
     FROM (
         SELECT 
-            T.intVendorId AS vyuAPVendor_intVendorId, 
+            T.intEntityVendorId AS vyuAPVendor_intEntityVendorId, 
             T.intEntityId AS vyuAPVendor_intEntityId, 
             T.strName AS vyuAPVendor_strName, 
             T.strVendorAccountNum AS vyuAPVendor_strVendorAccountNum, 

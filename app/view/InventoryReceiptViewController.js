@@ -29,7 +29,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{checkReadOnlyWithSource}'
             },
             cboVendor: {
-                value: '{current.intVendorId}',
+                value: '{current.intEntityVendorId}',
                 store: '{vendor}',
                 readOnly: '{checkReadOnlyWithSource}',
                 hidden: '{checkHiddenInTransferReceipt}'
@@ -128,12 +128,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     editor: {
                         store: '{poSource}',
                         defaultFilters: [{
-                            column: 'intOrderStatusId',
-                            value: 1,
+                            column: 'ysnCompleted',
+                            value: false,
                             conjunction: 'and'
                         },{
-                            column: 'intVendorId',
-                            value: '{current.intVendorId}',
+                            column: 'intEntityVendorId',
+                            value: '{current.intEntityVendorId}',
                             conjunction: 'and'
                         }]
                     }
@@ -615,7 +615,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         if (current) {
             current.set('strVendorName', records[0].get('strName'));
-            current.set('intVendorEntityId', records[0].get('intEntityId'));
+            current.set('intVendorEntityId', records[0].get('intEntityVendorId'));
             current.set('intCurrencyId', records[0].get('intCurrencyId'));
 
             current.set('intShipFromId', null);
@@ -821,12 +821,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var win = button.up('window');
         var current = win.viewModel.data.current;
 
-        if (current.get('intVendorId') !== null) {
+        if (current.get('intEntityVendorId') !== null) {
             iRely.Functions.openScreen('AccountsPayable.view.Vendor', {
                 filters: [
                     {
-                        column: 'intVendorId',
-                        value: current.get('intVendorId')
+                        column: 'intEntityVendorId',
+                        value: current.get('intEntityVendorId')
                     }
                 ]
             });
@@ -1324,12 +1324,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         valueField: 'strPurchaseOrderNumber',
                                         store: win.viewModel.storeInfo.poSource,
                                         defaultFilters: [{
-                                            column: 'intOrderStatusId',
-                                            value: 1,
+                                            column: 'ysnCompleted',
+                                            value: false,
                                             conjunction: 'and'
                                         },{
-                                            column: 'intVendorId',
-                                            value: current.get('intVendorId'),
+                                            column: 'intEntityVendorId',
+                                            value: current.get('intEntityVendorId'),
                                             conjunction: 'and'
                                         }]
                                     })

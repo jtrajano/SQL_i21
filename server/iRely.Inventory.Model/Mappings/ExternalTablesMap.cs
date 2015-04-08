@@ -62,12 +62,12 @@ namespace iRely.Inventory.Model
         public vyuAPVendorMap()
         {
             // Primary Key
-            this.HasKey(t => t.intVendorId);
+            this.HasKey(t => t.intEntityVendorId);
 
             // Table & Column Mappings
             this.ToTable("vyuAPVendor");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
-            this.Property(t => t.intVendorId).HasColumnName("intVendorId");
+            this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.strName).HasColumnName("strName");
             this.Property(t => t.strVendorAccountNum).HasColumnName("strVendorAccountNum");
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
