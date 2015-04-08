@@ -1286,6 +1286,7 @@
     <Build Include="dbo\Functions\fnPOHasBill.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustment.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustmentDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
