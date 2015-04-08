@@ -75,7 +75,20 @@ BEGIN
 	if(@constraint <> '')
 		exec('ALTER TABLE tblARCustomer DROP CONSTRAINT [' + @constraint +']' )
 
-	
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARInvoice' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblARInvoice DROP CONSTRAINT [' + @constraint +']' )	
+
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblSOSalesOrder' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblSOSalesOrder DROP CONSTRAINT [' + @constraint +']' )	
+
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARPayment' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblARPayment DROP CONSTRAINT [' + @constraint +']' )	
 	
 
 	print 'Adding tblEntityContact columns to tblEntity'
