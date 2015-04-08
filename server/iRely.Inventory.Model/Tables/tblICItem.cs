@@ -202,17 +202,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> NewAdjustmentDetails { get; set; }
-
-        public ICollection<tblICLot> tblICLots { get; set; }
-
-        //public tblICCommodity tblICCommodity { get; set; }
-        //public tblICCommodityAttribute CommodityOrigin { get; set; }
-        //public tblICCommodityAttribute CommodityProductType { get; set; }
-        //public tblICCommodityAttribute CommodityRegion { get; set; }
-        //public tblICCommodityAttribute CommoditySeason { get; set; }
-        //public tblICCommodityAttribute CommodityClassVariety { get; set; }
-        //public tblICCommodityAttribute CommodityProductLine { get; set; }
-        
+                
     }
 
     public class ItemVM : BaseEntity

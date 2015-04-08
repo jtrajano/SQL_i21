@@ -280,29 +280,6 @@
                             "designerId": "00835ff1-c7e0-4043-aace-36769bb0b680"
                         },
                         {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-notes",
-                                "itemId": "btnNotes",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Notes",
-                                "width": 50
-                            },
-                            "name": "MyButton2",
-                            "designerId": "fda7f767-516d-4196-a53c-8a72e6f95aca"
-                        },
-                        {
                             "type": "Ext.toolbar.Separator",
                             "reference": {
                                 "name": "items",
@@ -689,24 +666,6 @@
                                                     },
                                                     "name": "MyButton3",
                                                     "designerId": "f4c13716-f052-42ce-b274-8b43398ac96f"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-edit",
-                                                        "itemId": "btnEditItem",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Edit"
-                                                    },
-                                                    "name": "MyButton7",
-                                                    "designerId": "ab0fe97b-0105-4125-b3ef-3ba26f3d5aae"
                                                 },
                                                 {
                                                     "type": "Ext.button.Button",
@@ -1476,7 +1435,7 @@
                                                 "format": "0,000.##",
                                                 "itemId": "colNewWeightPerUnit",
                                                 "text": "New Wgt Per Unit",
-                                                "width": 90
+                                                "width": 110
                                             },
                                             "name": "MyNumberColumn8",
                                             "designerId": "926bbdd0-da78-4d32-b292-5f2c19dafc0b",
@@ -1812,7 +1771,7 @@
                                                 "dataIndex": "strCreditAccount",
                                                 "itemId": "colAccountCategory",
                                                 "text": "Account Category",
-                                                "width": 96
+                                                "width": 100
                                             },
                                             "name": "MyColumn4",
                                             "designerId": "525531bb-2ee1-43a3-944d-c13424b3722e",

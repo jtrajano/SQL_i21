@@ -222,48 +222,48 @@ namespace iRely.Inventory.Model
                 _lotNumber = value;
             }
         }
-        private decimal? _lotQty;
+        private decimal _lotQty;
         [NotMapped]
-        public decimal? dblLotQty
+        public decimal dblLotQty
         {
             get
             {
                 if (tblICLot != null)
-                    return tblICLot.dblQty;
+                    return tblICLot.dblQty ?? 0;
                 else
-                    return null;
+                    return 0;
             }
             set
             {
                 _lotQty = value;
             }
         }
-        private decimal? _lotUnitCost;
+        private decimal _lotUnitCost;
         [NotMapped]
-        public decimal? dblLotUnitCost
+        public decimal dblLotUnitCost
         {
             get
             {
                 if (tblICLot != null)
-                    return tblICLot.dblLastCost;
+                    return tblICLot.dblLastCost ?? 0;
                 else
-                    return null;
+                    return 0;
             }
             set
             {
                 _lotUnitCost = value;
             }
         }
-        private decimal? _lotWeightPerUnit;
+        private decimal _lotWeightPerUnit;
         [NotMapped]
-        public decimal? dblLotWeightPerUnit
+        public decimal dblLotWeightPerUnit
         {
             get
             {
                 if (tblICLot != null)
-                    return tblICLot.dblWeightPerQty;
+                    return tblICLot.dblWeightPerQty ?? 0;
                 else
-                    return null;
+                    return 0;
             }
             set
             {
@@ -308,23 +308,23 @@ namespace iRely.Inventory.Model
                 _itemUOM = value;
             }
         }
-        private string _itemWeightUOM;
+        private string _weightUOM;
         [NotMapped]
-        public string strItemWeightUOM
+        public string strWeightUOM
         {
             get
             {
-                if (string.IsNullOrEmpty(_itemWeightUOM))
+                if (string.IsNullOrEmpty(_weightUOM))
                     if (tblICLot != null)
-                        return tblICLot.strItemWeightUOM;
+                        return tblICLot.strWeightUOM;
                     else
                         return null;
                 else
-                    return _itemWeightUOM;
+                    return _weightUOM;
             }
             set
             {
-                _itemWeightUOM = value;
+                _weightUOM = value;
             }
         }
         private string _newItemUOM;
@@ -344,6 +344,25 @@ namespace iRely.Inventory.Model
             set
             {
                 _newItemUOM = value;
+            }
+        }
+        private string _lotStatus;
+        [NotMapped]
+        public string strLotStatus
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_lotStatus))
+                    if (tblICLot != null)
+                        return tblICLot.strLotStatus;
+                    else
+                        return null;
+                else
+                    return _lotStatus;
+            }
+            set
+            {
+                _lotStatus = value;
             }
         }
         private string _newLotStatus;
@@ -458,6 +477,33 @@ namespace iRely.Inventory.Model
             set
             {
                 _creditAccountDesc = value;
+            }
+        }
+        private DateTime? _expiry;
+        [NotMapped]
+        public DateTime? dtmExpiryDate
+        {
+            get
+            {
+                if (_expiry == null)
+                    if (tblICLot != null)
+                        return tblICLot.dtmExpiryDate;
+                    else
+                        return null;
+                else
+                    return _expiry;
+            }
+            set
+            {
+                _expiry = value;
+            }
+        }
+        [NotMapped]
+        public decimal dblGLAmount
+        {
+            get
+            {
+                return (dblLotUnitCost * (dblNewQuantity ?? 0));
             }
         }
         

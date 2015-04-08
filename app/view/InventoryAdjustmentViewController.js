@@ -107,9 +107,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     }
                 },
                 colWeightUOM: {
-                    dataIndex: 'strNewItemUOM',
+                    dataIndex: 'strWeightUOM',
                     editor: {
-                        store: '{newItemUOM}',
+                        store: '{weightUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{grdInventoryAdjustment.selection.intItemId}',
@@ -135,16 +135,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewItemDescription: 'strNewItemDescription',
 //                colPhysicalCount: '',
                 colNewPhysicalCount: 'dblNewPhysicalCount',
-//                colExpirationDate: '',
+                colExpirationDate: 'dtmExpiryDate',
                 colNewExpirationDate: 'dtmNewExpiryDate',
-//                colStatus: '',
+                colStatus: 'strLotStatus',
                 colNewStatus: {
                     dataIndex: 'strNewLotStatus',
                     editor: {
                         store: '{newLotStatus}'
                     }
                 },
-//                colGLAmount: '',
+                colGLAmount: 'dblGLAmount',
                 colAccountCategory: {
                     dataIndex: 'strAccountCategory',
                     editor: {
@@ -275,6 +275,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblLotUnitCost', records[0].get('dblLastCost'));
             current.set('dblLotWeightPerUnit', records[0].get('dblWeightPerQty'));
             current.set('strItemUOM', records[0].get('strItemUOM'));
+            current.set('strWeightUOM', records[0].get('strWeightUOM'));
+            current.set('intWeightUOMId', records[0].get('intWeightUOMId'));
+            current.set('strLotStatus', records[0].get('strLotStatus'));
+            current.set('intLotStatusId', records[0].get('intLotStatusId'));
+            current.set('dtmExpiryDate', records[0].get('dtmExpiryDate'));
+
         }
         else if (combo.itemId === 'cboNewUOM')
         {

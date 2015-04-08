@@ -167,17 +167,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                         text: 'Unpost'
                                     },
                                     {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        itemId: 'btnNotes',
-                                        width: 50,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-notes',
-                                        scale: 'large',
-                                        text: 'Notes'
-                                    },
-                                    {
                                         xtype: 'tbseparator',
                                         height: 30
                                     },
@@ -328,13 +317,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 itemId: 'btnAddItem',
                                                                 iconCls: 'small-add',
                                                                 text: 'Add'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnEditItem',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
                                                             },
                                                             {
                                                                 xtype: 'button',
@@ -682,7 +664,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         dataType: 'numeric',
                                                         dataIndex: 'dblNewQuantity',
                                                         itemId: 'colNewWeightPerUnit',
-                                                        width: 90,
+                                                        width: 110,
                                                         align: 'right',
                                                         text: 'New Wgt Per Unit',
                                                         format: '0,000.##'
@@ -835,7 +817,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colAccountCategory',
-                                                        width: 96,
+                                                        width: 100,
                                                         dataIndex: 'strCreditAccount',
                                                         text: 'Account Category',
                                                         editor: {

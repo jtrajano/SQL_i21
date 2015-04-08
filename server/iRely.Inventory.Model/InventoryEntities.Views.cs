@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets98940263b1b40bad31d3c9c63c309eaf7628acc73b20cdba7df209b3d8ea24bc))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa43efc0c88eeb59242eb8f0c82f3e2d242a96d3ce71f05be085818c46885f808))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets98940263b1b40bad31d3c9c63c309eaf7628acc73b20cdba7df209b3d8ea24bc : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsa43efc0c88eeb59242eb8f0c82f3e2d242a96d3ce71f05be085818c46885f808 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "98940263b1b40bad31d3c9c63c309eaf7628acc73b20cdba7df209b3d8ea24bc"; }
+            get { return "a43efc0c88eeb59242eb8f0c82f3e2d242a96d3ce71f05be085818c46885f808"; }
         }
 
         /// <summary>
@@ -1953,18 +1953,51 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICLot
-        [CodeFirstDatabaseSchema.tblICLot](T1.tblICLot_intLotId, T1.tblICLot_intItemId, T1.tblICLot_intItemLocationId, T1.tblICLot_intItemUOMId, T1.tblICLot_intWeightUOMId, T1.tblICLot_strLotNumber, T1.tblICLot_dblQty, T1.tblICLot_dblLastCost, T1.tblICLot_dblWeightPerQty, T1.tblICLot_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICLot](T1.tblICLot_intLotId, T1.tblICLot_intItemId, T1.tblICLot_strItemNo, T1.tblICLot_strItemDescription, T1.tblICLot_intLocationId, T1.tblICLot_strLocationName, T1.tblICLot_intItemLocationId, T1.tblICLot_intItemUOMId, T1.tblICLot_strItemUOM, T1.tblICLot_strLotNumber, T1.tblICLot_intSubLocationId, T1.tblICLot_strSubLocationName, T1.tblICLot_intStorageLocationId, T1.tblICLot_strStorageLocation, T1.tblICLot_dblQty, T1.tblICLot_dblLastCost, T1.tblICLot_dtmExpiryDate, T1.tblICLot_strLotAlias, T1.tblICLot_intLotStatusId, T1.tblICLot_strLotStatus, T1.tblICLot_intParentLotId, T1.tblICLot_intSplitFromLotId, T1.tblICLot_dblWeight, T1.tblICLot_intWeightUOMId, T1.tblICLot_strWeightUOM, T1.tblICLot_dblWeightPerQty, T1.tblICLot_intOriginId, T1.tblICLot_strBOLNo, T1.tblICLot_strVessel, T1.tblICLot_strReceiptNumber, T1.tblICLot_strMarkings, T1.tblICLot_strNotes, T1.tblICLot_intEntityVendorId, T1.tblICLot_strVendorLotNo, T1.tblICLot_intVendorLocationId, T1.tblICLot_strVendorLocation, T1.tblICLot_strContractNo, T1.tblICLot_dtmManufacturedDate, T1.tblICLot_ysnReleasedToWarehouse, T1.tblICLot_ysnProduced, T1.tblICLot_dtmDateCreated, T1.tblICLot_intCreatedUserId, T1.tblICLot_intConcurrencyId)
     FROM (
         SELECT 
             T.intLotId AS tblICLot_intLotId, 
             T.intItemId AS tblICLot_intItemId, 
+            T.strItemNo AS tblICLot_strItemNo, 
+            T.strItemDescription AS tblICLot_strItemDescription, 
+            T.intLocationId AS tblICLot_intLocationId, 
+            T.strLocationName AS tblICLot_strLocationName, 
             T.intItemLocationId AS tblICLot_intItemLocationId, 
             T.intItemUOMId AS tblICLot_intItemUOMId, 
-            T.intWeightUOMId AS tblICLot_intWeightUOMId, 
+            T.strItemUOM AS tblICLot_strItemUOM, 
             T.strLotNumber AS tblICLot_strLotNumber, 
+            T.intSubLocationId AS tblICLot_intSubLocationId, 
+            T.strSubLocationName AS tblICLot_strSubLocationName, 
+            T.intStorageLocationId AS tblICLot_intStorageLocationId, 
+            T.strStorageLocation AS tblICLot_strStorageLocation, 
             T.dblQty AS tblICLot_dblQty, 
             T.dblLastCost AS tblICLot_dblLastCost, 
+            T.dtmExpiryDate AS tblICLot_dtmExpiryDate, 
+            T.strLotAlias AS tblICLot_strLotAlias, 
+            T.intLotStatusId AS tblICLot_intLotStatusId, 
+            T.strLotStatus AS tblICLot_strLotStatus, 
+            T.intParentLotId AS tblICLot_intParentLotId, 
+            T.intSplitFromLotId AS tblICLot_intSplitFromLotId, 
+            T.dblWeight AS tblICLot_dblWeight, 
+            T.intWeightUOMId AS tblICLot_intWeightUOMId, 
+            T.strWeightUOM AS tblICLot_strWeightUOM, 
             T.dblWeightPerQty AS tblICLot_dblWeightPerQty, 
+            T.intOriginId AS tblICLot_intOriginId, 
+            T.strBOLNo AS tblICLot_strBOLNo, 
+            T.strVessel AS tblICLot_strVessel, 
+            T.strReceiptNumber AS tblICLot_strReceiptNumber, 
+            T.strMarkings AS tblICLot_strMarkings, 
+            T.strNotes AS tblICLot_strNotes, 
+            T.intEntityVendorId AS tblICLot_intEntityVendorId, 
+            T.strVendorLotNo AS tblICLot_strVendorLotNo, 
+            T.intVendorLocationId AS tblICLot_intVendorLocationId, 
+            T.strVendorLocation AS tblICLot_strVendorLocation, 
+            T.strContractNo AS tblICLot_strContractNo, 
+            T.dtmManufacturedDate AS tblICLot_dtmManufacturedDate, 
+            T.ysnReleasedToWarehouse AS tblICLot_ysnReleasedToWarehouse, 
+            T.ysnProduced AS tblICLot_ysnProduced, 
+            T.dtmDateCreated AS tblICLot_dtmDateCreated, 
+            T.intCreatedUserId AS tblICLot_intCreatedUserId, 
             T.intConcurrencyId AS tblICLot_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICLots AS T
@@ -4547,18 +4580,51 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICLots
-        [iRely.Inventory.Model.tblICLot](T1.tblICLot_intLotId, T1.tblICLot_intItemId, T1.tblICLot_intItemLocationId, T1.tblICLot_intItemUOMId, T1.tblICLot_intWeightUOMId, T1.tblICLot_strLotNumber, T1.tblICLot_dblQty, T1.tblICLot_dblLastCost, T1.tblICLot_dblWeightPerQty, T1.tblICLot_intConcurrencyId)
+        [iRely.Inventory.Model.tblICLot](T1.tblICLot_intLotId, T1.tblICLot_intItemId, T1.tblICLot_strItemNo, T1.tblICLot_strItemDescription, T1.tblICLot_intLocationId, T1.tblICLot_strLocationName, T1.tblICLot_intItemLocationId, T1.tblICLot_intItemUOMId, T1.tblICLot_strItemUOM, T1.tblICLot_strLotNumber, T1.tblICLot_intSubLocationId, T1.tblICLot_strSubLocationName, T1.tblICLot_intStorageLocationId, T1.tblICLot_strStorageLocation, T1.tblICLot_dblQty, T1.tblICLot_dblLastCost, T1.tblICLot_dtmExpiryDate, T1.tblICLot_strLotAlias, T1.tblICLot_intLotStatusId, T1.tblICLot_strLotStatus, T1.tblICLot_intParentLotId, T1.tblICLot_intSplitFromLotId, T1.tblICLot_dblWeight, T1.tblICLot_intWeightUOMId, T1.tblICLot_strWeightUOM, T1.tblICLot_dblWeightPerQty, T1.tblICLot_intOriginId, T1.tblICLot_strBOLNo, T1.tblICLot_strVessel, T1.tblICLot_strReceiptNumber, T1.tblICLot_strMarkings, T1.tblICLot_strNotes, T1.tblICLot_intEntityVendorId, T1.tblICLot_strVendorLotNo, T1.tblICLot_intVendorLocationId, T1.tblICLot_strVendorLocation, T1.tblICLot_strContractNo, T1.tblICLot_dtmManufacturedDate, T1.tblICLot_ysnReleasedToWarehouse, T1.tblICLot_ysnProduced, T1.tblICLot_dtmDateCreated, T1.tblICLot_intCreatedUserId, T1.tblICLot_intConcurrencyId)
     FROM (
         SELECT 
             T.intLotId AS tblICLot_intLotId, 
             T.intItemId AS tblICLot_intItemId, 
+            T.strItemNo AS tblICLot_strItemNo, 
+            T.strItemDescription AS tblICLot_strItemDescription, 
+            T.intLocationId AS tblICLot_intLocationId, 
+            T.strLocationName AS tblICLot_strLocationName, 
             T.intItemLocationId AS tblICLot_intItemLocationId, 
             T.intItemUOMId AS tblICLot_intItemUOMId, 
-            T.intWeightUOMId AS tblICLot_intWeightUOMId, 
+            T.strItemUOM AS tblICLot_strItemUOM, 
             T.strLotNumber AS tblICLot_strLotNumber, 
+            T.intSubLocationId AS tblICLot_intSubLocationId, 
+            T.strSubLocationName AS tblICLot_strSubLocationName, 
+            T.intStorageLocationId AS tblICLot_intStorageLocationId, 
+            T.strStorageLocation AS tblICLot_strStorageLocation, 
             T.dblQty AS tblICLot_dblQty, 
             T.dblLastCost AS tblICLot_dblLastCost, 
+            T.dtmExpiryDate AS tblICLot_dtmExpiryDate, 
+            T.strLotAlias AS tblICLot_strLotAlias, 
+            T.intLotStatusId AS tblICLot_intLotStatusId, 
+            T.strLotStatus AS tblICLot_strLotStatus, 
+            T.intParentLotId AS tblICLot_intParentLotId, 
+            T.intSplitFromLotId AS tblICLot_intSplitFromLotId, 
+            T.dblWeight AS tblICLot_dblWeight, 
+            T.intWeightUOMId AS tblICLot_intWeightUOMId, 
+            T.strWeightUOM AS tblICLot_strWeightUOM, 
             T.dblWeightPerQty AS tblICLot_dblWeightPerQty, 
+            T.intOriginId AS tblICLot_intOriginId, 
+            T.strBOLNo AS tblICLot_strBOLNo, 
+            T.strVessel AS tblICLot_strVessel, 
+            T.strReceiptNumber AS tblICLot_strReceiptNumber, 
+            T.strMarkings AS tblICLot_strMarkings, 
+            T.strNotes AS tblICLot_strNotes, 
+            T.intEntityVendorId AS tblICLot_intEntityVendorId, 
+            T.strVendorLotNo AS tblICLot_strVendorLotNo, 
+            T.intVendorLocationId AS tblICLot_intVendorLocationId, 
+            T.strVendorLocation AS tblICLot_strVendorLocation, 
+            T.strContractNo AS tblICLot_strContractNo, 
+            T.dtmManufacturedDate AS tblICLot_dtmManufacturedDate, 
+            T.ysnReleasedToWarehouse AS tblICLot_ysnReleasedToWarehouse, 
+            T.ysnProduced AS tblICLot_ysnProduced, 
+            T.dtmDateCreated AS tblICLot_dtmDateCreated, 
+            T.intCreatedUserId AS tblICLot_intCreatedUserId, 
             T.intConcurrencyId AS tblICLot_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICLot AS T
