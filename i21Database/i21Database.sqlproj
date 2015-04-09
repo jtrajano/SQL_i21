@@ -1301,6 +1301,9 @@
     <Build Include="dbo\Views\vyuARInvoiceDetail.sql" />
     <Build Include="dbo\Views\vyuSOSalesOrderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseLot.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetOptionsMonthList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
