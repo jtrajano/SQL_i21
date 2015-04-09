@@ -221,6 +221,8 @@ BEGIN TRY
 		,@dblPhysicalCount = @dblPhysicalCount
 		,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 		,@intBatchId = @intBatchId
+
+	Update dbo.tblICLot Set intLotStatusId =2 Where strLotNumber =@strOutputLotNumber
 		
 	Select @strOutputLotNumber as strOutputLotNumber
 
