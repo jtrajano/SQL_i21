@@ -33,18 +33,18 @@ BEGIN
 
 	PRINT 'BEGIN updating intVendorId from tblAPBill'
 	UPDATE tblAPBill
-	SET intVendorId = B.[intEntityVendorId]
+	SET [intEntityVendorId] = B.[intEntityVendorId]
 	FROM tblAPBill A
 		INNER JOIN tblAPVendor B
-		ON A.intVendorId = B.[intEntityVendorId]
+		ON A.[intEntityVendorId] = B.[intEntityVendorId]
 	PRINT 'END updating intVendorId from tblAPBill'
 
 	PRINT 'BEGIN updating intVendorId from tblAPPayment'
 	UPDATE tblAPPayment
-	SET intVendorId = B.[intEntityVendorId]
+	SET [intEntityVendorId] = B.[intEntityVendorId]
 	FROM tblAPPayment A
 		INNER JOIN tblAPVendor B
-		ON A.intVendorId = B.[intEntityVendorId]
+		ON A.[intEntityVendorId] = B.[intEntityVendorId]
 	PRINT 'END updating intVendorId from tblAPPayment'
 
 	--Verify the data integrity
@@ -66,12 +66,12 @@ BEGIN
 	DECLARE @invalidBillVendor INT
 	SELECT @invalidBillVendor = COUNT(*)
 	FROM tblAPBill A
-		WHERE A.intVendorId NOT IN (SELECT [intEntityVendorId] FROM tblAPVendor)
+		WHERE A.[intEntityVendorId] NOT IN (SELECT [intEntityVendorId] FROM tblAPVendor)
 
 	DECLARE @invalidPaymentVendor INT
 	SELECT @invalidPaymentVendor = COUNT(*)
 	FROM tblAPPayment A
-		WHERE A.intVendorId NOT IN (SELECT [intEntityVendorId] FROM tblAPVendor)
+		WHERE A.[intEntityVendorId] NOT IN (SELECT [intEntityVendorId] FROM tblAPVendor)
 
 	--Re-enable check constraint
 	ALTER TABLE dbo.tblAPPayment

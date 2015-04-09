@@ -2450,25 +2450,19 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblSCDeviceInterfaceFile_tblSCScaleDevice_intScaleDeviceId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0ae204d3-4fe1-4c66-b337-3affac148aaf" ChangeDateTime="04/09/2015 02:36:56">
+    <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityVendorId" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="2c617d41-c28a-429b-84e6-0f34b5ca74b3" ChangeDateTime="04/09/2015 02:33:57">
     <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intEntityVendorId]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
     <Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intVendorId" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="0ae204d3-4fe1-4c66-b337-3affac148aaf" ChangeDateTime="04/09/2015 02:36:56">
-    <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intVendorId]" />
-	<Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="intEntityVendorId" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="1fbe0fa4-8a6a-49ea-b7a3-03cc68fe0d35" ChangeDateTime="04/09/2015 02:49:47">
-    <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intEntityVendorId]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="[intVendorId]" />
   </Operation>
   <Operation Name="Rename Refactor" Key="9a272f90-594e-48b3-9ba7-214e60c8f763" ChangeDateTime="04/08/2015 15:08:00">
     <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricingPreferences].[intHistoryStartTime]" />
@@ -2483,5 +2477,61 @@
     <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricingPreferences]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strHisotryEndTime" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="baafae8d-21f8-4f97-b46b-7e1d4ff929ee" ChangeDateTime="04/09/2015 05:46:08">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f31cefc1-4fc4-4042-9743-46f4a27d55a0" ChangeDateTime="04/09/2015 05:49:46">
+    <Property Name="ElementName" Value="[dbo].[tblAPPayment].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPPayment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="479a7d33-40e2-44b3-b456-8dca772bb380" ChangeDateTime="04/09/2015 05:55:15">
+    <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="18721200-e94e-4695-bd01-30d198f91012" ChangeDateTime="04/09/2015 07:28:41">
+    <Property Name="ElementName" Value="[dbo].[tblARInvoice].[intCustomerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARInvoice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityCustomerId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="601f2ae4-e531-4bf6-9e49-e1e9f1d341d5" ChangeDateTime="04/09/2015 07:30:11">
+    <Property Name="ElementName" Value="[dbo].[tblARInvoice].[intSalespersonId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARInvoice]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntitySalespersonId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0bfc021b-cb05-4d39-a6af-42c109b263fd" ChangeDateTime="04/09/2015 07:31:23">
+    <Property Name="ElementName" Value="[dbo].[tblARPayment].[intCustomerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARPayment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityCustomerId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="27bcdd06-4f6d-46e8-a631-ae3dbc6bab17" ChangeDateTime="04/09/2015 07:33:59">
+    <Property Name="ElementName" Value="[dbo].[tblSOSalesOrder].[intCustomerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSOSalesOrder]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityCustomerId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ac5dcea8-a72e-4694-bdf8-3c750e111c41" ChangeDateTime="04/09/2015 09:08:09">
+    <Property Name="ElementName" Value="[dbo].[tblSOSalesOrder].[intSalespersonId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSOSalesOrder]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntitySalespersonId]" />
   </Operation>
 </Operations>

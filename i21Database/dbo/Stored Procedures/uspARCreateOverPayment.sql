@@ -24,12 +24,12 @@ SELECT @DateOnly = CAST(GETDATE() as date)
 
 INSERT INTO [tblARInvoice]
 	([strInvoiceOriginId]
-	,[intCustomerId]
+	,[intEntityCustomerId]
 	,[dtmDate]
 	,[dtmDueDate]
 	,[intCurrencyId]
 	,[intCompanyLocationId]
-	,[intSalespersonId]
+	,[intEntitySalespersonId]
 	,[dtmShipDate]
 	,[intShipViaId]
 	,[strPONumber]
@@ -64,7 +64,7 @@ INSERT INTO [tblARInvoice]
 	,[intEntityId])
 SELECT
 	[strInvoiceOriginId]	= NULL
-	,[intCustomerId]		= A.[intCustomerId] 
+	,[intCustomerId]		= A.[intEntityCustomerId] 
 	,[dtmDate]				= @DateOnly
 	,[dtmDueDate]			= @DateOnly
 	,[intCurrencyId]		= ISNULL(A.[intCurrencyId], 0)
@@ -106,7 +106,7 @@ FROM
 	[tblARPayment] A
 INNER JOIN
 	[tblARCustomer] C
-		ON A.[intCustomerId] = C.[intEntityCustomerId]
+		ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 INNER JOIN
 	[tblEntityLocation] EL
 		ON C.[intDefaultLocationId] = EL.[intEntityLocationId] 
@@ -161,7 +161,7 @@ FROM
 	[tblARPayment] A
 INNER JOIN
 	[tblARCustomer] C
-		ON A.[intCustomerId] = C.[intEntityCustomerId]
+		ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 INNER JOIN
 	[tblSMCompanyLocation] CL
 		ON A.[intLocationId] = CL.[intCompanyLocationId] 

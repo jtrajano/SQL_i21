@@ -9,12 +9,12 @@ BEGIN
 	
 	
 	INSERT INTO tblSOSalesOrder
-		(   [intCustomerId]
+		(   [intEntityCustomerId]
            ,[dtmDate]
            ,[dtmDueDate]
            ,[intCurrencyId]
            ,[intCompanyLocationId]
-           ,[intSalespersonId]
+           ,[intEntitySalespersonId]
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]
@@ -46,12 +46,12 @@ BEGIN
            ,[intEntityId]
         )
 	SELECT
-			[intCustomerId]
+			[intEntityCustomerId]
            ,GETDATE() --Date
 		   ,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
            ,[intCurrencyId]
            ,[intCompanyLocationId]
-           ,[intSalespersonId]
+           ,[intEntitySalespersonId]
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]

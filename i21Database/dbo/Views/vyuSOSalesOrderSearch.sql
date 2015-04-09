@@ -24,7 +24,7 @@ CompLoc.strLocationName,
 0.000000 AS dblPaymentAmount
 FROM         
 dbo.tblSOSalesOrder AS SO INNER JOIN
-dbo.tblARCustomer AS Cus ON SO.intCustomerId = Cus.[intEntityCustomerId] INNER JOIN
+dbo.tblARCustomer AS Cus ON SO.[intEntityCustomerId] = Cus.[intEntityCustomerId] INNER JOIN
 dbo.tblEntity AS NTT ON Cus.[intEntityCustomerId] = NTT.intEntityId LEFT OUTER JOIN
 dbo.tblSMTerm AS Term ON SO.intTermId = Term.intTermID LEFT OUTER JOIN
 dbo.tblSMCompanyLocation AS CompLoc ON SO.intCompanyLocationId  = CompLoc.intCompanyLocationId

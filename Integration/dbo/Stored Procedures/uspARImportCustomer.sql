@@ -72,7 +72,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_ga_hold_pay_yn = CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END,
 				agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END,
 				agcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
-				agcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intSalespersonId = Cus.intSalespersonId),
+				agcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = Cus.intSalespersonId),
 				agcus_srvchr_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				agcus_dflt_mkt_zone = (SELECT strMarketZoneCode FROM tblARMarketZone WHERE intMarketZoneId = Cus.intMarketZoneId)	
 			FROM tblEntity Ent
@@ -186,7 +186,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				(CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END) as ysnHoldBatchGrainPayment,	
 				(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding,
 				(SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
-				(SELECT strSalespersonId FROM tblARSalesperson WHERE intSalespersonId = Cus.intSalespersonId),
+				(SELECT strSalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = Cus.intSalespersonId),
 				(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				(SELECT strMarketZoneCode FROM tblARMarketZone WHERE intMarketZoneId = Cus.intMarketZoneId)
 				FROM tblEntity Ent
@@ -273,14 +273,14 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	
 			--Customer
 			DECLARE @intEntityId				INT
-			DECLARE @intCustomerId				INT
+			DECLARE @intEntityCustomerId				INT
 			DECLARE @strCustomerNumber			NVARCHAR(15)    
 			DECLARE @strType					NVARCHAR(MAX)
 			DECLARE @dblCreditLimit				NUMERIC(18,6)
 			DECLARE @strTaxNumber				NVARCHAR(MAX)
 			DECLARE @strCurrency				NVARCHAR(3)
 			DECLARE @intAccountStatusId			INT
-			DECLARE @intSalespersonId			INT
+			DECLARE @intEntitySalespersonId			INT
 			DECLARE	@strPricing					NVARCHAR(MAX)
 			DECLARE @ysnActive					BIT
 			DECLARE @ysnPORequired				BIT
@@ -388,7 +388,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					@strTaxNumber			= agcus_tax_exempt,
 					@strCurrency			= agcus_dflt_currency, 				
 					@intAccountStatusId		= (SELECT intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = agcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS),			
-					@intSalespersonId		= (SELECT intEntitySalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = agcus_slsmn_id COLLATE Latin1_General_CI_AS),			
+					@intEntitySalespersonId		= (SELECT intEntitySalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = agcus_slsmn_id COLLATE Latin1_General_CI_AS),			
     				@strPricing				= agcus_prc_lvl,					
 					@ysnActive				= CASE WHEN agcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
 					@ysnPORequired			= CASE WHEN agcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
@@ -474,7 +474,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				 @strTaxNumber,
 				 @strCurrency,			
 				 @intAccountStatusId,			
-				 @intSalespersonId,		
+				 @intEntitySalespersonId,		
 				 @strPricing,	
 				 @ysnActive,				
 				 @ysnPORequired,									
@@ -500,8 +500,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				 @ysnHoldBatchGrainPayment,	
 				 @ysnFederalWithholding)
 			 
-				 --Get intCustomerId
-				 SELECT @intCustomerId = intEntityCustomerId FROM tblARCustomer WHERE intEntityCustomerId = @EntityId
+				 --Get intEntityCustomerId
+				 SELECT @intEntityCustomerId = intEntityCustomerId FROM tblARCustomer WHERE intEntityCustomerId = @EntityId
 	
 
 				--INSERT ENTITY record for Contact
@@ -542,7 +542,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				DECLARE @CustomerToContactId INT
 			
 				INSERT [dbo].[tblARCustomerToContact] ([intEntityCustomerId],[intEntityContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
-				VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
+				VALUES							  (@intEntityCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
 		
 				SET @CustomerToContactId = SCOPE_IDENTITY()
 				
@@ -644,7 +644,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),
 				ptcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),
 				ptcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
-				ptcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intSalespersonId = Cus.intSalespersonId),
+				ptcus_slsmn_id		= (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = Cus.intSalespersonId),
 				ptcus_srv_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId)
 				--ptcus_dpa_cnt = Cus.strDPAContract,
 				--ptcus_dpa_rev_dt = CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
@@ -755,7 +755,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2) as strBudgetBillingBeginMonth,
 				SUBSTRING(Cus.strBudgetBillingEndMonth,1,2) as strBudgetBillingEndMonth,
 				(SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
-				(SELECT strSalespersonId FROM tblARSalesperson WHERE intSalespersonId = Cus.intSalespersonId),
+				(SELECT strSalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = Cus.intSalespersonId),
 				(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId)
 				--Cus.strDPAContract,				
 				--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),					
@@ -837,14 +837,14 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		
 			--Customer
 			DECLARE @intEntityId				INT
-			DECLARE @intCustomerId				INT            
+			DECLARE @intEntityCustomerId				INT            
 			DECLARE @strCustomerNumber			NVARCHAR(15)    
 			DECLARE @strType					NVARCHAR(MAX)
 			DECLARE @dblCreditLimit				NUMERIC(18,6)
 			DECLARE @strTaxNumber				NVARCHAR(MAX)
 			DECLARE @strCurrency				NVARCHAR(3)
 			DECLARE @intAccountStatusId			INT
-			DECLARE @intSalespersonId			INT
+			DECLARE @intEntitySalespersonId			INT
 			DECLARE	@strPricing					NVARCHAR(MAX)
 			DECLARE @ysnActive					BIT
 			DECLARE @ysnPORequired				BIT
@@ -950,7 +950,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					@strTaxNumber			= ptcus_sales_tax_id,
 					--@strCurrency			= agcus_dflt_currency, 				
 					@intAccountStatusId		= (SELECT intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = ptcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS),			
-					@intSalespersonId		= (SELECT intEntitySalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = ptcus_slsmn_id COLLATE Latin1_General_CI_AS),		
+					@intEntitySalespersonId		= (SELECT intEntitySalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = ptcus_slsmn_id COLLATE Latin1_General_CI_AS),		
     				@strPricing				= NULL, --agcus_prc_lvl					
 					@ysnActive				= CASE WHEN ptcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
 					@ysnPORequired			= 0, --there is no source field for PT  --CASE WHEN ptcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
@@ -1037,7 +1037,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				 @strTaxNumber,
 				 @strCurrency,			
 				 @intAccountStatusId,			
-				 @intSalespersonId,		
+				 @intEntitySalespersonId,		
 				 @strPricing,	
 				 @ysnActive,				
 				 @ysnPORequired,									
@@ -1064,8 +1064,8 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				 --@ysnFederalWithholding
 				 )
 				 
-				 --Get intCustomerId
-				 SELECT @intCustomerId = intEntityCustomerId FROM tblARCustomer WHERE intEntityCustomerId = @EntityId
+				 --Get intEntityCustomerId
+				 SELECT @intEntityCustomerId = intEntityCustomerId FROM tblARCustomer WHERE intEntityCustomerId = @EntityId
 		
 
 				--INSERT ENTITY record for Contact
@@ -1104,7 +1104,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				DECLARE @CustomerToContactId INT
 				
 				INSERT [dbo].[tblARCustomerToContact] ([intEntityCustomerId],[intEntityContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
-				VALUES							  (@intCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
+				VALUES							  (@intEntityCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
 				
 				SET @CustomerToContactId = SCOPE_IDENTITY()
 				

@@ -13,12 +13,12 @@ BEGIN
 
 	INSERT INTO tblARInvoice(
 		strInvoiceOriginId
-		,intCustomerId
+		,[intEntityCustomerId]
 		,dtmDate
 		,dtmDueDate
 		,intCurrencyId
 		,intCompanyLocationId
-		,intSalespersonId
+		,[intEntitySalespersonId]
 		,dtmShipDate
 		,intShipViaId
 		,strPONumber
@@ -51,12 +51,12 @@ BEGIN
 		,intEntityId)
 	SELECT 
 		strInvoiceOriginId
-		,intCustomerId
+		,[intEntityCustomerId]
 		,@InvoiceDate
 		,dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, intTermId)
 		,intCurrencyId
 		,intCompanyLocationId
-		,intSalespersonId
+		,[intEntitySalespersonId]
 		,@InvoiceDate
 		,intShipViaId
 		,strPONumber

@@ -2,12 +2,12 @@
     [intSalesOrderId]       INT             IDENTITY (1, 1) NOT NULL,
     [strSalesOrderNumber]   NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [strSalesOrderOriginId] NVARCHAR (8)    COLLATE Latin1_General_CI_AS NULL,
-    [intCustomerId]         INT             NOT NULL,
+    [intEntityCustomerId]         INT             NOT NULL,
     [dtmDate]               DATETIME        NOT NULL,
     [dtmDueDate]            DATETIME        NOT NULL,
     [intCurrencyId]         INT             NOT NULL,
     [intCompanyLocationId]  INT             NULL,
-    [intSalespersonId]      INT             NOT NULL,
+    [intEntitySalespersonId]      INT             NOT NULL,
     [intShipViaId]          INT             NOT NULL,
     [strPONumber]           NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [intTermId]             INT             NOT NULL,
@@ -39,7 +39,7 @@
     [intConcurrencyId]      INT             CONSTRAINT [DF_tblSOSalesOrder_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     [intEntityId]           INT             CONSTRAINT [DF_tblSOSalesOrder_intEntityId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblSOSalesOrder] PRIMARY KEY CLUSTERED ([intSalesOrderId] ASC),
-    CONSTRAINT [FK_tblSOSalesOrder_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+    CONSTRAINT [FK_tblSOSalesOrder_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
     CONSTRAINT [FK_tblSOSalesOrder_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );

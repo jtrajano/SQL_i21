@@ -40,7 +40,7 @@ SELECT
  ,D.strType
 FROM tblPOPurchase A
  INNER JOIN  tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
- INNER JOIN tblAPVendor C ON A.[intVendorId] = C.intEntityVendorId
+ INNER JOIN tblAPVendor C ON A.[intEntityVendorId] = C.intEntityVendorId
  LEFT JOIN tblICItem D ON B.intItemId = D.intItemId
  LEFT JOIN tblICItemUOM E ON B.intUnitOfMeasureId = E.intItemUOMId
  LEFT JOIN tblICUnitMeasure H ON E.intUnitMeasureId = H.intUnitMeasureId

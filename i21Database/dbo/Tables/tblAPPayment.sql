@@ -15,7 +15,7 @@
     [intUserId]           INT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [intEntityId] INT NOT NULL DEFAULT 0,
-    [intVendorId] INT NULL,
+    [intEntityVendorId] INT NULL,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
     [ysnVoid] BIT NOT NULL DEFAULT 0, 
     [ysnPrinted] BIT NOT NULL DEFAULT 0, 
@@ -23,7 +23,7 @@
 	[dtmDateDeleted] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
     CONSTRAINT [PK_dbo.tblAPPayments] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
-    CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+    CONSTRAINT [FK_tblAPPayment_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
 	CONSTRAINT [FK_tblAPPayment_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblAPPayment_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
 );
@@ -31,7 +31,7 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_tblAPPayment_intVendorId_intPaymentId] ON [dbo].[tblAPPayment] 
 (
-	[intVendorId] ASC,
+	[intEntityVendorId] ASC,
 	[intPaymentId] ASC,
 	[dtmDatePaid] ASC
 )

@@ -2,12 +2,12 @@
     [intInvoiceId]         INT             IDENTITY (1, 1) NOT NULL,
     [strInvoiceNumber]     NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceOriginId]   NVARCHAR (8)     COLLATE Latin1_General_CI_AS NULL,
-    [intCustomerId]        INT             NOT NULL,
+    [intEntityCustomerId]        INT             NOT NULL,
     [dtmDate]              DATETIME        NOT NULL,
     [dtmDueDate]           DATETIME        NOT NULL,
     [intCurrencyId]        INT             NOT NULL,
     [intCompanyLocationId] INT             NULL,
-    [intSalespersonId]     INT             NOT NULL,
+    [intEntitySalespersonId]     INT             NOT NULL,
     [dtmShipDate]          DATETIME        NULL,
     [intShipViaId]         INT             NOT NULL,
     [strPONumber]          NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,
@@ -41,7 +41,7 @@
     [intConcurrencyId]     INT             CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     [intEntityId]		   INT             NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
-    CONSTRAINT [FK_tblARInvoice_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+    CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
 	CONSTRAINT [FK_tblARInvoice_tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
 	CONSTRAINT [FK_tblARInvoice_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 );
@@ -107,5 +107,5 @@ CREATE NONCLUSTERED INDEX [PIndex2]
 
 GO
 CREATE NONCLUSTERED INDEX [PIndex]
-    ON [dbo].[tblARInvoice]([strInvoiceNumber] ASC, [intCustomerId] ASC, [dtmDate] ASC, [dtmDueDate] ASC, [intCurrencyId] ASC, [intCompanyLocationId] ASC, [intSalespersonId] ASC, [dtmShipDate] ASC, [intShipViaId] ASC, [strPONumber] ASC, [intTermId] ASC);
+    ON [dbo].[tblARInvoice]([strInvoiceNumber] ASC, [intEntityCustomerId] ASC, [dtmDate] ASC, [dtmDueDate] ASC, [intCurrencyId] ASC, [intCompanyLocationId] ASC, [intEntitySalespersonId] ASC, [dtmShipDate] ASC, [intShipViaId] ASC, [strPONumber] ASC, [intTermId] ASC);
 
