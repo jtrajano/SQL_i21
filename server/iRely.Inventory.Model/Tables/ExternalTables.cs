@@ -176,8 +176,7 @@ namespace iRely.Inventory.Model
 
     public class tblARCustomer : BaseEntity
     {
-        public int intEntityId { get; set; }
-        public int intCustomerId { get; set; }
+        public int intEntityCustomerId { get; set; }
         public string strCustomerNumber { get; set; }
         public string strType { get; set; }
 

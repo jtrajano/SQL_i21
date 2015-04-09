@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets58bde4825027d3164e32662942c91de85ea1a86711a2620515188d8daab7cec5))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsd107e074b7301d1ff027355f3658a75cb14167c6b6692722842fb592bd564d13))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets58bde4825027d3164e32662942c91de85ea1a86711a2620515188d8daab7cec5 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsd107e074b7301d1ff027355f3658a75cb14167c6b6692722842fb592bd564d13 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "58bde4825027d3164e32662942c91de85ea1a86711a2620515188d8daab7cec5"; }
+            get { return "d107e074b7301d1ff027355f3658a75cb14167c6b6692722842fb592bd564d13"; }
         }
 
         /// <summary>
@@ -1233,11 +1233,10 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblARCustomer
-        [CodeFirstDatabaseSchema.tblARCustomer](T1.tblARCustomer_intCustomerId, T1.tblARCustomer_intEntityId, T1.tblARCustomer_strCustomerNumber, T1.tblARCustomer_strType, T1.tblARCustomer_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblARCustomer](T1.tblARCustomer_intEntityCustomerId, T1.tblARCustomer_strCustomerNumber, T1.tblARCustomer_strType, T1.tblARCustomer_intConcurrencyId)
     FROM (
         SELECT 
-            T.intCustomerId AS tblARCustomer_intCustomerId, 
-            T.intEntityId AS tblARCustomer_intEntityId, 
+            T.intEntityCustomerId AS tblARCustomer_intEntityCustomerId, 
             T.strCustomerNumber AS tblARCustomer_strCustomerNumber, 
             T.strType AS tblARCustomer_strType, 
             T.intConcurrencyId AS tblARCustomer_intConcurrencyId, 
@@ -3860,11 +3859,10 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblARCustomers
-        [iRely.Inventory.Model.tblARCustomer](T1.tblARCustomer_intCustomerId, T1.tblARCustomer_intEntityId, T1.tblARCustomer_strCustomerNumber, T1.tblARCustomer_strType, T1.tblARCustomer_intConcurrencyId)
+        [iRely.Inventory.Model.tblARCustomer](T1.tblARCustomer_intEntityCustomerId, T1.tblARCustomer_strCustomerNumber, T1.tblARCustomer_strType, T1.tblARCustomer_intConcurrencyId)
     FROM (
         SELECT 
-            T.intCustomerId AS tblARCustomer_intCustomerId, 
-            T.intEntityId AS tblARCustomer_intEntityId, 
+            T.intEntityCustomerId AS tblARCustomer_intEntityCustomerId, 
             T.strCustomerNumber AS tblARCustomer_strCustomerNumber, 
             T.strType AS tblARCustomer_strType, 
             T.intConcurrencyId AS tblARCustomer_intConcurrencyId, 

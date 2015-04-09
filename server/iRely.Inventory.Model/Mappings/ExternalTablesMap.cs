@@ -79,12 +79,11 @@ namespace iRely.Inventory.Model
         public tblARCustomerMap()
         {
             // Primary Key
-            this.HasKey(t => t.intCustomerId);
+            this.HasKey(t => t.intEntityCustomerId);
 
             // Table & Column Mappings
             this.ToTable("tblARCustomer");
-            this.Property(t => t.intCustomerId).HasColumnName("intCustomerId");
-            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
+            this.Property(t => t.intEntityCustomerId).HasColumnName("intEntityCustomerId");
             this.Property(t => t.strCustomerNumber).HasColumnName("strCustomerNumber");
             this.Property(t => t.strType).HasColumnName("strType");
         }

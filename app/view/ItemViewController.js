@@ -1058,10 +1058,11 @@ Ext.define('Inventory.view.ItemViewController', {
 
     onSaveClick: function(button, e, options) {
         var win = button.up('window');
+        var me = this;
         if (win.viewModel.data.current.dirty && win.viewModel.data.current.phantom) {
             var buttonAction = function(button) {
                 if (button === 'yes') {
-                    this.onSaveClick(button, e, options);
+                    me.onSaveClick(button, e, options);
                 }
             };
             var current = win.viewModel.data.current;
@@ -1074,11 +1075,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 iRely.Functions.showCustomDialog('warning', 'yesno', 'GL Accounts has to be setup for the item. Continue without setting up your GL Accounts?', buttonAction);
             }
             else {
-                this.onSaveClick(button, e, options);
+                me.onSaveClick(button, e, options);
             }
         }
         else {
-            this.onSaveClick(button, e, options);
+            me.onSaveClick(button, e, options);
         }
     },
 
@@ -1363,7 +1364,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 break;
             case 'Manufacturing Item':
             case 'Manufacturing':
-            case 'Finished Good':
+            case 'Finished Good' :
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);
                 pgePricing.tab.setHidden(false);
