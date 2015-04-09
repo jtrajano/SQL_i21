@@ -361,6 +361,7 @@ Ext.define('Inventory.view.Category', {
                                             {
                                                 xtype: 'advancefiltergrid',
                                                 itemId: 'grdUnitOfMeasure',
+                                                margin: -1,
                                                 header: false,
                                                 title: 'Unit of Measure',
                                                 forceFit: true,

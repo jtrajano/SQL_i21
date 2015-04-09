@@ -1010,7 +1010,7 @@
                                                         "itemId": "btnAddItem",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Add"
+                                                        "text": "Insert"
                                                     },
                                                     "name": "MyButton3",
                                                     "designerId": "11d278cb-085b-43f8-a33f-1b5c5a816cab"
@@ -1075,7 +1075,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter150",
+                                                    "name": "filter126",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1641,7 +1641,7 @@
                                                         "itemId": "btnAddNotes",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Add"
+                                                        "text": "Insert"
                                                     },
                                                     "name": "MyButton6",
                                                     "designerId": "72e46279-03be-44e9-a386-b526ef2b39cd"
@@ -1688,7 +1688,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter151",
+                                                    "name": "filter127",
                                                     "designerId": "dc8288c0-74ca-4def-b42c-feb73cdf1f4d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

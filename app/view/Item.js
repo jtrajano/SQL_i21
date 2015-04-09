@@ -887,7 +887,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnAddLocation',
                                                                                 iconCls: 'small-add',
-                                                                                text: 'Add'
+                                                                                text: 'Insert'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
@@ -4536,7 +4536,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colAssemblyQuantity',
-                                                        width: 60,
+                                                        width: 65,
                                                         align: 'right',
                                                         text: 'Quantity',
                                                         editor: {
@@ -4728,7 +4728,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colBundleQuantity',
-                                                        width: 60,
+                                                        width: 65,
                                                         align: 'right',
                                                         text: 'Quantity',
                                                         editor: {
@@ -4796,7 +4796,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colBundleUnit',
-                                                        width: 37,
+                                                        width: 45,
                                                         align: 'right',
                                                         text: 'Unit',
                                                         editor: {

@@ -915,7 +915,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 xtype: 'advancefiltergrid',
                                                                 reference: 'grdLotTracking',
                                                                 itemId: 'grdLotTracking',
-                                                                margin: '5 5 0 5',
+                                                                margin: -1,
                                                                 dockedItems: [
                                                                     {
                                                                         xtype: 'toolbar',

@@ -259,39 +259,11 @@ Ext.define('Inventory.view.StorageUnit', {
                                             valueField: 'intCompanyLocationId'
                                         },
                                         {
-                                            xtype: 'gridcombobox',
-                                            columns: [
-                                                {
-                                                    dataIndex: 'intCompanyLocationSubLocationId',
-                                                    dataType: 'numeric',
-                                                    text: 'Sub Location Id',
-                                                    hidden: true
-                                                },
-                                                {
-                                                    dataIndex: 'intCompanyLocationId',
-                                                    dataType: 'numeric',
-                                                    text: 'Location Id',
-                                                    hidden: true
-                                                },
-                                                {
-                                                    dataIndex: 'strSubLocationName',
-                                                    dataType: 'string',
-                                                    text: 'Sub Location Name',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    dataIndex: 'strSubLocationDescription',
-                                                    dataType: 'string',
-                                                    text: 'Description',
-                                                    flex: 1
-                                                }
-                                            ],
+                                            xtype: 'combobox',
                                             itemId: 'cboSubLocation',
                                             fieldLabel: 'Sub Location',
                                             labelWidth: 110,
-                                            readOnly: false,
-                                            displayField: 'strSubLocationName',
-                                            valueField: 'intCompanyLocationSubLocationId'
+                                            readOnly: true
                                         },
                                         {
                                             xtype: 'gridcombobox',
@@ -625,7 +597,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     tabIndex: -1,
                                                     itemId: 'btnAddMeasurement',
                                                     iconCls: 'small-add',
-                                                    text: 'Add Detail'
+                                                    text: 'Insert'
                                                 },
                                                 {
                                                     xtype: 'button',

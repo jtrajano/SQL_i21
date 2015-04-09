@@ -663,7 +663,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteUom',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -1710,7 +1710,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnDeleteGlAccounts',
                                                                 iconCls: 'small-delete',
-                                                                text: 'Delete'
+                                                                text: 'Remove'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -1724,43 +1724,10 @@ Ext.define('Inventory.view.Commodity', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colAccountLocation',
-                                                        dataIndex: 'string',
-                                                        text: 'Location',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intCompanyLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Location Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLocationType',
-                                                                    dataType: 'string',
-                                                                    text: 'Location Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboAccountLocation',
-                                                            displayField: 'strLocationName',
-                                                            valueField: 'strLocationName'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
                                                         itemId: 'colAccountCategory',
+                                                        width: 248,
                                                         dataIndex: 'string',
                                                         text: 'Account Category',
-                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1784,17 +1751,10 @@ Ext.define('Inventory.view.Commodity', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
-                                                        itemId: 'colAccountGroup',
-                                                        text: 'Account Group',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
                                                         itemId: 'colAccountId',
+                                                        width: 217,
                                                         dataIndex: 'string',
-                                                        text: 'Account Id',
-                                                        flex: 1,
+                                                        text: 'Account ID',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1842,8 +1802,8 @@ Ext.define('Inventory.view.Commodity', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colAccountDescription',
+                                                        dataIndex: 'string',
                                                         text: 'Account Description',
                                                         flex: 1
                                                     }

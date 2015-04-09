@@ -338,7 +338,7 @@ Ext.define('Inventory.view.CertificationProgram', {
                             }
                         },
                         {
-                            xtype: 'gridcolumn',
+                            xtype: 'numbercolumn',
                             itemId: 'colPerUOM',
                             width: 80,
                             text: 'Per UOM',

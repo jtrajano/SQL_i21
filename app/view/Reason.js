@@ -260,7 +260,7 @@ Ext.define('Inventory.view.Reason', {
                                                     tabIndex: -1,
                                                     itemId: 'btnAddWorkCenterMapping',
                                                     iconCls: 'small-add',
-                                                    text: 'Add'
+                                                    text: 'Insert'
                                                 },
                                                 {
                                                     xtype: 'button',

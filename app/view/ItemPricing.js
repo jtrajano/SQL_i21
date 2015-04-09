@@ -27,11 +27,11 @@ Ext.define('Inventory.view.ItemPricing', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 386,
+    height: 335,
     hidden: false,
-    minHeight: 386,
-    minWidth: 594,
-    width: 594,
+    minHeight: 335,
+    minWidth: 595,
+    width: 595,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',

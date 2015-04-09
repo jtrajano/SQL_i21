@@ -316,7 +316,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnAddItem',
                                                                 iconCls: 'small-add',
-                                                                text: 'Add'
+                                                                text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',
@@ -949,7 +949,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnAddNotes',
                                                                 iconCls: 'small-add',
-                                                                text: 'Add'
+                                                                text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',

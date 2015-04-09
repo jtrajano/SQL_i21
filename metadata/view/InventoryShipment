@@ -2018,7 +2018,7 @@
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "itemId": "grdLotTracking",
-                                                        "margin": "5 5 0 5",
+                                                        "margin": -1,
                                                         "reference": "grdLotTracking",
                                                         "title": null
                                                     },

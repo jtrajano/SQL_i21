@@ -10,19 +10,19 @@
         "defaultFocus": null,
         "designer|userAlias": "icitempricing",
         "designer|userClassName": "ItemPricing",
-        "height": 386,
+        "height": 335,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maxHeight": null,
         "maximizable": true,
-        "minHeight": 386,
-        "minWidth": 594,
+        "minHeight": 335,
+        "minWidth": 595,
         "minimizable": null,
         "reference": null,
         "title": "Item Pricing",
-        "width": 594
+        "width": 595
     },
     "designerId": "54062c27-ee12-42e6-8f66-e9a370fe94ab",
     "viewControllerInstanceId": "653f4b76-74f7-4a94-9435-07ec95e1dd59",
@@ -702,7 +702,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging117",
                     "designerId": "ee98d62c-330d-4829-b90b-22407d93d85f",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

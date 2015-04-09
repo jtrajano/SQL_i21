@@ -1278,7 +1278,7 @@
                                                         "itemId": "btnDeleteUom",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Remove"
                                                     },
                                                     "name": "MyButton42",
                                                     "designerId": "281f8e8c-ec12-4e3a-ab2b-ffbbd3026d41"
@@ -1307,7 +1307,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter132",
+                                                    "name": "filter14",
                                                     "designerId": "cfe7d6a1-9373-4396-b427-061b4323a19b",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1614,7 +1614,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter133",
+                                                    "name": "filter15",
                                                     "designerId": "774320ee-0c3c-46f5-ac4e-9acda0e48025",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3102,7 +3102,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter134",
+                                                    "name": "filter16",
                                                     "designerId": "eba518f5-6e1c-4310-b412-16897ab2e39e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3475,7 +3475,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter135",
+                                                    "name": "filter17",
                                                     "designerId": "e9ad3d80-e267-4067-aa45-29a3069f9395",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3764,7 +3764,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter136",
+                                                    "name": "filter18",
                                                     "designerId": "d3a363a5-85c8-4ee8-97e8-07576d381b52",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4016,7 +4016,7 @@
                                                         "itemId": "btnDeleteGlAccounts",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Delete"
+                                                        "text": "Remove"
                                                     },
                                                     "name": "MyButton68",
                                                     "designerId": "b464733f-230a-431d-94f2-5e34345e60be"
@@ -4045,7 +4045,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter137",
+                                                    "name": "filter19",
                                                     "designerId": "27709837-db86-47ab-a575-7586b5b5aef3",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4060,75 +4060,10 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": 1,
-                                                "itemId": "colAccountLocation",
-                                                "text": "Location"
-                                            },
-                                            "name": "MyColumn92",
-                                            "designerId": "09912dbd-de8f-4c24-af37-a06a90e33bab",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intCompanyLocationId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Location Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strLocationName',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Location Name',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strLocationType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Location Type',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strLocationName",
-                                                        "itemId": "cboAccountLocation",
-                                                        "valueField": "strLocationName"
-                                                    },
-                                                    "name": "MyComboBox2",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "70fce8b0-55dd-496d-b268-4861b518de61",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
+                                                "flex": null,
                                                 "itemId": "colAccountCategory",
-                                                "text": "Account Category"
+                                                "text": "Account Category",
+                                                "width": 248
                                             },
                                             "name": "MyColumn93",
                                             "designerId": "dc482388-5008-45f4-b98c-8efbfac639a9",
@@ -4186,25 +4121,10 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": 1,
-                                                "itemId": "colAccountGroup",
-                                                "text": "Account Group"
-                                            },
-                                            "name": "MyColumn56",
-                                            "designerId": "7a522a83-f741-4a16-b99d-f6768273fd68"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
+                                                "flex": null,
                                                 "itemId": "colAccountId",
-                                                "text": "Account Id"
+                                                "text": "Account ID",
+                                                "width": 217
                                             },
                                             "name": "MyColumn94",
                                             "designerId": "2028ca00-2d01-47ef-92b4-bf1dfcf50bbc",
@@ -4351,7 +4271,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging11",
                     "designerId": "fca9ca25-ac5c-43f8-9dd2-ce604fae6ecb",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
