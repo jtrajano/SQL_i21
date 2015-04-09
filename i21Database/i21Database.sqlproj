@@ -1300,6 +1300,7 @@
     <Build Include="dbo\Tables\tblPREmployeeDepartment.sql" />
     <Build Include="dbo\Views\vyuARInvoiceDetail.sql" />
     <Build Include="dbo\Views\vyuSOSalesOrderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1345,7 +1346,6 @@
     <Build Include="dbo\Tables\tblMFFloorMovement.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCompleteWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickWorkOrder.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFValidateWarhouseReleaseLot.sql" />
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckEntry.sql" />
   </ItemGroup>
   <ItemGroup>
