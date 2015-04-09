@@ -1298,6 +1298,7 @@
     <Build Include="dbo\Tables\tblRKElectronicPricing.sql" />
     <Build Include="dbo\Tables\tblPREmployeeSupervisor.sql" />
     <Build Include="dbo\Tables\tblPREmployeeDepartment.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

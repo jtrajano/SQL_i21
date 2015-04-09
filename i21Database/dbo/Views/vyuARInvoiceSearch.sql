@@ -1,36 +1,66 @@
 ﻿CREATE VIEW dbo.vyuARInvoiceSearch
 AS
-SELECT     
-Inv.intInvoiceId, 
-Inv.strInvoiceNumber,
-NTT.strName AS strCustomerName, 
-Cus.strCustomerNumber, 
-Cus.[intEntityCustomerId], 
-Inv.strTransactionType, 
-Term.strTerm,
-Inv.intTermId, 
-Inv.intAccountId,
-Inv.dtmDate,
-Inv.dtmDueDate, 
-Inv.ysnPosted, 
-Inv.ysnPaid, 
-Inv.dblInvoiceTotal, 
-ISNULL(Inv.dblDiscount,0) AS dblDiscount, 
-ISNULL(Inv.dblAmountDue,0) AS dblAmountDue, 
-ISNULL(Inv.dblPayment, 0) AS dblPayment,
-Inv.intPaymentMethodId, 
-Inv.intCompanyLocationId, 
-Inv.strComments,
-Inv.intCurrencyId,
-CompLoc.strLocationName,
-PayMthd.strPaymentMethod,
-0.000000 AS dblPaymentAmount
-FROM         
-dbo.tblARInvoice AS Inv INNER JOIN
-dbo.tblARCustomer AS Cus ON Inv.intCustomerId = Cus.[intEntityCustomerId] INNER JOIN
-dbo.tblEntity AS NTT ON Cus.[intEntityCustomerId] = NTT.intEntityId LEFT OUTER JOIN
-dbo.tblSMTerm AS Term ON Inv.intTermId = Term.intTermID LEFT OUTER JOIN
-dbo.tblSMCompanyLocation AS CompLoc ON Inv.intCompanyLocationId  = CompLoc.intCompanyLocationId LEFT OUTER JOIN
-dbo.tblSMPaymentMethod AS PayMthd ON Inv.intPaymentMethodId = PayMthd.intPaymentMethodID
-
-
+	SELECT     
+		I.intInvoiceId, 
+		I.strInvoiceNumber,
+		CE.strName					AS strCustomerName, 
+		C.strCustomerNumber, 
+		C.[intEntityCustomerId], 
+		I.strTransactionType, 
+		I.strPONumber, 
+		T.strTerm,
+		I.intTermId, 
+		I.intAccountId,
+		I.dtmDate,
+		I.dtmDueDate, 
+		I.dtmPostDate,
+		I.dtmShipDate,
+		I.ysnPosted, 
+		I.ysnPaid, 
+		I.dblInvoiceTotal, 
+		ISNULL(I.dblDiscount,0)			AS dblDiscount, 
+		ISNULL(I.dblAmountDue,0)		AS dblAmountDue, 
+		ISNULL(I.dblPayment, 0)			AS dblPayment,
+		ISNULL(I.dblInvoiceSubtotal, 0)	AS dblInvoiceSubtotal,
+		ISNULL(I.dblShipping, 0)		AS dblShipping,
+		ISNULL(I.dblTax, 0)				AS dblTax,
+		I.intPaymentMethodId, 
+		I.intCompanyLocationId, 
+		I.strComments,
+		I.intCurrencyId,
+		L.strLocationName,
+		P.strPaymentMethod,
+		0.000000						AS dblPaymentAmount,
+		SV.strName						AS strShipVia,
+		SE.strName						AS strSalesPerson,
+		E.strEmail						AS strCustomerEmail,
+		CUR.strCurrency				
+	FROM         
+		dbo.tblARInvoice AS I 
+	INNER JOIN
+		dbo.tblARCustomer AS C 
+			ON I.intCustomerId = C.[intEntityCustomerId] 
+	INNER JOIN
+		dbo.tblEntity AS E 
+			ON C.intDefaultContactId = E.intEntityId
+	INNER JOIN
+		dbo.tblEntity AS CE 
+			ON C.[intEntityCustomerId] = CE.intEntityId 
+	LEFT OUTER JOIN
+		dbo.tblSMTerm AS T 
+			ON I.intTermId = T.intTermID 
+	LEFT OUTER JOIN
+		dbo.tblSMCompanyLocation AS L 
+			ON I.intCompanyLocationId  = L.intCompanyLocationId 
+	LEFT OUTER JOIN
+		dbo.tblSMPaymentMethod AS P 
+			ON I.intPaymentMethodId = P.intPaymentMethodID
+	LEFT OUTER JOIN
+		dbo.tblSMShipVia AS SV 
+			ON I.intShipViaId = SV.intShipViaID
+	LEFT OUTER JOIN
+		dbo.tblEntity AS SE 
+			ON I.intSalespersonId = SE.intEntityId 
+	LEFT OUTER JOIN
+		dbo.tblSMCurrency CUR
+			ON I.intCurrencyId = CUR.intCurrencyID
