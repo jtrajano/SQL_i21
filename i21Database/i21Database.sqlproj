@@ -1300,6 +1300,8 @@
     <Build Include="dbo\Tables\tblPREmployeeDepartment.sql" />
     <Build Include="dbo\Views\vyuARInvoiceDetail.sql" />
     <Build Include="dbo\Views\vyuSOSalesOrderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRecurBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspPORecur.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
