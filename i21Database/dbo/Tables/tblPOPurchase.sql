@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPOPurchase]
 (
 	[intPurchaseId] INT IDENTITY (1, 1) NOT NULL PRIMARY KEY, 
-    [intVendorId] INT NOT NULL, 
+    [intEntityVendorId] INT NOT NULL, 
     [intAccountId] INT NULL, 
     [intFreightTermId] INT NULL, 
     [intCurrencyId] INT NOT NULL, 
@@ -49,7 +49,7 @@
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblPOOrderStatus_intOrderStatusId] FOREIGN KEY (intOrderStatusId) REFERENCES tblPOOrderStatus(intOrderStatusId),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
-	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intVendorId]) REFERENCES tblAPVendor (intEntityVendorId)
+	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor (intEntityVendorId)
 );
 GO
 CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_intPurchaseId]
@@ -59,5 +59,5 @@ CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_strPurchaseOrderNumber]
     ON [dbo].[tblPOPurchase]([strPurchaseOrderNumber] ASC);
 GO
 CREATE NONCLUSTERED INDEX [IX_tblPOPurchase_intVendorId]
-    ON [dbo].[tblPOPurchase]([intVendorId] ASC)
+    ON [dbo].[tblPOPurchase]([intEntityVendorId] ASC)
 	INCLUDE ([intPurchaseId],[strVendorOrderNumber]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

@@ -146,7 +146,7 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR
-			ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.intVendorId, CHK.intEntityId)
+			ON VENDOR.[intEntityVendorId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
 		LEFT JOIN tblEntity ENTITY
 			ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
 		LEFT JOIN tblEntityLocation LOCATION

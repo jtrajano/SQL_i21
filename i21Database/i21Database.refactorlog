@@ -2459,7 +2459,7 @@
   </Operation>
   <Operation Name="Rename Refactor" Key="0ae204d3-4fe1-4c66-b337-3affac148aaf" ChangeDateTime="04/09/2015 02:36:56">
     <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intVendorId]" />
-	<Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityVendorId" />
   </Operation>
@@ -2483,5 +2483,26 @@
     <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricingPreferences]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strHisotryEndTime" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="baafae8d-21f8-4f97-b46b-7e1d4ff929ee" ChangeDateTime="04/09/2015 05:46:08">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f31cefc1-4fc4-4042-9743-46f4a27d55a0" ChangeDateTime="04/09/2015 05:49:46">
+    <Property Name="ElementName" Value="[dbo].[tblAPPayment].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPPayment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="479a7d33-40e2-44b3-b456-8dca772bb380" ChangeDateTime="04/09/2015 05:55:15">
+    <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityVendorId]" />
   </Operation>
 </Operations>

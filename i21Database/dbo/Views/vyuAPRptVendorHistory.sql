@@ -27,7 +27,7 @@ AS
 			LEFT JOIN (dbo.tblAPPayment B1 INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId)
 			 ON A.intBillId = B.intBillId
 			LEFT JOIN dbo.tblAPVendor
-				ON tblAPVendor.[intEntityVendorId] = A.intVendorId
+				ON tblAPVendor.[intEntityVendorId] = A.[intEntityVendorId]
 	WHERE 
 	1 = CASE WHEN B1.intPaymentId IS NULL 
 		THEN 1

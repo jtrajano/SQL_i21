@@ -49,7 +49,7 @@ SELECT
 	D.strPhone2,
 	D.strTitle,
 	E.strCurrency,
-	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 FROM dbo.tblAPBill G WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.intVendorId = B.[intEntityVendorId]) 
+	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 FROM dbo.tblAPBill G WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.[intEntityVendorId] = B.[intEntityVendorId]) 
 						THEN 1 ELSE 0 END) AS BIT)
 FROM
 		dbo.tblEntity A

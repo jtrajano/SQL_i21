@@ -23,7 +23,7 @@
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dtmBillDate] DATETIME NOT NULL DEFAULT GETDATE(), 
     [intEntityId] INT NOT NULL , 
-    [intVendorId] INT NOT NULL  , 
+    [intEntityVendorId] INT NOT NULL  , 
     [dblWithheld] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblBillTax] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
@@ -62,7 +62,7 @@
     CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPBillBatch_intBillBatchId] FOREIGN KEY ([intBillBatchId]) REFERENCES [dbo].[tblAPBillBatch] ([intBillBatchId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intVendorId] FOREIGN KEY (intVendorId) REFERENCES tblAPVendor([intEntityVendorId]),
+	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor([intEntityVendorId]),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
 	CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId)
 );
@@ -74,5 +74,5 @@ CREATE NONCLUSTERED INDEX [IX_strBillId]
     ON [dbo].[tblAPBill]([strBillId] ASC);
 GO
 CREATE NONCLUSTERED INDEX [IX_intVendorId]
-    ON [dbo].[tblAPBill]([intVendorId] ASC)
+    ON [dbo].[tblAPBill]([intEntityVendorId] ASC)
 	INCLUDE ([intBillId], [strVendorOrderNumber]) WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]

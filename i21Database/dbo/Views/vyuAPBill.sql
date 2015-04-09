@@ -19,7 +19,7 @@ FROM
 	tblAPBill A
 	INNER JOIN 
 		(tblAPVendor B INNER JOIN tblEntity B1 ON B.[intEntityVendorId] = B1.intEntityId)
-	ON A.intVendorId = B.[intEntityVendorId]
+	ON A.[intEntityVendorId] = B.[intEntityVendorId]
 	INNER JOIN tblGLAccount C
 		ON A.intAccountId = C.intAccountId
 	OUTER APPLY

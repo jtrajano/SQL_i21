@@ -14,7 +14,7 @@ SELECT
 	A.intPaymentId ,
 	A.intPaymentMethodId ,
 	A.intUserId ,
-	A.intVendorId ,
+	A.[intEntityVendorId] ,
 	A.strNotes ,
 	A.strPaymentInfo ,
 	A.strPaymentRecordNum ,
@@ -32,6 +32,6 @@ SELECT
 		LEFT JOIN dbo.tblCMBank C
 			ON B.intBankId = C.intBankId
 		LEFT JOIN dbo.tblAPVendor D
-			ON A.intVendorId = D.[intEntityVendorId]
+			ON A.[intEntityVendorId] = D.[intEntityVendorId]
 		LEFT JOIN dbo.tblCMBankTransaction E
 			ON A.strPaymentRecordNum = E.strTransactionId

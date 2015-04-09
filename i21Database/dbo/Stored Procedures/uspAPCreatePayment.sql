@@ -39,7 +39,7 @@ BEGIN
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
 		INNER JOIN tblAPVendor C
-			ON A.intVendorId = C.[intEntityVendorId]
+			ON A.[intEntityVendorId] = C.[intEntityVendorId]
 
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(

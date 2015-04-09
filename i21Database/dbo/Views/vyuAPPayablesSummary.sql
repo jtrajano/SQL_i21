@@ -33,5 +33,5 @@ FROM (
 LEFT JOIN dbo.tblAPBill A
 ON A.intBillId = tmpAPPayablesSummary.intBillId
 LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.[intEntityVendorId] = C.intEntityId)
-ON B.[intEntityVendorId] = A.intVendorId
+ON B.[intEntityVendorId] = A.[intEntityVendorId]
 
