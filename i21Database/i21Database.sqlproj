@@ -1157,6 +1157,8 @@
     <Build Include="dbo\Functions\fnPOHasItemReceipt.sql" />
     <Build Include="dbo\Functions\fnPOHasBill.sql" />
     <Build Include="dbo\Functions\fnCalculateCostPerLot.sql" />
+    <Build Include="dbo\Functions\fnCalculateLotQty.sql" />
+    <Build Include="dbo\Functions\fnCalculateLotWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
