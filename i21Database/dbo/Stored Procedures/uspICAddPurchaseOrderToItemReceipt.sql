@@ -68,7 +68,7 @@ INSERT INTO dbo.tblICInventoryReceipt (
 )
 SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
-		,intEntityVendorId		= PO.intEntityVendorId
+		,intEntityVendorId		= PO.[intVendorId]
 		,strReceiptType			= @ReceiptType_PurchaseOrder
 		,intBlanketRelease		= NULL
 		,intLocationId			= PO.intShipToId

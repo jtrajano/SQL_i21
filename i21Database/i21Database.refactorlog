@@ -2450,6 +2450,26 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblSCDeviceInterfaceFile_tblSCScaleDevice_intScaleDeviceId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2c617d41-c28a-429b-84e6-0f34b5ca74b3" ChangeDateTime="04/09/2015 02:33:57">
+    <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intEntityVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intVendorId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0ae204d3-4fe1-4c66-b337-3affac148aaf" ChangeDateTime="04/09/2015 02:36:56">
+    <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intVendorId]" />
+	<Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityVendorId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1fbe0fa4-8a6a-49ea-b7a3-03cc68fe0d35" ChangeDateTime="04/09/2015 02:49:47">
+    <Property Name="ElementName" Value="[dbo].[tblPOPurchase].[intEntityVendorId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPOPurchase]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intVendorId]" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="9a272f90-594e-48b3-9ba7-214e60c8f763" ChangeDateTime="04/08/2015 15:08:00">
     <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricingPreferences].[intHistoryStartTime]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />

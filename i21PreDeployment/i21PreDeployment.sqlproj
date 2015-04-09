@@ -94,6 +94,7 @@
     <None Include="Scripts\Pre-Deployment\9_FRD\2_1440_to_1510.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\Account_Category_Change_14_4.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\FixARTransactionsAccounts.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\AddPOVendorConstraint.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
