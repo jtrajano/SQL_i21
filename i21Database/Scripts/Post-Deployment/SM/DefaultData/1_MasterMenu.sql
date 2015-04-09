@@ -589,13 +589,13 @@ GO
 		SET strCommand = 'Inventory.view.InventoryShipment', intSort = 2
 		WHERE strMenuName = 'Inventory Shipment' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Transfer' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
-		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Inventory Transfer', 'Inventory', @InventoryActivityId, 'Inventory Transfer', 'Screen', 'Inventory.view.InventoryTransfer', 'small-screen', 1, 1, 0, 1, 3, 0)
-	ELSE
-		UPDATE tblSMMasterMenu
-		SET strCommand = 'Inventory.view.InventoryTransfer', intSort = 3
-		WHERE strMenuName = 'Inventory Transfer' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
+	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Transfer' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
+	--	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	--	VALUES ('Inventory Transfer', 'Inventory', @InventoryActivityId, 'Inventory Transfer', 'Screen', 'Inventory.view.InventoryTransfer', 'small-screen', 1, 1, 0, 1, 3, 0)
+	--ELSE
+	--	UPDATE tblSMMasterMenu
+	--	SET strCommand = 'Inventory.view.InventoryTransfer', intSort = 3
+	--	WHERE strMenuName = 'Inventory Transfer' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Adjustment' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
@@ -605,14 +605,13 @@ GO
 		SET strCommand = 'Inventory.view.InventoryAdjustment', intSort = 4
 		WHERE strMenuName = 'Inventory Adjustment' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Physical Count' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
-		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Physical Count', 'Inventory', @InventoryActivityId, 'Physical Count', 'Screen', 'Inventory.view.PhysicalCount', 'small-screen', 1, 1, 0, 1, 5, 0)
-	ELSE
-		UPDATE tblSMMasterMenu
-		SET strCommand = 'Inventory.view.PhysicalCount', intSort = 5
-		WHERE strMenuName = 'Physical Count' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
-
+	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Physical Count' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
+	--	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	--	VALUES ('Physical Count', 'Inventory', @InventoryActivityId, 'Physical Count', 'Screen', 'Inventory.view.PhysicalCount', 'small-screen', 1, 1, 0, 1, 5, 0)
+	--ELSE
+	--	UPDATE tblSMMasterMenu
+	--	SET strCommand = 'Inventory.view.PhysicalCount', intSort = 5
+	--	WHERE strMenuName = 'Physical Count' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
 
 	/* --------------------------------------- */
 	/* -- Create Inventory Maintenance Menu -- */
@@ -648,13 +647,13 @@ GO
 		SET strCommand = 'Inventory.view.Category', intSort = 3
 		WHERE strMenuName = 'Category' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Catalog Maintenance' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
-		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-		VALUES ('Catalog Maintenance', 'Inventory', @InventoryMaintenanceId, 'Catalog Maintenance', 'Screen', 'Inventory.view.Catalog', 'small-screen', 1, 1, 0, 1, 4, 0)
-	ELSE
-		UPDATE tblSMMasterMenu
-		SET strCommand = 'Inventory.view.Catalog', intSort = 4
-		WHERE strMenuName = 'Catalog Maintenance' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId
+	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Catalog Maintenance' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId)
+	--	INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+	--	VALUES ('Catalog Maintenance', 'Inventory', @InventoryMaintenanceId, 'Catalog Maintenance', 'Screen', 'Inventory.view.Catalog', 'small-screen', 1, 1, 0, 1, 4, 0)
+	--ELSE
+	--	UPDATE tblSMMasterMenu
+	--	SET strCommand = 'Inventory.view.Catalog', intSort = 4
+	--	WHERE strMenuName = 'Catalog Maintenance' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceId
 
 	/* -------------------------------- */
 	/* -- Create Inventory RIN Menus -- */
@@ -884,6 +883,21 @@ GO
 		AND strModuleName = 'Inventory' 
 		AND intParentMenuID = @InventoryMaintenanceId
 
+	DELETE FROM tblSMMasterMenu 
+	WHERE strMenuName = 'Catalog Maintenance' 
+		AND strModuleName = 'Inventory' 
+		AND intParentMenuID = @InventoryMaintenanceId
+
+	DELETE FROM tblSMMasterMenu 
+	WHERE strMenuName = 'Inventory Transfer' 
+		AND strModuleName = 'Inventory' 
+		AND intParentMenuID = @InventoryActivityId
+
+	DELETE FROM tblSMMasterMenu 
+	WHERE strMenuName = 'Physical Count' 
+		AND strModuleName = 'Inventory' 
+		AND intParentMenuID = @InventoryActivityId
+			
 GO
 	/* --- Payroll Module Menu --- */
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payroll' AND strModuleName = 'Payroll' AND intParentMenuID = 0)
