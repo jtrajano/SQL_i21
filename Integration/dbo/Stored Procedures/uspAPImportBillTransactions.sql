@@ -81,7 +81,7 @@ BEGIN
 		--Payment variable
 		DECLARE @bankAccount INT,
 					@paymentMethod INT,
-					@intVendorId INT,
+					@intEntityVendorId INT,
 					@paymentInfo NVARCHAR(10),
 					@notes NVARCHAR(500),
 					@payment DECIMAL(18, 6) = NULL,
@@ -100,7 +100,7 @@ BEGIN
 		BEGIN
 
 			INSERT INTO [dbo].[tblAPBill] (
-				[intVendorId],
+				[intEntityVendorId],
 				--[strVendorId], 
 				--[strBillId],
 				[strVendorOrderNumber], 
@@ -125,7 +125,7 @@ BEGIN
 			OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber, inserted.intTransactionType INTO #InsertedData
 			--Unposted
 			SELECT
-				[intVendorId]			=	D.intEntityVendorId,
+				[intEntityVendorId]			=	D.intEntityVendorId,
 				--[strVendorId]			=	A.aptrx_vnd_no,
 				--[strBillId] 			=	A.aptrx_ivc_no,
 				[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
@@ -163,7 +163,7 @@ BEGIN
 			--Posted
 			UNION
 			SELECT
-				[intVendorId]			=	D.intEntityVendorId, 
+				[intEntityVendorId]			=	D.intEntityVendorId, 
 				--[strVendorId]			=	A.apivc_vnd_no,
 				--[strBillId] 			=	A.apivc_ivc_no,
 				[strVendorOrderNumber] 	=	A.apivc_ivc_no,
@@ -224,7 +224,7 @@ BEGIN
 				C.apegl_dist_no
 			FROM tblAPBill A
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intEntityVendorId
+					ON A.intEntityVendorId = B.intEntityVendorId
 				INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
 								ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 								AND C2.aptrx_vnd_no = C.apegl_vnd_no
@@ -255,7 +255,7 @@ BEGIN
 				C.aphgl_dist_no
 				FROM tblAPBill A
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intEntityVendorId
+					ON A.intEntityVendorId = B.intEntityVendorId
 				INNER JOIN (apivcmst C2 INNER JOIN aphglmst C 
 							ON C2.apivc_ivc_no = C.aphgl_ivc_no 
 							AND C2.apivc_vnd_no = C.aphgl_vnd_no
@@ -346,7 +346,7 @@ BEGIN
 				AND A.apchk_rev_dt = B.apivc_chk_rev_dt
 				AND A.apchk_cbk_no = B.apivc_cbk_no
 			AND A.apchk_trx_ind <> ''O'' AND A.apchk_chk_amt <> 0
-				INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intVendorId = D.intEntityVendorId)
+				INNER JOIN (tblAPBill C INNER JOIN tblAPVendor D ON C.intEntityVendorId = D.intEntityVendorId)
 					ON B.apivc_ivc_no = C.strVendorOrderNumber COLLATE Latin1_General_CS_AS
 					AND B.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 			)
@@ -399,7 +399,7 @@ BEGIN
 
 				SELECT TOP(1)
 					@bankAccount = C.intBankAccountId,
-					@intVendorId = B.intEntityVendorId,
+					@intEntityVendorId = B.intEntityVendorId,
 					@paymentInfo = A.strCheckNo,
 					@payment = A.dblAmount,
 					@datePaid = A.dtmDate,
@@ -481,7 +481,7 @@ BEGIN
 				AND A.intBankAccountId = B.intBankAccountId
 				AND A.strReferenceNo = B.strPaymentInfo
 			INNER JOIN (tblAPVendor C INNER JOIN tblEntity D ON C.intEntityVendorId = D.intEntityId)
-				ON B.intVendorId = C.intEntityVendorId 
+				ON B.intEntityVendorId = C.intEntityVendorId 
 				--AND A.strPayee = D.strName
 			WHERE A.strSourceSystem = ''AP''
 		
@@ -492,7 +492,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT [dbo].[tblAPBill] (
-				[intVendorId], 
+				[intEntityVendorId], 
 				--[strBillId],
 				[strVendorOrderNumber], 
 				[intTermsId], 
@@ -516,7 +516,7 @@ BEGIN
 			OUTPUT inserted.intBillId, inserted.strBillId, inserted.ysnPosted, inserted.ysnPaid, inserted.strVendorOrderNumber, inserted.intTransactionType INTO #InsertedData
 			--Unposted
 			SELECT
-				[intVendorId]			=	D.intEntityVendorId,
+				[intEntityVendorId]			=	D.intEntityVendorId,
 				--[strVendorId]			=	A.aptrx_vnd_no,
 				--[strBillId] 			=	A.aptrx_ivc_no,
 				[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
@@ -578,7 +578,7 @@ BEGIN
 				C.apegl_dist_no
 				FROM tblAPBill A
 					INNER JOIN tblAPVendor B
-						ON A.intVendorId = B.intEntityVendorId
+						ON A.intEntityVendorId = B.intEntityVendorId
 					INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
 								ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 								AND C2.aptrx_vnd_no = C.apegl_vnd_no
