@@ -422,7 +422,7 @@ BEGIN
 	print 'Add ysnPortalAccess to EntityToContact'
 	exec(N'		
 			alter table tblEntityToContact
-			add [ysnPortalAccess]          BIT          NOT NULL ')
+			add [ysnPortalAccess]          BIT          NULL ')
 	print 'Add ysnDefaultContact to EntityToContact'
 	exec(N'					
 			alter table tblEntityToContact
