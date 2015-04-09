@@ -117,8 +117,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         }]
                     }
                 },
-                colGrossWeight: 'dblGrossWeight',
-                colTareWeight: 'dblTareWeight',
                 colNetWeight: 'dblNetWeight',
                 colNewWeightPerUnit: 'dblNewWeightPerUnit',
                 colNewItemNumber: {
@@ -133,8 +131,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     }
                 },
                 colNewItemDescription: 'strNewItemDescription',
-//                colPhysicalCount: '',
-                colNewPhysicalCount: 'dblNewPhysicalCount',
                 colExpirationDate: 'dtmExpiryDate',
                 colNewExpirationDate: 'dtmNewExpiryDate',
                 colStatus: 'strLotStatus',
@@ -280,7 +276,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strLotStatus', records[0].get('strLotStatus'));
             current.set('intLotStatusId', records[0].get('intLotStatusId'));
             current.set('dtmExpiryDate', records[0].get('dtmExpiryDate'));
-
+            current.set('dblNetWeight', records[0].get('dblWeight'));
         }
         else if (combo.itemId === 'cboNewUOM')
         {
@@ -301,12 +297,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         else if (combo.itemId === 'cboCreditAccount')
         {
             current.set('intCreditAccountId', records[0].get('intAccountId'));
-            current.set('strDebitAccountDescription', records[0].get('strDescription'));
+            current.set('strCreditAccountDescription', records[0].get('strDescription'));
         }
         else if (combo.itemId === 'cboDebitAccount')
         {
             current.set('intDebitAccountId', records[0].get('intAccountId'));
-            current.set('strCreditAccountDescription', records[0].get('strDescription'));
+            current.set('strDebitAccountDescription', records[0].get('strDescription'));
         }
     },
 

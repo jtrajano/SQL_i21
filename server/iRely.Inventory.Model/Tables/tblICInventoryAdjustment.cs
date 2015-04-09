@@ -77,8 +77,7 @@ namespace iRely.Inventory.Model
         public decimal? dblNewQuantity { get; set; }
         public int? intNewItemUOMId { get; set; }
         public int? intWeightUOMId { get; set; }
-        public decimal? dblGrossWeight { get; set; }
-        public decimal? dblTareWeight { get; set; }
+        public decimal? dblNetWeight { get; set; }
         public decimal? dblNewWeightPerUnit { get; set; }
         public int? intNewItemId { get; set; }
         public decimal? dblNewPhysicalCount { get; set; }

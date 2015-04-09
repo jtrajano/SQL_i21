@@ -51,8 +51,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblNewQuantity).HasColumnName("dblNewQuantity").HasPrecision(18, 6);
             this.Property(t => t.intNewItemUOMId).HasColumnName("intNewItemUOMId");
             this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
-            this.Property(t => t.dblGrossWeight).HasColumnName("dblGrossWeight").HasPrecision(18, 6);
-            this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblNetWeight).HasColumnName("dblNetWeight").HasPrecision(18, 6);
             this.Property(t => t.dblNewWeightPerUnit).HasColumnName("dblNewWeightPerUnit").HasPrecision(18, 6);
             this.Property(t => t.intNewItemId).HasColumnName("intNewItemId");
             this.Property(t => t.dblNewPhysicalCount).HasColumnName("dblNewPhysicalCount").HasPrecision(18, 6);

@@ -34,6 +34,7 @@ Ext.define('Inventory.model.AdjustmentDetail', {
         { name: 'intLotId', type: 'int', allowNull: true },
         { name: 'intNewLotId', type: 'int', allowNull: true },
         { name: 'dblNewQuantity', type: 'float' },
+        { name: 'dblNetWeight', type: 'float' },
         { name: 'intNewItemUOMId', type: 'int', allowNull: true },
         { name: 'intNewItemId', type: 'int', allowNull: true },
         { name: 'dblNewPhysicalCount', type: 'float' },

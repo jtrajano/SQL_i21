@@ -491,9 +491,9 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strNewLotID',
                                                         itemId: 'colNewLotID',
                                                         width: 90,
+                                                        dataIndex: 'strNewLotID',
                                                         text: 'New Lot ID',
                                                         editor: {
                                                             xtype: 'textfield',
@@ -626,46 +626,20 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        itemId: 'colGrossWeight',
-                                                        width: 90,
-                                                        align: 'right',
-                                                        dataIndex: 'dblNewQuantity',
-                                                        text: 'Gross Weight',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colTareWeight',
-                                                        width: 90,
-                                                        align: 'right',
-                                                        dataIndex: 'dblNewQuantity',
-                                                        text: 'Tare Weight',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        dataIndex: 'dblNewQuantity',
                                                         itemId: 'colNetWeight',
                                                         width: 90,
                                                         align: 'right',
+                                                        dataIndex: 'dblNewQuantity',
                                                         text: 'Net Weight',
                                                         format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblNewQuantity',
                                                         itemId: 'colNewWeightPerUnit',
                                                         width: 110,
                                                         align: 'right',
+                                                        dataIndex: 'dblNewQuantity',
                                                         text: 'New Wgt Per Unit',
                                                         format: '0,000.##'
                                                     },
@@ -720,29 +694,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         width: 150,
                                                         dataIndex: 'strNewItemDescription',
                                                         text: 'New Item Description'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colPhysicalCount',
-                                                        width: 110,
-                                                        align: 'right',
-                                                        dataIndex: 'dblPhysicalCount',
-                                                        text: 'Physical Count',
-                                                        format: '0,000'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colNewPhysicalCount',
-                                                        width: 119,
-                                                        align: 'right',
-                                                        dataIndex: 'dblNewPhysicalCount',
-                                                        text: 'New Physical Count',
-                                                        format: '0,000',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
                                                     },
                                                     {
                                                         xtype: 'datecolumn',

@@ -53,51 +53,39 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         },
 
         item: {
-            autoLoad: true,
             type: 'icbuffereditemstockview'
         },
         subLocation: {
-            autoLoad: true,
             type: 'smcompanylocationsublocationbuffered'
         },
         storageLocation: {
-            autoLoad: true,
             type: 'icbufferedstoragelocation'
         },
         lot: {
-            autoLoad: true,
             type: 'icbufferedlot'
         },
         newLot: {
-            autoLoad: true,
             type: 'icbufferedlot'
         },
         newItemUOM: {
-            autoLoad: true,
             type: 'icbuffereditemunitmeasure'
         },
         weightUOM: {
-            autoLoad: true,
             type: 'icbuffereditemweightuom'
         },
         newItem: {
-            autoLoad: true,
             type: 'icbuffereditemstockview'
         },
         newLotStatus: {
-            autoLoad: true,
             type: 'icbufferedlotstatus'
         },
         accountCategory: {
-            autoLoad: true,
             type: 'glbufaccountcategorygroup'
         },
         creditGLAccount: {
-            autoLoad: true,
             type: 'glbufaccountid'
         },
         debitGLAccount: {
-            autoLoad: true,
             type: 'glbufaccountid'
         }
     },
