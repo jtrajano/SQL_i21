@@ -6,6 +6,7 @@
     [intProfitCenter] INT NULL , 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
+    CONSTRAINT [PK_tblPRDepartment] PRIMARY KEY ([intDepartmentId]), 
 )
 
 GO
