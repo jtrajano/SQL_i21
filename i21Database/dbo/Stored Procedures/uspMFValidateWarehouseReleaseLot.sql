@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFValidateWarhouseReleaseLot (
+﻿CREATE PROCEDURE uspMFValidateWarehouseReleaseLot (
 	@strLotNumber NVARCHAR(50)
 	,@intLocationId INT
 	)
@@ -81,7 +81,7 @@ BEGIN TRY
 	FROM dbo.tblICLotStatus
 	WHERE intLotStatusId = @intLotStatusId
 
-	IF @strSecondaryStatus = 'GHOST'
+	IF @strSecondaryStatus = 'Ghost'
 	BEGIN
 		RAISERROR (
 				'Pallet Lot has been marked as a ghost and cannot be released.Please call Supervisor to reverse this!'
@@ -92,10 +92,10 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF @strSecondaryStatus <> 'QUARANTINED'
+	IF @strSecondaryStatus <> 'Quarantined'
 		OR (
-			@strSecondaryStatus = 'IN_WAREHOUSE'
-			AND @strPrimaryStatus = 'ON_HOLD'
+			@strSecondaryStatus = 'In_Warehouse'
+			AND @strPrimaryStatus = 'On_Hold'
 			)
 		--OR (
 		--	@strSecondaryStatus = 'ACTIVE'

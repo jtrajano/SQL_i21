@@ -793,3 +793,25 @@ BEGIN
 		,4
 		,0
 END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblICLotStatus
+		WHERE strSecondaryStatus = 'Quarantined' and strPrimaryStatus='Quarantined'
+		)
+BEGIN
+	INSERT INTO dbo.tblICLotStatus (
+		strSecondaryStatus
+		,strDescription
+		,strPrimaryStatus
+		,intSort
+		,intConcurrencyId
+		)
+	SELECT 'Quarantined'
+		,'Standard quarantined status'
+		,'Quarantined'
+		,1
+		,0
+END
+GO
+
