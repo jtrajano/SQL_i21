@@ -10,8 +10,7 @@
     [dblNewQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intNewItemUOMId] INT NULL, 
 	[intWeightUOMId] INT NULL,
-	[dblGrossWeight] NUMERIC(18, 6) NULL DEFAULT ((0)),
-	[dblTareWeight] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblNetWeight] NUMERIC(18,6) NULL DEFAULT ((0)),
 	[dblNewWeightPerUnit] NUMERIC(18, 6) NULL DEFAULT ((0)),
     [intNewItemId] INT NULL, 
     [dblNewPhysicalCount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -48,23 +47,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intWeightUOMId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Gross Weight',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryAdjustmentDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'dblGrossWeight'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Tare Weight',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryAdjustmentDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'dblTareWeight'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Account Category Id',
@@ -237,3 +222,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
 GO
+
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Net Weight',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryAdjustmentDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'dblNetWeight'
