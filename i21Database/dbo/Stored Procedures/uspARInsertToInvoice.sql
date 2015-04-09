@@ -54,7 +54,7 @@ BEGIN
 		,@DateOnly --Post Date
 		,[intCurrencyId]
 		,[intCompanyLocationId]
-		,[intSalespersonId]
+		,[intEntitySalespersonId]
 		,@DateOnly --Ship Date
 		,[intShipViaId]
 		,[strPONumber]

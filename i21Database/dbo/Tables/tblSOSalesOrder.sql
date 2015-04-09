@@ -7,7 +7,7 @@
     [dtmDueDate]            DATETIME        NOT NULL,
     [intCurrencyId]         INT             NOT NULL,
     [intCompanyLocationId]  INT             NULL,
-    [intSalespersonId]      INT             NOT NULL,
+    [intEntitySalespersonId]      INT             NOT NULL,
     [intShipViaId]          INT             NOT NULL,
     [strPONumber]           NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [intTermId]             INT             NOT NULL,

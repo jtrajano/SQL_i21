@@ -14,7 +14,7 @@ BEGIN
            ,[dtmDueDate]
            ,[intCurrencyId]
            ,[intCompanyLocationId]
-           ,[intSalespersonId]
+           ,[intEntitySalespersonId]
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]
@@ -51,7 +51,7 @@ BEGIN
 		   ,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
            ,[intCurrencyId]
            ,[intCompanyLocationId]
-           ,[intSalespersonId]
+           ,[intEntitySalespersonId]
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]

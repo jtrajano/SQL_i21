@@ -2527,4 +2527,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityCustomerId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ac5dcea8-a72e-4694-bdf8-3c750e111c41" ChangeDateTime="04/09/2015 09:08:09">
+    <Property Name="ElementName" Value="[dbo].[tblSOSalesOrder].[intSalespersonId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSOSalesOrder]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntitySalespersonId]" />
+  </Operation>
 </Operations>
