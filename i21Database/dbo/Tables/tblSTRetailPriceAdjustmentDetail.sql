@@ -29,7 +29,7 @@
     CONSTRAINT [PK_tblSTRetailPriceAdjustmentDetail] PRIMARY KEY CLUSTERED ([intRetailPriceAdjustmentDetailId] ASC), 
     CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTRetailPriceAdjustment] FOREIGN KEY ([intRetailPriceAdjustmentId]) REFERENCES [tblSTRetailPriceAdjustment]([intRetailPriceAdjustmentId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
-	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
+	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblEntity] FOREIGN KEY ([intVendorId]) REFERENCES [tblEntity]([intEntityId]), 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]) ,
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]) ,
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTSubcategory_intFamilyId] FOREIGN KEY ([intFamilyId]) REFERENCES [tblSTSubcategory]([intSubcategoryId]), 
