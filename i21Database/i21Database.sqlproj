@@ -1351,7 +1351,9 @@
     <Build Include="dbo\Tables\tblRKMatchFuturesPSHeader.sql" />
     <Build Include="dbo\Tables\tblRKMatchFuturesPSDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxGroup.sql" />
-	<Build Include="dbo\Functions\fnCalculateCostPerLot.sql" />
+    <Build Include="dbo\Functions\fnCalculateCostPerLot.sql" />
+    <Build Include="dbo\Functions\fnCalculateLotQty.sql" />
+    <Build Include="dbo\Functions\fnCalculateLotWeight.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

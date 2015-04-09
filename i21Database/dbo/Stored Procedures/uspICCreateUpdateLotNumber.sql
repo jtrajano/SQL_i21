@@ -76,26 +76,26 @@ DECLARE
 	,@intDetailId				AS INT 
 
 
--- Check for UNIQUE errors. 
-BEGIN
-	SELECT	TOP 1 
-			@strReceiptNumber = LotMaster.strReceiptNumber
-			,@strLotNumber = LotMaster.strLotNumber
-	FROM	tblICLot LotMaster INNER JOIN @ItemsForLot LotFromTransaction
-				ON LotMaster.intItemId = LotFromTransaction.intItemId
-				AND LotMaster.strLotNumber = LotFromTransaction.strLotNumber
-			INNER JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intItemLocationId = LotFromTransaction.intItemLocationId
-				AND LotMaster.intLocationId = ItemLocation.intLocationId
-	WHERE	ISNULL(LotMaster.dblQty, 0) > 0
+---- Check for UNIQUE errors. 
+--BEGIN
+--	SELECT	TOP 1 
+--			@strReceiptNumber = LotMaster.strReceiptNumber
+--			,@strLotNumber = LotMaster.strLotNumber
+--	FROM	tblICLot LotMaster INNER JOIN @ItemsForLot LotFromTransaction
+--				ON LotMaster.intItemId = LotFromTransaction.intItemId
+--				AND LotMaster.strLotNumber = LotFromTransaction.strLotNumber
+--			INNER JOIN dbo.tblICItemLocation ItemLocation
+--				ON ItemLocation.intItemLocationId = LotFromTransaction.intItemLocationId
+--				AND LotMaster.intLocationId = ItemLocation.intLocationId
+--	WHERE	ISNULL(LotMaster.dblQty, 0) > 0
 
-	IF ISNULL(@strReceiptNumber, '') <> ''
-	BEGIN 
-		-- 'The lot number {Lot Number} is already used in {Transaction Id}.'
-		RAISERROR(51051, 11, 1, @strLotNumber, @strReceiptNumber);
-		RETURN -9
-	END 
-END			
+--	IF ISNULL(@strReceiptNumber, '') <> ''
+--	BEGIN 
+--		-- 'The lot number {Lot Number} is already used in {Transaction Id}.'
+--		RAISERROR(51051, 11, 1, @strLotNumber, @strReceiptNumber);
+--		RETURN -9
+--	END 
+--END			
 
 -- Check for redundant lot numbers 
 BEGIN 
@@ -352,10 +352,27 @@ BEGIN
 										  END
 				-- Allow update on the following fields if dblQty is zero.  
 				,dblWeightPerQty		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN 														
-														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight) 
+														CASE	WHEN ISNULL(LotToUpdate.intWeightUOMId, 0) <> 0 THEN 
+																	dbo.fnCalculateWeightUnitQty(LotToUpdate.dblQty, LotToUpdate.dblWeight) 
 																ELSE 0 
 														END 
-													ELSE LotMaster.dblWeightPerQty 
+													ELSE 
+														-- Increase the weight per Qty if there is an incoming stock for the lot. 
+														CASE	WHEN LotToUpdate.dblQty > 0  THEN 
+																	dbo.fnCalculateWeightUnitQty(
+																		(
+																			LotMaster.dblQty 
+																			+ LotToUpdate.dblQty
+																		)
+																		,(
+																			(CAST(LotMaster.dblQty AS FLOAT) * CAST(LotMaster.dblWeightPerQty AS FLOAT))
+																			+ CAST(LotToUpdate.dblWeight AS FLOAT) 
+																		)
+																	) 
+																ELSE 
+																	LotMaster.dblWeightPerQty 
+														END 
+
 											END
 				,intItemUOMId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemUOMId ELSE LotMaster.intItemUOMId END
 				,intWeightUOMId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intWeightUOMId ELSE LotMaster.intWeightUOMId END
