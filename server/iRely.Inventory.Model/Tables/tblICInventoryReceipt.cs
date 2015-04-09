@@ -170,6 +170,7 @@ namespace iRely.Inventory.Model
         public int? intUnitMeasureId { get; set; }
         public int? intWeightUOMId { get; set; }
         public decimal? dblUnitCost { get; set; }
+        public decimal? dblUnitRetail { get; set; }
         public decimal? dblLineTotal { get; set; }
         public int? intSort { get; set; }
 
@@ -341,36 +342,50 @@ namespace iRely.Inventory.Model
                 _weigthUOM = value;
             }
         }
-        private decimal? _itemConv;
+        private decimal _itemConv;
         [NotMapped]
-        public decimal? dblItemUOMConvFactor
+        public decimal dblItemUOMConvFactor
         {
             get
             {
                 if (tblICItemUOM != null)
-                    return tblICItemUOM.dblUnitQty;
+                    return tblICItemUOM.dblUnitQty ?? 0;
                 else
-                    return null;
+                    return 0;
             }
             set
             {
                 _itemConv = value;
             }
         }
-        private decimal? _weightConv;
+        private decimal _weightConv;
         [NotMapped]
-        public decimal? dblWeightUOMConvFactor
+        public decimal dblWeightUOMConvFactor
         {
             get
             {
                 if (WeightUOM != null)
-                    return WeightUOM.dblUnitQty;
+                    return WeightUOM.dblUnitQty ?? 0;
                 else
-                    return null;
+                    return 0;
             }
             set
             {
                 _weightConv = value;
+            }
+        }
+        private decimal _grossMargin;
+        [NotMapped]
+        public decimal dblGrossMargin
+        {
+            get
+            {
+                var salesPrice = dblUnitRetail ?? 0;
+                return ((salesPrice - (dblUnitCost ?? 0)) / (salesPrice)) * 100;
+            }
+            set
+            {
+                _grossMargin = value;
             }
         }
         

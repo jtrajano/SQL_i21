@@ -1043,7 +1043,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colGrossMargin',
-                                                                        width: 85,
+                                                                        width: 100,
                                                                         dataIndex: 'dblGrossMargin',
                                                                         text: 'Gross Margin'
                                                                     },
@@ -1561,78 +1561,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         }
                                                                     }
                                                                 ]
-                                                            }
-                                                        ]
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        hidden: true,
-                                        itemId: 'pgeLots',
-                                        title: 'Lots',
-                                        layout: {
-                                            type: 'vbox',
-                                            align: 'stretch'
-                                        },
-                                        items: [
-                                            {
-                                                xtype: 'container',
-                                                margins: '',
-                                                margin: 5,
-                                                layout: {
-                                                    type: 'hbox',
-                                                    align: 'stretch'
-                                                },
-                                                items: [
-                                                    {
-                                                        xtype: 'container',
-                                                        margins: '',
-                                                        margin: 5,
-                                                        items: [
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtLotItemId',
-                                                                fieldLabel: 'Item Id',
-                                                                readOnly: true
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtLotItemDescription',
-                                                                fieldLabel: 'Description',
-                                                                readOnly: true
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtLotUOM',
-                                                                fieldLabel: 'UOM',
-                                                                readOnly: true
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        margin: 5,
-                                                        items: [
-                                                            {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtLotItemQty',
-                                                                fieldLabel: 'Qty to Receive',
-                                                                readOnly: true
-                                                            },
-                                                            {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtLotCost',
-                                                                fieldLabel: 'Cost',
-                                                                readOnly: true
-                                                            },
-                                                            {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtLotTotalQty',
-                                                                fieldLabel: 'Lots Total Qty',
-                                                                readOnly: true
                                                             }
                                                         ]
                                                     }

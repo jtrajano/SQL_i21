@@ -965,7 +965,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var txtCalculatedFreight = win.down('#txtCalculatedFreight');
 
         var unitRate = (txtUnitsWeightMiles.getValue() * txtFreightRate.getValue());
-        var unitRateSurcharge = (unitRate * txtFuelSurcharge.getValue());
+        var unitRateSurcharge = (unitRate * (txtFuelSurcharge.getValue() / 100));
 
         txtCalculatedFreight.setValue(unitRate + unitRateSurcharge);
     },
@@ -1023,8 +1023,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 else if (context.field === 'dblUnitCost'){
                     value = context.value * (record.get('dblOpenReceive'));
                     record.set('dblUnitRetail', context.value);
+                    record.set('dblGrossMargin', 0);
                 }
                 record.set('dblLineTotal', value);
+            }
+        }
+        else if (context.field === 'dblUnitRetail')
+        {
+            if (context.record) {
+                var unitCost = context.record.get('dblUnitCost');
+                var salesPrice = context.value;
+                var grossMargin = ((salesPrice - unitCost) / (salesPrice)) * 100;
+                context.record.set('dblGrossMargin', grossMargin);
             }
         }
         else if (context.field === 'strWeightUOM') {
