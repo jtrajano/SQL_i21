@@ -90,10 +90,6 @@ BEGIN
 	if(@constraint <> '')
 		exec('ALTER TABLE tblARPayment DROP CONSTRAINT [' + @constraint +']' )	
 	
-	set @constraint = ''
-    select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblCCSite' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer'
-       if(@constraint <> '')
-              exec('ALTER TABLE tblCCSite DROP CONSTRAINT [' + @constraint +']' )
 
 	print 'Adding tblEntityContact columns to tblEntity'
 	exec(N'	
@@ -426,7 +422,7 @@ BEGIN
 	print 'Add ysnPortalAccess to EntityToContact'
 	exec(N'		
 			alter table tblEntityToContact
-			add [ysnPortalAccess]          BIT          NULL ')
+			add [ysnPortalAccess]          BIT          NOT NULL ')
 	print 'Add ysnDefaultContact to EntityToContact'
 	exec(N'					
 			alter table tblEntityToContact
