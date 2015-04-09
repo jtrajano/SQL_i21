@@ -24,7 +24,8 @@ Type the overview for the table here.
 		[dblReceived] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intUnitMeasureId] INT NOT NULL, 
 		[intWeightUOMId] INT NULL,
-		[dblUnitCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblUnitCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblUnitRetail] NUMERIC(18,6) NULL DEFAULT ((0)),
 		[dblLineTotal] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
@@ -167,3 +168,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryReceiptItem',
     @level2type = N'COLUMN',
     @level2name = N'intWeightUOMId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Unit Retail',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryReceiptItem',
+    @level2type = N'COLUMN',
+    @level2name = N'dblUnitRetail'

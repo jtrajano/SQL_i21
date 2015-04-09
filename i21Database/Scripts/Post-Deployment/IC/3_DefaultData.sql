@@ -45,3 +45,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblICEquipmentLength WHERE strEquipmentLength 
 BEGIN
 	INSERT INTO tblICEquipmentLength (strEquipmentLength, strDescription, intSort) VALUES ('05300', '53 ft trailer', 5)
 END
+
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICInventoryReceiptItem') AND name = 'dblUnitRetail')
+BEGIN
+	EXEC ('
+	UPDATE tblICInventoryReceiptItem
+	SET dblUnitRetail = dblUnitCost
+	WHERE ISNULL(dblUnitRetail, 0) = 0
+	')
+END
