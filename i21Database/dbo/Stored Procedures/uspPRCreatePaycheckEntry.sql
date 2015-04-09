@@ -60,7 +60,7 @@ SELECT
 	,[strCity]					= BA.strCity
 	,[strState]					= BA.strState
 	,[strCountry]				= BA.strCountry             
-	,[dblAmount]				= PC.dblNetPayTotal
+	,[dblAmount]				= PC.dblNetPayTotal * -1 --Insert as Credit
 	,[strAmountInWords]			= dbo.fnConvertNumberToWord(PC.dblNetPayTotal)
 	,[strMemo]					= ''
 	,[strReferenceNo]			= ''
