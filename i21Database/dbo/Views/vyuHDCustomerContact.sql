@@ -20,8 +20,8 @@
 		,ec.imgPhoto
 	  from
 		--tblEntityContact ec
-		tblEntity ec
-		inner join tblARCustomerToContact etc on etc.[intEntityContactId] = ec.[intEntityId]
+		tblARCustomerToContact etc 		
+		inner join tblEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
 		--inner join tblARCustomerToContact etc on etc.[intEntityContactId] = ec.[intEntityContactId]
 		inner join tblARCustomer c on c.[intEntityCustomerId] = etc.[intEntityCustomerId]
 		inner join tblEntity e on e.intEntityId = c.[intEntityCustomerId]
