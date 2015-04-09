@@ -197,6 +197,8 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intLotId = @intLotId
 
+	Update tblICLot Set intLotStatusId =1 Where intLotId=@intLotId
+
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
