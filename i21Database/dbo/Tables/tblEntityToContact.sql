@@ -4,7 +4,7 @@
     [intEntityContactId]         INT NULL,
     [intEntityLocationId]        INT NULL,
 	[strUserType]              NVARCHAR (5) COLLATE Latin1_General_CI_AS NULL,
-	[ysnPortalAccess]          BIT          NOT NULL,    
+	[ysnPortalAccess]          BIT          NOT NULL DEFAULT ((0)),    
 	[ysnDefaultContact] BIT NOT NULL DEFAULT ((0)), 
     [intConcurrencyId]     INT DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblEntity2Contact1] PRIMARY KEY CLUSTERED ([intEntityToContactId] ASC),
