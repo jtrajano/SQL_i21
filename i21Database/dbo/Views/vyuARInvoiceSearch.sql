@@ -39,7 +39,7 @@ AS
 		dbo.tblARInvoice AS I 
 	INNER JOIN
 		dbo.tblARCustomer AS C 
-			ON I.intCustomerId = C.[intEntityCustomerId] 
+			ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
 	INNER JOIN
 		dbo.tblEntity AS E 
 			ON C.intDefaultContactId = E.intEntityId
@@ -60,7 +60,7 @@ AS
 			ON I.intShipViaId = SV.intShipViaID
 	LEFT OUTER JOIN
 		dbo.tblEntity AS SE 
-			ON I.intSalespersonId = SE.intEntityId 
+			ON I.[intEntitySalespersonId] = SE.intEntityId 
 	LEFT OUTER JOIN
 		dbo.tblSMCurrency CUR
 			ON I.intCurrencyId = CUR.intCurrencyID

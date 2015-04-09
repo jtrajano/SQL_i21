@@ -639,7 +639,7 @@ BEGIN
 				ON A.intAccountId = GLAccnt.intAccountId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -690,7 +690,7 @@ BEGIN
 				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -734,7 +734,7 @@ BEGIN
 				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -775,7 +775,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -838,7 +838,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN 
 			tblARCustomer D 
-				ON A.intCustomerId = D.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = D.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -888,7 +888,7 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1337,7 +1337,7 @@ BEGIN
 				intConcurrencyId = 1
 				FROM tblARPayment A
 					INNER JOIN tblARCustomer B
-						ON A.intCustomerId = B.[intEntityCustomerId]
+						ON A.[intEntityCustomerId] = B.[intEntityCustomerId]
 				INNER JOIN
 					tblGLAccount GL
 						ON A.intAccountId = GL.intAccountId 
@@ -1510,7 +1510,7 @@ ELSE
 				ON A.intAccountId = GLAccnt.intAccountId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1560,7 +1560,7 @@ ELSE
 				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1603,7 +1603,7 @@ ELSE
 				ON L.intARAccount = GLAccnt.intAccountId 
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.intEntityCustomerId
+				ON A.[intEntityCustomerId] = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1642,7 +1642,7 @@ ELSE
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1704,7 +1704,7 @@ ELSE
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN 
 			tblARCustomer D 
-				ON A.intCustomerId = D.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = D.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId
@@ -1753,7 +1753,7 @@ ELSE
 				ON A.intPaymentId = B.intPaymentId
 		INNER JOIN
 			tblARCustomer C
-				ON A.intCustomerId = C.[intEntityCustomerId]
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 		LEFT JOIN 
 			Units U
 				ON A.intAccountId = U.intAccountId

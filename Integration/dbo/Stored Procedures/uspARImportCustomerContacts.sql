@@ -123,10 +123,10 @@ DECLARE @Contacts TABLE
 
 			BEGIN -- Create Customer to Contact
 
-				declare @CustomerNo nvarchar(max), @intCustomerId int
+				declare @CustomerNo nvarchar(max), @intEntityCustomerId int
 
 				select top 1 @CustomerNo = sscon_cus_no from @Contacts where id = @id
-				select top 1 @intCustomerId = intEntityCustomerId from tblARCustomer where strCustomerNumber = @CustomerNo 
+				select top 1 @intEntityCustomerId = intEntityCustomerId from tblARCustomer where strCustomerNumber = @CustomerNo 
 
 				insert into tblARCustomerToContact
 				(
@@ -137,7 +137,7 @@ DECLARE @Contacts TABLE
 					, ysnPortalAccess
 				)
 				select
-					@intCustomerId
+					@intEntityCustomerId
 					, @intContactId
 					, null
 					, 'User'

@@ -12,13 +12,13 @@ BEGIN
 	SELECT @DateOnly = CAST(GETDATE() as date)
 	
 	INSERT INTO tblARInvoice
-		([intCustomerId]
+		([intEntityCustomerId]
 		,[dtmDate]
 		,[dtmDueDate]
 		,[dtmPostDate]
 		,[intCurrencyId]
 		,[intCompanyLocationId]
-		,[intSalespersonId]
+		,[intEntitySalespersonId]
 		,[dtmShipDate]
 		,[intShipViaId]
 		,[strPONumber]
@@ -48,7 +48,7 @@ BEGIN
 		,[strBillToCountry]
 	)
 	SELECT
-		[intCustomerId]
+		[intEntityCustomerId]
 		,@DateOnly --Date
 		,[dbo].fnGetDueDateBasedOnTerm(@DateOnly,intTermId) --Due Date
 		,@DateOnly --Post Date

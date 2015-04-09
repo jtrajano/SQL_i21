@@ -49,13 +49,13 @@ BEGIN
 			--================================================
 			INSERT INTO [dbo].[tblARInvoice]
 			   ([strInvoiceOriginId]
-			   ,[intCustomerId]
+			   ,[intEntityCustomerId]
 			   ,[dtmDate]
 			   ,[dtmDueDate]
 			   ,[dtmPostDate]
 			   ,[intCurrencyId]
 			   ,[intCompanyLocationId]
-			   ,[intSalespersonId]
+			   ,[intEntitySalespersonId]
 			   ,[dtmShipDate]
 			   ,[intShipViaId]
 			   ,[strPONumber]
@@ -78,13 +78,13 @@ BEGIN
 			   )
 			SELECT
 				agivc_ivc_no,--[strInvoiceOriginId]		
-				Cus.intEntityCustomerId,--[intCustomerId]		
+				Cus.intEntityCustomerId,--[intEntityCustomerId]		
 				(CASE WHEN ISDATE(agivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDate]
 				(CASE WHEN ISDATE(agivc_net_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_net_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmDueDate]
 				(CASE WHEN ISDATE(agivc_orig_rev_dt) = 1 THEN CONVERT(DATE, CAST(agivc_orig_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END),--[dtmPostDate]
 				ISNULL(Cur.intCurrencyID,0),--[intCurrencyId]
 				(SELECT intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationNumber  COLLATE Latin1_General_CI_AS = agivc_loc_no COLLATE Latin1_General_CI_AS),--[intCompanyLocationId]
-				Salesperson.intEntitySalespersonId,--[intSalespersonId]
+				Salesperson.intEntitySalespersonId,--[intEntitySalespersonId]
 				NULL, -- [dtmShipDate]
 				0, --to do [intShipViaId]
 				agivc_po_no, --[strPONumber]
@@ -180,7 +180,7 @@ BEGIN
 					ON C.intShipToId = S.intEntityLocationId 													
 			WHERE
 				intInvoiceId > @maxInvoiceId
-				AND tblARInvoice.intCustomerId = C.intEntityCustomerId
+				AND tblARInvoice.intEntityCustomerId = C.intEntityCustomerId
 
 	END
 
