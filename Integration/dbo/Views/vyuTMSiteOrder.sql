@@ -39,7 +39,8 @@ BEGIN
 		,ISNULL(A.ysnActive,0) AS ysnActive
 		,ISNULL(A.ysnOnHold,0) AS ysnOnHold
 		,DATEADD(dd, DATEDIFF(dd, 0, A.dtmNextDeliveryDate), 0) AS dtmNextJulianDate
-		,CAST(ISNULL((SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = A.intSiteID),0) AS BIT) AS ysnPending
+		,CAST((CASE WHEN G.intDispatchID IS NULL THEN 0 ELSE 1 END) AS BIT) AS ysnPending
+		,intDispatchID AS intDispatchId
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
@@ -51,6 +52,8 @@ BEGIN
 		ON A.intDriverID = E.A4GLIdentity	
 	LEFT JOIN vwitmmst F
 		ON A.intProduct = F.A4GLIdentity
+	LEFT JOIN tblTMDispatch G
+		ON A.intSiteID = G.intSiteID
 	')	
 END	
 GO
