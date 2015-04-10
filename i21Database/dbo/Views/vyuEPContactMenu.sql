@@ -4,7 +4,7 @@ SELECT
 intUserSecurityMenuId = Permission.intEntityPortalPermissionId,
 intUserSecurityId = Contact.[intEntityId],    
 intMenuId = Menu.intEntityPortalMenuId,    
-intParentMenuId = (CASE WHEN Menu.intPortalParentMenuId = 0 THEN 0 ELSE (  
+intParentMenuId = ISNULL((CASE WHEN Menu.intPortalParentMenuId = 0 THEN 0 ELSE (  
      SELECT intEntityPortalPermissionId  
      FROM tblEntityPortalPermission  
      LEFT JOIN tblEntityToContact  ON tblEntityPortalPermission.intEntityToContactId = tblEntityToContact.intEntityToContactId       
@@ -13,7 +13,7 @@ intParentMenuId = (CASE WHEN Menu.intPortalParentMenuId = 0 THEN 0 ELSE (
   
        
      AND tblEntityPortalPermission.intEntityPortalMenuId = Menu.intPortalParentMenuId  
-     ) END),  
+     ) END), 0),  
 strMenuName = Menu.strPortalMenuName,    
 strModuleName = 'Customer Portal',    
 strIcon = (CASE WHEN Menu.strType = 'Folder' THEN 'small-folder' ELSE 'small-screen' END),    
