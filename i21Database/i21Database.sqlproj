@@ -1340,6 +1340,8 @@
     <Build Include="dbo\Tables\tblCFCardType.sql" />
     <Build Include="dbo\Tables\tblCFCard.sql" />
     <Build Include="dbo\Tables\tblCFAccount.sql" />
+    <Build Include="dbo\Tables\tblLGGenerateLoad.sql" />
+    <Build Include="dbo\Tables\tblLGLoadAllocationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
