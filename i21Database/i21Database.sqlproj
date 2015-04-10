@@ -1346,6 +1346,7 @@
     <Build Include="dbo\Tables\tblSMTaxGroupMaster.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupMasterGroup.sql" />
     <Build Include="dbo\Views\vyuEMEntityContact.sql" />
+    <Build Include="dbo\Views\vyuCFCustomerEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
