@@ -2744,6 +2744,22 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'Manufacturing.view.BlendProduction', intSort = 0
 			WHERE strMenuName = 'Blend Production' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId					
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bag Off' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Bag Off', 'Manufacturing', @ManufacturingActivityId, 'Bag Off', 'Screen', 'Manufacturing.view.BagOff', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Manufacturing.view.BagOff', intSort = 0
+			WHERE strMenuName = 'Bag Off' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId					
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Release To Warehouse' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Release To Warehouse', 'Manufacturing', @ManufacturingActivityId, 'Release To Warehouse', 'Screen', 'Manufacturing.view.ReleaseToWarehouse', 'small-screen', 0, 0, 0, 1, 0, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Manufacturing.view.ReleaseToWarehouse', intSort = 0
+			WHERE strMenuName = 'Release To Warehouse' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivityId					
 
 	/* ------------------------------------------------- */
 	/* -- Create Manufacturing Maintenance Menu -- */
@@ -2786,6 +2802,14 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'Inventory.view.PackType', intSort = 4
 			WHERE strMenuName = 'Pack Type' AND strModuleName = 'Inventory' AND intParentMenuID = @ManufacturingMaintenanceId
+			
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Machine' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Machine', 'Manufacturing', @ManufacturingMaintenanceId, 'Machine', 'Screen', 'Manufacturing.view.Machine', 'small-screen', 0, 0, 0, 1, 2, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Manufacturing.view.Machine', intSort = 2
+			WHERE strMenuName = 'Machine' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceId
 
 	/* --------------------------------------------------- */
 	/* -- End of Create Manufacturing Module Menu -- */
