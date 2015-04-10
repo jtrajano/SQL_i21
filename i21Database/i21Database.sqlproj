@@ -1345,6 +1345,7 @@
     <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxGroupMaster.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupMaster.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupMasterGroup.sql" />
+    <Build Include="dbo\Views\vyuEMEntityContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

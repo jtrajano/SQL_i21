@@ -16,13 +16,18 @@ pivot
 	for strType in (Vendor,Customer)
 )piv
 */
-SELECT a.intEntityId,
-			a.strName,
-			case when b.intEntityVendorId is null then 0 else 1 end Vendor,
-			case when c.intEntityCustomerId is null then 0 else 1 end Customer
-		FROM tblEntity a
-			left join tblAPVendor b
-				on a.intEntityId = b.intEntityVendorId
-			left join tblARCustomer c
-				on a.intEntityId = c.intEntityCustomerId
-	where (isnull(b.intEntityVendorId,0) + isnull(c.intEntityCustomerId,0) ) > 1
+SELECT 
+	a.intEntityId,  
+	a.strName,  
+	case when b.intEntityVendorId is null then 0 else 1 end Vendor,  
+	case when c.intEntityCustomerId is null then 0 else 1 end Customer ,  
+	case when d.intEntitySalespersonId is null then 0 else 1 end Salesperson 
+	
+FROM tblEntity a  
+	left join tblAPVendor b  
+		on a.intEntityId = b.intEntityVendorId  
+	left join tblARCustomer c  
+	    on a.intEntityId = c.intEntityCustomerId  
+	LEFT JOIN tblARSalesperson d
+		on a.intEntityId = d.intEntitySalespersonId
+ where (isnull(b.intEntityVendorId,0) + isnull(c.intEntityCustomerId,0) +  isnull(d.intEntitySalespersonId,0)) > 1
