@@ -148,9 +148,11 @@ BEGIN
 			EXEC uspSMGetStartingNumber 20, @billRecordId OUT
 
 		UPDATE A
-			SET A.strBillId = @billId
+			SET A.strBillId = @billRecordId
 		FROM tblAPBill A
 		WHERE A.intBillId = @billKey
+
+		SET @newBillId = @billRecordId
 
 		DELETE FROM #tmpInsertedBill
 		WHERE intBillId = @billKey
@@ -159,29 +161,5 @@ BEGIN
 	
 	ALTER TABLE tblAPBill
 	ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
-
-	----Create History
-	--INSERT INTO tblAPRecurringHistory(
-	--	[strTransactionId], 
-	--	[strTransactionCreated], 
-	--	[dtmDateProcessed], 
-	--	[strReference], 
-	--	[dtmNextProcess], 
-	--	[dtmLastProcess], 
-	--	[intTransactionType]
-	--)
-	--SELECT 
-	--	[strTransactionId]		= C.strBillId, 
-	--	[strTransactionCreated]	= B.strBillId, 
-	--	[dtmDateProcessed]		= GETDATE(), 
-	--	[strReference]			= D.strReference, 
-	--	[dtmNextProcess]		= D.dtmNextProcess, 
-	--	[dtmLastProcess]		= D.dtmLastProcess,
-	--	[intTransactionType]	= 1
-	--FROM @InsertedData A
-	--	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
-	--	INNER JOIN tblAPBill C ON B.strVendorOrderNumber = C.strVendorOrderNumber
-	--	INNER JOIN #tmpRecurringBill D ON C.intBillId = D.intTransactionId
-
 
 END
