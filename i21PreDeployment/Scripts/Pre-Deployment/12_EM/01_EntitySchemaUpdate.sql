@@ -122,7 +122,10 @@ BEGIN
 		exec('ALTER TABLE tblAPPayment DROP CONSTRAINT [' + @constraint +']' )
 	
 	
-
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARCustomerProductVersion' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer' 
+	if(@constraint <> '')
+		print('ALTER TABLE tblARCustomerProductVersion DROP CONSTRAINT [' + @constraint +']' )
 
 	print 'Adding tblEntityContact columns to tblEntity'
 	exec(N'	
@@ -574,5 +577,14 @@ BEGIN
 					join tblAPVendor b
 						on a.intVendorId =  b.intVendorId ')
 	END	
+	
+	print 'Update Linking of tblARCustomerProductVersion from customer id to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerProductVersion' AND [COLUMN_NAME] = 'intCustomerId') 
+	BEGIN
+		exec(N' update a set a.intCustomerId = b.intEntityId
+				from tblARCustomerProductVersion a
+					join tblARCustomer b
+						on a.intCustomerId =  b.intCustomerId ')
+	END			
 
 END
