@@ -1,14 +1,23 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRCreatePaycheckEntry]
-	@intPaycheckId INT
-	,@intUserId INT       
+	@strPaycheckId NVARCHAR(50)
+	,@intUserId INT
+	,@intEntityId INT     
 AS
 BEGIN
 
-DECLARE @intTransactionId INT
+DECLARE @intPaycheckId INT
+		,@intTransactionId INT
 		,@intEmployeeId INT
 		,@strTransactionId NVARCHAR(50) = ''
 
 --[insert validations here]--
+
+/* Get Paycheck Details */
+SELECT @intPaycheckId = intPaycheckId
+	  ,@intEmployeeId = intEmployeeId
+	  ,@strTransactionId = strPaycheckId
+FROM tblPRPaycheck 
+WHERE strPaycheckId = @strPaycheckId
 
 /* Insert Paycheck data into tblCMBankTransaction */
 INSERT INTO [dbo].[tblCMBankTransaction]
@@ -240,19 +249,15 @@ WHERE T.strPaidBy = 'Company'
   AND T.dblTotal > 0
   AND T.intPaycheckId = @intPaycheckId
 
-/* Get Employee Details */
-SELECT @intEmployeeId = intEmployeeId
-	  ,@strTransactionId = strPaycheckId 
-  FROM tblPRPaycheck 
-  WHERE intPaycheckId = @intTransactionId
-
 DECLARE @ysnPost BIT = 1
 		,@ysnRecap BIT = 0
 		,@isSuccessful BIT
 		,@message_id BIT
 
 /* Execute Bank Transaction Post Procedure */
-EXEC dbo.uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEmployeeId, @isSuccessful, @message_id
+EXEC dbo.uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId, @isSuccessful, @message_id
+
+UPDATE tblPRPaycheck SET ysnPosted = 1 WHERE strPaycheckId = @strTransactionId
 
 END
 GO
