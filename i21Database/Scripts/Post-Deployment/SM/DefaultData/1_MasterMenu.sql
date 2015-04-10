@@ -2792,3 +2792,20 @@ GO
 	/* --------------------------------------------------- */
 	
 GO
+	/* ---------------------------- */
+	/* -- Entity Management Menu -- */
+	/* ---------------------------- */
+
+	UPDATE tblSMMasterMenu
+	SET strCommand = 'EntityManagement.view.Entity:searchEntityVendor'
+	WHERE strMenuName = 'Vendors' AND strModuleName = 'Accounts Payable' AND strCommand = 'AccountsPayable.view.Vendor'
+	
+	UPDATE tblSMMasterMenu
+	SET strCommand = 'EntityManagement.view.Entity:searchEntityCustomer'
+	WHERE strMenuName = 'Customers' AND strModuleName = 'Accounts Receivable' AND strCommand = 'AccountsReceivable.view.Customer'
+
+	UPDATE tblSMMasterMenu
+	SET strCommand = 'EntityManagement.view.Entity:searchEntitySalesperson'
+	WHERE strMenuName = 'Salesperson' AND strModuleName = 'Accounts Receivable' AND strCommand = 'AccountsReceivable.view.Salesperson'
+
+GO
