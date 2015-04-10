@@ -1016,6 +1016,14 @@ Ext.define('Inventory.view.ItemViewController', {
             });
         }
 
+        var cepPricing = grdPricing.getPlugin('cepPricing');
+        if (cepPricing){
+            cepPricing.on({
+                validateedit: me.onEditPricing,
+                scope: me
+            });
+        }
+
         return win.context;
     },
 
@@ -1996,6 +2004,44 @@ Ext.define('Inventory.view.ItemViewController', {
                             context.record.set('dblUnitPrice', dblSalePrice - amountRate);
                         }
                     }
+                }
+            }
+        }
+    },
+
+    onEditPricing: function(editor, context, eOpts) {
+        if (context.field === 'strPricingMethod' || context.field === 'dblAmountPercent' || context.field === 'dblStandardCost') {
+            if (context.record) {
+                var win = context.grid.up('window');
+                var grdPricing = win.down('#grdPricing');
+                var pricingMethod = context.record.get('strPricingMethod');
+                var amount = context.record.get('dblAmountPercent');
+                var cost = context.record.get('dblStandardCost');
+
+                if (context.field === 'strPricingMethod') {
+                    pricingMethod = context.value;
+                }
+                else if (context.field === 'dblAmountPercent') {
+                    amount = context.value;
+                }
+                else if (context.field === 'dblStandardCost') {
+                    cost = context.value;
+                }
+
+                if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'None'){
+                    context.record.set('dblSalePrice', cost);
+                    context.record.set('dblAmountPercent', 0.00);
+                }
+                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Fixed Dollar Amount'){
+                    context.record.set('dblSalePrice', (cost + amount));
+                }
+                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Markup Standard Cost'){
+                    var markup = (cost * (amount / 100));
+                    context.record.set('dblSalePrice', (cost + markup));
+                }
+                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Percent of Margin'){
+                    var markup = (cost / (1 - (amount / 100)));
+                    context.record.set('dblSalePrice', markup);
                 }
             }
         }
