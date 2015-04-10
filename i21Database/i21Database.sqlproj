@@ -1304,6 +1304,9 @@
     <Build Include="dbo\Tables\tblRKFutOptTransaction.sql" />
     <Build Include="dbo\Tables\tblRKFutOptTransactionHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetOptionsMonthList.sql" />
+    <Build Include="dbo\uspICDuplicateItem.sql" />
+    <Build Include="dbo\fnICGetItemLocationIdFromDuplicateItem.sql" />
+    <Build Include="dbo\fnICGetItemUOMIdFromDuplicateItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
