@@ -25,6 +25,32 @@ BEGIN
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblHDTicket' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer' 
 	if(@constraint <> '')
 		exec('ALTER TABLE tblHDTicket DROP CONSTRAINT [' + @constraint +']' )
+
+	/*Add by Jayson for tblHDProject*/
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblHDProject' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer' 
+	if(@constraint <> '')
+		exec('ALTER TABLE tblHDProject DROP CONSTRAINT [' + @constraint +']' )
+		
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE OBJECT_NAME(parent_object_id) = 'tblHDProject' and OBJECT_NAME(referenced_object_id) = 'tblEntityContact' and name = 'FK_Project_Contact'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblHDProject DROP CONSTRAINT [' + @constraint +']' )
+		
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE OBJECT_NAME(parent_object_id) = 'tblHDProject' and OBJECT_NAME(referenced_object_id) = 'tblEntityContact' and name = 'FK_Project_CusProjMgr'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblHDProject DROP CONSTRAINT [' + @constraint +']' )
+		
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE OBJECT_NAME(parent_object_id) = 'tblHDProject' and OBJECT_NAME(referenced_object_id) = 'tblEntityContact' and name = 'FK_Project_CusLeadSponsor'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblHDProject DROP CONSTRAINT [' + @constraint +']' )
+		
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE OBJECT_NAME(parent_object_id) = 'tblHDProjectModule' and OBJECT_NAME(referenced_object_id) = 'tblEntityContact'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblHDProjectModule DROP CONSTRAINT [' + @constraint +']' )
 	
 	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARCustomerToContact' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer' 
