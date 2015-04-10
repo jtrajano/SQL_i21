@@ -2534,4 +2534,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntitySalespersonId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="02d6af22-29d2-464f-8d76-91a75d44e98a" ChangeDateTime="04/10/2015 19:51:55">
+    <Property Name="ElementName" Value="[dbo].[tblRKTradersbyBrokersAccountMapping].[intSalespersonId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKTradersbyBrokersAccountMapping]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntitySalespersonId" />
+  </Operation>
 </Operations>
