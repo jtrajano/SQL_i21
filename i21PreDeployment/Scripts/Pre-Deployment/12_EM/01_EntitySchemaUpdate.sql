@@ -115,7 +115,14 @@ BEGIN
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARPayment' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer'
 	if(@constraint <> '')
 		exec('ALTER TABLE tblARPayment DROP CONSTRAINT [' + @constraint +']' )	
+
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblAPPayment' and OBJECT_NAME(referenced_object_id) = 'tblAPVendor'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblAPPayment DROP CONSTRAINT [' + @constraint +']' )
 	
+	
+
 
 	print 'Adding tblEntityContact columns to tblEntity'
 	exec(N'	
@@ -435,6 +442,15 @@ BEGIN
 						  join tblAPVendor b 
 							on a.intVendorId = b.intVendorId')
 	 END
+
+	 print 'Update Linking of tblAPPayment intVendorId from intVendorId to entityid '
+	 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPPayment' AND [COLUMN_NAME] = 'intVendorId') 
+	 BEGIN
+		  exec(N' UPDATE a set a.intVendorId = b.intEntityId
+					 from tblAPPayment a 
+						  join tblAPVendor b 
+							on a.intVendorId = b.intVendorId')
+	END
 
 	print 'add locationid to tblEntityToContact'
 	exec(N'		
