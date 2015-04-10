@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web;
@@ -144,6 +145,31 @@ namespace iRely.Inventory.BRL
         public SaveResult Save(bool continueOnConflict)
         {
             return _db.Save(continueOnConflict);
+        }
+
+        public int? DuplicateItem(int intItemId)
+        {
+            int? newItemId = null;
+
+            using (SqlConnection conn = new SqlConnection(_db.ContextManager.Database.Connection.ConnectionString))
+            {
+                conn.Open();
+                using (SqlCommand command = new SqlCommand("uspICDuplicateItem", conn))
+                {
+                    command.Parameters.Add(new SqlParameter("@ItemId", intItemId));
+                    var outParam = new SqlParameter("@NewItemId", newItemId);
+                    outParam.Direction = System.Data.ParameterDirection.Output;
+                    outParam.DbType = System.Data.DbType.Int32;
+                    outParam.SqlDbType = System.Data.SqlDbType.Int;
+                    command.Parameters.Add(outParam);
+                    command.CommandType = System.Data.CommandType.StoredProcedure;
+                    command.ExecuteNonQuery();
+                    newItemId = (int)outParam.Value;
+                }
+                conn.Close();
+            }
+           
+            return newItemId;
         }
         
         public void Dispose()

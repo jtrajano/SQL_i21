@@ -143,6 +143,17 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
+        [HttpGet]
+        [ActionName("DuplicateItem")]
+        public HttpResponseMessage DuplicateItem(int ItemId)
+        {
+            var NewItemId = _ItemBRL.DuplicateItem(ItemId);
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                id = NewItemId
+            });
+        }
+
         [HttpPost]
         public HttpResponseMessage PostItems(IEnumerable<tblICItem> items, bool continueOnConflict = false)
         {

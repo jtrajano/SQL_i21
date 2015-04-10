@@ -2322,6 +2322,25 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onDuplicateClick: function(button) {
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            Ext.Ajax.request({
+                timeout: 120000,
+                url: '../Inventory/api/Item/DuplicateItem?ItemId=' + current.get('intItemId'),
+                method: 'GET',
+                success: function(response){
+                    var jsonData = Ext.decode(response.responseText);
+                    context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.id }]);
+                    context.configuration.paging.moveFirst();
+                }
+            });
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2461,6 +2480,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboCommodityLocation": {
                 select: this.onItemCommodityLocationSelect
+            },
+            "#btnDuplicate": {
+                click: this.onDuplicateClick
             }
         });
     }
