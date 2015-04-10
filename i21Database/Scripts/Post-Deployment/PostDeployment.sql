@@ -117,4 +117,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Version Update
 :r .\VersionUpdate.sql
 
+-- Entity Management
+:r .\EM\001_EMEntityPortalMenu.sql
+
 print 'END POST DEPLOYMENT'

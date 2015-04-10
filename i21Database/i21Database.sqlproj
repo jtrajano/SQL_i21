@@ -146,6 +146,7 @@
     <Folder Include="dbo\Triggers" />
     <Folder Include="Scripts\Post-Deployment\PR" />
     <Folder Include="Scripts\Post-Deployment\PR\DefaultData" />
+    <Folder Include="Scripts\Post-Deployment\EM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1393,6 +1394,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCompleteWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckEntry.sql" />
+    <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
