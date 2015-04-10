@@ -1391,6 +1391,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 pgeContract.tab.setHidden(true);
                 break;
 
+            case 'Software':
             case 'Non-Inventory':
                 pgeDetails.tab.setHidden(false);
                 pgeSetup.tab.setHidden(false);

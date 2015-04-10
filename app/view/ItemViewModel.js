@@ -69,6 +69,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                 },
                 {
                     strType: 'Service'
+                },
+                {
+                    strType: 'Software'
                 }
             ],
             fields: [
