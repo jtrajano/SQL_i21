@@ -5,7 +5,7 @@ CREATE FUNCTION [dbo].[fnCalculateCostPerLot] (
 	,@intLotUOMId AS INT
 	,@dblCostPerItemUOMId AS NUMERIC(38,20)
 )
-RETURNS NUMERIC(38,20)
+RETURNS FLOAT
 AS
 BEGIN 
 	DECLARE @CostPerWeightUOM AS FLOAT
@@ -26,10 +26,18 @@ BEGIN
 	END 
 
 	-- Formula to get the cost per Weight UOM
-	-- Cost / (	(Item UOM Unit Qty) / (Weight UOM Unit Qty) )
-	SET @CostPerWeightUOM = @dblCostPerItemUOMId / (@ItemUOMUnitQty / @WeightUOMUnitQty)
-
-	-- Formula to get the cost per Lot UOM
-	-- (Cost Per Weight UOM) / (Weight UOM Unit Qty) * (Lot UOM Unit Qty)
-	RETURN @CostPerWeightUOM / @WeightUOMUnitQty * @LotUOMUnitQty 
+	-- Let: 
+	-- A = Cost per Weight UOM
+	-- B = Cost per Lot UOM
+	--
+	-- Calculation: 
+	-- A = Cost / (	(Item UOM Unit Qty) / (Weight UOM Unit Qty) )
+	-- B = A / (Weight UOM Unit Qty) * (Lot UOM Unit Qty)
+	RETURN (
+		(
+			@dblCostPerItemUOMId / (@ItemUOMUnitQty / @WeightUOMUnitQty)
+		)
+		/ @WeightUOMUnitQty
+		* @LotUOMUnitQty
+	)
 END

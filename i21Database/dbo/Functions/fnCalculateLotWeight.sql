@@ -17,10 +17,10 @@ BEGIN
 						ISNULL(@dblLotWeight, 0) + @dblCostingQty
 					ELSE 
 						-- @dblCostingQty is in Lot UOM. Need to convert the Qty into weight value. 
-						CAST(ISNULL(@dblLotWeight, 0) AS FLOAT) 
+						ISNULL(@dblLotWeight, 0) 
 						+ ( 
-							CAST(@dblCostingQty AS FLOAT) 
-							* CAST(ISNULL(@dblLotWeightPerQty, 0) AS FLOAT)
+							@dblCostingQty 
+							* ISNULL(@dblLotWeightPerQty, 0)
 						) 
 			END
 END
