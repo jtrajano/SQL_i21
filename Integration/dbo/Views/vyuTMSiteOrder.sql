@@ -41,6 +41,9 @@ BEGIN
 		,DATEADD(dd, DATEDIFF(dd, 0, A.dtmNextDeliveryDate), 0) AS dtmNextJulianDate
 		,CAST((CASE WHEN G.intDispatchID IS NULL THEN 0 ELSE 1 END) AS BIT) AS ysnPending
 		,intDispatchID AS intDispatchId
+		,F.vwitm_class AS strItemClass
+		,A.intProduct AS intProductId
+		,A.intDeliveryTermID
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
