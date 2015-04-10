@@ -1488,8 +1488,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
-            current.set('intDecimalDisplay', records[0].get('intDecimalDisplay'));
-            current.set('intDecimalCalculation', records[0].get('intDecimalCalculation'));
             current.set('ysnAllowPurchase', true);
             current.set('ysnAllowSale', true);
             current.set('tblICUnitMeasure', records[0]);

@@ -419,18 +419,6 @@ Ext.define('Inventory.view.Category', {
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
                                                                     flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intDecimalCalculation',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Decimal Places for Calculation',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intDecimalDisplay',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Decimal Places for Display',
-                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboDetailUnitMeasure',
@@ -528,18 +516,6 @@ Ext.define('Inventory.view.Category', {
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
                                                                     flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intDecimalCalculation',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Decimal Places for Calculation',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intDecimalDisplay',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Decimal Places for Display',
-                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboDetailWeightUOM',
@@ -613,18 +589,6 @@ Ext.define('Inventory.view.Category', {
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
                                                                     flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intDecimalCalculation',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Decimal Places for Calculation',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intDecimalDisplay',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Decimal Places for Display',
-                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboDetailDimensionUOM',
@@ -672,18 +636,6 @@ Ext.define('Inventory.view.Category', {
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
                                                                     flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intDecimalCalculation',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Decimal Places for Calculation',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intDecimalDisplay',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Decimal Places for Display',
-                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboDetailVolumeUOM',

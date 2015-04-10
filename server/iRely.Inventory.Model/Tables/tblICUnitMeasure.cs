@@ -16,8 +16,6 @@ namespace iRely.Inventory.Model
         public string strUnitMeasure { get; set; }
         public string strSymbol { get; set; }
         public string strUnitType { get; set; }
-        public int intDecimalDisplay { get; set; }
-        public int intDecimalCalculation { get; set; }
 
         public ICollection<tblICUnitMeasureConversion> tblICUnitMeasureConversions { get; set; }
 

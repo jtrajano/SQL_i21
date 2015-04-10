@@ -59,9 +59,7 @@ Ext.define('Inventory.model.ItemUOM', {
         { name: 'intVolumeUOMId', type: 'int', allowNull: true },
         { name: 'dblMaxQty', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },
-        { name: 'strUnitMeasure', type: 'string'},
-        { name: 'intDecimalCalculation', type: 'int'},
-        { name: 'intDecimalDisplay', type: 'int'}
+        { name: 'strUnitMeasure', type: 'string'}
     ],
 
     validators: [

@@ -68,38 +68,6 @@ namespace iRely.Inventory.Model
                 _unitType = value;
             }
         }
-        private int _calculation;
-        [NotMapped]
-        public int intDecimalCalculation
-        {
-            get
-            {
-                if (tblICUnitMeasure != null)
-                    return tblICUnitMeasure.intDecimalCalculation;
-                else
-                    return 2;
-            }
-            set
-            {
-                _calculation = value;
-            }
-        }
-        private int _display;
-        [NotMapped]
-        public int intDecimalDisplay
-        {
-            get
-            {
-                if (tblICUnitMeasure != null)
-                    return tblICUnitMeasure.intDecimalDisplay;
-                else
-                    return 2;
-            }
-            set
-            {
-                _display = value;
-            }
-        }
         private string _weightUOM;
         [NotMapped]
         public string strWeightUOM

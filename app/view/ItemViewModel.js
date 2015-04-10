@@ -624,12 +624,6 @@ Ext.define('Inventory.view.ItemViewModel', {
     },
 
     formulas: {
-        formatUOMDisplayDecimal: function (get) {
-            return i21.ModuleMgr.Inventory.createNumberFormat(get('current.intDecimalDisplay'));
-        },
-        formatUOMCalculationDecimal: function (get) {
-            return i21.ModuleMgr.Inventory.createNumberFormat(get('current.intDecimalCalculation'));
-        },
         checkLotTracking: function (get) {
             if (get('current.strLotTracking') === 'No') {
                 this.data.current.set('strInventoryTracking', 'Item Level');

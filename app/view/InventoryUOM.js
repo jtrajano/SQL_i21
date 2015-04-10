@@ -22,10 +22,10 @@ Ext.define('Inventory.view.InventoryUOM', {
         'Ext.form.Panel',
         'Ext.button.Button',
         'Ext.toolbar.Separator',
-        'Ext.form.field.Number',
         'Ext.form.field.ComboBox',
         'Ext.grid.Panel',
         'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
@@ -171,49 +171,14 @@ Ext.define('Inventory.view.InventoryUOM', {
                                         labelWidth: 80
                                     },
                                     {
-                                        xtype: 'numberfield',
-                                        flex: 1.2,
-                                        itemId: 'txtDecimalPlacesToDisplay',
-                                        margin: '0 0 0 5',
-                                        fieldLabel: 'Decimal Places to Display',
-                                        labelWidth: 180,
-                                        hideTrigger: true,
-                                        allowDecimals: false,
-                                        allowExponential: false,
-                                        maxValue: 6,
-                                        minValue: 0
-                                    }
-                                ]
-                            },
-                            {
-                                xtype: 'container',
-                                margin: '0 0 5 0',
-                                layout: {
-                                    type: 'hbox',
-                                    align: 'stretch'
-                                },
-                                items: [
-                                    {
                                         xtype: 'combobox',
                                         flex: 1,
                                         itemId: 'cboUnitType',
+                                        margin: '0 0 0 5',
                                         fieldLabel: 'Unit Type',
                                         labelWidth: 80,
                                         displayField: 'strDescription',
                                         valueField: 'strDescription'
-                                    },
-                                    {
-                                        xtype: 'numberfield',
-                                        flex: 1.2,
-                                        itemId: 'txtDecimalPlacesForCalculation',
-                                        margin: '0 0 0 5',
-                                        fieldLabel: 'Decimal Places for Calculation',
-                                        labelWidth: 180,
-                                        hideTrigger: true,
-                                        allowDecimals: false,
-                                        allowExponential: false,
-                                        maxValue: 6,
-                                        minValue: 0
                                     }
                                 ]
                             },
@@ -276,18 +241,6 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                     dataType: 'string',
                                                     text: 'Unit Type',
                                                     flex: 1
-                                                },
-                                                {
-                                                    dataIndex: 'intDecimalCalculation',
-                                                    dataType: 'numeric',
-                                                    text: 'Decimal Places for Calculation',
-                                                    hidden: true
-                                                },
-                                                {
-                                                    dataIndex: 'intDecimalDisplay',
-                                                    dataType: 'numeric',
-                                                    text: 'Decimal Places for Display',
-                                                    hidden: true
                                                 }
                                             ],
                                             itemId: 'cboStockUom',
