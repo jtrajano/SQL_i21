@@ -1,5 +1,4 @@
-﻿
--- This function returns the weight per uom 
+﻿-- This function returns the weight per uom 
 CREATE FUNCTION [dbo].[fnCalculateWeightUnitQty] (
 	@dblQty AS NUMERIC(18,6)
 	,@dblTotalWeight AS NUMERIC(38,20)
@@ -7,10 +6,11 @@ CREATE FUNCTION [dbo].[fnCalculateWeightUnitQty] (
 RETURNS NUMERIC(38,20)
 AS
 BEGIN 
-	-- formula is Total Weight / Qty
-	-- If qty is zero, return zero. 
+	-- The formula is Total Weight / Qty
+	-- If Qty is zero or null, return zero. 
 	RETURN CASE		WHEN ISNULL(@dblQty, 0) = 0 THEN 
 						0 
-					ELSE CAST(ISNULL(@dblTotalWeight, 0) AS FLOAT) / CAST(@dblQty AS FLOAT)
+					ELSE
+						ISNULL(@dblTotalWeight, 0.00) / @dblQty
 			END 
 END

@@ -15,18 +15,17 @@ BEGIN
 	RETURN	CASE	WHEN @intLotItemUOMId = @intCostingItemUOMId THEN 
 						-- @dblCostingQty is in Lot UOM. 
 						ISNULL(@dblLotQty, 0) 
-						+ @dblCostingQty 
+						+ ISNULL(@dblCostingQty, 0)
 					ELSE 
 						-- @dblCostingQty is in Weight. Since it is a weight, need to convert it into Qty. 						
 						CASE	WHEN ISNULL(@dblLotWeightPerQty, 0) = 0 THEN 
-									ISNULL(@dblLotQty, 0) 
+									@dblLotQty
 								ELSE 
 									(
-										CAST(@dblLotWeight AS FLOAT)
-										+ CAST(@dblCostingQty AS FLOAT) 
+										ISNULL(@dblLotWeight, 0)
+										+ ISNULL(@dblCostingQty, 0)
 									) 
-									/ CAST(@dblLotWeightPerQty AS FLOAT) 
-
+									/ @dblLotWeightPerQty 
 						END 
 			END
 END

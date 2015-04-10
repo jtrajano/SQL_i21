@@ -198,7 +198,7 @@ BEGIN
 						CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
 									CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
 											WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
-												dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intUnitMeasureId, DetailItemLot.dblQuantity)
+												dbo.fnCalculateQtyBetweenUOM(ISNULL(DetailItemLot.intItemUnitMeasureId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItemLot.dblQuantity)
 											
 											-- The item has a weight UOM. 
 											ELSE 

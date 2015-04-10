@@ -15,8 +15,8 @@ BEGIN
 			,@intLotUOMId AS INT = @WetGrains_10LbBag
 			,@dblCostPerItemUOMId AS NUMERIC(18,6) = 13.35
 
-	DECLARE @result AS NUMERIC(38,20)
-	DECLARE @expected AS NUMERIC(38,20) = 60.55465340965790200000
+	DECLARE @result AS FLOAT
+	DECLARE @expected AS FLOAT = 60.554653409657902
 
 	-- Act
 	SELECT @result = dbo.fnCalculateCostPerLot(
