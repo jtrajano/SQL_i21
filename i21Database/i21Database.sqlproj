@@ -1348,6 +1348,8 @@
     <Build Include="dbo\Tables\tblSMTaxGroupMasterGroup.sql" />
     <Build Include="dbo\Views\vyuEMEntityContact.sql" />
     <Build Include="dbo\Views\vyuCFCustomerEntity.sql" />
+    <Build Include="dbo\Tables\tblRKMatchFuturesPSHeader.sql" />
+    <Build Include="dbo\Tables\tblRKMatchFuturesPSDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
