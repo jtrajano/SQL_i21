@@ -1342,6 +1342,9 @@
     <Build Include="dbo\Tables\tblCFAccount.sql" />
     <Build Include="dbo\Tables\tblLGGenerateLoad.sql" />
     <Build Include="dbo\Tables\tblLGLoadAllocationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxGroupMaster.sql" />
+    <Build Include="dbo\Tables\tblSMTaxGroupMaster.sql" />
+    <Build Include="dbo\Tables\tblSMTaxGroupMasterGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
