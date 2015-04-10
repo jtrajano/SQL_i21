@@ -6,7 +6,7 @@ BEGIN
 	delete tblEntityPortalPermission
 	delete tblEntityPortalMenu
 
-	DBCC CHECKIDENT (''tblEntityPortalMenu'', RESEED, 0);
+	DBCC CHECKIDENT (''tblEntityPortalMenu'', RESEED, 1);
 	insert into tblEntityPortalMenu(strPortalMenuName,intPortalParentMenuId,strType,strCommand)
 	select ''Help Desk'',0,''Folder'',null
 
