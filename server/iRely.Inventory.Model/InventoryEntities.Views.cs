@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsd107e074b7301d1ff027355f3658a75cb14167c6b6692722842fb592bd564d13))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsad748de2873e412b1e15c71fb591d114c00bab8d8cc1d3974216262ebf856de9))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsd107e074b7301d1ff027355f3658a75cb14167c6b6692722842fb592bd564d13 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsad748de2873e412b1e15c71fb591d114c00bab8d8cc1d3974216262ebf856de9 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "d107e074b7301d1ff027355f3658a75cb14167c6b6692722842fb592bd564d13"; }
+            get { return "ad748de2873e412b1e15c71fb591d114c00bab8d8cc1d3974216262ebf856de9"; }
         }
 
         /// <summary>
@@ -1708,15 +1708,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICUnitMeasure
-        [CodeFirstDatabaseSchema.tblICUnitMeasure](T1.tblICUnitMeasure_intUnitMeasureId, T1.tblICUnitMeasure_strUnitMeasure, T1.tblICUnitMeasure_strSymbol, T1.tblICUnitMeasure_strUnitType, T1.tblICUnitMeasure_intDecimalDisplay, T1.tblICUnitMeasure_intDecimalCalculation, T1.tblICUnitMeasure_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICUnitMeasure](T1.tblICUnitMeasure_intUnitMeasureId, T1.tblICUnitMeasure_strUnitMeasure, T1.tblICUnitMeasure_strSymbol, T1.tblICUnitMeasure_strUnitType, T1.tblICUnitMeasure_intConcurrencyId)
     FROM (
         SELECT 
             T.intUnitMeasureId AS tblICUnitMeasure_intUnitMeasureId, 
             T.strUnitMeasure AS tblICUnitMeasure_strUnitMeasure, 
             T.strSymbol AS tblICUnitMeasure_strSymbol, 
             T.strUnitType AS tblICUnitMeasure_strUnitType, 
-            T.intDecimalDisplay AS tblICUnitMeasure_intDecimalDisplay, 
-            T.intDecimalCalculation AS tblICUnitMeasure_intDecimalCalculation, 
             T.intConcurrencyId AS tblICUnitMeasure_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICUnitMeasures AS T
@@ -4334,15 +4332,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICUnitMeasures
-        [iRely.Inventory.Model.tblICUnitMeasure](T1.tblICUnitMeasure_intUnitMeasureId, T1.tblICUnitMeasure_strUnitMeasure, T1.tblICUnitMeasure_strSymbol, T1.tblICUnitMeasure_strUnitType, T1.tblICUnitMeasure_intDecimalDisplay, T1.tblICUnitMeasure_intDecimalCalculation, T1.tblICUnitMeasure_intConcurrencyId)
+        [iRely.Inventory.Model.tblICUnitMeasure](T1.tblICUnitMeasure_intUnitMeasureId, T1.tblICUnitMeasure_strUnitMeasure, T1.tblICUnitMeasure_strSymbol, T1.tblICUnitMeasure_strUnitType, T1.tblICUnitMeasure_intConcurrencyId)
     FROM (
         SELECT 
             T.intUnitMeasureId AS tblICUnitMeasure_intUnitMeasureId, 
             T.strUnitMeasure AS tblICUnitMeasure_strUnitMeasure, 
             T.strSymbol AS tblICUnitMeasure_strSymbol, 
             T.strUnitType AS tblICUnitMeasure_strUnitType, 
-            T.intDecimalDisplay AS tblICUnitMeasure_intDecimalDisplay, 
-            T.intDecimalCalculation AS tblICUnitMeasure_intDecimalCalculation, 
             T.intConcurrencyId AS tblICUnitMeasure_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICUnitMeasure AS T
