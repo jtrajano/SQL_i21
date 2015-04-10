@@ -115,7 +115,7 @@ BEGIN
 					, CAST(0 as bit) [blnChk]
 					FROM dbo.tblARInvoice I
 					JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = I.intCompanyLocationId			
-					WHERE I.intCustomerId = @intCustomerId AND strTransactionType in (''I'', ''C'', ''Invoice'', ''Credit Memo'')
+					WHERE I.intEntityCustomerId = @intCustomerId AND strTransactionType in (''I'', ''C'', ''Invoice'', ''Credit Memo'')
 					AND strInvoiceNumber Not In (Select strInvoiceNo From dbo.tblNRNoteTransaction Where intNoteTransTypeId = 1)
 				) x WHERE x.dblAmount <> 0
 			END

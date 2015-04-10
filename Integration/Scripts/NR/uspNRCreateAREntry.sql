@@ -170,7 +170,7 @@ BEGIN
 				
 			
 				INSERT INTO [dbo].[tblARPayment]
-				   ([intCustomerId]			   ,[intCurrencyId]			   ,[dtmDatePaid]			   ,[intAccountId]
+				   ([intEntityCustomerId]			   ,[intCurrencyId]			   ,[dtmDatePaid]			   ,[intAccountId]
 				   ,[intPaymentMethodId]	   ,[intLocationId]			   ,[dblAmountPaid]			   ,[dblUnappliedAmount]
 				   ,[dblOverpayment]		   ,[dblBalance]			   ,[strRecordNumber]		   ,[strPaymentInfo]
 				   ,[strNotes]				   ,[ysnPosted]				   ,[intEntityId]				   ,[intConcurrencyId])
