@@ -121,6 +121,8 @@
 :r "..\Scripts\AP\FixBillData.sql"
 --:r "..\Scripts\AP\UpdateBillPONumber.sql"
 
+
+
 -- TAX FORMS
 :r ..\dbo\Views\vyuTFTaxCycle.sql
 
@@ -136,3 +138,7 @@
 :r "..\dbo\Stored Procedures\uspARImportTerm.sql"
 :r "..\dbo\Stored Procedures\uspARSyncTerms.sql"
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
+
+
+
+
