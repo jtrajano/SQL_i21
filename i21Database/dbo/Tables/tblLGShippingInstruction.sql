@@ -73,5 +73,7 @@ CONSTRAINT [FK_tblLGShippingInstruction_tblEntity_intForwardingAgentEntityId_int
 CONSTRAINT [FK_tblLGShippingInstruction_tblSMCurrency_intDemurrageCurrencyId_intCurrencyID] FOREIGN KEY ([intDemurrageCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 CONSTRAINT [FK_tblLGShippingInstruction_tblSMCurrency_intDespatchCurrencyId_intCurrencyID] FOREIGN KEY ([intDespatchCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 CONSTRAINT [FK_tblLGShippingInstruction_tblICUnitMeasure_intLoadingUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intLoadingUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-CONSTRAINT [FK_tblLGShippingInstruction_tblICUnitMeasure_intDischargeUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intDischargeUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+CONSTRAINT [FK_tblLGShippingInstruction_tblICUnitMeasure_intDischargeUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intDischargeUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+
+CONSTRAINT [UK_tblLGShippingInstruction_intReferenceNumber] UNIQUE ([intReferenceNumber])
 )

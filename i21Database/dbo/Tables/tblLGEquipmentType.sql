@@ -4,5 +4,6 @@
  [intConcurrencyId] INT NOT NULL, 
  [strEquipmentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
  
- CONSTRAINT [PK_tblLGEquipmentType_intEquipmentTypeId] PRIMARY KEY ([intEquipmentTypeId])
+ CONSTRAINT [PK_tblLGEquipmentType_intEquipmentTypeId] PRIMARY KEY ([intEquipmentTypeId]),
+ CONSTRAINT [UK_tblLGEquipmentType_strEquipmentType] UNIQUE ([strEquipmentType])
 )
