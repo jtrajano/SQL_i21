@@ -10,7 +10,6 @@ SELECT
 	,L.strLocationName 
 	,G.intTaxGroupId
 	,G.strTaxGroup 
-	,TG.ysnSeparateOnInvoice
 	,TC.intTaxCodeId
 	,TC.strTaxCode
 	,TC.intSalesTaxAccountId  

@@ -1350,6 +1350,7 @@
     <Build Include="dbo\Views\vyuCFCustomerEntity.sql" />
     <Build Include="dbo\Tables\tblRKMatchFuturesPSHeader.sql" />
     <Build Include="dbo\Tables\tblRKMatchFuturesPSDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
