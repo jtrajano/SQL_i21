@@ -249,5 +249,6 @@
     </None>
     <None Include="dbo\Views\vyuTMConsumptionSiteSearch.sql" />
     <None Include="dbo\Stored Procedures\uspGLBuildAccountTemporary.sql" />
+    <None Include="dbo\Stored Procedures\uspTMImportTankMonitorReading.sql" />
   </ItemGroup>
 </Project>
