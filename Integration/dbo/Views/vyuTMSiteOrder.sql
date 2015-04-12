@@ -44,6 +44,7 @@ BEGIN
 		,F.vwitm_class AS strItemClass
 		,A.intProduct AS intProductId
 		,A.intDeliveryTermID
+		,ISNULL(G.ysnDispatched,0) AS ysnDispatched
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
