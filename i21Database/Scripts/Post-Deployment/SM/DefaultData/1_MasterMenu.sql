@@ -1914,6 +1914,17 @@ GO
 		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
 		VALUES ('Clock Reading History', 'Tank Management', @TankManagementMaintenanceId, 'Clock Reading History', 'Screen', 'TankManagement.view.ClockReadingHistory', 'small-screen', 0, 0, 0, 1, NULL, 1)
 
+		/* ------------------------------------- */
+		/* -- Tank Management Activities Menu -- */
+		/* ------------------------------------- */
+
+		DECLARE @TankManagementActivitiesId INT
+		SELECT @TankManagementActivitiesId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementModuleId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Generate Orders' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementActivitiesId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Generate Orders', 'Tank Management', @TankManagementActivitiesId, 'Generate Orders', 'Screen', 'TankManagement.view.GenerateOrder', 'small-screen', 0, 0, 0, 1, NULL, 1)
+
 	/* --------------------------------- */
 	/* -- Tank Management Module Menu -- */
 	/* --------------------------------- */
