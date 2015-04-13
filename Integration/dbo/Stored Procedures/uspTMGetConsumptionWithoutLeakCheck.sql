@@ -44,9 +44,8 @@ BEGIN
 --</parameter>
 --</filterinfo>'
 	--DECLARE @xmlParam NVARCHAR(MAX)
-	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam />'
 	--set @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam><filters><filter><fieldname>strLocation</fieldname><condition>Between</condition><from></from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>dtmDate</fieldname><condition>Between</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>Date</datatype></filter><filter><fieldname>strCustomerStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strSiteStatus</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strOwnership</fieldname><condition>Equal To</condition><from /><to /><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter><filter><fieldname>strTankType</fieldname><condition>Equal To</condition><from>D</from><to></to><join>And</join><begingroup>0</begingroup><endgroup>0</endgroup><datatype>String</datatype></filter></filters></xmlparam>'
-	 
+	
 	SET NOCOUNT ON;
 	IF (ISNULL(@xmlParam,'') = '')
 	BEGIN 
@@ -160,13 +159,13 @@ BEGIN
 		   ,@ToTankOwnership = [to]
 		  ,@TankOwnershipCondition = condition
 	FROM @temp_params where [fieldname] = 'strOwnership'
-	
+
 	--Tank Type
 	SELECT @FromTankType = [from]
 		   ,@ToTankType = [to]
 		  ,@TankTypeCondition = condition
 	FROM @temp_params where [fieldname] = 'strTankType'
-
+	
 	--*****************BEGIN For intTotalTanks subquery WHERE CLAUSE
 	---Site Status
 	IF (ISNULL(@FromSiteStatus,'') != '')
@@ -219,7 +218,7 @@ BEGIN
          IF(@LocationCondition = 'Equal To' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND Z.strLocation = ''' + @FromLocation + '''' END
 		 
 	END
-	
+
 	---Tank Type
 	IF (ISNULL(@FromTankType,'') != '')
 	BEGIN 
@@ -232,7 +231,7 @@ BEGIN
          IF(@TankTypeCondition = 'Equal To' ) BEGIN SET @WhereClause1 = @WhereClause1 + ' AND T.strTankType = ''' + @FromTankType + '''' END
 		 
 	END
-
+	
 	----Date
 	--IF (ISNULL(@FromDate,'') != '')
 	--BEGIN 
@@ -319,7 +318,7 @@ BEGIN
          IF(@DateCondition = 'Custom' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND (dtmDate BETWEEN ''' + @FromDate + ''' AND ''' +  @ToDate + ''')'END
          IF(@DateCondition = 'Equal To' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND dtmDate = ''' + @FromDate + '''' END
 	END
-	
+
 	--Tank Type
 	IF (ISNULL(@FromTankType,'') != '')
 	BEGIN 
@@ -332,7 +331,7 @@ BEGIN
          IF(@TankTypeCondition = 'Equal To' ) BEGIN SET @WhereClause2 = @WhereClause2 + ' AND strTankType = ''' + @FromTankType + '''' END
 		 
 	END
-
+	
 	--***************************************** END For Main Query WHERE CLAUSE
 
 ---*******************BEGIN Get the GrandTotalTanks
@@ -377,16 +376,16 @@ SET @GrandTotalWithCheckQuery =
 				V.ysnAppliance = 0
 				AND V.intInventoryStatusTypeId = (SELECT TOP 1 intInventoryStatusTypeId FROM tblTMInventoryStatusType WHERE strInventoryStatusType = ''Out'' AND ysnDefault = 1) 
 				AND U.strDeviceType = ''Tank''
-				AND (EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE tblTMEvent.intDeviceId = V.intDeviceId AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-004'' AND ysnDefault = 1)))  
+				AND (EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE ISNULL(tblTMEvent.intSiteID,-1) = Z.intSiteID AND tblTMEvent.intEventTypeID = (SELECT intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-004'' AND ysnDefault = 1)))  
 				' + ISNULL(@WhereClause1,'') 
 
 EXEC(@GrandTotalWithCheckQuery)	
 
 SET @intGrandTotalWithCheck = (SELECT TOP 1 intGrandTotalWithCheck FROM #tmpGrandTotalWithCheck)
-print 'intGrandTotalWithCheck' 
-print @intGrandTotalWithCheck
 
 ---*******************END  Get the GrandTotal With Check
+print 'intGrandTotalWithCheck' 
+print @intGrandTotalWithCheck
 
 IF (@intGrandTotalTanks = 0)
 BEGIN 
@@ -535,8 +534,6 @@ where	ysnHasLeakGasCheck = 0 '
 	EXEC(@Query)
 	
 END
-
-
 GO
 PRINT 'END OF CREATING [uspTMGetConsumptionWithoutLeakCheck] SP'
 GO
