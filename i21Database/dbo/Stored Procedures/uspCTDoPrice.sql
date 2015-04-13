@@ -69,7 +69,7 @@ BEGIN TRY
 				WHERE intContractDetailId = @ContractDetailId
 			)
 	
-	IF	(ISNULL(@Futures,0) > 0 AND ISNULL(@Basis,0) > 0)
+	IF	@Futures IS NOT NULL AND @Basis IS NOT NULL
 		SET @intPricingType = 1
 	ELSE IF	(@Futures IS NULL)
 		SET @intPricingType = 2
