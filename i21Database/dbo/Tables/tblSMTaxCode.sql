@@ -2,7 +2,7 @@
 (
     [intTaxCodeId]			INT				NOT NULL PRIMARY KEY IDENTITY, 
     [strTaxCode]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL, 
-    [intTaxTypeId]          INT				NULL, 
+    [intTaxClassId]         INT				NULL, 
     [strDescription]        NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL, 
     [strCalculationMethod]	NVARCHAR(15)	COLLATE Latin1_General_CI_AS NULL, 
     [numRate]				NUMERIC(18, 6)	NULL, 
@@ -12,12 +12,12 @@
     [strState]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS NOT NULL,
     [strCity]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS NOT NULL,
     [strCountry]			NVARCHAR (25)	COLLATE Latin1_General_CI_AS NOT NULL,
-    [intSalesTaxAccountId]		INT				NULL, 
+	[strCounty]				NVARCHAR (25)	COLLATE Latin1_General_CI_AS NULL,
+	[intSalesTaxAccountId]		INT				NULL, 
     [intPurchaseTaxAccountId] INT			NULL, 
-    [ysnTaxable]			BIT				NOT NULL	DEFAULT 0, 
-    [ysnSeparateOnInvoice]	BIT				NOT NULL	DEFAULT 0, 
+    [strTaxableByOtherTaxes] NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]		INT				NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_tblSMTaxCode_tblSMTaxType] FOREIGN KEY (intTaxTypeId) REFERENCES tblSMTaxType(intTaxTypeId),
+    CONSTRAINT [FK_tblSMTaxCode_tblSMTaxClass] FOREIGN KEY ([intTaxClassId]) REFERENCES tblSMTaxClass(intTaxClassId),
     CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_salesTax] FOREIGN KEY ([intSalesTaxAccountId]) REFERENCES tblGLAccount(intAccountId),
     CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_purchaseTax] FOREIGN KEY ([intPurchaseTaxAccountId]) REFERENCES tblGLAccount(intAccountId)
 )
