@@ -26,6 +26,7 @@
     [strCancelDispatchMessage] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intDeliveryTermID]        INT             NULL,
     [dtmDispatchingDate]       DATETIME        NULL,
+    [strWillCallStatus] NVARCHAR(10) NOT NULL DEFAULT ('Generated'), 
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -274,3 +275,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDispatch',
     @level2type = N'COLUMN',
     @level2name = N'dtmDispatchingDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Status for Orders/Will Call',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'strWillCallStatus'

@@ -111,6 +111,9 @@
 :r "..\dbo\Views\vyuTMOriginDegreeOption.sql"
 :r "..\Scripts\TM\Customer.sql"
 :r "..\dbo\Views\vyuTMConsumptionSiteSearch.sql"
+:r "..\dbo\Views\vyuTMSiteOrder.sql"
+:r "..\dbo\Functions\fnTMGetContractPriceForCustomer.sql"
+:r "..\dbo\Functions\fnTMGetSpecialPricing.sql"
 
 --:r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
