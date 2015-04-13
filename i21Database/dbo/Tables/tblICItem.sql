@@ -48,7 +48,8 @@ Type the overview for the table here.
 		[strMask2] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strMask3] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intPatronageCategoryId] INT NULL, 
-		[intTaxClassId] INT NULL, 
+		[intFuelTaxClassId] INT NULL, 
+		[intTaxGroupId] INT NULL,
 		[ysnStockedItem] BIT NULL DEFAULT ((0)), 
 		[ysnDyedFuel] BIT NULL DEFAULT ((0)), 
 		[strBarcodePrint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -77,8 +78,7 @@ Type the overview for the table here.
 		[ysnHazardMaterial] BIT NULL DEFAULT ((0)), 
 		[ysnMaterialFee] BIT NULL DEFAULT ((0)), 
 		[ysnAutoBlend] BIT NULL DEFAULT ((0)),
-		[ysnEnableHelpDesk] BIT NULL DEFAULT ((0)),
-		[ysnUserGroupFee] BIT NULL DEFAULT ((0)),
+		[dblUserGroupFee] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[strNACSCategory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strWICCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intAGCategory] INT NULL, 
@@ -113,12 +113,13 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [FK_tblICItem_tblICPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICPackType]([intPackTypeId]), 
 		CONSTRAINT [FK_tblICItem_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]), 
-		CONSTRAINT [FK_tblICItem_tblICFuelTaxClass] FOREIGN KEY ([intTaxClassId]) REFERENCES [tblICFuelTaxClass]([intFuelTaxClassId]), 
+		CONSTRAINT [FK_tblICItem_tblICFuelTaxClass] FOREIGN KEY ([intFuelTaxClassId]) REFERENCES [tblICFuelTaxClass]([intFuelTaxClassId]), 
 		CONSTRAINT [FK_tblICItem_tblICRinFuelCategory] FOREIGN KEY ([intRINFuelTypeId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]), 
 		CONSTRAINT [FK_tblICItem_MedicationTag] FOREIGN KEY ([intMedicationTag]) REFERENCES [tblICTag]([intTagId]),
 		CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
 		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
-		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId])  
+		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
+		CONSTRAINT [FK_tblICItem_tblSMTaxGroupMaster] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId])  
 	);
 	GO
 
@@ -149,15 +150,6 @@ Type the overview for the table here.
 		@level1name = N'tblICItem',
 		@level2type = N'COLUMN',
 		@level2name = N'intPatronageCategoryId'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Tax Class Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItem',
-		@level2type = N'COLUMN',
-		@level2name = N'intTaxClassId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Stocked Item',
@@ -895,15 +887,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'ysnAutoBlend'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Enable HelpDesk',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItem',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnEnableHelpDesk'
+
 GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'User Group Fee',
     @level0type = N'SCHEMA',
@@ -911,4 +897,22 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICItem',
     @level2type = N'COLUMN',
-    @level2name = N'ysnUserGroupFee'
+    @level2name = N'dblUserGroupFee'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Fuel Tax Class Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intFuelTaxClassId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tax Group Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intTaxGroupId'
