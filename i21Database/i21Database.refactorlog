@@ -2590,4 +2590,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intWillCallUserId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="17d7f63c-1114-4866-87bd-0ad9e4fc7657" ChangeDateTime="04/13/2015 14:35:30">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketCost].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketCost]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketCostId" />
+  </Operation>
 </Operations>
