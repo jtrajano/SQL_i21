@@ -1,6 +1,6 @@
 ﻿CREATE TABLE dbo.tblMFShift (
 	intShiftId INT IDENTITY(1, 1) NOT NULL CONSTRAINT PK_tblMFShift_intShiftId PRIMARY KEY
-	,strShiftName NVARCHAR(50) NOT NULL CONSTRAINT UQ_tblMFShift_strShiftName UNIQUE
+	,strShiftName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL CONSTRAINT UQ_tblMFShift_strShiftName UNIQUE 
 	,dtmShiftStartTime DATETIME NOT NULL
 	,dtmShiftEndTime DATETIME NOT NULL
 	,intDuration INT NOT NULL
