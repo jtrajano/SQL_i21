@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsad748de2873e412b1e15c71fb591d114c00bab8d8cc1d3974216262ebf856de9))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets7df24cd1dd4674147ddaed41de52f10193eddafed6a42f625afe41356c077329))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsad748de2873e412b1e15c71fb591d114c00bab8d8cc1d3974216262ebf856de9 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets7df24cd1dd4674147ddaed41de52f10193eddafed6a42f625afe41356c077329 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "ad748de2873e412b1e15c71fb591d114c00bab8d8cc1d3974216262ebf856de9"; }
+            get { return "7df24cd1dd4674147ddaed41de52f10193eddafed6a42f625afe41356c077329"; }
         }
 
         /// <summary>
@@ -1278,7 +1278,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItem
-        [CodeFirstDatabaseSchema.tblICItem](T1.tblICItem_intItemId, T1.tblICItem_strItemNo, T1.tblICItem_strType, T1.tblICItem_strDescription, T1.tblICItem_intManufacturerId, T1.tblICItem_intBrandId, T1.tblICItem_intCategoryId, T1.tblICItem_strStatus, T1.tblICItem_strModelNo, T1.tblICItem_strInventoryTracking, T1.tblICItem_strLotTracking, T1.tblICItem_ysnRequireCustomerApproval, T1.tblICItem_intRecipeId, T1.tblICItem_ysnSanitationRequired, T1.tblICItem_intLifeTime, T1.tblICItem_strLifeTimeType, T1.tblICItem_intReceiveLife, T1.tblICItem_strGTIN, T1.tblICItem_strRotationType, T1.tblICItem_intNMFCId, T1.tblICItem_ysnStrictFIFO, T1.tblICItem_intDimensionUOMId, T1.tblICItem_dblHeight, T1.tblICItem_dblWidth, T1.tblICItem_dblDepth, T1.tblICItem_intWeightUOMId, T1.tblICItem_dblWeight, T1.tblICItem_intMaterialPackTypeId, T1.tblICItem_strMaterialSizeCode, T1.tblICItem_intInnerUnits, T1.tblICItem_intLayerPerPallet, T1.tblICItem_intUnitPerLayer, T1.tblICItem_dblStandardPalletRatio, T1.tblICItem_strMask1, T1.tblICItem_strMask2, T1.tblICItem_strMask3, T1.tblICItem_intPatronageCategoryId, T1.tblICItem_intTaxClassId, T1.tblICItem_ysnStockedItem, T1.tblICItem_ysnDyedFuel, T1.tblICItem_strBarcodePrint, T1.tblICItem_ysnMSDSRequired, T1.tblICItem_strEPANumber, T1.tblICItem_ysnInboundTax, T1.tblICItem_ysnOutboundTax, T1.tblICItem_ysnRestrictedChemical, T1.tblICItem_ysnTankRequired, T1.tblICItem_ysnAvailableTM, T1.tblICItem_dblDefaultFull, T1.tblICItem_strFuelInspectFee, T1.tblICItem_strRINRequired, T1.tblICItem_intRINFuelTypeId, T1.tblICItem_dblDenaturantPercent, T1.tblICItem_ysnTonnageTax, T1.tblICItem_ysnLoadTracking, T1.tblICItem_dblMixOrder, T1.tblICItem_ysnHandAddIngredient, T1.tblICItem_intMedicationTag, T1.tblICItem_intIngredientTag, T1.tblICItem_strVolumeRebateGroup, T1.tblICItem_intPhysicalItem, T1.tblICItem_ysnExtendPickTicket, T1.tblICItem_ysnExportEDI, T1.tblICItem_ysnHazardMaterial, T1.tblICItem_ysnMaterialFee, T1.tblICItem_ysnAutoBlend, T1.tblICItem_ysnEnableHelpDesk, T1.tblICItem_ysnUserGroupFee, T1.tblICItem_strNACSCategory, T1.tblICItem_strWICCode, T1.tblICItem_intAGCategory, T1.tblICItem_ysnReceiptCommentRequired, T1.tblICItem_strCountCode, T1.tblICItem_ysnLandedCost, T1.tblICItem_strLeadTime, T1.tblICItem_ysnTaxable, T1.tblICItem_strKeywords, T1.tblICItem_dblCaseQty, T1.tblICItem_dtmDateShip, T1.tblICItem_dblTaxExempt, T1.tblICItem_ysnDropShip, T1.tblICItem_ysnCommisionable, T1.tblICItem_ysnSpecialCommission, T1.tblICItem_intCommodityId, T1.tblICItem_intCommodityHierarchyId, T1.tblICItem_dblGAShrinkFactor, T1.tblICItem_intOriginId, T1.tblICItem_intProductTypeId, T1.tblICItem_intRegionId, T1.tblICItem_intSeasonId, T1.tblICItem_intClassVarietyId, T1.tblICItem_intProductLineId, T1.tblICItem_strMarketValuation, T1.tblICItem_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItem](T1.tblICItem_intItemId, T1.tblICItem_strItemNo, T1.tblICItem_strType, T1.tblICItem_strDescription, T1.tblICItem_intManufacturerId, T1.tblICItem_intBrandId, T1.tblICItem_intCategoryId, T1.tblICItem_strStatus, T1.tblICItem_strModelNo, T1.tblICItem_strInventoryTracking, T1.tblICItem_strLotTracking, T1.tblICItem_ysnRequireCustomerApproval, T1.tblICItem_intRecipeId, T1.tblICItem_ysnSanitationRequired, T1.tblICItem_intLifeTime, T1.tblICItem_strLifeTimeType, T1.tblICItem_intReceiveLife, T1.tblICItem_strGTIN, T1.tblICItem_strRotationType, T1.tblICItem_intNMFCId, T1.tblICItem_ysnStrictFIFO, T1.tblICItem_intDimensionUOMId, T1.tblICItem_dblHeight, T1.tblICItem_dblWidth, T1.tblICItem_dblDepth, T1.tblICItem_intWeightUOMId, T1.tblICItem_dblWeight, T1.tblICItem_intMaterialPackTypeId, T1.tblICItem_strMaterialSizeCode, T1.tblICItem_intInnerUnits, T1.tblICItem_intLayerPerPallet, T1.tblICItem_intUnitPerLayer, T1.tblICItem_dblStandardPalletRatio, T1.tblICItem_strMask1, T1.tblICItem_strMask2, T1.tblICItem_strMask3, T1.tblICItem_intPatronageCategoryId, T1.tblICItem_intFuelTaxClassId, T1.tblICItem_intTaxGroupId, T1.tblICItem_ysnStockedItem, T1.tblICItem_ysnDyedFuel, T1.tblICItem_strBarcodePrint, T1.tblICItem_ysnMSDSRequired, T1.tblICItem_strEPANumber, T1.tblICItem_ysnInboundTax, T1.tblICItem_ysnOutboundTax, T1.tblICItem_ysnRestrictedChemical, T1.tblICItem_ysnTankRequired, T1.tblICItem_ysnAvailableTM, T1.tblICItem_dblDefaultFull, T1.tblICItem_strFuelInspectFee, T1.tblICItem_strRINRequired, T1.tblICItem_intRINFuelTypeId, T1.tblICItem_dblDenaturantPercent, T1.tblICItem_ysnTonnageTax, T1.tblICItem_ysnLoadTracking, T1.tblICItem_dblMixOrder, T1.tblICItem_ysnHandAddIngredient, T1.tblICItem_intMedicationTag, T1.tblICItem_intIngredientTag, T1.tblICItem_strVolumeRebateGroup, T1.tblICItem_intPhysicalItem, T1.tblICItem_ysnExtendPickTicket, T1.tblICItem_ysnExportEDI, T1.tblICItem_ysnHazardMaterial, T1.tblICItem_ysnMaterialFee, T1.tblICItem_ysnAutoBlend, T1.tblICItem_dblUserGroupFee, T1.tblICItem_strNACSCategory, T1.tblICItem_strWICCode, T1.tblICItem_intAGCategory, T1.tblICItem_ysnReceiptCommentRequired, T1.tblICItem_strCountCode, T1.tblICItem_ysnLandedCost, T1.tblICItem_strLeadTime, T1.tblICItem_ysnTaxable, T1.tblICItem_strKeywords, T1.tblICItem_dblCaseQty, T1.tblICItem_dtmDateShip, T1.tblICItem_dblTaxExempt, T1.tblICItem_ysnDropShip, T1.tblICItem_ysnCommisionable, T1.tblICItem_ysnSpecialCommission, T1.tblICItem_intCommodityId, T1.tblICItem_intCommodityHierarchyId, T1.tblICItem_dblGAShrinkFactor, T1.tblICItem_intOriginId, T1.tblICItem_intProductTypeId, T1.tblICItem_intRegionId, T1.tblICItem_intSeasonId, T1.tblICItem_intClassVarietyId, T1.tblICItem_intProductLineId, T1.tblICItem_strMarketValuation, T1.tblICItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemId AS tblICItem_intItemId, 
@@ -1318,7 +1318,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strMask2 AS tblICItem_strMask2, 
             T.strMask3 AS tblICItem_strMask3, 
             T.intPatronageCategoryId AS tblICItem_intPatronageCategoryId, 
-            T.intTaxClassId AS tblICItem_intTaxClassId, 
+            T.intFuelTaxClassId AS tblICItem_intFuelTaxClassId, 
+            T.intTaxGroupId AS tblICItem_intTaxGroupId, 
             T.ysnStockedItem AS tblICItem_ysnStockedItem, 
             T.ysnDyedFuel AS tblICItem_ysnDyedFuel, 
             T.strBarcodePrint AS tblICItem_strBarcodePrint, 
@@ -1347,8 +1348,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnHazardMaterial AS tblICItem_ysnHazardMaterial, 
             T.ysnMaterialFee AS tblICItem_ysnMaterialFee, 
             T.ysnAutoBlend AS tblICItem_ysnAutoBlend, 
-            T.ysnEnableHelpDesk AS tblICItem_ysnEnableHelpDesk, 
-            T.ysnUserGroupFee AS tblICItem_ysnUserGroupFee, 
+            T.dblUserGroupFee AS tblICItem_dblUserGroupFee, 
             T.strNACSCategory AS tblICItem_strNACSCategory, 
             T.strWICCode AS tblICItem_strWICCode, 
             T.intAGCategory AS tblICItem_intAGCategory, 
@@ -3902,7 +3902,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItems
-        [iRely.Inventory.Model.tblICItem](T1.tblICItem_intItemId, T1.tblICItem_strItemNo, T1.tblICItem_strType, T1.tblICItem_strDescription, T1.tblICItem_intManufacturerId, T1.tblICItem_intBrandId, T1.tblICItem_intCategoryId, T1.tblICItem_strStatus, T1.tblICItem_strModelNo, T1.tblICItem_strInventoryTracking, T1.tblICItem_strLotTracking, T1.tblICItem_ysnRequireCustomerApproval, T1.tblICItem_intRecipeId, T1.tblICItem_ysnSanitationRequired, T1.tblICItem_intLifeTime, T1.tblICItem_strLifeTimeType, T1.tblICItem_intReceiveLife, T1.tblICItem_strGTIN, T1.tblICItem_strRotationType, T1.tblICItem_intNMFCId, T1.tblICItem_ysnStrictFIFO, T1.tblICItem_intDimensionUOMId, T1.tblICItem_dblHeight, T1.tblICItem_dblWidth, T1.tblICItem_dblDepth, T1.tblICItem_intWeightUOMId, T1.tblICItem_dblWeight, T1.tblICItem_intMaterialPackTypeId, T1.tblICItem_strMaterialSizeCode, T1.tblICItem_intInnerUnits, T1.tblICItem_intLayerPerPallet, T1.tblICItem_intUnitPerLayer, T1.tblICItem_dblStandardPalletRatio, T1.tblICItem_strMask1, T1.tblICItem_strMask2, T1.tblICItem_strMask3, T1.tblICItem_intPatronageCategoryId, T1.tblICItem_intTaxClassId, T1.tblICItem_ysnStockedItem, T1.tblICItem_ysnDyedFuel, T1.tblICItem_strBarcodePrint, T1.tblICItem_ysnMSDSRequired, T1.tblICItem_strEPANumber, T1.tblICItem_ysnInboundTax, T1.tblICItem_ysnOutboundTax, T1.tblICItem_ysnRestrictedChemical, T1.tblICItem_ysnTankRequired, T1.tblICItem_ysnAvailableTM, T1.tblICItem_dblDefaultFull, T1.tblICItem_strFuelInspectFee, T1.tblICItem_strRINRequired, T1.tblICItem_intRINFuelTypeId, T1.tblICItem_dblDenaturantPercent, T1.tblICItem_ysnTonnageTax, T1.tblICItem_ysnLoadTracking, T1.tblICItem_dblMixOrder, T1.tblICItem_ysnHandAddIngredient, T1.tblICItem_intMedicationTag, T1.tblICItem_intIngredientTag, T1.tblICItem_strVolumeRebateGroup, T1.tblICItem_intPhysicalItem, T1.tblICItem_ysnExtendPickTicket, T1.tblICItem_ysnExportEDI, T1.tblICItem_ysnHazardMaterial, T1.tblICItem_ysnMaterialFee, T1.tblICItem_ysnAutoBlend, T1.tblICItem_ysnEnableHelpDesk, T1.tblICItem_ysnUserGroupFee, T1.tblICItem_strNACSCategory, T1.tblICItem_strWICCode, T1.tblICItem_intAGCategory, T1.tblICItem_ysnReceiptCommentRequired, T1.tblICItem_strCountCode, T1.tblICItem_ysnLandedCost, T1.tblICItem_strLeadTime, T1.tblICItem_ysnTaxable, T1.tblICItem_strKeywords, T1.tblICItem_dblCaseQty, T1.tblICItem_dtmDateShip, T1.tblICItem_dblTaxExempt, T1.tblICItem_ysnDropShip, T1.tblICItem_ysnCommisionable, T1.tblICItem_ysnSpecialCommission, T1.tblICItem_intCommodityId, T1.tblICItem_intCommodityHierarchyId, T1.tblICItem_dblGAShrinkFactor, T1.tblICItem_intOriginId, T1.tblICItem_intProductTypeId, T1.tblICItem_intRegionId, T1.tblICItem_intSeasonId, T1.tblICItem_intClassVarietyId, T1.tblICItem_intProductLineId, T1.tblICItem_strMarketValuation, T1.tblICItem_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItem](T1.tblICItem_intItemId, T1.tblICItem_strItemNo, T1.tblICItem_strType, T1.tblICItem_strDescription, T1.tblICItem_intManufacturerId, T1.tblICItem_intBrandId, T1.tblICItem_intCategoryId, T1.tblICItem_strStatus, T1.tblICItem_strModelNo, T1.tblICItem_strInventoryTracking, T1.tblICItem_strLotTracking, T1.tblICItem_ysnRequireCustomerApproval, T1.tblICItem_intRecipeId, T1.tblICItem_ysnSanitationRequired, T1.tblICItem_intLifeTime, T1.tblICItem_strLifeTimeType, T1.tblICItem_intReceiveLife, T1.tblICItem_strGTIN, T1.tblICItem_strRotationType, T1.tblICItem_intNMFCId, T1.tblICItem_ysnStrictFIFO, T1.tblICItem_intDimensionUOMId, T1.tblICItem_dblHeight, T1.tblICItem_dblWidth, T1.tblICItem_dblDepth, T1.tblICItem_intWeightUOMId, T1.tblICItem_dblWeight, T1.tblICItem_intMaterialPackTypeId, T1.tblICItem_strMaterialSizeCode, T1.tblICItem_intInnerUnits, T1.tblICItem_intLayerPerPallet, T1.tblICItem_intUnitPerLayer, T1.tblICItem_dblStandardPalletRatio, T1.tblICItem_strMask1, T1.tblICItem_strMask2, T1.tblICItem_strMask3, T1.tblICItem_intPatronageCategoryId, T1.tblICItem_intFuelTaxClassId, T1.tblICItem_intTaxGroupId, T1.tblICItem_ysnStockedItem, T1.tblICItem_ysnDyedFuel, T1.tblICItem_strBarcodePrint, T1.tblICItem_ysnMSDSRequired, T1.tblICItem_strEPANumber, T1.tblICItem_ysnInboundTax, T1.tblICItem_ysnOutboundTax, T1.tblICItem_ysnRestrictedChemical, T1.tblICItem_ysnTankRequired, T1.tblICItem_ysnAvailableTM, T1.tblICItem_dblDefaultFull, T1.tblICItem_strFuelInspectFee, T1.tblICItem_strRINRequired, T1.tblICItem_intRINFuelTypeId, T1.tblICItem_dblDenaturantPercent, T1.tblICItem_ysnTonnageTax, T1.tblICItem_ysnLoadTracking, T1.tblICItem_dblMixOrder, T1.tblICItem_ysnHandAddIngredient, T1.tblICItem_intMedicationTag, T1.tblICItem_intIngredientTag, T1.tblICItem_strVolumeRebateGroup, T1.tblICItem_intPhysicalItem, T1.tblICItem_ysnExtendPickTicket, T1.tblICItem_ysnExportEDI, T1.tblICItem_ysnHazardMaterial, T1.tblICItem_ysnMaterialFee, T1.tblICItem_ysnAutoBlend, T1.tblICItem_dblUserGroupFee, T1.tblICItem_strNACSCategory, T1.tblICItem_strWICCode, T1.tblICItem_intAGCategory, T1.tblICItem_ysnReceiptCommentRequired, T1.tblICItem_strCountCode, T1.tblICItem_ysnLandedCost, T1.tblICItem_strLeadTime, T1.tblICItem_ysnTaxable, T1.tblICItem_strKeywords, T1.tblICItem_dblCaseQty, T1.tblICItem_dtmDateShip, T1.tblICItem_dblTaxExempt, T1.tblICItem_ysnDropShip, T1.tblICItem_ysnCommisionable, T1.tblICItem_ysnSpecialCommission, T1.tblICItem_intCommodityId, T1.tblICItem_intCommodityHierarchyId, T1.tblICItem_dblGAShrinkFactor, T1.tblICItem_intOriginId, T1.tblICItem_intProductTypeId, T1.tblICItem_intRegionId, T1.tblICItem_intSeasonId, T1.tblICItem_intClassVarietyId, T1.tblICItem_intProductLineId, T1.tblICItem_strMarketValuation, T1.tblICItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemId AS tblICItem_intItemId, 
@@ -3942,7 +3942,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strMask2 AS tblICItem_strMask2, 
             T.strMask3 AS tblICItem_strMask3, 
             T.intPatronageCategoryId AS tblICItem_intPatronageCategoryId, 
-            T.intTaxClassId AS tblICItem_intTaxClassId, 
+            T.intFuelTaxClassId AS tblICItem_intFuelTaxClassId, 
+            T.intTaxGroupId AS tblICItem_intTaxGroupId, 
             T.ysnStockedItem AS tblICItem_ysnStockedItem, 
             T.ysnDyedFuel AS tblICItem_ysnDyedFuel, 
             T.strBarcodePrint AS tblICItem_strBarcodePrint, 
@@ -3971,8 +3972,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnHazardMaterial AS tblICItem_ysnHazardMaterial, 
             T.ysnMaterialFee AS tblICItem_ysnMaterialFee, 
             T.ysnAutoBlend AS tblICItem_ysnAutoBlend, 
-            T.ysnEnableHelpDesk AS tblICItem_ysnEnableHelpDesk, 
-            T.ysnUserGroupFee AS tblICItem_ysnUserGroupFee, 
+            T.dblUserGroupFee AS tblICItem_dblUserGroupFee, 
             T.strNACSCategory AS tblICItem_strNACSCategory, 
             T.strWICCode AS tblICItem_strWICCode, 
             T.intAGCategory AS tblICItem_intAGCategory, 

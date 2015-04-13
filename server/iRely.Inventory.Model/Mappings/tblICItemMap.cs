@@ -49,7 +49,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strMask2).HasColumnName("strMask2");
             this.Property(t => t.strMask3).HasColumnName("strMask3");
             this.Property(t => t.intPatronageCategoryId).HasColumnName("intPatronageCategoryId");
-            this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
+            this.Property(t => t.intFuelTaxClassId).HasColumnName("intFuelTaxClassId");
             this.Property(t => t.ysnStockedItem).HasColumnName("ysnStockedItem");
             this.Property(t => t.ysnDyedFuel).HasColumnName("ysnDyedFuel");
             this.Property(t => t.strBarcodePrint).HasColumnName("strBarcodePrint");
@@ -78,8 +78,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnHazardMaterial).HasColumnName("ysnHazardMaterial");
             this.Property(t => t.ysnMaterialFee).HasColumnName("ysnMaterialFee");
             this.Property(t => t.ysnAutoBlend).HasColumnName("ysnAutoBlend");
-            this.Property(t => t.ysnEnableHelpDesk).HasColumnName("ysnEnableHelpDesk");
-            this.Property(t => t.ysnUserGroupFee).HasColumnName("ysnUserGroupFee");
+            this.Property(t => t.dblUserGroupFee).HasColumnName("dblUserGroupFee");
             this.Property(t => t.strNACSCategory).HasColumnName("strNACSCategory");
             this.Property(t => t.strWICCode).HasColumnName("strWICCode");
             this.Property(t => t.intAGCategory).HasColumnName("intAGCategory");

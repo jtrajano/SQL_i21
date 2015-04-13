@@ -178,9 +178,13 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.intPatronageCategoryId}',
                 store: '{patronage}'
             },
-            cboTaxClass: {
-                value: '{current.intTaxClassId}',
+            cboFuelTaxClass: {
+                value: '{current.intFuelTaxClassId}',
                 store: '{taxClass}'
+            },
+            cboTaxGroup: {
+                value: '{current.intTaxGroupId}',
+                store: '{taxGroup}'
             },
             chkStockedItem: '{current.ysnStockedItem}',
             chkDyedFuel: '{current.ysnDyedFuel}',
@@ -231,8 +235,7 @@ Ext.define('Inventory.view.ItemViewController', {
             chkHazardMaterial: '{current.ysnHazardMaterial}',
             chkMaterialFee: '{current.ysnMaterialFee}',
             chkAutoBlend: '{current.ysnAutoBlend}',
-            chkEnableHelpDesk: '{current.ysnEnableHelpDesk}',
-            chkUserGroupFee: '{current.ysnUserGroupFee}',
+            txtUserGroupFee: '{current.dblUserGroupFee}',
 
             //-------//
             //POS Tab//

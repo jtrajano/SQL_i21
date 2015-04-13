@@ -32,6 +32,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'AccountsReceivable.store.CustomerBuffered',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CountryBuffered',
+        'i21.store.TaxGroupMasterBuffered',
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup'
     ],
@@ -170,6 +171,9 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         taxClass: {
             type: 'icbufferedfueltaxclass'
+        },
+        taxGroup: {
+            type: 'smtaxgroupmasterbuffered'
         },
         barcodePrints: {
             autoLoad: true,

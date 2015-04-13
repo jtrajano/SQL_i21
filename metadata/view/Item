@@ -2284,7 +2284,7 @@
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
                                                                 "displayField": "strTaxClassCode",
-                                                                "fieldLabel": "Tax Class",
+                                                                "fieldLabel": "Fuel Tax Class",
                                                                 "itemId": "cboTaxClass",
                                                                 "labelWidth": 116,
                                                                 "layout|flex": null,
@@ -2295,6 +2295,64 @@
                                                                 "columns": "array"
                                                             },
                                                             "designerId": "383ec3e6-0a59-4430-9a95-db8790b1a65a",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intTaxGroupMasterId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Tax Group Master Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strTaxGroupMaster',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Tax Group Master',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\txtype: 'checkcolumn',",
+                                                                    "\t\tdataIndex: 'ysnSeparateOnInvoice',",
+                                                                    "\t\tdataType: 'boolean',",
+                                                                    "\t\ttext: 'Separate on Invoice',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strTaxGroupMaster",
+                                                                "fieldLabel": "Tax Group",
+                                                                "itemId": "cboTaxGroup",
+                                                                "labelWidth": 116,
+                                                                "layout|flex": null,
+                                                                "valueField": "intTaxGroupMasterId"
+                                                            },
+                                                            "name": "MyComboBox70",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "1db1e69f-e866-437e-acaa-e0f128a801cb",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
@@ -3026,58 +3084,21 @@
                                                             "designerId": "d310a6c9-9201-4f9d-83f7-9ba98d75da3d"
                                                         },
                                                         {
-                                                            "type": "Ext.panel.Panel",
+                                                            "type": "Ext.form.field.Number",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "container|align": "stretch",
-                                                                "layout": "vbox",
-                                                                "layout|flex": 1,
-                                                                "title": "Software"
+                                                                "designer|createAlias": "numeric",
+                                                                "fieldLabel": "User Group Fee",
+                                                                "itemId": "txtUserGroupFee",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null
                                                             },
-                                                            "name": "MyPanel34",
-                                                            "designerId": "3c734781-7268-4914-b9ed-045215feb528",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Checkbox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "boxLabel": null,
-                                                                        "fieldLabel": "Enable HelpDesk",
-                                                                        "itemId": "chkEnableHelpDesk",
-                                                                        "labelWidth": 125,
-                                                                        "layout|flex": null,
-                                                                        "margin": 5
-                                                                    },
-                                                                    "name": "MyCheckbox26",
-                                                                    "designerId": "5bd5e624-e244-4fa3-9a9b-de0d854e251f"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.Checkbox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "boxLabel": null,
-                                                                        "fieldLabel": "User Group Fee",
-                                                                        "itemId": "chkUserGroupFee",
-                                                                        "labelWidth": 125,
-                                                                        "layout|flex": null,
-                                                                        "margin": "0 0 0 5"
-                                                                    },
-                                                                    "name": "MyCheckbox27",
-                                                                    "designerId": "ec394b75-3882-4f11-a03e-9287d93d394c"
-                                                                }
-                                                            ]
+                                                            "name": "MyNumberField59",
+                                                            "designerId": "35d9d7bb-6bfe-475b-afff-0ad27420f0c8"
                                                         }
                                                     ]
                                                 }

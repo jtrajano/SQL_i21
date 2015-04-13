@@ -1118,10 +1118,45 @@ Ext.define('Inventory.view.Item', {
                                                                             }
                                                                         ],
                                                                         itemId: 'cboTaxClass',
-                                                                        fieldLabel: 'Tax Class',
+                                                                        fieldLabel: 'Fuel Tax Class',
                                                                         labelWidth: 116,
                                                                         displayField: 'strTaxClassCode',
                                                                         valueField: 'intFuelTaxClassId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intTaxGroupMasterId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Tax Group Master Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strTaxGroupMaster',
+                                                                                dataType: 'string',
+                                                                                text: 'Tax Group Master',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkcolumn',
+                                                                                dataIndex: 'ysnSeparateOnInvoice',
+                                                                                dataType: 'boolean',
+                                                                                text: 'Separate on Invoice',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboTaxGroup',
+                                                                        fieldLabel: 'Tax Group',
+                                                                        labelWidth: 116,
+                                                                        displayField: 'strTaxGroupMaster',
+                                                                        valueField: 'intTaxGroupMasterId'
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
@@ -1458,29 +1493,10 @@ Ext.define('Inventory.view.Item', {
                                                                         labelWidth: 125
                                                                     },
                                                                     {
-                                                                        xtype: 'panel',
-                                                                        flex: 1,
-                                                                        title: 'Software',
-                                                                        layout: {
-                                                                            type: 'vbox',
-                                                                            align: 'stretch'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkEnableHelpDesk',
-                                                                                margin: 5,
-                                                                                fieldLabel: 'Enable HelpDesk',
-                                                                                labelWidth: 125
-                                                                            },
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkUserGroupFee',
-                                                                                margin: '0 0 0 5',
-                                                                                fieldLabel: 'User Group Fee',
-                                                                                labelWidth: 125
-                                                                            }
-                                                                        ]
+                                                                        xtype: 'numeric',
+                                                                        itemId: 'txtUserGroupFee',
+                                                                        fieldLabel: 'User Group Fee',
+                                                                        labelWidth: 125
                                                                     }
                                                                 ]
                                                             }

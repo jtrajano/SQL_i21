@@ -49,7 +49,8 @@ namespace iRely.Inventory.Model
         public string strMask2 { get; set; }
         public string strMask3 { get; set; }
         public int? intPatronageCategoryId { get; set; }
-        public int? intTaxClassId { get; set; }
+        public int? intFuelTaxClassId { get; set; }
+        public int? intTaxGroupId { get; set; }
         public bool? ysnStockedItem { get; set; }
         public bool? ysnDyedFuel { get; set; }
         public string strBarcodePrint { get; set; }
@@ -78,8 +79,7 @@ namespace iRely.Inventory.Model
         public bool? ysnHazardMaterial { get; set; }
         public bool? ysnMaterialFee { get; set; }
         public bool? ysnAutoBlend { get; set; }
-        public bool? ysnEnableHelpDesk { get; set; }
-        public bool? ysnUserGroupFee { get; set; }
+        public decimal? dblUserGroupFee { get; set; }
         public string strNACSCategory { get; set; }
         public string strWICCode { get; set; }
         public int? intAGCategory { get; set; }

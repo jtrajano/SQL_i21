@@ -33,7 +33,7 @@ Ext.define('Inventory.model.Item', {
     idProperty: 'intItemId',
 
     fields: [
-        { name: 'intItemId', type: 'int' },
+        { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'strItemNo', type: 'string' },
         { name: 'strType', type: 'string' },
         { name: 'strDescription', type: 'string' },
@@ -70,7 +70,8 @@ Ext.define('Inventory.model.Item', {
         { name: 'strMask2', type: 'string' },
         { name: 'strMask3', type: 'string' },
         { name: 'intPatronageCategoryId', type: 'int', allowNull: true },
-        { name: 'intTaxClassId', type: 'int', allowNull: true },
+        { name: 'intFuelTaxClassId', type: 'int', allowNull: true },
+        { name: 'intTaxGroupId', type: 'int', allowNull: true },
         { name: 'ysnStockedItem', type: 'boolean' },
         { name: 'ysnDyedFuel', type: 'boolean' },
         { name: 'strBarcodePrint', type: 'string' },
@@ -99,8 +100,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'ysnHazardMaterial', type: 'boolean' },
         { name: 'ysnMaterialFee', type: 'boolean' },
         { name: 'ysnAutoBlend', type: 'boolean' },
-        { name: 'ysnEnableHelpDesk', type: 'boolean' },
-        { name: 'ysnUserGroupFee', type: 'boolean' },
+        { name: 'dblUserGroupFee', type: 'float' },
         { name: 'strNACSCategory', type: 'string' },
         { name: 'strWICCode', type: 'string' },
         { name: 'intAGCategory', type: 'int', allowNull: true },
@@ -125,7 +125,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'intSeasonId', type: 'int', allowNull: true },
         { name: 'intClassVarietyId', type: 'int', allowNull: true },
         { name: 'intProductLineId', type: 'int', allowNull: true },
-        { name: 'strMarketValuation', type: 'string' }
+        { name: 'strMarketValuation', type: 'string' },
     ],
 
     validators: [
