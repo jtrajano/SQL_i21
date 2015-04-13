@@ -96,7 +96,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				'Lot is already in history!'
+				'Lot has already been released!.'
 				,16
 				,1
 				)
