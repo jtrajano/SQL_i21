@@ -179,6 +179,13 @@ BEGIN
 				join tblARCustomer b
 					on a.intEntityId = b.intEntityId
 		')
+	
+	print 'check if the ysnActive is available in tblEntityContact'
+	 IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'ysnActive') 
+	 BEGIN
+	  exec(N'alter table tblEntityContact 
+		add [ysnActive] [bit] NOT NULL DEFAULT ((1))')
+	 END
 
 	print 'Moving Entity Contact Data to Entity'
 	exec(N'	
