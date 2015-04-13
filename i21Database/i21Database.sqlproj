@@ -1354,6 +1354,7 @@
     <Build Include="dbo\Functions\fnCalculateCostPerLot.sql" />
     <Build Include="dbo\Functions\fnCalculateLotQty.sql" />
     <Build Include="dbo\Functions\fnCalculateLotWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

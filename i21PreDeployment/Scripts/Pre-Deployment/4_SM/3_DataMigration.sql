@@ -31,3 +31,15 @@ GO
 			ON SecurityMenu.intUserSecurityMenuId = MenuFavorite.intUserSecurityMenuId')
 	END
 GO
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMTaxClass' AND [COLUMN_NAME] = 'ysnTaxable') 
+		BEGIN		
+			PRINT N'INSERT data from tblSMTaxType to tblSMTaxClass'
+
+			EXEC ('TRUNCATE TABLE tblSMTaxClass
+				   SET IDENTITY_INSERT tblSMTaxClass ON
+				   INSERT INTO tblSMTaxClass([intTaxClassId], [strTaxClass], [ysnTaxable])
+				   SELECT [intTaxTypeId], [strTaxType], 0
+				   FROM tblSMTaxType
+				   SET IDENTITY_INSERT tblSMTaxClass OFF')
+		END	
+GO
