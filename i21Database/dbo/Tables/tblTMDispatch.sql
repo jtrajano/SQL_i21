@@ -26,7 +26,7 @@
     [strCancelDispatchMessage] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intDeliveryTermID]        INT             NULL,
     [dtmDispatchingDate]       DATETIME        NULL,
-    [strWillCallStatus] NVARCHAR(10) NOT NULL DEFAULT ('Generated'), 
+    [strWillCallStatus] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Generated'), 
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );

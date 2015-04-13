@@ -29,6 +29,20 @@
     [dblExtendedAmount]                  NUMERIC (18, 6) NOT NULL DEFAULT 0,
     [ysnForReview] BIT NOT NULL DEFAULT 0, 
     [dtmMarkForReviewDate] DATETIME NULL, 
+    [dblWillCallPercentLeft] NUMERIC(18, 6) NULL, 
+    [dblWillCallCalculatedQuantity] NUMERIC(18, 6) NULL, 
+    [dblWillCallDesiredQuantity] NUMERIC(18, 6) NULL, 
+    [intWillCallDriverId] INT NULL, 
+    [intWillCallProductId] INT NULL, 
+    [intWillCallSubstituteProductId] INT NULL, 
+    [dblWillCallPrice] NUMERIC(18, 6) NULL, 
+    [intWillCallDeliveryTermId] INT NULL, 
+    [dtmWillCallRequestedDate] DATETIME NULL, 
+    [intWillCallPriority] INT NULL, 
+    [dblWillCallTotal] NUMERIC(18, 6) NULL, 
+    [strWillCallComments] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
+    [dtmWillCallCallInDate] DATETIME NULL, 
+    [intWillCallUserId] INT NULL, 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -304,3 +318,129 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
     @level2name = N'dtmMarkForReviewDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call percent left',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = 'dblWillCallPercentLeft'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call calculated quantity',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblWillCallCalculatedQuantity'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call desired quantity',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblWillCallDesiredQuantity'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call driver Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = 'intWillCallDriverId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call product Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'intWillCallProductId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call substitute product Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'intWillCallSubstituteProductId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call price',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblWillCallPrice'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call delivery term Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'intWillCallDeliveryTermId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call requested date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmWillCallRequestedDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call priority',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'intWillCallPriority'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call total',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblWillCallTotal'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call comments',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'strWillCallComments'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call call-in date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = 'dtmWillCallCallInDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call entered by Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = 'intWillCallUserId'
