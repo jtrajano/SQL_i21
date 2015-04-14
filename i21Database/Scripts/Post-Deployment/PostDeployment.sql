@@ -46,6 +46,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\8_WorkToDoItem.sql
 :r .\TM\DefaultData\9_WorkCloseReason.sql
 :r .\TM\DefaultData\10_RegulatorType.sql
+----TM Reports
+:r .\TM\Reports\FieldSelection\DeliveryFill.sql
+:r .\TM\Reports\Layout\DeliveryFill.sql
+:r .\TM\Reports\DataSource\DeliveryFill.sql
+:r .\TM\Reports\DefaultCriteria\DeliveryFill.sql
 
 
 -- Canned Panels
