@@ -478,6 +478,15 @@ BEGIN
 							on a.intVendorId = b.intVendorId')
 	END
 
+	print 'Delete orphan entity to contact'
+	exec(N'		
+			delete from tblEntityToContact	where intEntityId not in ( select intEntityId from tblEntity)
+			
+			delete from tblEntityToContact	where intContactId not in ( select intEntityId from tblEntityContact)
+
+			')
+
+
 	print 'add locationid to tblEntityToContact'
 	exec(N'		
 			alter table tblEntityToContact
