@@ -1360,6 +1360,7 @@
     <Build Include="dbo\Tables\tblSCTicketCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSCInventoryUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdationFromTicketDistribution.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
