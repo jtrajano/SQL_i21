@@ -146,16 +146,16 @@ BEGIN
 	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.dblOpenReceive) 
 									ELSE (	dblQtyReceived - B.dblOpenReceive) 
 							END
-	FROM	tblPOPurchaseDetail A INNER JOIN #receivedItems B 
+	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
 				ON A.intItemId = B.intItemId 
 				AND A.intPurchaseDetailId = B.intLineNo
 				AND intPurchaseId = B.intSourceId
 				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
 
-	WHILE @count != (SELECT COUNT(*) FROM #receivedItems)
+	WHILE @count != (SELECT COUNT(*) FROM #tmpReceivedPOItems)
 	BEGIN
 		SET @count = @count + 1;
-		SET @purchaseId = (SELECT TOP(@count) intSourceId FROM #receivedItems)
+		SET @purchaseId = (SELECT TOP(@count) intSourceId FROM #tmpReceivedPOItems)
 		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
 	END
 
