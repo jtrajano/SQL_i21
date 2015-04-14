@@ -210,3 +210,24 @@ EXEC sp_addmessage 51051,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51052) EXEC sp_dropmessage 51052, 'us_english'	
 SET @strmessage = 'Please check for duplicate lot numbers. The lot number %s is used more than once in item %s on %s.'
 EXEC sp_addmessage 51052,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51053) EXEC sp_dropmessage 51053, 'us_english'	
+SET @strmessage = 'Invalid Lot.'
+EXEC sp_addmessage 51053,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51054) EXEC sp_dropmessage 51054, 'us_english'	
+SET @strmessage = 'This lot %s was not produced through work order production process; hence this lot cannot be released from this screen. Try changing the lot status using the Lot Status Change screen available in the Inventory view screen.'
+EXEC sp_addmessage 51054,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51055) EXEC sp_dropmessage 51055, 'us_english'	
+SET @strmessage = 'Lot has already been released!.'
+EXEC sp_addmessage 51055,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51056) EXEC sp_dropmessage 51056, 'us_english'	
+SET @strmessage = 'Pallet Lot has been marked as a ghost and cannot be released. Please call Supervisor to reverse this!.'
+EXEC sp_addmessage 51056,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51057) EXEC sp_dropmessage 51057, 'us_english'	
+SET @strmessage = 'Invalid item type - you can only release finished goods items!.'
+EXEC sp_addmessage 51057,11,@strmessage,'us_english','False'
+
