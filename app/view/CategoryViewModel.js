@@ -8,7 +8,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
         'Inventory.store.BufferedLineOfBusiness',
         'Inventory.store.BufferedCategoryLocation',
         'GeneralLedger.store.BufAccountId',
-        'AccountsPayable.store.VendorBuffered',
+        'EntityManagement.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
         'Inventory.store.Class',
         'Inventory.store.Family',
@@ -120,7 +120,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
             type: 'storefamily'
         },
         vendor: {
-            type: 'vendorbuffered'
+            type: 'emvendorbuffered'
         }
     },
 

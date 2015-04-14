@@ -997,7 +997,7 @@ Ext.define('Inventory.view.Category', {
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strVendorName',
+                                                                    dataIndex: 'strName',
                                                                     dataType: 'string',
                                                                     text: 'Vendor Name',
                                                                     flex: 1

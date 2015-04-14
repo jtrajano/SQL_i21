@@ -170,12 +170,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         xtype: 'button',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnDuplicate',
-                                        width: 59,
+                                        itemId: 'btnBill',
+                                        width: 50,
                                         iconAlign: 'top',
-                                        iconCls: 'large-duplicate',
+                                        iconCls: 'large-bill',
                                         scale: 'large',
-                                        text: 'Duplicate'
+                                        text: 'Bill'
                                     },
                                     {
                                         xtype: 'button',
@@ -198,17 +198,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         iconCls: 'large-pallet',
                                         scale: 'large',
                                         text: 'Inventory'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        itemId: 'btnNotes',
-                                        width: 50,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-notes',
-                                        scale: 'large',
-                                        text: 'Notes'
                                     },
                                     {
                                         xtype: 'tbseparator',
@@ -283,7 +272,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 flex: 1
                                                             },
                                                             {
-                                                                dataIndex: 'strVendorName',
+                                                                dataIndex: 'strName',
                                                                 dataType: 'string',
                                                                 text: 'Vendor Name',
                                                                 flex: 1

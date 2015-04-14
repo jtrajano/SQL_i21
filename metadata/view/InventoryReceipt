@@ -288,16 +288,16 @@
                                 "height": 57,
                                 "icon": null,
                                 "iconAlign": "top",
-                                "iconCls": "large-duplicate",
-                                "itemId": "btnDuplicate",
+                                "iconCls": "large-bill",
+                                "itemId": "btnBill",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
-                                "text": "Duplicate",
-                                "width": 59
+                                "text": "Bill",
+                                "width": 50
                             },
-                            "name": "MyButton1",
-                            "designerId": "665a9637-57f9-4430-ba39-a882deff87ce"
+                            "name": "MyButton6",
+                            "designerId": "6f13ab41-4007-47fe-ab83-db7191350cac"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -344,29 +344,6 @@
                             },
                             "name": "MyButton",
                             "designerId": "f581ef92-f4e2-4d2f-979c-18379e19d008"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-notes",
-                                "itemId": "btnNotes",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Notes",
-                                "width": 50
-                            },
-                            "name": "MyButton2",
-                            "designerId": "527417bf-3828-4ec0-a662-3fb5734fdace"
                         },
                         {
                             "type": "Ext.toolbar.Separator",
@@ -515,7 +492,7 @@
                                                     "\t\tflex: 1",
                                                     "\t},",
                                                     "\t{",
-                                                    "\t\tdataIndex: 'strVendorName',",
+                                                    "\t\tdataIndex: 'strName',",
                                                     "\t\tdataType: 'string',",
                                                     "\t\ttext: 'Vendor Name',",
                                                     "\t\tflex: 1",
@@ -1468,7 +1445,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter122",
+                                                                    "name": "filter1",
                                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2394,7 +2371,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter123",
+                                                                            "name": "filter11",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3492,7 +3469,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter124",
+                                                    "name": "filter12",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4329,7 +4306,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter125",
+                                                    "name": "filter13",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4773,7 +4750,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging111",
+                    "name": "statusbarpaging1",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

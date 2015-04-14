@@ -28,8 +28,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedProductTypeAttribute',
         'Inventory.store.BufferedSeasonAttribute',
         'Inventory.store.BufferedCategory',
-        'AccountsPayable.store.VendorBuffered',
-        'AccountsReceivable.store.CustomerBuffered',
+        'EntityManagement.store.VendorBuffered',
+        'EntityManagement.store.CustomerBuffered',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CountryBuffered',
         'i21.store.TaxGroupMasterBuffered',
@@ -359,7 +359,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'icbuffereditemlocation'
         },
         vendorXrefVendor: {
-            type: 'vendorbuffered'
+            type: 'emvendorbuffered'
         },
         vendorXrefUom: {
             type: 'icbuffereditemunitmeasure'

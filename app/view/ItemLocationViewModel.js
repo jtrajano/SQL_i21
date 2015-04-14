@@ -22,7 +22,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         'i21.store.FreightTermsBuffered',
         'i21.store.ShipViaBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
-        'AccountsPayable.store.VendorBuffered',
+        'EntityManagement.store.VendorBuffered',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.Product',
         'Inventory.store.Class',
@@ -41,7 +41,7 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
             type: 'smcompanylocationsublocationbuffered'
         },
         vendor: {
-            type: 'vendorbuffered'
+            type: 'emvendorbuffered'
         },
         costingMethods: {
             data: [

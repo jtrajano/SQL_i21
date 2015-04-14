@@ -2533,9 +2533,9 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strType',
+                                                                                    dataIndex: 'strName',
                                                                                     dataType: 'string',
-                                                                                    text: 'Type',
+                                                                                    text: 'Name',
                                                                                     flex: 1
                                                                                 }
                                                                             ],
@@ -2679,7 +2679,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strVendorName',
+                                                                                    dataIndex: 'strName',
                                                                                     dataType: 'string',
                                                                                     text: 'Vendor Name',
                                                                                     flex: 1

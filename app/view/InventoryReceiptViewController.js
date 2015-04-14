@@ -579,11 +579,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var btnSave = win.down('#btnSave');
             var btnDelete = win.down('#btnDelete');
             var btnUndo = win.down('#btnUndo');
-            var btnDuplicate = win.down('#btnDuplicate');
-            var btnNotes = win.down('#btnNotes');
-
-            btnDuplicate.setHidden(true);
-            btnNotes.setHidden(true);
 
             var current = records[0];
             if (current){
@@ -820,6 +815,39 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else {
             iRely.Functions.showErrorDialog('Please select an Item to view.');
         }
+    },
+
+    onBillClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var context = win.context;
+        var current = win.viewModel.data.current;
+
+//        if (current) {
+//            Ext.Ajax.request({
+//                timeout: 120000,
+//                url: '../Inventory/api/Receipt/DuplicateItem?ItemId=' + current.get('intItemId'),
+//                method: 'GET',
+//                success: function(response){
+//                    var jsonData = Ext.decode(response.responseText);
+//                    context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.id }]);
+//                    context.configuration.paging.moveFirst();
+//                }
+//            });
+//        }
+//
+//        if (selected) {
+//            if (selected.length > 0){
+//                var current = selected[0];
+//                if (!current.dummy)
+//                    iRely.Functions.openScreen('Inventory.view.Item', current.get('intItemId'));
+//            }
+//            else {
+//                iRely.Functions.showErrorDialog('Please select an Item to view.');
+//            }
+//        }
+//        else {
+//            iRely.Functions.showErrorDialog('Please select an Item to view.');
+//        }
     },
 
     onVendorClick: function(button, e, eOpts) {
@@ -1709,8 +1737,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             row: 0,
                             column: column
                         });
-//                        var txtNotes = gridObj.query('#txtNotes')[0];
-//                        txtNotes.focus();
                     });
 
                     task.delay(10);
@@ -1725,17 +1751,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var vm = win.viewModel;
             var pnlLotTracking = win.down('#pnlLotTracking');
             var grdLotTracking = win.down('#grdLotTracking');
-            var txtLotItemId = win.down('#txtLotItemId');
-            var txtLotItemDescription = win.down('#txtLotItemDescription');
-            var txtLotUOM = win.down('#txtLotUOM');
-            var txtLotItemQty = win.down('#txtLotItemQty');
-            var txtLotCost = win.down('#txtLotCost');
-            var pgeLots = win.down('#pgeLots');
-
-            txtLotItemId.setValue(null);
-            txtLotItemDescription.setValue(null);
-            txtLotUOM.setValue(null);
-            txtLotItemQty.setValue(null);
 
             if (selected.length > 0) {
                 var current = selected[0];
@@ -1744,11 +1759,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 }
                 else if (current.get('strLotTracking') === 'Yes - Serial Number' || current.get('strLotTracking') === 'Yes - Manual'){
                     vm.data.currentReceiptItem = current;
-                    txtLotItemId.setValue(current.get('strItemNo'));
-                    txtLotItemDescription.setValue(current.get('strItemDescription'));
-                    txtLotUOM.setValue(current.get('strUnitMeasure'));
-                    txtLotItemQty.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblOpenReceive'), 2));
-                    txtLotCost.setValue(i21.ModuleMgr.Inventory.roundDecimalFormat(current.get('dblUnitCost'), 2));
                 }
                 else {
                     vm.data.currentReceiptItem = null;
@@ -1828,6 +1838,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnRecap": {
                 click: this.onRecapClick
+            },
+            "#btnBill": {
+                click: this.onBillClick
             },
             "#btnInventory": {
                 click: this.onInventoryClick

@@ -310,9 +310,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         flex: 1
                                                                     },
                                                                     {
-                                                                        dataIndex: 'strType',
+                                                                        dataIndex: 'strName',
                                                                         dataType: 'string',
-                                                                        text: 'Type',
+                                                                        text: 'Name',
                                                                         flex: 1
                                                                     }
                                                                 ],

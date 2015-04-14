@@ -8,7 +8,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'i21.store.CompanyLocationBuffered',
         'i21.store.FreightTermsBuffered',
         'i21.store.ShipViaBuffered',
-        'AccountsReceivable.store.CustomerBuffered',
+        'EntityManagement.store.CustomerBuffered',
         'AccountsReceivable.store.SalesOrderDetailBuffered'
     ],
 
