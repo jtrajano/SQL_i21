@@ -37,6 +37,9 @@ USING	(
 		UNION ALL 
 		SELECT	id = 9
 				,name = 'Produce'
+		UNION ALL 
+		SELECT	id = 10
+				,name = 'Inventory Adjustment'
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
 
