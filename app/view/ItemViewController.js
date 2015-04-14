@@ -2099,6 +2099,36 @@ Ext.define('Inventory.view.ItemViewController', {
         cboSeason.defaultFilters = filter;
         cboClass.defaultFilters = filter;
         cboProductLine.defaultFilters = filter;
+
+        var current = win.viewModel.data.current;
+        if (current){
+            var uoms = records[0].get('tblICCommodityUnitMeasures');
+            if (uoms) {
+                if (uoms.length > 0) {
+                    current.tblICItemUOMs().removeAll();
+                    uoms.forEach(function(uom){
+                        var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
+                            intItemId : current.get('intItemId'),
+                            strUnitMeasure: uom.strUnitMeasure,
+                            intUnitMeasureId : uom.intUnitMeasureId,
+                            dblUnitQty : uom.dblUnitQty,
+                            ysnStockUnit : uom.ysnStockUnit,
+                            ysnAllowPurchase : true,
+                            ysnAllowSale : true,
+                            dblLength : 0.00,
+                            dblWidth : 0.00,
+                            dblHeight : 0.00,
+                            dblVolume : 0.00,
+                            dblMaxQty : 0.00,
+                            intSort : uom.intSort
+                        });
+                        current.tblICItemUOMs().add(newItemUOM);
+                    });
+                    var grid = win.down('#grdUnitOfMeasure');
+                    grid.gridMgr.newRow.add();
+                }
+            }
+        }
     },
 
     // </editor-fold>

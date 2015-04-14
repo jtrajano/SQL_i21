@@ -74,16 +74,12 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICCommodity>()
+                .Include("tblICCommodityUnitMeasures.tblICUnitMeasure")
                 .Where(w => query.Where(predicate).Any(a => a.intCommodityId == w.intCommodityId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)
                 .Take(limit)
-                .AsNoTracking()
-                .Select(p=> new {
-                    intCommodityId = p.intCommodityId,
-                    strCommodityCode= p.strCommodityCode,
-                    strDescription = p.strDescription
-                });
+                .AsNoTracking();
         }
 
         public void AddCommodity(tblICCommodity commodity)
