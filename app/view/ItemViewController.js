@@ -1263,6 +1263,11 @@ Ext.define('Inventory.view.ItemViewController', {
                     grdOwner.getView().refresh();
                 else
                     grdOwner.store.load();
+
+                if (grdFactory) {
+                    grdFactory.getSelectionModel().select(0);
+                }
+                
                 break;
 
             case 'pgeNotes':
