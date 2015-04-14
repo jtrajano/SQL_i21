@@ -125,7 +125,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'intSeasonId', type: 'int', allowNull: true },
         { name: 'intClassVarietyId', type: 'int', allowNull: true },
         { name: 'intProductLineId', type: 'int', allowNull: true },
-        { name: 'strMarketValuation', type: 'string' },
+        { name: 'strMarketValuation', type: 'string' }
     ],
 
     validators: [
@@ -151,5 +151,24 @@ Ext.define('Inventory.model.Item', {
             ],
             message: 'Invalid Type! Please select an Item Type from the list.'
         }
-    ]
+    ],
+
+    validate: function(options){
+        var errors = this.callParent(arguments);
+        if (this.get('strType') === 'Raw Material') {
+            if (this.get('intLifeTime') <= 0) {
+                errors.add({
+                    field: 'intLifeTime',
+                    message: 'Lifetime must be greater than zero(0).'
+                })
+            }
+            if (this.get('intReceiveLife') <= 0) {
+                errors.add({
+                    field: 'intReceiveLife',
+                    message: 'Receive Life must be greater than zero(0).'
+                })
+            }
+        }
+        return errors;
+    }
 });
