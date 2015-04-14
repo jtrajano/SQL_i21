@@ -231,3 +231,14 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51057) EXEC sp_dropmessa
 SET @strmessage = 'Invalid item type - you can only release finished goods items!.'
 EXEC sp_addmessage 51057,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51058) EXEC sp_dropmessage 51058, 'us_english'	
+SET @strmessage = 'Invalid GTIN Case code.'
+EXEC sp_addmessage 51058,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51059) EXEC sp_dropmessage 51059, 'us_english'	
+SET @strmessage = 'The pallet lot quantity cannot exceed more than  item''s cases per pallet value. Please check quantity produced.'
+EXEC sp_addmessage 51059,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51060) EXEC sp_dropmessage 51060, 'us_english'	
+SET @strmessage = 'Item number for GTIN Case Code and Pallet Lot ID is not matching, please scan the appropriate case code.'
+EXEC sp_addmessage 51060,11,@strmessage,'us_english','False'
