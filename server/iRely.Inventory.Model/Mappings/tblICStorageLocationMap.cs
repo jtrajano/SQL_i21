@@ -158,4 +158,49 @@ namespace iRely.Inventory.Model
                 .HasForeignKey(p => p.intContainerTypeId);
         }
     }
+
+    class vyuICGetStorageLocationMap : EntityTypeConfiguration<vyuICGetStorageLocation>
+    {
+        public vyuICGetStorageLocationMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intStorageLocationId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetStorageLocation");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strName).HasColumnName("strName");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.intStorageUnitTypeId).HasColumnName("intStorageUnitTypeId");
+            this.Property(t => t.strStorageUnitType).HasColumnName("strStorageUnitType");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intParentStorageLocationId).HasColumnName("intParentStorageLocationId");
+            this.Property(t => t.strParentStorageLocationName).HasColumnName("strParentStorageLocationName");
+            this.Property(t => t.ysnAllowConsume).HasColumnName("ysnAllowConsume");
+            this.Property(t => t.ysnAllowMultipleItem).HasColumnName("ysnAllowMultipleItem");
+            this.Property(t => t.ysnAllowMultipleLot).HasColumnName("ysnAllowMultipleLot");
+            this.Property(t => t.ysnMergeOnMove).HasColumnName("ysnMergeOnMove");
+            this.Property(t => t.ysnCycleCounted).HasColumnName("ysnCycleCounted");
+            this.Property(t => t.ysnDefaultWHStagingUnit).HasColumnName("ysnDefaultWHStagingUnit");
+            this.Property(t => t.intRestrictionId).HasColumnName("intRestrictionId");
+            this.Property(t => t.strRestrictionCode).HasColumnName("strRestrictionCode");
+            this.Property(t => t.strRestrictionDesc).HasColumnName("strRestrictionDesc");
+            this.Property(t => t.strUnitGroup).HasColumnName("strUnitGroup");
+            this.Property(t => t.dblMinBatchSize).HasColumnName("dblMinBatchSize").HasPrecision(18, 6);
+            this.Property(t => t.dblBatchSize).HasColumnName("dblBatchSize").HasPrecision(18, 6);
+            this.Property(t => t.intBatchSizeUOMId).HasColumnName("intBatchSizeUOMId");
+            this.Property(t => t.intSequence).HasColumnName("intSequence");
+            this.Property(t => t.ysnActive).HasColumnName("ysnActive");
+            this.Property(t => t.intRelativeX).HasColumnName("intRelativeX");
+            this.Property(t => t.intRelativeY).HasColumnName("intRelativeY");
+            this.Property(t => t.intRelativeZ).HasColumnName("intRelativeZ");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.dblPackFactor).HasColumnName("dblPackFactor").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
+            this.Property(t => t.dblResidualUnit).HasColumnName("dblResidualUnit").HasPrecision(18, 6);
+        }
+    }
 }

@@ -314,4 +314,41 @@ namespace iRely.Inventory.Model
 
     }
 
+    public class vyuICGetStorageLocation
+    {
+        public int intStorageLocationId { get; set; }
+        public string strName { get; set; }
+        public string strDescription { get; set; }
+        public int? intStorageUnitTypeId { get; set; }
+        public string strStorageUnitType { get; set; }
+        public int? intLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intParentStorageLocationId { get; set; }
+        public string strParentStorageLocationName { get; set; }
+        public bool? ysnAllowConsume { get; set; }
+        public bool? ysnAllowMultipleItem { get; set; }
+        public bool? ysnAllowMultipleLot { get; set; }
+        public bool? ysnMergeOnMove { get; set; }
+        public bool? ysnCycleCounted { get; set; }
+        public bool? ysnDefaultWHStagingUnit { get; set; }
+        public int? intRestrictionId { get; set; }
+        public string strRestrictionCode { get; set; }
+        public string strRestrictionDesc { get; set; }
+        public string strUnitGroup { get; set; }
+        public decimal? dblMinBatchSize { get; set; }
+        public decimal? dblBatchSize { get; set; }
+        public int? intBatchSizeUOMId { get; set; }
+        public int? intSequence { get; set; }
+        public bool? ysnActive { get; set; }
+        public int? intRelativeX { get; set; }
+        public int? intRelativeY { get; set; }
+        public int? intRelativeZ { get; set; }
+        public int? intCommodityId { get; set; }
+        public decimal? dblPackFactor { get; set; }
+        public decimal? dblUnitPerFoot { get; set; }
+        public decimal? dblResidualUnit { get; set; }
+    }
+
 }

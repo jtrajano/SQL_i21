@@ -217,6 +217,7 @@ namespace iRely.Inventory.Model
         public DbSet<vyuICGetReceiptItemSource> vyuICGetReceiptItemSources { get; set; }
         public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
         public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
+        public DbSet<vyuICGetStorageLocation> vyuICGetStorageLocations { get; set; }
 
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
@@ -365,6 +366,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetReceiptItemSourceMap());
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
+            modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
         }
     }
 }

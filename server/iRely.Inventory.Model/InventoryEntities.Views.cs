@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets7df24cd1dd4674147ddaed41de52f10193eddafed6a42f625afe41356c077329))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetseefadde15077b1c0d0e9998e1dbf779943d53e17495fb3a6e7a3b6fb03bf0f94))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets7df24cd1dd4674147ddaed41de52f10193eddafed6a42f625afe41356c077329 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetseefadde15077b1c0d0e9998e1dbf779943d53e17495fb3a6e7a3b6fb03bf0f94 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "7df24cd1dd4674147ddaed41de52f10193eddafed6a42f625afe41356c077329"; }
+            get { return "eefadde15077b1c0d0e9998e1dbf779943d53e17495fb3a6e7a3b6fb03bf0f94"; }
         }
 
         /// <summary>
@@ -1212,14 +1212,24 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView232();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuSMGetLocationPricingLevel")
+            if (extentName == "CodeFirstDatabase.vyuICGetStorageLocation")
             {
                 return GetView233();
             }
 
-            if (extentName == "InventoryEntities.vyuSMGetLocationPricingLevels")
+            if (extentName == "InventoryEntities.vyuICGetStorageLocations")
             {
                 return GetView234();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuSMGetLocationPricingLevel")
+            {
+                return GetView235();
+            }
+
+            if (extentName == "InventoryEntities.vyuSMGetLocationPricingLevels")
+            {
+                return GetView236();
             }
 
             return null;
@@ -7844,10 +7854,108 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.vyuSMGetLocationPricingLevel.
+        /// Gets the view for CodeFirstDatabase.vyuICGetStorageLocation.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView233()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetStorageLocation
+        [CodeFirstDatabaseSchema.vyuICGetStorageLocation](T1.vyuICGetStorageLocation_intStorageLocationId, T1.vyuICGetStorageLocation_strName, T1.vyuICGetStorageLocation_strDescription, T1.vyuICGetStorageLocation_intStorageUnitTypeId, T1.vyuICGetStorageLocation_strStorageUnitType, T1.vyuICGetStorageLocation_intLocationId, T1.vyuICGetStorageLocation_strLocationName, T1.vyuICGetStorageLocation_intSubLocationId, T1.vyuICGetStorageLocation_strSubLocationName, T1.vyuICGetStorageLocation_intParentStorageLocationId, T1.vyuICGetStorageLocation_strParentStorageLocationName, T1.vyuICGetStorageLocation_ysnAllowConsume, T1.vyuICGetStorageLocation_ysnAllowMultipleItem, T1.vyuICGetStorageLocation_ysnAllowMultipleLot, T1.vyuICGetStorageLocation_ysnMergeOnMove, T1.vyuICGetStorageLocation_ysnCycleCounted, T1.vyuICGetStorageLocation_ysnDefaultWHStagingUnit, T1.vyuICGetStorageLocation_intRestrictionId, T1.vyuICGetStorageLocation_strRestrictionCode, T1.vyuICGetStorageLocation_strRestrictionDesc, T1.vyuICGetStorageLocation_strUnitGroup, T1.vyuICGetStorageLocation_dblMinBatchSize, T1.vyuICGetStorageLocation_dblBatchSize, T1.vyuICGetStorageLocation_intBatchSizeUOMId, T1.vyuICGetStorageLocation_intSequence, T1.vyuICGetStorageLocation_ysnActive, T1.vyuICGetStorageLocation_intRelativeX, T1.vyuICGetStorageLocation_intRelativeY, T1.vyuICGetStorageLocation_intRelativeZ, T1.vyuICGetStorageLocation_intCommodityId, T1.vyuICGetStorageLocation_dblPackFactor, T1.vyuICGetStorageLocation_dblUnitPerFoot, T1.vyuICGetStorageLocation_dblResidualUnit)
+    FROM (
+        SELECT 
+            T.intStorageLocationId AS vyuICGetStorageLocation_intStorageLocationId, 
+            T.strName AS vyuICGetStorageLocation_strName, 
+            T.strDescription AS vyuICGetStorageLocation_strDescription, 
+            T.intStorageUnitTypeId AS vyuICGetStorageLocation_intStorageUnitTypeId, 
+            T.strStorageUnitType AS vyuICGetStorageLocation_strStorageUnitType, 
+            T.intLocationId AS vyuICGetStorageLocation_intLocationId, 
+            T.strLocationName AS vyuICGetStorageLocation_strLocationName, 
+            T.intSubLocationId AS vyuICGetStorageLocation_intSubLocationId, 
+            T.strSubLocationName AS vyuICGetStorageLocation_strSubLocationName, 
+            T.intParentStorageLocationId AS vyuICGetStorageLocation_intParentStorageLocationId, 
+            T.strParentStorageLocationName AS vyuICGetStorageLocation_strParentStorageLocationName, 
+            T.ysnAllowConsume AS vyuICGetStorageLocation_ysnAllowConsume, 
+            T.ysnAllowMultipleItem AS vyuICGetStorageLocation_ysnAllowMultipleItem, 
+            T.ysnAllowMultipleLot AS vyuICGetStorageLocation_ysnAllowMultipleLot, 
+            T.ysnMergeOnMove AS vyuICGetStorageLocation_ysnMergeOnMove, 
+            T.ysnCycleCounted AS vyuICGetStorageLocation_ysnCycleCounted, 
+            T.ysnDefaultWHStagingUnit AS vyuICGetStorageLocation_ysnDefaultWHStagingUnit, 
+            T.intRestrictionId AS vyuICGetStorageLocation_intRestrictionId, 
+            T.strRestrictionCode AS vyuICGetStorageLocation_strRestrictionCode, 
+            T.strRestrictionDesc AS vyuICGetStorageLocation_strRestrictionDesc, 
+            T.strUnitGroup AS vyuICGetStorageLocation_strUnitGroup, 
+            T.dblMinBatchSize AS vyuICGetStorageLocation_dblMinBatchSize, 
+            T.dblBatchSize AS vyuICGetStorageLocation_dblBatchSize, 
+            T.intBatchSizeUOMId AS vyuICGetStorageLocation_intBatchSizeUOMId, 
+            T.intSequence AS vyuICGetStorageLocation_intSequence, 
+            T.ysnActive AS vyuICGetStorageLocation_ysnActive, 
+            T.intRelativeX AS vyuICGetStorageLocation_intRelativeX, 
+            T.intRelativeY AS vyuICGetStorageLocation_intRelativeY, 
+            T.intRelativeZ AS vyuICGetStorageLocation_intRelativeZ, 
+            T.intCommodityId AS vyuICGetStorageLocation_intCommodityId, 
+            T.dblPackFactor AS vyuICGetStorageLocation_dblPackFactor, 
+            T.dblUnitPerFoot AS vyuICGetStorageLocation_dblUnitPerFoot, 
+            T.dblResidualUnit AS vyuICGetStorageLocation_dblResidualUnit, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetStorageLocations AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetStorageLocations.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView234()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetStorageLocations
+        [iRely.Inventory.Model.vyuICGetStorageLocation](T1.vyuICGetStorageLocation_intStorageLocationId, T1.vyuICGetStorageLocation_strName, T1.vyuICGetStorageLocation_strDescription, T1.vyuICGetStorageLocation_intStorageUnitTypeId, T1.vyuICGetStorageLocation_strStorageUnitType, T1.vyuICGetStorageLocation_intLocationId, T1.vyuICGetStorageLocation_strLocationName, T1.vyuICGetStorageLocation_intSubLocationId, T1.vyuICGetStorageLocation_strSubLocationName, T1.vyuICGetStorageLocation_intParentStorageLocationId, T1.vyuICGetStorageLocation_strParentStorageLocationName, T1.vyuICGetStorageLocation_ysnAllowConsume, T1.vyuICGetStorageLocation_ysnAllowMultipleItem, T1.vyuICGetStorageLocation_ysnAllowMultipleLot, T1.vyuICGetStorageLocation_ysnMergeOnMove, T1.vyuICGetStorageLocation_ysnCycleCounted, T1.vyuICGetStorageLocation_ysnDefaultWHStagingUnit, T1.vyuICGetStorageLocation_intRestrictionId, T1.vyuICGetStorageLocation_strRestrictionCode, T1.vyuICGetStorageLocation_strRestrictionDesc, T1.vyuICGetStorageLocation_strUnitGroup, T1.vyuICGetStorageLocation_dblMinBatchSize, T1.vyuICGetStorageLocation_dblBatchSize, T1.vyuICGetStorageLocation_intBatchSizeUOMId, T1.vyuICGetStorageLocation_intSequence, T1.vyuICGetStorageLocation_ysnActive, T1.vyuICGetStorageLocation_intRelativeX, T1.vyuICGetStorageLocation_intRelativeY, T1.vyuICGetStorageLocation_intRelativeZ, T1.vyuICGetStorageLocation_intCommodityId, T1.vyuICGetStorageLocation_dblPackFactor, T1.vyuICGetStorageLocation_dblUnitPerFoot, T1.vyuICGetStorageLocation_dblResidualUnit)
+    FROM (
+        SELECT 
+            T.intStorageLocationId AS vyuICGetStorageLocation_intStorageLocationId, 
+            T.strName AS vyuICGetStorageLocation_strName, 
+            T.strDescription AS vyuICGetStorageLocation_strDescription, 
+            T.intStorageUnitTypeId AS vyuICGetStorageLocation_intStorageUnitTypeId, 
+            T.strStorageUnitType AS vyuICGetStorageLocation_strStorageUnitType, 
+            T.intLocationId AS vyuICGetStorageLocation_intLocationId, 
+            T.strLocationName AS vyuICGetStorageLocation_strLocationName, 
+            T.intSubLocationId AS vyuICGetStorageLocation_intSubLocationId, 
+            T.strSubLocationName AS vyuICGetStorageLocation_strSubLocationName, 
+            T.intParentStorageLocationId AS vyuICGetStorageLocation_intParentStorageLocationId, 
+            T.strParentStorageLocationName AS vyuICGetStorageLocation_strParentStorageLocationName, 
+            T.ysnAllowConsume AS vyuICGetStorageLocation_ysnAllowConsume, 
+            T.ysnAllowMultipleItem AS vyuICGetStorageLocation_ysnAllowMultipleItem, 
+            T.ysnAllowMultipleLot AS vyuICGetStorageLocation_ysnAllowMultipleLot, 
+            T.ysnMergeOnMove AS vyuICGetStorageLocation_ysnMergeOnMove, 
+            T.ysnCycleCounted AS vyuICGetStorageLocation_ysnCycleCounted, 
+            T.ysnDefaultWHStagingUnit AS vyuICGetStorageLocation_ysnDefaultWHStagingUnit, 
+            T.intRestrictionId AS vyuICGetStorageLocation_intRestrictionId, 
+            T.strRestrictionCode AS vyuICGetStorageLocation_strRestrictionCode, 
+            T.strRestrictionDesc AS vyuICGetStorageLocation_strRestrictionDesc, 
+            T.strUnitGroup AS vyuICGetStorageLocation_strUnitGroup, 
+            T.dblMinBatchSize AS vyuICGetStorageLocation_dblMinBatchSize, 
+            T.dblBatchSize AS vyuICGetStorageLocation_dblBatchSize, 
+            T.intBatchSizeUOMId AS vyuICGetStorageLocation_intBatchSizeUOMId, 
+            T.intSequence AS vyuICGetStorageLocation_intSequence, 
+            T.ysnActive AS vyuICGetStorageLocation_ysnActive, 
+            T.intRelativeX AS vyuICGetStorageLocation_intRelativeX, 
+            T.intRelativeY AS vyuICGetStorageLocation_intRelativeY, 
+            T.intRelativeZ AS vyuICGetStorageLocation_intRelativeZ, 
+            T.intCommodityId AS vyuICGetStorageLocation_intCommodityId, 
+            T.dblPackFactor AS vyuICGetStorageLocation_dblPackFactor, 
+            T.dblUnitPerFoot AS vyuICGetStorageLocation_dblUnitPerFoot, 
+            T.dblResidualUnit AS vyuICGetStorageLocation_dblResidualUnit, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetStorageLocation AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuSMGetLocationPricingLevel.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView235()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuSMGetLocationPricingLevel
@@ -7866,7 +7974,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuSMGetLocationPricingLevels.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView234()
+        private static DbMappingView GetView236()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuSMGetLocationPricingLevels

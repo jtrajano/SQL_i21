@@ -26,13 +26,13 @@ namespace iRely.Invetory.WebAPI.Controllers
         {
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICStorageLocation>();
+            var predicate = ExpressionBuilder.True<vyuICGetStorageLocation>();
             var selector = ExpressionBuilder.GetSelector(columns);
 
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts);
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICStorageLocation>(searchFilters);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<vyuICGetStorageLocation>(searchFilters);
 
             var data = _StorageLocationBRL.GetSearchQuery(page, start, limit, selector, sortSelector, predicate);
 
@@ -52,11 +52,11 @@ namespace iRely.Invetory.WebAPI.Controllers
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICStorageLocation>();
+            var predicate = ExpressionBuilder.True<vyuICGetStorageLocation>();
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intStorageLocationId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICStorageLocation>(searchFilters, true);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<vyuICGetStorageLocation>(searchFilters, true);
 
             var total = _StorageLocationBRL.GetCount(predicate);
             var data = _StorageLocationBRL.GetStorageLocations(page, start, page == 0 ? total : limit, sortSelector, predicate);

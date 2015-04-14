@@ -27,7 +27,12 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             columns: [
                 {dataIndex: 'intStorageLocationId',text: "Storage Location Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strName', text: 'Name', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'}
+                {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strLocationName', text: 'Location Name', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strSubLocationName', text: 'Sub Location Name', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strStorageUnitType', text: 'Storage Unit Type', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strParentStorageLocationName', text: 'Parent Storage Location', flex: 1.5,  dataType: 'string'},
+                {dataIndex: 'strRestrictionCode', text: 'Restriction Code', flex: 1,  dataType: 'string'}
             ]
         },
         binding: {
@@ -147,7 +152,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.StorageLocation', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
             binding: me.config.binding,
@@ -155,21 +160,21 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             details: [
                 {
                     key: 'tblICStorageLocationCategories',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdItemCategoryAllowed'),
                         deleteButton : win.down('#btnDeleteItemCategoryAllowed')
                     })
                 },
                 {
                     key: 'tblICStorageLocationMeasurements',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdMeasurement'),
                         deleteButton : win.down('#btnDeleteMeasurement')
                     })
                 },
                 {
                     key: 'tblICStorageLocationSkus',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdSKU'),
                         deleteButton : win.down('#btnDeleteSKU'),
                         position: 'none'
@@ -177,7 +182,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 },
                 {
                     key: 'tblICStorageLocationContainers',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                    component: Ext.create('iRely.grid.Manager', {
                         grid: win.down('#grdContainer'),
                         deleteButton : win.down('#btnDeleteContainer'),
                         position: 'none'

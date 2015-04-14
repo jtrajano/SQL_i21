@@ -21,12 +21,12 @@ namespace iRely.Inventory.BRL
             _db = new Repository(new Inventory.Model.InventoryEntities());
         }
 
-        public IQueryable<tblICStorageLocation> GetSearchQuery()
+        public IQueryable<vyuICGetStorageLocation> GetSearchQuery()
         {
-            return _db.GetQuery<tblICStorageLocation>();
+            return _db.GetQuery<vyuICGetStorageLocation>();
         }
 
-        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<tblICStorageLocation, bool>> predicate)
+        public object GetSearchQuery(int page, int start, int limit, IProjectionSelector selector, CompositeSortSelector sortSelector, Expression<Func<vyuICGetStorageLocation, bool>> predicate)
         {
             return GetSearchQuery()
                 .Where(predicate)
@@ -37,12 +37,12 @@ namespace iRely.Inventory.BRL
                 .AsNoTracking();
         }
 
-        public int GetCount(Expression<Func<tblICStorageLocation, bool>> predicate)
+        public int GetCount(Expression<Func<vyuICGetStorageLocation, bool>> predicate)
         {
             return GetSearchQuery().Where(predicate).Count();
         }
 
-        public IQueryable<tblICStorageLocation> GetStorageLocations(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICStorageLocation, bool>> predicate)
+        public IQueryable<tblICStorageLocation> GetStorageLocations(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<vyuICGetStorageLocation, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICStorageLocation>()
