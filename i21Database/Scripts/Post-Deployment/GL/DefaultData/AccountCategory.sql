@@ -267,7 +267,7 @@ BEGIN
 	INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Auto-Negative'
 END
-END
 
-EXEC dbo.[uspGLConvertAccountGroupToCategory]
+
+
 
