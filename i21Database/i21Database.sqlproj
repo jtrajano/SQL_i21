@@ -148,6 +148,11 @@
     <Folder Include="Scripts\Post-Deployment\PR\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\EM" />
     <Folder Include="Scripts\Post-Deployment\LG" />
+    <Folder Include="Scripts\Post-Deployment\TM\Reports" />
+    <Folder Include="Scripts\Post-Deployment\TM\Reports\DataSource" />
+    <Folder Include="Scripts\Post-Deployment\TM\Reports\Layout" />
+    <Folder Include="Scripts\Post-Deployment\TM\Reports\FieldSelection" />
+    <Folder Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1360,8 +1365,12 @@
     <Build Include="dbo\Tables\tblSCTicketCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSCInventoryUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdationFromTicketDistribution.sql" />
-	<Build Include="dbo\Views\vyuICGetStorageLocation.sql" />
-	<Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustment.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustment.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeliveryFill.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeliveryFill.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\FieldSelection\DeliveryFill.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\DeliveryFill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
