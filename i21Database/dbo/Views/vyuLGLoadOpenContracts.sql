@@ -6,6 +6,7 @@ AS
 			CD.intItemId, 					IM.strDescription 			AS strItemDescription,
 			CD.dblQuantity												AS dblDetailQuantity,
 			CD.intUnitMeasureId, 			UM.strUnitMeasure,
+			CD.intCompanyLocationId,
 			CD.dblQuantity - IsNull((SELECT SUM (LD.dblQuantity) from tblLGLoad LD Group By LD.intContractDetailId Having CD.intContractDetailId = LD.intContractDetailId), 0) AS dblUnLoadedQuantity,
 			
 			CH.intPurchaseSale,
