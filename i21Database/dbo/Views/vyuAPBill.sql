@@ -14,6 +14,7 @@ SELECT
 	B1.strName,
 	C.strAccountId,
 	Payment.strPaymentInfo,
+	Payment.strBankAccountNo,
 	F.strUserName AS strUserId
 FROM
 	tblAPBill A
@@ -27,8 +28,10 @@ FROM
 		SELECT TOP 1
 			D.intBillId
 			,E.strPaymentInfo
+			,G.strBankAccountNo
 		FROM tblAPPaymentDetail D
 			INNER JOIN tblAPPayment E ON D.intPaymentId = E.intPaymentId
+			INNER JOIN tblCMBankAccount G ON E.intAccountId = G.intGLAccountId
 		WHERE E.ysnPosted = 1 AND A.intBillId = D.intBillId
 		ORDER BY intBillId, E.dtmDatePaid DESC --get only the latest payment
 	) Payment
