@@ -21,6 +21,12 @@ BEGIN
 	if(@constraint <> '')
 		exec('ALTER TABLE tblAPBill DROP CONSTRAINT [' + @constraint +']' )
 	
+	
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblICCategoryVendor' and OBJECT_NAME(referenced_object_id) = 'tblAPVendor' 
+	if(@constraint <> '')
+		exec('ALTER TABLE tblICCategoryVendor DROP CONSTRAINT [' + @constraint +']' )
+
 	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblHDTicket' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer' 
 	if(@constraint <> '')
@@ -242,6 +248,16 @@ BEGIN
 	BEGIN
 		exec(N' update a set a.intVendorId = b.intEntityId
 				from tblAPBill a
+					join tblAPVendor b
+						on a.intVendorId =  b.intVendorId ')
+	END
+
+
+	print 'Update Linking of tblICCategoryVendor from vendor id to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICCategoryVendor' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		exec(N' update a set a.intVendorId = b.intEntityId
+				from tblICCategoryVendor a
 					join tblAPVendor b
 						on a.intVendorId =  b.intVendorId ')
 	END
