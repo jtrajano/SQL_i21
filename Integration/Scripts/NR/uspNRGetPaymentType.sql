@@ -25,7 +25,7 @@ BEGIN
 			BEGIN		
 				IF @strOriginSystem = ''PT''
 				BEGIN
-					Select pttyp_pay_type [PaymentMethodId], RTRIM(pttyp_desc) [PaymentMethodName] from dbo.pttypmst
+					Select pttyp_pay_type [strPaymentMethodId], RTRIM(pttyp_desc) [strPaymentMethodName] from dbo.pttypmst
 				END
 				ELSE
 				BEGIN
@@ -42,7 +42,7 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				Select CAST(intPaymentMethodID as nvarchar(50)) [PaymentMethodId], strPaymentMethod [PaymentMethodName] from  dbo.tblSMPaymentMethod
+				Select CAST(intPaymentMethodID as nvarchar(50)) [strPaymentMethodId], strPaymentMethod [strPaymentMethodName] from  dbo.tblSMPaymentMethod
 			END
 			
 		END
