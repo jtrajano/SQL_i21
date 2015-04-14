@@ -7,6 +7,7 @@
 	[intLFutOptTransactionId] INT NOT NULL,
 	[intSFutOptTransactionId] INT NOT NULL		 
 	 CONSTRAINT [PK_tblRKMatchFuturesPSDetail_intMatchFuturesPSDetailId] PRIMARY KEY (intMatchFuturesPSDetailId), 
+	 CONSTRAINT [FK_tblRKMatchFuturesPSDetail_tblRKMatchFuturesPSHeader_intMatchFuturesPSHeaderId] FOREIGN KEY ([intMatchFuturesPSHeaderId]) REFERENCES [tblRKMatchFuturesPSHeader]([intMatchFuturesPSHeaderId]),
 	 CONSTRAINT [FK_tblRKMatchFuturesPSDetail_tblRKFutOptTransaction_intLFutOptTransactionId] FOREIGN KEY ([intLFutOptTransactionId]) REFERENCES [tblRKFutOptTransaction]([intFutOptTransactionId]),
 	 CONSTRAINT [FK_tblRKMatchFuturesPSDetail_tblRKFutOptTransaction_intSFutOptTransactionId] FOREIGN KEY ([intSFutOptTransactionId]) REFERENCES [tblRKFutOptTransaction]([intFutOptTransactionId]),
 )
