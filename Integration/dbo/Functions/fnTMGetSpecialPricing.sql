@@ -48,6 +48,10 @@ BEGIN
 	DECLARE @dblAverageItemCost DECIMAL(18,6)
 	DECLARE @dblStandardItemCost DECIMAL(18,6)
 	DECLARE @dblLastItemCost DECIMAL(18,6)
+	DECLARE @dblItemPriceLevel1 DECIMAL(18,6)
+	DECLARE @dblItemPriceLevel2 DECIMAL(18,6)
+	DECLARE @dblItemPriceLevel3 DECIMAL(18,6)
+	
 
 
 	--Get Customer pricing level
@@ -279,6 +283,21 @@ BEGIN
 			SET @dblCurrentItemPrice = @dblCurrentItemPrice - ISNULL(@dblFactor,0.0)
 		END
 		
+	END
+	
+	IF(@strBasisIndicator = ''1'')
+	BEGIN
+		SET @dblCurrentItemPrice = @dblItemPriceLevel1 + ISNULL(@dblFactor,0.0)
+	END
+	
+	IF(@strBasisIndicator = ''2'')
+	BEGIN
+		SET @dblCurrentItemPrice = @dblItemPriceLevel2 + ISNULL(@dblFactor,0.0)
+	END
+	
+	IF(@strBasisIndicator = ''3'')
+	BEGIN
+		SET @dblCurrentItemPrice = @dblItemPriceLevel3 + ISNULL(@dblFactor,0.0)
 	END
 	
 	IF(NOT(@strBasisIndicator = ''X'' AND @dblCurrentItemPrice > @dblItemPrice))
