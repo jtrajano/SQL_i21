@@ -45,12 +45,16 @@ WHEN NOT MATCHED THEN
 	INSERT (
 		intLotStatusId
 		,strPrimaryStatus
+		,strSecondaryStatus 
 		,strDescription
+		,intSort
 	)
 	VALUES (
 		PrimaryLotStatusHardValues.id 
 		,PrimaryLotStatusHardValues.PrimaryStatus
+		,PrimaryLotStatusHardValues.PrimaryStatus
 		,@Description
+		,PrimaryLotStatusHardValues.id 
 	)
 ;
 
