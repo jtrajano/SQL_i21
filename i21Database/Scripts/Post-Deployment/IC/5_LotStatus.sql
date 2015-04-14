@@ -8,6 +8,8 @@ GO
 
 SET IDENTITY_INSERT dbo.tblICLotStatus ON
 
+DECLARE @Description AS NVARCHAR(100) = 'This is system used lot status. Please do not change.'
+
 -- Use UPSERT to populate the primary lot status 
 MERGE 
 INTO	dbo.tblICLotStatus
@@ -26,21 +28,29 @@ USING	(
 	ON  LotStatus.intLotStatusId = PrimaryLotStatusHardValues.id
 
 -- When id is matched but name is not, then update the name. 
-WHEN MATCHED AND LotStatus.strPrimaryStatus <> PrimaryLotStatusHardValues.PrimaryStatus THEN 
+WHEN	MATCHED 
+		AND (
+			LotStatus.strPrimaryStatus <> PrimaryLotStatusHardValues.PrimaryStatus
+			OR LotStatus.strSecondaryStatus <> PrimaryLotStatusHardValues.PrimaryStatus
+			OR LotStatus.strDescription <> @Description
+		) 
+THEN 
 	UPDATE 
 	SET 	strPrimaryStatus = PrimaryLotStatusHardValues.PrimaryStatus
-			,strSecondaryStatus = NULL
-			,strDescription = NULL
+			,strSecondaryStatus = PrimaryLotStatusHardValues.PrimaryStatus
+			,strDescription = @Description
 
 -- When id is missing, then do an insert. 
 WHEN NOT MATCHED THEN
 	INSERT (
 		intLotStatusId
 		,strPrimaryStatus
+		,strDescription
 	)
 	VALUES (
 		PrimaryLotStatusHardValues.id 
 		,PrimaryLotStatusHardValues.PrimaryStatus
+		,@Description
 	)
 ;
 
