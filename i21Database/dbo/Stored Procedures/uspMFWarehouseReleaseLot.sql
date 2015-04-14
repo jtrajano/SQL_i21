@@ -45,8 +45,8 @@ BEGIN TRY
 		OR @intLotId IS NULL
 	BEGIN
 		RAISERROR (
-				'Invalid Lot'
-				,16
+				51053
+				,11
 				,1
 				)
 
@@ -57,8 +57,8 @@ BEGIN TRY
 		OR @strGTINCaseBarCode IS NULL
 	BEGIN
 		RAISERROR (
-				'Invalid GTIN Case code'
-				,16
+				51058
+				,11
 				,1
 				)
 
@@ -78,12 +78,12 @@ BEGIN TRY
 			WHERE intLotId = @intLotId
 			)
 	BEGIN
-		SET @ErrMsg = 'This lot ' + @strLotNumber + ' was not produced through work order production process; hence this lot cannot be released from this screen. Try changing the lot status using the ''Lot Status Change'' screen available in the Inventory view screen.'
-
+		
 		RAISERROR (
-				@ErrMsg
-				,16
+				51054
+				,11
 				,1
+				,@strLotNumber
 				)
 	END
 
@@ -96,8 +96,8 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				'Lot has already been released!.'
-				,16
+				51055
+				,11
 				,1
 				)
 
@@ -112,8 +112,8 @@ BEGIN TRY
 	IF @strSecondaryStatus = 'Ghost'
 	BEGIN
 		RAISERROR (
-				'Pallet Lot has been marked as a ghost and cannot be released.Please call Supervisor to reverse this!'
-				,16
+				51056
+				,11
 				,1
 				)
 	END
@@ -129,8 +129,8 @@ BEGIN TRY
 		--	)
 	BEGIN
 		RAISERROR (
-				'Lot has already been released!.'
-				,16
+				51055
+				,11
 				,1
 				)
 	END
@@ -144,8 +144,8 @@ BEGIN TRY
 		AND @dblReleaseQty > @CasesPerPallet
 	BEGIN
 		RAISERROR (
-				'The pallet lot quantity cannot exceed more than  material''s cases per pallet value. Please check quantity produced.'
-				,16
+				51059
+				,11
 				,1
 				)
 
@@ -155,8 +155,8 @@ BEGIN TRY
 	IF @strItemNo <> @strGTINCaseBarCode
 	BEGIN
 		RAISERROR (
-				'Item number for GTIN Case Code and Pallet Lot ID is not matching, please scan the appropriate case code.'
-				,16
+				51060
+				,11
 				,1
 				)
 	END
@@ -170,8 +170,8 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				'Invalid material type - you can only release finished goods items!'
-				,16
+				51057
+				,11
 				,1
 				)
 	END
