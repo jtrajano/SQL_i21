@@ -5,6 +5,7 @@ SELECT
 ,Cus.[intEntityCustomerId]
 ,Entity.strName
 ,Cus.strCustomerNumber
+,Cus.strType
 ,Con.strPhone
 ,Loc.strAddress
 ,Loc.strCity

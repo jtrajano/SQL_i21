@@ -16,18 +16,30 @@ pivot
 	for strType in (Vendor,Customer)
 )piv
 */
-SELECT 
-	a.intEntityId,  
+SELECT   
+	a.intEntityId,    
 	a.strName,  
-	case when b.intEntityVendorId is null then 0 else 1 end Vendor,  
-	case when c.intEntityCustomerId is null then 0 else 1 end Customer ,  
-	case when d.intEntitySalespersonId is null then 0 else 1 end Salesperson 
-	
-FROM tblEntity a  
-	left join tblAPVendor b  
-		on a.intEntityId = b.intEntityVendorId  
-	left join tblARCustomer c  
-	    on a.intEntityId = c.intEntityCustomerId  
-	LEFT JOIN tblARSalesperson d
-		on a.intEntityId = d.intEntitySalespersonId
- where (isnull(b.intEntityVendorId,0) + isnull(c.intEntityCustomerId,0) +  isnull(d.intEntitySalespersonId,0)) > 1
+	g.strPhone,  
+	e.strAddress,  
+	e.strCity,  
+	e.strState,  
+	e.strZipCode,  
+	case when b.intEntityVendorId is null then 0 else 1 end Vendor,    
+	case when c.intEntityCustomerId is null then 0 else 1 end Customer ,    
+	case when d.intEntitySalespersonId is null then 0 else 1 end Salesperson   
+   
+FROM tblEntity a    
+	left join tblAPVendor b    
+		on a.intEntityId = b.intEntityVendorId    
+	left join tblARCustomer c    
+		on a.intEntityId = c.intEntityCustomerId    
+	LEFT JOIN tblARSalesperson d  
+		on a.intEntityId = d.intEntitySalespersonId  
+	left join tblEntityLocation e  
+		on a.intDefaultLocationId = e.intEntityLocationId  
+	left join tblEntityToContact f  
+		on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
+	left join tblEntity g  
+		on f.intEntityContactId = g.intEntityId  
+   
+ where (isnull(b.intEntityVendorId,0) + isnull(c.intEntityCustomerId,0) +  isnull(d.intEntitySalespersonId,0)) > 1  
