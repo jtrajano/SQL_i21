@@ -102,7 +102,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\1_MasterTables.sql
 
 --Notes Receivable
-:R .\NR\1_NRStartingNumber.sql
+:R .\NR\1_NRNoteTransType.sql
 
 --Grain
 :R .\GR\1_MasterTables.sql

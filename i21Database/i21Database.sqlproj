@@ -1118,7 +1118,7 @@
     <None Include="Scripts\Post-Deployment\AP\FixstrBillId.sql" />
     <None Include="Scripts\Post-Deployment\IC\3_DefaultData.sql" />
     <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
-    <None Include="Scripts\Post-Deployment\NR\1_NRStartingNumber.sql" />
+    <None Include="Scripts\Post-Deployment\NR\1_NRNoteTransType.sql" />
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>
