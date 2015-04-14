@@ -21,10 +21,10 @@ Ext.define('Inventory.view.LotStatusViewController', {
     setupContext: function () {
         "use strict";
         var win = this.getView();
-        win.context = Ext.create('iRely.mvvm.Engine', {
+        win.context = Ext.create('iRely.Engine', {
             window: win,
             store: Ext.create('Inventory.store.LotStatus'),
-            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+            singleGridMgr: Ext.create('iRely.grid.Manager', {
                 grid: win.down('grid'),
                 title: 'Lot Status',
                 columns: [
@@ -72,6 +72,87 @@ Ext.define('Inventory.view.LotStatusViewController', {
         me.getView().show();
         var context = me.setupContext();
         context.data.load();
+    },
+
+    onDeleteRecord: function(button) {
+        var grid = button.up('grid');
+        var selection = grid.getSelectionModel().getSelection();
+
+        if (selection) {
+            if (selection.length > 0) {
+                Ext.Array.each(selection, function(row) {
+                    if (row.get('intLotStatusId') === 1 || row.get('intLotStatusId') === 2 || row.get('intLotStatusId') === 3) {
+                        iRely.Functions.showErrorDialog('You cannot delete a default Lot Status!');
+                        return;
+                    }
+                });
+            }
+        }
+    },
+
+    onGridColumnBeforeRender: function(column) {
+        "use strict";
+        if (!column) return false;
+        var me = this,
+            win = column.up('window');
+
+        // Show or hide the editor based on the selected Field type.
+        column.getEditor = function(record) {
+            if (!record) return false;
+            var columnId = column.itemId;
+
+            if (record.get('intLotStatusId') === 1 || record.get('intLotStatusId') === 2 || record.get('intLotStatusId') === 3) {
+                return false;
+            }
+            else {
+                switch (columnId) {
+                    case 'colPrimaryStatus' :
+                        return Ext.create('Ext.grid.CellEditor', {
+                            field: Ext.widget({
+                                xtype: 'combobox',
+                                displayField: 'strDescription',
+                                valueField: 'strDescription',
+                                store: {
+                                    data: [
+                                        { strDescription: 'Active' },
+                                        { strDescription: 'On Hold' },
+                                        { strDescription: 'Quarantine' }
+                                    ],
+                                    fields: [
+                                        { name: 'strDescription' }
+                                    ]
+                                }
+                            })
+                        });
+                        break;
+                    case 'colSecondaryStatus' :
+                    case 'colDescription' :
+                        return Ext.create('Ext.grid.CellEditor', {
+                            field: Ext.widget({
+                                xtype: 'textfield'
+                            })
+                        });
+                        break;
+                }
+            }
+        };
+    },
+
+    init: function(application) {
+        this.control({
+            "#btnDelete": {
+                click: this.onDeleteRecord
+            },
+            "#colPrimaryStatus" : {
+                beforerender: this.onGridColumnBeforeRender
+            },
+            "#colSecondaryStatus" : {
+                beforerender: this.onGridColumnBeforeRender
+            },
+            "#colDescription" : {
+                beforerender: this.onGridColumnBeforeRender
+            }
+        })
     }
 
 });
