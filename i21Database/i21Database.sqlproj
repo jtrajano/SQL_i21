@@ -1371,6 +1371,8 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeliveryFill.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\FieldSelection\DeliveryFill.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\DeliveryFill.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
