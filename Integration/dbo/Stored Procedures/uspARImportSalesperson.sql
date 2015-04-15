@@ -136,9 +136,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		
 			--INSERT Entity record for Salesperson
 			INSERT [dbo].[tblEntity]	
-			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed])
+			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber])
 			VALUES						
-			(@strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL)
+			(@strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, '''')
 				
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()
@@ -355,9 +355,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportSalesperson]
 		
 			--INSERT Entity record for Salesperson
 			INSERT [dbo].[tblEntity]	
-			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed])
+			([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed], [strContactNumber])
 			VALUES						
-			(@strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL)
+			(@strName, @strEmail, '''', '''', 0, '''', '''', '''', NULL, NULL, '''')
 				
 			DECLARE @EntityId INT
 			SET @EntityId = SCOPE_IDENTITY()
