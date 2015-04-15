@@ -566,6 +566,14 @@ BEGIN
 					on a.intEntityId = b.intEntityId
 				where b.intEntityId not in (select intEntityId from tblEntityType)	')
 
+	print 'Update entity type for salesperson'
+	exec(N'		
+			insert into tblEntityType(intEntityId,strType,intConcurrencyId)
+			select b.intEntityId,''Salesperson'',0 from tblARSalesperson a
+				join tblEntity b
+					on a.intEntityId = b.intEntityId
+				where b.intEntityId not in (select intEntityId from tblEntityType)	')
+
 	print 'Update entity type for User'
 	exec(N'		
 			insert into tblEntityType(intEntityId,strType,intConcurrencyId)		
