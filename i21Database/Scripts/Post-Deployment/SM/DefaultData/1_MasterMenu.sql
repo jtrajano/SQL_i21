@@ -613,6 +613,14 @@ GO
 	--	SET strCommand = 'Inventory.view.PhysicalCount', intSort = 5
 	--	WHERE strMenuName = 'Physical Count' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Build Assembly' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Build Assembly', 'Inventory', @InventoryActivityId, 'Build Assembly', 'Screen', 'Inventory.view.BuildAssemblyBlend', 'small-screen', 1, 1, 0, 1, 6, 0)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET strCommand = 'Inventory.view.BuildAssemblyBlend', intSort = 6
+		WHERE strMenuName = 'Build Assembly' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
+
 	/* --------------------------------------- */
 	/* -- Create Inventory Maintenance Menu -- */
 	/* --------------------------------------- */
