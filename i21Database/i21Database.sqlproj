@@ -1380,6 +1380,8 @@
     <Build Include="dbo\Views\vyuSMBatchPostingResult.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateConsumeLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateLot.sql" />
+    <Build Include="dbo\Views\vyuRKLFuturePSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
