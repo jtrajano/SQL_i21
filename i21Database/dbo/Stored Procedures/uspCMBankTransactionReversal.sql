@@ -9,7 +9,8 @@
 */
 GO 
 CREATE PROCEDURE uspCMBankTransactionReversal
-	@intUserId INT  
+	@intUserId INT,
+	@dtmReverseDate DATETIME = NULL
 	,@isSuccessful BIT = 0 OUTPUT
 AS
 
@@ -18,6 +19,11 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
+
+-- Local Variable for Reversing Date
+DECLARE @dtmReversalDate AS DATETIME,
+		@intTransactionId AS INT,
+		@intVoidTransactionId AS INT
 
 -- Constant variables for payment methods
 DECLARE @CASH_PAYMENT AS NVARCHAR(20) = 'Cash'
@@ -42,6 +48,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@AR_PAYMENT AS INT = 18
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
+		,@PAYCHECK AS INT = 21
 		
 -- Constant variables for Check number status. 
 DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
@@ -78,7 +85,6 @@ FROM	tblCMCheckNumberAudit AUDIT INNER JOIN tblCMBankTransaction F
 			ON F.strTransactionId = TMP.strTransactionId
 WHERE	-- Condition #1:
 		F.strReferenceNo NOT IN (@CASH_PAYMENT)	
-		AND F.intBankTransactionTypeId NOT IN (@AP_ECHECK)
 		-- Condition #2:
 		AND F.dtmCheckPrinted IS NOT NULL 
 		-- Condition #3:
@@ -132,33 +138,148 @@ WHERE	NOT EXISTS (
 					AND AUDIT.intTransactionId = F.intTransactionId
 					AND AUDIT.intCheckNoStatus = @CHECK_NUMBER_STATUS_VOID
 		)
-		AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
-		AND F.intBankTransactionTypeId NOT IN (@AP_ECHECK) 
+		AND F.strReferenceNo NOT IN (@CASH_PAYMENT)		
 		AND ISNULL(F.strReferenceNo, '') <> ''
 		AND F.dtmCheckPrinted IS NOT NULL 
 IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 
-/**
-* Void the "check" transactions
-* Conditions:
-*	1. Void only check transactions
-*	2. Applicable only on check transactions with printed check report.
-*	3. Void process is applicable for checks issued in AP Payment, Misc Checks, and from origin. 
+/** Check if Reversing Date is specified. 
+*	-If no Reversing Date specified, do the default Voiding procedure
+*	-Otherwise, do the Void Check Reversal Procedure 
+*   (This is temporary condition until reversal procedure is finalized)
 */
-UPDATE	tblCMBankTransaction
-SET		ysnCheckVoid = 1
-		,ysnPosted = 0
-		,strReferenceNo = 'Voided' + (CASE WHEN ISNULL(F.strReferenceNo, '') = '' THEN '' ELSE '-' + F.strReferenceNo END)
-		,dtmLastModified = GETDATE()
-		,intLastModifiedUserId = @intUserId
-FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
-			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
-		-- Condition #1:
-		AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
-		-- Condition #2:		
-		AND F.dtmCheckPrinted IS NOT NULL 
-IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
+IF (@dtmReverseDate IS NULL)
+	BEGIN
+		/**
+		* Void the "check" transactions
+		* Conditions:
+		*	1. Void only check transactions
+		*	2. Applicable only on check transactions with printed check report.
+		*	3. Void process is applicable for checks issued in AP Payment, Misc Checks, and from origin. 
+		*/
+		UPDATE	tblCMBankTransaction
+		SET		ysnCheckVoid = 1
+				,ysnPosted = 0
+				,strReferenceNo = 'Voided' + (CASE WHEN ISNULL(F.strReferenceNo, '') = '' THEN '' ELSE '-' + F.strReferenceNo END)
+				,dtmLastModified = GETDATE()
+				,intLastModifiedUserId = @intUserId
+		FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+					ON F.strTransactionId = TMP.strTransactionId
+		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+				-- Condition #1:
+				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+				-- Condition #2:		
+				AND F.dtmCheckPrinted IS NOT NULL 
+		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
+	END
+ELSE
+	BEGIN
+		/**
+		* Reverse the "check" transaction by creating a Void Check offset
+		* Conditions:
+		*	1. Reverse only check transactions
+		*	2. Applicable only on check transactions with printed check report.
+		*   3. (Temporary) Reverse only if Reversing Date is specified
+		**/
+
+		/** Clean-up Reversing Date parameter **/
+		SELECT @dtmReversalDate = ISNULL(@dtmReverseDate, dtmDate), @intTransactionId = intTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP ON F.strTransactionId = TMP.strTransactionId
+		WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS) AND F.strReferenceNo NOT IN (@CASH_PAYMENT) AND F.dtmCheckPrinted IS NOT NULL 
+
+		/** Insert Reversal Entry Header **/
+		INSERT INTO tblCMBankTransaction
+			(strTransactionId, intBankTransactionTypeId, intBankAccountId, intCurrencyId, dblExchangeRate, dtmDate, strPayee, intPayeeId, strAddress, 
+			strZipCode, strCity, strState, strCountry, dblAmount, strAmountInWords, strMemo, strReferenceNo, dtmCheckPrinted, ysnCheckToBePrinted,
+			ysnCheckVoid, ysnPosted, strLink, ysnClr, dtmDateReconciled, intBankStatementImportId, intBankFileAuditId, strSourceSystem, intEntityId, 
+			intCreatedUserId, intCompanyLocationId, dtmCreated, intLastModifiedUserId)
+		SELECT
+			F.strTransactionId + 'V', 19, intBankAccountId, intCurrencyId, dblExchangeRate, @dtmReversalDate, strPayee, intPayeeId, strAddress, 
+			strZipCode, strCity, strState, strCountry, dblAmount, strAmountInWords, 'Void Transaction for ' + F.strTransactionId, 'Voided-' + strReferenceNo, @dtmReversalDate, ysnCheckToBePrinted,
+			0, 0, strLink, 0, @dtmReversalDate, intBankStatementImportId, intBankFileAuditId, strSourceSystem, intEntityId, 
+			@intUserId, intCompanyLocationId, getdate(), @intUserId
+		FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+					ON F.strTransactionId = TMP.strTransactionId
+		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+				-- Condition #1:
+				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+				-- Condition #2:		
+				AND F.dtmCheckPrinted IS NOT NULL 
+		SELECT @intVoidTransactionId = @@IDENTITY
+
+		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
+
+		/** Insert Reversal Entry Detail(s) **/
+		INSERT INTO tblCMBankTransactionDetail 
+			(intTransactionId, dtmDate, intGLAccountId, strDescription, dblDebit, dblCredit, intUndepositedFundId, 
+			intEntityId, intCreatedUserId, dtmCreated, intLastModifiedUserId, dtmLastModified, intConcurrencyId)
+		SELECT @intVoidTransactionId, @dtmReversalDate, intGLAccountId, strDescription, dblCredit, dblDebit, NULL, 
+			intEntityId, @intUserId, getdate(), @intUserId, getdate(), 1
+		FROM tblCMBankTransactionDetail D 
+			LEFT JOIN (SELECT F.intTransactionId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+						ON F.strTransactionId = TMP.strTransactionId
+						WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+						AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+						AND F.dtmCheckPrinted IS NOT NULL
+						) M ON D.intTransactionId = M.intTransactionId
+						WHERE D.intTransactionId = @intTransactionId 
+						
+						
+		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
+
+		/* Insert created Void Check Transaction Ids to #tmpCMBankTransactionReversal */
+		SELECT strTransactionId, intEntityId INTO #tmpCMBankTransactionReversal FROM 
+			(SELECT F.strTransactionId + 'V' AS strTransactionId, F.intEntityId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+				ON F.strTransactionId = TMP.strTransactionId
+				WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+				AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
+				AND F.dtmCheckPrinted IS NOT NULL) X
+
+		/* Execute Posting Procedure for each Void Check entry*/
+		DECLARE @isPostingSuccessful BIT
+		DECLARE @strVoidTransactionId NVARCHAR(40)
+		DECLARE @intEntityId INT
+		WHILE EXISTS (SELECT 1 FROM #tmpCMBankTransactionReversal) 
+			BEGIN
+				SELECT TOP 1 @strVoidTransactionId = strTransactionId, @intEntityId = intEntityId FROM #tmpCMBankTransactionReversal
+
+				/* Post the Void Check entry*/
+				EXEC uspCMPostVoidCheck 1, 0, @strVoidTransactionId, @intUserId, @intEntityId, @isSuccessful = @isPostingSuccessful OUTPUT
+
+				/* Clear the Void Check entry if successfull posted*/
+				IF (@isPostingSuccessful = 1) 
+					BEGIN
+						UPDATE tblCMBankTransaction SET ysnClr = 1 
+						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = 19
+					END
+				/* Otherwise Delete the Void Check entry and abort the reversal */
+				ELSE 
+					BEGIN
+						DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intVoidTransactionId 
+						DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intVoidTransactionId 
+						GOTO Exit_BankTransactionReversal_WithErrors
+					END
+			
+				DELETE FROM #tmpCMBankTransactionReversal WHERE strTransactionId = @strVoidTransactionId 
+			END
+		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
+
+		/* Void and Clear the Original Transactions */
+		UPDATE	tblCMBankTransaction
+		SET		ysnCheckVoid = 1
+				,ysnClr = 1
+				,strReferenceNo = 'Voided' + (CASE WHEN ISNULL(F.strReferenceNo, '') = '' THEN '' ELSE '-' + F.strReferenceNo END)
+				,dtmLastModified = GETDATE()
+				,dtmDateReconciled = @dtmReversalDate
+				,intLastModifiedUserId = @intUserId
+		FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+					ON F.strTransactionId = TMP.strTransactionId
+		WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
+				-- Condition #1:
+				AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+				-- Condition #2:		
+				AND F.dtmCheckPrinted IS NOT NULL 
+		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
+	END
 
 /** 
 * Void "checks" from origin. 
@@ -176,7 +297,7 @@ IF @isSuccessful = 0 GOTO Exit_BankTransactionReversal_WithErrors
 DELETE tblCMBankTransaction
 FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 			ON F.strTransactionId = TMP.strTransactionId
-WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @AR_PAYMENT)		
+WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT)		
 		AND (
 			-- Condition #1:
 			F.strReferenceNo IN (@CASH_PAYMENT)
@@ -197,3 +318,6 @@ Exit_BankTransactionReversal_WithErrors:
 	GOTO Exit_BankTransactionReversal
 	
 Exit_BankTransactionReversal:
+	-- Clean-up routines:
+	-- Delete all temporary tables used during the reversal procedure. 
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpCMBankTransactionReversal')) DROP TABLE #tmpCMBankTransactionReversal
