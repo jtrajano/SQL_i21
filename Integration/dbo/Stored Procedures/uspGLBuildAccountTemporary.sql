@@ -155,10 +155,10 @@ BEGIN
 						IF EXISTS (SELECT 1 FROM #Segments) 
 						BEGIN
 							TRUNCATE TABLE #TempResults
-
-							INSERT INTO #TempResults ([strCode], [strPrimary], [strSegment], [strDescription], [strAccountGroup], [intAccountGroupId], [intAccountStructureId], [intAccountSegmentId], [strAccountSegmentId])
+							INSERT INTO #TempResults ([strCode], [strPrimary], [strSegment], [strDescription], [strAccountGroup], [intAccountGroupId], [intAccountStructureId], [intAccountSegmentId], [strAccountSegmentId],[intAccountCategoryId])
 							SELECT CA.strCode + @strDivider + S.strCode AS strCode, strPrimary, CA.strSegment + '''' + S.strCode AS strSegment, CA.strDescription + @strDivider + S.strDescription AS strDescription
 								 ,CA.strAccountGroup, CA.intAccountGroupId, CA.intAccountStructureId, S.intAccountSegmentId, CA.strAccountSegmentId + '';'' + CAST(S.intAccountSegmentId as NVARCHAR(50)) AS strAccountSegmentId
+								 ,CA.intAccountCategoryId AS intAccountCategoryId
 							FROM #ConstructAccount CA, #Segments S
 							WHERE S.intAccountStructureId = @iStructureType  							
 					    END
