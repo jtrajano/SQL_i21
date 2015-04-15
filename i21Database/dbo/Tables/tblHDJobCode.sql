@@ -7,11 +7,13 @@
 	[dblRate] [numeric](18, 6) NOT NULL,
 	[ysnSupported] [bit] NOT NULL DEFAULT 1,
 	[intItemId] INT NULL, 
+	[intCompanyLocationId] INT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
     CONSTRAINT [PK_tblHDJobCode] PRIMARY KEY CLUSTERED ([intJobCodeId] ASC),
 	CONSTRAINT [UNQ_tblHDJobCode] UNIQUE ([strJobCode]),
-	CONSTRAINT [FK_tblHDJobCode_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
+	CONSTRAINT [FK_tblHDJobCode_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
+	CONSTRAINT [FK_tblHDJobCode_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId])
 )
 
 GO
@@ -77,3 +79,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDJobCode',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Inventory Item Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDJobCode',
+    @level2type = N'COLUMN',
+    @level2name = N'intItemId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Status',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDJobCode',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnSupported'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Company Location Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDJobCode',
+    @level2type = N'COLUMN',
+    @level2name = N'intCompanyLocationId'
