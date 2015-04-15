@@ -50,6 +50,13 @@ BEGIN
            ,[intFilterConcurrencyId] = (SELECT TOP 1 intConcurrencyId FROM tblRMCriteriaField WHERE strFieldName = 'ysnPending' AND intReportId = @intReportId)
            ,[intUserId] = 0
 END
+ELSE
+BEGIN
+	UPDATE [tblRMDefaultFilter] 
+	SET		[strFrom] = 'False'
+	WHERE intReportId = @intReportId AND strFieldName = 'ysnPending'
+           
+END
 
 
 GO
