@@ -79,7 +79,7 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		[dtmDate] DATETIME NOT NULL, 
 		[dblStockIn] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblStockOut] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-		[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 		
+		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 		
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionId] INT NOT NULL,		
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
@@ -97,4 +97,9 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intItemId_intLocationId]
 		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC)
 		INCLUDE (dtmDate, dblStockIn, dblStockOut, dblCost);
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_strTransactionId]
+		ON [dbo].[tblICInventoryFIFO]([strTransactionId] ASC)
+		INCLUDE (intTransactionId);
 	GO

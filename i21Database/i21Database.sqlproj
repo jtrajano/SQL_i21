@@ -2322,6 +2322,10 @@
     <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
     <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
+    <Build Include="dbo\Tables\tblICInventoryFIFOCostAdjustment.sql" />
+    <Build Include="dbo\Tables\tblICInventoryFIFORevalueOutStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostAverageCostingAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostingAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

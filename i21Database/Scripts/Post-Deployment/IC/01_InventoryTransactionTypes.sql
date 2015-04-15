@@ -94,6 +94,14 @@ USING	(
 		SELECT	id = 21
 				,name = 'Pick Lots'
 				,form = null
+		UNION ALL 
+		SELECT	id = 22
+				,name = 'Cost Variance'
+				,form = null
+		UNION ALL 
+		SELECT	id = 23
+				,name = 'Bill'
+				,form = null
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
