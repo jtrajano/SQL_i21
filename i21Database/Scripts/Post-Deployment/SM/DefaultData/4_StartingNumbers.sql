@@ -335,8 +335,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Build Assembly')
-
-
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 36
+			,[strTransactionType]	= N'Batch Posting'
+			,[strPrefix]			= N'BATCH-'
+			,[intNumber]			= 1
+			,[strModule]			= 'System Manager'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch Posting')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

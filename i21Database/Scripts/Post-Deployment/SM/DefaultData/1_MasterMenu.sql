@@ -1123,6 +1123,14 @@ GO
 			SET intSort = 17
 			WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Reminder List'
 
+		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Batch Posting')
+            INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+            VALUES (N'Batch Posting', N'System Manager', 13, N'Batch Posting', N'Screen', N'i21.view.BatchPosting', N'small-screen', 0, 0, 0, 1, 18, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET intSort = 18
+			WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Batch Posting'
+
 	/* ------------------------------- */	
 	/* --   End Common Info Menus   -- */
 	/* ------------------------------- */	
