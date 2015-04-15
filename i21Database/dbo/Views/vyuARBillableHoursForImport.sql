@@ -9,7 +9,8 @@ SELECT
 	,HW.intTicketHoursWorkedId
 	,HW.intAgentEntityId
 	,U.strName					AS "strAgentName"
-	,HW.dtmBilled
+	,GETDATE()					AS	"dtmBilled"
+	,HW.dtmDate
 	,JC.intJobCodeId
 	,JC.strJobCode
 	,JC.intItemId
