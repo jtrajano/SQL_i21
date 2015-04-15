@@ -13,6 +13,7 @@ SELECT
 	,HW.dtmDate
 	,JC.intJobCodeId
 	,JC.strJobCode
+	,JC.intCompanyLocationId
 	,JC.intItemId
 	,IC.strItemNo
 	,HW.intHours
