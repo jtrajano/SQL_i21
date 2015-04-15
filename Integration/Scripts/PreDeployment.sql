@@ -113,7 +113,7 @@
 :r "..\dbo\Views\vyuTMConsumptionSiteSearch.sql"
 :r "..\dbo\Views\vyuTMSiteOrder.sql"
 :r "..\dbo\Functions\fnTMGetSalesTax.sql"
-:r "..\dbo\Functions\fnTMGetContractPriceForCustomer.sql"
+:r "..\dbo\Functions\fnTMGetContractForCustomer.sql"
 :r "..\dbo\Functions\fnTMGetSpecialPricing.sql"
 
 
