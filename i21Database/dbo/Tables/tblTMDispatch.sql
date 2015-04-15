@@ -27,6 +27,7 @@
     [intDeliveryTermID]        INT             NULL,
     [dtmDispatchingDate]       DATETIME        NULL,
     [strWillCallStatus] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Generated'), 
+    [strPricingMethod] NVARCHAR(10) NOT NULL DEFAULT ('Regular'), 
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -284,3 +285,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDispatch',
     @level2type = N'COLUMN',
     @level2name = N'strWillCallStatus'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Pricing method used in will call order',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'strPricingMethod'

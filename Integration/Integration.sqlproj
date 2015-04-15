@@ -251,7 +251,7 @@
     <None Include="dbo\Stored Procedures\uspGLBuildAccountTemporary.sql" />
     <None Include="dbo\Stored Procedures\uspTMImportTankMonitorReading.sql" />
     <None Include="dbo\Views\vyuTMSiteOrder.sql" />
-    <None Include="dbo\Functions\fnTMGetContractPriceForCustomer.sql" />
+    <None Include="dbo\Functions\fnTMGetContractForCustomer.sql" />
     <None Include="dbo\Functions\fnTMGetSpecialPricing.sql" />
     <None Include="dbo\Functions\fnTMGetSalesTax.sql" />
   </ItemGroup>

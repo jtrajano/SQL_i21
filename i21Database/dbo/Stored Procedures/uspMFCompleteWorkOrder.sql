@@ -29,6 +29,10 @@ BEGIN TRY
 		,@intExecutionOrder INT
 		,@dblInputWeight NUMERIC(18, 6)
 		,@intBatchId INT
+		,@dtmCurrentDate datetime
+		,@intSubLocationId int
+		,@ysnNegativeQtyAllowed BIT
+		,@ysnSubLotAllowed Bit
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -50,9 +54,12 @@ BEGIN TRY
 		,@intInputLotId = intInputLotId
 		,@dblInputWeight = dblInputWeight
 		,@intLocationId = intLocationId
+		,@intSubLocationId=intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
 		,@intContainerId = intContainerId
 		,@ysnEmptyOutSource = ysnEmptyOutSource
+		,@ysnNegativeQtyAllowed=ysnNegativeQtyAllowed
+		,@ysnSubLotAllowed=ysnSubLotAllowed
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -71,12 +78,20 @@ BEGIN TRY
 			,intInputLotId INT
 			,dblInputWeight NUMERIC(18, 6)
 			,intLocationId INT
+			,intSubLocationId Int
 			,intStorageLocationId INT
 			,intContainerId INT
 			,ysnEmptyOutSource BIT
+			,ysnNegativeQtyAllowed BIT
+			,ysnSubLotAllowed BIT
 			)
 
 	BEGIN TRANSACTION
+
+	Select @dtmCurrentDate=GetDate()
+
+	If @intSubLocationId is null
+	Select @intSubLocationId=intSubLocationId From dbo.tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
 
 	IF @strOutputLotNumber = ''
 		OR @strOutputLotNumber IS NULL
@@ -96,7 +111,7 @@ BEGIN TRY
 
 		SELECT @intStatusId = intStatusId
 		FROM dbo.tblMFWorkOrderStatus
-		WHERE strName = 'Completed'
+		WHERE strName = 'Started'
 
 		SELECT @intManufacturingCellId = intManufacturingCellId
 		FROM dbo.tblMFRecipe
@@ -145,16 +160,16 @@ BEGIN TRY
 			,@intManufacturingCellId
 			,@intStorageLocationId
 			,@intLocationId
-			,GetDate()
+			,@dtmCurrentDate
 			,@intUserId
-			,GetDate()
+			,@dtmCurrentDate
 			,@intUserId
 			,@strVendorLotNo
 			,@dtmPlannedDate
 			,@intPlannedShiftId
 			,@dtmPlannedDate
 			,ISNULL(@intExecutionOrder, 1)
-			,Getdate()
+			,@dtmCurrentDate
 			,1
 			,@intBatchId
 
@@ -190,9 +205,9 @@ BEGIN TRY
 			,intWeightUOMId
 			,@intBatchId
 			,1
-			,GetDate()
+			,@dtmCurrentDate
 			,@intUserId
-			,GetDate()
+			,@dtmCurrentDate
 			,@intUserId
 		FROM dbo.tblICLot
 		WHERE intLotId = @intInputLotId
@@ -208,6 +223,27 @@ BEGIN TRY
 		,@dblProduceQty = @dblProduceQty
 		,@intProduceUOMKey = @intProduceUnitMeasureId
 		,@intUserId = @intUserId
+		,@ysnNegativeQtyAllowed=@ysnNegativeQtyAllowed
+
+	EXEC dbo.uspMFValidateCreateLot @strLotNumber = @strOutputLotNumber
+		,@dtmCreated = @dtmPlannedDate
+		,@intShiftId =@intPlannedShiftId
+		,@intItemId = @intItemId
+		,@intStorageLocationId = @intStorageLocationId
+		,@intSubLocationId = @intSubLocationId
+		,@intLocationId = @intLocationId
+		,@dblQuantity = @dblProduceQty
+		,@intItemUOMId = @intProduceUnitMeasureId
+		,@dblUnitCount = @dblPhysicalCount
+		,@intItemUnitCountUOMId = @intPhysicalItemUOMId
+		,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+		,@ysnSubLotAllowed = @ysnSubLotAllowed
+		,@intWorkOrderId = @intWorkOrderId
+		,@intLotTransactionTypeId = 3
+		,@ysnCreateNewLot = 1
+		,@ysnFGProduction = 0
+		,@ysnIgnoreTolerance = 1
+
 
 	EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
 		,@dblProduceQty = @dblProduceQty

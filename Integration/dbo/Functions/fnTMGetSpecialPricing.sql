@@ -18,8 +18,9 @@ CREATE FUNCTION [dbo].[fnTMGetSpecialPricing](
 	,@strItemClass NVARCHAR(20)
 	,@dtmOrderDate DATETIME
 	,@dblQuantity DECIMAL(18,6)
+	,@strContractNumber NVARCHAR(20)
 )
-RETURNS DECIMAL(18,6)
+RETURNS NVARCHAR(50)
 AS
 BEGIN 
 
@@ -51,6 +52,7 @@ BEGIN
 	DECLARE @dblItemPriceLevel1 DECIMAL(18,6)
 	DECLARE @dblItemPriceLevel2 DECIMAL(18,6)
 	DECLARE @dblItemPriceLevel3 DECIMAL(18,6)
+	DECLARE @strReturnString NVARCHAR(50)
 	
 
 
@@ -89,6 +91,9 @@ BEGIN
 			,@dblLastItemCost = ISNULL(vwitm_last_un_cost,0.0)
 		FROM vwitmmst
 		WHERE vwitm_no = @strItemNumber
+	
+	SET @strReturnString = CAST(ISNULL(@dblCurrentItemPrice,0) AS NVARCHAR(40)) + '':Regular''
+	
 
 	--CHECK	item by location
 	IF(@strLocation <> '''')
@@ -133,12 +138,36 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		RETURN @dblCurrentItemPrice
+		--RETURN @dblCurrentItemPrice
+		RETURN @strReturnString
 	END
 	
 	SET @dblItemPrice = @dblCurrentItemPrice
 
 	SET @strOrderDate =  CAST(YEAR(@dtmOrderDate)AS NVARCHAR(4)) + RIGHT(''00''+ CAST(MONTH(@dtmOrderDate)AS NVARCHAR(2)),2) + RIGHT(''00''+ CAST(DAY(@dtmOrderDate)AS NVARCHAR(2)),2)
+	
+	---CHECK fort the Contract
+	
+	
+	IF(@strContractNumber <> '''')
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM vwcntmst WHERE vwcnt_cnt_no = @strContractNumber AND vwcnt_loc_no <> ''000'' AND vwcnt_due_rev_dt >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0))
+		BEGIN
+			IF (SELECT TOP 1 vwcnt_ppd_yndm FROM vwcntmst WHERE vwcnt_cnt_no = @strContractNumber AND vwcnt_loc_no <> ''000'' AND vwcnt_due_rev_dt >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)) = ''D''
+			BEGIN
+				SET @strReturnString = CAST(0.0 AS NVARCHAR(40)) + '':Contract''
+			END
+			ELSE
+			BEGIN
+				IF EXISTS(SELECT TOP 1 1 FROM vwcntmst WHERE vwcnt_cnt_no = @strContractNumber AND vwcnt_loc_no <> ''000'' AND vwcnt_due_rev_dt >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND vwcnt_ppd_yndm = ''M'' AND vwcnt_un_prc > @dblItemPrice) 
+					SET @strReturnString = CAST(@dblItemPrice AS NVARCHAR(40)) + '':Regular''
+				ELSE
+					SET @strReturnString = (SELECT TOP 1 CAST(ISNULL(vwcnt_un_prc,0) AS NVARCHAR(40)) + '':Contract'' FROM vwcntmst WHERE vwcnt_cnt_no = @strContractNumber AND vwcnt_loc_no <> ''000'' AND vwcnt_due_rev_dt >= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0))
+			END
+			RETURN @strReturnString
+		END
+	END	
+	
 	
 	--Check for special Pricing Step 1
 	--Customer and item
@@ -207,7 +236,8 @@ BEGIN
 
 	IF (@strCostToUseLas IS NULL AND @strBasisIndicator IS NULL AND @dblFactor IS NULL AND @dblUnits1 IS NULL AND @dblUnits2 IS NULL AND @dblUnits3 IS NULL AND @strQuantityDiscountByPa IS NULL)
 	BEGIN
-		RETURN ISNULL(@dblCurrentItemPrice,0)
+		--RETURN ISNULL(@dblCurrentItemPrice,0)
+		RETURN @strReturnString
 	END
 	
 	--GEt Item Cost
@@ -225,7 +255,7 @@ BEGIN
 		SET @dblItemCost = @dblLastItemCost
 	END
 	
-	
+	------------From here special price
 	---Calculate Based on factor
 	
 	IF(@strBasisIndicator = ''X'' OR @strBasisIndicator = ''F'')
@@ -302,14 +332,20 @@ BEGIN
 	
 	IF(NOT(@strBasisIndicator = ''X'' AND @dblCurrentItemPrice > @dblItemPrice))
 	BEGIN
-		RETURN @dblCurrentItemPrice
+		--RETURN @dblCurrentItemPrice
+		SET @strReturnString = CAST(ISNULL(@dblCurrentItemPrice,0) AS NVARCHAR(40)) + '':Special''
+		RETURN @strReturnString
 	END
 	ELSE
 	BEGIN
-		RETURN @dblItemPrice
+		--RETURN @dblItemPrice
+		SET @strReturnString = CAST(ISNULL(@dblItemPrice,0) AS NVARCHAR(40)) + '':Regular''
+		RETURN @strReturnString
 	END
 	
-	RETURN ISNULL(@dblCurrentItemPrice,0)
+	--RETURN ISNULL(@dblCurrentItemPrice,0)
+	SET @strReturnString = CAST(ISNULL(@dblCurrentItemPrice,0) AS NVARCHAR(40)) + '':Special''
+	RETURN @strReturnString
 END	
 '
 )

@@ -1361,7 +1361,6 @@
     <Build Include="dbo\Functions\fnCalculateLotQty.sql" />
     <Build Include="dbo\Functions\fnCalculateLotWeight.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxCode.sql" />
-    <None Include="Scripts\Post-Deployment\LG\1_LGStartingNumber.sql" />
     <Build Include="dbo\Tables\tblSCTicketCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSCInventoryUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdationFromTicketDistribution.sql" />
@@ -1371,6 +1370,20 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeliveryFill.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\FieldSelection\DeliveryFill.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\DeliveryFill.sql" />
+    <Build Include="dbo\Tables\tblICBuildAssembly.sql" />
+    <Build Include="dbo\Tables\tblICBuildAssemblyDetail.sql" />
+    <Build Include="dbo\Views\vyuARBillableHoursForImport.sql" />
+    <Build Include="dbo\Tables\tblQMListItem.sql" />
+    <Build Include="dbo\Tables\tblQMList.sql" />
+    <Build Include="dbo\Views\vyuSMBatchPosting.sql" />
+    <Build Include="dbo\Views\vyuSMBatchPostingRecap.sql" />
+    <Build Include="dbo\Views\vyuSMBatchPostingResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateConsumeLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateCreateLot.sql" />
+    <Build Include="dbo\Views\vyuRKLFuturePSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\LG\1_LGStartingNumber.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingProcessMachine.sql" />
     <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
   </ItemGroup>

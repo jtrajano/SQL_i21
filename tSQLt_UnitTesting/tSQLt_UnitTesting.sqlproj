@@ -925,6 +925,7 @@
     <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for Kg-LB-10LbBag.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for Lb-Kg-10LbBag.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for Kg-Ton-10LbBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for 25KgBag-LB-NULL.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateLotQty for the basics.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateLotQty for adding a Qty value.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateLotQty for adding a Weight value.sql" />

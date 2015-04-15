@@ -14,6 +14,12 @@ BEGIN
 			,@WeightUOMUnitQty AS FLOAT
 			,@LotUOMUnitQty AS FLOAT
 
+	-- If lot UOM is null, then assume it is the Item UOM. 
+	IF ISNULL(@intLotUOMId, 0) = 0 
+	BEGIN 
+		SET @intLotUOMId = @intItemUOMId
+	END 
+
 	SELECT	@ItemUOMUnitQty = CASE WHEN intItemUOMId = @intItemUOMId THEN dblUnitQty ELSE @ItemUOMUnitQty END 
 			,@WeightUOMUnitQty = CASE WHEN intItemUOMId = @intWeightUOMId THEN dblUnitQty ELSE @WeightUOMUnitQty END 
 			,@LotUOMUnitQty = CASE WHEN intItemUOMId = @intLotUOMId THEN dblUnitQty ELSE @LotUOMUnitQty END 

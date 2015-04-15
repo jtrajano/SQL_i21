@@ -9,6 +9,7 @@
 	[dblRate] [numeric](18, 6) NOT NULL,
 	[strDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strJIRALink] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
+	[intInvoiceId] [int] NULL,
 	[ysnBillable] [bit] NOT NULL,
 	[ysnBilled] [bit] NULL,
 	[dtmBilled] [datetime] NULL,
@@ -19,7 +20,8 @@
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicketHoursWorked] PRIMARY KEY CLUSTERED ([intTicketHoursWorkedId] ASC),
     CONSTRAINT [FK_TicketHoursWorked_Ticket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])  on delete cascade,
-    CONSTRAINT [FK_TicketHoursWorked_JobCode] FOREIGN KEY ([intJobCodeId]) REFERENCES [dbo].[tblHDJobCode] ([intJobCodeId])
+    CONSTRAINT [FK_TicketHoursWorked_JobCode] FOREIGN KEY ([intJobCodeId]) REFERENCES [dbo].[tblHDJobCode] ([intJobCodeId]),
+	CONSTRAINT [FK_tblHDTicketHoursWorked_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId])
 )
 
 GO

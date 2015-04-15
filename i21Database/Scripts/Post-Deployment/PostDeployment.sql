@@ -126,7 +126,4 @@ print 'BEGIN POST DEPLOYMENT'
 -- Entity Management
 :r .\EM\001_EMEntityPortalMenu.sql
 
---Logistics
-:R .\LG\1_LGStartingNumber.sql
-
 print 'END POST DEPLOYMENT'

@@ -8,7 +8,9 @@ GO
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1
 BEGIN
 
-EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
+EXEC(
+'
+CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		@CustomerId NVARCHAR(50) = NULL,
 		@Update BIT = 0,
 		@Total INT = 0 OUTPUT
@@ -419,12 +421,13 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				WHERE agcus_key = @originCustomer
 			
 				--INSERT Entity record for Customer
-				INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto])
-				VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto)
+				INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber])
+				VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''')
 
 				DECLARE @EntityId INT
 				SET @EntityId = SCOPE_IDENTITY()
 			
+				INSERT INTO [dbo].[tblEntityType]([intEntityId],[strType]) values( @EntityId, ''Customer'' )
 				--INSERT into Customer
 				INSERT [dbo].[tblARCustomer](
 				[intEntityCustomerId], 
@@ -503,32 +506,29 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				 --Get intEntityCustomerId
 				 SELECT @intEntityCustomerId = intEntityCustomerId FROM tblARCustomer WHERE intEntityCustomerId = @EntityId
 	
-
+				if(@strName is null)
+					set @strName = ''''
 				--INSERT ENTITY record for Contact
 				IF(@strContactName IS NOT NULL)
 				BEGIN
-					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
-					VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes)
+					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+					VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes,'''',@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 				END
 				ELSE
-					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
-					VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes)
+					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+					VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes,'''',@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 			
 				
 
 				DECLARE @ContactEntityId INT
 		
 				SET @ContactEntityId = SCOPE_IDENTITY()
-	
-				-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEntityContact.strContactNumber to 20 characters
-				INSERT [dbo].[tblEntityContact] ([intEntityContactId], [strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-				SELECT							 @ContactEntityId, 
-												UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END)
-												,@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes
+				
+				
+				-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEntityContact.strContactNumber to 20 characters				
 						
-				--Get intContactId
-				SELECT @intContactId = intEntityContactId FROM tblEntityContact WHERE intEntityContactId = @ContactEntityId
-		
+				--Get intContactId				
+				
 		
 				--INSERT into Location
 				INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
@@ -541,8 +541,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				 --INSERT into tblARCustomerToContact
 				DECLARE @CustomerToContactId INT
 			
-				INSERT [dbo].[tblARCustomerToContact] ([intEntityCustomerId],[intEntityContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
-				VALUES							  (@intEntityCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
+				--INSERT [dbo].[tblARCustomerToContact] ([intEntityCustomerId],[intEntityContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
+				--VALUES							  (@intEntityCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
+
+				INSERT INTO [dbo].[tblEntityToContact]([intEntityId],[intEntityContactId],[intEntityLocationId],[ysnDefaultContact],[ysnPortalAccess],[strUserType])
+				VALUES( @EntityId, @ContactEntityId, @EntityLocationId, 1 ,0 , ''User'')
 		
 				SET @CustomerToContactId = SCOPE_IDENTITY()
 				
@@ -584,12 +587,15 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		
 	END
 	'
-	)
+)
 END
 
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
-EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
+EXEC(
+
+'
+CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		@CustomerId NVARCHAR(50) = NULL,
 		@Update BIT = 0,
 		@Total INT = 0 OUTPUT
@@ -598,15 +604,15 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 	BEGIN
 
 		--================================================
-		--     UPDATE/INSERT IN ORIGIN	
+		--     UPDATE/INSERT IN ORIGIN
 		--================================================
-		IF(@Update = 1 AND @CustomerId IS NOT NULL) 
+		IF(@Update = 1 AND @CustomerId IS NOT NULL)
 		BEGIN
 			--UPDATE IF EXIST IN THE ORIGIN
 			IF(EXISTS(SELECT 1 FROM ptcusmst WHERE ptcus_cus_no = @CustomerId))
 			BEGIN
 				UPDATE ptcusmst
-				SET 
+				SET
 				--Entity
 				ptcus_last_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),''''),
 				ptcus_first_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),''''),
@@ -655,7 +661,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				--agcus_mkt_sign_yn = CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END,
 				--agcus_dflt_mkt_zone = Cus.intMarketZoneId,
 				--agcus_ga_hold_pay_yn = CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END,
-				--agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END	
+				--agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END
 			FROM tblEntity Ent
 				INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityCustomerId
 				INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
@@ -663,14 +669,14 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 				WHERE strCustomerNumber = @CustomerId AND ptcus_cus_no = @CustomerId
 			END
-			--INSERT IF NOT EXIST IN THE ORIGIN	
+			--INSERT IF NOT EXIST IN THE ORIGIN
 			ELSE
 				INSERT INTO ptcusmst(
 				--Entity
 				ptcus_last_name,
 				ptcus_first_name,
-				ptcus_mid_init, 
-				ptcus_name_suffx, 
+				ptcus_mid_init,
+				ptcus_name_suffx,
 				ptcus_comment,
 				--Contact,
 				ptcus_contact,
@@ -702,7 +708,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_budget_beg_mm,
 				ptcus_budget_end_mm,
 				ptcus_acct_stat_x_1,
-				ptcus_slsmn_id,		
+				ptcus_slsmn_id,
 				ptcus_srv_cd
 				--agcus_dpa_cnt
 				--agcus_dpa_rev_dt,
@@ -713,15 +719,15 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				--agcus_mkt_sign_yn,
 				--agcus_dflt_mkt_zone,
 				--agcus_ga_hold_pay_yn ,
-				--agcus_ga_wthhld_yn	
-			
+				--agcus_ga_wthhld_yn
+
 			)
-		
-			SELECT 
+
+			SELECT
 				--Entity
 				ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),'''') AS strLastName,
 				ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),'''') AS strFirsName,
-				'''' as strMiddleInitial, 
+				'''' as strMiddleInitial,
 				'''' as strNameSuffix,
 				SUBSTRING(Ent.strInternalNotes,1,30) as strInternalNotes,
 				--Ent.str1099Name,
@@ -757,33 +763,33 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				(SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
 				(SELECT strSalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = Cus.intSalespersonId),
 				(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId)
-				--Cus.strDPAContract,				
-				--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),					
-				--Cus.strGBReceiptNumber,			
-				--(CASE WHEN Cus.ysnCheckoffExempt = 1 THEN ''Y'' ELSE ''N'' END) as ysnCheckoffExempt,			
-				--(CASE WHEN Cus.ysnVoluntaryCheckoff = 1 THEN ''Y'' ELSE ''N'' END) as ysnVoluntaryCheckoff,		
-				--Cus.strCheckoffState,			
-				--(CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END) as ysnMarketAgreementSigned,	
-				--Cus.intMarketZoneId,			
-				--(CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END) as ysnHoldBatchGrainPayment,	
+				--Cus.strDPAContract,
+				--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
+				--Cus.strGBReceiptNumber,
+				--(CASE WHEN Cus.ysnCheckoffExempt = 1 THEN ''Y'' ELSE ''N'' END) as ysnCheckoffExempt,
+				--(CASE WHEN Cus.ysnVoluntaryCheckoff = 1 THEN ''Y'' ELSE ''N'' END) as ysnVoluntaryCheckoff,
+				--Cus.strCheckoffState,
+				--(CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END) as ysnMarketAgreementSigned,
+				--Cus.intMarketZoneId,
+				--(CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END) as ysnHoldBatchGrainPayment,
 				--(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding
 				FROM tblEntity Ent
-				INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityCustomerId 
+				INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityCustomerId
 				INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
 				INNER JOIN tblEntityContact Con ON CustToCon.intEntityContactId = Con.intEntityContactId
 				INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
 				WHERE strCustomerNumber = @CustomerId
-			
+
 
 		RETURN;
 		END
 
 		--================================================
-		--     ONE TIME CUSTOMER SYNCHRONIZATION	
+		--     ONE TIME CUSTOMER SYNCHRONIZATION
 		--================================================
-		IF(@Update = 0 AND @CustomerId IS NULL) 
+		IF(@Update = 0 AND @CustomerId IS NULL)
 		BEGIN
-		
+
 			--1 Time synchronization here
 			PRINT ''1 Time Customer Synchronization''
 
@@ -791,38 +797,38 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 			--Entity
 			DECLARE @strName			NVARCHAR (MAX)
-			DECLARE	@strEmail           NVARCHAR (MAX) 
+			DECLARE	@strEmail           NVARCHAR (MAX)
 			DECLARE	@strWebsite			NVARCHAR (MAX)
 			DECLARE	@strInternalNotes	NVARCHAR (MAX)
-			DECLARE @str1099Name        NVARCHAR (100) 
-			DECLARE @ysnPrint1099       BIT     
-			DECLARE @str1099Type		NVARCHAR (100) 
+			DECLARE @str1099Name        NVARCHAR (100)
+			DECLARE @ysnPrint1099       BIT
+			DECLARE @str1099Type		NVARCHAR (100)
 			DECLARE @dtmW9Signed		DATETIME
-			DECLARE	@str1099Form        NVARCHAR (MAX) 
+			DECLARE	@str1099Form        NVARCHAR (MAX)
 			DECLARE @strFederalTaxId    NVARCHAR (MAX)
-			DECLARE @imgPhoto			varbinary(MAX) 
+			DECLARE @imgPhoto			varbinary(MAX)
 
 			--Contacts
 			DECLARE @intContactId		INT
-			DECLARE	@strTitle           NVARCHAR (MAX) 
-			DECLARE	@strContactName     NVARCHAR (MAX) 
-			DECLARE	@strDepartment      NVARCHAR (MAX) 
-			DECLARE	@strMobile          NVARCHAR (MAX) 
-			DECLARE	@strPhone           NVARCHAR (MAX) 
+			DECLARE	@strTitle           NVARCHAR (MAX)
+			DECLARE	@strContactName     NVARCHAR (MAX)
+			DECLARE	@strDepartment      NVARCHAR (MAX)
+			DECLARE	@strMobile          NVARCHAR (MAX)
+			DECLARE	@strPhone           NVARCHAR (MAX)
 			DECLARE	@strPhone2          NVARCHAR (MAX)
-			DECLARE	@strEmail2          NVARCHAR (MAX) 
-			DECLARE	@strFax             NVARCHAR (MAX) 
-			DECLARE	@strNotes           NVARCHAR (MAX) 
-			DECLARE	@strContactMethod   NVARCHAR (MAX) 
+			DECLARE	@strEmail2          NVARCHAR (MAX)
+			DECLARE	@strFax             NVARCHAR (MAX)
+			DECLARE	@strNotes           NVARCHAR (MAX)
+			DECLARE	@strContactMethod   NVARCHAR (MAX)
 			DECLARE	@strTimezone        NVARCHAR (MAX)
-			
+
 			--Customer To Contact
-			DECLARE	@strUserType        NVARCHAR (MAX)  
+			DECLARE	@strUserType        NVARCHAR (MAX)
 			DECLARE @ysnPortalAccess	BIT
-			
+
 
 			--Locations
-			DECLARE	@strLocationName     NVARCHAR (50) 
+			DECLARE	@strLocationName     NVARCHAR (50)
 			DECLARE	@strLocationContactName      NVARCHAR (MAX)
 			DECLARE	@strAddress          NVARCHAR (MAX)
 			DECLARE	@strCity             NVARCHAR (MAX)
@@ -830,15 +836,15 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE	@strState            NVARCHAR (MAX)
 			DECLARE	@strZipCode          NVARCHAR (MAX)
 			DECLARE	@strLocationNotes            NVARCHAR (MAX)
-			DECLARE	@intShipViaId        INT           
-			DECLARE	@intTaxCodeId        INT           
-			DECLARE	@intTermsId          INT           
-			DECLARE	@intWarehouseId      INT          
-		
+			DECLARE	@intShipViaId        INT
+			DECLARE	@intTaxCodeId        INT
+			DECLARE	@intTermsId          INT
+			DECLARE	@intWarehouseId      INT
+
 			--Customer
 			DECLARE @intEntityId				INT
-			DECLARE @intEntityCustomerId				INT            
-			DECLARE @strCustomerNumber			NVARCHAR(15)    
+			DECLARE @intEntityCustomerId				INT
+			DECLARE @strCustomerNumber			NVARCHAR(15)
 			DECLARE @strType					NVARCHAR(MAX)
 			DECLARE @dblCreditLimit				NUMERIC(18,6)
 			DECLARE @strTaxNumber				NVARCHAR(MAX)
@@ -870,11 +876,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @intMarketZoneId			INT
 			DECLARE @ysnHoldBatchGrainPayment	BIT
 			DECLARE @ysnFederalWithholding		BIT
-	    
+
 			DECLARE @Counter INT = 0
-	    
+
 			--Import only those are not yet imported
-			SELECT ptcus_cus_no INTO #tmpptcusmst 
+			SELECT ptcus_cus_no INTO #tmpptcusmst
 				FROM ptcusmst
 			LEFT JOIN tblARCustomer
 				ON ptcusmst.ptcus_cus_no COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
@@ -883,7 +889,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 			WHILE (EXISTS(SELECT 1 FROM #tmpptcusmst))
 			BEGIN
-			
+
 				SELECT @originCustomer = ptcus_cus_no FROM #tmpptcusmst
 
 				SELECT TOP 1
@@ -904,7 +910,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					@strContactName = ptcus_contact,
 					@strDepartment = NULL,
 					@strMobile     = NULL,
-					@strPhone      = (CASE	
+					@strPhone      = (CASE
 										WHEN ptcus_phone_ext IS NULL OR ptcus_phone_ext = '''' THEN
 											RTRIM(LTRIM(ptcus_phone))
 										WHEN ptcus_phone IS NULL OR ptcus_phone = '''' AND ptcus_phone_ext IS NOT NULL AND ptcus_phone_ext <> '''' THEN
@@ -912,7 +918,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 										ELSE
 											RTRIM(LTRIM(ptcus_phone)) + '' x'' + RTRIM(LTRIM(ptcus_phone_ext))
 									 END),
-					@strPhone2     = (CASE	
+					@strPhone2     = (CASE
 										WHEN ptcus_phone_ext2 IS NULL OR ptcus_phone_ext2 = '''' THEN
 											RTRIM(LTRIM(ptcus_phone2))
 										WHEN ptcus_phone2 IS NULL OR ptcus_phone2 = '''' AND ptcus_phone_ext2 IS NOT NULL AND ptcus_phone_ext2 <> '''' THEN
@@ -926,7 +932,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					@strNotes      = NULL,
 					@strContactMethod = NULL,
 					@strTimezone = NULL,
-					
+
 					@strUserType = NULL,
 					@ysnPortalAccess = NULL,
 
@@ -942,182 +948,185 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 					@intTaxCodeId    = NULL,
 					@intTermsId      = NULL,
 					@intWarehouseId  = NULL,
-				
+
 					--Customer
-					@strCustomerNumber		= ptcus_cus_no,			
-					@strType				= CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN ''Company'' ELSE ''Person'' END,					
-					@dblCreditLimit			= ptcus_credit_limit,					
+					@strCustomerNumber		= ptcus_cus_no,
+					@strType				= CASE WHEN ptcus_co_per_ind_cp = ''C'' THEN ''Company'' ELSE ''Person'' END,
+					@dblCreditLimit			= ptcus_credit_limit,
 					@strTaxNumber			= ptcus_sales_tax_id,
-					--@strCurrency			= agcus_dflt_currency, 				
-					@intAccountStatusId		= (SELECT intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = ptcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS),			
-					@intEntitySalespersonId		= (SELECT intEntitySalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = ptcus_slsmn_id COLLATE Latin1_General_CI_AS),		
-    				@strPricing				= NULL, --agcus_prc_lvl					
-					@ysnActive				= CASE WHEN ptcus_active_yn = ''Y'' THEN 1 ELSE 0 END,					
-					@ysnPORequired			= 0, --there is no source field for PT  --CASE WHEN ptcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,									
-					@ysnStatementDetail		= CASE WHEN ptcus_prt_stmnt_dtl_yn = ''Y'' THEN 1 ELSE 0 END,			
-					@strStatementFormat		= CASE WHEN ptcus_stmt_fmt = ''O'' THEN ''Open Item'' WHEN ptcus_stmt_fmt = ''B'' THEN ''Balance Forward'' WHEN ptcus_stmt_fmt = ''R'' THEN ''Budget Reminder'' WHEN ptcus_stmt_fmt = ''N'' THEN ''None'' WHEN ptcus_stmt_fmt IS NULL THEN Null Else '''' END ,			
-					@intCreditStopDays		= ptcus_crd_stop_days,			
-					@strTaxAuthority1		= ptcus_local1,			
-					@strTaxAuthority2		= ptcus_local2,			
-					@ysnPrintPriceOnPrintTicket = CASE WHEN ptcus_pic_prc_yn = ''Y'' THEN 1 ELSE 0 END,	
-					@intServiceChargeId		= (SELECT intServiceChargeId FROM tblARServiceCharge WHERE strServiceChargeCode COLLATE Latin1_General_CI_AS = ptcus_srv_cd COLLATE Latin1_General_CI_AS),			
-					@ysnApplySalesTax		= CASE WHEN ptcus_sales_tax_yn = ''Y'' THEN 1 ELSE 0 END,			
+					--@strCurrency			= agcus_dflt_currency,
+					@intAccountStatusId		= (SELECT intAccountStatusId FROM tblARAccountStatus WHERE strAccountStatusCode COLLATE Latin1_General_CI_AS = ptcus_acct_stat_x_1 COLLATE Latin1_General_CI_AS),
+					@intEntitySalespersonId		= (SELECT intEntitySalespersonId FROM tblARSalesperson WHERE strSalespersonId COLLATE Latin1_General_CI_AS = ptcus_slsmn_id COLLATE Latin1_General_CI_AS),
+    				@strPricing				= NULL, --agcus_prc_lvl
+					@ysnActive				= CASE WHEN ptcus_active_yn = ''Y'' THEN 1 ELSE 0 END,
+					@ysnPORequired			= 0, --there is no source field for PT  --CASE WHEN ptcus_req_po_yn = ''Y'' THEN 1 ELSE 0 END,
+					@ysnStatementDetail		= CASE WHEN ptcus_prt_stmnt_dtl_yn = ''Y'' THEN 1 ELSE 0 END,
+					@strStatementFormat		= CASE WHEN ptcus_stmt_fmt = ''O'' THEN ''Open Item'' WHEN ptcus_stmt_fmt = ''B'' THEN ''Balance Forward'' WHEN ptcus_stmt_fmt = ''R'' THEN ''Budget Reminder'' WHEN ptcus_stmt_fmt = ''N'' THEN ''None'' WHEN ptcus_stmt_fmt IS NULL THEN Null Else '''' END ,
+					@intCreditStopDays		= ptcus_crd_stop_days,
+					@strTaxAuthority1		= ptcus_local1,
+					@strTaxAuthority2		= ptcus_local2,
+					@ysnPrintPriceOnPrintTicket = CASE WHEN ptcus_pic_prc_yn = ''Y'' THEN 1 ELSE 0 END,
+					@intServiceChargeId		= (SELECT intServiceChargeId FROM tblARServiceCharge WHERE strServiceChargeCode COLLATE Latin1_General_CI_AS = ptcus_srv_cd COLLATE Latin1_General_CI_AS),
+					@ysnApplySalesTax		= CASE WHEN ptcus_sales_tax_yn = ''Y'' THEN 1 ELSE 0 END,
 					@dblBudgetAmountForBudgetBilling = ptcus_budget_amt,
-					@strBudgetBillingBeginMonth	= ptcus_budget_beg_mm,	
+					@strBudgetBillingBeginMonth	= ptcus_budget_beg_mm,
 					@strBudgetBillingEndMonth	= ptcus_budget_end_mm
 					--Grain Tab
-					--@strDPAContract = agcus_dpa_cnt,				
-					--@dtmDPADate = (CASE WHEN agcus_dpa_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),7,2)) END),					
-					--@strGBReceiptNumber = agcus_gb_rcpt_no,			
-					--@ysnCheckoffExempt = CASE WHEN agcus_ckoff_exempt_yn = ''Y'' THEN 1 ELSE 0 END,			
-					--@ysnVoluntaryCheckoff = CASE WHEN agcus_ckoff_vol_yn = ''Y'' THEN 1 ELSE 0 END ,		
-					--@strCheckoffState = agcus_ga_origin_st,			
-					--@ysnMarketAgreementSigned = CASE WHEN agcus_mkt_sign_yn = ''Y'' THEN 1 ELSE 0 END ,	
-					--@intMarketZoneId = NULL, --agcus_dflt_mkt_zone this should be query to tblARMarketzone,			
-					--@ysnHoldBatchGrainPayment = CASE WHEN agcus_ga_hold_pay_yn = ''Y'' THEN 1 ELSE 0 END ,	
-					--@ysnFederalWithholding = CASE WHEN agcus_ga_wthhld_yn = ''Y'' THEN 1 ELSE 0 END	
-				
+					--@strDPAContract = agcus_dpa_cnt,
+					--@dtmDPADate = (CASE WHEN agcus_dpa_rev_dt = 0 THEN NULL ELSE CONVERT(datetime,SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),0,5) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),5,2) + ''-'' + SUBSTRING(CONVERT(nvarchar,agcus_dpa_rev_dt),7,2)) END),
+					--@strGBReceiptNumber = agcus_gb_rcpt_no,
+					--@ysnCheckoffExempt = CASE WHEN agcus_ckoff_exempt_yn = ''Y'' THEN 1 ELSE 0 END,
+					--@ysnVoluntaryCheckoff = CASE WHEN agcus_ckoff_vol_yn = ''Y'' THEN 1 ELSE 0 END ,
+					--@strCheckoffState = agcus_ga_origin_st,
+					--@ysnMarketAgreementSigned = CASE WHEN agcus_mkt_sign_yn = ''Y'' THEN 1 ELSE 0 END ,
+					--@intMarketZoneId = NULL, --agcus_dflt_mkt_zone this should be query to tblARMarketzone,
+					--@ysnHoldBatchGrainPayment = CASE WHEN agcus_ga_hold_pay_yn = ''Y'' THEN 1 ELSE 0 END ,
+					--@ysnFederalWithholding = CASE WHEN agcus_ga_wthhld_yn = ''Y'' THEN 1 ELSE 0 END
+
 				FROM ptcusmst
 				WHERE ptcus_cus_no = @originCustomer
-				
+
 				--INSERT Entity record for Customer
-				INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto])
-				VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto)
+				INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber])
+				VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''')
 
 				DECLARE @EntityId INT
 				SET @EntityId = SCOPE_IDENTITY()
-				
+
+				INSERT INTO [dbo].[tblEntityType]([intEntityId],[strType]) values( @EntityId, ''Customer'' )
+
 				--INSERT into Customer
 				INSERT [dbo].[tblARCustomer](
-				[intEntityCustomerId], 
-				[intDefaultLocationId], 
-				[intDefaultContactId], 
-				[strCustomerNumber],		
-				[strType],			
+				[intEntityCustomerId],
+				[intDefaultLocationId],
+				[intDefaultContactId],
+				[strCustomerNumber],
+				[strType],
 				[dblCreditLimit],
-				[dblARBalance],				
+				[dblARBalance],
 				[strTaxNumber],
-				[strCurrency],			
-				[intAccountStatusId],			
-				[intSalespersonId],		
-				[strPricing],	
-				[ysnActive],				
-				[ysnPORequired],									
-				[ysnStatementDetail],		
-				[strStatementFormat],		
-				[intCreditStopDays],		
-				[strTaxAuthority1],		
-				[strTaxAuthority2],			
-				[ysnPrintPriceOnPrintTicket],	
-				[intServiceChargeId],		
-				[ysnApplySalesTax],		
+				[strCurrency],
+				[intAccountStatusId],
+				[intSalespersonId],
+				[strPricing],
+				[ysnActive],
+				[ysnPORequired],
+				[ysnStatementDetail],
+				[strStatementFormat],
+				[intCreditStopDays],
+				[strTaxAuthority1],
+				[strTaxAuthority2],
+				[ysnPrintPriceOnPrintTicket],
+				[intServiceChargeId],
+				[ysnApplySalesTax],
 				[dblBudgetAmountForBudgetBilling],
 				[strBudgetBillingBeginMonth],
 				[strBudgetBillingEndMonth]
 				--Grain Tab
-				--[strDPAContract],				
-				--[dtmDPADate],				
-				--[strGBReceiptNumber],			
-				--[ysnCheckoffExempt],			
-				--[ysnVoluntaryCheckoff],		
-				--[strCheckoffState],			
-				--[ysnMarketAgreementSigned],	
-				--[intMarketZoneId],			
-				--[ysnHoldBatchGrainPayment],	
+				--[strDPAContract],
+				--[dtmDPADate],
+				--[strGBReceiptNumber],
+				--[ysnCheckoffExempt],
+				--[ysnVoluntaryCheckoff],
+				--[strCheckoffState],
+				--[ysnMarketAgreementSigned],
+				--[intMarketZoneId],
+				--[ysnHoldBatchGrainPayment],
 				--[ysnFederalWithholding]
 				)
-				VALUES						
+				VALUES
 				(@EntityId,
-				 NULL, 
-				 NULL, 
-				 @strCustomerNumber,		
-				 @strType,			
+				 NULL,
+				 NULL,
+				 @strCustomerNumber,
+				 @strType,
 				 @dblCreditLimit,
-				 0,				
+				 0,
 				 @strTaxNumber,
-				 @strCurrency,			
-				 @intAccountStatusId,			
-				 @intEntitySalespersonId,		
-				 @strPricing,	
-				 @ysnActive,				
-				 @ysnPORequired,									
-				 @ysnStatementDetail,		
-				 @strStatementFormat,		
-				 @intCreditStopDays,		
-				 @strTaxAuthority1,		
-				 @strTaxAuthority2,			
-				 @ysnPrintPriceOnPrintTicket,	
-				 @intServiceChargeId,		
-				 @ysnApplySalesTax,		
+				 @strCurrency,
+				 @intAccountStatusId,
+				 @intEntitySalespersonId,
+				 @strPricing,
+				 @ysnActive,
+				 @ysnPORequired,
+				 @ysnStatementDetail,
+				 @strStatementFormat,
+				 @intCreditStopDays,
+				 @strTaxAuthority1,
+				 @strTaxAuthority2,
+				 @ysnPrintPriceOnPrintTicket,
+				 @intServiceChargeId,
+				 @ysnApplySalesTax,
 				 @dblBudgetAmountForBudgetBilling,
 				 @strBudgetBillingBeginMonth,
 				 @strBudgetBillingEndMonth
-				 --@strDPAContract,				
-				 --@dtmDPADate,					
-				 --@strGBReceiptNumber,			
-				 --@ysnCheckoffExempt,			
-				 --@ysnVoluntaryCheckoff,		
-				 --@strCheckoffState,			
-				 --@ysnMarketAgreementSigned,	
-				 --@intMarketZoneId,			
-				 --@ysnHoldBatchGrainPayment,	
+				 --@strDPAContract,
+				 --@dtmDPADate,
+				 --@strGBReceiptNumber,
+				 --@ysnCheckoffExempt,
+				 --@ysnVoluntaryCheckoff,
+				 --@strCheckoffState,
+				 --@ysnMarketAgreementSigned,
+				 --@intMarketZoneId,
+				 --@ysnHoldBatchGrainPayment,
 				 --@ysnFederalWithholding
 				 )
-				 
+
 				 --Get intEntityCustomerId
 				 SELECT @intEntityCustomerId = intEntityCustomerId FROM tblARCustomer WHERE intEntityCustomerId = @EntityId
-		
+
+				 if(@strName is null)
+					set @strName = ''''
+
 
 				--INSERT ENTITY record for Contact
 				IF(@strContactName IS NOT NULL)
 				BEGIN
-					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
-					VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes)
+					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+					VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes,'''',@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 				END
 				ELSE
-					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes])
-					VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes)
+					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
+					VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes,'''',@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+			
 
 				DECLARE @ContactEntityId INT
-				
+
 				SET @ContactEntityId = SCOPE_IDENTITY()
-			
-				-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEntityContact.strContactNumber to 20 characters
-				INSERT [dbo].[tblEntityContact] (intEntityContactId, [strContactNumber], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-				SELECT							 @ContactEntityId, 
-												CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END
-												,@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes
-					
-				--Get intContactId
-				SELECT @intContactId = intEntityContactId FROM tblEntityContact WHERE intEntityContactId = @ContactEntityId
-				
-			
+
+				-- RULE: when creating a default contact from agcusmst.agcus_contact, trim tblEntityContact.strContactNumber to 20 characters				
+
+				--Get intContactId				
+
+
 				--INSERT into Location
 				INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
 				VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId)
 
 				DECLARE @EntityLocationId INT
 				SET @EntityLocationId = SCOPE_IDENTITY()
-			
-				 
+
+
 				--INSERT into tblARCustomerToContact
 				DECLARE @CustomerToContactId INT
-				
-				INSERT [dbo].[tblARCustomerToContact] ([intEntityCustomerId],[intEntityContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
-				VALUES							  (@intEntityCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
-				
+
+				--INSERT [dbo].[tblARCustomerToContact] ([intEntityCustomerId],[intEntityContactId],[intEntityLocationId],[strUserType],[ysnPortalAccess])
+				--VALUES							  (@intEntityCustomerId, @intContactId, @EntityLocationId, ''User'', 0)
+				INSERT INTO [dbo].[tblEntityToContact]([intEntityId],[intEntityContactId],[intEntityLocationId],[ysnDefaultContact],[ysnPortalAccess],[strUserType])
+				VALUES( @EntityId, @ContactEntityId, @EntityLocationId, 1 ,0 , ''User'')
+
 				SET @CustomerToContactId = SCOPE_IDENTITY()
-				
-				UPDATE tblARCustomer 
-				SET intDefaultContactId = @CustomerToContactId, 
+
+				UPDATE tblARCustomer
+				SET intDefaultContactId = @CustomerToContactId,
 					intDefaultLocationId = @EntityLocationId,
 					intBillToId = @EntityLocationId,
 					intShipToId = @EntityLocationId
-				WHERE intEntityCustomerId = @EntityId 
-		
-			
+				WHERE intEntityCustomerId = @EntityId
 
-				IF(@@ERROR <> 0) 
+
+
+				IF(@@ERROR <> 0)
 				BEGIN
 					PRINT @@ERROR;
 					RETURN;
@@ -1125,25 +1134,29 @@ EXEC('CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 				PRINT @originCustomer
 				DELETE FROM #tmpptcusmst WHERE ptcus_cus_no = @originCustomer
-			
+
 				SET @Counter += 1;
 
 			END
-		
+
 		SET @Total = @Counter
 
 		END
 
 		--================================================
-		--     GET TO BE IMPORTED RECORDS	
+		--     GET TO BE IMPORTED RECORDS
 		--================================================
-		IF(@Update = 1 AND @CustomerId IS NULL) 
+		IF(@Update = 1 AND @CustomerId IS NULL)
 		BEGIN
-			SELECT @Total = COUNT(ptcus_cus_no)  
+			SELECT @Total = COUNT(ptcus_cus_no)
 				FROM ptcusmst
 			LEFT JOIN tblARCustomer
 				ON ptcusmst.ptcus_cus_no COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
 			WHERE tblARCustomer.strCustomerNumber IS NULL
 		END
-	END')
+	END
+
+'
+
+)
 END

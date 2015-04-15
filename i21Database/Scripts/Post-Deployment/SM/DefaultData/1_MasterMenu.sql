@@ -402,45 +402,55 @@ GO
 		BEGIN
 			UPDATE tblSMMasterMenu SET intSort = 3 WHERE strMenuName = 'Import Invoices from Origin' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
 		END
+
+	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Import Billable from Help Desk' AND intParentMenuID = @activitiesId)
+		BEGIN
+			INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
+			VALUES ('Import Billable from Help Desk','Accounts Receivable',@activitiesId,'Import Billable from Help Desk','Screen','AccountsReceivable.view.ImportBillable','small-screen',1,0,0,1,4,1)
+		END
+	ELSE
+		BEGIN
+			UPDATE tblSMMasterMenu SET intSort = 4 WHERE strMenuName = 'Import Billable from Help Desk' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
+		END
 	
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Credit Memo' AND intParentMenuID = @activitiesId)
 		BEGIN
 			INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-			VALUES ('Credit Memo','Accounts Receivable',@activitiesId,'Credit Memo','Screen','AccountsReceivable.view.CreditMemo','small-screen',1,0,0,1,4,1)
+			VALUES ('Credit Memo','Accounts Receivable',@activitiesId,'Credit Memo','Screen','AccountsReceivable.view.CreditMemo','small-screen',1,0,0,1,5,1)
 		END 
 	ELSE
 		BEGIN
-			UPDATE tblSMMasterMenu SET intSort = 4 WHERE strMenuName = 'Credit Memo' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
+			UPDATE tblSMMasterMenu SET intSort = 5 WHERE strMenuName = 'Credit Memo' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
 		END
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payments' AND intParentMenuID = @activitiesId)
 		BEGIN
 			INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-			VALUES ('Receive Payments','Accounts Receivable',@activitiesId,'Receive Payments','Screen','AccountsReceivable.view.ReceivePayments','small-screen',1,0,0,1,5,1)
+			VALUES ('Receive Payments','Accounts Receivable',@activitiesId,'Receive Payments','Screen','AccountsReceivable.view.ReceivePayments','small-screen',1,0,0,1,6,1)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblSMMasterMenu SET intSort = 5 WHERE strMenuName = 'Receive Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
+			UPDATE tblSMMasterMenu SET intSort = 6 WHERE strMenuName = 'Receive Payments' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
 		END
 
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Receive Payment Detail' AND intParentMenuID = @activitiesId)
 		BEGIN
 			INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-			VALUES ('Receive Payment Detail','Accounts Receivable',@activitiesId,'Receive Payment Detail','Screen','AccountsReceivable.view.ReceivePaymentsDetail','small-screen',1,0,0,1,6,1)
+			VALUES ('Receive Payment Detail','Accounts Receivable',@activitiesId,'Receive Payment Detail','Screen','AccountsReceivable.view.ReceivePaymentsDetail','small-screen',1,0,0,1,7,1)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblSMMasterMenu SET intSort = 6 WHERE strMenuName = 'Receive Payment Detail' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
+			UPDATE tblSMMasterMenu SET intSort = 7 WHERE strMenuName = 'Receive Payment Detail' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
 		END
 		
 	IF NOT EXISTS (SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'Accounts Receivable' AND strMenuName = 'Batch Posting' AND intParentMenuID = @activitiesId)
 		BEGIN
 			INSERT dbo.tblSMMasterMenu(strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon,ysnVisible, ysnExpanded,ysnIsLegacy,ysnLeaf,intSort,intConcurrencyId)
-			VALUES ('Batch Posting','Accounts Receivable',@activitiesId,'Batch Posting','Screen','AccountsReceivable.controller.BatchPosting','small-screen',1,0,0,1,7,1)
+			VALUES ('Batch Posting','Accounts Receivable',@activitiesId,'Batch Posting','Screen','AccountsReceivable.controller.BatchPosting','small-screen',1,0,0,1,8,1)
 		END
 	ELSE
 		BEGIN
-			UPDATE tblSMMasterMenu SET intSort = 7 WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
+			UPDATE tblSMMasterMenu SET intSort = 8 WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @activitiesId
 		END
 
 	/* -------------------------------------------------- */
@@ -612,6 +622,14 @@ GO
 	--	UPDATE tblSMMasterMenu
 	--	SET strCommand = 'Inventory.view.PhysicalCount', intSort = 5
 	--	WHERE strMenuName = 'Physical Count' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Build Assembly' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId)
+		INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+		VALUES ('Build Assembly', 'Inventory', @InventoryActivityId, 'Build Assembly', 'Screen', 'Inventory.view.BuildAssemblyBlend', 'small-screen', 1, 1, 0, 1, 6, 0)
+	ELSE
+		UPDATE tblSMMasterMenu
+		SET strCommand = 'Inventory.view.BuildAssemblyBlend', intSort = 6
+		WHERE strMenuName = 'Build Assembly' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivityId
 
 	/* --------------------------------------- */
 	/* -- Create Inventory Maintenance Menu -- */
@@ -1104,6 +1122,14 @@ GO
 			UPDATE tblSMMasterMenu
 			SET intSort = 17
 			WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Reminder List'
+
+		IF NOT EXISTS(SELECT 1 FROM dbo.tblSMMasterMenu WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Batch Posting')
+            INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+            VALUES (N'Batch Posting', N'System Manager', 13, N'Batch Posting', N'Screen', N'i21.view.BatchPosting', N'small-screen', 0, 0, 0, 1, 18, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET intSort = 18
+			WHERE strModuleName = 'System Manager' AND intParentMenuID = 13 AND strMenuName = 'Batch Posting'
 
 	/* ------------------------------- */	
 	/* --   End Common Info Menus   -- */
@@ -1825,6 +1851,15 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'Logistics.view.LoadSchedule', intSort = 2
 			WHERE strMenuName = 'Load Schedule' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Generate Loads' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Generate Loads', 'Logistics', @LogisticsActivitiesId, 'Generate Loads', 'Screen', 'Logistics.view.GenerateLoad', 'small-screen', 0, 0, 0, 1, 3, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Logistics.view.GenerateLoad', intSort = 3
+			WHERE strMenuName = 'Generate Loads' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesId
+
 GO
 
 	/* ------------------------------------- */
