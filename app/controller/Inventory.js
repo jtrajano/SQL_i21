@@ -92,161 +92,59 @@ Ext.define('Inventory.controller.Inventory', {
         return today;
     },
 
-    getICAccountCategories: function() {
-        var accounts = [
-            {
-                column: 'strAccountCategory',
-                value: 'End Inventory',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Fee Expense',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Fee Income',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Freight Expenses',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Interest Expense',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Interest Income',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Inventory',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Options Expense',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Options Expense',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Options Income',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Purchase Account',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Rail Freight',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Sales Account',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Storage Expense',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Storage Income',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Begin Inventory',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Broker Expense',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Contract Equity',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Contract Purchase Gain/Loss',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Contract Sales Gain/Loss',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Cost of Goods',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Currency Equity',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Currency Purchase Gain/Loss',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Currency Sales Gain/Loss',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Discount Receivable',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'DP Income',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'DP Liability',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Storage Income',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Storage Receivable',
-                conjunction: 'or'
-            },
-            {
-                column: 'strAccountCategory',
-                value: 'Variance Account',
-                conjunction: 'or'
-            }
-        ];
+    getFullUPCString: function(shortUPC) {
+        if (iRely.Functions.isEmpty(shortUPC)) return null;
+        if (shortUPC.length < 6) return null;
+        var lastDigit = parseInt(shortUPC.substring(shortUPC.length - 1));
+        var fullUPC = "";
+        if (lastDigit < 0 || lastDigit === null || lastDigit === undefined) return null;
 
-        return accounts;
+        switch (lastDigit) {
+            case 0 :
+                fullUPC += "000";
+                fullUPC += shortUPC.substring(0, 2);
+                fullUPC += "00000";
+                fullUPC += shortUPC.substring(2, 5);
+                fullUPC += "0";
+                break;
+            case 1 :
+                fullUPC += "000";
+                fullUPC += shortUPC.substring(0, 2);
+                fullUPC += "10000";
+                fullUPC += shortUPC.substring(2, 5);
+                fullUPC += "0";
+                break;
+            case 2 :
+                fullUPC += "000";
+                fullUPC += shortUPC.substring(0, 2);
+                fullUPC += "20000";
+                fullUPC += shortUPC.substring(2, 5);
+                fullUPC += "0";
+                break;
+            case 3 :
+                fullUPC += "000";
+                fullUPC += shortUPC.substring(0, 3);
+                fullUPC += "00000";
+                fullUPC += shortUPC.substring(3, 5);
+                fullUPC += "0";
+                break;
+            case 4 :
+                fullUPC += "000";
+                fullUPC += shortUPC.substring(0, 4);
+                fullUPC += "00000";
+                fullUPC += shortUPC.substring(4, 5);
+                fullUPC += "0";
+                break;
+            default :
+                fullUPC += "000";
+                fullUPC += shortUPC.substring(0, 5);
+                fullUPC += "0000";
+                fullUPC += shortUPC.substring(5, 6);
+                fullUPC += "0";
+                break;
+        }
+
+        return fullUPC;
     },
 
     checkEmptyStore: function(arrayItems) {

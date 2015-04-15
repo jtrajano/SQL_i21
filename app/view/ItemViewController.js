@@ -94,7 +94,8 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colDetailUpcCode: 'strUpcCode',
+                colDetailShortUPC: 'strUpcCode',
+                colDetailUpcCode: 'strFullUPC',
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: 'ysnAllowPurchase',

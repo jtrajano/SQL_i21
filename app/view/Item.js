@@ -566,21 +566,23 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colDetailUpcCode',
-                                                        minWidth: 80,
                                                         dataIndex: 'string',
-                                                        text: 'UPC Code',
-                                                        flex: 2,
+                                                        itemId: 'colDetailShortUPC',
+                                                        width: 70,
+                                                        text: 'Short UPC',
                                                         editor: {
-                                                            xtype: 'textfield'
+                                                            xtype: 'numberfield',
+                                                            allowDecimals: false,
+                                                            allowExponential: false
                                                         }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colDetailShortUPC',
-                                                        width: 70,
                                                         dataIndex: 'string',
-                                                        text: 'Short UPC'
+                                                        itemId: 'colDetailUpcCode',
+                                                        minWidth: 110,
+                                                        text: 'UPC Code',
+                                                        flex: 2
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
