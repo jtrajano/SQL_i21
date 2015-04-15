@@ -326,6 +326,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Work Order')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 35
+			,[strTransactionType]	= N'Build Assembly'
+			,[strPrefix]			= N'BUILD-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Inventory'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Build Assembly')
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
