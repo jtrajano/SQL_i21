@@ -344,6 +344,42 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch Posting')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 37
+			,[strTransactionType]	= N'Shipping Instructions'
+			,[strPrefix]			= N'SI-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Shipping Instructions')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 38
+			,[strTransactionType]	= N'Allocations'
+			,[strPrefix]			= N'AL-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Allocations')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 39
+			,[strTransactionType]	= N'Load Schedule'
+			,[strPrefix]			= N'LS-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Load Schedule')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 40
+			,[strTransactionType]	= N'Generate Loads'
+			,[strPrefix]			= N'GL-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Generate Loads')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
