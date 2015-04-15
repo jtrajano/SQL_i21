@@ -919,6 +919,29 @@
     <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting LB to LB.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to 50 LB BAG.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting KG to KG.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for LB-LB-25KgBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for 25KgBag-LB-25KgBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for Kg-LB-10LbBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for Lb-Kg-10LbBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for Kg-Ton-10LbBag.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotQty for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotQty for adding a Qty value.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotQty for adding a Weight value.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotQty for reducing a Qty value.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotQty for reducing a Weight value.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotWeight for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotWeight for adding a Weight value.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotWeight for reducing a Weight value.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotWeight for reducing a Qty value.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotWeight for reducing a Qty value in steps.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateLotWeight for adding a Qty value.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for the basics.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for correct arguments.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for zero Qty.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for zero weight.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for whole numbers.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for 25KgBag-LB-NULL.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

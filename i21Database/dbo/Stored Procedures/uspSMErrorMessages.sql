@@ -202,3 +202,11 @@ EXEC sp_addmessage 51049,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51050) EXEC sp_dropmessage 51050, 'us_english'	
 SET @strmessage = 'Please correct the unit qty in UOM %s on %s.'
 EXEC sp_addmessage 51050,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51051) EXEC sp_dropmessage 51051, 'us_english'	
+SET @strmessage = 'The lot number %s is already used in %s.'
+EXEC sp_addmessage 51051,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51052) EXEC sp_dropmessage 51052, 'us_english'	
+SET @strmessage = 'Please check for duplicate lot numbers. The lot number %s is used more than once in item %s on %s.'
+EXEC sp_addmessage 51052,11,@strmessage,'us_english','False'

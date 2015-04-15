@@ -14,6 +14,8 @@ BEGIN
 			,B.dblOpenReceive
 			,B.intItemId
 			,A.ysnPosted
+			,B.intUnitMeasureId
+			,CalculatedOpenReceive = B.dblOpenReceive
 	INTO	#tmpReceivedPOItems
 	FROM	tblICInventoryReceipt A LEFT JOIN tblICInventoryReceiptItem B 
 				ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -54,16 +56,31 @@ BEGIN
 		RETURN;
 	END
 
-	IF EXISTS(SELECT 1 FROM tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B ON A.intPurchaseDetailId = B.intLineNo AND A.intItemId = B.intItemId AND intPurchaseId = intSourceId AND (dblQtyReceived + B.dblOpenReceive) > dblQtyOrdered ) AND @posted = 1
-	BEGIN
-		--Received item exceeds
-		RAISERROR(51035, 11, 1); 
-		RETURN;
-	END
+	-- Calculate the open receive to the UOM of the PO
+	UPDATE	POItems
+	SET		CalculatedOpenReceive = dbo.fnCalculateQtyBetweenUOM(POItems.intUnitMeasureId, PODetail.intUnitOfMeasureId, POItems.dblOpenReceive)
+	FROM	#tmpReceivedPOItems POItems INNER JOIN dbo.tblPOPurchaseDetail PODetail
+				ON POItems.intSourceId = PODetail.intPurchaseId
+				AND POItems.intLineNo = PODetail.intPurchaseDetailId
+
+	--IF EXISTS(
+	--		SELECT	1 
+	--		FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
+	--					ON A.intPurchaseDetailId = B.intLineNo 
+	--					AND A.intItemId = B.intItemId 
+	--					AND intPurchaseId = intSourceId 
+	--					AND (dblQtyReceived + B.CalculatedOpenReceive) > dblQtyOrdered 
+	--		) 
+	--	AND @posted = 1
+	--BEGIN
+	--	--Received item exceeds
+	--	RAISERROR(51035, 11, 1); 
+	--	RETURN;
+	--END
 
 	UPDATE	A
-	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.dblOpenReceive) 
-									ELSE (	dblQtyReceived - B.dblOpenReceive) 
+	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.CalculatedOpenReceive) 
+									ELSE (	dblQtyReceived - B.CalculatedOpenReceive) 
 							END
 	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
 				ON A.intItemId = B.intItemId 
@@ -72,7 +89,7 @@ BEGIN
 				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
 
 	UPDATE	A
-	SET		intOrderStatusId =	CASE	WHEN (SELECT SUM(dblQtyReceived) - SUM(dblQtyOrdered) FROM tblPOPurchaseDetail WHERE intPurchaseId = B.intSourceId) = 0 THEN 3 
+	SET		intOrderStatusId =	CASE	WHEN (SELECT SUM(dblQtyReceived) - SUM(dblQtyOrdered) FROM tblPOPurchaseDetail WHERE intPurchaseId = B.intSourceId) >= 0 THEN 3 
 										ELSE 2 
 								END
 	FROM	tblPOPurchase A INNER JOIN #tmpReceivedPOItems B 
@@ -101,14 +118,16 @@ BEGIN
 				,intItemLocationId		= ItemLocation.intItemLocationId
 				,intItemUOMId			= ReceiptItem.intUnitMeasureId
 				,intSubLocationId		= ReceiptItem.intSubLocationId
-				,dblQty					= ReceiptItem.dblOpenReceive * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END 
-				,dblUOMQty				= ItemUOM.dblUnitQty 
+				,dblQty					= ReceiptItem.dblOpenReceive * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END -- dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
+				,dblUOMQty				= ItemUOM.dblUnitQty   --1 -- Keep value as one (1). The dblQty is converted manually by using the fnCalculateQtyBetweenUOM function.
 				,intTransactionId		= Receipt.intInventoryReceiptId
 				,strTransactionId		= Receipt.strReceiptNumber
 				,intTransactionTypeId	= -1 -- any value
-
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				INNER JOIN dbo.tblPOPurchaseDetail PODetail
+					ON ReceiptItem.intSourceId = PODetail.intPurchaseId
+					AND ReceiptItem.intLineNo = PODetail.intPurchaseDetailId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = ReceiptItem.intItemId
 					AND ItemLocation.intLocationId = Receipt.intLocationId				

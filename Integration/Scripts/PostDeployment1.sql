@@ -18,3 +18,6 @@ GO
 
 :r "..\Scripts\AP\TransferImportedTermsData.sql"
 :r "..\Scripts\AP\TransferImportedVendorData.sql"
+:r "..\Scripts\NR\uspNRGetDetailsForInvoice.sql"
+:r "..\Scripts\NR\uspNRCreateAREntry.sql"
+:r "..\Scripts\NR\uspNRGenerateEFTSchedule.sql"

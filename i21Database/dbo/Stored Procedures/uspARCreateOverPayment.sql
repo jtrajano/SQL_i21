@@ -86,7 +86,7 @@ SELECT
 	,[strComments]			= A.strRecordNumber 
 	,[intAccountId]			= ISNULL(CL.[intARAccount], 0) 
 	,[dtmPostDate]			= NULL
-	,[ysnPosted]			= 0
+	,[ysnPosted]			= 1
 	,[ysnPaid]				= 0
 	,[strShipToLocationName]= ISNULL(SL.[strLocationName], EL.[strLocationName])
 	,[strShipToAddress]		= ISNULL(SL.[strAddress], EL.[strAddress])
@@ -169,31 +169,31 @@ WHERE
 	A.[intPaymentId] = @PaymentId 
            
            
-IF @Post = 1
-	BEGIN
-		DECLARE	@return_value int,
-				@successfulCount int,
-				@invalidCount int,
-				@success bit
+--IF @Post = 1
+--	BEGIN
+--		DECLARE	@return_value int,
+--				@successfulCount int,
+--				@invalidCount int,
+--				@success bit
 
-		EXEC	@return_value = [dbo].[uspARPostInvoice]
-				@batchId = @BatchId,
-				@post = 1,
-				@recap = 0,
-				@param = @NewInvoiceId,
-				@userId = @UserId,
-				@beginDate = NULL,
-				@endDate = NULL,
-				@beginTransaction = NULL,
-				@endTransaction = NULL,
-				@exclude = NULL,
-				@successfulCount = @successfulCount OUTPUT,
-				@invalidCount = @invalidCount OUTPUT,
-				@success = @success OUTPUT,
-				@batchIdUsed = NULL,
-				@recapId = NULL,
-				@transType = N'Overpayment'
-	END           
+--		EXEC	@return_value = [dbo].[uspARPostInvoice]
+--				@batchId = @BatchId,
+--				@post = 1,
+--				@recap = 0,
+--				@param = @NewInvoiceId,
+--				@userId = @UserId,
+--				@beginDate = NULL,
+--				@endDate = NULL,
+--				@beginTransaction = NULL,
+--				@endTransaction = NULL,
+--				@exclude = NULL,
+--				@successfulCount = @successfulCount OUTPUT,
+--				@invalidCount = @invalidCount OUTPUT,
+--				@success = @success OUTPUT,
+--				@batchIdUsed = NULL,
+--				@recapId = NULL,
+--				@transType = N'Overpayment'
+--	END           
 
            
 RETURN @NewId

@@ -31,12 +31,13 @@ BEGIN
             --Where intAccountId in (Select intGLAccountId From dbo.tblCMBankAccount) 
             --AND intAccountGroupId In (Select intAccountGroupId from dbo.tblGLAccountGroup Where strAccountGroup = 'Cash Accounts')
             
-            SELECT @intBankAccountId = intBankAccountId FROM dbo.tblCMBankAccount 
-            WHERE intGLAccountId IN (SELECT intAccountId FROM dbo.tblGLAccount WHERE intAccountGroupId IN 
-            (Select intAccountGroupId from dbo.tblGLAccountGroup Where strAccountGroup = 'Cash Accounts')
-            )
+            --SELECT @intBankAccountId = intBankAccountId FROM dbo.tblCMBankAccount 
+            --WHERE intGLAccountId IN (SELECT intAccountId FROM dbo.tblGLAccount WHERE intAccountGroupId IN 
+            --(Select intAccountGroupId from dbo.tblGLAccountGroup Where strAccountGroup = 'Cash Accounts')
+            --)
             
-            
+            Select @intBankAccountId = strValue From dbo.tblSMPreferences Where strPreference = 'nrBankAccount'
+                        
             
             --Get currency Id
             SET @intCurrencyId = (
