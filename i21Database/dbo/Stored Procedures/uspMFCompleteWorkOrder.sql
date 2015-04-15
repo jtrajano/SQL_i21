@@ -226,7 +226,8 @@ BEGIN TRY
 		,@ysnNegativeQtyAllowed=@ysnNegativeQtyAllowed
 
 	EXEC dbo.uspMFValidateCreateLot @strLotNumber = @strOutputLotNumber
-		,@dtmCreated = @dtmCurrentDate
+		,@dtmCreated = @dtmPlannedDate
+		,@intShiftId =@intPlannedShiftId
 		,@intItemId = @intItemId
 		,@intStorageLocationId = @intStorageLocationId
 		,@intSubLocationId = @intSubLocationId

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].uspMFValidateCreateLot (
 	@strLotNumber NVARCHAR(50)
 	,@dtmCreated DATETIME = NULL
+	,@intShiftId int=NULL
 	,@intItemId INT
 	,@intStorageLocationId INT
 	,@intSubLocationId INT
@@ -260,7 +261,7 @@ BEGIN TRY
 				,@strExistingStorageLocationName
 				)
 	END
-
+	Select @dtmCreated=@dtmCreated+dtmShiftStartTime+intStartOffset from tblMFShift Where intShiftId=@intShiftId 
 	IF @dtmCreated > GetDate()
 	BEGIN
 		RAISERROR (
