@@ -1851,6 +1851,15 @@ GO
 			UPDATE tblSMMasterMenu
 			SET strCommand = 'Logistics.view.LoadSchedule', intSort = 2
 			WHERE strMenuName = 'Load Schedule' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesId
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Generate Loads' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Generate Loads', 'Logistics', @LogisticsActivitiesId, 'Generate Loads', 'Screen', 'Logistics.view.GenerateLoad', 'small-screen', 0, 0, 0, 1, 3, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'Logistics.view.GenerateLoad', intSort = 3
+			WHERE strMenuName = 'Generate Loads' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsActivitiesId
+
 GO
 
 	/* ------------------------------------- */
