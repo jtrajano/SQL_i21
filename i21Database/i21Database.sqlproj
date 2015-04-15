@@ -1379,6 +1379,8 @@
     <Build Include="dbo\Views\vyuSMBatchPosting.sql" />
     <Build Include="dbo\Views\vyuSMBatchPostingRecap.sql" />
     <Build Include="dbo\Views\vyuSMBatchPostingResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateConsumeLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateCreateLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
