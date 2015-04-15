@@ -1382,6 +1382,8 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateLot.sql" />
     <Build Include="dbo\Views\vyuRKLFuturePSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\LG\1_LGStartingNumber.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingProcessMachine.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
