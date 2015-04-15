@@ -1373,6 +1373,7 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\DeliveryFill.sql" />
     <Build Include="dbo\Tables\tblICBuildAssembly.sql" />
     <Build Include="dbo\Tables\tblICBuildAssemblyDetail.sql" />
+    <Build Include="dbo\Views\vyuARBillableHoursForImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

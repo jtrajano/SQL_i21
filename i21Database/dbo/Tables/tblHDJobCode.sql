@@ -6,10 +6,12 @@
 	[ysnBillable] [bit] NOT NULL,
 	[dblRate] [numeric](18, 6) NOT NULL,
 	[ysnSupported] [bit] NOT NULL DEFAULT 1,
+	[intItemId] INT NULL, 
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
- CONSTRAINT [PK_tblHDJobCode] PRIMARY KEY CLUSTERED ([intJobCodeId] ASC),
- CONSTRAINT [UNQ_tblHDJobCode] UNIQUE ([strJobCode])
+    CONSTRAINT [PK_tblHDJobCode] PRIMARY KEY CLUSTERED ([intJobCodeId] ASC),
+	CONSTRAINT [UNQ_tblHDJobCode] UNIQUE ([strJobCode]),
+	CONSTRAINT [FK_tblHDJobCode_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
 )
 
 GO
