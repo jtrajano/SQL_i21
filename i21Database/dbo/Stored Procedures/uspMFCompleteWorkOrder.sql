@@ -223,8 +223,9 @@ BEGIN TRY
 		,@dblProduceQty = @dblProduceQty
 		,@intProduceUOMKey = @intProduceUnitMeasureId
 		,@intUserId = @intUserId
+		,@ysnNegativeQtyAllowed=@ysnNegativeQtyAllowed
 
-	EXEC dbo.uspICValidateCreateLot @strLotNumber = @strOutputLotNumber
+	EXEC dbo.uspMFValidateCreateLot @strLotNumber = @strOutputLotNumber
 		,@dtmCreated = @dtmCurrentDate
 		,@intItemId = @intItemId
 		,@intStorageLocationId = @intStorageLocationId
@@ -239,7 +240,7 @@ BEGIN TRY
 		,@intWorkOrderId = @intWorkOrderId
 		,@intLotTransactionTypeId = 3
 		,@ysnCreateNewLot = 1
-		,@ysnPallet = 0
+		,@ysnFGProduction = 0
 		,@ysnIgnoreTolerance = 1
 
 
