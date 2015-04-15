@@ -111,7 +111,7 @@ BEGIN TRY
 
 		SELECT @intStatusId = intStatusId
 		FROM dbo.tblMFWorkOrderStatus
-		WHERE strName = 'Completed'
+		WHERE strName = 'Started'
 
 		SELECT @intManufacturingCellId = intManufacturingCellId
 		FROM dbo.tblMFRecipe

@@ -152,7 +152,7 @@ BEGIN TRY
 				AND intRecipeItemTypeId = 1
 				AND R.intLocationId = @intLocationId
 			)
-		OR @intItemId NOT IN (
+		and @intItemId NOT IN (
 			SELECT RSI.intSubstituteItemId
 			FROM dbo.tblMFRecipe R
 			JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
