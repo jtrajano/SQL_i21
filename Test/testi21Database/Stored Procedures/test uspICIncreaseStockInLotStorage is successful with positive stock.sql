@@ -74,7 +74,7 @@ BEGIN
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[intCreatedUserId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -87,7 +87,7 @@ BEGIN
 			,[dtmDate] DATETIME
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[intCreatedUserId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -101,7 +101,7 @@ BEGIN
 				,@intStorageLocationId AS INT
 				,@dtmDate AS DATETIME				= 'January 23, 2015'
 				,@dblQty NUMERIC(18,6)				= 10
-				,@dblCost AS NUMERIC(18,6)			= 33.19
+				,@dblCost AS NUMERIC(38,20)			= 33.19
 				,@strTransactionId AS NVARCHAR(40)	= 'NewStock-00001'
 				,@intTransactionId AS INT			= 1
 				,@intUserId AS INT					= 1

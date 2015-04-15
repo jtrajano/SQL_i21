@@ -76,7 +76,7 @@ BEGIN
 			,@dtmDate AS DATETIME
 			,@dblQty AS NUMERIC(18,6)
 			,@dblUOMQty AS NUMERIC(18,6)
-			,@dblCost AS NUMERIC(18,6)
+			,@dblCost AS NUMERIC(38, 20)
 			,@dblSalesPrice AS NUMERIC(18,6)
 			,@intCurrencyId AS INT
 			,@dblExchangeRate AS NUMERIC(18,6)
@@ -101,7 +101,7 @@ BEGIN
 			[intStorageLocationId] INT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 			[dblValue] NUMERIC(18, 6) NULL, 
 			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[intCurrencyId] INT NULL,
@@ -125,7 +125,7 @@ BEGIN
 			[intStorageLocationId] INT NULL,
 			[dtmDate] DATETIME NOT NULL, 
 			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 			[dblValue] NUMERIC(18, 6) NULL, 
 			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 			[intCurrencyId] INT NULL,

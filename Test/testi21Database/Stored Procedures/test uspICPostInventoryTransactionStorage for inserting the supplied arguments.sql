@@ -18,7 +18,7 @@ BEGIN
 				,@dtmDate DATETIME							= '01/06/2015'
 				,@dblQty NUMERIC(18, 6)						= 7
 				,@dblUOMQty NUMERIC(18, 6)					= 8
-				,@dblCost NUMERIC(18, 6)					= 9
+				,@dblCost NUMERIC(38, 20)					= 9
 				,@dblValue NUMERIC(18, 6)					= 10
 				,@dblSalesPrice NUMERIC(18, 6)				= 11
 				,@intCurrencyId INT							= 12
@@ -45,7 +45,7 @@ BEGIN
 			[dtmDate] DATETIME,	
 			[dblQty] NUMERIC(18, 6), 
 			[dblUOMQty] NUMERIC(18, 6), 		
-			[dblCost] NUMERIC(18, 6), 
+			[dblCost] NUMERIC(38, 20), 
 			[dblValue] NUMERIC(18, 6), 
 			[dblSalesPrice] NUMERIC(18, 6), 
 			[intCurrencyId] INT,
@@ -74,7 +74,7 @@ BEGIN
 			[dtmDate] DATETIME,	
 			[dblQty] NUMERIC(18, 6), 
 			[dblUOMQty] NUMERIC(18, 6), 		
-			[dblCost] NUMERIC(18, 6), 
+			[dblCost] NUMERIC(38, 20), 
 			[dblValue] NUMERIC(18, 6), 
 			[dblSalesPrice] NUMERIC(18, 6), 
 			[intCurrencyId] INT,

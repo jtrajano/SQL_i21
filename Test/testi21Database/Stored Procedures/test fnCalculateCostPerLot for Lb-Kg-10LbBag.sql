@@ -13,7 +13,7 @@ BEGIN
 	DECLARE	@intItemUOMId AS INT = @WetGrains_Lb
 			,@intWeightUOMId AS INT = @WetGrains_Kg
 			,@intLotUOMId AS INT = @WetGrains_10LbBag
-			,@dblCostPerItemUOMId AS NUMERIC(18,6) = 13.35
+			,@dblCostPerItemUOMId AS NUMERIC(38, 20) = 13.35
 
 	DECLARE @result AS FLOAT
 	DECLARE @expected AS FLOAT = 133.50

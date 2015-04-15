@@ -11,7 +11,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInFIFOStorage]
 	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
-	,@dblCost AS NUMERIC(18,6)
+	,@dblCost AS NUMERIC(38, 20)
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT
 	,@intUserId AS INT

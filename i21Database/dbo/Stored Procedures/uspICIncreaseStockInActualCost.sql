@@ -13,7 +13,7 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInActualCost
 	,@intItemUOMId AS INT 
 	,@dtmDate AS DATETIME
 	,@dblQty NUMERIC(18,6) 
-	,@dblCost AS NUMERIC(18,6)
+	,@dblCost AS NUMERIC(38, 20)
 	,@intUserId AS INT
 	,@FullQty AS NUMERIC(18,6) 
 	,@TotalQtyOffset AS NUMERIC(18,6)

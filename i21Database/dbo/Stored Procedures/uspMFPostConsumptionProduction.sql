@@ -109,7 +109,7 @@ BEGIN
 
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblQty
 
-	DECLARE @dblCostPerStockUOM NUMERIC(18,6)
+	DECLARE @dblCostPerStockUOM NUMERIC(38, 20)
 
 	IF @intItemStockUOMId=@intItemUOMId
 	BEGIN

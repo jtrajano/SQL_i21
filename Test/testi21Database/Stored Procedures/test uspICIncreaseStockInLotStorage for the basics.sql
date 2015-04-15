@@ -17,7 +17,7 @@ BEGIN
 			[intStorageLocationId] INT,
 			[dblStockIn] NUMERIC(18, 6), 
 			[dblStockOut] NUMERIC(18, 6), 
-			[dblCost] NUMERIC(18, 6), 
+			[dblCost] NUMERIC(38, 20), 
 			[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
 			[intTransactionId] INT,
 			[dtmCreated] DATETIME, 
@@ -37,7 +37,7 @@ BEGIN
 			[intStorageLocationId] INT,
 			[dblStockIn] NUMERIC(18, 6), 
 			[dblStockOut] NUMERIC(18, 6), 
-			[dblCost] NUMERIC(18, 6), 
+			[dblCost] NUMERIC(38, 20), 
 			[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS, 
 			[intTransactionId] INT,
 			[dtmCreated] DATETIME, 
@@ -55,7 +55,7 @@ BEGIN
 				,@intStorageLocationId AS INT
 				,@dtmDate AS DATETIME 
 				,@dblQty NUMERIC(18,6) 
-				,@dblCost AS NUMERIC(18,6)
+				,@dblCost AS NUMERIC(38,20)
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT 
 				,@intUserId AS INT

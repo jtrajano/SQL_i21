@@ -11,7 +11,7 @@ BEGIN
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[dtmCreated] DATETIME 
 			,[intCreatedUserId] INT 
 			,[intConcurrencyId]	INT
@@ -23,7 +23,7 @@ BEGIN
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[dtmCreated] DATETIME 
 			,[intCreatedUserId] INT 
 			,[intConcurrencyId]	INT
@@ -38,7 +38,7 @@ BEGIN
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
 				,@dblQty NUMERIC(18,6) 
-				,@dblCost AS NUMERIC(18,6)
+				,@dblCost AS NUMERIC(38,20)
 				,@intUserId AS INT
 				,@strTransactionId AS NVARCHAR(40)
 				,@intTransactionId AS INT

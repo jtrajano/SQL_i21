@@ -74,7 +74,7 @@ BEGIN
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38, 20)
 			,[intCreatedUserId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -87,7 +87,7 @@ BEGIN
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38, 20)
 			,[intCreatedUserId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -101,7 +101,7 @@ BEGIN
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
 				,@dblSoldQty NUMERIC(18,6)				= -125
-				,@dblCost AS NUMERIC(18,6)				= 45.66
+				,@dblCost AS NUMERIC(38,20)				= 45.66
 				,@strTransactionId AS NVARCHAR(40)		= 'NEWSTOCK-00002'
 				,@intTransactionId AS INT				= 2
 				,@intUserId AS INT						= 1

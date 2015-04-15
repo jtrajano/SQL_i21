@@ -2324,8 +2324,9 @@
     <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFOCostAdjustment.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFORevalueOutStock.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostAverageCostingAdjustment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostCostingAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustment.sql" />
+    <Build Include="dbo\User Defined Types\NewItemCostTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

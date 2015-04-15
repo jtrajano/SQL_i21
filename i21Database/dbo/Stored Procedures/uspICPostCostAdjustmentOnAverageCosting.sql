@@ -27,13 +27,14 @@
 	@intUserId - The user who initiated or called this stored procedure. 
 */
 
-CREATE PROCEDURE [dbo].[uspICPostAverageCostingAdjustment]
+CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT
 	,@dtmDate AS DATETIME
 	,@dblValue AS NUMERIC(38,20)
 	,@intTransactionId AS INT
+	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
 	,@intSourceTransactionId AS INT
 	,@strSourceTransactionId AS NVARCHAR(20)
@@ -52,11 +53,18 @@ SET ANSI_WARNINGS OFF
 -- Initialize
 -----------------------------------------------------------------------------------------------------------------------------
 
+-- Create the CONSTANT variables for the costing methods
+DECLARE @AVERAGECOST AS INT = 1
+		,@FIFO AS INT = 2
+		,@LIFO AS INT = 3
+		,@LOTCOST AS INT = 4 	
+		,@ACTUALCOST AS INT = 5	
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_NEGATIVE AS INT = 1;
 DECLARE @INVENTORY_WRITE_OFF_SOLD AS INT = 2;
 DECLARE @INVENTORY_REVALUE_SOLD AS INT = 3;
-DECLARE @INVENTORY_COST_VARIANCE AS INT = 11;
+DECLARE @INVENTORY_COST_VARIANCE AS INT = 22;
 
 DECLARE @FIFOId AS INT
 		,@InventoryTransactionIdentityId AS INT
@@ -218,6 +226,7 @@ BEGIN
 					,@intCurrencyId							= @TransactionCurrencyId
 					,@dblExchangeRate						= @TransactionExchangeRate
 					,@intTransactionId						= @intTransactionId
+					,@intTransactionDetailId				= @intTransactionDetailId
 					,@strTransactionId						= @strTransactionId
 					,@strBatchId							= @strBatchId
 					,@intTransactionTypeId					= @INVENTORY_WRITE_OFF_SOLD
@@ -228,6 +237,7 @@ BEGIN
 					,@strRelatedTransactionId				= @TransactionStringId 
 					,@strTransactionForm					= @TransactionTypeName
 					,@intUserId								= @intUserId
+					,@intCostingMethod						= @AVERAGECOST
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 
 				-- Create the Revalue sold 
@@ -248,6 +258,7 @@ BEGIN
 					,@intCurrencyId							= @TransactionCurrencyId
 					,@dblExchangeRate						= @TransactionExchangeRate
 					,@intTransactionId						= @intTransactionId
+					,@intTransactionDetailId				= @intTransactionDetailId
 					,@strTransactionId						= @strTransactionId
 					,@strBatchId							= @strBatchId
 					,@intTransactionTypeId					= @INVENTORY_REVALUE_SOLD
@@ -258,6 +269,7 @@ BEGIN
 					,@strRelatedTransactionId				= @TransactionStringId 
 					,@strTransactionForm					= @TransactionTypeName
 					,@intUserId								= @intUserId
+					,@intCostingMethod						= @AVERAGECOST
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 
 				-- Create the Cost Variance 
@@ -276,6 +288,7 @@ BEGIN
 					,@intCurrencyId							= @TransactionCurrencyId
 					,@dblExchangeRate						= @TransactionExchangeRate
 					,@intTransactionId						= @intTransactionId
+					,@intTransactionDetailId				= @intTransactionDetailId
 					,@strTransactionId						= @strTransactionId
 					,@strBatchId							= @strBatchId
 					,@intTransactionTypeId					= @INVENTORY_COST_VARIANCE
@@ -286,6 +299,7 @@ BEGIN
 					,@strRelatedTransactionId				= @TransactionStringId 
 					,@strTransactionForm					= @TransactionTypeName
 					,@intUserId								= @intUserId
+					,@intCostingMethod						= @AVERAGECOST
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 			END
 

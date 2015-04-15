@@ -18,7 +18,7 @@
 		[strSealNo] NVARCHAR(32) COLLATE Latin1_General_CI_AS  NULL,
 		[strProNo] NVARCHAR(32) COLLATE Latin1_General_CI_AS NULL,
 		[strContainerNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
-		[dblCost] NUMERIC(18,6),
+		[dblCost] NUMERIC(38, 20),
 		[intCreatedUserId] INT NULL,
 		[dtmCreated] DATETIME NULL DEFAULT GetDate(),
 		[intLastModifiedUserId] INT NULL,

@@ -39,7 +39,7 @@ BEGIN
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[intCreatedUserId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -52,7 +52,7 @@ BEGIN
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
-			,[dblCost] NUMERIC(18,6)
+			,[dblCost] NUMERIC(38,20)
 			,[intCreatedUserId] INT 
 			,[intConcurrencyId]	INT
 		)
@@ -66,7 +66,7 @@ BEGIN
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
 				,@dblQty NUMERIC(18,6)				= 40
-				,@dblCost AS NUMERIC(18,6)			= 88.77
+				,@dblCost AS NUMERIC(38,20)			= 88.77
 				,@intUserId AS INT = 1
 				,@FullQty AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)	= 'NewStock-00001'

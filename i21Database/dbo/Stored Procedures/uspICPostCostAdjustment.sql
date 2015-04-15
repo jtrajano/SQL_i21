@@ -16,10 +16,10 @@
 
 	@intUserId - The user who is initiating the post. 
 */
-CREATE PROCEDURE [dbo].[uspICPostCostingAdjustment]
+CREATE PROCEDURE [dbo].[uspICPostCostAdjustment]
 	@ItemsToAdjust AS ItemCostingTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
-	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Variance Account'
+	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost Adjustment'
 	,@intUserId AS INT
 AS
 
@@ -45,6 +45,7 @@ DECLARE @intId AS INT
 		,@dtmDate AS DATETIME
 		,@dblValue AS NUMERIC(38, 20)
 		,@intTransactionId AS INT
+		,@intTransactionDetailId AS INT
 		,@strTransactionId AS NVARCHAR(40) 
 		,@intSourceTransactionId AS INT
 		,@strSourceTransactionId AS NVARCHAR(40) 
@@ -59,8 +60,8 @@ DECLARE @CostingMethod AS INT
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4
-		,@LOTCOST AS INT = 5
+		,@LOTCOST AS INT = 4 	
+		,@ACTUALCOST AS INT = 5	
 
 -- Initialize the transaction name. Use this as the transaction form name
 SELECT	TOP 1 
@@ -93,6 +94,7 @@ SELECT  intId
 		,dtmDate
 		,dblValue
 		,intTransactionId
+		,intTransactionDetailId
 		,strTransactionId
 		,intSourceTransactionId
 		,strSourceTransactionId
@@ -113,6 +115,7 @@ FETCH NEXT FROM loopItems INTO
 	,@dtmDate
 	,@dblValue 
 	,@intTransactionId
+	,@intTransactionDetailId
 	,@strTransactionId
 	,@intSourceTransactionId
 	,@strSourceTransactionId
@@ -138,13 +141,14 @@ BEGIN
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST)
 	BEGIN 
-		EXEC dbo.uspICPostAverageCostingAdjustment
+		EXEC dbo.uspICPostCostAdjustmentOnAverageCosting
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
 			,@dtmDate
 			,@dblValue
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@strTransactionId
 			,@intSourceTransactionId
 			,@strSourceTransactionId
@@ -164,6 +168,7 @@ BEGIN
 		,@dtmDate
 		,@dblValue 
 		,@intTransactionId
+		,@intTransactionDetailId
 		,@strTransactionId
 		,@intSourceTransactionId
 		,@strSourceTransactionId
@@ -230,6 +235,7 @@ BEGIN
 			,dtmDate
 			,dblValue
 			,intTransactionId
+			,intTransactionDetailId
 			,strTransactionId
 			,intTransactionTypeId
 			,intLotId 
@@ -248,6 +254,7 @@ BEGIN
 		,@dtmDate
 		,@dblValue 
 		,@intTransactionId
+		,@intTransactionDetailId
 		,@strTransactionId
 		,@intTransactionTypeId
 		,@intLotId
@@ -285,31 +292,32 @@ BEGIN
 			IF ROUND(ISNULL(@AutoNegativeAmount, 0),6) <> 0.00
 			BEGIN 
 				EXEC [dbo].[uspICPostInventoryTransaction]
-						@intItemId							= @intItemId
-						,@intItemLocationId					= @intItemLocationId
-						,@intItemUOMId						= @intItemUOMId
-						,@intSubLocationId					= @intSubLocationId
-						,@intStorageLocationId				= @intStorageLocationId
-						,@dtmDate							= @dtmDate
-						,@dblQty							= 0
-						,@dblUOMQty							= 0
-						,@dblCost							= 0
-						,@dblValue							= @AutoNegativeAmount
-						,@dblSalesPrice						= 0
-						,@intCurrencyId						= NULL
-						,@dblExchangeRate					= 1
-						,@intTransactionId					= @intTransactionId
-						,@strTransactionId					= @strTransactionId
-						,@strBatchId						= @strBatchId
-						,@intTransactionTypeId				= @INVENTORY_AUTO_NEGATIVE
-						,@intLotId							= NULL 
-						,@ysnIsUnposted						= 0
-						,@intRelatedInventoryTransactionId	= NULL 
-						,@intRelatedTransactionId			= NULL
-						,@strRelatedTransactionId			= NULL 
-						,@strTransactionForm				= @TransactionTypeName
-						,@intUserId							= @intUserId
-						,@InventoryTransactionIdentityId	= @InventoryTransactionIdentityId OUTPUT 
+						@intItemId								= @intItemId
+						,@intItemLocationId						= @intItemLocationId
+						,@intItemUOMId							= @intItemUOMId
+						,@intSubLocationId						= @intSubLocationId
+						,@intStorageLocationId					= @intStorageLocationId
+						,@dtmDate								= @dtmDate
+						,@dblQty								= 0
+						,@dblUOMQty								= 0
+						,@dblCost								= 0
+						,@dblValue								= @AutoNegativeAmount
+						,@dblSalesPrice							= 0
+						,@intCurrencyId							= NULL
+						,@dblExchangeRate						= 1
+						,@intTransactionId						= @intTransactionId
+						,@intTransactionDetailId				= @intTransactionDetailId
+						,@strTransactionId						= @strTransactionId
+						,@strBatchId							= @strBatchId
+						,@intTransactionTypeId					= @INVENTORY_AUTO_NEGATIVE
+						,@intLotId								= NULL
+						,@intRelatedInventoryTransactionId		= 0
+						,@intRelatedTransactionId				= NULL
+						,@strRelatedTransactionId				= NULL
+						,@strTransactionForm					= @TransactionTypeName
+						,@intUserId								= @intUserId
+						,@intCostingMethod						= @AVERAGECOST
+						,@InventoryTransactionIdentityId 		= @InventoryTransactionIdentityId OUTPUT 
 			END 
 		END
 
@@ -323,6 +331,7 @@ BEGIN
 			,@dtmDate
 			,@dblValue 
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@strTransactionId
 			,@intTransactionTypeId
 			,@intLotId

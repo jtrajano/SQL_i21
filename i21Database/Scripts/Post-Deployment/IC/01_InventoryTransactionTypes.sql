@@ -96,7 +96,7 @@ USING	(
 				,form = null
 		UNION ALL 
 		SELECT	id = 22
-				,name = 'Cost Variance'
+				,name = 'Cost Adjustment'
 				,form = null
 		UNION ALL 
 		SELECT	id = 23

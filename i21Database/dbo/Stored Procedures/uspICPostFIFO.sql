@@ -11,7 +11,7 @@ CREATE PROCEDURE [dbo].[uspICPostFIFO]
 	,@dtmDate AS DATETIME
 	,@dblQty AS NUMERIC(18,6)
 	,@dblUOMQty AS NUMERIC(18,6)
-	,@dblCost AS NUMERIC(18,6)
+	,@dblCost AS NUMERIC(38, 20)
 	,@dblSalesPrice AS NUMERIC(18,6)
 	,@intCurrencyId AS INT
 	,@dblExchangeRate AS NUMERIC(18,6)
@@ -94,7 +94,7 @@ BEGIN
 
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(18,6) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
-			DECLARE @dblCostToUse AS NUMERIC(18,6) = ISNULL(@CostUsed, @dblCost)
+			DECLARE @dblCostToUse AS NUMERIC(38, 20) = ISNULL(@CostUsed, @dblCost)
 
 			EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId = @intItemId

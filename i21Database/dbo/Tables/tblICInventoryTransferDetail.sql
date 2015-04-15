@@ -16,7 +16,7 @@
     [dblTareWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intNewLotId] INT NULL, 
     [strNewLotId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblCost] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [intTaxCodeId] INT NULL, 
     [dblFreightRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblFreightAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
