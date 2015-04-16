@@ -147,7 +147,6 @@
     <Folder Include="Scripts\Post-Deployment\PR" />
     <Folder Include="Scripts\Post-Deployment\PR\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\EM" />
-    <Folder Include="Scripts\Post-Deployment\LG" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\DataSource" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\Layout" />
@@ -1382,7 +1381,6 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateLot.sql" />
     <Build Include="dbo\Views\vyuRKLFuturePSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />
-    <None Include="Scripts\Post-Deployment\LG\1_LGStartingNumber.sql" />
     <Build Include="dbo\Tables\tblMFManufacturingProcessMachine.sql" />
     <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
@@ -1410,7 +1408,7 @@
     <None Include="Scripts\Post-Deployment\AP\FixstrBillId.sql" />
     <None Include="Scripts\Post-Deployment\IC\3_DefaultData.sql" />
     <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
-    <None Include="Scripts\Post-Deployment\NR\1_NRStartingNumber.sql" />
+    <None Include="Scripts\Post-Deployment\NR\1_NoteTransType.sql" />
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\1_TaxStatesAndLocalities.sql" />
     <None Include="Scripts\Post-Deployment\AP\DateCreatedValueDefault.sql" />
