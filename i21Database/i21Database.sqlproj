@@ -1389,8 +1389,11 @@
     <Build Include="dbo\Tables\tblICInventoryTransferNote.sql" />
     <Build Include="dbo\Views\vyuLGAllocationDetailOpenGenerateLoads.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportBillableHours.sql" />
-    <Build Include="dbo\Tables\tblQMAttributeDataType.sql" />
-    <Build Include="dbo\Tables\tblQMAttribute.sql" />
+    <Build Include="dbo\Views\vyuCCSite.sql" />
+    <Build Include="dbo\Tables\tblSMImportFileHeader.sql" />
+    <Build Include="dbo\Tables\tblSMImportFileColumnDetail.sql" />
+    <Build Include="dbo\Tables\tblSMImportFileRecordMarker.sql" />
+    <Build Include="dbo\Tables\tblSMImportFileTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
