@@ -1387,6 +1387,7 @@
     <Build Include="dbo\Tables\tblICInventoryTransfer.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransferDetail.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransferNote.sql" />
+    <Build Include="dbo\Views\vyuLGAllocationDetailOpenGenerateLoads.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
