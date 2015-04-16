@@ -1384,6 +1384,9 @@
     <Build Include="dbo\Tables\tblMFManufacturingProcessMachine.sql" />
     <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransfer.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransferDetail.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransferNote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
