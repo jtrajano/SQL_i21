@@ -205,7 +205,7 @@ BEGIN
 			--add detail
 			INSERT INTO tblAPBillDetail(
 				[intBillId],
-				[strDescription],
+				[strMiscDescription],
 				[dblQtyOrdered],
 				[dblQtyReceived],
 				[intAccountId],
@@ -236,7 +236,7 @@ BEGIN
 		
 			INSERT INTO tblAPBillDetail(
 				[intBillId],
-				[strDescription],
+				[strMiscDescription],
 				[dblQtyOrdered],
 				[dblQtyReceived],
 				[intAccountId],
@@ -559,7 +559,7 @@ BEGIN
 			--add detail
 			INSERT INTO tblAPBillDetail(
 				[intBillId],
-				[strDescription],
+				[strMiscDescription],
 				[dblQtyOrdered],
 				[dblQtyReceived],
 				[intAccountId],

@@ -2674,4 +2674,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTaxCodeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f5ed94c8-06f3-434f-9c48-6369e4330327" ChangeDateTime="04/15/2015 08:07:51">
+    <Property Name="ElementName" Value="[dbo].[tblPOPurchaseDetail].[strDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPOPurchaseDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strMiscDescription]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a2c8358f-dd95-440b-8e52-56d816504f90" ChangeDateTime="04/15/2015 08:09:23">
+    <Property Name="ElementName" Value="[dbo].[tblAPBillDetail].[strDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBillDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strMiscDescription]" />
+  </Operation>
 </Operations>

@@ -376,7 +376,7 @@ BEGIN
 			[intTransactionId] = A.intBillId, 
 			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strReference,
-			[strJournalLineDescription] = B.strDescription,
+			[strJournalLineDescription] = B.[strMiscDescription],
 			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmBillDate,
 			[dblDebit]				= CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END, --Bill Detail
@@ -702,7 +702,7 @@ ELSE
 			[intTransactionId] = A.intBillId,
 			[intAccountId] = B.intAccountId,
 			[strDescription] = A.strReference,
-			[strJournalLineDescription] = B.strDescription,
+			[strJournalLineDescription] = B.[strMiscDescription],
 			[strReference] = C.strVendorId,
 			[dtmTransactionDate] = A.dtmDate,
 			[dblDebit] = CASE WHEN @post = 1 THEN B.dblTotal ELSE 0 END,

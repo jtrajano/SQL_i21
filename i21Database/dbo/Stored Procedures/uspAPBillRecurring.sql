@@ -99,7 +99,7 @@ WHERE intBillId IN (SELECT intTransactionId FROM #tmpRecurringBill)
 
 INSERT INTO tblAPBillDetail(
 	[intBillId],
-	[strDescription],
+	[strMiscDescription],
 	[strComment], 
 	[intAccountId],
 	[dblTotal],
@@ -119,7 +119,7 @@ INSERT INTO tblAPBillDetail(
 )
 SELECT
 	[intBillId],
-	[strDescription],
+	[strMiscDescription],
 	[strComment], 
 	[intAccountId],
 	[dblTotal],
