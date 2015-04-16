@@ -2,7 +2,7 @@
 (
 	[intInventoryTransferId] INT NOT NULL IDENTITY, 
     [strTransferNo] NVARCHAR(50) NOT NULL, 
-    [dtmTransferDate] NCHAR(10) NULL DEFAULT (getdate()), 
+    [dtmTransferDate] DATETIME NULL DEFAULT (getdate()), 
     [strTransferType] NVARCHAR(50) NOT NULL, 
     [intTransferredById] INT NULL, 
     [strDescription] NVARCHAR(100) NULL, 
