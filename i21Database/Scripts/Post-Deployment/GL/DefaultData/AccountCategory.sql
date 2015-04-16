@@ -296,6 +296,11 @@ BEGIN -- GROUP CATEGORY MAPPING
 	FROM tblGLAccountGroup A
 	JOIN CTE B ON A.strAccountGroup = B.strAccountGroup
 	JOIN tblGLAccountCategory C ON C.strAccountCategory = B.strAccountCategory
+
+	UPDATE tblGLAccountCategory SET ysnRestricted = 1
+		WHERE strAccountCategory IN('Cash Account','AP Account','AR Account','Undeposited Funds')
+
+	UPDATE tblGLAccountCategory SET ysnRestricted = 0 WHERE ysnRestricted IS NULL
 END
 
 EXEC dbo.[uspGLConvertAccountGroupToCategory]

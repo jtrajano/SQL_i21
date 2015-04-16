@@ -10,7 +10,12 @@
     [intAccountEnd]            INT             NULL,
     [strAccountGroupNamespace] NVARCHAR (1000) COLLATE Latin1_General_CI_AS NULL,
     [intEntityIdLastModified] INT NULL, 
-    [intDefaultAccountCategoryId] INT NULL, 
-    CONSTRAINT [PK_GLAccountGroup_AccountGroupId] PRIMARY KEY CLUSTERED ([intAccountGroupId] ASC)
+    [intAccountCategoryId] INT NULL, 
+    CONSTRAINT [PK_GLAccountGroup_AccountGroupId] PRIMARY KEY CLUSTERED ([intAccountGroupId] ASC), 
+    CONSTRAINT [FK_tblGLAccountGroup_tblGLAccountCategory] FOREIGN KEY([intAccountCategoryId])	REFERENCES [dbo].[tblGLAccountCategory] ([intAccountCategoryId])
 );
+GO
+
+
+
 
