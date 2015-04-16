@@ -1395,6 +1395,7 @@
     <Build Include="dbo\Tables\tblSMImportFileRecordMarker.sql" />
     <Build Include="dbo\Tables\tblSMImportFileTable.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateScheduleQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

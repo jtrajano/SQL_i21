@@ -1176,6 +1176,14 @@ GO
 			SET strCommand = 'ContractManagement.view.ContractAdjustment', intSort = 2
 			WHERE strMenuName = 'Contract Adjustments' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId		
 
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Roll Contracts' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId)
+			INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
+			VALUES ('Roll Contracts', 'Contract Management', @ContractManagementActivityId, 'Roll Contracts', 'Screen', 'ContractManagement.view.RollContracts', 'small-screen', 0, 0, 0, 1, 3, 1)
+		ELSE
+			UPDATE tblSMMasterMenu
+			SET strCommand = 'ContractManagement.view.RollContracts', intSort = 3
+			WHERE strMenuName = 'Roll Contracts' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivityId	
+
 	/* ------------------------------------------------- */
 	/* -- Create Contract Management Maintenance Menu -- */
 	/* ------------------------------------------------- */
