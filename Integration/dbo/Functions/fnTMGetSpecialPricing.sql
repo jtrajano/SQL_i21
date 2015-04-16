@@ -53,6 +53,8 @@ BEGIN
 	DECLARE @dblItemPriceLevel2 DECIMAL(18,6)
 	DECLARE @dblItemPriceLevel3 DECIMAL(18,6)
 	DECLARE @strReturnString NVARCHAR(50)
+	DECLARE @strRackVendorNumber NVARCHAR(50)
+	DECLARE @strRackItemNumber NVARCHAR(50)
 	
 
 
@@ -181,6 +183,10 @@ BEGIN
 			,@dblUnits2 = vwprc_units_2
 			,@dblUnits3 = vwprc_units_3
 			,@strQuantityDiscountByPa = vwprc_qty_disc_by_pa
+			,@strRackVendorNumber = vwprc_rack_vnd_no
+			,@strRackItemNumber = vwprc_rack_itm_no
+
+			
 		FROM vwprcmst WHERE vwprc_cus_no = @strCustomerNumber AND vwprc_itm_no = @strItemNumber AND ISNULL(vwprc_begin_rev_dt,0) < CAST(@strOrderDate AS INT) AND ISNULL(vwprc_end_rev_dt,0) > CAST(@strOrderDate AS INT)
 	END
 	ELSE
@@ -197,6 +203,8 @@ BEGIN
 				,@dblUnits2 = vwprc_units_2
 				,@dblUnits3 = vwprc_units_3
 				,@strQuantityDiscountByPa = vwprc_qty_disc_by_pa
+				,@strRackVendorNumber = vwprc_rack_vnd_no
+				,@strRackItemNumber = vwprc_rack_itm_no
 			FROM vwprcmst WHERE vwprc_cus_no = @strCustomerNumber AND ISNULL(vwprc_itm_no,'''') = '''' AND vwprc_class = @strItemClass AND ISNULL(vwprc_begin_rev_dt,0) < CAST(@strOrderDate AS INT) AND ISNULL(vwprc_end_rev_dt,0) > CAST(@strOrderDate AS INT)
 		END
 		ELSE
@@ -212,6 +220,8 @@ BEGIN
 					,@dblUnits2 = vwprc_units_2
 					,@dblUnits3 = vwprc_units_3
 					,@strQuantityDiscountByPa = vwprc_qty_disc_by_pa
+					,@strRackVendorNumber = vwprc_rack_vnd_no
+					,@strRackItemNumber = vwprc_rack_itm_no
 				FROM vwprcmst WHERE vwprc_cus_no = @strCustomerNumber AND ISNULL(vwprc_itm_no,'''') = '''' AND ISNULL(vwprc_class,'''') = '''' AND ISNULL(vwprc_begin_rev_dt,0) < CAST(@strOrderDate AS INT) AND ISNULL(vwprc_end_rev_dt,0) > CAST(@strOrderDate AS INT)
 			END
 			ELSE
@@ -227,6 +237,8 @@ BEGIN
 						,@dblUnits2 = vwprc_units_2
 						,@dblUnits3 = vwprc_units_3
 						,@strQuantityDiscountByPa = vwprc_qty_disc_by_pa
+						,@strRackVendorNumber = vwprc_rack_vnd_no
+						,@strRackItemNumber = vwprc_rack_itm_no
 					FROM vwprcmst WHERE ISNULL(vwprc_cus_no,'''') = '''' AND vwprc_itm_no = @strItemNumber AND ISNULL(vwprc_class,'''') = '''' AND ISNULL(vwprc_begin_rev_dt,0) < CAST(@strOrderDate AS INT) AND ISNULL(vwprc_end_rev_dt,0) > CAST(@strOrderDate AS INT)
 				END
 			END
@@ -328,6 +340,28 @@ BEGIN
 	IF(@strBasisIndicator = ''3'')
 	BEGIN
 		SET @dblCurrentItemPrice = @dblItemPriceLevel3 + ISNULL(@dblFactor,0.0)
+	END
+	
+	IF(@strBasisIndicator = ''R'')
+	BEGIN
+		SELECT TOP 1 @dblCurrentItemPrice  = dblJobberRackPrice 
+		FROM vyuTMtrprcmst 
+		WHERE strVendorNumber = @strRackVendorNumber 
+			AND strRackItemNumber = @strRackItemNumber 
+			AND dtmDate <= GETDATE()
+		
+		SET @dblCurrentItemPrice = ISNULL(@dblCurrentItemPrice,0.0) + ISNULL(@dblFactor,0.0)
+	END
+	
+	IF(@strBasisIndicator = ''V'')
+	BEGIN
+		SELECT TOP 1 @dblCurrentItemPrice  = dblVendorRackPrice 
+		FROM vyuTMtrprcmst 
+		WHERE strVendorNumber = @strRackVendorNumber 
+			AND strRackItemNumber = @strRackItemNumber 
+			AND dtmDate <= GETDATE()
+		
+		SET @dblCurrentItemPrice = ISNULL(@dblCurrentItemPrice,0.0) + ISNULL(@dblFactor,0.0)
 	END
 	
 	IF(NOT(@strBasisIndicator = ''X'' AND @dblCurrentItemPrice > @dblItemPrice))
