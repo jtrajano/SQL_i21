@@ -129,6 +129,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
 
         public ICollection<tblICInventoryAdjustment> tblICInventoryAdjustments { get; set; }
+        public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
 
     }
 
@@ -329,5 +330,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICStorageLocation> tblICStorageLocations { get; set; }
         public ICollection<tblICItemStock> tblICItemStocks { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
+        public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
+        public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
     }
 }

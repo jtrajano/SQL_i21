@@ -8,7 +8,7 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "buildassemblyblend",
+        "designer|userAlias": "icbuildassemblyblend",
         "designer|userClassName": "BuildAssemblyBlend",
         "height": 625,
         "hidden": false,
@@ -392,13 +392,36 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": null,
-                                        "designer|createAlias": null,
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Location Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strLocationName',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Location Name',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strLocationType',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Location Type',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strLocationName",
                                         "fieldLabel": "Location",
                                         "itemId": "cboLocation",
                                         "labelWidth": 85,
                                         "layout|flex": null,
-                                        "name": null
+                                        "name": null,
+                                        "valueField": "intCompanyLocationId"
                                     },
                                     "name": "MyComboBox74",
                                     "configAlternates": {
@@ -421,13 +444,43 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": null,
-                                        "designer|createAlias": null,
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Sub Location Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Location Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strSubLocationName',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Sub Location Name',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strSubLocationDescription',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Description',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]",
+                                            ""
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strSubLocationName",
                                         "fieldLabel": "Sub Location",
                                         "itemId": "cboSubLocation",
                                         "labelWidth": 85,
                                         "layout|flex": null,
-                                        "name": null
+                                        "name": null,
+                                        "valueField": "intCompanyLocationSubLocationId"
                                     },
                                     "name": "MyComboBox76",
                                     "configAlternates": {
@@ -470,13 +523,48 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": null,
-                                        "designer|createAlias": null,
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intItemId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Item Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strItemNo',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Item Number',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strType',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Item Type',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strDescription',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Description',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strLotTracking',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Lot Tracking',",
+                                            "\t\thidden: true",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strItemNo",
                                         "fieldLabel": "Item No",
                                         "itemId": "cboItemNumber",
                                         "labelWidth": 85,
                                         "layout|flex": null,
-                                        "name": null
+                                        "name": null,
+                                        "valueField": "intItemId"
                                     },
                                     "name": "MyComboBox75",
                                     "configAlternates": {
@@ -500,7 +588,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "columns": null,
-                                        "designer|createAlias": null,
+                                        "designer|createAlias": "numeric",
                                         "fieldLabel": "Build Quantity",
                                         "hideTrigger": true,
                                         "itemId": "txtBuildQuantity",
@@ -529,13 +617,43 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": null,
-                                        "designer|createAlias": null,
+                                        "columns": [
+                                            "[",
+                                            "\t{",
+                                            "\t\tdataIndex: 'intItemUOMId',",
+                                            "\t\tdataType: 'numeric',",
+                                            "\t\ttext: 'Unit Of Measure Id',",
+                                            "\t\thidden: true",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Unit Measure',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\tdataIndex: 'strUnitType',",
+                                            "\t\tdataType: 'string',",
+                                            "\t\ttext: 'Unit Type',",
+                                            "\t\tflex: 1",
+                                            "\t},",
+                                            "\t{",
+                                            "\t\txtype: 'checkcolumn',",
+                                            "\t\tdataIndex: 'ysnStockUnit',",
+                                            "\t\tdataType: 'boolean',",
+                                            "\t\ttext: 'Stock Unit',",
+                                            "\t\tflex: 1",
+                                            "\t}",
+                                            "]"
+                                        ],
+                                        "designer|createAlias": "gridcombobox",
+                                        "displayField": "strUnitMeasure",
                                         "fieldLabel": "UOM",
                                         "itemId": "cboUOM",
                                         "labelWidth": 85,
                                         "layout|flex": null,
-                                        "name": null
+                                        "name": null,
+                                        "valueField": "intItemUOMId"
                                     },
                                     "name": "MyComboBox77",
                                     "configAlternates": {
@@ -578,13 +696,16 @@
                                     },
                                     "codeClass": null,
                                     "userConfig": {
+                                        "blankText": "Created on Save",
                                         "columns": null,
                                         "designer|createAlias": null,
+                                        "emptyText": "Created on Save",
                                         "fieldLabel": "Build No",
                                         "itemId": "txtBuildNumber",
                                         "labelWidth": 50,
                                         "layout|flex": null,
-                                        "name": null
+                                        "name": null,
+                                        "readOnly": true
                                     },
                                     "name": "MyTextField69",
                                     "configAlternates": {
@@ -608,7 +729,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "columns": null,
-                                        "designer|createAlias": null,
+                                        "designer|createAlias": "numeric",
                                         "fieldLabel": "Cost",
                                         "hideTrigger": true,
                                         "itemId": "txtCost",
@@ -720,7 +841,7 @@
                                     "userConfig": {
                                         "icon": null,
                                         "iconCls": "small-delete",
-                                        "itemId": "btnRemove1",
+                                        "itemId": "btnRemove",
                                         "layout|flex": null,
                                         "tabIndex": -1,
                                         "text": "Remove"
@@ -752,7 +873,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter110",
+                                    "name": "filter167",
                                     "designerId": "5fbc10f4-aec3-4a1c-aa64-227db4fba5a3",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -768,7 +889,7 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 1,
-                                "itemId": null,
+                                "itemId": "colItemNo",
                                 "text": "Item No."
                             },
                             "name": "MyColumn125",
@@ -784,7 +905,7 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": 2,
-                                "itemId": null,
+                                "itemId": "colDescription",
                                 "text": "Description"
                             },
                             "name": "MyColumn50",
@@ -800,7 +921,7 @@
                             "userConfig": {
                                 "dataIndex": "string",
                                 "flex": null,
-                                "itemId": null,
+                                "itemId": "colSubLocation",
                                 "text": "Sub Location"
                             },
                             "name": "MyColumn51",
@@ -815,7 +936,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "align": "right",
-                                "itemId": null,
+                                "itemId": "colStock",
                                 "minWidth": null,
                                 "text": "Stock",
                                 "width": 70
@@ -832,7 +953,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "align": "right",
-                                "itemId": null,
+                                "itemId": "colQuantity",
                                 "minWidth": null,
                                 "text": "Quantity",
                                 "width": 70
@@ -851,7 +972,7 @@
                                 "dataIndex": "string",
                                 "defaultWidth": 90,
                                 "flex": null,
-                                "itemId": null,
+                                "itemId": "colUOM",
                                 "text": "UOM",
                                 "width": 63
                             },
@@ -867,7 +988,7 @@
                             "codeClass": null,
                             "userConfig": {
                                 "align": "right",
-                                "itemId": null,
+                                "itemId": "colCost",
                                 "minWidth": null,
                                 "text": "Cost",
                                 "width": 85
@@ -919,7 +1040,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging18",
                     "designerId": "efc2b220-9ee5-484d-9265-6473eb69e982",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

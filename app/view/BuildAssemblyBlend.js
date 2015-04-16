@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.BuildAssemblyBlend', {
     extend: 'Ext.window.Window',
-    alias: 'widget.buildassemblyblend',
+    alias: 'widget.icbuildassemblyblend',
 
     requires: [
         'Inventory.view.Filter1',
@@ -215,16 +215,66 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                     labelWidth: 85
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intCompanyLocationId',
+                                            dataType: 'numeric',
+                                            text: 'Location Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strLocationName',
+                                            dataType: 'string',
+                                            text: 'Location Name',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strLocationType',
+                                            dataType: 'string',
+                                            text: 'Location Type',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboLocation',
                                     fieldLabel: 'Location',
-                                    labelWidth: 85
+                                    labelWidth: 85,
+                                    displayField: 'strLocationName',
+                                    valueField: 'intCompanyLocationId'
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intCompanyLocationSubLocationId',
+                                            dataType: 'numeric',
+                                            text: 'Sub Location Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'intCompanyLocationId',
+                                            dataType: 'numeric',
+                                            text: 'Location Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strSubLocationName',
+                                            dataType: 'string',
+                                            text: 'Sub Location Name',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strSubLocationDescription',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboSubLocation',
                                     fieldLabel: 'Sub Location',
-                                    labelWidth: 85
+                                    labelWidth: 85,
+                                    displayField: 'strSubLocationName',
+                                    valueField: 'intCompanyLocationSubLocationId'
                                 }
                             ]
                         },
@@ -238,23 +288,86 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                             },
                             items: [
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intItemId',
+                                            dataType: 'numeric',
+                                            text: 'Item Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strItemNo',
+                                            dataType: 'string',
+                                            text: 'Item Number',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strType',
+                                            dataType: 'string',
+                                            text: 'Item Type',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strDescription',
+                                            dataType: 'string',
+                                            text: 'Description',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strLotTracking',
+                                            dataType: 'string',
+                                            text: 'Lot Tracking',
+                                            hidden: true
+                                        }
+                                    ],
                                     itemId: 'cboItemNumber',
                                     fieldLabel: 'Item No',
-                                    labelWidth: 85
+                                    labelWidth: 85,
+                                    displayField: 'strItemNo',
+                                    valueField: 'intItemId'
                                 },
                                 {
-                                    xtype: 'numberfield',
+                                    xtype: 'numeric',
                                     itemId: 'txtBuildQuantity',
                                     fieldLabel: 'Build Quantity',
                                     labelWidth: 85,
                                     hideTrigger: true
                                 },
                                 {
-                                    xtype: 'combobox',
+                                    xtype: 'gridcombobox',
+                                    columns: [
+                                        {
+                                            dataIndex: 'intItemUOMId',
+                                            dataType: 'numeric',
+                                            text: 'Unit Of Measure Id',
+                                            hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'strUnitMeasure',
+                                            dataType: 'string',
+                                            text: 'Unit Measure',
+                                            flex: 1
+                                        },
+                                        {
+                                            dataIndex: 'strUnitType',
+                                            dataType: 'string',
+                                            text: 'Unit Type',
+                                            flex: 1
+                                        },
+                                        {
+                                            xtype: 'checkcolumn',
+                                            dataIndex: 'ysnStockUnit',
+                                            dataType: 'boolean',
+                                            text: 'Stock Unit',
+                                            flex: 1
+                                        }
+                                    ],
                                     itemId: 'cboUOM',
                                     fieldLabel: 'UOM',
-                                    labelWidth: 85
+                                    labelWidth: 85,
+                                    displayField: 'strUnitMeasure',
+                                    valueField: 'intItemUOMId'
                                 }
                             ]
                         },
@@ -271,10 +384,13 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                     xtype: 'textfield',
                                     itemId: 'txtBuildNumber',
                                     fieldLabel: 'Build No',
-                                    labelWidth: 50
+                                    labelWidth: 50,
+                                    readOnly: true,
+                                    blankText: 'Created on Save',
+                                    emptyText: 'Created on Save'
                                 },
                                 {
-                                    xtype: 'numberfield',
+                                    xtype: 'numeric',
                                     itemId: 'txtCost',
                                     fieldLabel: 'Cost',
                                     labelWidth: 50,
@@ -314,7 +430,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                 {
                                     xtype: 'button',
                                     tabIndex: -1,
-                                    itemId: 'btnRemove1',
+                                    itemId: 'btnRemove',
                                     iconCls: 'small-delete',
                                     text: 'Remove'
                                 },
@@ -330,35 +446,41 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                     columns: [
                         {
                             xtype: 'gridcolumn',
+                            itemId: 'colItemNo',
                             dataIndex: 'string',
                             text: 'Item No.',
                             flex: 1
                         },
                         {
                             xtype: 'gridcolumn',
+                            itemId: 'colDescription',
                             dataIndex: 'string',
                             text: 'Description',
                             flex: 2
                         },
                         {
                             xtype: 'gridcolumn',
+                            itemId: 'colSubLocation',
                             dataIndex: 'string',
                             text: 'Sub Location'
                         },
                         {
                             xtype: 'numbercolumn',
+                            itemId: 'colStock',
                             width: 70,
                             align: 'right',
                             text: 'Stock'
                         },
                         {
                             xtype: 'numbercolumn',
+                            itemId: 'colQuantity',
                             width: 70,
                             align: 'right',
                             text: 'Quantity'
                         },
                         {
                             xtype: 'gridcolumn',
+                            itemId: 'colUOM',
                             width: 63,
                             defaultWidth: 90,
                             dataIndex: 'string',
@@ -366,6 +488,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                         },
                         {
                             xtype: 'numbercolumn',
+                            itemId: 'colCost',
                             width: 85,
                             align: 'right',
                             text: 'Cost'

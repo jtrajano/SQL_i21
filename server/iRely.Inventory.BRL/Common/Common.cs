@@ -19,6 +19,8 @@ namespace iRely.Inventory.BRL
             InventoryReceipt = 23,
             LotNumber = 24,
             InventoryAdjustment = 30,
+            InventoryShipment = 31,
+            BuildAssembly = 35,
         }
 
         public class Posting_RequestModel

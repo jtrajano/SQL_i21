@@ -130,6 +130,17 @@ Ext.define('Inventory.view.Item', {
                     text: 'Duplicate'
                 },
                 {
+                    xtype: 'button',
+                    tabIndex: -1,
+                    height: 57,
+                    itemId: 'btnBuildAssembly',
+                    width: 90,
+                    iconAlign: 'top',
+                    iconCls: 'large-build',
+                    scale: 'large',
+                    text: 'Build Assembly'
+                },
+                {
                     xtype: 'tbseparator',
                     height: 30
                 },
@@ -4544,7 +4555,7 @@ Ext.define('Inventory.view.Item', {
                                                             ],
                                                             itemId: 'cboAssemblyUOM',
                                                             displayField: 'strUnitMeasure',
-                                                            valueField: 'intUnitMeasureId'
+                                                            valueField: 'strUnitMeasure'
                                                         }
                                                     },
                                                     {

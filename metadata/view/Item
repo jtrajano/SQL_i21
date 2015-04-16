@@ -199,6 +199,29 @@
                     "designerId": "5d1fd672-1ffb-4812-943a-378a5df3e2ad"
                 },
                 {
+                    "type": "Ext.button.Button",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "designer|displayName": null,
+                        "height": 57,
+                        "icon": null,
+                        "iconAlign": "top",
+                        "iconCls": "large-build",
+                        "itemId": "btnBuildAssembly",
+                        "layout|flex": null,
+                        "scale": "large",
+                        "tabIndex": -1,
+                        "text": "Build Assembly",
+                        "width": 90
+                    },
+                    "name": "MyButton16",
+                    "designerId": "9c1f776c-197f-46c5-9263-521c23dc524d"
+                },
+                {
                     "type": "Ext.toolbar.Separator",
                     "reference": {
                         "name": "items",
@@ -10000,7 +10023,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strUnitMeasure",
                                                         "itemId": "cboAssemblyUOM",
-                                                        "valueField": "intUnitMeasureId"
+                                                        "valueField": "strUnitMeasure"
                                                     },
                                                     "name": "MyComboBox68",
                                                     "configAlternates": {

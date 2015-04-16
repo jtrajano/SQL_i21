@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Mappings\tblICBuildAssemblyMap.cs" />
     <Compile Include="Mappings\tblICInventoryAdjustmentMap.cs" />
     <Compile Include="Mappings\tblICItemCommodityCostMap.cs" />
     <Compile Include="Mappings\tblICStockReservationMap.cs" />
@@ -131,6 +132,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stored Procedures\Posting\PostInventoryReceipt.cs" />
     <Compile Include="Stored Procedures\DuplicateItem.cs" />
+    <Compile Include="Tables\tblICBuildAssembly.cs" />
     <Compile Include="Tables\tblICInventoryAdjustment.cs" />
     <Compile Include="Tables\tblICItemCommodityCost.cs" />
     <Compile Include="Tables\tblICStockReservation.cs" />

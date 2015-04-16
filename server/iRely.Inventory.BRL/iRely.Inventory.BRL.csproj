@@ -61,6 +61,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activities\BuildAssembly\BuildAssembly.cs" />
     <Compile Include="Activities\Inventory Adjustment\Adjustment.cs" />
     <Compile Include="Activities\Receipts\Lot.cs" />
     <Compile Include="Activities\Receipts\Receipt_Posting.cs" />

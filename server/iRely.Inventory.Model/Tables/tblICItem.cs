@@ -202,6 +202,9 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> NewAdjustmentDetails { get; set; }
+
+        public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
+        public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
                 
     }
 

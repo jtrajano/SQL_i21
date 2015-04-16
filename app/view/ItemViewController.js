@@ -30,6 +30,9 @@ Ext.define('Inventory.view.ItemViewController', {
             //-----------//
             //Details Tab//
             //-----------//
+            btnBuildAssembly: {
+                hidden: '{hideBuildAssembly}'
+            },
             txtItemNo: '{current.strItemNo}',
             txtDescription: '{current.strDescription}',
             txtModelNo: '{current.strModelNo}',
@@ -2425,6 +2428,30 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onBuildAssemblyClick: function(button) {
+        var win = button.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            var screenName = 'Inventory.view.BuildAssemblyBlend';
+
+            Ext.require([
+                screenName,
+                    screenName + 'ViewModel',
+                    screenName + 'ViewController'
+            ], function () {
+                var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
+                var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
+                var controller = view.getController();
+                controller.show({
+                    itemId: current.get('intItemId'),
+                    action: 'new',
+                    itemSetup: current.tblICItemAssemblies().data.items
+                });
+            });
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2567,6 +2594,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#btnDuplicate": {
                 click: this.onDuplicateClick
+            },
+            "#btnBuildAssembly": {
+                click: this.onBuildAssemblyClick
             }
         });
     }

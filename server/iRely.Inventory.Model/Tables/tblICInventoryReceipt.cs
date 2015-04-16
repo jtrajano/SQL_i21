@@ -381,6 +381,8 @@ namespace iRely.Inventory.Model
             get
             {
                 var salesPrice = dblUnitRetail ?? 0;
+                if (salesPrice == 0) return 0;
+
                 return ((salesPrice - (dblUnitCost ?? 0)) / (salesPrice)) * 100;
             }
             set

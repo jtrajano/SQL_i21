@@ -641,6 +641,14 @@ Ext.define('Inventory.view.ItemViewModel', {
                 return true;
             }
         },
+        hideBuildAssembly: function (get) {
+            if (get('current.strLotTracking') === 'No' && get('current.strType') === 'Assembly/Blend') {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
         checkStockTracking: function (get) {
             var isNotStockTracked = false;
 
