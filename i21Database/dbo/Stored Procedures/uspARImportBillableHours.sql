@@ -121,7 +121,7 @@ SELECT
 	,BL.[strZipCode]			--[strBillToZipCode]
 	,BL.[strCountry]			--[strBillToCountry]
 	,1
-	,@userId
+	,@UserId
 FROM
 	vyuARBillableHoursForImport V
 INNER JOIN
