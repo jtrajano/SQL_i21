@@ -1389,6 +1389,8 @@
     <Build Include="dbo\Tables\tblICInventoryTransferNote.sql" />
     <Build Include="dbo\Views\vyuLGAllocationDetailOpenGenerateLoads.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportBillableHours.sql" />
+    <Build Include="dbo\Tables\tblQMAttributeDataType.sql" />
+    <Build Include="dbo\Tables\tblQMAttribute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
