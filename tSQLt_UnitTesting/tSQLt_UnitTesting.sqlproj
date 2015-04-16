@@ -949,6 +949,9 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\Fake data for inventory adjustment table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks discontinued items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and phased out items.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on phased out lot items.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
