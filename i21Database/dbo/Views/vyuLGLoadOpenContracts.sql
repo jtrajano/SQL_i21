@@ -7,7 +7,7 @@ AS
 			CD.dblQuantity												AS dblDetailQuantity,
 			CD.intUnitMeasureId, 			UM.strUnitMeasure,
 			CD.intCompanyLocationId,
-			CD.dblQuantity - IsNull((SELECT SUM (LD.dblQuantity) from tblLGLoad LD Group By LD.intContractDetailId Having CD.intContractDetailId = LD.intContractDetailId), 0) AS dblUnLoadedQuantity,
+			IsNull(CD.dblBalance, 0) - IsNull(CD.dblScheduleQty, 0)		AS dblUnLoadedQuantity,
 			
 			CH.intPurchaseSale,
 			CH.intEntityId,
@@ -18,4 +18,4 @@ AS
 	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
 	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
 
-	WHERE (CD.dblQuantity - IsNull((select sum (LD.dblQuantity) from tblLGLoad LD Group By LD.intContractDetailId Having CD.intContractDetailId = LD.intContractDetailId), 0)) > 0	
+	WHERE (IsNull(CD.dblBalance, 0) - IsNull(CD.dblScheduleQty, 0)) > 0	
