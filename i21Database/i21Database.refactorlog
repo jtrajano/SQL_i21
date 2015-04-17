@@ -2422,4 +2422,24 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblRKElectronicPricing_tblRKMarketExchange_intMarketExchangeId]" />
   </Operation>
-</Operations>
+  <Operation Name="Rename Refactor" Key="461cebdb-e57a-43a3-9fb7-93fd0a8c1864" ChangeDateTime="04/08/2015 06:56:32">
+    <Property Name="ElementName" Value="[dbo].[tblSMGridLayout].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMGridLayout]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intGridLayoutId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="18483cba-880d-4d56-8413-729411d04a84" ChangeDateTime="04/08/2015 07:02:48">
+    <Property Name="ElementName" Value="[dbo].[tblSMGridLayout].[intUserId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMGridLayout]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="5e412c2b-d880-404a-a651-18ce4c4e6541" ChangeDateTime="04/08/2015 07:07:35">
+    <Property Name="ElementName" Value="[dbo].[tblSMGridLayout].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMGridLayout]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intUserId" />
+  </Operation>
