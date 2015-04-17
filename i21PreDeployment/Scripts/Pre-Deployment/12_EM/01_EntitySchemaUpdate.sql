@@ -167,6 +167,9 @@ BEGIN
 
 	alter table tblEntity
 	add [strTimezone] [nvarchar](100) NULL
+
+	alter table tblEntity
+	add [strEntityNo] [nvarchar](100) NULL
 		
 	alter table tblEntity
 	add [ysnActive] [bit] NOT NULL DEFAULT ((1))
@@ -174,6 +177,25 @@ BEGIN
 
 	alter table tblEntity
 	add [intDefaultLocationId]       INT            NULL ')
+
+	print 'Update tblEntity strEntityNo to get the Vendor strVendorId'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' AND [COLUMN_NAME] = 'strEntityNo') 
+	BEGIN
+		exec(N' update a set a.strEntityNo = b.strVendorId
+				from tblEntity a
+					join tblAPVendor b
+						on a.intEntityId =  b.intEntityId ')
+	END
+
+	print 'Update tblEntity strEntityNo to get the tblARCustomer strCustomerNumber'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' AND [COLUMN_NAME] = 'strEntityNo') 
+	BEGIN
+		exec(N' update a set a.strEntityNo = b.strCustomerNumber
+				from tblEntity a
+					join tblARCustomer b
+						on a.intEntityId =  b.intEntityId ')
+	END
+
 
 	print 'Moving Default Location'
 	exec(N'				
