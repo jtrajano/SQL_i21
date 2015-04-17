@@ -2443,25 +2443,4 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intUserId" />
   </Operation>
-  <Operation Name="Rename Refactor" Key="b686d36d-2008-4cc8-958e-52381a5398e7" ChangeDateTime="04/08/2015 07:08:04">
-    <Property Name="ElementName" Value="[dbo].[tblSMGridLayoutField].[Id]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblSMGridLayoutField]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="intGridLayoutFieldId" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="f724e1c9-c74a-473b-aad5-7a2296bcfa0a" ChangeDateTime="04/08/2015 07:28:25">
-    <Property Name="ElementName" Value="[dbo].[FK_tblSMGridLayoutField_ToTable]" />
-    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
-    <Property Name="ParentElementName" Value="[dbo].[tblSMGridLayoutField]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="[FK_tblSMGridLayoutField_TblSMGridLayout]" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="480dfb6e-4ee5-4de0-948f-744fed4d994e" ChangeDateTime="04/08/2015 07:29:56">
-    <Property Name="ElementName" Value="[dbo].[FK_tblSMGridLayoutField_ToTable]" />
-    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
-    <Property Name="ParentElementName" Value="[dbo].[tblSMGridLayoutField]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="[FK_tblSMGridLayoutField_TblSMGridLayout]" />
-  </Operation>
 </Operations>
