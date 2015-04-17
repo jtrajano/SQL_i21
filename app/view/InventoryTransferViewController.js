@@ -27,7 +27,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.strTransferType}',
                 store: '{transferTypes}'
             },
-            cboTransferredBy: '{current.intTransferredById}',
+            cboTransferredBy: {
+                value: '{current.intTransferredById}',
+                store: '{userList}'
+            },
             dtmTransferDate: '{current.dtmTransferDate}',
             chkShipmentRequired: '{current.ysnShipmentRequired}',
             txtTransferNumber: '{current.strTransferNo}',
@@ -40,11 +43,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.intToLocationId}',
                 store: '{toLocation}'
             },
-            cboCarrier: {
-                value: '{current.intCarrierId}'
-//                ,
-//                store: '{adjustmentTypes}'
-            },
+//            cboCarrier: {
+//                value: '{current.intCarrierId}'
+////                ,
+////                store: '{adjustmentTypes}'
+//            },
             cboFreightUOM: {
                 value: '{current.intFreightUOMId}',
                 store: '{uom}'
@@ -132,13 +135,23 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{itemUOM}'
+                        store: '{itemUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdInventoryTransfer.selection.intItemId}',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
-                        store: '{weightUOM}'
+                        store: '{weightUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdInventoryTransfer.selection.intItemId}',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colGross: 'dblGrossWeight',
@@ -250,9 +263,174 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
     },
 
+    createRecord: function(config, action) {
+        var today = new Date();
+        var record = Ext.create('Inventory.model.Transfer');
+        record.set('strTransferType', 'Location to Location');
+        if (app.DefaultLocation > 0){
+            record.set('intFromLocationId', app.DefaultLocation);
+            record.set('intToLocationId', app.DefaultLocation);
+        }
+        if (app.EntityId > 0)
+            record.set('intTransferredById', app.EntityId);
+        record.set('dtmTransferDate', today);
+
+        action(record);
+    },
+
+    onTransferDetailSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var me = win.controller;
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+
+        if (combo.itemId === 'cboItem') {
+            current.set('intItemId', records[0].get('intItemId'));
+            current.set('strItemDescription', records[0].get('strDescription'));
+        }
+        else if (combo.itemId === 'cboLot') {
+            current.set('intLotId', records[0].get('intLotId'));
+        }
+        else if (combo.itemId === 'cboFromSubLocation') {
+            current.set('intFromSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
+        }
+        else if (combo.itemId === 'cboFromStorage') {
+            current.set('intFromStorageLocationId', records[0].get('intStorageLocationId'));
+        }
+        else if (combo.itemId === 'cboToSubLocation') {
+            current.set('intToSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
+        }
+        else if (combo.itemId === 'cboToStorage') {
+            current.set('intToStorageLocationId', records[0].get('intStorageLocationId'));
+        }
+        else if (combo.itemId === 'cboUOM') {
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+        }
+        else if (combo.itemId === 'cboWeightUOM') {
+            current.set('intItemWeightUOMId', records[0].get('intItemUOMId'));
+        }
+        else if (combo.itemId === 'cboNewLotID') {
+            current.set('intNewLotId', records[0].get('intLotId'));
+        }
+        else if (combo.itemId === 'cboCreditAccount') {
+            current.set('intCreditAccountId', records[0].get('intAccountId'));
+            current.set('strCreditAccountDescription', records[0].get('strDescription'));
+        }
+        else if (combo.itemId === 'cboDebitAccount') {
+            current.set('intDebitAccountId', records[0].get('intAccountId'));
+            current.set('strDebitAccountDescription', records[0].get('strDescription'));
+        }
+        else if (combo.itemId === 'cboTaxCode') {
+            current.set('intTaxCodeId', records[0].get('intTaxCodeId'));
+        }
+    },
+
+    onTransferTypeChange: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var pnlFreight = win.down('#pnlFreight');
+        var grdInventoryTransfer = win.down('#grdInventoryTransfer');
+        var colCost = grdInventoryTransfer.columns[14];
+        var colCreditAccount = grdInventoryTransfer.columns[15];
+        var colCreditAccountDescription = grdInventoryTransfer.columns[16];
+        var colDebitAccount = grdInventoryTransfer.columns[17];
+        var colDebitAccountDescription = grdInventoryTransfer.columns[18];
+        var colTaxCode = grdInventoryTransfer.columns[19];
+        var colTaxAmount = grdInventoryTransfer.columns[20];
+
+        var colFreightRate = grdInventoryTransfer.columns[21];
+        var colFreightAmount = grdInventoryTransfer.columns[22];
+
+        switch (newValue) {
+            case 'Location to Location':
+                pnlFreight.setHidden(false);
+
+                colCost.setHidden(true);
+                colCreditAccount.setHidden(true);
+                colCreditAccountDescription.setHidden(true);
+                colDebitAccount.setHidden(true);
+                colDebitAccountDescription.setHidden(true);
+                colTaxCode.setHidden(true);
+                colTaxAmount.setHidden(true);
+
+                colFreightRate.setHidden(false);
+                colFreightAmount.setHidden(false);
+                break
+            case 'Storage to Storage':
+                pnlFreight.setHidden(true);
+
+                colCost.setHidden(true);
+                colCreditAccount.setHidden(true);
+                colCreditAccountDescription.setHidden(true);
+                colDebitAccount.setHidden(true);
+                colDebitAccountDescription.setHidden(true);
+                colTaxCode.setHidden(true);
+                colTaxAmount.setHidden(true);
+
+                colFreightRate.setHidden(true);
+                colFreightAmount.setHidden(true);
+                break
+            case 'Location to External':
+                pnlFreight.setHidden(false);
+
+                colCost.setHidden(false);
+                colCreditAccount.setHidden(false);
+                colCreditAccountDescription.setHidden(false);
+                colDebitAccount.setHidden(false);
+                colDebitAccountDescription.setHidden(false);
+                colTaxCode.setHidden(false);
+                colTaxAmount.setHidden(false);
+
+                colFreightRate.setHidden(false);
+                colFreightAmount.setHidden(false);
+                break
+        }
+    },
+
     init: function(application) {
         this.control({
-
+            "#cboItem": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboLot": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboFromSubLocation": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboFromStorage": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboToSubLocation": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboToStorage": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboUOM": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboWeightUOM": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboNewLotID": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboCreditAccount": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboDebitAccount": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboTaxCode": {
+                select: this.onTransferDetailSelect
+            },
+            "#cboTransferType": {
+                change: this.onTransferTypeChange
+            }
         });
     }
 });

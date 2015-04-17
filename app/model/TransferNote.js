@@ -31,9 +31,5 @@ Ext.define('Inventory.model.TransferNote', {
         { name: 'strNoteType', type: 'string' },
         { name: 'strNotes', type: 'string' },
         { name: 'intSort', type: 'int', allowNull: true }
-    ],
-
-    validators: [
-
     ]
 });

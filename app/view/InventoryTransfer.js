@@ -46,7 +46,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
     collapsible: true,
     iconCls: 'small-icon-i21',
     title: 'Inventory Transfer',
-    defaultFocus: 'cboTransferredBy',
     maximizable: true,
 
     initConfig: function(instanceConfig) {
@@ -228,7 +227,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'gridcombobox',
-                                                                        flex: 1,
                                                                         columns: [
                                                                             {
                                                                                 dataIndex: 'strDescription',
@@ -237,6 +235,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        flex: 1,
                                                                         itemId: 'cboTransferType',
                                                                         fieldLabel: 'Transfer Type',
                                                                         labelWidth: 90,
@@ -245,7 +244,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
-                                                                        flex: 1,
                                                                         columns: [
                                                                             {
                                                                                 dataIndex: 'intEntityId',
@@ -272,6 +270,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        flex: 1,
                                                                         itemId: 'cboTransferredBy',
                                                                         fieldLabel: 'Transferred By',
                                                                         labelWidth: 90,
@@ -309,13 +308,15 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                         flex: 1,
                                                                         itemId: 'txtTransferNumber',
                                                                         fieldLabel: 'Transfer No',
-                                                                        labelWidth: 90
+                                                                        labelWidth: 90,
+                                                                        readOnly: true,
+                                                                        blankText: 'Created on Save',
+                                                                        emptyText: 'Created on Save'
                                                                     }
                                                                 ]
                                                             },
                                                             {
                                                                 xtype: 'textfield',
-                                                                flex: 1,
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
                                                                 labelWidth: 90
@@ -329,7 +330,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'gridcombobox',
-                                                                        flex: 1,
                                                                         columns: [
                                                                             {
                                                                                 dataIndex: 'intCompanyLocationId',
@@ -350,6 +350,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        flex: 1,
                                                                         itemId: 'cboFromLocation',
                                                                         fieldLabel: 'From Location',
                                                                         labelWidth: 90,
@@ -358,7 +359,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
-                                                                        flex: 1,
                                                                         columns: [
                                                                             {
                                                                                 dataIndex: 'intCompanyLocationId',
@@ -379,6 +379,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        flex: 1,
                                                                         itemId: 'cboToLocation',
                                                                         fieldLabel: 'To Location',
                                                                         labelWidth: 90,

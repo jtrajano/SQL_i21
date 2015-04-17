@@ -6,6 +6,7 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.TaxCodeBuffered',
+        'i21.store.UserListBuffered',
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
         'Inventory.store.BufferedItemStockView',
@@ -33,6 +34,9 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+        userList: {
+            type: 'userlistbuffered'
         },
 
         fromLocation: {

@@ -51,12 +51,12 @@ Ext.define('Inventory.model.TransferDetail', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string' },
-        { name: 'strUnitMeasure', type: 'string' },
+        { name: 'strUnitMeasure', type: 'string' }
     ],
 
     validators: [
         { type: 'presence', field: 'strItemNo' },
         { type: 'presence', field: 'dblQuantity' },
-        { type: 'presence', field: 'strUnitMeasure' },
+        { type: 'presence', field: 'strUnitMeasure' }
     ]
 });

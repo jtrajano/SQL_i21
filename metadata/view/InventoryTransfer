@@ -7,7 +7,6 @@
     "codeClass": null,
     "userConfig": {
         "collapsible": true,
-        "defaultFocus": "cboTransferredBy",
         "designer|userAlias": "icinventorytransfer",
         "designer|userClassName": "InventoryTransfer",
         "height": 700,
@@ -611,7 +610,9 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "alwaysDisplayDecimals": null,
+                                                                "blankText": "Created on Save",
                                                                 "designer|createAlias": null,
+                                                                "emptyText": "Created on Save",
                                                                 "fieldLabel": "Transfer No",
                                                                 "hidden": null,
                                                                 "hideTrigger": null,
@@ -620,6 +621,7 @@
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
                                                                 "name": null,
+                                                                "readOnly": true,
                                                                 "width": null
                                                             },
                                                             "name": "MyTextField20",
@@ -648,7 +650,7 @@
                                                         "fieldLabel": "Description",
                                                         "itemId": "txtDescription",
                                                         "labelWidth": 90,
-                                                        "layout|flex": 1
+                                                        "layout|flex": null
                                                     },
                                                     "name": "MyTextField22",
                                                     "designerId": "41b9c35c-73f3-4c0e-a119-2f601680bc73"
