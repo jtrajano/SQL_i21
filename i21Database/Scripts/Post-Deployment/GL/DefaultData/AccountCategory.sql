@@ -292,7 +292,7 @@ BEGIN -- GROUP CATEGORY MAPPING
 		SELECT 'Undeposited Funds','Undeposited Funds'
 	)
 	UPDATE A 
-	SET A.intDefaultAccountCategoryId = C.intAccountCategoryId
+	SET A.intAccountCategoryId = C.intAccountCategoryId
 	FROM tblGLAccountGroup A
 	JOIN CTE B ON A.strAccountGroup = B.strAccountGroup
 	JOIN tblGLAccountCategory C ON C.strAccountCategory = B.strAccountCategory
