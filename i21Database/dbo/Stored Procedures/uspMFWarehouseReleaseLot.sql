@@ -197,7 +197,7 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intLotId = @intLotId
 
-	Update tblICLot Set intLotStatusId =1 Where intLotId=@intLotId
+	Update tblICLot Set intLotStatusId =(Select intLotStatusId from tblICLotStatus Where strSecondaryStatus='Active') Where intLotId=@intLotId
 
 	COMMIT TRANSACTION
 
