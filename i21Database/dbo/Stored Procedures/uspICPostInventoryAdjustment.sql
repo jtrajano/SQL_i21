@@ -128,14 +128,13 @@ EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1  
 BEGIN  
-	DECLARE @ItemsForPost AS ItemCostingTableType  
+	DECLARE @ItemsForAdjust AS ItemCostingTableType  
 
 	-----------------------------------
 	--  Call Quantity Change 
 	-----------------------------------
 	BEGIN 
-		-- Insert the data into @ItemsForPost
-		INSERT INTO @ItemsForPost (  
+		INSERT INTO @ItemsForAdjust (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -161,8 +160,7 @@ BEGIN
 	--  Call UOM Change 
 	-----------------------------------
 	BEGIN 
-		-- Insert the data into @ItemsForPost
-		INSERT INTO @ItemsForPost (  
+		INSERT INTO @ItemsForAdjust (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -188,8 +186,7 @@ BEGIN
 	--  Call Item Change 
 	-----------------------------------
 	BEGIN 
-		-- Insert the data into @ItemsForPost
-		INSERT INTO @ItemsForPost (  
+		INSERT INTO @ItemsForAdjust (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -215,8 +212,7 @@ BEGIN
 	--  Call Lot Status Change
 	-----------------------------------
 	BEGIN 
-		-- Insert the data into @ItemsForPost
-		INSERT INTO @ItemsForPost (  
+		INSERT INTO @ItemsForAdjust (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -242,8 +238,7 @@ BEGIN
 	--  Call Split Lot Change
 	-----------------------------------
 	BEGIN 
-		-- Insert the data into @ItemsForPost
-		INSERT INTO @ItemsForPost (  
+		INSERT INTO @ItemsForAdjust (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -269,8 +264,7 @@ BEGIN
 	--  Call Expiry Lot Change
 	-----------------------------------
 	BEGIN 
-		-- Insert the data into @ItemsForPost
-		INSERT INTO @ItemsForPost (  
+		INSERT INTO @ItemsForAdjust (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -291,7 +285,7 @@ BEGIN
 		EXEC	dbo.uspICPostInventoryAdjustmentExpiryLotChange
 				@intTransactionId
 	END 
-
+	
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
@@ -324,7 +318,7 @@ BEGIN
 				,[intConcurrencyId]
 		)
 		EXEC	dbo.uspICPostCosting  
-				@ItemsForPost  
+				@ItemsForAdjust  
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId		
@@ -397,7 +391,8 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0 
 BEGIN 
-	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+	-- If there are items for adjust, expect it to have g/l entries. 
+	IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust) 
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END
