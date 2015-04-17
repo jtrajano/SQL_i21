@@ -1299,7 +1299,7 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	SET @intCurrentPanelId = (SELECT TOP 1 intPanelId FROM tblDBPanel WHERE intCannedPanelId = @intCannedPanelId)
 		
-	INSERT INTO [dbo].[tblDBPanelColumn] 
+	INSERT INTO [dbo].[tblDBPanelColumn]
 	([intPanelId], [strColumn], [strCaption], [intWidth], [strAlignment], [strArea], [strFooter], [strFormat], [intSort], [strFormatTrue], [strFormatFalse], [strDrillDownColumn], [ysnVisible], [strType], [strAxis], [strUserName], [intUserId], [intDonut], [intMinInterval], [intMaxInterval], [intStepInterval], [strIntervalFormat], [ysnHiddenColumn], [intConcurrencyId], [intCannedPanelId], [strDataType])
 	SELECT @intCurrentPanelId, [strColumn], [strCaption], [intWidth], [strAlignment], [strArea], [strFooter], [strFormat], [intSort], [strFormatTrue], [strFormatFalse], [strDrillDownColumn], [ysnVisible], [strType], [strAxis], [strUserName], [intUserId], [intDonut], [intMinInterval], [intMaxInterval], [intStepInterval], [strIntervalFormat], [ysnHiddenColumn], [intConcurrencyId], [intCannedPanelId], [strDataType]
 	FROM #TempCannedPanelColumn 
@@ -1319,11 +1319,7 @@ print('/*******************  END UPDATING canned panels on table Panel Column  *
 
 print('/***********************   BEGIN checking posible duplicate column  ****************/')
 /*******************  BEGIN checking posible duplicate column *******************/
-DELETE FROM [dbo].[tblDBPanelColumn] WHERE​ intPanelColumnId NOT IN (SELECT MIN(intPanelColumnId)
-              FROM [dbo].[tblDBPanelColumn] 
-              GROUP BY intPanelId,strColumn,strCaption,intWidth,strAlignment,strArea,strFooter,strFormat,intSort,strFormatTrue,strFormatFalse,              
-                           strDrillDownColumn,ysnVisible,strType,strAxis,strUserName,intUserId,intDonut,intMinInterval,intMaxInterval,intStepInterval,
-                           strIntervalFormat,ysnHiddenColumn,[intConcurrencyId])
+DELETE FROM [dbo].[tblDBPanelColumn] WHERE​ intPanelColumnId NOT IN (SELECT MIN(intPanelColumnId) FROM [dbo].[tblDBPanelColumn] GROUP BY intPanelId,strColumn,strCaption,intWidth,strAlignment,strArea,strFooter,strFormat,intSort,strFormatTrue,strFormatFalse, strDrillDownColumn,ysnVisible,strType,strAxis,strUserName,intUserId,intDonut,intMinInterval,intMaxInterval,intStepInterval, strIntervalFormat,ysnHiddenColumn,[intConcurrencyId])
 
 print('/***********************   END checking posible duplicate column  ****************/')
 /*******************  END checking posible duplicate column *******************/
