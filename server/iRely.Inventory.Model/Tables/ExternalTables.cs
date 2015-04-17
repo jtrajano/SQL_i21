@@ -24,98 +24,6 @@ namespace iRely.Inventory.Model
         public string strPhone { get; set; }
         public string strFax { get; set; }
 
-        //public string strAddress { get; set; }
-        //public string strZipPostalCode { get; set; }
-        //public string strCity { get; set; }
-        //public string strStateProvince { get; set; }
-        //public string strCountry { get; set; }
-        //public string strPhone { get; set; }
-        //public string strFax { get; set; }
-        //public string strEmail { get; set; }
-        //public string strWebsite { get; set; }
-        //public string strInternalNotes { get; set; }
-        //public string strUseLocationAddress { get; set; }
-        //public string strSkipSalesmanDefault { get; set; }
-        //public bool ysnSkipTermsDefault { get; set; }
-        //public string strOrderTypeDefault { get; set; }
-        //public string strPrintCashReceipts { get; set; }
-        //public bool ysnPrintCashTendered { get; set; }
-        //public string strSalesTaxByLocation { get; set; }
-        //public string strDeliverPickupDefault { get; set; }
-        //public string strTaxState { get; set; }
-        //public string strTaxAuthorityId1 { get; set; }
-        //public string strTaxAuthorityId2 { get; set; }
-        //public bool ysnOverridePatronage { get; set; }
-        //public string strOutOfStockWarning { get; set; }
-        //public string strLotOverdrawnWarning { get; set; }
-        //public string strDefaultCarrier { get; set; }
-        //public bool ysnOrderSection2Required { get; set; }
-        //public string strPrintonPO { get; set; }
-        //public decimal? dblMixerSize { get; set; }
-        //public bool ysnOverrideMixerSize { get; set; }
-        //public bool ysnEvenBatches { get; set; }
-        //public bool ysnDefaultCustomBlend { get; set; }
-        //public bool ysnAgroguideInterface { get; set; }
-        //public bool ysnLocationActive { get; set; }
-        //public int intCashAccount { get; set; }
-        //public int intDepositAccount { get; set; }
-        //public int intARAccount { get; set; }
-        //public int intAPAccount { get; set; }
-        //public int intSalesAdvAcct { get; set; }
-        //public int intPurchaseAdvAccount { get; set; }
-        //public int intFreightAPAccount { get; set; }
-        //public int intFreightExpenses { get; set; }
-        //public int intFreightIncome { get; set; }
-        //public int intServiceCharges { get; set; }
-        //public int intSalesDiscounts { get; set; }
-        //public int intCashOverShort { get; set; }
-        //public int intWriteOff { get; set; }
-        //public int intCreditCardFee { get; set; }
-        //public int intSalesAccount { get; set; }
-        //public int intCostofGoodsSold { get; set; }
-        //public int intInventory { get; set; }
-        //public string strInvoiceType { get; set; }
-        //public string strDefaultInvoicePrinter { get; set; }
-        //public string strPickTicketType { get; set; }
-        //public string strDefaultTicketPrinter { get; set; }
-        //public string strLastOrderNumber { get; set; }
-        //public string strLastInvoiceNumber { get; set; }
-        //public string strPrintonInvoice { get; set; }
-        //public bool ysnPrintContractBalance { get; set; }
-        //public string strJohnDeereMerchant { get; set; }
-        //public string strInvoiceComments { get; set; }
-        //public bool ysnUseOrderNumberforInvoiceNumber { get; set; }
-        //public bool ysnOverrideOrderInvoiceNumber { get; set; }
-        //public bool ysnPrintInvoiceMedTags { get; set; }
-        //public bool ysnPrintPickTicketMedTags { get; set; }
-        //public bool ysnSendtoEnergyTrac { get; set; }
-        //public string strDiscountScheduleType { get; set; }
-        //public string strLocationDiscount { get; set; }
-        //public string strLocationStorage { get; set; }
-        //public string strMarketZone { get; set; }
-        //public string strLastTicket { get; set; }
-        //public bool ysnDirectShipLocation { get; set; }
-        //public bool ysnScaleInstalled { get; set; }
-        //public string strDefaultScaleId { get; set; }
-        //public bool ysnActive { get; set; }
-        //public bool ysnUsingCashDrawer { get; set; }
-        //public string strCashDrawerDeviceId { get; set; }
-        //public bool ysnPrintRegisterTape { get; set; }
-        //public bool ysnUseUPConOrders { get; set; }
-        //public bool ysnUseUPConPhysical { get; set; }
-        //public bool ysnUseUPConPurchaseOrders { get; set; }
-        //public string strUPCSearchSequence { get; set; }
-        //public string strBarCodePrinterName { get; set; }
-        //public string strPriceLevel1 { get; set; }
-        //public string strPriceLevel2 { get; set; }
-        //public string strPriceLevel3 { get; set; }
-        //public string strPriceLevel4 { get; set; }
-        //public string strPriceLevel5 { get; set; }
-        //public bool ysnOverShortEntries { get; set; }
-        //public string strOverShortCustomer { get; set; }
-        //public string strOverShortAccount { get; set; }
-        //public bool ysnAutomaticCashDepositEntries { get; set; }
-
         public ICollection<tblICManufacturingCell> tblICManufacturingCells { get; set; }
         public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }
         
@@ -131,6 +39,9 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryAdjustment> tblICInventoryAdjustments { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
 
+        public ICollection<tblICInventoryTransfer> FromInventoryTransfers { get; set; }
+        public ICollection<tblICInventoryTransfer> ToInventoryTransfers { get; set; }
+
     }
 
     public class tblGLAccount
@@ -145,6 +56,8 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> DebitAdjustmentDetails { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> CreditAdjustmentDetails { get; set; }
+        public ICollection<tblICInventoryTransferDetail> CreditTransferDetails { get; set; }
+        public ICollection<tblICInventoryTransferDetail> DebitTransferDetails { get; set; }
 
     }
 
@@ -332,5 +245,30 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
+
+        public ICollection<tblICInventoryTransferDetail> FromTransferDetails { get; set; }
+        public ICollection<tblICInventoryTransferDetail> ToTransferDetails { get; set; }
+    }
+
+    public class tblSMTaxCode : BaseEntity
+    {
+        public int intTaxCodeId { get; set; }
+        public string strTaxCode { get; set; }
+        public int? intTaxClassId { get; set; }
+        public string strDescription { get; set; }
+        public string strCalculationMethod { get; set; }
+        public decimal? numRate { get; set; }
+        public string strTaxAgency { get; set; }
+        public string strAddress { get; set; }
+        public string strZipCode { get; set; }
+        public string strState { get; set; }
+        public string strCity { get; set; }
+        public string strCountry { get; set; }
+        public string strCounty { get; set; }
+        public int? intSalesTaxAccountId { get; set; }
+        public int? intPurchaseTaxAccountId { get; set; }
+        public string strTaxableByOtherTaxes { get; set; }
+
+        public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
     }
 }

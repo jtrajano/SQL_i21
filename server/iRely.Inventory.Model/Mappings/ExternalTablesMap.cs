@@ -328,4 +328,32 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class tblSMTaxCodeMap : EntityTypeConfiguration<tblSMTaxCode>
+    {
+        public tblSMTaxCodeMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intTaxCodeId);
+
+            // Table & Column Mappings
+            this.ToTable("tblSMTaxCode");
+            this.Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
+            this.Property(t => t.strTaxCode).HasColumnName("strTaxCode");
+            this.Property(t => t.intTaxClassId).HasColumnName("intTaxClassId");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strCalculationMethod).HasColumnName("strCalculationMethod");
+            this.Property(t => t.numRate).HasColumnName("numRate").HasPrecision(18, 6);
+            this.Property(t => t.strTaxAgency).HasColumnName("strTaxAgency");
+            this.Property(t => t.strAddress).HasColumnName("strAddress");
+            this.Property(t => t.strZipCode).HasColumnName("strZipCode");
+            this.Property(t => t.strState).HasColumnName("strState");
+            this.Property(t => t.strCity).HasColumnName("strCity");
+            this.Property(t => t.strCountry).HasColumnName("strCountry");
+            this.Property(t => t.strCounty).HasColumnName("strCounty");
+            this.Property(t => t.intSalesTaxAccountId).HasColumnName("intSalesTaxAccountId");
+            this.Property(t => t.intPurchaseTaxAccountId).HasColumnName("intPurchaseTaxAccountId");
+            this.Property(t => t.strTaxableByOtherTaxes).HasColumnName("strTaxableByOtherTaxes");
+        }
+    }
+
 }

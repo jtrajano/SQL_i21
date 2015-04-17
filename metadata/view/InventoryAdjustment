@@ -709,7 +709,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter120",
+                                                    "name": "filter12",
                                                     "designerId": "f7c10b11-c359-49ba-99e8-69e1af636272",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1631,7 +1631,7 @@
                                                 "dataIndex": "strCreditAccount",
                                                 "itemId": "colAccountCategory",
                                                 "text": "Account Category",
-                                                "width": 100
+                                                "width": 110
                                             },
                                             "name": "MyColumn4",
                                             "designerId": "525531bb-2ee1-43a3-944d-c13424b3722e",
@@ -2029,7 +2029,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter121",
+                                                    "name": "filter13",
                                                     "designerId": "675f97e5-0409-46e6-8715-a4dc0129950a",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2214,7 +2214,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging110",
+                    "name": "statusbarpaging11",
                     "designerId": "76244995-910a-41a2-86d9-d8e3a962e968",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -768,7 +768,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colAccountCategory',
-                                                        width: 100,
+                                                        width: 110,
                                                         dataIndex: 'strCreditAccount',
                                                         text: 'Account Category',
                                                         editor: {

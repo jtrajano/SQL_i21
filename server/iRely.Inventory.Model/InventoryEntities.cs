@@ -27,12 +27,6 @@ namespace iRely.Inventory.Model
             
         }
 
-        //public InventoryEntities()
-        //    : base("Name=InventoryEntities")
-        //{
-        //    this.Configuration.ProxyCreationEnabled = false;
-        //}
-
         #region Function
         /// <summary>
         /// 
@@ -186,6 +180,10 @@ namespace iRely.Inventory.Model
         public DbSet<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
         public DbSet<tblICInventoryAdjustmentNote> tblICInventoryAdjustmentNotes { get; set; }
 
+        public DbSet<tblICInventoryTransfer> tblICInventoryTransfers { get; set; }
+        public DbSet<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
+        public DbSet<tblICInventoryTransferNote> tblICInventoryTransferNotes { get; set; }
+
         public DbSet<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
         public DbSet<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
 
@@ -214,6 +212,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblSMStartingNumber> tblSMStartingNumbers { get; set; }
         public DbSet<tblSMFreightTerm> tblSMFreightTerms { get; set; }
         public DbSet<tblSMCompanyLocationSubLocation> tblSMCompanyLocationSubLocations { get; set; }
+        public DbSet<tblSMTaxCode> tblSMTaxCodes { get; set; }
 
         public DbSet<tblMFQAProperty> tblMFQAProperties { get; set; }
         public DbSet<vyuSMGetLocationPricingLevel> vyuSMGetLocationPricingLevels { get; set; }
@@ -337,6 +336,10 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryAdjustmentDetailMap());
             modelBuilder.Configurations.Add(new tblICInventoryAdjustmentNoteMap());
 
+            modelBuilder.Configurations.Add(new tblICInventoryTransferMap());
+            modelBuilder.Configurations.Add(new tblICInventoryTransferDetailMap());
+            modelBuilder.Configurations.Add(new tblICInventoryTransferNoteMap());
+
             modelBuilder.Configurations.Add(new tblICBuildAssemblyMap());
             modelBuilder.Configurations.Add(new tblICBuildAssemblyDetailMap());
 
@@ -350,6 +353,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblSMCountryMap());
             modelBuilder.Configurations.Add(new tblSMCurrencyMap());
             modelBuilder.Configurations.Add(new tblSMCompanyLocationSubLocationMap());
+            modelBuilder.Configurations.Add(new tblSMTaxCodeMap());
 
             modelBuilder.Configurations.Add(new tblSTPaidOutMap());
             modelBuilder.Configurations.Add(new tblSTStoreMap());
