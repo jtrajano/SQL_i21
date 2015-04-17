@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICPostInventoryAdjustmentSplitLot  
+﻿CREATE PROCEDURE uspICPostInventoryAdjustmentSplitLotChange  
 	@intTransactionId INT = NULL   
 AS  
   

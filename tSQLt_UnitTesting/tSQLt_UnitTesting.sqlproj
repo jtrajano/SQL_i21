@@ -952,6 +952,27 @@
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks discontinued items.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and phased out items.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on phased out lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment on getting the batch id.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Qty Change.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Expiry Lot Change.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Item Change.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Lot Status Change.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Split Lot Change.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling UOM Change.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -1400,7 +1400,8 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentUOMChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotStatusChange.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentSplitLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentSplitLotChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

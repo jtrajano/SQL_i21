@@ -2,6 +2,7 @@
 AS
 BEGIN
 	EXEC [testi21Database].[Fake inventory items];
+	EXEC testi21Database.[Fake open fiscal year and accounting periods]
 
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustment', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustmentDetail', @Identity = 1;	
@@ -41,15 +42,27 @@ BEGIN
 			,@ManualLotGrains_PoundUOMId AS INT = 13
 			,@SerializedLotGrains_PoundUOMId AS INT = 14
 
-	-- Declare the variables for the transaction 
-	DECLARE @strReceiptNumber AS NVARCHAR(40);
-	DECLARE @intReceiptNumber AS INT;
-	DECLARE @BaseCurrencyId AS INT = 1;
-	DECLARE @dblExchangeRate AS NUMERIC(18,6) = 1;
-	DECLARE @dtmDate AS DATETIME;
-	DECLARE @InventoryReceiptTypeId AS INT = 4;
-	DECLARE @intEntityId AS INT = 1;
-	DECLARE @intUserId AS INT = 1;
+	-- Declare Item-Locations
+	DECLARE @WetGrains_DefaultLocation AS INT = 1
+			,@StickyGrains_DefaultLocation AS INT = 2
+			,@PremiumGrains_DefaultLocation AS INT = 3
+			,@ColdGrains_DefaultLocation AS INT = 4
+			,@HotGrains_DefaultLocation AS INT = 5
+
+			,@WetGrains_NewHaven AS INT = 6
+			,@StickyGrains_NewHaven AS INT = 7
+			,@PremiumGrains_NewHaven AS INT = 8
+			,@ColdGrains_NewHaven AS INT = 9
+			,@HotGrains_NewHaven AS INT = 10
+
+			,@WetGrains_BetterHaven AS INT = 11
+			,@StickyGrains_BetterHaven AS INT = 12
+			,@PremiumGrains_BetterHaven AS INT = 13
+			,@ColdGrains_BetterHaven AS INT = 14
+			,@HotGrains_BetterHaven AS INT = 15
+
+			,@ManualLotGrains_DefaultLocation AS INT = 16
+			,@SerializedLotGrains_DefaultLocation AS INT = 17
 
 	-- Create mock data for the starting number 
 	EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';	
@@ -88,4 +101,32 @@ BEGIN
 	-- 6. Change the expiry date of an existing lot. 
 	-- 7. Change the value/cost of an existing stock. 
 
+	-- Constant for Adjustment Types
+	DECLARE @ADJUSTMENT_TYPE_QTY_CHANGE AS INT = 1
+			,@ADJUSTMENT_TYPE_UOM_CHANGE AS INT = 2
+			,@ADJUSTMENT_TYPE_ITEM_CHANGE AS INT = 3
+			,@ADJUSTMENT_TYPE_LOT_STATUS_CHANGE AS INT = 4
+			,@ADJUSTMENT_TYPE_LOT_ID_CHANGE AS INT = 5
+			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
+
+	INSERT INTO dbo.tblICInventoryAdjustment (
+			intLocationId 
+			,dtmAdjustmentDate       
+			,intAdjustmentType 
+			,strAdjustmentNo                                    
+			,strDescription                                                                                       
+			,intSort     
+			,ysnPosted 
+			,intEntityId 
+			,intConcurrencyId	
+	)
+	SELECT 	intLocationId		= @NewHaven
+			,dtmAdjustmentDate  = GETDATE()     
+			,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+			,strAdjustmentNo    = 'ADJ-1'                              
+			,strDescription     = 'Header only record'                                                                          
+			,intSort			= 1
+			,ysnPosted			= 0
+			,intEntityId		= 1
+			,intConcurrencyId	= 1
 END 
