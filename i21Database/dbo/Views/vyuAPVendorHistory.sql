@@ -3,7 +3,7 @@ WITH SCHEMABINDING
 AS
 SELECT 
 	tblAPVendor.intEntityVendorId as intEntityId
-	,intVendorId = tblAPVendor.intEntityVendorId
+	,intEntityVendorId = tblAPVendor.intEntityVendorId
 	,strVendorId = tblAPVendor.strVendorId
 	,A.dtmDate
 	,intTransactionId = A.intBillId 

@@ -11,8 +11,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		CREATE VIEW [dbo].[vyuTMtrprcmst]
 		AS
 		SELECT
-		strVendorNumber = ''
-			,strRackItemNumber = ''
+		strVendorNumber = ''''
+			,strRackItemNumber = ''''
 			,dblVendorRackPrice = 0
 			,dblJobberRackPrice = 0
 			,dtmDate = GETDATE()
