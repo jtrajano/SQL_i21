@@ -191,11 +191,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     formulas: {
         checkHiddenInInvoicePaid: function (get) {
             var isEnabled = false;
-            if (get('ysnPosted')){
+            if (get('current.ysnPosted')){
                 isEnabled = true;
             }
             else {
-                if (get('ysnInvoicePaid')){
+                if (get('current.ysnInvoicePaid')){
                     isEnabled = true;
                 }
                 else {

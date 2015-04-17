@@ -306,6 +306,110 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
+    onAdjustmentTypeChange: function(obj, newValue, oldValue, eOpts) {
+        var win = obj.up('window');
+        var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
+        var colNewLot = grdInventoryAdjustment.columns[5];
+        var colNewQty = grdInventoryAdjustment.columns[10];
+        var colNewUOM = grdInventoryAdjustment.columns[11];
+        var colWeightUOM = grdInventoryAdjustment.columns[12];
+        var colNetWeight = grdInventoryAdjustment.columns[13];
+        var colNewWeightPerUnit = grdInventoryAdjustment.columns[14];
+        var colNewItemId = grdInventoryAdjustment.columns[15];
+        var colNewItemDesc = grdInventoryAdjustment.columns[16];
+        var colExpiry = grdInventoryAdjustment.columns[17];
+        var colNewExpiry = grdInventoryAdjustment.columns[18];
+        var colStatus = grdInventoryAdjustment.columns[19];
+        var colNewStatus = grdInventoryAdjustment.columns[20];
+
+        switch (newValue) {
+            case 1:
+                colNewLot.setHidden(true);
+                colNewQty.setHidden(false);
+                colNewUOM.setHidden(true);
+                colWeightUOM.setHidden(false);
+                colNetWeight.setHidden(false);
+                colNewWeightPerUnit.setHidden(false);
+                colNewItemId.setHidden(true);
+                colNewItemDesc.setHidden(true);
+                colExpiry.setHidden(true);
+                colNewExpiry.setHidden(true);
+                colStatus.setHidden(true);
+                colNewStatus.setHidden(true);
+                break;
+            case 2:
+                colNewLot.setHidden(true);
+                colNewQty.setHidden(true);
+                colNewUOM.setHidden(false);
+                colWeightUOM.setHidden(false);
+                colNetWeight.setHidden(false);
+                colNewWeightPerUnit.setHidden(false);
+                colNewItemId.setHidden(true);
+                colNewItemDesc.setHidden(true);
+                colExpiry.setHidden(true);
+                colNewExpiry.setHidden(true);
+                colStatus.setHidden(true);
+                colNewStatus.setHidden(true);
+                break;
+            case 3:
+                colNewLot.setHidden(true);
+                colNewQty.setHidden(true);
+                colNewUOM.setHidden(true);
+                colWeightUOM.setHidden(true);
+                colNetWeight.setHidden(true);
+                colNewWeightPerUnit.setHidden(true);
+                colNewItemId.setHidden(false);
+                colNewItemDesc.setHidden(false);
+                colExpiry.setHidden(true);
+                colNewExpiry.setHidden(true);
+                colStatus.setHidden(true);
+                colNewStatus.setHidden(true);
+                break;
+            case 4:
+                colNewLot.setHidden(true);
+                colNewQty.setHidden(true);
+                colNewUOM.setHidden(true);
+                colWeightUOM.setHidden(true);
+                colNetWeight.setHidden(true);
+                colNewWeightPerUnit.setHidden(true);
+                colNewItemId.setHidden(true);
+                colNewItemDesc.setHidden(true);
+                colExpiry.setHidden(true);
+                colNewExpiry.setHidden(true);
+                colStatus.setHidden(false);
+                colNewStatus.setHidden(false);
+                break;
+            case 5:
+                colNewLot.setHidden(false);
+                colNewQty.setHidden(false);
+                colNewUOM.setHidden(false);
+                colWeightUOM.setHidden(false);
+                colNetWeight.setHidden(false);
+                colNewWeightPerUnit.setHidden(false);
+                colNewItemId.setHidden(true);
+                colNewItemDesc.setHidden(true);
+                colExpiry.setHidden(true);
+                colNewExpiry.setHidden(true);
+                colStatus.setHidden(true);
+                colNewStatus.setHidden(true);
+                break;
+            case 6:
+                colNewLot.setHidden(true);
+                colNewQty.setHidden(true);
+                colNewUOM.setHidden(true);
+                colWeightUOM.setHidden(true);
+                colNetWeight.setHidden(true);
+                colNewWeightPerUnit.setHidden(true);
+                colNewItemId.setHidden(true);
+                colNewItemDesc.setHidden(true);
+                colExpiry.setHidden(false);
+                colNewExpiry.setHidden(false);
+                colStatus.setHidden(true);
+                colNewStatus.setHidden(true);
+                break;
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboItemNo": {
@@ -340,6 +444,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#cboDebitAccount": {
                 select: this.onAdjustmentDetailSelect
+            },
+            "#cboAdjustmentType": {
+                change: this.onAdjustmentTypeChange
             }
         });
     }
