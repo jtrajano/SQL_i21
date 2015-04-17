@@ -166,7 +166,7 @@ GO
 
 
 --=====================================================================================================================================
--- 	FIX: NULL Description to EMPTY String
+-- 	FIX: NULL value to EMPTY String
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 GO
@@ -174,8 +174,84 @@ GO
 GO
 
 UPDATE tblFRRowDesign SET strDescription = '' 
-	WHERE strDescription is null 
+	WHERE strDescription IS NULL
+UPDATE tblFRRowDesign SET strBalanceSide = '' 
+	WHERE strBalanceSide IS NULL
+UPDATE tblFRRowDesign SET strRelatedRows = '' 
+	WHERE strRelatedRows IS NULL
+UPDATE tblFRRowDesign SET strAccountsUsed = '' 
+	WHERE strAccountsUsed IS NULL
 
 GO
 	PRINT N'END NULL TO EMPTY STRING'
+GO
+
+
+--=====================================================================================================================================
+-- 	FIX: RELATIONSHIP TO SEGMENT FILTER ID
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT 'BEGIN FRD UPDATE SEGMENT CODE'
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intSegmentFilterGroupId' AND OBJECT_ID = OBJECT_ID(N'tblFRColumnDesign')) 
+BEGIN
+
+	UPDATE tblFRColumnDesign SET intSegmentFilterGroupId = NULL WHERE intSegmentFilterGroupId NOT IN (SELECT intSegmentFilterGroupId FROM tblFRSegmentFilterGroup) AND intSegmentFilterGroupId IS NOT NULL
+
+END
+GO
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'intSegmentCode' AND OBJECT_ID = OBJECT_ID(N'tblFRReport')) 
+BEGIN
+
+	UPDATE tblFRReport SET intSegmentCode = NULL WHERE intSegmentCode NOT IN (SELECT intSegmentFilterGroupId FROM tblFRSegmentFilterGroup) AND intSegmentCode IS NOT NULL
+
+END
+GO
+
+GO
+	PRINT 'END FRD UPDATE SEGMENT CODE'
+GO
+
+
+--=====================================================================================================================================
+-- 	FIX: NULL value to EMPTY String
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN NULL TO EMPTY STRING'
+GO
+
+UPDATE tblFRRowDesign SET strDescription = '' 
+	WHERE strDescription IS NULL
+UPDATE tblFRRowDesign SET strBalanceSide = '' 
+	WHERE strBalanceSide IS NULL
+UPDATE tblFRRowDesign SET strRelatedRows = '' 
+	WHERE strRelatedRows IS NULL
+UPDATE tblFRRowDesign SET strAccountsUsed = '' 
+	WHERE strAccountsUsed IS NULL
+
+GO
+	PRINT N'END NULL TO EMPTY STRING'
+GO
+
+
+--=====================================================================================================================================
+-- 	FIX: ORPHAN(NULL) ID
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN FIX ORPHAN(NULL) ID'
+GO
+
+UPDATE tblFRRowDesignCalculation 
+	SET intRowDetailRefNo = (SELECT TOP 1 intRowDetailId FROM tblFRRowDesign WHERE 
+			tblFRRowDesign.intRowId = (SELECT TOP 1 intRowId FROM tblFRRowDesign B WHERE B.intRowDetailId =tblFRRowDesignCalculation.intRowDetailId) 
+				and tblFRRowDesign.intRefNo = tblFRRowDesignCalculation.intRefNoCalc)
+		WHERE intRowDetailRefNo IS NULL
+
+GO
+	PRINT N'END FIX ORPHAN(NULL) ID'
 GO
