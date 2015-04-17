@@ -3,7 +3,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewModel', {
     alias: 'viewmodel.icbuildassemblyblend',
 
     requires: [
-        'Inventory.store.BufferedItemStockView',
+        'Inventory.store.BufferedAssemblyItem',
         'Inventory.store.BufferedItemUnitMeasure',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered'
@@ -11,7 +11,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewModel', {
 
     stores: {
         item:{
-            type: 'icbuffereditemstockview'
+            type: 'icbufferedassemblyitem'
         },
         itemUOM:{
             type: 'icbuffereditemunitmeasure'

@@ -64,6 +64,11 @@ namespace iRely.Inventory.BRL
             return GetSearchQuery().Where(predicate).Count();
         }
 
+        public int GetAssemblyCount(Expression<Func<ItemVM, bool>> predicate)
+        {
+            return GetSearchQuery().Where(predicate).Where(p => p.strType == "Assembly/Blend" && p.strLotTracking == "No").Count();
+        }
+
         public IQueryable<tblICItem> GetItems(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<ItemVM, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
@@ -125,6 +130,20 @@ namespace iRely.Inventory.BRL
             var data = query.ToList();
             
             return data;
+        }
+
+        public IQueryable<tblICItem> GetAssemblyItems(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<ItemVM, bool>> predicate)
+        {
+            var query = GetSearchQuery(); //Get Search Query
+            var finalQuery = _db.GetQuery<tblICItem>()
+                    .Include("tblICItemAssemblies.tblICItem")
+                    .Include("tblICItemAssemblies.tblICItemUOM.tblICUnitMeasure")
+                    .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
+                    .Where(p => p.strType == "Assembly/Blend" && p.strLotTracking == "No")
+                    .OrderBySelector(sortSelector)
+                    .Skip(start)
+                    .Take(limit);
+            return finalQuery;
         }
 
         public void AddItem(tblICItem item)

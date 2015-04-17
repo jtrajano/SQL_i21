@@ -154,7 +154,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                     var newDetail = Ext.create('Inventory.model.BuildAssemblyDetail');
                     newDetail.set('intItemId', row.get('intAssemblyItemId'));
                     newDetail.set('strItemNo', row.get('strItemNo'));
-//                newDetail.set('strItemDescription', row.get('strDescription'));
+                    newDetail.set('strItemDescription', row.get('strItemDescription'));
                     newDetail.set('intSubLocationId', null);
                     newDetail.set('dblQuantity', row.get('dblQuantity'));
                     newDetail.set('intItemUOMId', row.get('intItemUnitMeasureId'));
@@ -168,9 +168,40 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
         action(record);
     },
 
+    onItemSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+        var record = records[0];
+
+        if (current) {
+            var assemblyItem = record.tblICItemAssemblies();
+            if (assemblyItem) {
+                var assemblyItems = assemblyItem.data.items;
+                Ext.Array.each(assemblyItems, function(row) {
+                    var newRecord = Ext.create('Inventory.model.BuildAssemblyDetail');
+                    newRecord.set('intItemId', row.get('intAssemblyItemId'));
+                    newRecord.set('strItemNo', row.get('strItemNo'));
+                    newRecord.set('strItemDescription', row.get('strItemDescription'));
+                    newRecord.set('intSubLocationId', null);
+                    newRecord.set('dblQuantity', row.get('dblQuantity'));
+                    newRecord.set('intItemUOMId', row.get('intItemUnitMeasureId'));
+                    newRecord.set('strUnitMeasure', row.get('strUnitMeasure'));
+                    newRecord.set('dblCost', row.get('dblCost'));
+                    newRecord.set('intSort', row.get('intSort'));
+                    current.tblICBuildAssemblyDetails().add(newRecord);
+                });
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
-
+            "#cboItemNumber" : {
+                select: this.onItemSelect
+            }
         });
     }
 });
