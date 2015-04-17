@@ -362,3 +362,7 @@ EXEC sp_addmessage 51089,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51090) EXEC sp_dropmessage 51090, 'us_english'	
 SET @strmessage = 'The status of %s is Discontinued.'
 EXEC sp_addmessage 51090,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51091) EXEC sp_dropmessage 51091, 'us_english'	
+SET @strmessage = 'Missing costing method setup for item %s.'
+EXEC sp_addmessage 51091,11,@strmessage,'us_english','False' 

@@ -973,6 +973,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling UOM Change.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks items with missing costing method setup.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

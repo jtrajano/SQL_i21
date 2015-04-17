@@ -67,6 +67,20 @@ BEGIN
 	GOTO _Exit
 END 
 
+-- Check for Missing Costing Method
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+			ON Errors.intItemId = Item.intItemId
+WHERE	intErrorCode = 51091
+
+IF @strItemNo IS NOT NULL 
+BEGIN 
+	-- 'Missing costing method setup for item {Item}.'
+	RAISERROR(51091, 11, 1, @strItemNo)
+	GOTO _Exit
+END 
+
 -- Check for "Discontinued" status
 SELECT TOP 1 
 		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
