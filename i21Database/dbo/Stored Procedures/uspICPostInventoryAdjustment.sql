@@ -130,6 +130,13 @@ IF @ysnPost = 1
 BEGIN  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
 
+	-- TODO: Quantity Change. One for Lot and another one for non-lot. 		
+	-- TODO: UOM Change. One for Lot and another one for non-lot. 
+	-- TODO: Item Change. One for Lot and another one for non-lot. 
+	-- TODO: Lot Status Change. This one is for lot only. 
+	-- TODO: Split Lot. This one is for lot only. 
+	-- TODO: Expiry date change. This one is for lot only. 
+	
 	----------------------------------------
 	--  TODO Process the original data first. 
 	----------------------------------------

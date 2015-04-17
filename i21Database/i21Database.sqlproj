@@ -1386,6 +1386,11 @@
     <Build Include="dbo\Tables\tblMFManufacturingProcessMachine.sql" />
     <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentQtyChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentItemChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentUOMChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotStatusChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentSplitLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
