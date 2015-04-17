@@ -96,9 +96,7 @@ BEGIN
 	RAISERROR(50008, 11, 1)  
 	GOTO Post_Exit  
 END   
-  
--- TODO Check if an item is inactive  
-  
+
 -- Check Company preference: Allow User Self Post  
 IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0   
 BEGIN   

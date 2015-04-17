@@ -949,6 +949,7 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="testi21Database\Stored Procedures\Fake data for inventory adjustment table.sql" />
+    <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks items with missing costing method setup.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

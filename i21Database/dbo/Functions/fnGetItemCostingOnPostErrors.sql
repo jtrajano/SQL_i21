@@ -23,9 +23,45 @@ RETURN (
 					SELECT TOP 1 1 
 					FROM	tblICItem 
 					WHERE	intItemId = @intItemId
-				)	
+				)
+
+		-- Check for any invalid item location 
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = FORMATMESSAGE(50028)
+				,intErrorCode = 50028
+		WHERE	NOT EXISTS (
+					SELECT TOP 1 1 
+					FROM	dbo.tblICItemLocation
+					WHERE	intItemLocationId = @intItemLocationId
+				)
+				AND @intItemId IS NOT NULL 	
+
+		-- Check for missing costing method. 
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = FORMATMESSAGE(51091)
+				,intErrorCode = 51091
+		FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation ItemLocation 
+					ON Item.intItemId = ItemLocation.intItemLocationId
+		WHERE	ISNULL(dbo.fnGetCostingMethod(ItemLocation.intItemId, ItemLocation.intItemLocationId), 0) = 0 
+				AND ItemLocation.intItemId = @intItemId 
+				AND ItemLocation.intItemLocationId = @intItemLocationId
+
+		-- Check for "Discontinued" status. Do not allow use of that item even if there are stocks on it. 
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = FORMATMESSAGE(51090)
+				,intErrorCode = 51090
+		FROM	tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+				AND Item.strStatus = 'Discontinued'
 
 		-- Check for negative stock and if negative stock is NOT allowed. 
+		-- and do not allow negative stock on items being phased-out. 
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
@@ -42,10 +78,14 @@ RETURN (
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0)  < 0
-							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 					
+							AND (							
+								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
+								OR Item.strStatus = 'Phased Out'
+							)
 				)
 
 		-- Check for negative stocks at the lot table. 
+		-- and do not allow negative stock on items being phased-out. 
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
@@ -62,7 +102,10 @@ RETURN (
 					WHERE	Item.intItemId = @intItemId
 							AND Location.intItemLocationId = @intItemLocationId							
 							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
-							AND Location.intAllowNegativeInventory = 3			
+							AND (							
+								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
+								OR Item.strStatus = 'Phased Out'
+							)		
 				)
 	) AS Query		
 )

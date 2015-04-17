@@ -149,7 +149,7 @@ BEGIN
 			INSERT INTO dbo.tblICItemPricing (intItemId, intItemLocationId, dblAverageCost) VALUES (@HotGrains, @HotGrains_BetterHaven, 0)
 			INSERT INTO dbo.tblICItemStockUOM (intItemId, intItemLocationId, intItemUOMId, dblOnHand) VALUES (@HotGrains, @HotGrains_BetterHaven, @HotGrains_BushelUOMId, 0)
 		END
-		
+	
 		-- Setup the expected data
 		INSERT INTO expected (
 				intItemId
@@ -163,12 +163,26 @@ BEGIN
 				,strText = FORMATMESSAGE(50027)
 				,intErrorCode = 50027
 
+		-- 3: Valid item and invalid location
+		UNION ALL 
+		SELECT	intItemId = @StickyGrains
+				,intItemLocationId = -1
+				,strText = FORMATMESSAGE(50028)
+				,intErrorCode = 50028
+
 		-- 4: Invalid item and invalid location
 		UNION ALL		
 		SELECT	intItemId = -1
 				,intItemLocationId = -1
 				,strText = FORMATMESSAGE(50027)
 				,intErrorCode = 50027
+
+		-- 4: Invalid item and invalid location
+		UNION ALL		
+		SELECT	intItemId = -1
+				,intItemLocationId = -1
+				,strText = FORMATMESSAGE(50028)
+				,intErrorCode = 50028
 
 		-- 6: Negative stock is not allowed 
 		UNION ALL
