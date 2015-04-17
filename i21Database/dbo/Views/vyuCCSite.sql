@@ -19,7 +19,7 @@ FROM
 	JOIN dbo.tblCCCompanyOwnedSite B
 		ON A.intVendorDefaultId = B.intVendorDefaultId
 	JOIN dbo.tblCCSite C
-		ON B.intCompanyOwnedSiteId = C.intSiteId
+		ON B.intCompanyOwnedSiteId = C.intCompanyOwnedSiteId
 	JOIN dbo.tblSMPaymentMethod G
 	    ON G.intPaymentMethodID = C.intPaymentMethodId
     JOIN dbo.tblARCustomer H
@@ -45,7 +45,7 @@ FROM
 	JOIN dbo.tblCCDealerSite E
 		ON D.intVendorDefaultId = E.intVendorDefaultId
 	JOIN dbo.tblCCSite F
-		ON E.intDealerSiteId = F.intSiteId
+		ON E.intDealerSiteId = F.intDealerSiteId
     LEFT JOIN dbo.tblSMPaymentMethod J
 	    ON J.intPaymentMethodID = F.intPaymentMethodId
     LEFT JOIN dbo.tblARCustomer K
