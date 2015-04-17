@@ -21,7 +21,7 @@ SELECT
  ,B.dblCost
  ,B.dblTotal
  ,B.dtmExpectedDate
- ,B.strDescription
+ ,B.[strMiscDescription]
  ,B.strPONumber
  ,B.intLineNo
  ,C.strVendorId

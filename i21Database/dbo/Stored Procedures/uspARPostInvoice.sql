@@ -1044,6 +1044,14 @@ END
 			tblARInvoice A
 		WHERE
 			intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
+			
+			
+		UPDATE
+			tblHDTicketHoursWorked
+		SET
+			ysnBilled = 0
+		WHERE
+			intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)			
 
 
 	END
@@ -1071,6 +1079,13 @@ END
 			,A.intInvoiceId
 		FROM
 			tblARInvoice A
+		WHERE
+			intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
+			
+		UPDATE
+			tblHDTicketHoursWorked
+		SET
+			ysnBilled = 1
 		WHERE
 			intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
 

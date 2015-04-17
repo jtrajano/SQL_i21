@@ -172,4 +172,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\12_EM\01_EntitySchemaUpdate.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\9_FRD\3_1510_to_1520.sql" />
+  </ItemGroup>
 </Project>

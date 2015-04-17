@@ -284,6 +284,24 @@ BEGIN
 	SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Auto-Negative'
 END
 END
+BEGIN -- GROUP CATEGORY MAPPING
+	;WITH CTE(strAccountGroup, strAccountCategory)AS
+	(	SELECT 'Cash Accounts', 'Cash Account' UNION
+		SELECT 'Payables','AP Account'UNION
+		SELECT 'Receivables','AR Account' UNION
+		SELECT 'Undeposited Funds','Undeposited Funds'
+	)
+	UPDATE A 
+	SET A.intAccountCategoryId = C.intAccountCategoryId
+	FROM tblGLAccountGroup A
+	JOIN CTE B ON A.strAccountGroup = B.strAccountGroup
+	JOIN tblGLAccountCategory C ON C.strAccountCategory = B.strAccountCategory
+
+	UPDATE tblGLAccountCategory SET ysnRestricted = 1
+		WHERE strAccountCategory IN('Cash Account','AP Account','AR Account','Undeposited Funds')
+
+	UPDATE tblGLAccountCategory SET ysnRestricted = 0 WHERE ysnRestricted IS NULL
+END
 
 EXEC dbo.[uspGLConvertAccountGroupToCategory]
 

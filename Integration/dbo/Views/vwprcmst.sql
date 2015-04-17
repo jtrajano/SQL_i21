@@ -40,6 +40,8 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,vwprc_user_id   = spprc_user_id     
 			,vwprc_user_rev_dt  = spprc_user_rev_dt    
 			,A4GLIdentity = CAST(A4GLIdentity   AS INT)
+			,vwprc_rack_vnd_no  = '''' 
+			,vwprc_rack_itm_no  = ''''
 			FROM  
 			spprcmst
 			')
@@ -81,6 +83,8 @@ BEGIN
 			,vwprc_user_id   = NULL     
 			,vwprc_user_rev_dt  = NULL    
 			,A4GLIdentity = CAST(A4GLIdentity   AS INT)
+			,vwprc_rack_vnd_no  = ptpdv_rack_vnd_no 
+			,vwprc_rack_itm_no  = ptpdv_rack_itm_no 
 			FROM  
 			ptpdvmst
 			')

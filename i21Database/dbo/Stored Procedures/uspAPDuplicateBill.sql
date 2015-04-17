@@ -89,7 +89,7 @@ INSERT INTO tblAPBill(
 
 	INSERT INTO tblAPBillDetail(
 		[intBillId],
-		[strDescription],
+		[strMiscDescription],
 		[strComment], 
 		[intAccountId],
 		[dblTotal],
@@ -109,7 +109,7 @@ INSERT INTO tblAPBill(
 	)
 	SELECT
 		[intBillId],
-		[strDescription],
+		[strMiscDescription],
 		[strComment], 
 		[intAccountId],
 		[dblTotal],

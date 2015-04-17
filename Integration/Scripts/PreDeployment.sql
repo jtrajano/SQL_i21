@@ -102,6 +102,7 @@
 :r ..\dbo\Views\vwtaxmst.sql
 :r ..\dbo\Views\vwtrmmst.sql
 :r ..\dbo\Views\vwDispatch.sql
+:r ..\dbo\Views\vyuTMtrprcmst.sql
 :r ..\dbo\Views\vyuTMOriginAccountStatus.sql
 :r "..\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql"

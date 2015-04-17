@@ -2625,4 +2625,67 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intSubLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="11339df1-1fc0-4d3d-8ed4-a82c8d0b7dc9" ChangeDateTime="04/16/2015 01:34:19">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransfer].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransfer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryTransferId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="28a4ef5e-e737-424c-81a7-d53a9614463c" ChangeDateTime="04/16/2015 01:40:21">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransfer].[intTrasferredBy]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransfer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTrasferredById" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c06c1d7a-3d2b-41f3-a182-23b224118119" ChangeDateTime="04/16/2015 01:42:49">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransfer].[intAccountCategoryID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransfer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAccountCategoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ff5fbcbe-4ad0-4213-9d67-a4ab6768f09d" ChangeDateTime="04/16/2015 01:44:06">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransferDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransferDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryTransferDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="93617b52-b3ab-4391-a74e-0d0c898f2dfe" ChangeDateTime="04/16/2015 01:52:07">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransferNote].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransferNote]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryTransferNoteId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="85aaea9b-f47d-4bc0-bf6d-03162e7a01b8" ChangeDateTime="04/16/2015 02:11:09">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransfer].[intTrasferredById]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransfer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransferredById" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4222a93f-3b36-4001-86f6-9bbf04613e7c" ChangeDateTime="04/16/2015 02:30:16">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransferDetail].[intTaxCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransferDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxCodeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f5ed94c8-06f3-434f-9c48-6369e4330327" ChangeDateTime="04/15/2015 08:07:51">
+    <Property Name="ElementName" Value="[dbo].[tblPOPurchaseDetail].[strDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPOPurchaseDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strMiscDescription]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a2c8358f-dd95-440b-8e52-56d816504f90" ChangeDateTime="04/15/2015 08:09:23">
+    <Property Name="ElementName" Value="[dbo].[tblAPBillDetail].[strDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBillDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strMiscDescription]" />
+  </Operation>
 </Operations>

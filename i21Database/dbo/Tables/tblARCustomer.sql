@@ -66,6 +66,7 @@
     [strPatronClass]                  CHAR (1)        COLLATE Latin1_General_CI_AS NULL,
     [dtmDeceasedDate]                 DATETIME        NULL,
     [ysnSubjectToFWT]                 BIT             DEFAULT ((0)) NOT NULL,
+	[ysnHDBillableSupport]			  BIT             DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
