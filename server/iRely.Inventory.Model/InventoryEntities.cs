@@ -22,68 +22,11 @@ namespace iRely.Inventory.Model
         }
 
         public InventoryEntities()
-            : base(GetConnectionString()) 
+            : base(iRely.Common.Security.GetCompanyName())
         {
-            
+            this.Configuration.ProxyCreationEnabled = false;
         }
-
-        #region Function
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="token"></param>
-        /// <returns></returns>
-        public static string ConstructConnectionString(string token)
-        {
-            if (string.IsNullOrEmpty(token))
-                return "";
-
-            var tokenDecoded = Encoding.Default.GetString(Convert.FromBase64String(token.Replace("Basic ", "")));
-            var tokens = tokenDecoded.Split(':');
-
-            if (tokens.Length < 3)
-            {
-                return "";
-            }
-            else
-            {
-                var company = tokens[2];
-
-                var appPath = HttpContext.Current.Request.ApplicationPath;
-                var rootPath = appPath.Substring(0, appPath.LastIndexOf("/"));
-
-                var serverUrl = string.Format("{0}://{1}/{2}", HttpContext.Current.Request.Url.Scheme, HttpContext.Current.Request.Url.Host, rootPath);
-                var actionUrl = string.Format("{0}/SystemManager/api/CompanyConfiguration/GetCompanyConnection?CompanyName={1}", serverUrl, company);
-
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(actionUrl);
-                var result = request.GetResponse();
-                var config = "";
-
-                using (StreamReader reader = new StreamReader(result.GetResponseStream(), Encoding.UTF8))
-                {
-                    config = reader.ReadToEnd().Replace(@"\\", @"\").Replace("\"", "");
-                    reader.Close();
-                }
-
-                if (!string.IsNullOrEmpty(config))
-                    return config;
-                else
-                    return "";
-            }
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public static string GetConnectionString()
-        {
-            var token = System.Web.HttpContext.Current.Request.Headers["Authorization"];
-            var cs = ConstructConnectionString(token);
-
-            return cs;
-        }
-        #endregion
-
+        
         public DbSet<tblICBrand> tblICBrands { get; set; }
         public DbSet<tblICCatalog> tblICCatalogs { get; set; }
         public DbSet<tblICCategory> tblICCategorys { get; set; }
