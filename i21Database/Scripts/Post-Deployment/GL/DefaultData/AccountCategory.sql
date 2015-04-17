@@ -99,7 +99,10 @@ IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCate
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Purchase Tax Account')
 	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Purchase Tax Account', 'PurchaseTax',1)
 
-
+--DEFAULTS ALL ACCOUNTS WITH NO CATEGORY TO GENERAL
+UPDATE tblGLAccount SET intAccountCategoryId=(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'General')
+WHERE intAccountCategoryId IS NULL
+ 
 ;WITH cte(intAccountCategoryId)
 AS
 (

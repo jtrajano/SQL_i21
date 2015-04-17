@@ -1093,6 +1093,9 @@
     <Build Include="dbo\Views\vyuARCustomerTaxCode.sql" />
     <Build Include="dbo\Index\IX_tblGLIjemst_0_1_2_3_4_5_19.sql" />
     <Build Include="dbo\Functions\fnSplitString.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRGetPaymentType.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1117,7 +1120,7 @@
     <None Include="Scripts\Post-Deployment\AP\FixstrBillId.sql" />
     <None Include="Scripts\Post-Deployment\IC\3_DefaultData.sql" />
     <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
-    <None Include="Scripts\Post-Deployment\NR\1_NRStartingNumber.sql" />
+    <None Include="Scripts\Post-Deployment\NR\1_NRNoteTransType.sql" />
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>

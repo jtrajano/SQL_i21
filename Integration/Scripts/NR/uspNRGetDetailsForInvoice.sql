@@ -147,6 +147,8 @@ BEGIN
 			
 			SELECT TOP 1 dtmNoteTranDate FROM dbo.tblNRNoteTransaction WHERE intNoteId = @intNoteId AND intNoteTransTypeId = 3 ORDER BY intNoteTransId DESC
 			
+			EXEC uspNRGetPaymentType
+			
 		END
 
 	')
