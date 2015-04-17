@@ -196,6 +196,15 @@ BEGIN
 						on a.intEntityId =  b.intEntityId ')
 	END
 
+	print 'Update tblEntity strEntityNo to get the tblARSalesperson strSalespersonId'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' AND [COLUMN_NAME] = 'strEntityNo') 
+	BEGIN
+		exec(N' update a set a.strEntityNo = b.strSalespersonId
+				from tblEntity a
+					join tblARSalesperson b
+						on a.intEntityId =  b.intEntityId ')
+	END
+
 
 	print 'Moving Default Location'
 	exec(N'				
