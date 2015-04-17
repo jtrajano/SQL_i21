@@ -15,6 +15,7 @@ AS
 			AD.dblPAllocatedQty,
 			AD.intPUnitMeasureId,
 			ENP.strName AS strVendor,
+			IsNull(CDP.dblBalance, 0) - IsNull(CDP.dblScheduleQty, 0)		AS dblPUnLoadedQuantity,
 
 			AD.intSContractDetailId,
 			CHS.intContractNumber as intSContractNumber,
@@ -25,7 +26,8 @@ AS
 			CAST (CHS.intContractNumber AS VARCHAR(100)) +  '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber, 
 			AD.dblSAllocatedQty,
 			AD.intSUnitMeasureId,
-			ENS.strName AS strCustomer
+			ENS.strName AS strCustomer,
+			IsNull(CDS.dblBalance, 0) - IsNull(CDS.dblScheduleQty, 0)		AS dblSUnLoadedQuantity
 
 	FROM 	tblLGAllocationDetail AD
 	JOIN	tblLGAllocationHeader	AH	ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
