@@ -236,6 +236,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
+    createRecord: function(config, action) {
+        var today = new Date();
+        var record = Ext.create('Inventory.model.Adjustment');
+        record.set('intAdjustmentType', '1');
+        if (app.DefaultLocation > 0)
+            record.set('intLocationId', app.DefaultLocation);
+        record.set('dtmAdjustmentDate', today);
+        action(record);
+    },
+
     onAdjustmentDetailSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
