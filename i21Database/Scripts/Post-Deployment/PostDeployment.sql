@@ -126,4 +126,8 @@ print 'BEGIN POST DEPLOYMENT'
 -- Entity Management
 :r .\EM\001_EMEntityPortalMenu.sql
 
+-- Quality Module
+:r .\QM\1_MasterTables.sql
+
+
 print 'END POST DEPLOYMENT'

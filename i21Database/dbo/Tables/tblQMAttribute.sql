@@ -15,5 +15,5 @@
 	CONSTRAINT [PK_tblQMAttribute] PRIMARY KEY ([intAttributeId]), 
 	CONSTRAINT [AK_tblQMAttribute_strAttributeName] UNIQUE ([strAttributeName]), 
 	CONSTRAINT [FK_tblQMAttribute_tblQMAttributeDataType] FOREIGN KEY ([intDataTypeId]) REFERENCES [tblQMAttributeDataType]([intDataTypeId]), 
-	CONSTRAINT [FK_tblQMAttribute_tblQMList] FOREIGN KEY ([intListId]) REFERENCES [tblQMList]([intListId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblQMAttribute_tblQMList] FOREIGN KEY ([intListId]) REFERENCES [tblQMList]([intListId]) 
 )

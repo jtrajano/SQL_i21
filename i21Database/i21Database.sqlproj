@@ -152,6 +152,7 @@
     <Folder Include="Scripts\Post-Deployment\TM\Reports\Layout" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\FieldSelection" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria" />
+    <Folder Include="Scripts\Post-Deployment\QM" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1396,6 +1397,8 @@
     <Build Include="dbo\Tables\tblSMImportFileTable.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateScheduleQuantity.sql" />
+    <Build Include="dbo\Tables\tblQMAttribute.sql" />
+    <Build Include="dbo\Tables\tblQMAttributeDataType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1443,6 +1446,7 @@
     <Build Include="dbo\Stored Procedures\uspMFPickWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckEntry.sql" />
     <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />
+    <None Include="Scripts\Post-Deployment\QM\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
