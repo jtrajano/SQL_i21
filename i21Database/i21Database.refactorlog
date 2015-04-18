@@ -2688,4 +2688,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strMiscDescription]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2a159318-7f63-4997-9ceb-ddced5fa9547" ChangeDateTime="04/18/2015 00:39:11">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutOptTransaction].[dblInternalTradeNo]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutOptTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strInternalTradeNo" />
+  </Operation>
 </Operations>
