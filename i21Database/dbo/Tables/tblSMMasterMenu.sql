@@ -4,6 +4,7 @@
     [strModuleName]    NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
     [intParentMenuID]  INT            NULL,
     [strDescription]   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+    [strCategory]      NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strType]          NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strCommand]       NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strIcon]          NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
@@ -62,6 +63,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMMasterMenu',
     @level2type = N'COLUMN',
     @level2name = N'strDescription'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Category of Menu',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMMasterMenu',
+    @level2type = N'COLUMN',
+    @level2name = 'strCategory'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Type of Menu',
