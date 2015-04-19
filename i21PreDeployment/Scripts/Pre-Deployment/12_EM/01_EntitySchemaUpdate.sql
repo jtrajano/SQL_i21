@@ -659,3 +659,20 @@ BEGIN
 	END			
 
 END
+
+
+	print 'Update tblEntityLocation to set the default Location'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityLocation' AND [COLUMN_NAME] = 'ysnDefaultLocation') 
+	BEGIN
+
+		exec(N' alter table tblEntityLocation
+			add [ysnDefaultLocation]       BIT            NULL')
+		exec(N' update a set a.ysnDefaultLocation = 1
+				from tblEntityLocation a
+					join tblARCustomer b
+						on b.intDefaultLocationId =  a.intEntityLocationId ')
+		exec(N' update a set a.ysnDefaultLocation = 1
+				from tblEntityLocation a
+					join tblAPVendor b
+						on b.intDefaultLocationId =  a.intEntityLocationId ')
+	END
