@@ -1406,6 +1406,7 @@
     <Build Include="dbo\Stored Procedures\uspTMGetNextWillCallStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateEntityTables.sql" />
     <Build Include="dbo\Tables\tblAREmailTemplate.sql" />
+    <Build Include="dbo\Tables\tblCTContractAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
