@@ -87,36 +87,36 @@ namespace iRely.Inventory.Model
                 .WithMany(p => p.tblICInventoryAdjustmentDetails)
                 .HasForeignKey(p => p.intStorageLocationId);
 
-            this.HasOptional(p => p.tblICItem)
+            this.HasOptional(p => p.Item)
                 .WithMany(p => p.tblICInventoryAdjustmentDetails)
                 .HasForeignKey(p => p.intItemId);
             this.HasOptional(p => p.NewItem)
                 .WithMany(p => p.NewAdjustmentDetails)
                 .HasForeignKey(p => p.intNewItemId);            
             
-            this.HasOptional(p => p.tblICLot)
+            this.HasOptional(p => p.Lot)
                 .WithMany(p => p.tblICInventoryAdjustmentDetails)
                 .HasForeignKey(p => p.intLotId);
             this.HasOptional(p => p.NewLot)
                 .WithMany(p => p.NewAdjustmentDetails)
                 .HasForeignKey(p => p.intNewLotId);
 
-            this.HasOptional(p => p.tblICItemUOM)
-                .WithMany(p => p.tblICInventoryAdjustmentDetails)
+            this.HasOptional(p => p.ItemUOM)
+                .WithMany(p => p.OldItemUOMAdjustmentDetails)
                 .HasForeignKey(p => p.intItemUOMId);
             this.HasOptional(p => p.NewItemUOM)
-                .WithMany(p => p.tblICInventoryAdjustmentDetails)
+                .WithMany(p => p.NewItemUOMAdjustmentDetails)
                 .HasForeignKey(p => p.intNewItemUOMId);
-            
+
             this.HasOptional(p => p.WeightUOM)
-                .WithMany(p => p.AdjustmentWeightUOMs)
+                .WithMany(p => p.OldWeightUOMAdjustmentDetails)
                 .HasForeignKey(p => p.intWeightUOMId);
             this.HasOptional(p => p.NewWeightUOM)
-                .WithMany(p => p.AdjustmentWeightUOMs)
+                .WithMany(p => p.NewWeightUOMAdjustmentDetails)
                 .HasForeignKey(p => p.intNewWeightUOMId);
 
             this.HasOptional(p => p.NewLotStatus)
-                .WithMany(p => p.tblICInventoryAdjustmentDetails)
+                .WithMany(p => p.NewLotStatusAdjustmentDetails)
                 .HasForeignKey(p => p.intNewLotStatusId);
         }
     }

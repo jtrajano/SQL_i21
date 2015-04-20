@@ -54,8 +54,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
         public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
-        public ICollection<tblICInventoryAdjustmentDetail> DebitAdjustmentDetails { get; set; }
-        public ICollection<tblICInventoryAdjustmentDetail> CreditAdjustmentDetails { get; set; }
         public ICollection<tblICInventoryTransferDetail> CreditTransferDetails { get; set; }
         public ICollection<tblICInventoryTransferDetail> DebitTransferDetails { get; set; }
 
@@ -69,7 +67,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemAccount> tblICItemAccounts { get; set; }
         public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
         public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
-        public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
     }
 
     

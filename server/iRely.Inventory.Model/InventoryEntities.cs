@@ -21,6 +21,16 @@ namespace iRely.Inventory.Model
 
         }
 
+        // Uncomment this constructor when generating the EF views (pre-cached views) 
+        // If compiling for QC or Production, comment it. 
+        //public InventoryEntities()
+        //    : base("InventoryEntities")
+        //{
+        //    this.Configuration.ProxyCreationEnabled = false;
+        //}
+
+        // Comment this constructor when generating the EF views (pre-cached views)
+        // If compiling for QC or Production, uncomment it. 
         public InventoryEntities()
             //: base(iRely.Common.Security.GetCompanyName())
         {

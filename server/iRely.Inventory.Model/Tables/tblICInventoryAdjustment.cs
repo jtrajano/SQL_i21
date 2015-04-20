@@ -144,8 +144,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemNo))
-                    if (tblICItem != null)
-                        return tblICItem.strItemNo;
+                    if (Item != null)
+                        return Item.strItemNo;
                     else
                         return null;
                 else
@@ -185,8 +185,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemDesc))
-                    if (tblICItem != null)
-                        return tblICItem.strDescription;
+                    if (Item != null)
+                        return Item.strDescription;
                     else
                         return null;
                 else
@@ -226,8 +226,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_lotNumber))
-                    if (tblICLot != null)
-                        return tblICLot.strLotNumber;
+                    if (Lot != null)
+                        return Lot.strLotNumber;
                     else
                         return null;
                 else
@@ -265,8 +265,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (tblICLot != null)
-                    return tblICLot.dblQty ?? 0;
+                if (Lot != null)
+                    return Lot.dblQty ?? 0;
                 else
                     return 0;
             }
@@ -281,8 +281,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (tblICLot != null)
-                    return tblICLot.dblLastCost ?? 0;
+                if (Lot != null)
+                    return Lot.dblLastCost ?? 0;
                 else
                     return 0;
             }
@@ -297,8 +297,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (tblICLot != null)
-                    return tblICLot.dblWeightPerQty ?? 0;
+                if (Lot != null)
+                    return Lot.dblWeightPerQty ?? 0;
                 else
                     return 0;
             }
@@ -317,8 +317,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemUOM))
-                    if (tblICLot != null)
-                        return tblICLot.strItemUOM;
+                    if (Lot != null)
+                        return Lot.strItemUOM;
                     else
                         return null;
                 else
@@ -336,8 +336,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_newItemUOM))
-                    if (tblICItemUOM != null)
-                        return tblICItemUOM.strUnitMeasure;
+                    if (ItemUOM != null)
+                        return ItemUOM.strUnitMeasure;
                     else
                         return null;
                 else
@@ -357,8 +357,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_weightUOM))
-                    if (tblICLot != null)
-                        return tblICLot.strWeightUOM;
+                    if (Lot != null)
+                        return Lot.strWeightUOM;
                     else
                         return null;
                 else
@@ -381,11 +381,11 @@ namespace iRely.Inventory.Model
                     else
                         return null;
                 else
-                    return _weightUOM;
+                    return _newWeightUOM;
             }
             set
             {
-                _weightUOM = value;
+                _newWeightUOM = value;
             }
         }        
 
@@ -397,8 +397,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_lotStatus))
-                    if (tblICLot != null)
-                        return tblICLot.strLotStatus;
+                    if (Lot != null)
+                        return Lot.strLotStatus;
                     else
                         return null;
                 else
@@ -430,13 +430,13 @@ namespace iRely.Inventory.Model
         }
 
         public tblICInventoryAdjustment tblICInventoryAdjustment { get; set; }
-        public tblICItem tblICItem { get; set; }
-        public tblICItem NewItem { get; set; }
         public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public tblICStorageLocation tblICStorageLocation { get; set; }
-        public tblICLot tblICLot { get; set; }
+        public tblICItem Item { get; set; }
+        public tblICItem NewItem { get; set; }
+        public tblICLot Lot { get; set; }
         public tblICLot NewLot { get; set; }
-        public tblICItemUOM tblICItemUOM { get; set; }
+        public tblICItemUOM ItemUOM { get; set; }
         public tblICItemUOM NewItemUOM { get; set; }
         public tblICItemUOM WeightUOM { get; set; }
         public tblICItemUOM NewWeightUOM { get; set; }
