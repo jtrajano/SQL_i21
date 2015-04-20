@@ -26,7 +26,7 @@
 	[intDefaultLocationId]       INT            NULL,
 	[ysnActive]        BIT             CONSTRAINT [DF_tblEntity_ysnActive] DEFAULT ((1)) NOT NULL,    	
     [intConcurrencyId] INT             CONSTRAINT [DF__tmp_ms_xx__intCo__5132705A] DEFAULT ((0)) NOT NULL,
-	CONSTRAINT [FK_tblEntity_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
+	--CONSTRAINT [FK_tblEntity_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
     CONSTRAINT [PK_dbo.tblEntity] PRIMARY KEY CLUSTERED ([intEntityId] ASC)
 );
 
