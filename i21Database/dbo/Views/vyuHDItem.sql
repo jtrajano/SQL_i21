@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuHDItem]
 	AS
 		select
-			intId = ROW_NUMBER() over (order by item.intItemId),
+			intId = cast(ROW_NUMBER() over (order by item.intItemId) as int),
 			item.intItemId, item.strItemNo, item.strDescription, item.strType, item.strStatus,
 			comLoc.intCompanyLocationId, comLoc.strLocationName, comLoc.strLocationNumber, comLoc.strLocationType,
 			uom.intUnitMeasureId, uom.strUnitMeasure, uom.strSymbol, uom.strUnitType
