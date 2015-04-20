@@ -20,6 +20,14 @@ GO
 GO
 	PRINT N'END Eliminate duplicate Terms Code'
 GO
+	/* --------------------------------------- */
+	/* - Update Admin to System Manager Menu - */
+	/* --------------------------------------- */
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0)
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'System Manager', strDescription = 'System Manager'
+	WHERE strMenuName = 'Admin' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+GO
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMMasterMenu' AND [COLUMN_NAME] = 'strCategory') 
 	BEGIN
