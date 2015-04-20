@@ -18,6 +18,6 @@ namespace iRely.Inventory.Model
         public int intSort { get; set; }
 
         public ICollection<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }
-        public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
+        public ICollection<tblICInventoryAdjustmentDetail> NewLotStatusAdjustmentDetails { get; set; }
     }
 }
