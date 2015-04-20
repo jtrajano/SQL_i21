@@ -11,6 +11,8 @@
 	[intManufacturerId] INT NULL,
     [intFamilyId] INT NULL, 
     [intClassId] INT NULL, 
+	[strFamily] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
+	[strClass] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
     [strUpcCode] NVARCHAR(14) COLLATE Latin1_General_CI_AS NULL,
     [strUpcDescription] NVARCHAR(60) COLLATE Latin1_General_CI_AS NULL,
     [ysnPromo] BIT NULL, 
