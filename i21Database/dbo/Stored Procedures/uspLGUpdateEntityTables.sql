@@ -152,6 +152,8 @@ BEGIN TRY
 
 		SET @intOutEntityId = @intIdentityEntityId
 		SET @intOutEntityLocationId = @intIdentityEntityLocationId
+
+		SELECT @intOutEntityId AS intOutEntityId, @intOutEntityLocationId as intOutEntityLocationId
 	END
 
 	IF @intTransType = 2

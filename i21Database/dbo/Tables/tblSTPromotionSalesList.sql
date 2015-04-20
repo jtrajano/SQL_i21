@@ -11,6 +11,7 @@
     [dblPromoPrice] NUMERIC(5, 2) NULL, 
     [intPromoFeeType] INT NOT NULL, 
     [intRegProdId] INT NULL, 
+	[strProductCode] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
     [dtmPromoBegPeriod] DATETIME NULL, 
     [dtmPromoBegTime] DATETIME NULL, 
     [dtmPromoEndPeriod] DATETIME NULL, 
