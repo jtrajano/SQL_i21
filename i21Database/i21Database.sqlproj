@@ -1405,6 +1405,7 @@
     <Build Include="dbo\Views\vyuAPBillForApproval.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetNextWillCallStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateEntityTables.sql" />
+    <Build Include="dbo\Tables\tblAREmailTemplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
