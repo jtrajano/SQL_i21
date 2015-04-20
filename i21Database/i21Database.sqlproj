@@ -1404,6 +1404,7 @@
     <Build Include="dbo\Views\vyuHDItem.sql" />
     <Build Include="dbo\Views\vyuAPBillForApproval.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetNextWillCallStartingNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateEntityTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

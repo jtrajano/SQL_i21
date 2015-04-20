@@ -19,6 +19,8 @@
     [strAccountNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strNotes] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
     [ysnActive] BIT NOT NULL, 
-    
+
+	[intEntityId] INT NULL, 
+    [intEntityLocationId] INT NULL,     
 	CONSTRAINT [PK_tblLGShippingLine_intShippingLineId] PRIMARY KEY ([intShippingLineId])
 )
