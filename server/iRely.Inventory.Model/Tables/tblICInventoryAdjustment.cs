@@ -69,25 +69,74 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryAdjustmentDetailId { get; set; }
         public int intInventoryAdjustmentId { get; set; }
-        public int? intItemId { get; set; }
         public int? intSubLocationId { get; set; }
         public int? intStorageLocationId { get; set; }
+        public int? intItemId { get; set; }
+        public int? intNewItemId { get; set; }
         public int? intLotId { get; set; }
         public int? intNewLotId { get; set; }
+
+        public decimal? dblQuantity { get; set; }
         public decimal? dblNewQuantity { get; set; }
+        public int? intItemUOMId { get; set; }
         public int? intNewItemUOMId { get; set; }
         public int? intWeightUOMId { get; set; }
-        public decimal? dblNetWeight { get; set; }
-        public decimal? dblNewWeightPerUnit { get; set; }
-        public int? intNewItemId { get; set; }
-        public decimal? dblNewPhysicalCount { get; set; }
+        public int? intNewWeightUOMId { get; set; }
+        public decimal? dblWeight { get; set; }
+        public decimal? dblNewWeight { get; set; }
+        public decimal? dblWeightPerQty { get; set; }
+        public decimal? dblNewWeightPerQty { get; set; }
+        public DateTime? dtmExpiryDate { get; set; }
         public DateTime? dtmNewExpiryDate { get; set; }
+        public int? intLotStatusId { get; set; }
         public int? intNewLotStatusId { get; set; }
-        public int? intAccountCategoryId { get; set; }
-        public int? intCreditAccountId { get; set; }
-        public int? intDebitAccountId { get; set; }
+        public decimal? dblCost { get; set; }
+        public decimal? dblNewCost { get; set; }
+        public decimal? dblLineTotal { get; set; }
         public int? intSort { get; set; }
 
+        // 1: Sub Location
+        private string _subLocation;
+        [NotMapped]
+        public string strSubLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocation))
+                    if (tblSMCompanyLocationSubLocation != null)
+                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocation;
+            }
+            set
+            {
+                _subLocation = value;
+            }
+        }
+        // 2: Storage Location
+        private string _storageLocation;
+        [NotMapped]
+        public string strStorageLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_storageLocation))
+                    if (tblICStorageLocation != null)
+                        return tblICStorageLocation.strName;
+                    else
+                        return null;
+                else
+                    return _storageLocation;
+            }
+            set
+            {
+                _storageLocation = value;
+            }
+        }
+
+        // 3: Item & New Item
         private string _itemNo;
         [NotMapped]
         public string strItemNo
@@ -105,25 +154,6 @@ namespace iRely.Inventory.Model
             set
             {
                 _itemNo = value;
-            }
-        }
-        private string _itemDesc;
-        [NotMapped]
-        public string strItemDescription
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_itemDesc))
-                    if (tblICItem != null)
-                        return tblICItem.strDescription;
-                    else
-                        return null;
-                else
-                    return _itemDesc;
-            }
-            set
-            {
-                _itemDesc = value;
             }
         }
         private string _newItemNo;
@@ -145,6 +175,28 @@ namespace iRely.Inventory.Model
                 _newItemNo = value;
             }
         }
+
+
+        // 4: Item Description & New Item Description
+        private string _itemDesc;
+        [NotMapped]
+        public string strItemDescription
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemDesc))
+                    if (tblICItem != null)
+                        return tblICItem.strDescription;
+                    else
+                        return null;
+                else
+                    return _itemDesc;
+            }
+            set
+            {
+                _itemDesc = value;
+            }
+        }
         private string _newItemDesc;
         [NotMapped]
         public string strNewItemDescription
@@ -164,44 +216,9 @@ namespace iRely.Inventory.Model
                 _newItemDesc = value;
             }
         }
-        private string _subLocation;
-        [NotMapped]
-        public string strSubLocation
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_subLocation))
-                    if (tblSMCompanyLocationSubLocation != null)
-                        return tblSMCompanyLocationSubLocation.strSubLocationName;
-                    else
-                        return null;
-                else
-                    return _subLocation;
-            }
-            set
-            {
-                _subLocation = value;
-            }
-        }
-        private string _storageLocation;
-        [NotMapped]
-        public string strStorageLocation
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_storageLocation))
-                    if (tblICStorageLocation != null)
-                        return tblICStorageLocation.strName;
-                    else
-                        return null;
-                else
-                    return _storageLocation;
-            }
-            set
-            {
-                _storageLocation = value;
-            }
-        }
+
+
+        // 5: Lot Number and New Lot Number
         private string _lotNumber;
         [NotMapped]
         public string strLotNumber
@@ -221,6 +238,27 @@ namespace iRely.Inventory.Model
                 _lotNumber = value;
             }
         }
+        private string _newLotNumber;
+        [NotMapped]
+        public string strNewLotNumber
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_newLotNumber))
+                    if (NewLot != null)
+                        return NewLot.strLotNumber;
+                    else
+                        return null;
+                else
+                    return _newLotNumber;
+            }
+            set
+            {
+                _newLotNumber = value;
+            }
+        }    
+        
+        // 6: Lot Qty, Lot Cost, and Weight Per Qty
         private decimal _lotQty;
         [NotMapped]
         public decimal dblLotQty
@@ -253,9 +291,9 @@ namespace iRely.Inventory.Model
                 _lotUnitCost = value;
             }
         }
-        private decimal _lotWeightPerUnit;
+        private decimal _lotWeightPerQty;
         [NotMapped]
-        public decimal dblLotWeightPerUnit
+        public decimal dblLotWeightPerQty
         {
             get
             {
@@ -266,28 +304,12 @@ namespace iRely.Inventory.Model
             }
             set
             {
-                _lotWeightPerUnit = value;
+                _lotWeightPerQty = value;
             }
         }
-        private string _newLotNumber;
-        [NotMapped]
-        public string strNewLotNumber
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_newLotNumber))
-                    if (NewLot != null)
-                        return NewLot.strLotNumber;
-                    else
-                        return null;
-                else
-                    return _newLotNumber;
-            }
-            set
-            {
-                _newLotNumber = value;
-            }
-        }
+
+
+        // 7: Item UOM and New Item UOM
         private string _itemUOM;
         [NotMapped]
         public string strItemUOM
@@ -305,25 +327,6 @@ namespace iRely.Inventory.Model
             set
             {
                 _itemUOM = value;
-            }
-        }
-        private string _weightUOM;
-        [NotMapped]
-        public string strWeightUOM
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_weightUOM))
-                    if (tblICLot != null)
-                        return tblICLot.strWeightUOM;
-                    else
-                        return null;
-                else
-                    return _weightUOM;
-            }
-            set
-            {
-                _weightUOM = value;
             }
         }
         private string _newItemUOM;
@@ -345,6 +348,48 @@ namespace iRely.Inventory.Model
                 _newItemUOM = value;
             }
         }
+
+        // 8: Weight UOM and New Weight UOM
+        private string _weightUOM;
+        [NotMapped]
+        public string strWeightUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_weightUOM))
+                    if (tblICLot != null)
+                        return tblICLot.strWeightUOM;
+                    else
+                        return null;
+                else
+                    return _weightUOM;
+            }
+            set
+            {
+                _weightUOM = value;
+            }
+        }
+        private string _newWeightUOM;
+        [NotMapped]
+        public string strNewWeightUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_newWeightUOM))
+                    if (NewWeightUOM != null)
+                        return NewWeightUOM.strWeightUOM;
+                    else
+                        return null;
+                else
+                    return _weightUOM;
+            }
+            set
+            {
+                _weightUOM = value;
+            }
+        }        
+
+        // 9: Lot Status and New Lot Status
         private string _lotStatus;
         [NotMapped]
         public string strLotStatus
@@ -371,8 +416,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_newLotStatus))
-                    if (tblICLotStatus != null)
-                        return tblICLotStatus.strPrimaryStatus;
+                    if (NewLotStatus != null)
+                        return NewLotStatus.strPrimaryStatus;
                     else
                         return null;
                 else
@@ -383,129 +428,6 @@ namespace iRely.Inventory.Model
                 _newLotStatus = value;
             }
         }
-        private string _accountCategory;
-        [NotMapped]
-        public string strAccountCategory
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_accountCategory))
-                    if (tblGLAccountCategory != null)
-                        return tblGLAccountCategory.strAccountCategory;
-                    else
-                        return null;
-                else
-                    return _accountCategory;
-            }
-            set
-            {
-                _accountCategory = value;
-            }
-        }
-        private string _debitAccount;
-        [NotMapped]
-        public string strDebitAccountId
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_debitAccount))
-                    if (DebitAccount != null)
-                        return DebitAccount.strAccountId;
-                    else
-                        return null;
-                else
-                    return _debitAccount;
-            }
-            set
-            {
-                _debitAccount = value;
-            }
-        }
-        private string _debitAccountDesc;
-        [NotMapped]
-        public string strDebitAccountDescription
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_debitAccountDesc))
-                    if (DebitAccount != null)
-                        return DebitAccount.strDescription;
-                    else
-                        return null;
-                else
-                    return _debitAccountDesc;
-            }
-            set
-            {
-                _debitAccountDesc = value;
-            }
-        }
-        private string _creditAccount;
-        [NotMapped]
-        public string strCreditAccountId
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_creditAccount))
-                    if (CreditAccount != null)
-                        return CreditAccount.strAccountId;
-                    else
-                        return null;
-                else
-                    return _creditAccount;
-            }
-            set
-            {
-                _creditAccount = value;
-            }
-        }
-        private string _creditAccountDesc;
-        [NotMapped]
-        public string strCreditAccountDescription
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_creditAccountDesc))
-                    if (CreditAccount != null)
-                        return CreditAccount.strDescription;
-                    else
-                        return null;
-                else
-                    return _creditAccountDesc;
-            }
-            set
-            {
-                _creditAccountDesc = value;
-            }
-        }
-        private DateTime? _expiry;
-        [NotMapped]
-        public DateTime? dtmExpiryDate
-        {
-            get
-            {
-                if (_expiry == null)
-                    if (tblICLot != null)
-                        return tblICLot.dtmExpiryDate;
-                    else
-                        return null;
-                else
-                    return _expiry;
-            }
-            set
-            {
-                _expiry = value;
-            }
-        }
-        [NotMapped]
-        public decimal dblGLAmount
-        {
-            get
-            {
-                return (dblLotUnitCost * (dblNewQuantity ?? 0));
-            }
-        }
-        
 
         public tblICInventoryAdjustment tblICInventoryAdjustment { get; set; }
         public tblICItem tblICItem { get; set; }
@@ -515,11 +437,10 @@ namespace iRely.Inventory.Model
         public tblICLot tblICLot { get; set; }
         public tblICLot NewLot { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
+        public tblICItemUOM NewItemUOM { get; set; }
         public tblICItemUOM WeightUOM { get; set; }
-        public tblICLotStatus tblICLotStatus { get; set; }
-        public tblGLAccountCategory tblGLAccountCategory { get; set; }
-        public tblGLAccount DebitAccount { get; set; }
-        public tblGLAccount CreditAccount { get; set; }
+        public tblICItemUOM NewWeightUOM { get; set; }
+        public tblICLotStatus NewLotStatus { get; set; }
     }
 
     public class tblICInventoryAdjustmentNote : BaseEntity
