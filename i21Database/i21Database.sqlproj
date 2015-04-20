@@ -1402,6 +1402,7 @@
     <Build Include="dbo\Tables\tblQMAttributeDataType.sql" />
     <Build Include="dbo\Stored Procedures\uspPOReceivedMiscItem.sql" />
     <Build Include="dbo\Views\vyuHDItem.sql" />
+    <Build Include="dbo\Views\vyuAPBillForApproval.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
