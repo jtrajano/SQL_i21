@@ -60,7 +60,8 @@
     [intLastModifiedUserId]          INT            NULL,
     [dtmLastModified]                DATETIME       NULL,
     [intConcurrencyId]               INT            CONSTRAINT [DF_tblCFSite_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblCFSiteLocation] PRIMARY KEY CLUSTERED ([intSiteId] ASC),
-    CONSTRAINT [FK_tblCFSiteLocation_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId])
+    CONSTRAINT [PK_tblCFSiteLocation] PRIMARY KEY CLUSTERED ([intSiteId] ASC)
 );
+
+
 

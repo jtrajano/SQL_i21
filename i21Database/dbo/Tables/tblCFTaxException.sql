@@ -26,6 +26,8 @@
     [intInvoiceItemId]    INT             NULL,
     [intConcurrencyId]    INT             CONSTRAINT [DF_tblCFTaxException_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFTaxException] PRIMARY KEY CLUSTERED ([intTaxExceptionId] ASC),
-    CONSTRAINT [FK_tblCFTaxException_tblCFAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblCFAccount] ([intAccountId])
+    CONSTRAINT [FK_tblCFTaxException_tblCFAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblCFAccount] ([intAccountId]) ON DELETE CASCADE
 );
+
+
 
