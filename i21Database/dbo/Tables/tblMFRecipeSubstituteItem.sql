@@ -1,7 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblMFRecipeSubstituteItem]
 (
 	[intRecipeSubstituteItemId] INT NOT NULL IDENTITY(1,1) , 
-    [intRecipeItemId] INT NOT NULL, 
+    [intRecipeItemId] INT NOT NULL,
+	[intRecipeId] INT NOT NULL, 
     [intItemId] INT NOT NULL, 
     [intSubstituteItemId] INT NOT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
@@ -18,6 +19,7 @@
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFRecipeSubstituteItem_intConcurrencyId] DEFAULT 0,
     CONSTRAINT [PK_tblMFRecipeSubstituteItem_intRecipeSubstituteItemId] PRIMARY KEY ([intRecipeSubstituteItemId]),
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]), 
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblICItem_intItemId_intSubstituteItemId] FOREIGN KEY ([intSubstituteItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFRecipeSubstituteItem_tblICUnitMeasure_intUnitMeasureId_intUOMId] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

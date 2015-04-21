@@ -210,3 +210,151 @@ EXEC sp_addmessage 51051,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51052) EXEC sp_dropmessage 51052, 'us_english'	
 SET @strmessage = 'Please check for duplicate lot numbers. The lot number %s is used more than once in item %s on %s.'
 EXEC sp_addmessage 51052,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51053) EXEC sp_dropmessage 51053, 'us_english'	
+SET @strmessage = 'Invalid Lot.'
+EXEC sp_addmessage 51053,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51054) EXEC sp_dropmessage 51054, 'us_english'	
+SET @strmessage = 'This lot %s was not produced through work order production process; hence this lot cannot be released from this screen. Try changing the lot status using the Lot Status Change screen available in the Inventory view screen.'
+EXEC sp_addmessage 51054,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51055) EXEC sp_dropmessage 51055, 'us_english'	
+SET @strmessage = 'Lot has already been released!.'
+EXEC sp_addmessage 51055,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51056) EXEC sp_dropmessage 51056, 'us_english'	
+SET @strmessage = 'Pallet Lot has been marked as a ghost and cannot be released. Please call Supervisor to reverse this!.'
+EXEC sp_addmessage 51056,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51057) EXEC sp_dropmessage 51057, 'us_english'	
+SET @strmessage = 'Invalid item type - you can only release finished goods items!.'
+EXEC sp_addmessage 51057,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51058) EXEC sp_dropmessage 51058, 'us_english'	
+SET @strmessage = 'Invalid GTIN Case code.'
+EXEC sp_addmessage 51058,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51059) EXEC sp_dropmessage 51059, 'us_english'	
+SET @strmessage = 'The pallet lot quantity cannot exceed more than  item''s cases per pallet. Please check produce quantity.'
+EXEC sp_addmessage 51059,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51060) EXEC sp_dropmessage 51060, 'us_english'	
+SET @strmessage = 'Item number for GTIN Case Code and Pallet Lot ID is not matching, please scan the appropriate case code.'
+EXEC sp_addmessage 51060,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51061) EXEC sp_dropmessage 51061, 'us_english'	
+SET @strmessage = 'Special characters are not allowed for LotID.'
+EXEC sp_addmessage 51061,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51062) EXEC sp_dropmessage 51062, 'us_english'	
+SET @strmessage = 'Lot quantity and physical count should be equal when same UOM is selected.'
+EXEC sp_addmessage 51062,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51063) EXEC sp_dropmessage 51063, 'us_english'	
+SET @strmessage = 'Lot quantity should be greater than zero.'
+EXEC sp_addmessage 51063,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51064) EXEC sp_dropmessage 51064, 'us_english'	
+SET @strmessage = 'Item is not available. It may have been deleted or inactive.'
+EXEC sp_addmessage 51064,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51065) EXEC sp_dropmessage 51065, 'us_english'	
+SET @strmessage =  'The specified item ''%s'' is InActive. The transaction can not proceed.'
+EXEC sp_addmessage 51065,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51066) EXEC sp_dropmessage 51066, 'us_english'	
+SET @strmessage =  'Location is not available. It may have been deleted.'
+EXEC sp_addmessage 51066,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51067) EXEC sp_dropmessage 51067, 'us_english'	
+SET @strmessage =  'Sub Location is not available. It may have been deleted.'
+EXEC sp_addmessage 51067,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51068) EXEC sp_dropmessage 51068, 'us_english'	
+SET @strmessage =  'Storage Location is not available. It may have been deleted.'
+EXEC sp_addmessage 51068,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51069) EXEC sp_dropmessage 51069, 'us_english'	
+SET @strmessage =  'Parent Storage Location is not allowed to hold a Lot.'
+EXEC sp_addmessage 51069,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51070) EXEC sp_dropmessage 51070, 'us_english'	
+SET @strmessage =  'The Storage Location is already used by other Lot.'
+EXEC sp_addmessage 51070,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51071) EXEC sp_dropmessage 51071, 'us_english'	
+SET @strmessage =  'The Storage Location is already used by other Lot for the Item ''%s'''
+EXEC sp_addmessage 51071,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51072) EXEC sp_dropmessage 51072, 'us_english'	
+SET @strmessage =  'The Storage Location is already used by other Item.'
+EXEC sp_addmessage 51072,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51073) EXEC sp_dropmessage 51073, 'us_english'	
+SET @strmessage =  'LotID ''%s'' already exists in this storage location ''%s''.'
+EXEC sp_addmessage 51073,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51074) EXEC sp_dropmessage 51074, 'us_english'	
+SET @strmessage =  'LotID ''%s'' has been configured with item ''%s'' in storage location ''%s''.'+' Please select same item to proceed.'
+EXEC sp_addmessage 51074,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51075) EXEC sp_dropmessage 51075, 'us_english'	
+SET @strmessage =   'Create date should not be in future date.'
+EXEC sp_addmessage 51075,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51076) EXEC sp_dropmessage 51076, 'us_english'	
+SET @strmessage =  'The Lot %s does not exist.'
+EXEC sp_addmessage 51076,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51077) EXEC sp_dropmessage 51077, 'us_english'	
+SET @strmessage =   'Invalid Item.'
+EXEC sp_addmessage 51077,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51078) EXEC sp_dropmessage 51078, 'us_english'	
+SET @strmessage =   'The work order that you clicked on does not exist.'
+EXEC sp_addmessage 51078,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51079) EXEC sp_dropmessage 51079, 'us_english'	
+SET @strmessage =  'The work order that you clicked on is already completed.'
+EXEC sp_addmessage 51079,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51080) EXEC sp_dropmessage 51080, 'us_english'	
+SET @strmessage =  'It is possible that this work order has been temporarily paused by another user. Please refresh the screen.'
+EXEC sp_addmessage 51080,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51081) EXEC sp_dropmessage 51081, 'us_english'	
+SET @strmessage =  'Work order is not in started state. Please start the work order.'
+EXEC sp_addmessage 51081,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51082) EXEC sp_dropmessage 51082, 'us_english'	
+SET @strmessage = 'The item ''%s'' on lot ''%s'' is not a configured input item on the product item %s''s BOM. The transaction will not be allowed to proceed.'
+EXEC sp_addmessage 51082,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51083) EXEC sp_dropmessage 51083, 'us_english'	
+SET @strmessage = 'The attempted produce quantity of ''%d'' for material ''%s'' is more than the allowed production quantity with upper tolerance %d. The transaction will not be allowed to proceed.'
+EXEC sp_addmessage 51083,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51084) EXEC sp_dropmessage 51084, 'us_english'	
+SET @strmessage =  'The attempted produce quantity of ''%d'' for material ''%s'' is more than the allowed production quantity with lower tolerance %d. The transaction will not be allowed to proceed.'
+EXEC sp_addmessage 51084,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51085) EXEC sp_dropmessage 51085, 'us_english'	
+SET @strmessage =  'The requested consume quantity of %d is invalid. Please attempt to consume a positive quantity less than or equal to input lot quantity.'
+EXEC sp_addmessage 51085,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51086) EXEC sp_dropmessage 51086, 'us_english'	
+SET @strmessage =  'Lot ''%s'' is in quarantine. You are not allowed to consume a quantity from a quarantined lot.'
+EXEC sp_addmessage 51086,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51087) EXEC sp_dropmessage 51087, 'us_english'	
+SET @strmessage =  'The lot ''%s'' is not available for consumption.'
+EXEC sp_addmessage 51087,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51088) EXEC sp_dropmessage 51088, 'us_english'	
+SET @strmessage =  'The Lot ''%s'' is expired. You cannot consume.'
+EXEC sp_addmessage 51088,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51089) EXEC sp_dropmessage 51089, 'us_english'	
+SET @strmessage = 'The attempted consumption quantity of %d %s of material ''%s'' from lot ''%s'' is more than the lot''s queued quantity of %d %s. The transaction will not be allowed to proceed.'
+EXEC sp_addmessage 51089,11,@strmessage,'us_english','False' 

@@ -148,3 +148,119 @@ BEGIN
     VALUES(13,'Completed')
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFReleaseStatus
+		WHERE intReleaseStatusId=1
+		)
+BEGIN
+	INSERT INTO dbo.tblMFReleaseStatus (
+		intReleaseStatusId
+		,strReleaseStatus
+		)
+	SELECT 1
+		,'Release'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFReleaseStatus
+		WHERE intReleaseStatusId=2
+		)
+BEGIN
+	INSERT INTO dbo.tblMFReleaseStatus (
+		intReleaseStatusId
+		,strReleaseStatus
+		)
+	SELECT 2
+		,'Hold'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFStationType
+		WHERE intStationTypeId=1
+		)
+BEGIN
+	INSERT INTO dbo.tblMFStationType (
+		intStationTypeId
+		,strStationTypeName
+		)
+	SELECT 1
+		,'Sub Location'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFStationType
+		WHERE intStationTypeId=2
+		)
+BEGIN
+	INSERT INTO dbo.tblMFStationType (
+		intStationTypeId
+		,strStationTypeName
+		)
+	SELECT 2
+		,'Parent Storage Location'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFStationType
+		WHERE  intStationTypeId=3
+		)
+BEGIN
+	INSERT INTO dbo.tblMFStationType (
+		intStationTypeId
+		,strStationTypeName
+		)
+	SELECT 3
+		,'Storage Location'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFFloorMovementType
+		WHERE intFloorMovementTypeId=1
+		)
+BEGIN
+	INSERT INTO dbo.tblMFFloorMovementType (
+		intFloorMovementTypeId
+		,strFloorMovementTypeName
+		)
+	SELECT 1
+		,'Storage Location'
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFFloorMovementType
+		WHERE intFloorMovementTypeId=2
+		)
+BEGIN
+	INSERT INTO dbo.tblMFFloorMovementType (
+		intFloorMovementTypeId
+		,strFloorMovementTypeName
+		)
+	SELECT 2
+		,'Machine'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFWorkOrderProductionType
+		WHERE intProductionTypeId=1
+		)
+BEGIN
+	INSERT INTO dbo.tblMFWorkOrderProductionType (
+		intProductionTypeId
+		,strName
+		)
+	SELECT 1
+		,'Stock'
+END
+GO
