@@ -51,7 +51,8 @@ Ext.define('Inventory.model.TransferDetail', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string' },
-        { name: 'strUnitMeasure', type: 'string' }
+        { name: 'strUnitMeasure', type: 'string' },
+        { name: 'dblTaxAmount', type: 'float' }
     ],
 
     validators: [

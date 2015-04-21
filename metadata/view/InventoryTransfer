@@ -1076,7 +1076,7 @@
                                                                 "fieldLabel": "Account ID",
                                                                 "hidden": null,
                                                                 "hideTrigger": null,
-                                                                "itemId": "cboAccountID",
+                                                                "itemId": "cboAccountId",
                                                                 "labelWidth": 120,
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
@@ -1365,7 +1365,7 @@
                                                             "\t\tflex: 1",
                                                             "\t},",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataIndex: 'strItemDescription',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Description',",
                                                             "\t\tflex: 1",
@@ -1375,6 +1375,24 @@
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Lot Tracking',",
                                                             "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Sub Location',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strStorageLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Storage Location',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'dblOnHand',",
+                                                            "\t\tdataType: 'float',",
+                                                            "\t\ttext: 'On Hand',",
+                                                            "\t\tflex: 1",
                                                             "\t}",
                                                             "]"
                                                         ],
@@ -1762,9 +1780,9 @@
                                                 "dataIndex": "dblQuantity",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
-                                                "itemId": "colQuantity",
-                                                "text": "Quantity",
-                                                "width": 65
+                                                "itemId": "colAvailableQty",
+                                                "text": "Available Qty",
+                                                "width": 100
                                             },
                                             "name": "MyNumberColumn",
                                             "designerId": "93550651-e77d-4c56-8026-e78854b1182e",
@@ -1773,18 +1791,6 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
-                                                }
-                                            ],
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyNumberField",
-                                                    "designerId": "9d93682c-c4d6-48cf-949c-79cf94b1e608"
                                                 }
                                             ]
                                         },
@@ -1858,6 +1864,47 @@
                                                             "type": "string"
                                                         }
                                                     ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblQuantity",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colTransferQty",
+                                                "text": "Transfer Qty",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn1",
+                                            "designerId": "18ecee92-1698-457c-b15a-50193a40a53f",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "width": 100
+                                                    },
+                                                    "name": "MyNumberField",
+                                                    "designerId": "d0c2d56f-2f2d-4e31-afab-34b0961cd6e3"
                                                 }
                                             ]
                                         },

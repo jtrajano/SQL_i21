@@ -26,7 +26,10 @@ Ext.define('Inventory.model.Transfer', {
         { name: 'intFreightUOMId', type: 'int', allowNull: true },
         { name: 'intAccountCategoryId', type: 'int', allowNull: true },
         { name: 'intAccountId', type: 'int', allowNull: true },
-        { name: 'intSort', type: 'int', allowNull: true }
+        { name: 'intSort', type: 'int', allowNull: true },
+
+        { name: 'dblTaxAmount', type: 'float' }
+
     ],
 
     validators: [

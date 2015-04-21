@@ -528,7 +528,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        itemId: 'cboAccountID',
+                                                                        itemId: 'cboAccountId',
                                                                         fieldLabel: 'Account ID',
                                                                         labelWidth: 120,
                                                                         displayField: 'strAccountId',
@@ -641,7 +641,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     flex: 1
                                                                 },
                                                                 {
-                                                                    dataIndex: 'strDescription',
+                                                                    dataIndex: 'strItemDescription',
                                                                     dataType: 'string',
                                                                     text: 'Description',
                                                                     flex: 1
@@ -651,6 +651,24 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     dataType: 'string',
                                                                     text: 'Lot Tracking',
                                                                     hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Sub Location',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStorageLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Location',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblOnHand',
+                                                                    dataType: 'float',
+                                                                    text: 'On Hand',
+                                                                    flex: 1
                                                                 }
                                                             ],
                                                             itemId: 'cboItem',
@@ -839,15 +857,12 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        itemId: 'colQuantity',
-                                                        width: 65,
-                                                        align: 'right',
                                                         dataIndex: 'dblQuantity',
-                                                        text: 'Quantity',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        itemId: 'colAvailableQty',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'Available Qty',
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -887,6 +902,20 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                             itemId: 'cboUOM',
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'strUnitMeasure'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        dataIndex: 'dblQuantity',
+                                                        itemId: 'colTransferQty',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'Transfer Qty',
+                                                        format: '0,000.##',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            width: 100
                                                         }
                                                     },
                                                     {

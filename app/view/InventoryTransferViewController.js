@@ -55,7 +55,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.intAccountCategoryId}',
                 store: '{accountCategory}'
             },
-            cboAccountID: {
+            cboAccountId: {
                 value: '{current.intAccountId}',
                 store: '{glAccount}'
             },
@@ -205,6 +205,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Transfer', { pageSize: 1 });
 
+        var grdInventoryTransfer = win.down('#grdInventoryTransfer');
+
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
@@ -218,8 +220,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 {
                     key: 'tblICInventoryTransferDetails',
                     component: Ext.create('iRely.grid.Manager', {
-                        grid: win.down('#grdInventoryTransfer'),
-                        deleteButton : win.down('#btnRemoveItem')
+                        grid: grdInventoryTransfer,
+                        deleteButton : grdInventoryTransfer.down('#btnRemoveItem')
                     })
                 },
                 {
@@ -231,6 +233,14 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 }
             ]
         });
+
+//        var cepItem = grdInventoryTransfer.getPlugin('cepItem');
+//        if (cepItem){
+//            cepItem.on({
+//                validateedit: me.onEditDetails,
+//                scope: me
+//            });
+//        }
 
         return win.context;
     },
@@ -289,7 +299,12 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 
         if (combo.itemId === 'cboItem') {
             current.set('intItemId', records[0].get('intItemId'));
-            current.set('strItemDescription', records[0].get('strDescription'));
+            current.set('strItemDescription', records[0].get('strItemDescription'));
+            current.set('strFromSubLocationName', records[0].get('strSubLocationName'));
+            current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
+            current.set('strFromStorageLocationName', records[0].get('strStorageLocationName'));
+            current.set('intFromStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('dblQuantity', records[0].get('dblOnHand'));
         }
         else if (combo.itemId === 'cboLot') {
             current.set('intLotId', records[0].get('intLotId'));
@@ -325,6 +340,18 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
         else if (combo.itemId === 'cboTaxCode') {
             current.set('intTaxCodeId', records[0].get('intTaxCodeId'));
+        }
+    },
+
+    onAccountSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            current.set('strAccountDescription', records[0].get('strDescription'));
         }
     },
 
@@ -389,6 +416,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
     },
 
+    onEditDetails: function(editor, context, eOpts) {
+//        if (context.field === 'dblTaxAmount')
+//        {
+//
+//        }
+    },
+
     init: function(application) {
         this.control({
             "#cboItem": {
@@ -429,6 +463,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             "#cboTransferType": {
                 change: this.onTransferTypeChange
+            },
+            "#cboAccountId": {
+                select: this.onAccountSelect
             }
         });
     }

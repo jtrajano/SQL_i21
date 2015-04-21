@@ -42,12 +42,27 @@ namespace iRely.Inventory.BRL
             return GetSearchQuery().Where(predicate).Count();
         }
 
+        public int GetItemStockUOMCount(Expression<Func<vyuICGetItemStockUOM, bool>> predicate)
+        {
+            return _db.GetQuery<vyuICGetItemStockUOM>().Where(predicate).Count();
+        }
+
         public IQueryable<tblICItemStock> GetItemStocks(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<tblICItemStock, bool>> predicate)
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICItemStock>()
                 .Include("tblICItemLocation.tblSMCompanyLocation")
                 .Where(w => query.Where(predicate).Any(a => a.intItemStockId == w.intItemStockId)) //Filter the Main DataSource Based on Search Query
+                .OrderBySelector(sortSelector)
+                .Skip(start)
+                .Take(limit)
+                .AsNoTracking();
+        }
+
+        public IQueryable<vyuICGetItemStockUOM> GetItemStockUOMView(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<vyuICGetItemStockUOM, bool>> predicate)
+        {
+            return _db.GetQuery<vyuICGetItemStockUOM>()
+                .Where(predicate)
                 .OrderBySelector(sortSelector)
                 .Skip(start)
                 .Take(limit)
