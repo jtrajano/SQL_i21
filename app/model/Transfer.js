@@ -22,7 +22,7 @@ Ext.define('Inventory.model.Transfer', {
         { name: 'intFromLocationId', type: 'int', allowNull: true },
         { name: 'intToLocationId', type: 'int', allowNull: true },
         { name: 'ysnShipmentRequired', type: 'boolean' },
-        { name: 'intCarrierId', type: 'int', allowNull: true },
+        { name: 'intShipViaId', type: 'int', allowNull: true },
         { name: 'intFreightUOMId', type: 'int', allowNull: true },
         { name: 'intAccountCategoryId', type: 'int', allowNull: true },
         { name: 'intAccountId', type: 'int', allowNull: true },

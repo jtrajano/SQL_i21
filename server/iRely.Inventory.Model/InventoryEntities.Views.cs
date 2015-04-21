@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsd063bbb70c2a301fd7d841e342905f40da70504e17d4559826e366d51a4d6c4d))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets89e247856c4f0ba7eb35776fa51d8b7986e00ad78ba16bc15cba882964082807))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsd063bbb70c2a301fd7d841e342905f40da70504e17d4559826e366d51a4d6c4d : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets89e247856c4f0ba7eb35776fa51d8b7986e00ad78ba16bc15cba882964082807 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "d063bbb70c2a301fd7d841e342905f40da70504e17d4559826e366d51a4d6c4d"; }
+            get { return "89e247856c4f0ba7eb35776fa51d8b7986e00ad78ba16bc15cba882964082807"; }
         }
 
         /// <summary>
@@ -1869,7 +1869,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransfer
-        [CodeFirstDatabaseSchema.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intCarrierId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferId AS tblICInventoryTransfer_intInventoryTransferId, 
@@ -1881,7 +1881,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intFromLocationId AS tblICInventoryTransfer_intFromLocationId, 
             T.intToLocationId AS tblICInventoryTransfer_intToLocationId, 
             T.ysnShipmentRequired AS tblICInventoryTransfer_ysnShipmentRequired, 
-            T.intCarrierId AS tblICInventoryTransfer_intCarrierId, 
+            T.intShipViaId AS tblICInventoryTransfer_intShipViaId, 
             T.intFreightUOMId AS tblICInventoryTransfer_intFreightUOMId, 
             T.intAccountCategoryId AS tblICInventoryTransfer_intAccountCategoryId, 
             T.intAccountId AS tblICInventoryTransfer_intAccountId, 
@@ -4672,7 +4672,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransfers
-        [iRely.Inventory.Model.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intCarrierId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferId AS tblICInventoryTransfer_intInventoryTransferId, 
@@ -4684,7 +4684,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intFromLocationId AS tblICInventoryTransfer_intFromLocationId, 
             T.intToLocationId AS tblICInventoryTransfer_intToLocationId, 
             T.ysnShipmentRequired AS tblICInventoryTransfer_ysnShipmentRequired, 
-            T.intCarrierId AS tblICInventoryTransfer_intCarrierId, 
+            T.intShipViaId AS tblICInventoryTransfer_intShipViaId, 
             T.intFreightUOMId AS tblICInventoryTransfer_intFreightUOMId, 
             T.intAccountCategoryId AS tblICInventoryTransfer_intAccountCategoryId, 
             T.intAccountId AS tblICInventoryTransfer_intAccountId, 
