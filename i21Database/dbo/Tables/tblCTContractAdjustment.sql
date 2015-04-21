@@ -8,7 +8,7 @@
 	ysnAdjustment BIT,
 	dblOldQuantity NUMERIC(12, 4),
 	dblOldBalance NUMERIC(12, 4),
-	dblAdjBalance NUMERIC(12, 4) NOT NULL,
+	[dblAdjAmount] NUMERIC(12, 4) NOT NULL,
 	dblNewBalance NUMERIC(12, 4),
 	dblNewQuantity NUMERIC(12, 4),
 	dblContractPrice NUMERIC(8, 4),

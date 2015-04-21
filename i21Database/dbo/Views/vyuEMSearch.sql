@@ -30,11 +30,11 @@ SELECT
    
 FROM tblEntity a    
 	left join tblAPVendor b    
-		on a.intEntityId = b.intEntityVendorId    
+		on a.intEntityId = b.intEntityVendorId and b.ysnPymtCtrlActive = 1
 	left join tblARCustomer c    
-		on a.intEntityId = c.intEntityCustomerId    
+		on a.intEntityId = c.intEntityCustomerId and c.ysnActive = 1
 	LEFT JOIN tblARSalesperson d  
-		on a.intEntityId = d.intEntitySalespersonId  
+		on a.intEntityId = d.intEntitySalespersonId and d.ysnActive = 1
 	left join tblEntityLocation e  
 		on a.intDefaultLocationId = e.intEntityLocationId  
 	left join tblEntityToContact f  

@@ -105,3 +105,10 @@ GO
 	WHERE parent.strMenuName = 'Dashboard'
 	
 GO
+
+	/* CHANGE ACCOUNTS PAYABLE MENU NAME TO PURCHASING */
+	UPDATE tblSMMasterMenu
+	SET strMenuName = 'Purchasing'
+	WHERE strMenuName = 'Accounts Payable' AND intParentMenuID = 0
+
+GO
