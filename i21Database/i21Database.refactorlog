@@ -2695,6 +2695,13 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strInternalTradeNo" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="fdf8a99e-4835-459d-b894-223692940f7f" ChangeDateTime="04/21/2015 02:15:23">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryTransfer].[intCarrierId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryTransfer]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intShipViaId" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="461cebdb-e57a-43a3-9fb7-93fd0a8c1864" ChangeDateTime="04/08/2015 06:56:32">
     <Property Name="ElementName" Value="[dbo].[tblSMGridLayout].[Id]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />

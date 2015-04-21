@@ -9,7 +9,7 @@
     [intFromLocationId] INT NULL, 
     [intToLocationId] INT NULL, 
     [ysnShipmentRequired] BIT NULL DEFAULT ((0)), 
-    [intCarrierId] INT NULL, 
+    [intShipViaId] INT NULL, 
     [intFreightUOMId] INT NULL, 
     [intAccountCategoryId] INT NULL, 
     [intAccountId] INT NULL, 
@@ -22,7 +22,8 @@
     CONSTRAINT [FK_tblICInventoryTransfer_ToLocation] FOREIGN KEY ([intToLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblICUnitMeasure] FOREIGN KEY ([intFreightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblGLAccountCategory] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId]), 
-    CONSTRAINT [FK_tblICInventoryTransfer_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]) 
+    CONSTRAINT [FK_tblICInventoryTransfer_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
+    CONSTRAINT [FK_tblICInventoryTransfer_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]) 
 )
 
 GO
@@ -108,13 +109,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'ysnShipmentRequired'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Carrier Id',
+    @value = N'Ship Via Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblICInventoryTransfer',
     @level2type = N'COLUMN',
-    @level2name = N'intCarrierId'
+    @level2name = 'intShipViaId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Freight Unit of Measure Id',
