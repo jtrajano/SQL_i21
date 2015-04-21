@@ -88,6 +88,13 @@ BEGIN TRY
 			)
 
 	BEGIN TRANSACTION
+	If @intWorkOrderId is not null or @intWorkOrderId>0
+	Begin
+		SELECT @intStatusId = intStatusId
+			FROM dbo.tblMFWorkOrderStatus
+			WHERE strName = 'Started'
+		Update tblMFWorkOrder Set intStatusId =@intStatusId  Where intWorkOrderId=@intWorkOrderId
+	End
 
 	Select @dtmCurrentDate=GetDate()
 
@@ -260,7 +267,7 @@ BEGIN TRY
 		,@intBatchId = @intBatchId
 		,@strBatchId=@strRetBatchId
 
-	Update dbo.tblICLot Set intLotStatusId =(Select intLotStatusId from tblICLotStatus Where strSecondaryStatus='Quarantine')Where strLotNumber =@strOutputLotNumber
+	Update dbo.tblICLot Set intLotStatusId =(Select intLotStatusId from tblICLotStatus Where strSecondaryStatus='Quarantined')Where strLotNumber =@strOutputLotNumber
 		
 	Select @strOutputLotNumber as strOutputLotNumber
 
