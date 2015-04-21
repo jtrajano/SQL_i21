@@ -342,7 +342,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colItemNumber',
                                                         width: 100,
-                                                        dataIndex: 'strItemNumber',
+                                                        dataIndex: 'strItemNo',
                                                         text: 'Item No.',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -464,9 +464,9 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colLotID',
+                                                        itemId: 'colLotNumber',
                                                         width: 90,
-                                                        dataIndex: 'strLotID',
+                                                        dataIndex: 'strLotNumber',
                                                         text: 'Lot ID',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -484,16 +484,16 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboLotId',
+                                                            itemId: 'cboLotNumber',
                                                             displayField: 'strLotNumber',
                                                             valueField: 'strLotNumber'
                                                         }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colNewLotID',
+                                                        itemId: 'colNewLotNumber',
                                                         width: 90,
-                                                        dataIndex: 'strNewLotID',
+                                                        dataIndex: 'strNewLotNumber',
                                                         text: 'New Lot ID',
                                                         editor: {
                                                             xtype: 'textfield',
@@ -511,33 +511,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         format: '0,000.##'
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colUOM',
-                                                        width: 70,
-                                                        dataIndex: 'strUOM',
-                                                        text: 'UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colWeightPerUnit',
-                                                        width: 110,
-                                                        align: 'right',
-                                                        dataIndex: 'dblWeightPerUnit',
-                                                        text: 'Weight Per Unit',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colUnitCost',
-                                                        width: 95,
-                                                        align: 'right',
-                                                        dataIndex: 'dblUnitCost',
-                                                        text: 'Unit Cost',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
                                                         itemId: 'colNewQuantity',
@@ -552,9 +525,16 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colUOM',
+                                                        width: 70,
+                                                        dataIndex: 'strItemUOM',
+                                                        text: 'UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colNewUOM',
                                                         width: 70,
-                                                        dataIndex: 'strNewUOM',
+                                                        dataIndex: 'strNewItemUOM',
                                                         text: 'New UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -591,11 +571,38 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colNetWeight',
+                                                        width: 90,
+                                                        align: 'right',
+                                                        dataIndex: 'dblWeight',
+                                                        text: 'Net Weight',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colNewNetWeight',
+                                                        width: 110,
+                                                        align: 'right',
+                                                        dataIndex: 'dblNewWeight',
+                                                        text: 'New Net Weight',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colWeightUOM',
                                                         width: 70,
-                                                        dataIndex: 'strNewUOM',
-                                                        text: 'Wgt UOM',
+                                                        dataIndex: 'strWeightUOM',
+                                                        text: 'Wgt UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colNewWeightUOM',
+                                                        width: 70,
+                                                        dataIndex: 'strNewWeightUOM',
+                                                        text: 'New Wgt UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -618,7 +625,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboWeightUOM',
+                                                            itemId: 'cboNewWeightUOM',
+                                                            width: 100,
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'strUnitMeasure'
                                                         }
@@ -626,28 +634,64 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        itemId: 'colNetWeight',
-                                                        width: 90,
+                                                        itemId: 'colWeightPerQty',
+                                                        width: 110,
                                                         align: 'right',
-                                                        dataIndex: 'dblNewQuantity',
-                                                        text: 'Net Weight',
+                                                        dataIndex: 'dblWeightPerQty',
+                                                        text: 'Weight Per Qty',
                                                         format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        itemId: 'colNewWeightPerUnit',
+                                                        itemId: 'colNewWeightPerQty',
                                                         width: 110,
                                                         align: 'right',
-                                                        dataIndex: 'dblNewQuantity',
-                                                        text: 'New Wgt Per Unit',
+                                                        dataIndex: 'dblNewWeightPerQty',
+                                                        text: 'New Wgt Per Qty',
+                                                        format: '0,000.##',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colUnitCost',
+                                                        width: 95,
+                                                        align: 'right',
+                                                        dataIndex: 'dblCost',
+                                                        text: 'Unit Cost',
                                                         format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colUnitCost1',
+                                                        width: 95,
+                                                        align: 'right',
+                                                        dataIndex: 'dblCost',
+                                                        text: 'Unit Cost',
+                                                        format: '0,000.##'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colNewUnitCost',
+                                                        width: 95,
+                                                        align: 'right',
+                                                        dataIndex: 'dblNewCost',
+                                                        text: 'New Unit Cost',
+                                                        format: '0,000.##',
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewItemNumber',
                                                         width: 90,
-                                                        dataIndex: 'strNewItemNumber',
+                                                        dataIndex: 'strNewItemNo',
                                                         text: 'New Item No.',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -697,13 +741,15 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'datecolumn',
-                                                        itemId: 'colExpirationDate',
+                                                        itemId: 'colExpiryDate',
+                                                        dataIndex: 'dtmExpiryDate',
                                                         text: 'Expiration Date'
                                                     },
                                                     {
                                                         xtype: 'datecolumn',
-                                                        itemId: 'colNewExpirationDate',
+                                                        itemId: 'colNewExpiryDate',
                                                         width: 117,
+                                                        dataIndex: 'dtmNewExpiryDate',
                                                         text: 'New Expiration Date',
                                                         editor: {
                                                             xtype: 'datefield'
@@ -711,17 +757,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colStatus',
+                                                        itemId: 'colNewLotStatus',
                                                         width: 75,
-                                                        dataIndex: 'strStatus',
-                                                        text: 'Status'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNewStatus',
-                                                        width: 75,
-                                                        dataIndex: 'strNewStatus',
-                                                        text: 'New Status',
+                                                        dataIndex: 'strNewLotStatus',
+                                                        text: 'New Lot Status',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -756,157 +795,11 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         }
                                                     },
                                                     {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colGLAmount',
-                                                        width: 95,
-                                                        align: 'right',
-                                                        dataIndex: 'dblGLAmount',
-                                                        text: 'GL Amount',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colAccountCategory',
-                                                        width: 110,
-                                                        dataIndex: 'strCreditAccount',
-                                                        text: 'Account Category',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intAccountCategoryId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Category Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountCategory',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Category',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboAccountCategory',
-                                                            displayField: 'strAccountCategory',
-                                                            valueField: 'strAccountCategory'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colCreditAccount',
-                                                        width: 96,
-                                                        dataIndex: 'strCreditAccount',
-                                                        text: 'Credit Account',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intAccountId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountId',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Id',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intAccountGroupId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Group Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountGroup',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Group',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountType',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboCreditAccount',
-                                                            displayField: 'strAccountId',
-                                                            valueField: 'strAccountId'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colCreditAccountDescription',
-                                                        width: 150,
-                                                        dataIndex: 'strCreditAccountDescription',
-                                                        text: 'Description'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colDebitAccount',
-                                                        width: 97,
-                                                        dataIndex: 'strDebitAccount',
-                                                        text: 'Debit Account',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intAccountId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountId',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Id',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intAccountGroupId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Group Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountGroup',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Group',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountType',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboDebitAccount',
-                                                            displayField: 'strAccountId',
-                                                            valueField: 'strAccountId'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colDebitAccountDescription',
-                                                        width: 150,
-                                                        dataIndex: 'strDebitAccountDescription',
-                                                        text: 'Description'
+                                                        itemId: 'colLineTotal',
+                                                        width: 75,
+                                                        dataIndex: 'dblLineTotal',
+                                                        text: 'Lot Status'
                                                     }
                                                 ],
                                                 plugins: [

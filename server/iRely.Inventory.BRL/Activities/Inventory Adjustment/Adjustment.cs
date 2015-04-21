@@ -64,11 +64,12 @@ namespace iRely.Inventory.BRL
                 .Include("tblICInventoryAdjustmentDetails.NewItem")
                 .Include("tblICInventoryAdjustmentDetails.Lot")
                 .Include("tblICInventoryAdjustmentDetails.NewLot")
-                .Include("tblICInventoryAdjustmentDetails.ItemUOM")
-                .Include("tblICInventoryAdjustmentDetails.NewItemUOM")
-                .Include("tblICInventoryAdjustmentDetails.WeightUOM")
-                .Include("tblICInventoryAdjustmentDetails.NewWeightUOM")
+                .Include("tblICInventoryAdjustmentDetails.ItemUOM.tblICUnitMeasure")
+                .Include("tblICInventoryAdjustmentDetails.NewItemUOM.tblICUnitMeasure")
+                .Include("tblICInventoryAdjustmentDetails.WeightUOM.tblICUnitMeasure")
+                .Include("tblICInventoryAdjustmentDetails.NewWeightUOM.tblICUnitMeasure")
                 .Include("tblICInventoryAdjustmentDetails.NewLotStatus")
+                
                 .Include(p => p.tblICInventoryAdjustmentNotes)
                 .Where(w => query.Where(predicate).Any(a => a.intInventoryAdjustmentId == w.intInventoryAdjustmentId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)

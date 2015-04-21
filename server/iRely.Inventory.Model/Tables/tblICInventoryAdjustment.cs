@@ -71,27 +71,38 @@ namespace iRely.Inventory.Model
         public int intInventoryAdjustmentId { get; set; }
         public int? intSubLocationId { get; set; }
         public int? intStorageLocationId { get; set; }
+
         public int? intItemId { get; set; }
         public int? intNewItemId { get; set; }
+        
         public int? intLotId { get; set; }
         public int? intNewLotId { get; set; }
+        public string strNewLotNumber { get; set; }
 
         public decimal? dblQuantity { get; set; }
         public decimal? dblNewQuantity { get; set; }
+
         public int? intItemUOMId { get; set; }
         public int? intNewItemUOMId { get; set; }
+        
         public int? intWeightUOMId { get; set; }
         public int? intNewWeightUOMId { get; set; }
+        
         public decimal? dblWeight { get; set; }
         public decimal? dblNewWeight { get; set; }
+        
         public decimal? dblWeightPerQty { get; set; }
         public decimal? dblNewWeightPerQty { get; set; }
+        
         public DateTime? dtmExpiryDate { get; set; }
         public DateTime? dtmNewExpiryDate { get; set; }
+        
         public int? intLotStatusId { get; set; }
         public int? intNewLotStatusId { get; set; }
+
         public decimal? dblCost { get; set; }
         public decimal? dblNewCost { get; set; }
+        
         public decimal? dblLineTotal { get; set; }
         public int? intSort { get; set; }
 
@@ -238,25 +249,25 @@ namespace iRely.Inventory.Model
                 _lotNumber = value;
             }
         }
-        private string _newLotNumber;
-        [NotMapped]
-        public string strNewLotNumber
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_newLotNumber))
-                    if (NewLot != null)
-                        return NewLot.strLotNumber;
-                    else
-                        return null;
-                else
-                    return _newLotNumber;
-            }
-            set
-            {
-                _newLotNumber = value;
-            }
-        }    
+        //private string _newLotNumber;
+        //[NotMapped]
+        //public string strNewLotNumber
+        //{
+        //    get
+        //    {
+        //        if (string.IsNullOrEmpty(_newLotNumber))
+        //            if (NewLot != null)
+        //                return NewLot.strLotNumber;
+        //            else
+        //                return null;
+        //        else
+        //            return _newLotNumber;
+        //    }
+        //    set
+        //    {
+        //        _newLotNumber = value;
+        //    }
+        //}    
         
         // 6: Lot Qty, Lot Cost, and Weight Per Qty
         private decimal _lotQty;
@@ -317,8 +328,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemUOM))
-                    if (Lot != null)
-                        return Lot.strItemUOM;
+                    if (ItemUOM != null)
+                        return ItemUOM.strUnitMeasure;
                     else
                         return null;
                 else
@@ -336,8 +347,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_newItemUOM))
-                    if (ItemUOM != null)
-                        return ItemUOM.strUnitMeasure;
+                    if (NewItemUOM != null)
+                        return NewItemUOM.strUnitMeasure;
                     else
                         return null;
                 else

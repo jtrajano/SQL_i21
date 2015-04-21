@@ -14,7 +14,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 {dataIndex: 'strAdjustmentNo', text: 'Adjustment No', flex: 1, dataType: 'string'},
                 {dataIndex: 'strLocationName', text: 'Location Id', flex: 1, dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
-//                {dataIndex: 'strAdjustmentType', text: 'Adjustment Type', flex: 1, dataType: 'string'},
+                //{dataIndex: 'strAdjustmentType', text: 'Adjustment Type', flex: 1, dataType: 'string'},
                 {dataIndex: 'dtmAdjustmentDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn'}
             ]
         },
@@ -46,7 +46,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         }]
                     }
                 },
+
                 colDescription: 'strItemDescription',
+
                 colSubLocation: {
                     dataIndex: 'strSubLocation',
                     editor: {
@@ -62,6 +64,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         }]
                     }
                 },
+
                 colStorageLocation: {
                     dataIndex: 'strStorageLocation',
                     editor: {
@@ -73,7 +76,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         }]
                     }
                 },
-                colLotID: {
+
+                colLotNumber: {
                     dataIndex: 'strLotNumber',
                     editor: {
                         store: '{lot}',
@@ -84,17 +88,20 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         }]
                     }
                 },
-                colNewLotID: {
+
+                colNewLotNumber: {
                     dataIndex: 'strNewLotNumber',
                     editor: {
                         store: '{newLot}'
                     }
                 },
-                colQuantity: 'dblLotQty',
-                colUOM: 'strItemUOM',
-                colWeightPerUnit: 'dblLotWeightPerUnit',
-                colUnitCost: 'dblLotUnitCost',
+
+                colQuantity: 'dblQuantity',
+
                 colNewQuantity: 'dblNewQuantity',
+
+                colUOM: 'strItemUOM',
+
                 colNewUOM: {
                     dataIndex: 'strNewItemUOM',
                     editor: {
@@ -106,6 +113,11 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         }]
                     }
                 },
+
+                colNetWeight: 'dblWeight',
+
+                colNewNetWeight: 'dblNewWeight',
+
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
@@ -117,8 +129,26 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         }]
                     }
                 },
-                colNetWeight: 'dblNetWeight',
-                colNewWeightPerUnit: 'dblNewWeightPerUnit',
+                colNewWeightUOM: {
+                    dataIndex: 'strNewWeightUOM',
+                    editor: {
+                        store: '{weightUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdInventoryAdjustment.selection.intItemId}',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
+
+                colWeightPerQty: 'dblWeightPerQty',
+
+                colNewWeightPerQty: 'dblNewWeightPerQty',
+
+                colUnitCost: 'dblCost',
+
+                colNewUnitCost: 'dblNewCost',
+
                 colNewItemNumber: {
                     dataIndex: 'strNewItemNo',
                     editor: {
@@ -130,41 +160,21 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         }]
                     }
                 },
+
                 colNewItemDescription: 'strNewItemDescription',
-                colExpirationDate: 'dtmExpiryDate',
-                colNewExpirationDate: 'dtmNewExpiryDate',
-                colStatus: 'strLotStatus',
-                colNewStatus: {
+
+                colExpiryDate: 'dtmExpiryDate',
+
+                colNewExpiryDate: 'dtmNewExpiryDate',
+
+                colLotStatus: 'strLotStatus',
+
+                colNewLotStatus: {
                     dataIndex: 'strNewLotStatus',
                     editor: {
                         store: '{newLotStatus}'
                     }
-                },
-                colGLAmount: 'dblGLAmount',
-                colAccountCategory: {
-                    dataIndex: 'strAccountCategory',
-                    editor: {
-                        store: '{accountCategory}',
-                        defaultFilters: [{
-                            column: 'strAccountCategoryGroupCode',
-                            value: 'INV'
-                        }]
-                    }
-                },
-                colCreditAccount: {
-                    dataIndex: 'strCreditAccountId',
-                    editor: {
-                        store: '{creditGLAccount}'
-                    }
-                },
-                colCreditAccountDescription: 'strCreditAccountDescription',
-                colDebitAccount: {
-                    dataIndex: 'strDebitAccountId',
-                    editor: {
-                        store: '{debitGLAccount}'
-                    }
-                },
-                colDebitAccountDescription: 'strDebitAccountDescription'
+                }
             },
 
             grdNotes: {
@@ -258,8 +268,37 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         if (combo.itemId === 'cboItemNo')
         {
+            // Populate the default data.
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
+
+            // Clear the values for the following fields:
+            current.set('strSubLocation', null);
+            current.set('strStorageLocation', null);
+
+            current.set('intLotId', null);
+            current.set('strLotNumber', null);
+            current.set('intNewLotId', null);
+            current.set('strNewLotNumber', null);
+
+            current.set('dblQuantity', null);
+            current.set('dblNewQuantity', null);
+
+            current.set('intItemUOMId', null);
+            current.set('strItemUOM', null);
+            current.set('intNewItemUOMId', null);
+            current.set('strNewItemUOM', null);
+
+            current.set('dblWeight', null);
+            current.set('dblNewWeight', null);
+
+            current.set('intWeightUOMId', null);
+            current.set('strWeightUOM', null);
+            current.set('intNewWeightUOMId', null);
+            current.set('strNewWeightUOM', null);
+
+            current.set('dblWeightPerQty', null);
+            current.set('dblNewWeightPerQty', null);
         }
         else if (combo.itemId === 'cboNewItemNo')
         {
@@ -274,150 +313,177 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         {
             current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
         }
-        else if (combo.itemId === 'cboLotId')
+        else if (combo.itemId === 'cboLotNumber')
         {
             current.set('intLotId', records[0].get('intLotId'));
-            current.set('dblLotQty', records[0].get('dblQty'));
-            current.set('dblLotUnitCost', records[0].get('dblLastCost'));
-            current.set('dblLotWeightPerUnit', records[0].get('dblWeightPerQty'));
+            current.set('dblQuantity', records[0].get('dblQty'));
+            current.set('dblCost', records[0].get('dblLastCost'));
+            current.set('dblWeightPerQty', records[0].get('dblWeightPerQty'));
+
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
             current.set('strItemUOM', records[0].get('strItemUOM'));
+
             current.set('strWeightUOM', records[0].get('strWeightUOM'));
             current.set('intWeightUOMId', records[0].get('intWeightUOMId'));
+
             current.set('strLotStatus', records[0].get('strLotStatus'));
             current.set('intLotStatusId', records[0].get('intLotStatusId'));
+
             current.set('dtmExpiryDate', records[0].get('dtmExpiryDate'));
-            current.set('dblNetWeight', records[0].get('dblWeight'));
+            current.set('dblWeight', records[0].get('dblWeight'));
         }
         else if (combo.itemId === 'cboNewUOM')
         {
             current.set('intNewItemUOMId', records[0].get('intItemUOMId'));
         }
-        else if (combo.itemId === 'cboWeightUOM')
+        else if (combo.itemId === 'cboNewWeightUOM')
         {
-            current.set('intWeightUOMId', records[0].get('intItemUOMId'));
+            current.set('intNewWeightUOMId', records[0].get('intItemUOMId'));
         }
         else if (combo.itemId === 'cboNewStatus')
         {
             current.set('intNewLotStatusId', records[0].get('intLotStatusId'));
         }
-        else if (combo.itemId === 'cboAccountCategory')
-        {
-            current.set('intAccountCategoryId', records[0].get('intAccountCategoryId'));
-        }
-        else if (combo.itemId === 'cboCreditAccount')
-        {
-            current.set('intCreditAccountId', records[0].get('intAccountId'));
-            current.set('strCreditAccountDescription', records[0].get('strDescription'));
-        }
-        else if (combo.itemId === 'cboDebitAccount')
-        {
-            current.set('intDebitAccountId', records[0].get('intAccountId'));
-            current.set('strDebitAccountDescription', records[0].get('strDescription'));
+    },
+
+    /**
+     * A helper function. It will return the column object from the grid
+     * using the data index.
+     *
+     * Using the column index is not reliable since it can be changed during runtime.
+     * The use of data index is more reliable.
+     *
+     * @param grid
+     * @param dataIndex
+     * @returns {*}
+     */
+    getGridColumnByDataIndex: function(grid, dataIndex) {
+        gridColumns = grid.headerCt.getGridColumns();
+        for (var i = 0; i < gridColumns.length; i++) {
+            if (gridColumns[i].dataIndex == dataIndex) {
+                return gridColumns[i];
+            }
         }
     },
 
     onAdjustmentTypeChange: function(obj, newValue, oldValue, eOpts) {
         var win = obj.up('window');
-        var grdInventoryAdjustment = win.down('#grdInventoryAdjustment');
-        var colNewLot = grdInventoryAdjustment.columns[5];
-        var colNewQty = grdInventoryAdjustment.columns[10];
-        var colNewUOM = grdInventoryAdjustment.columns[11];
-        var colWeightUOM = grdInventoryAdjustment.columns[12];
-        var colNetWeight = grdInventoryAdjustment.columns[13];
-        var colNewWeightPerUnit = grdInventoryAdjustment.columns[14];
-        var colNewItemId = grdInventoryAdjustment.columns[15];
-        var colNewItemDesc = grdInventoryAdjustment.columns[16];
-        var colExpiry = grdInventoryAdjustment.columns[17];
-        var colNewExpiry = grdInventoryAdjustment.columns[18];
-        var colStatus = grdInventoryAdjustment.columns[19];
-        var colNewStatus = grdInventoryAdjustment.columns[20];
+        var grid = win.down('#grdInventoryAdjustment');
+
+        var colNewLot = this.getGridColumnByDataIndex(grid, 'strNewLotNumber');
+
+        var colQuantity = this.getGridColumnByDataIndex(grid, 'dblQuantity');
+        var colNewQuantity = this.getGridColumnByDataIndex(grid, 'dblNewQuantity');
+
+        var colUOM = this.getGridColumnByDataIndex(grid, 'strItemUOM');
+        var colNewUOM = this.getGridColumnByDataIndex(grid, 'strNewItemUOM');
+
+        var colNetWeight = this.getGridColumnByDataIndex(grid, 'dblWeight');
+        var colNewNetWeight = this.getGridColumnByDataIndex(grid, 'dblNewWeight');
+
+        var colWeightUOM = this.getGridColumnByDataIndex(grid, 'strWeightUOM');
+        var colNewWeightUOM = this.getGridColumnByDataIndex(grid, 'strNewWeightUOM');
+
+        var colWeightPerQty = this.getGridColumnByDataIndex(grid, 'dblWeightPerQty');
+        var colNewWeightPerQty = this.getGridColumnByDataIndex(grid, 'dblNewWeightPerQty');
+
+        var colUnitCost = this.getGridColumnByDataIndex(grid, 'dblCost');
+        var colNewUnitCost = this.getGridColumnByDataIndex(grid, 'dblNewCost');
+
+        var colNewItemNumber = this.getGridColumnByDataIndex(grid, 'strNewItemNo');
+        var colNewItemDescription = this.getGridColumnByDataIndex(grid, 'strNewItemDescription');
+
+        var colExpiryDate = this.getGridColumnByDataIndex(grid, 'dtmExpiryDate');
+        var colNewExpiryDate = this.getGridColumnByDataIndex(grid, 'dtmNewExpiryDate');
+
+        var colLotStatus = this.getGridColumnByDataIndex(grid, 'strLotStatus');
+        var colNewLotStatus = this.getGridColumnByDataIndex(grid, 'strNewLotStatus');
+
+        var QuantityChange = 1;
+        var UOMChange = 2;
+        var ItemChange = 3;
+        var LotStatusChange = 4;
+        var LotIdChange = 5;
+        var ExpiryDateChange = 6;
+
+        var hide = true;
+        var show = false;
 
         switch (newValue) {
-            case 1:
-                colNewLot.setHidden(true);
-                colNewQty.setHidden(false);
-                colNewUOM.setHidden(true);
-                colWeightUOM.setHidden(false);
-                colNetWeight.setHidden(false);
-                colNewWeightPerUnit.setHidden(false);
-                colNewItemId.setHidden(true);
-                colNewItemDesc.setHidden(true);
-                colExpiry.setHidden(true);
-                colNewExpiry.setHidden(true);
-                colStatus.setHidden(true);
-                colNewStatus.setHidden(true);
+            case QuantityChange:
+                // Hide columns:
+                colNewLot.setHidden(hide);
+                colNewItemNumber.setHidden(hide);
+                colNewItemDescription.setHidden(hide);
+                colExpiryDate.setHidden(hide);
+                colNewExpiryDate.setHidden(hide);
+                colLotStatus.setHidden(hide);
+                colNewLotStatus.setHidden(hide);
+
+                // Show columns:
+                colQuantity.setHidden(show);
+                colNewQuantity.setHidden(show);
+
+                colUOM.setHidden(show);
+                colNewUOM.setHidden(show);
+
+                colNetWeight.setHidden(show);
+                colNewNetWeight.setHidden(show);
+
+                colWeightUOM.setHidden(show);
+                colNewWeightUOM.setHidden(show);
+
+                colWeightPerQty.setHidden(show);
+                colNewWeightPerQty.setHidden(show);
+
+                colUnitCost.setHidden(show);
+                colNewUnitCost.setHidden(show);
                 break;
-            case 2:
-                colNewLot.setHidden(true);
-                colNewQty.setHidden(true);
-                colNewUOM.setHidden(false);
-                colWeightUOM.setHidden(false);
-                colNetWeight.setHidden(false);
-                colNewWeightPerUnit.setHidden(false);
-                colNewItemId.setHidden(true);
-                colNewItemDesc.setHidden(true);
-                colExpiry.setHidden(true);
-                colNewExpiry.setHidden(true);
-                colStatus.setHidden(true);
-                colNewStatus.setHidden(true);
+            case UOMChange:
+                // todo
                 break;
-            case 3:
-                colNewLot.setHidden(true);
-                colNewQty.setHidden(true);
-                colNewUOM.setHidden(true);
-                colWeightUOM.setHidden(true);
-                colNetWeight.setHidden(true);
-                colNewWeightPerUnit.setHidden(true);
-                colNewItemId.setHidden(false);
-                colNewItemDesc.setHidden(false);
-                colExpiry.setHidden(true);
-                colNewExpiry.setHidden(true);
-                colStatus.setHidden(true);
-                colNewStatus.setHidden(true);
+            case ItemChange:
+                // todo
                 break;
-            case 4:
-                colNewLot.setHidden(true);
-                colNewQty.setHidden(true);
-                colNewUOM.setHidden(true);
-                colWeightUOM.setHidden(true);
-                colNetWeight.setHidden(true);
-                colNewWeightPerUnit.setHidden(true);
-                colNewItemId.setHidden(true);
-                colNewItemDesc.setHidden(true);
-                colExpiry.setHidden(true);
-                colNewExpiry.setHidden(true);
-                colStatus.setHidden(false);
-                colNewStatus.setHidden(false);
+            case LotStatusChange:
+                // todo
                 break;
-            case 5:
-                colNewLot.setHidden(false);
-                colNewQty.setHidden(false);
-                colNewUOM.setHidden(false);
-                colWeightUOM.setHidden(false);
-                colNetWeight.setHidden(false);
-                colNewWeightPerUnit.setHidden(false);
-                colNewItemId.setHidden(true);
-                colNewItemDesc.setHidden(true);
-                colExpiry.setHidden(true);
-                colNewExpiry.setHidden(true);
-                colStatus.setHidden(true);
-                colNewStatus.setHidden(true);
+            case LotIdChange:
+                // todo
                 break;
-            case 6:
-                colNewLot.setHidden(true);
-                colNewQty.setHidden(true);
-                colNewUOM.setHidden(true);
-                colWeightUOM.setHidden(true);
-                colNetWeight.setHidden(true);
-                colNewWeightPerUnit.setHidden(true);
-                colNewItemId.setHidden(true);
-                colNewItemDesc.setHidden(true);
-                colExpiry.setHidden(false);
-                colNewExpiry.setHidden(false);
-                colStatus.setHidden(true);
-                colNewStatus.setHidden(true);
+            case ExpiryDateChange:
+                // todo
                 break;
         }
+    },
+
+    /**
+     * This function is going to disable the other options.
+     * Allowed adjustment type for now is: Quantity Change
+     * Remove this function if we can now support the other
+     * adjustment types.
+     *
+     * @param combo
+     * @param record
+     * @returns {boolean}
+     */
+    onAdjustmentTypeBeforeSelect: function(combo, record){
+        var QuantityChange = 1;
+
+        var data = record.getData();
+        var adjustmentTypeId;
+        if (data && (adjustmentTypeId = data.intAdjustmentTypeId)){
+            if (adjustmentTypeId !== QuantityChange){
+                var msgBox = iRely.Functions;
+                msgBox.showCustomDialog(
+                    msgBox.dialogType.ERROR,
+                    msgBox.dialogButtonType.OK,
+                    data.strDescription + ' is not yet supported.'
+                );
+                return false;
+            }
+        }
+        return true;
     },
 
     init: function(application) {
@@ -431,7 +497,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             "#cboStorageLocation": {
                 select: this.onAdjustmentDetailSelect
             },
-            "#cboLotId": {
+            "#cboLotNumber": {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboSubLocation": {
@@ -456,8 +522,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboAdjustmentType": {
-                change: this.onAdjustmentTypeChange
+                change: this.onAdjustmentTypeChange,
+                beforeselect: this.onAdjustmentTypeBeforeSelect
             }
         });
     }
 });
+
