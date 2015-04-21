@@ -1803,12 +1803,69 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "strUOM",
-                                                "itemId": "colUOM",
+                                                "itemId": "colAvailableUOM",
                                                 "text": "UOM",
                                                 "width": 70
                                             },
                                             "name": "MyColumn46",
-                                            "designerId": "a040696e-e9e4-4a26-a6ee-6e15ebe90971",
+                                            "designerId": "a040696e-e9e4-4a26-a6ee-6e15ebe90971"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblQuantity",
+                                                "dataType": "numeric",
+                                                "format": "0,000.##",
+                                                "itemId": "colTransferQty",
+                                                "text": "Transfer Qty",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn1",
+                                            "designerId": "18ecee92-1698-457c-b15a-50193a40a53f",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "width": 100
+                                                    },
+                                                    "name": "MyNumberField",
+                                                    "designerId": "d0c2d56f-2f2d-4e31-afab-34b0961cd6e3"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strUOM",
+                                                "itemId": "colTransferUOM",
+                                                "text": "UOM",
+                                                "width": 70
+                                            },
+                                            "name": "MyColumn",
+                                            "designerId": "e6827937-bdeb-480e-91ff-1452c7abc9ed",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1856,7 +1913,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "3b354db3-c94a-4898-b025-92488f33b3b8",
+                                                    "designerId": "c66f6b30-e8a9-44f7-921f-eea58cab3620",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -1864,47 +1921,6 @@
                                                             "type": "string"
                                                         }
                                                     ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblQuantity",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colTransferQty",
-                                                "text": "Transfer Qty",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn1",
-                                            "designerId": "18ecee92-1698-457c-b15a-50193a40a53f",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ],
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "width": 100
-                                                    },
-                                                    "name": "MyNumberField",
-                                                    "designerId": "d0c2d56f-2f2d-4e31-afab-34b0961cd6e3"
                                                 }
                                             ]
                                         },
@@ -2080,18 +2096,6 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
-                                                }
-                                            ],
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyNumberField3",
-                                                    "designerId": "c3c1260c-8bbe-47eb-85bb-b7073c7fa438"
                                                 }
                                             ]
                                         },

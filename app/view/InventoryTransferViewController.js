@@ -130,8 +130,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         }]
                     }
                 },
-                colQuantity: 'dblQuantity',
-                colUOM: {
+                colAvailableQty: 'dblAvailableQty',
+                colAvailableUOM: 'strAvailableUOM',
+
+                colTransferQty: 'dblQuantity',
+                colTransferUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{itemUOM}',
@@ -292,7 +295,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             return;
 
         var win = combo.up('window');
-        var me = win.controller;
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
@@ -304,7 +306,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
             current.set('strFromStorageLocationName', records[0].get('strStorageLocationName'));
             current.set('intFromStorageLocationId', records[0].get('intStorageLocationId'));
-            current.set('dblQuantity', records[0].get('dblOnHand'));
+            current.set('dblAvailableQty', records[0].get('dblOnHand'));
+            current.set('strAvailableUOM', records[0].get('strUnitMeasure'));
         }
         else if (combo.itemId === 'cboLot') {
             current.set('intLotId', records[0].get('intLotId'));
@@ -359,16 +362,16 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         var win = obj.up('window');
         var pnlFreight = win.down('#pnlFreight');
         var grdInventoryTransfer = win.down('#grdInventoryTransfer');
-        var colCost = grdInventoryTransfer.columns[14];
-        var colCreditAccount = grdInventoryTransfer.columns[15];
-        var colCreditAccountDescription = grdInventoryTransfer.columns[16];
-        var colDebitAccount = grdInventoryTransfer.columns[17];
-        var colDebitAccountDescription = grdInventoryTransfer.columns[18];
-        var colTaxCode = grdInventoryTransfer.columns[19];
-        var colTaxAmount = grdInventoryTransfer.columns[20];
+        var colCost = grdInventoryTransfer.columns[16];
+        var colCreditAccount = grdInventoryTransfer.columns[17];
+        var colCreditAccountDescription = grdInventoryTransfer.columns[18];
+        var colDebitAccount = grdInventoryTransfer.columns[19];
+        var colDebitAccountDescription = grdInventoryTransfer.columns[20];
+        var colTaxCode = grdInventoryTransfer.columns[21];
+        var colTaxAmount = grdInventoryTransfer.columns[22];
 
-        var colFreightRate = grdInventoryTransfer.columns[21];
-        var colFreightAmount = grdInventoryTransfer.columns[22];
+        var colFreightRate = grdInventoryTransfer.columns[23];
+        var colFreightAmount = grdInventoryTransfer.columns[24];
 
         switch (newValue) {
             case 'Location to Location':

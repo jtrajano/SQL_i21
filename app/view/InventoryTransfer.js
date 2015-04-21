@@ -866,7 +866,28 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colUOM',
+                                                        dataIndex: 'strUOM',
+                                                        itemId: 'colAvailableUOM',
+                                                        width: 70,
+                                                        text: 'UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        dataIndex: 'dblQuantity',
+                                                        itemId: 'colTransferQty',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'Transfer Qty',
+                                                        format: '0,000.##',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            width: 100
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colTransferUOM',
                                                         width: 70,
                                                         dataIndex: 'strUOM',
                                                         text: 'UOM',
@@ -902,20 +923,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                             itemId: 'cboUOM',
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'strUnitMeasure'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        dataIndex: 'dblQuantity',
-                                                        itemId: 'colTransferQty',
-                                                        width: 100,
-                                                        align: 'right',
-                                                        text: 'Transfer Qty',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            width: 100
                                                         }
                                                     },
                                                     {
@@ -987,15 +994,12 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
+                                                        dataIndex: 'dblNet',
                                                         itemId: 'colNet',
                                                         width: 65,
                                                         align: 'right',
-                                                        dataIndex: 'dblNet',
                                                         text: 'Net',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
