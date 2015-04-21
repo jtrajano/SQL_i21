@@ -143,7 +143,6 @@
     <Folder Include="Scripts\Post-Deployment\GR" />
     <Folder Include="Scripts\Post-Deployment\MF" />
     <Folder Include="dbo\Index" />
-    <Folder Include="dbo\Triggers\GL" />
     <Folder Include="Scripts\Post-Deployment\PR" />
     <Folder Include="Scripts\Post-Deployment\PR\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\EM" />
@@ -1208,7 +1207,6 @@
     <Build Include="dbo\Tables\tblRKBrokersAccountMarketMapping.sql" />
     <Build Include="dbo\Tables\tblRKBrokerageCommission.sql" />
     <Build Include="dbo\Tables\tblRKBrokerageAccount.sql" />
-    <Build Include="dbo\Triggers\GL\trgAfterUpdatetblGLAccountSegment.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConvertAccountGroupToCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeletePrePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreatePrePayment.sql" />
@@ -1266,8 +1264,6 @@
     <Build Include="dbo\Tables\tblRKFuturesBroker.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScaleActivity.sql" />
     <Build Include="dbo\Tables\tblGLAccountAdjustmentLog.sql" />
-    <Build Include="dbo\Triggers\GL\trgAfterUpdatetblGLAccount.sql" />
-    <Build Include="dbo\Triggers\GL\trgAfterUpdatetblGLAccountGroup.sql" />
     <Build Include="dbo\Tables\tblLGLoadCost.sql" />
     <Build Include="dbo\Tables\tblLGLoad.sql" />
     <Build Include="dbo\Views\vyuLGLoadOpenContracts.sql" />
@@ -1407,9 +1403,10 @@
     <Build Include="dbo\Stored Procedures\uspLGUpdateEntityTables.sql" />
     <Build Include="dbo\Tables\tblAREmailTemplate.sql" />
     <Build Include="dbo\Tables\tblCTContractAdjustment.sql" />
+    <Build Include="dbo\Tables\tblSMGridLayout.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccount.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
-    <Build Include="dbo\Tables\tblSMGridLayout.sql" />
+    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
