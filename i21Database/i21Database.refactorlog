@@ -2723,4 +2723,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intUserId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b2916594-6584-4dbf-b65a-f497b8d9e073" ChangeDateTime="04/21/2015 03:44:10">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractAdjustment].[dblAdjBalance]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractAdjustment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblAdjAmount" />
+  </Operation>
 </Operations>
