@@ -1407,6 +1407,9 @@
     <Build Include="dbo\Stored Procedures\uspLGUpdateEntityTables.sql" />
     <Build Include="dbo\Tables\tblAREmailTemplate.sql" />
     <Build Include="dbo\Tables\tblCTContractAdjustment.sql" />
+    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccount.sql" />
+    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
+    <Build Include="dbo\Tables\tblSMGridLayout.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
