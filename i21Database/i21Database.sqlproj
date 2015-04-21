@@ -1416,6 +1416,7 @@
     <Build Include="dbo\Views\vyuICGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoAdjustment.sql" />
     <Build Include="dbo\Views\vyuCTContractAdjustment.sql" />
+    <Build Include="dbo\Tables\cstGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
