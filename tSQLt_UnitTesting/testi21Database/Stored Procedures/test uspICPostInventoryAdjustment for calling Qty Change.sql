@@ -9,7 +9,7 @@ BEGIN
 		DECLARE @intUserId AS INT = 1
 		DECLARE @intEntityId AS INT = 1
 
-		-- Add a spy for uspPOReceived
+		-- Add a spy for uspICPostInventoryAdjustmentQtyChange
 		EXEC tSQLt.SpyProcedure 'dbo.uspICPostInventoryAdjustmentQtyChange';	
 
 		EXEC [testi21Database].[Fake data for inventory adjustment table];

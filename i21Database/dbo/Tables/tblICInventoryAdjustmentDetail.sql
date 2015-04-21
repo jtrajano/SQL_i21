@@ -2,39 +2,46 @@
 (
 	[intInventoryAdjustmentDetailId] INT NOT NULL IDENTITY, 
     [intInventoryAdjustmentId] INT NOT NULL, 
-    [intItemId] INT NULL, 
     [intSubLocationId] INT NULL, 
     [intStorageLocationId] INT NULL, 
+    [intItemId] INT NULL,
+	[intNewItemId] INT NULL,  
     [intLotId] INT NULL, 
     [intNewLotId] INT NULL, 
+	[strNewLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblNewQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [intNewItemUOMId] INT NULL, 
+    [intItemUOMId] INT NULL, 
+	[intNewItemUOMId] INT NULL, 
 	[intWeightUOMId] INT NULL,
-	[dblNetWeight] NUMERIC(18,6) NULL DEFAULT ((0)),
-	[dblNewWeightPerUnit] NUMERIC(18, 6) NULL DEFAULT ((0)),
-    [intNewItemId] INT NULL, 
-    [dblNewPhysicalCount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [dtmNewExpiryDate] DATETIME NULL, 
+	[intNewWeightUOMId] INT NULL,
+	[dblWeight] NUMERIC(18,6) NULL DEFAULT ((0)),
+	[dblNewWeight] NUMERIC(18, 6) NULL DEFAULT ((0)),	
+	[dblWeightPerQty] NUMERIC(38,20) NULL DEFAULT ((0)),
+	[dblNewWeightPerQty] NUMERIC(38,20) NULL DEFAULT ((0)),      
+	[dtmExpiryDate] DATETIME NULL, 
+	[dtmNewExpiryDate] DATETIME NULL, 
+	[intLotStatusId] INT NULL, 
     [intNewLotStatusId] INT NULL, 
-    [intAccountCategoryId] INT NULL, 
-    [intCreditAccountId] INT NULL, 
-    [intDebitAccountId] INT NULL, 
+	[dblCost] NUMERIC(38,20) NULL DEFAULT ((0)), 
+	[dblNewCost] NUMERIC(38,20) NULL DEFAULT ((0)), 
+	[dblLineTotal] NUMERIC(38,20) NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryAdjustmentDetail] PRIMARY KEY ([intInventoryAdjustmentDetailId]), 
     CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICInventoryAdjustment] FOREIGN KEY ([intInventoryAdjustmentId]) REFERENCES [tblICInventoryAdjustment]([intInventoryAdjustmentId]) ON DELETE CASCADE, 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_NewItem] FOREIGN KEY ([intNewItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItem_OldItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItem_NewItem] FOREIGN KEY ([intNewItemId]) REFERENCES [tblICItem]([intItemId]),	 
     CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
     CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_NewLot] FOREIGN KEY ([intNewLotId]) REFERENCES [tblICLot]([intLotId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM] FOREIGN KEY ([intNewItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLotStatus] FOREIGN KEY ([intNewLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblGLAccountCategory] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_DebitAccount] FOREIGN KEY ([intDebitAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_CreditAccount] FOREIGN KEY ([intCreditAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLot_OldLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLot_NewLot] FOREIGN KEY ([intNewLotId]) REFERENCES [tblICLot]([intLotId]), 
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM_OldItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM_NewItemUOM] FOREIGN KEY ([intNewItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM_OldWeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM_NewWeightUOM] FOREIGN KEY ([intNewWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLotStatus_OldLotStatus] FOREIGN KEY ([intLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]), 
+	CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLotStatus_NewLotStatus] FOREIGN KEY ([intNewLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]) 
 )
 
 GO
@@ -50,15 +57,6 @@ GO
 
 GO
 
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Category Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryAdjustmentDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'intAccountCategoryId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
@@ -142,13 +140,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intNewItemUOMId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'New Weight Per Unit',
+    @value = N'New Weight Per Qty',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblICInventoryAdjustmentDetail',
     @level2type = N'COLUMN',
-    @level2name = N'dblNewWeightPerUnit'
+    @level2name = N'dblNewWeightPerQty'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'New Item Id',
@@ -158,15 +156,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryAdjustmentDetail',
     @level2type = N'COLUMN',
     @level2name = N'intNewItemId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'New Physical Count',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryAdjustmentDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'dblNewPhysicalCount'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'New Expiry Date',
@@ -185,24 +174,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryAdjustmentDetail',
     @level2type = N'COLUMN',
     @level2name = N'intNewLotStatusId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Credit Account Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryAdjustmentDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'intCreditAccountId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Debit Account Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryAdjustmentDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'intDebitAccountId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
@@ -230,4 +201,4 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICInventoryAdjustmentDetail',
     @level2type = N'COLUMN',
-    @level2name = N'dblNetWeight'
+    @level2name = N'dblWeight'
