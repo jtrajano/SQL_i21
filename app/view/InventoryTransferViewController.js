@@ -43,11 +43,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.intToLocationId}',
                 store: '{toLocation}'
             },
-//            cboCarrier: {
-//                value: '{current.intCarrierId}'
-////                ,
-////                store: '{adjustmentTypes}'
-//            },
+            cboShipVia: {
+                value: '{current.intShipViaId}',
+                store: '{shipVia}'
+            },
             cboFreightUOM: {
                 value: '{current.intFreightUOMId}',
                 store: '{uom}'

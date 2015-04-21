@@ -7,6 +7,7 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.TaxCodeBuffered',
         'i21.store.UserListBuffered',
+        'i21.store.ShipViaBuffered',
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
         'Inventory.store.BufferedItemStockView',
@@ -50,6 +51,9 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         },
         accountCategory: {
             type: 'glbufaccountcategorygroup'
+        },
+        shipVia: {
+            type: 'shipviabuffered'
         },
         glAccount: {
             type: 'glbufaccountid'

@@ -26,7 +26,7 @@ namespace iRely.Inventory.Model
         public int? intFromLocationId { get; set; }
         public int? intToLocationId { get; set; }
         public bool? ysnShipmentRequired { get; set; }
-        public int? intCarrierId { get; set; }
+        public int? intShipViaId { get; set; }
         public int? intFreightUOMId { get; set; }
         public int? intAccountCategoryId { get; set; }
         public int? intAccountId { get; set; }
