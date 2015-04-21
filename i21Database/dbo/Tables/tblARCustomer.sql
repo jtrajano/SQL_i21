@@ -67,6 +67,7 @@
     [dtmDeceasedDate]                 DATETIME        NULL,
     [ysnSubjectToFWT]                 BIT             DEFAULT ((0)) NOT NULL,
 	[ysnHDBillableSupport]			  BIT             DEFAULT ((0)) NOT NULL,
+	[intTaxCodeId]					  INT			  NULL,
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
@@ -75,6 +76,7 @@
     CONSTRAINT [FK_tblARCustomer_tblARServiceCharge] FOREIGN KEY ([intServiceChargeId]) REFERENCES [dbo].[tblARServiceCharge] ([intServiceChargeId]),
     CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [FK_tblARCustomer_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
+	 CONSTRAINT [FK_tblARCustomer_tblSMTaxCode] FOREIGN KEY([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
     CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intEntityCustomerId] ASC),
     CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
