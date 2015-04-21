@@ -78,15 +78,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         },
         newLotStatus: {
             type: 'icbufferedlotstatus'
-        },
-        accountCategory: {
-            type: 'glbufaccountcategorygroup'
-        },
-        creditGLAccount: {
-            type: 'glbufaccountid'
-        },
-        debitGLAccount: {
-            type: 'glbufaccountid'
         }
     },
 
