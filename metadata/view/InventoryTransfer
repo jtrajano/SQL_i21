@@ -848,26 +848,56 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "alwaysDisplayDecimals": null,
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intShipViaID',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Ship Via Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strShipVia',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Ship Via',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strShippingService',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Shipping Service',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
                                                                 "designer|createAlias": "gridcombobox",
-                                                                "fieldLabel": "Carrier",
+                                                                "displayField": "strShipVia",
+                                                                "fieldLabel": "Ship Via",
                                                                 "hidden": null,
                                                                 "hideTrigger": null,
-                                                                "itemId": "cboCarrier",
+                                                                "itemId": "cboShipVia",
                                                                 "labelWidth": 120,
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
                                                                 "name": null,
+                                                                "valueField": "intShipViaID",
                                                                 "width": null
                                                             },
                                                             "name": "MyComboBox16",
                                                             "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean"
+                                                                "alwaysDisplayDecimals": "boolean",
+                                                                "columns": "array"
                                                             },
                                                             "designerId": "89472246-297b-48fb-98ae-62a5004369e6",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
                                                                     "name": "alwaysDisplayDecimals",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
                                                                     "type": "string"
                                                                 }
                                                             ]

@@ -412,9 +412,31 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 items: [
                                                                     {
                                                                         xtype: 'gridcombobox',
-                                                                        itemId: 'cboCarrier',
-                                                                        fieldLabel: 'Carrier',
-                                                                        labelWidth: 120
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intShipViaID',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Ship Via Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strShipVia',
+                                                                                dataType: 'string',
+                                                                                text: 'Ship Via',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strShippingService',
+                                                                                dataType: 'string',
+                                                                                text: 'Shipping Service',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboShipVia',
+                                                                        fieldLabel: 'Ship Via',
+                                                                        labelWidth: 120,
+                                                                        displayField: 'strShipVia',
+                                                                        valueField: 'intShipViaID'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
