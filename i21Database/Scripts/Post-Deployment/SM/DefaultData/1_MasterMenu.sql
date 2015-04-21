@@ -222,7 +222,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File
 
 		/* ACCOUNTS PAYABLE */
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-		VALUES (112, N'Accounts Payable', N'Accounts Payable', 0, N'Accounts Payable', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, NULL, 1)
+		VALUES (112, N'Purchasing', N'Accounts Payable', 0, N'Accounts Payable', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, NULL, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES (114, N'Pay Bill Detail', N'Accounts Payable', 112, N'Pay Bills', N'Activity', N'Screen', N'AccountsPayable.view.PayBillsDetail', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
 		INSERT [dbo].[tblSMMasterMenu] ([intMenuID], [strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -436,7 +436,7 @@ VALUES (N'Check Register', N'Cash Management', @CashManagementParentMenuId, N'Ch
 
 /* ACCOUNTS PAYABLE */
 DECLARE @AccountsPayableParentMenuId INT
-SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Accounts Payable' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
+SELECT @AccountsPayableParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchasing' AND strModuleName = 'Accounts Payable' AND intParentMenuID = 0
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchase Order' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
