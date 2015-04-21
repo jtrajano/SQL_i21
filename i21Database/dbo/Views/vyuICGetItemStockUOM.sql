@@ -6,6 +6,8 @@ SELECT
 	StockUOM.intItemId,
 	Item.strItemNo,
 	strItemDescription = Item.strDescription,
+	strType = Item.strType,
+	strLotTracking = Item.strLotTracking,
 	intLocationId = Location.intCompanyLocationId,
 	StockUOM.intItemLocationId,
 	Location.strLocationName,
