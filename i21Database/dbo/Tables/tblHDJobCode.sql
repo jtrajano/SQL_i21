@@ -8,12 +8,14 @@
 	[ysnSupported] [bit] NOT NULL DEFAULT 1,
 	[intItemId] INT NULL, 
 	[intCompanyLocationId] INT NULL,
+	[intUnitMeasureId] INT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
     CONSTRAINT [PK_tblHDJobCode] PRIMARY KEY CLUSTERED ([intJobCodeId] ASC),
 	CONSTRAINT [UNQ_tblHDJobCode] UNIQUE ([strJobCode]),
 	CONSTRAINT [FK_tblHDJobCode_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
-	CONSTRAINT [FK_tblHDJobCode_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId])
+	CONSTRAINT [FK_tblHDJobCode_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+	CONSTRAINT [FK_tblHDJobCode_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
 )
 
 GO
@@ -106,3 +108,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDJobCode',
     @level2type = N'COLUMN',
     @level2name = N'intCompanyLocationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Unit of Measure Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDJobCode',
+    @level2type = N'COLUMN',
+    @level2name = N'intUnitMeasureId'

@@ -621,7 +621,7 @@ BEGIN
 	BEGIN
 		SET @count = @count + 1
 		SELECT TOP (@count) @id = intBillId FROM #tmpPostBillData
-		EXEC uspPOReceived @id, 2
+		EXEC [uspPOReceivedMiscItem] @id
 	END
 
 END

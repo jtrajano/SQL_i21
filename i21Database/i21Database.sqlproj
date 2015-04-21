@@ -143,7 +143,6 @@
     <Folder Include="Scripts\Post-Deployment\GR" />
     <Folder Include="Scripts\Post-Deployment\MF" />
     <Folder Include="dbo\Index" />
-    <Folder Include="dbo\Triggers" />
     <Folder Include="Scripts\Post-Deployment\PR" />
     <Folder Include="Scripts\Post-Deployment\PR\DefaultData" />
     <Folder Include="Scripts\Post-Deployment\EM" />
@@ -152,6 +151,8 @@
     <Folder Include="Scripts\Post-Deployment\TM\Reports\Layout" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\FieldSelection" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria" />
+    <Folder Include="Scripts\Post-Deployment\QM" />
+    <Folder Include="dbo\Triggers\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1206,7 +1207,6 @@
     <Build Include="dbo\Tables\tblRKBrokersAccountMarketMapping.sql" />
     <Build Include="dbo\Tables\tblRKBrokerageCommission.sql" />
     <Build Include="dbo\Tables\tblRKBrokerageAccount.sql" />
-    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConvertAccountGroupToCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeletePrePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreatePrePayment.sql" />
@@ -1264,8 +1264,6 @@
     <Build Include="dbo\Tables\tblRKFuturesBroker.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScaleActivity.sql" />
     <Build Include="dbo\Tables\tblGLAccountAdjustmentLog.sql" />
-    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccount.sql" />
-    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
     <Build Include="dbo\Tables\tblLGLoadCost.sql" />
     <Build Include="dbo\Tables\tblLGLoad.sql" />
     <Build Include="dbo\Views\vyuLGLoadOpenContracts.sql" />
@@ -1396,12 +1394,25 @@
     <Build Include="dbo\Tables\tblSMImportFileTable.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateLoadDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateScheduleQuantity.sql" />
+    <Build Include="dbo\Tables\tblQMAttribute.sql" />
+    <Build Include="dbo\Tables\tblQMAttributeDataType.sql" />
+    <Build Include="dbo\Stored Procedures\uspPOReceivedMiscItem.sql" />
+    <Build Include="dbo\Views\vyuHDItem.sql" />
+    <Build Include="dbo\Views\vyuAPBillForApproval.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGetNextWillCallStartingNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateEntityTables.sql" />
+    <Build Include="dbo\Tables\tblAREmailTemplate.sql" />
+    <Build Include="dbo\Tables\tblCTContractAdjustment.sql" />
+    <Build Include="dbo\Tables\tblSMGridLayout.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentQtyChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentUOMChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotStatusChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentSplitLotChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
+    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccount.sql" />
+    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
+    <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1449,6 +1460,7 @@
     <Build Include="dbo\Stored Procedures\uspMFPickWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckEntry.sql" />
     <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />
+    <None Include="Scripts\Post-Deployment\QM\1_MasterTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

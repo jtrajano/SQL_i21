@@ -12,6 +12,8 @@
     [strMobile] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL, 
     [strFax] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL, 
     [strNotes] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
-    
+
+	[intEntityId] INT NULL, 
+    [intEntityLocationId] INT NULL,     
 	CONSTRAINT [PK_tblLGTerminal_intTerminalId] PRIMARY KEY ([intTerminalId])
 )

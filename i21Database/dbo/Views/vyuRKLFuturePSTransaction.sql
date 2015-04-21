@@ -4,7 +4,7 @@ SELECT strTotalLot-dblSelectedLot1 AS dblBalanceLot, Case WHEN dblSelectedLot1=0
 SELECT 
 	strBrokerTradeNo AS strTransactionNo
 	,dtmTransactionDate as dtmTransactionDate
-	,ot.strNoOfContract as strTotalLot
+	,ot.intNoOfContract as strTotalLot
 	,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD Group By AD.intLFutOptTransactionId 
 			Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0)  As dblSelectedLot1
 	,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell

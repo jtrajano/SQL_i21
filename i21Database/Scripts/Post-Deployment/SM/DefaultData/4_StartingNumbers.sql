@@ -389,6 +389,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inventory Transfer')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 42
+			,[strTransactionType]	= N'Will Call'
+			,[strPrefix]			= N'TMO-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Tank Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Will Call')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

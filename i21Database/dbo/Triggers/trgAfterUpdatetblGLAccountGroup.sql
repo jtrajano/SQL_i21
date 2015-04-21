@@ -5,24 +5,24 @@ BEGIN
 	SET NOCOUNT ON;
 	INSERT INTO tblGLAccountAdjustmentLog (intPrimaryKey,strColumn,strAction,dtmAction,strOriginalValue,strNewValue,intEntityId,strTable,strName)
 	SELECT	d.intAccountGroupId
-			,'Account Group'
+			,'strAccountGroup'
 			,'Rename'
 			,getdate()
 			,d.strAccountGroup 
 			,i.strAccountGroup
-			,i.[intEntityIdLastModified],'Account Group',d.strAccountGroup
+			,i.[intEntityIdLastModified],'tblGLAccountGroup',d.strAccountGroup
 	FROM deleted d 
 	JOIN inserted i ON i.intAccountGroupId = d.intAccountGroupId
 	WHERE i.strAccountGroup != d.strAccountGroup
 
 	INSERT INTO tblGLAccountAdjustmentLog (intPrimaryKey,strColumn,strAction,dtmAction,strOriginalValue,strNewValue,intEntityId,strTable,strName)
 	SELECT	d.intAccountGroupId
-			,'Account Group'
+			,'intParentGroupId'
 			,'Move'
 			,getdate()
 			,d.intParentGroupId
 			,i.intParentGroupId
-			,i.[intEntityIdLastModified],'Parent Group',d.strAccountGroup
+			,i.[intEntityIdLastModified],'tblGLAccountGroup',d.strAccountGroup
 	FROM deleted d 
 	JOIN inserted i ON i.intAccountGroupId = d.intAccountGroupId
 	WHERE i.intParentGroupId != d.intParentGroupId

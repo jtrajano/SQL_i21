@@ -7,7 +7,7 @@ BEGIN
 	DECLARE @purchaseId INT, @lineNo INT, @itemId INT;
 	DECLARE @purchaseOrderNumber NVARCHAR(50), @strItemNo NVARCHAR(50);
 	DECLARE @posted BIT;
-	DECLARE @count INT;
+	DECLARE @count INT = 0;
 	DECLARE @receivedNum DECIMAL(18,6);
 
 	SELECT	B.intSourceId
@@ -64,38 +64,6 @@ BEGIN
 				ON POItems.intSourceId = PODetail.intPurchaseId
 				AND POItems.intLineNo = PODetail.intPurchaseDetailId
 
-	--IF EXISTS(
-	--		SELECT	1 
-	--		FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
-	--					ON A.intPurchaseDetailId = B.intLineNo 
-	--					AND A.intItemId = B.intItemId 
-	--					AND intPurchaseId = intSourceId 
-	--					AND (dblQtyReceived + B.CalculatedOpenReceive) > dblQtyOrdered 
-	--		) 
-	--	AND @posted = 1
-	--BEGIN
-	--	--Received item exceeds
-	--	RAISERROR(51035, 11, 1); 
-	--	RETURN;
-	--END
-
-	UPDATE	A
-	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.CalculatedOpenReceive) 
-									ELSE (	dblQtyReceived - B.CalculatedOpenReceive) 
-							END
-	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
-				ON A.intItemId = B.intItemId 
-				AND A.intPurchaseDetailId = B.intLineNo
-				AND intPurchaseId = B.intSourceId
-				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
-
-	UPDATE	A
-	SET		intOrderStatusId =	CASE	WHEN (SELECT SUM(dblQtyReceived) - SUM(dblQtyOrdered) FROM tblPOPurchaseDetail WHERE intPurchaseId = B.intSourceId) >= 0 THEN 3 
-										ELSE 2 
-								END
-	FROM	tblPOPurchase A INNER JOIN #tmpReceivedPOItems B 
-				ON A.intPurchaseId = B.intSourceId
-
 
 	-- Update the On Order Qty
 	BEGIN 
@@ -140,11 +108,10 @@ BEGIN
 		-- Call the stored procedure that updates the on order qty. 
 		EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
 	END 
-
 	
 	UPDATE	A
-	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.dblOpenReceive) 
-									ELSE (	dblQtyReceived - B.dblOpenReceive) 
+	SET		dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (dblQtyReceived + B.CalculatedOpenReceive) 
+									ELSE (	dblQtyReceived - B.CalculatedOpenReceive) 
 							END
 	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
 				ON A.intItemId = B.intItemId 
@@ -156,7 +123,7 @@ BEGIN
 	BEGIN
 		SET @count = @count + 1;
 		SET @purchaseId = (SELECT TOP(@count) intSourceId FROM #tmpReceivedPOItems)
-		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
+		EXEC uspPOUpdateStatus @purchaseId
 	END
 
 END

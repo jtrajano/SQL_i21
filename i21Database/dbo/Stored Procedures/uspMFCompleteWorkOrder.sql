@@ -33,6 +33,7 @@ BEGIN TRY
 		,@intSubLocationId int
 		,@ysnNegativeQtyAllowed BIT
 		,@ysnSubLotAllowed Bit
+		,@strRetBatchId nvarchar(40)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -224,6 +225,7 @@ BEGIN TRY
 		,@intProduceUOMKey = @intProduceUnitMeasureId
 		,@intUserId = @intUserId
 		,@ysnNegativeQtyAllowed=@ysnNegativeQtyAllowed
+		,@strRetBatchId=@strRetBatchId Output
 
 	EXEC dbo.uspMFValidateCreateLot @strLotNumber = @strOutputLotNumber
 		,@dtmCreated = @dtmPlannedDate
@@ -243,8 +245,7 @@ BEGIN TRY
 		,@ysnCreateNewLot = 1
 		,@ysnFGProduction = 0
 		,@ysnIgnoreTolerance = 1
-
-
+		
 	EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
 		,@dblProduceQty = @dblProduceQty
 		,@intProduceUOMKey = @intProduceUnitMeasureId
@@ -257,8 +258,9 @@ BEGIN TRY
 		,@dblPhysicalCount = @dblPhysicalCount
 		,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 		,@intBatchId = @intBatchId
+		,@strBatchId=@strRetBatchId
 
-	Update dbo.tblICLot Set intLotStatusId =2 Where strLotNumber =@strOutputLotNumber
+	Update dbo.tblICLot Set intLotStatusId =(Select intLotStatusId from tblICLotStatus Where strSecondaryStatus='Quarantine')Where strLotNumber =@strOutputLotNumber
 		
 	Select @strOutputLotNumber as strOutputLotNumber
 

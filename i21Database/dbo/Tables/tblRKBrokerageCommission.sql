@@ -4,7 +4,7 @@
     [intBrokerageAccountId] INT NOT NULL, 
     [intConcurrencyId] INT NOT NULL, 
     [dtmEffectiveDate] DATETIME NOT NULL, 
-    [dtmEndDate] DATETIME NOT NULL, 
+    [dtmEndDate] DATETIME NULL, 
     [intFuturesRateType] INT NULL , 
     [dblFutCommission] NUMERIC(18, 6) NULL, 
     [intFutCurrencyId] INT NULL, 

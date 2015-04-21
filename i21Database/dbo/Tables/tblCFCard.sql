@@ -37,10 +37,12 @@
     [ysnCardForOwnUse]           BIT            NULL,
     [ysnIgnoreCardTransaction]   BIT            NULL,
     CONSTRAINT [PK_tblCFCard] PRIMARY KEY CLUSTERED ([intCardId] ASC),
-    CONSTRAINT [FK_tblCFCard_tblCFAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblCFAccount] ([intAccountId]),
+    CONSTRAINT [FK_tblCFCard_tblCFAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblCFAccount] ([intAccountId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblCFCard_tblCFCardType] FOREIGN KEY ([intCardTypeId]) REFERENCES [dbo].[tblCFCardType] ([intCardTypeId]),
     CONSTRAINT [FK_tblCFCard_tblCFDepartment] FOREIGN KEY ([intDepartmentId]) REFERENCES [dbo].[tblCFDepartment] ([intDepartmentId]),
     CONSTRAINT [FK_tblCFCard_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]),
     CONSTRAINT [FK_tblCFCard_tblCFVehicle] FOREIGN KEY ([intDefaultFixVehicleNumber]) REFERENCES [dbo].[tblCFVehicle] ([intVehicleId])
 );
+
+
 
