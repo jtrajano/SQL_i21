@@ -1417,6 +1417,9 @@
     <Build Include="dbo\Stored Procedures\uspCTDoAdjustment.sql" />
     <Build Include="dbo\Views\vyuCTContractAdjustment.sql" />
     <Build Include="dbo\Tables\cstGLAccount.sql" />
+    <Build Include="dbo\Tables\tblQMSampleTypeDetail.sql" />
+    <Build Include="dbo\Tables\tblQMSampleType.sql" />
+    <Build Include="dbo\Tables\tblQMControlPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
