@@ -61,6 +61,7 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
 
 
         item: {
+            autoLoad: true,
             type: 'icbuffereditemstockuomview'
         },
         lot: {
