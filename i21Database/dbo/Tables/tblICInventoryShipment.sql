@@ -132,17 +132,6 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intFreightTermId'
 	GO
-	
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Carrier Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryShipment',
-		@level2type = N'COLUMN',
-		@level2name = N'intCarrierId'
-	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Vessel/Vehicle',
 		@level0type = N'SCHEMA',
