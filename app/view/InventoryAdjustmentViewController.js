@@ -499,41 +499,131 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         return true;
     },
 
+    calculateLineTotal: function(quantity, cost, record){
+        var lineTotal = 0.00;
+
+        if (record){
+            // Get the new quantity.
+            quantity = Ext.isNumeric(quantity) ? quantity : record.get('dblNewQuantity');
+
+            // if new quantity is invalid, get the original qty.
+            quantity = Ext.isNumeric(quantity) ? quantity : record.get('dblQuantity');
+
+            // if original quantity is invalid, use zero.
+            quantity = Ext.isNumeric(quantity) ? quantity : 0.00;
+
+            // Get the new cost.
+            cost = Ext.isNumeric(cost) ? cost : record.get('dblNewCost');
+
+            // if new cost is invalid, use original cost.
+            cost = Ext.isNumeric(cost) ? cost : record.get('dblCost');
+
+            // if original cost is invalid, use zero.
+            cost = Ext.isNumeric(cost) ? cost : 0.00;
+
+            lineTotal = quantity * cost;
+
+            record.set('dblLineTotal', lineTotal);
+        }
+    },
+
+    calculateNewNetWeight: function(quantity, weight, record){
+        var newWeightPerQty = null;
+        var newQty
+            ,newWeight;
+
+        // Calculate a new Wgt per Qty if there is a valid new wgt.
+        if (record){
+
+            // Get the new values
+            newQty = Ext.isNumeric(quantity) ? quantity : record.get('dblNewQuantity');
+            newWeight = Ext.isNumeric(weight) ? weight : record.get('dblNewWeight');
+
+            // If new qty is intentionally set to null, use the original qty
+            if (quantity === false){
+                quantity = record.get('dblQuantity');
+                newQty = null;
+            }
+
+            // If new weight is intentionally set to null, use the original weight
+            if (weight === false){
+                weight = record.get('dblWeight');
+                newWeight = null;
+            }
+
+            // If new values are both null, set the weight per qty back to null
+            if (newQty === null && newWeight === null){
+                newWeightPerQty = null;
+            }
+            else {
+                // get the new Qty.
+                quantity = Ext.isNumeric(quantity) ? quantity : record.get('dblNewQuantity');
+
+                // If new Qty is invalid, use the original Qty
+                quantity = Ext.isNumeric(quantity) ? quantity : record.get('dblQuantity');
+
+                // If original qty is invalid, use zero
+                quantity = Ext.isNumeric(quantity) ? quantity : 0.00;
+
+                // get the new weight
+                weight = Ext.isNumeric(weight) ? weight : record.get('dblNewWeight');
+
+                // if new weight is invalid, use the original weight
+                weight = Ext.isNumeric(weight) ? weight : record.get('dblWeight');
+
+                if (Ext.isNumeric(weight) && quantity != 0){
+                    newWeightPerQty = weight / quantity;
+                }
+            }
+
+            record.set('dblNewWeightPerQty', newWeightPerQty);
+        }
+    },
+
     onNumNewQuantityChange: function(control, newQuantity, oldValue, eOpts ){
+        var me = this;
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        var lineTotal = 0.00;
-
         if (current){
-            newQuantity = Ext.isNumeric(newQuantity) ? newQuantity : 0.00;
-
-            var cost = current.get('dblNewCost');
-            cost = Ext.isNumeric(cost) ? cost : current.get('dblCost');
-            if (Ext.isNumeric(cost)){
-                lineTotal = newQuantity * cost;
-            }
+            me.calculateLineTotal(newQuantity === null ? 0.00 : newQuantity, null, current);
+            me.calculateNewNetWeight(newQuantity === null ? false : newQuantity, null, current);
         }
-
-        current.set('dblLineTotal', lineTotal);
     },
 
     onNumNewUnitCostChange: function(control, newCost, oldValue, eOpts ){
+        var me = this;
         var grid = control.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
-        var lineTotal = 0.00;
-
         if (current){
-            newCost = (newCost && newCost != 0) ? newCost : current.get('dblCost');
-
-            var quantity = current.get('dblNewQuantity');
-            if (Ext.isNumeric(quantity)){
-                lineTotal = quantity * newCost;
-            }
+            me.calculateLineTotal(null, newCost === null ? 0.00 : newCost, current);
         }
+    },
 
-        current.set('dblLineTotal', lineTotal);
+    onNumNewNetWeightChange: function(control, newNetWeight, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current) {
+            me.calculateNewNetWeight(null, (newNetWeight === null) ? false : newNetWeight, current);
+        }
+    },
+
+    /**
+     * Adds a renderer function to the "new" fields.
+     * It changes the text color to red so that we visually see the changes.
+     *
+     * @param column {Object}
+     */
+    onColumnBeforeRender: function(column){
+        "use strict";
+
+        column.renderer = function(value, metaData, record){
+            metaData.style = 'color: red';
+            return value;
+        };
     },
 
     init: function(application) {
@@ -580,7 +670,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#numNewUnitCost": {
                 change: this.onNumNewUnitCostChange
+            },
+            "#numNewNetWeight": {
+                change: this.onNumNewNetWeightChange
             }
+            //,
+            //"#colNewQuantity": {
+            //    beforerender: this.onColumnBeforeRender
+            //}
 
         });
     }

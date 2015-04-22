@@ -516,6 +516,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         width: 90,
                                                         align: 'right',
                                                         dataIndex: 'dblNewQuantity',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Quantity',
                                                         editor: {
                                                             xtype: 'numberfield',
@@ -588,7 +589,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'New Net Weight',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            itemId: 'numNewNetWeight'
+                                                            itemId: 'numNewNetWeight',
+                                                            fieldStyle: 'color:red;'
                                                         }
                                                     },
                                                     {

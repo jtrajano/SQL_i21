@@ -1087,6 +1087,7 @@
                                                 "dataType": "numeric",
                                                 "format": null,
                                                 "itemId": "colNewQuantity",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Quantity",
                                                 "width": 90
                                             },
@@ -1264,6 +1265,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "fieldStyle": "color:red;",
                                                         "itemId": "numNewNetWeight"
                                                     },
                                                     "name": "MyNumberField2",
