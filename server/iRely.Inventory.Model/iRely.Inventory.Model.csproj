@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Mappings\vyuICGetPostedLotMap.cs" />
     <Compile Include="Mappings\tblICInventoryTransferMap.cs" />
     <Compile Include="Mappings\tblICBuildAssemblyMap.cs" />
     <Compile Include="Mappings\tblICInventoryAdjustmentMap.cs" />
@@ -208,6 +209,7 @@
     <Compile Include="Tables\tblICTag.cs" />
     <Compile Include="Tables\tblICUnitMeasure.cs" />
     <Compile Include="Tables\tblICStorageUnitType.cs" />
+    <Compile Include="Views\vyuICGetPostedLot.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

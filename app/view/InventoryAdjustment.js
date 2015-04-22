@@ -520,7 +520,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'New Quantity',
                                                         format: '0,000.##',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            itemId: 'numNewQuantity'
                                                         }
                                                     },
                                                     {
@@ -661,18 +662,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         width: 95,
                                                         align: 'right',
                                                         dataIndex: 'dblCost',
-                                                        text: 'Unit Cost',
-                                                        format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colUnitCost1',
-                                                        width: 95,
-                                                        align: 'right',
-                                                        dataIndex: 'dblCost',
-                                                        text: 'Unit Cost',
-                                                        format: '0,000.##'
+                                                        text: 'Unit Cost'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -684,7 +674,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'New Unit Cost',
                                                         format: '0,000.##',
                                                         editor: {
-                                                            xtype: 'numberfield'
+                                                            xtype: 'numberfield',
+                                                            itemId: 'numNewUnitCost'
                                                         }
                                                     },
                                                     {
@@ -757,6 +748,13 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colLotStatus',
+                                                        width: 70,
+                                                        dataIndex: 'strLotStatus',
+                                                        text: 'Lot Status'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
                                                         itemId: 'colNewLotStatus',
                                                         width: 75,
                                                         dataIndex: 'strNewLotStatus',
@@ -795,11 +793,13 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         }
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
+                                                        xtype: 'numbercolumn',
                                                         itemId: 'colLineTotal',
                                                         width: 75,
+                                                        align: 'right',
                                                         dataIndex: 'dblLineTotal',
-                                                        text: 'Lot Status'
+                                                        text: 'Line Total',
+                                                        format: '0,000.##'
                                                     }
                                                 ],
                                                 plugins: [

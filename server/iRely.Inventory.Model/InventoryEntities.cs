@@ -21,15 +21,7 @@ namespace iRely.Inventory.Model
 
         }
 
-        // Uncomment this constructor when generating the EF views (pre-cached views) 
-        // If compiling for QC or Production, comment it. 
-        //public InventoryEntities()
-        //    : base("InventoryEntities")
-        //{
-        //    this.Configuration.ProxyCreationEnabled = false;
-        //}
-
-        // Comment this constructor when generating the EF views (pre-cached views)
+        // On this contructor function, comment the ": base(iRely.Common.Security.GetCompanyName())" when generating a new view. 
         // If compiling for QC or Production, uncomment it. 
         public InventoryEntities()
             : base(iRely.Common.Security.GetCompanyName())
@@ -110,7 +102,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICUnitMeasure> tblICUnitMeasures { get; set; }
         public DbSet<tblICUnitMeasureConversion> tblICUnitMeasureConversions { get; set; }
         public DbSet<tblICLot> tblICLots { get; set; }
-
+        
         public DbSet<tblICContainer> tblICContainers { get; set; }
         public DbSet<tblICContainerType> tblICContainerTypes { get; set; }
         public DbSet<tblICMeasurement> tblICMeasurements { get; set; }
@@ -173,8 +165,8 @@ namespace iRely.Inventory.Model
         public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
         public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
         public DbSet<vyuICGetStorageLocation> vyuICGetStorageLocations { get; set; }
-
-        
+        public DbSet<vyuICGetPostedLot> vyuICGetPostedLots { get; set; }
+                
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
             modelBuilder.Configurations.Add(new tblICBrandMap());
@@ -330,6 +322,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
+            modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());
         }
     }
 }

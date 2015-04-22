@@ -709,7 +709,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter13",
                                                     "designerId": "f7c10b11-c359-49ba-99e8-69e1af636272",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1107,6 +1107,9 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "numNewQuantity"
+                                                    },
                                                     "name": "MyNumberField49",
                                                     "designerId": "2da8fa68-258d-416d-b995-0f781b6c1398"
                                                 }
@@ -1411,39 +1414,12 @@
                                                 "align": "right",
                                                 "dataIndex": "dblCost",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
                                                 "itemId": "colUnitCost",
                                                 "text": "Unit Cost",
                                                 "width": 95
                                             },
                                             "name": "MyNumberColumn23",
                                             "designerId": "4b363813-e1fd-48ab-9d07-58a514efa807",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "dataIndex": "dblCost",
-                                                "dataType": "numeric",
-                                                "format": "0,000.##",
-                                                "itemId": "colUnitCost1",
-                                                "text": "Unit Cost",
-                                                "width": 95
-                                            },
-                                            "name": "MyNumberColumn1",
-                                            "designerId": "ceaf05a9-6267-4b54-aaf6-c577a8590d17",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1485,6 +1461,9 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "numNewUnitCost"
+                                                    },
                                                     "name": "MyNumberField",
                                                     "designerId": "5617e8c5-7df1-494b-938b-04dc55af1c25"
                                                 }
@@ -1635,6 +1614,22 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "dataIndex": "strLotStatus",
+                                                "itemId": "colLotStatus",
+                                                "text": "Lot Status",
+                                                "width": 70
+                                            },
+                                            "name": "MyColumn1",
+                                            "designerId": "ad7134ef-0037-47b1-bbff-bcf24c1545bd"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
                                                 "dataIndex": "strNewLotStatus",
                                                 "itemId": "colNewLotStatus",
                                                 "text": "New Lot Status",
@@ -1700,19 +1695,21 @@
                                             ]
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "align": "right",
                                                 "dataIndex": "dblLineTotal",
+                                                "format": "0,000.##",
                                                 "itemId": "colLineTotal",
-                                                "text": "Lot Status",
+                                                "text": "Line Total",
                                                 "width": 75
                                             },
-                                            "name": "MyColumn39",
+                                            "name": "MyNumberColumn1",
                                             "designerId": "d205b92e-42ee-4b14-9023-21e7dfdb2dce"
                                         },
                                         {
@@ -1864,7 +1861,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter14",
                                                     "designerId": "675f97e5-0409-46e6-8715-a4dc0129950a",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2049,7 +2046,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging12",
                     "designerId": "76244995-910a-41a2-86d9-d8e3a962e968",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

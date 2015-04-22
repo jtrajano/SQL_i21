@@ -10,6 +10,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         'Inventory.store.BufferedItemStockView',
         'Inventory.store.BufferedStorageLocation',
         'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedPostedLot',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedItemWeightUOM',
         'Inventory.store.BufferedLotStatus'
@@ -62,7 +63,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
             type: 'icbufferedstoragelocation'
         },
         lot: {
-            type: 'icbufferedlot'
+            type: 'icbufferedpostedlot'
         },
         newLot: {
             type: 'icbufferedlot'

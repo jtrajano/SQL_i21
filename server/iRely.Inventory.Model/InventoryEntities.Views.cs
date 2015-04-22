@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets72c6bf2e461ae0f27b658c10b3cf574dbabf416f8d7b92bb197d0a7064193a3b))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa99566c59f6c2e804ad5de20494309a4ca23b51ac58bf70e51ad8e4daf2248db))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets72c6bf2e461ae0f27b658c10b3cf574dbabf416f8d7b92bb197d0a7064193a3b : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsa99566c59f6c2e804ad5de20494309a4ca23b51ac58bf70e51ad8e4daf2248db : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "72c6bf2e461ae0f27b658c10b3cf574dbabf416f8d7b92bb197d0a7064193a3b"; }
+            get { return "a99566c59f6c2e804ad5de20494309a4ca23b51ac58bf70e51ad8e4daf2248db"; }
         }
 
         /// <summary>
@@ -1272,24 +1272,34 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView244();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetStorageLocation")
+            if (extentName == "CodeFirstDatabase.vyuICGetPostedLot")
             {
                 return GetView245();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetStorageLocations")
+            if (extentName == "InventoryEntities.vyuICGetPostedLots")
             {
                 return GetView246();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuSMGetLocationPricingLevel")
+            if (extentName == "CodeFirstDatabase.vyuICGetStorageLocation")
             {
                 return GetView247();
             }
 
-            if (extentName == "InventoryEntities.vyuSMGetLocationPricingLevels")
+            if (extentName == "InventoryEntities.vyuICGetStorageLocations")
             {
                 return GetView248();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuSMGetLocationPricingLevel")
+            {
+                return GetView249();
+            }
+
+            if (extentName == "InventoryEntities.vyuSMGetLocationPricingLevels")
+            {
+                return GetView250();
             }
 
             return null;
@@ -1665,7 +1675,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransfer
-        [CodeFirstDatabaseSchema.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intCarrierId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferId AS tblICInventoryTransfer_intInventoryTransferId, 
@@ -1677,7 +1687,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intFromLocationId AS tblICInventoryTransfer_intFromLocationId, 
             T.intToLocationId AS tblICInventoryTransfer_intToLocationId, 
             T.ysnShipmentRequired AS tblICInventoryTransfer_ysnShipmentRequired, 
-            T.intCarrierId AS tblICInventoryTransfer_intCarrierId, 
+            T.intShipViaId AS tblICInventoryTransfer_intShipViaId, 
             T.intFreightUOMId AS tblICInventoryTransfer_intFreightUOMId, 
             T.intAccountCategoryId AS tblICInventoryTransfer_intAccountCategoryId, 
             T.intAccountId AS tblICInventoryTransfer_intAccountId, 
@@ -4475,7 +4485,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransfers
-        [iRely.Inventory.Model.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intCarrierId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferId AS tblICInventoryTransfer_intInventoryTransferId, 
@@ -4487,7 +4497,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intFromLocationId AS tblICInventoryTransfer_intFromLocationId, 
             T.intToLocationId AS tblICInventoryTransfer_intToLocationId, 
             T.ysnShipmentRequired AS tblICInventoryTransfer_ysnShipmentRequired, 
-            T.intCarrierId AS tblICInventoryTransfer_intCarrierId, 
+            T.intShipViaId AS tblICInventoryTransfer_intShipViaId, 
             T.intFreightUOMId AS tblICInventoryTransfer_intFreightUOMId, 
             T.intAccountCategoryId AS tblICInventoryTransfer_intAccountCategoryId, 
             T.intAccountId AS tblICInventoryTransfer_intAccountId, 
@@ -8286,10 +8296,92 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.vyuICGetStorageLocation.
+        /// Gets the view for CodeFirstDatabase.vyuICGetPostedLot.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView245()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetPostedLot
+        [CodeFirstDatabaseSchema.vyuICGetPostedLot](T1.vyuICGetPostedLot_intLotId, T1.vyuICGetPostedLot_strLotNumber, T1.vyuICGetPostedLot_strLotAlias, T1.vyuICGetPostedLot_intItemId, T1.vyuICGetPostedLot_strItemNo, T1.vyuICGetPostedLot_strDescription, T1.vyuICGetPostedLot_intLocationId, T1.vyuICGetPostedLot_strLocationName, T1.vyuICGetPostedLot_intItemLocationId, T1.vyuICGetPostedLot_intSubLocationId, T1.vyuICGetPostedLot_strSubLocationName, T1.vyuICGetPostedLot_intStorageLocationId, T1.vyuICGetPostedLot_strStorageLocationName, T1.vyuICGetPostedLot_intItemUOMId, T1.vyuICGetPostedLot_strItemUOM, T1.vyuICGetPostedLot_intWeightUOMId, T1.vyuICGetPostedLot_strWeightUOM, T1.vyuICGetPostedLot_dblQty, T1.vyuICGetPostedLot_dblWeight, T1.vyuICGetPostedLot_dblWeightPerQty, T1.vyuICGetPostedLot_dblCost, T1.vyuICGetPostedLot_dtmExpiryDate, T1.vyuICGetPostedLot_intLotStatusId, T1.vyuICGetPostedLot_strLotStatus, T1.vyuICGetPostedLot_strLotPrimaryStatus)
+    FROM (
+        SELECT 
+            T.intLotId AS vyuICGetPostedLot_intLotId, 
+            T.strLotNumber AS vyuICGetPostedLot_strLotNumber, 
+            T.strLotAlias AS vyuICGetPostedLot_strLotAlias, 
+            T.intItemId AS vyuICGetPostedLot_intItemId, 
+            T.strItemNo AS vyuICGetPostedLot_strItemNo, 
+            T.strDescription AS vyuICGetPostedLot_strDescription, 
+            T.intLocationId AS vyuICGetPostedLot_intLocationId, 
+            T.strLocationName AS vyuICGetPostedLot_strLocationName, 
+            T.intItemLocationId AS vyuICGetPostedLot_intItemLocationId, 
+            T.intSubLocationId AS vyuICGetPostedLot_intSubLocationId, 
+            T.strSubLocationName AS vyuICGetPostedLot_strSubLocationName, 
+            T.intStorageLocationId AS vyuICGetPostedLot_intStorageLocationId, 
+            T.strStorageLocationName AS vyuICGetPostedLot_strStorageLocationName, 
+            T.intItemUOMId AS vyuICGetPostedLot_intItemUOMId, 
+            T.strItemUOM AS vyuICGetPostedLot_strItemUOM, 
+            T.intWeightUOMId AS vyuICGetPostedLot_intWeightUOMId, 
+            T.strWeightUOM AS vyuICGetPostedLot_strWeightUOM, 
+            T.dblQty AS vyuICGetPostedLot_dblQty, 
+            T.dblWeight AS vyuICGetPostedLot_dblWeight, 
+            T.dblWeightPerQty AS vyuICGetPostedLot_dblWeightPerQty, 
+            T.dblCost AS vyuICGetPostedLot_dblCost, 
+            T.dtmExpiryDate AS vyuICGetPostedLot_dtmExpiryDate, 
+            T.intLotStatusId AS vyuICGetPostedLot_intLotStatusId, 
+            T.strLotStatus AS vyuICGetPostedLot_strLotStatus, 
+            T.strLotPrimaryStatus AS vyuICGetPostedLot_strLotPrimaryStatus, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetPostedLots AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetPostedLots.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView246()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetPostedLots
+        [iRely.Inventory.Model.vyuICGetPostedLot](T1.vyuICGetPostedLot_intLotId, T1.vyuICGetPostedLot_strLotNumber, T1.vyuICGetPostedLot_strLotAlias, T1.vyuICGetPostedLot_intItemId, T1.vyuICGetPostedLot_strItemNo, T1.vyuICGetPostedLot_strDescription, T1.vyuICGetPostedLot_intLocationId, T1.vyuICGetPostedLot_strLocationName, T1.vyuICGetPostedLot_intItemLocationId, T1.vyuICGetPostedLot_intSubLocationId, T1.vyuICGetPostedLot_strSubLocationName, T1.vyuICGetPostedLot_intStorageLocationId, T1.vyuICGetPostedLot_strStorageLocationName, T1.vyuICGetPostedLot_intItemUOMId, T1.vyuICGetPostedLot_strItemUOM, T1.vyuICGetPostedLot_intWeightUOMId, T1.vyuICGetPostedLot_strWeightUOM, T1.vyuICGetPostedLot_dblQty, T1.vyuICGetPostedLot_dblWeight, T1.vyuICGetPostedLot_dblWeightPerQty, T1.vyuICGetPostedLot_dblCost, T1.vyuICGetPostedLot_dtmExpiryDate, T1.vyuICGetPostedLot_intLotStatusId, T1.vyuICGetPostedLot_strLotStatus, T1.vyuICGetPostedLot_strLotPrimaryStatus)
+    FROM (
+        SELECT 
+            T.intLotId AS vyuICGetPostedLot_intLotId, 
+            T.strLotNumber AS vyuICGetPostedLot_strLotNumber, 
+            T.strLotAlias AS vyuICGetPostedLot_strLotAlias, 
+            T.intItemId AS vyuICGetPostedLot_intItemId, 
+            T.strItemNo AS vyuICGetPostedLot_strItemNo, 
+            T.strDescription AS vyuICGetPostedLot_strDescription, 
+            T.intLocationId AS vyuICGetPostedLot_intLocationId, 
+            T.strLocationName AS vyuICGetPostedLot_strLocationName, 
+            T.intItemLocationId AS vyuICGetPostedLot_intItemLocationId, 
+            T.intSubLocationId AS vyuICGetPostedLot_intSubLocationId, 
+            T.strSubLocationName AS vyuICGetPostedLot_strSubLocationName, 
+            T.intStorageLocationId AS vyuICGetPostedLot_intStorageLocationId, 
+            T.strStorageLocationName AS vyuICGetPostedLot_strStorageLocationName, 
+            T.intItemUOMId AS vyuICGetPostedLot_intItemUOMId, 
+            T.strItemUOM AS vyuICGetPostedLot_strItemUOM, 
+            T.intWeightUOMId AS vyuICGetPostedLot_intWeightUOMId, 
+            T.strWeightUOM AS vyuICGetPostedLot_strWeightUOM, 
+            T.dblQty AS vyuICGetPostedLot_dblQty, 
+            T.dblWeight AS vyuICGetPostedLot_dblWeight, 
+            T.dblWeightPerQty AS vyuICGetPostedLot_dblWeightPerQty, 
+            T.dblCost AS vyuICGetPostedLot_dblCost, 
+            T.dtmExpiryDate AS vyuICGetPostedLot_dtmExpiryDate, 
+            T.intLotStatusId AS vyuICGetPostedLot_intLotStatusId, 
+            T.strLotStatus AS vyuICGetPostedLot_strLotStatus, 
+            T.strLotPrimaryStatus AS vyuICGetPostedLot_strLotPrimaryStatus, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetPostedLot AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetStorageLocation.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView247()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageLocation
@@ -8338,7 +8430,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetStorageLocations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView246()
+        private static DbMappingView GetView248()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageLocations
@@ -8387,7 +8479,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuSMGetLocationPricingLevel.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView247()
+        private static DbMappingView GetView249()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuSMGetLocationPricingLevel
@@ -8406,7 +8498,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuSMGetLocationPricingLevels.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView248()
+        private static DbMappingView GetView250()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuSMGetLocationPricingLevels

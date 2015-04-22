@@ -81,11 +81,28 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     dataIndex: 'strLotNumber',
                     editor: {
                         store: '{lot}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryAdjustment.selection.intItemId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryAdjustment.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryAdjustment.selection.intSubLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intStorageLocationId',
+                                value: '{grdInventoryAdjustment.selection.intStorageLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
 
@@ -260,6 +277,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if (records.length <= 0)
             return;
 
+        var record = records[0];
+
         var win = combo.up('window');
         var me = win.controller;
         var grid = combo.up('grid');
@@ -269,80 +288,74 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if (combo.itemId === 'cboItemNo')
         {
             // Populate the default data.
-            current.set('intItemId', records[0].get('intItemId'));
-            current.set('strItemDescription', records[0].get('strDescription'));
+            current.set('intItemId', record.get('intItemId'));
+            current.set('strItemDescription', record.get('strDescription'));
 
             // Clear the values for the following fields:
             current.set('strSubLocation', null);
             current.set('strStorageLocation', null);
-
             current.set('intLotId', null);
             current.set('strLotNumber', null);
             current.set('intNewLotId', null);
             current.set('strNewLotNumber', null);
-
             current.set('dblQuantity', null);
             current.set('dblNewQuantity', null);
-
+            current.set('dblCost', null);
+            current.set('dblNewCost', null);
             current.set('intItemUOMId', null);
             current.set('strItemUOM', null);
             current.set('intNewItemUOMId', null);
             current.set('strNewItemUOM', null);
-
             current.set('dblWeight', null);
             current.set('dblNewWeight', null);
-
             current.set('intWeightUOMId', null);
             current.set('strWeightUOM', null);
             current.set('intNewWeightUOMId', null);
             current.set('strNewWeightUOM', null);
-
             current.set('dblWeightPerQty', null);
             current.set('dblNewWeightPerQty', null);
+            current.set('dblLineTotal', 0.00);
         }
         else if (combo.itemId === 'cboNewItemNo')
         {
-            current.set('intNewItemId', records[0].get('intItemId'));
-            current.set('strNewItemDescription', records[0].get('strDescription'));
+            current.set('intNewItemId', record.get('intItemId'));
+            current.set('strNewItemDescription', record.get('strDescription'));
         }
         else if (combo.itemId === 'cboSubLocation')
         {
-            current.set('intSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
+            current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
         }
         else if (combo.itemId === 'cboStorageLocation')
         {
-            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('intStorageLocationId', record.get('intStorageLocationId'));
         }
         else if (combo.itemId === 'cboLotNumber')
         {
-            current.set('intLotId', records[0].get('intLotId'));
-            current.set('dblQuantity', records[0].get('dblQty'));
-            current.set('dblCost', records[0].get('dblLastCost'));
-            current.set('dblWeightPerQty', records[0].get('dblWeightPerQty'));
-
-            current.set('intItemUOMId', records[0].get('intItemUOMId'));
-            current.set('strItemUOM', records[0].get('strItemUOM'));
-
-            current.set('strWeightUOM', records[0].get('strWeightUOM'));
-            current.set('intWeightUOMId', records[0].get('intWeightUOMId'));
-
-            current.set('strLotStatus', records[0].get('strLotStatus'));
-            current.set('intLotStatusId', records[0].get('intLotStatusId'));
-
-            current.set('dtmExpiryDate', records[0].get('dtmExpiryDate'));
-            current.set('dblWeight', records[0].get('dblWeight'));
+            current.set('intLotId', record.get('intLotId'));
+            current.set('dblQuantity', record.get('dblQty'));
+            current.set('dblWeight', record.get('dblWeight'));
+            current.set('dblCost', record.get('dblCost'));
+            current.set('dblWeightPerQty', record.get('dblWeightPerQty'));
+            current.set('intItemUOMId', record.get('intItemUOMId'));
+            current.set('strItemUOM', record.get('strItemUOM'));
+            current.set('strWeightUOM', record.get('strWeightUOM'));
+            current.set('intWeightUOMId', record.get('intWeightUOMId'));
+            current.set('strLotStatus', record.get('strLotStatus'));
+            current.set('intLotStatusId', record.get('intLotStatusId'));
+            current.set('dtmExpiryDate', record.get('dtmExpiryDate'));
+            current.set('dblLineTotal', 0.00);
         }
         else if (combo.itemId === 'cboNewUOM')
         {
-            current.set('intNewItemUOMId', records[0].get('intItemUOMId'));
+            current.set('intNewItemUOMId', record.get('intItemUOMId'));
         }
         else if (combo.itemId === 'cboNewWeightUOM')
         {
-            current.set('intNewWeightUOMId', records[0].get('intItemUOMId'));
+            current.set('intNewWeightUOMId', record.get('intItemUOMId'));
         }
         else if (combo.itemId === 'cboNewStatus')
         {
-            current.set('intNewLotStatusId', records[0].get('intLotStatusId'));
+            current.set('intNewLotStatusId', record.get('intLotStatusId'));
         }
     },
 
@@ -486,6 +499,43 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         return true;
     },
 
+    onNumNewQuantityChange: function(control, newQuantity, oldValue, eOpts ){
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        var lineTotal = 0.00;
+
+        if (current){
+            newQuantity = Ext.isNumeric(newQuantity) ? newQuantity : 0.00;
+
+            var cost = current.get('dblNewCost');
+            cost = Ext.isNumeric(cost) ? cost : current.get('dblCost');
+            if (Ext.isNumeric(cost)){
+                lineTotal = newQuantity * cost;
+            }
+        }
+
+        current.set('dblLineTotal', lineTotal);
+    },
+
+    onNumNewUnitCostChange: function(control, newCost, oldValue, eOpts ){
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        var lineTotal = 0.00;
+
+        if (current){
+            newCost = (newCost && newCost != 0) ? newCost : current.get('dblCost');
+
+            var quantity = current.get('dblNewQuantity');
+            if (Ext.isNumeric(quantity)){
+                lineTotal = quantity * newCost;
+            }
+        }
+
+        current.set('dblLineTotal', lineTotal);
+    },
+
     init: function(application) {
         this.control({
             "#cboItemNo": {
@@ -524,7 +574,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             "#cboAdjustmentType": {
                 change: this.onAdjustmentTypeChange,
                 beforeselect: this.onAdjustmentTypeBeforeSelect
+            },
+            "#numNewQuantity": {
+                change: this.onNumNewQuantityChange
+            },
+            "#numNewUnitCost": {
+                change: this.onNumNewUnitCostChange
             }
+
         });
     }
 });
