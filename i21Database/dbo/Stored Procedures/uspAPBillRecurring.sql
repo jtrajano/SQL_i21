@@ -58,7 +58,7 @@ BEGIN
 		[intUserId],
 		[intConcurrencyId],
 		[dtmBillDate],
-		[intVendorId],
+		[intEntityVendorId],
 		[dblWithheld],
 		[dblDiscount],
 		[dblBillTax],
@@ -92,7 +92,7 @@ BEGIN
 		[intUserId],
 		[intConcurrencyId],
 		GETDATE(),
-		[intVendorId],
+		[intEntityVendorId],
 		[dblWithheld],
 		[dblDiscount],
 		[dblBillTax],
@@ -113,7 +113,7 @@ BEGIN
 
 	INSERT INTO tblAPBillDetail(
 		[intBillId],
-		[strDescription],
+		[strMiscDescription],
 		[strComment], 
 		[intAccountId],
 		[dblTotal],
@@ -133,7 +133,7 @@ BEGIN
 	)
 	SELECT
 		@generatedBillId,
-		[strDescription],
+		[strMiscDescription],
 		[strComment], 
 		[intAccountId],
 		[dblTotal],
