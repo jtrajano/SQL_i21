@@ -507,8 +507,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         width: 65,
                                                         align: 'right',
                                                         dataIndex: 'dblQuantity',
-                                                        text: 'Quantity',
-                                                        format: '0,000.##'
+                                                        text: 'Quantity'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -518,7 +517,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         align: 'right',
                                                         dataIndex: 'dblNewQuantity',
                                                         text: 'New Quantity',
-                                                        format: '0,000.##',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             itemId: 'numNewQuantity'
@@ -578,8 +576,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         width: 90,
                                                         align: 'right',
                                                         dataIndex: 'dblWeight',
-                                                        text: 'Net Weight',
-                                                        format: '0,000.##'
+                                                        text: 'Net Weight'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -589,7 +586,10 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         align: 'right',
                                                         dataIndex: 'dblNewWeight',
                                                         text: 'New Net Weight',
-                                                        format: '0,000.##'
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            itemId: 'numNewNetWeight'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -601,7 +601,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewWeightUOM',
-                                                        width: 70,
+                                                        width: 100,
                                                         dataIndex: 'strNewWeightUOM',
                                                         text: 'New Wgt UOM',
                                                         editor: {
@@ -639,21 +639,16 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         width: 110,
                                                         align: 'right',
                                                         dataIndex: 'dblWeightPerQty',
-                                                        text: 'Weight Per Qty',
-                                                        format: '0,000.##'
+                                                        text: 'Weight Per Qty'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
+                                                        dataIndex: 'dblNewWeightPerQty',
                                                         itemId: 'colNewWeightPerQty',
                                                         width: 110,
                                                         align: 'right',
-                                                        dataIndex: 'dblNewWeightPerQty',
-                                                        text: 'New Wgt Per Qty',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        text: 'New Wgt Per Qty'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -672,7 +667,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         align: 'right',
                                                         dataIndex: 'dblNewCost',
                                                         text: 'New Unit Cost',
-                                                        format: '0,000.##',
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             itemId: 'numNewUnitCost'
@@ -798,8 +792,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         width: 75,
                                                         align: 'right',
                                                         dataIndex: 'dblLineTotal',
-                                                        text: 'Line Total',
-                                                        format: '0,000.##'
+                                                        text: 'Line Total'
                                                     }
                                                 ],
                                                 plugins: [

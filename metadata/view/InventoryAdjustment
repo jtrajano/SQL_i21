@@ -1059,7 +1059,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblQuantity",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colQuantity",
                                                 "text": "Quantity",
                                                 "width": 65
@@ -1085,7 +1085,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblNewQuantity",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colNewQuantity",
                                                 "text": "New Quantity",
                                                 "width": 90
@@ -1215,7 +1215,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblWeight",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colNetWeight",
                                                 "text": "Net Weight",
                                                 "width": 90
@@ -1241,7 +1241,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblNewWeight",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colNewNetWeight",
                                                 "text": "New Net Weight",
                                                 "width": 110
@@ -1253,6 +1253,21 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "numNewNetWeight"
+                                                    },
+                                                    "name": "MyNumberField2",
+                                                    "designerId": "3fbdcd0c-330a-4637-8057-bc639d95e4c5"
                                                 }
                                             ]
                                         },
@@ -1283,7 +1298,7 @@
                                                 "dataIndex": "strNewWeightUOM",
                                                 "itemId": "colNewWeightUOM",
                                                 "text": "New Wgt UOM",
-                                                "width": 70
+                                                "width": 100
                                             },
                                             "name": "MyColumn",
                                             "designerId": "fc5f8992-ab0e-4949-9656-caa11c551bf4",
@@ -1350,7 +1365,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblWeightPerQty",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colWeightPerQty",
                                                 "text": "Weight Per Qty",
                                                 "width": 110
@@ -1376,7 +1391,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblNewWeightPerQty",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colNewWeightPerQty",
                                                 "text": "New Wgt Per Qty",
                                                 "width": 110
@@ -1388,18 +1403,6 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
-                                                }
-                                            ],
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyNumberField1",
-                                                    "designerId": "5a0cb34c-48b6-440e-8589-3685007c0479"
                                                 }
                                             ]
                                         },
@@ -1439,7 +1442,7 @@
                                                 "align": "right",
                                                 "dataIndex": "dblNewCost",
                                                 "dataType": "numeric",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colNewUnitCost",
                                                 "text": "New Unit Cost",
                                                 "width": 95
@@ -1704,7 +1707,7 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "dataIndex": "dblLineTotal",
-                                                "format": "0,000.##",
+                                                "format": null,
                                                 "itemId": "colLineTotal",
                                                 "text": "Line Total",
                                                 "width": 75
