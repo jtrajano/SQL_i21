@@ -158,7 +158,7 @@ BEGIN
                                 )                                
 				SELECT @intCashAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''NRCashAccount''
 				
-				SET @intPaymentMethodId = (Select top 1 intPaymentMethodID From dbo.tblSMPaymentMethod Order By 1 DESC) 
+				SET @intPaymentMethodId = CAST(@strPayType As Int) -- (Select top 1 intPaymentMethodID From dbo.tblSMPaymentMethod Order By 1 DESC) 
 				--******  To be changed when real payment method added  CAST(@strPayType As Int)
 				SET @intLocationId = CAST(@strInvoiceLocation As Int)
 								

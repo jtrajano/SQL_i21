@@ -1420,6 +1420,9 @@
     <Build Include="dbo\Tables\tblQMSampleTypeDetail.sql" />
     <Build Include="dbo\Tables\tblQMSampleType.sql" />
     <Build Include="dbo\Tables\tblQMControlPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRGetPaymentType.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
