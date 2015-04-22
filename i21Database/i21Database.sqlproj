@@ -1481,6 +1481,13 @@
     <Build Include="dbo\Functions\uspICDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostBuildAssembly.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPVoidPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDuplicateRecord.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntriesFromTransaction.sql" />
+    <Build Include="dbo\Functions\fnAPReverseGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreateBillGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

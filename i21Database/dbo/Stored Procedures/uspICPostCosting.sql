@@ -381,7 +381,7 @@ BEGIN
 				,intItemLocationId
 				,dblAverageCost 
 				,dblLastCost 
-				,dblStandardCost
+				,dblStandardCostba
 				,intConcurrencyId
 			)
 			VALUES (
