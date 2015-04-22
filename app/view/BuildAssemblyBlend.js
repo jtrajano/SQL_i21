@@ -332,7 +332,8 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                     itemId: 'txtBuildQuantity',
                                     fieldLabel: 'Build Quantity',
                                     labelWidth: 85,
-                                    hideTrigger: true
+                                    hideTrigger: true,
+                                    minValue: 0
                                 },
                                 {
                                     xtype: 'gridcombobox',
@@ -394,6 +395,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                     itemId: 'txtCost',
                                     fieldLabel: 'Cost',
                                     labelWidth: 50,
+                                    readOnly: true,
                                     hideTrigger: true
                                 }
                             ]
