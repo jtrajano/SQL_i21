@@ -1423,6 +1423,8 @@
     <Build Include="dbo\Stored Procedures\uspNRGetPaymentType.sql" />
     <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalList.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalListUserSecurity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
