@@ -13,28 +13,28 @@ Type the overview for the table here.
 	CREATE TABLE [dbo].[tblICInventoryShipment]
 	(
 		[intInventoryShipmentId] INT NOT NULL IDENTITY, 
-		[strBOLNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[strShipmentNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[dtmShipDate] DATETIME NOT NULL DEFAULT (getdate()), 
 		[intOrderType] INT NOT NULL, 
 		[strReferenceNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmRequestedArrivalDate] DATETIME NULL, 
 		[intShipFromLocationId] INT NOT NULL, 
+		[intEntityCustomerId] INT NULL, 
 		[intShipToLocationId] INT NOT NULL, 
-		[intCustomerId] INT NULL, 
 		[intFreightTermId] INT NOT NULL, 
-		[ysnDirectShipment] BIT NULL DEFAULT ((0)), 
-		[intCarrierId] INT NULL, 
+		[strBOLNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[intShipViaId] INT NULL, 
 		[strVessel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strProNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strDriverId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strSealNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strDeliveryInstruction] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmAppointmentTime] DATETIME NULL, 
 		[dtmDepartureTime] DATETIME NULL, 
 		[dtmArrivalTime] DATETIME NULL, 
 		[dtmDeliveredDate] DATETIME NULL, 
 		[dtmFreeTime] DATETIME NULL, 
 		[strReceivedBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strDeliveryInstruction] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnPosted] BIT DEFAULT((0)),
 		[intEntityId] INT NULL,
@@ -44,7 +44,8 @@ Type the overview for the table here.
 		CONSTRAINT [AK_tblICInventoryShipment_strBOLNumber] UNIQUE ([strBOLNumber]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblSMCompanyLocation] FOREIGN KEY ([intShipFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]), 
-		CONSTRAINT [FK_tblICInventoryShipment_tblSMShipVia] FOREIGN KEY ([intCarrierId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
+		CONSTRAINT [FK_tblICInventoryShipment_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
+    CONSTRAINT [FK_tblICInventoryShipment_ShipFromLocation] FOREIGN KEY ([intShipFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 
 	)
 
 	GO
@@ -112,13 +113,13 @@ Type the overview for the table here.
 		@level2name = N'intShipFromLocationId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Customer Id',
+		@value = N'Entity Customer Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICInventoryShipment',
 		@level2type = N'COLUMN',
-		@level2name = N'intCustomerId'
+		@level2name = 'intEntityCustomerId'
 	GO
 
 	GO
@@ -131,14 +132,7 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intFreightTermId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Direct Shipment',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryShipment',
-		@level2type = N'COLUMN',
-		@level2name = N'ysnDirectShipment'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Carrier Id',
@@ -256,3 +250,66 @@ Type the overview for the table here.
 		@level1name = N'tblICInventoryShipment',
 		@level2type = N'COLUMN',
 		@level2name = N'intShipToLocationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Shipment Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipment',
+    @level2type = N'COLUMN',
+    @level2name = N'strShipmentNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Ship Via Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipment',
+    @level2type = N'COLUMN',
+    @level2name = N'intShipViaId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Delivery Instruction',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipment',
+    @level2type = N'COLUMN',
+    @level2name = N'strDeliveryInstruction'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Comments',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipment',
+    @level2type = N'COLUMN',
+    @level2name = N'strComment'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Posted',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipment',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPosted'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Entity Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipment',
+    @level2type = N'COLUMN',
+    @level2name = N'intEntityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Created User Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipment',
+    @level2type = N'COLUMN',
+    @level2name = N'intCreatedUserId'
