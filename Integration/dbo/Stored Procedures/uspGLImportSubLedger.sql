@@ -338,7 +338,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 						  ,[strDebitCredit]
 						  ,[decAmount]
 						  ,[decUnits]
-						  ,[strJournalId],
+						  ,[strJournalId]
 						  ,[blnCorrection])
 						SELECT @importLogId,
 							@glije_error_desc,
@@ -357,7 +357,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 							glije_dr_cr_ind,
 							glije_amt,
 							glije_units,
-							strJournalId,
+							@strJournalId,
 							CASE WHEN UPPER(RTRIM(glije_correcting)) = ''Y'' THEN 1 ELSE 0 END
 							FROM tblGLIjemst 
     						WHERE glije_id = @id
