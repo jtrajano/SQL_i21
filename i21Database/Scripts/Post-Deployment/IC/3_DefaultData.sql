@@ -54,3 +54,12 @@ BEGIN
 	WHERE ISNULL(dblUnitRetail, 0) = 0
 	')
 END
+
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICItem') AND name = 'strType')
+BEGIN
+	EXEC ('
+	UPDATE tblICItem
+	SET strType = ''Finished Goods''
+	WHERE strType = ''Manufacturing''
+	')
+END
