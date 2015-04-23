@@ -89,10 +89,6 @@ BEGIN
 			LEFT JOIN tblAPBill B	
 				ON A.intBillBatchId = B.intBillBatchId
 	WHERE A.intBillBatchId = @billBatchId
-
-	SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
-	FROM #tmpPostBillData
-	ORDER BY intBillId
 END
 	
 IF(@beginDate IS NOT NULL)
@@ -117,6 +113,11 @@ BEGIN
 	FROM #tmpPostBillData A
 	WHERE EXISTS(SELECT * FROM #tmpBillsExclude B WHERE A.intBillId = B.intID)
 END
+
+--SET THE UPDATED @billIds
+SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
+FROM #tmpPostBillData
+ORDER BY intBillId
 
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
@@ -162,26 +163,21 @@ BEGIN
 	BEGIN TRANSACTION
 END
 
-
 --CREATE TEMP GL ENTRIES
 SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
 
 IF ISNULL(@post,0) = 1
-	BEGIN
-		
-		INSERT INTO @GLEntries
-		SELECT * FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
-
-	END
-	ELSE
-	BEGIN
-
-		INSERT INTO @GLEntries
-		SELECT * FROM dbo.fnAPReverseGLEntries(@validBillIds, 'Bill', DEFAULT, @userId, @batchId)
-
-	END
+BEGIN
+	INSERT INTO @GLEntries
+	SELECT * FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId)
+END
+ELSE
+BEGIN
+	INSERT INTO @GLEntries
+	SELECT * FROM dbo.fnAPReverseGLEntries(@validBillIds, 'Bill', DEFAULT, @userId, @batchId)
+END
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------
