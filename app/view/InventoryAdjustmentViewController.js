@@ -31,6 +31,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 hidden: '{!current.ysnPosted}'
             },
 
+            btnSave: {
+                disabled: '{current.ysnPosted}'
+            },
+
+            btnDelete: {
+                disabled: '{current.ysnPosted}'
+            },
+
+            btnUndo: {
+                disabled: '{current.ysnPosted}'
+            },
+
             cboLocation: {
                 value: '{current.intLocationId}',
                 store: '{location}',
@@ -242,8 +254,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
 
             grdNotes: {
-                colNoteDescription: 'strDescription',
-                colNotes: 'strNotes'
+                colNoteDescription: {
+                    dataIndex: 'strDescription',
+                    readOnly: '{current.ysnPosted}'
+                },
+                colNotes: {
+                    dataIndex: 'strNotes',
+                    readOnly: '{current.ysnPosted}'
+                }
             }
         }
     },
