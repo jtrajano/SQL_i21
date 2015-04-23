@@ -470,8 +470,8 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldLabel": "BOL No",
-                                                        "itemId": "txtBOLNumber",
+                                                        "fieldLabel": "Shipment No",
+                                                        "itemId": "txtShipmentNo",
                                                         "labelAlign": "top",
                                                         "labelWidth": 110,
                                                         "layout|flex": 1,
@@ -1039,6 +1039,26 @@
                                                     "designerId": "9d0b6e29-27ba-4cc3-8856-78a2d657181b",
                                                     "cn": [
                                                         {
+                                                            "type": "Ext.form.field.Text",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "fieldLabel": "BOL No",
+                                                                "itemId": "txtBOLNo",
+                                                                "labelWidth": 110,
+                                                                "layout|flex": null,
+                                                                "layout|margins": null,
+                                                                "name": null,
+                                                                "readOnly": null,
+                                                                "width": null
+                                                            },
+                                                            "name": "MyTextField7",
+                                                            "designerId": "8f5cfd46-5585-4663-87a1-b338cafb2c03"
+                                                        },
+                                                        {
                                                             "type": "Ext.form.field.ComboBox",
                                                             "reference": {
                                                                 "name": "items",
@@ -1071,9 +1091,9 @@
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
                                                                 "displayField": "strShipVia",
-                                                                "fieldLabel": "Carrier",
+                                                                "fieldLabel": "Ship Via",
                                                                 "hideTrigger": null,
-                                                                "itemId": "cboCarrier",
+                                                                "itemId": "cboShipVia",
                                                                 "labelWidth": 110,
                                                                 "layout|flex": null,
                                                                 "layout|margins": null,
@@ -1513,7 +1533,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter19",
+                                                                    "name": "filter128",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2082,7 +2102,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter110",
+                                                                    "name": "filter129",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2399,7 +2419,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter111",
+                                                                    "name": "filter130",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2653,7 +2673,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter131",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

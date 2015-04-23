@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa2495a4951de9aaae995c60d36bdf810bbd0080e28cbf4106640991dbd4259e1))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets2947145e1427053434f28ec62797adabe982613e606034bd23cb031862517c07))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsa2495a4951de9aaae995c60d36bdf810bbd0080e28cbf4106640991dbd4259e1 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets2947145e1427053434f28ec62797adabe982613e606034bd23cb031862517c07 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "a2495a4951de9aaae995c60d36bdf810bbd0080e28cbf4106640991dbd4259e1"; }
+            get { return "2947145e1427053434f28ec62797adabe982613e606034bd23cb031862517c07"; }
         }
 
         /// <summary>
@@ -3125,20 +3125,18 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItem
-        [CodeFirstDatabaseSchema.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_strReferenceNumber, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intUnitMeasureId, T1.tblICInventoryShipmentItem_intWeightUomId, T1.tblICInventoryShipmentItem_dblTareWeight, T1.tblICInventoryShipmentItem_dbNetWeight, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS tblICInventoryShipmentItem_intInventoryShipmentItemId, 
             T.intInventoryShipmentId AS tblICInventoryShipmentItem_intInventoryShipmentId, 
-            T.strReferenceNumber AS tblICInventoryShipmentItem_strReferenceNumber, 
+            T.intSourceId AS tblICInventoryShipmentItem_intSourceId, 
             T.intItemId AS tblICInventoryShipmentItem_intItemId, 
             T.intSubLocationId AS tblICInventoryShipmentItem_intSubLocationId, 
             T.dblQuantity AS tblICInventoryShipmentItem_dblQuantity, 
-            T.intUnitMeasureId AS tblICInventoryShipmentItem_intUnitMeasureId, 
-            T.intWeightUomId AS tblICInventoryShipmentItem_intWeightUomId, 
-            T.dblTareWeight AS tblICInventoryShipmentItem_dblTareWeight, 
-            T.dbNetWeight AS tblICInventoryShipmentItem_dbNetWeight, 
+            T.intItemUOMId AS tblICInventoryShipmentItem_intItemUOMId, 
             T.dblUnitPrice AS tblICInventoryShipmentItem_dblUnitPrice, 
+            T.intTaxCodeId AS tblICInventoryShipmentItem_intTaxCodeId, 
             T.intDockDoorId AS tblICInventoryShipmentItem_intDockDoorId, 
             T.strNotes AS tblICInventoryShipmentItem_strNotes, 
             T.intSort AS tblICInventoryShipmentItem_intSort, 
@@ -3156,25 +3154,26 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipment
-        [CodeFirstDatabaseSchema.tblICInventoryShipment](T1.tblICInventoryShipment_intInventoryShipmentId, T1.tblICInventoryShipment_strBOLNumber, T1.tblICInventoryShipment_dtmShipDate, T1.tblICInventoryShipment_intOrderType, T1.tblICInventoryShipment_strReferenceNumber, T1.tblICInventoryShipment_dtmRequestedArrivalDate, T1.tblICInventoryShipment_intShipFromLocationId, T1.tblICInventoryShipment_intShipToLocationId, T1.tblICInventoryShipment_intCustomerId, T1.tblICInventoryShipment_intFreightTermId, T1.tblICInventoryShipment_ysnDirectShipment, T1.tblICInventoryShipment_intCarrierId, T1.tblICInventoryShipment_strVessel, T1.tblICInventoryShipment_strProNumber, T1.tblICInventoryShipment_strDriverId, T1.tblICInventoryShipment_strSealNumber, T1.tblICInventoryShipment_dtmAppointmentTime, T1.tblICInventoryShipment_dtmDepartureTime, T1.tblICInventoryShipment_dtmArrivalTime, T1.tblICInventoryShipment_dtmDeliveredDate, T1.tblICInventoryShipment_dtmFreeTime, T1.tblICInventoryShipment_strReceivedBy, T1.tblICInventoryShipment_strComment, T1.tblICInventoryShipment_strDeliveryInstruction, T1.tblICInventoryShipment_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryShipment](T1.tblICInventoryShipment_intInventoryShipmentId, T1.tblICInventoryShipment_strShipmentNumber, T1.tblICInventoryShipment_dtmShipDate, T1.tblICInventoryShipment_intOrderType, T1.tblICInventoryShipment_strReferenceNumber, T1.tblICInventoryShipment_dtmRequestedArrivalDate, T1.tblICInventoryShipment_intShipFromLocationId, T1.tblICInventoryShipment_intEntityCustomerId, T1.tblICInventoryShipment_intShipToLocationId, T1.tblICInventoryShipment_intFreightTermId, T1.tblICInventoryShipment_strBOLNumber, T1.tblICInventoryShipment_intShipViaId, T1.tblICInventoryShipment_strVessel, T1.tblICInventoryShipment_strProNumber, T1.tblICInventoryShipment_strDriverId, T1.tblICInventoryShipment_strSealNumber, T1.tblICInventoryShipment_strDeliveryInstruction, T1.tblICInventoryShipment_dtmAppointmentTime, T1.tblICInventoryShipment_dtmDepartureTime, T1.tblICInventoryShipment_dtmArrivalTime, T1.tblICInventoryShipment_dtmDeliveredDate, T1.tblICInventoryShipment_dtmFreeTime, T1.tblICInventoryShipment_strReceivedBy, T1.tblICInventoryShipment_strComment, T1.tblICInventoryShipment_ysnPosted, T1.tblICInventoryShipment_intEntityId, T1.tblICInventoryShipment_intCreatedUserId, T1.tblICInventoryShipment_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentId AS tblICInventoryShipment_intInventoryShipmentId, 
-            T.strBOLNumber AS tblICInventoryShipment_strBOLNumber, 
+            T.strShipmentNumber AS tblICInventoryShipment_strShipmentNumber, 
             T.dtmShipDate AS tblICInventoryShipment_dtmShipDate, 
             T.intOrderType AS tblICInventoryShipment_intOrderType, 
             T.strReferenceNumber AS tblICInventoryShipment_strReferenceNumber, 
             T.dtmRequestedArrivalDate AS tblICInventoryShipment_dtmRequestedArrivalDate, 
             T.intShipFromLocationId AS tblICInventoryShipment_intShipFromLocationId, 
+            T.intEntityCustomerId AS tblICInventoryShipment_intEntityCustomerId, 
             T.intShipToLocationId AS tblICInventoryShipment_intShipToLocationId, 
-            T.intCustomerId AS tblICInventoryShipment_intCustomerId, 
             T.intFreightTermId AS tblICInventoryShipment_intFreightTermId, 
-            T.ysnDirectShipment AS tblICInventoryShipment_ysnDirectShipment, 
-            T.intCarrierId AS tblICInventoryShipment_intCarrierId, 
+            T.strBOLNumber AS tblICInventoryShipment_strBOLNumber, 
+            T.intShipViaId AS tblICInventoryShipment_intShipViaId, 
             T.strVessel AS tblICInventoryShipment_strVessel, 
             T.strProNumber AS tblICInventoryShipment_strProNumber, 
             T.strDriverId AS tblICInventoryShipment_strDriverId, 
             T.strSealNumber AS tblICInventoryShipment_strSealNumber, 
+            T.strDeliveryInstruction AS tblICInventoryShipment_strDeliveryInstruction, 
             T.dtmAppointmentTime AS tblICInventoryShipment_dtmAppointmentTime, 
             T.dtmDepartureTime AS tblICInventoryShipment_dtmDepartureTime, 
             T.dtmArrivalTime AS tblICInventoryShipment_dtmArrivalTime, 
@@ -3182,7 +3181,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.dtmFreeTime AS tblICInventoryShipment_dtmFreeTime, 
             T.strReceivedBy AS tblICInventoryShipment_strReceivedBy, 
             T.strComment AS tblICInventoryShipment_strComment, 
-            T.strDeliveryInstruction AS tblICInventoryShipment_strDeliveryInstruction, 
+            T.ysnPosted AS tblICInventoryShipment_ysnPosted, 
+            T.intEntityId AS tblICInventoryShipment_intEntityId, 
+            T.intCreatedUserId AS tblICInventoryShipment_intCreatedUserId, 
             T.intConcurrencyId AS tblICInventoryShipment_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICInventoryShipments AS T
@@ -5957,20 +5958,18 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItems
-        [iRely.Inventory.Model.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_strReferenceNumber, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intUnitMeasureId, T1.tblICInventoryShipmentItem_intWeightUomId, T1.tblICInventoryShipmentItem_dblTareWeight, T1.tblICInventoryShipmentItem_dbNetWeight, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS tblICInventoryShipmentItem_intInventoryShipmentItemId, 
             T.intInventoryShipmentId AS tblICInventoryShipmentItem_intInventoryShipmentId, 
-            T.strReferenceNumber AS tblICInventoryShipmentItem_strReferenceNumber, 
+            T.intSourceId AS tblICInventoryShipmentItem_intSourceId, 
             T.intItemId AS tblICInventoryShipmentItem_intItemId, 
             T.intSubLocationId AS tblICInventoryShipmentItem_intSubLocationId, 
             T.dblQuantity AS tblICInventoryShipmentItem_dblQuantity, 
-            T.intUnitMeasureId AS tblICInventoryShipmentItem_intUnitMeasureId, 
-            T.intWeightUomId AS tblICInventoryShipmentItem_intWeightUomId, 
-            T.dblTareWeight AS tblICInventoryShipmentItem_dblTareWeight, 
-            T.dbNetWeight AS tblICInventoryShipmentItem_dbNetWeight, 
+            T.intItemUOMId AS tblICInventoryShipmentItem_intItemUOMId, 
             T.dblUnitPrice AS tblICInventoryShipmentItem_dblUnitPrice, 
+            T.intTaxCodeId AS tblICInventoryShipmentItem_intTaxCodeId, 
             T.intDockDoorId AS tblICInventoryShipmentItem_intDockDoorId, 
             T.strNotes AS tblICInventoryShipmentItem_strNotes, 
             T.intSort AS tblICInventoryShipmentItem_intSort, 
@@ -5988,25 +5987,26 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipments
-        [iRely.Inventory.Model.tblICInventoryShipment](T1.tblICInventoryShipment_intInventoryShipmentId, T1.tblICInventoryShipment_strBOLNumber, T1.tblICInventoryShipment_dtmShipDate, T1.tblICInventoryShipment_intOrderType, T1.tblICInventoryShipment_strReferenceNumber, T1.tblICInventoryShipment_dtmRequestedArrivalDate, T1.tblICInventoryShipment_intShipFromLocationId, T1.tblICInventoryShipment_intShipToLocationId, T1.tblICInventoryShipment_intCustomerId, T1.tblICInventoryShipment_intFreightTermId, T1.tblICInventoryShipment_ysnDirectShipment, T1.tblICInventoryShipment_intCarrierId, T1.tblICInventoryShipment_strVessel, T1.tblICInventoryShipment_strProNumber, T1.tblICInventoryShipment_strDriverId, T1.tblICInventoryShipment_strSealNumber, T1.tblICInventoryShipment_dtmAppointmentTime, T1.tblICInventoryShipment_dtmDepartureTime, T1.tblICInventoryShipment_dtmArrivalTime, T1.tblICInventoryShipment_dtmDeliveredDate, T1.tblICInventoryShipment_dtmFreeTime, T1.tblICInventoryShipment_strReceivedBy, T1.tblICInventoryShipment_strComment, T1.tblICInventoryShipment_strDeliveryInstruction, T1.tblICInventoryShipment_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryShipment](T1.tblICInventoryShipment_intInventoryShipmentId, T1.tblICInventoryShipment_strShipmentNumber, T1.tblICInventoryShipment_dtmShipDate, T1.tblICInventoryShipment_intOrderType, T1.tblICInventoryShipment_strReferenceNumber, T1.tblICInventoryShipment_dtmRequestedArrivalDate, T1.tblICInventoryShipment_intShipFromLocationId, T1.tblICInventoryShipment_intEntityCustomerId, T1.tblICInventoryShipment_intShipToLocationId, T1.tblICInventoryShipment_intFreightTermId, T1.tblICInventoryShipment_strBOLNumber, T1.tblICInventoryShipment_intShipViaId, T1.tblICInventoryShipment_strVessel, T1.tblICInventoryShipment_strProNumber, T1.tblICInventoryShipment_strDriverId, T1.tblICInventoryShipment_strSealNumber, T1.tblICInventoryShipment_strDeliveryInstruction, T1.tblICInventoryShipment_dtmAppointmentTime, T1.tblICInventoryShipment_dtmDepartureTime, T1.tblICInventoryShipment_dtmArrivalTime, T1.tblICInventoryShipment_dtmDeliveredDate, T1.tblICInventoryShipment_dtmFreeTime, T1.tblICInventoryShipment_strReceivedBy, T1.tblICInventoryShipment_strComment, T1.tblICInventoryShipment_ysnPosted, T1.tblICInventoryShipment_intEntityId, T1.tblICInventoryShipment_intCreatedUserId, T1.tblICInventoryShipment_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentId AS tblICInventoryShipment_intInventoryShipmentId, 
-            T.strBOLNumber AS tblICInventoryShipment_strBOLNumber, 
+            T.strShipmentNumber AS tblICInventoryShipment_strShipmentNumber, 
             T.dtmShipDate AS tblICInventoryShipment_dtmShipDate, 
             T.intOrderType AS tblICInventoryShipment_intOrderType, 
             T.strReferenceNumber AS tblICInventoryShipment_strReferenceNumber, 
             T.dtmRequestedArrivalDate AS tblICInventoryShipment_dtmRequestedArrivalDate, 
             T.intShipFromLocationId AS tblICInventoryShipment_intShipFromLocationId, 
+            T.intEntityCustomerId AS tblICInventoryShipment_intEntityCustomerId, 
             T.intShipToLocationId AS tblICInventoryShipment_intShipToLocationId, 
-            T.intCustomerId AS tblICInventoryShipment_intCustomerId, 
             T.intFreightTermId AS tblICInventoryShipment_intFreightTermId, 
-            T.ysnDirectShipment AS tblICInventoryShipment_ysnDirectShipment, 
-            T.intCarrierId AS tblICInventoryShipment_intCarrierId, 
+            T.strBOLNumber AS tblICInventoryShipment_strBOLNumber, 
+            T.intShipViaId AS tblICInventoryShipment_intShipViaId, 
             T.strVessel AS tblICInventoryShipment_strVessel, 
             T.strProNumber AS tblICInventoryShipment_strProNumber, 
             T.strDriverId AS tblICInventoryShipment_strDriverId, 
             T.strSealNumber AS tblICInventoryShipment_strSealNumber, 
+            T.strDeliveryInstruction AS tblICInventoryShipment_strDeliveryInstruction, 
             T.dtmAppointmentTime AS tblICInventoryShipment_dtmAppointmentTime, 
             T.dtmDepartureTime AS tblICInventoryShipment_dtmDepartureTime, 
             T.dtmArrivalTime AS tblICInventoryShipment_dtmArrivalTime, 
@@ -6014,7 +6014,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.dtmFreeTime AS tblICInventoryShipment_dtmFreeTime, 
             T.strReceivedBy AS tblICInventoryShipment_strReceivedBy, 
             T.strComment AS tblICInventoryShipment_strComment, 
-            T.strDeliveryInstruction AS tblICInventoryShipment_strDeliveryInstruction, 
+            T.ysnPosted AS tblICInventoryShipment_ysnPosted, 
+            T.intEntityId AS tblICInventoryShipment_intEntityId, 
+            T.intCreatedUserId AS tblICInventoryShipment_intCreatedUserId, 
             T.intConcurrencyId AS tblICInventoryShipment_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICInventoryShipment AS T

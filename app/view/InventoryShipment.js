@@ -253,8 +253,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
-                                                                itemId: 'txtBOLNumber',
-                                                                fieldLabel: 'BOL No',
+                                                                itemId: 'txtShipmentNo',
+                                                                fieldLabel: 'Shipment No',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110
                                                             },
@@ -537,6 +537,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 },
                                                                 items: [
                                                                     {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtBOLNo',
+                                                                        fieldLabel: 'BOL No',
+                                                                        labelWidth: 110
+                                                                    },
+                                                                    {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
@@ -558,8 +564,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        itemId: 'cboCarrier',
-                                                                        fieldLabel: 'Carrier',
+                                                                        itemId: 'cboShipVia',
+                                                                        fieldLabel: 'Ship Via',
                                                                         labelWidth: 110,
                                                                         displayField: 'strShipVia',
                                                                         valueField: 'strShipVia'

@@ -17,21 +17,22 @@ namespace iRely.Inventory.Model
         }
 
         public int intInventoryShipmentId { get; set; }
-        public string strBOLNumber { get; set; }
+        public string strShipmentNumber { get; set; }
         public DateTime? dtmShipDate { get; set; }
-        public int? intOrderType { get; set; }
+        public int intOrderType { get; set; }
         public string strReferenceNumber { get; set; }
         public DateTime? dtmRequestedArrivalDate { get; set; }
         public int? intShipFromLocationId { get; set; }
+        public int? intEntityCustomerId { get; set; }
         public int? intShipToLocationId { get; set; }
-        public int? intCustomerId { get; set; }
         public int? intFreightTermId { get; set; }
-        public bool ysnDirectShipment { get; set; }
-        public int? intCarrierId { get; set; }
+        public string strBOLNumber { get; set; }
+        public int? intShipViaId { get; set; }
         public string strVessel { get; set; }
         public string strProNumber { get; set; }
         public string strDriverId { get; set; }
         public string strSealNumber { get; set; }
+        public string strDeliveryInstruction { get; set; }
         public DateTime? dtmAppointmentTime { get; set; }
         public DateTime? dtmDepartureTime { get; set; }
         public DateTime? dtmArrivalTime { get; set; }
@@ -39,7 +40,9 @@ namespace iRely.Inventory.Model
         public DateTime? dtmFreeTime { get; set; }
         public string strReceivedBy { get; set; }
         public string strComment { get; set; }
-        public string strDeliveryInstruction { get; set; }
+        public bool? ysnPosted { get; set; }
+        public int? intEntityId { get; set; }
+        public int? intCreatedUserId { get; set; }
 
         private string _shipFromAddress;
         [NotMapped]
@@ -108,26 +111,28 @@ namespace iRely.Inventory.Model
     public class InventoryShipmentView
     {
         public int intInventoryShipmentId { get; set; }
-        public string strBOLNumber { get; set; }
+        public string strShipmentNumber { get; set; }
         public DateTime? dtmShipDate { get; set; }
-        public int? intOrderType { get; set; }
+        public int intOrderType { get; set; }
         public string strOrderType { get; set; }
         public string strReferenceNumber { get; set; }
         public DateTime? dtmRequestedArrivalDate { get; set; }
         public int? intShipFromLocationId { get; set; }
+        public string strShipFromLocation { get; set; }
+        public int? intEntityCustomerId { get; set; }
+        public string strCustomerName { get; set; }
         public int? intShipToLocationId { get; set; }
-        public int? intCustomerId { get; set; }
-        public string strCustomerId { get; set; }
-        public string strShipToAddress { get; set; }
+        public string strShipToLocation { get; set; }
         public int? intFreightTermId { get; set; }
-        public string strFreightTermId { get; set; }
-        public bool ysnDirectShipment { get; set; }
-        public int? intCarrierId { get; set; }
-        public string strCarrierId { get; set; }
+        public string strFreightTerm { get; set; }
+        public string strBOLNumber { get; set; }
+        public int? intShipViaId { get; set; }
+        public string strShipVia { get; set; }
         public string strVessel { get; set; }
         public string strProNumber { get; set; }
         public string strDriverId { get; set; }
         public string strSealNumber { get; set; }
+        public string strDeliveryInstruction { get; set; }
         public DateTime? dtmAppointmentTime { get; set; }
         public DateTime? dtmDepartureTime { get; set; }
         public DateTime? dtmArrivalTime { get; set; }
@@ -135,7 +140,7 @@ namespace iRely.Inventory.Model
         public DateTime? dtmFreeTime { get; set; }
         public string strReceivedBy { get; set; }
         public string strComment { get; set; }
-        public string strDeliveryInstruction { get; set; }
+        public bool? ysnPosted { get; set; }
 
     }
 
@@ -148,15 +153,13 @@ namespace iRely.Inventory.Model
 
         public int intInventoryShipmentItemId { get; set; }
         public int intInventoryShipmentId { get; set; }
-        public string strReferenceNumber { get; set; }
+        public int? intSourceId { get; set; }
         public int? intItemId { get; set; }
         public int? intSubLocationId { get; set; }
         public decimal? dblQuantity { get; set; }
-        public int? intUnitMeasureId { get; set; }
-        public int? intWeightUomId { get; set; }
-        public decimal? dblTareWeight { get; set; }
-        public decimal? dbNetWeight { get; set; }
+        public int? intItemUOMId { get; set; }
         public decimal? dblUnitPrice { get; set; }
+        public int? intTaxCodeId { get; set; }
         public int? intDockDoorId { get; set; }
         public string strNotes { get; set; }
         public int? intSort { get; set; }
@@ -206,8 +209,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_uom))
-                    if (tblICUnitMeasure != null)
-                        return tblICUnitMeasure.strUnitMeasure;
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUnitMeasure;
                     else
                         return null;
                 else
@@ -218,25 +221,7 @@ namespace iRely.Inventory.Model
                 _uom = value;
             }
         }
-        private string _weightUom;
-        [NotMapped]
-        public string strWeightUnitMeasure
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_weightUom))
-                    if (WeightUnitMeasure != null)
-                        return WeightUnitMeasure.strUnitMeasure;
-                    else
-                        return null;
-                else
-                    return _weightUom;
-            }
-            set
-            {
-                _weightUom = value;
-            }
-        }
+        
         private string _subLocationName;
         [NotMapped]
         public string strSubLocationName
@@ -261,8 +246,7 @@ namespace iRely.Inventory.Model
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
         public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public tblICItem tblICItem { get; set; }
-        public tblICUnitMeasure tblICUnitMeasure { get; set; }
-        public tblICUnitMeasure WeightUnitMeasure { get; set; }
+        public tblICItemUOM tblICItemUOM { get; set; }
     }
 
     public class tblICInventoryShipmentItemLot : BaseEntity
@@ -274,7 +258,7 @@ namespace iRely.Inventory.Model
         public decimal? dblQuantityShipped { get; set; }
         public string strWarehouseCargoNumber { get; set; }
         public int? intSort { get; set; }
-
+        
         private string _lotId;
         [NotMapped]
         public string strLotId
