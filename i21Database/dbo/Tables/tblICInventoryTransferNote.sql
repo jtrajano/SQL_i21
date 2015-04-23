@@ -2,8 +2,8 @@
 (
 	[intInventoryTransferNoteId] INT NOT NULL IDENTITY, 
     [intInventoryTransferId] INT NOT NULL, 
-    [strNoteType] NVARCHAR(50) NULL, 
-    [strNotes] NVARCHAR(MAX) NULL, 
+    [strNoteType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryTransferNote] PRIMARY KEY ([intInventoryTransferNoteId]),
