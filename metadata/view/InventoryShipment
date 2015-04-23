@@ -470,6 +470,8 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "blankText": "Created on Save",
+                                                        "emptyText": "Created on Save",
                                                         "fieldLabel": "Shipment No",
                                                         "itemId": "txtShipmentNo",
                                                         "labelAlign": "top",
@@ -477,7 +479,7 @@
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "name": null,
-                                                        "readOnly": null,
+                                                        "readOnly": true,
                                                         "width": null
                                                     },
                                                     "name": "MyTextField24",

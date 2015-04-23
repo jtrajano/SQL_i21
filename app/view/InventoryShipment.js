@@ -256,7 +256,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 itemId: 'txtShipmentNo',
                                                                 fieldLabel: 'Shipment No',
                                                                 labelAlign: 'top',
-                                                                labelWidth: 110
+                                                                labelWidth: 110,
+                                                                readOnly: true,
+                                                                blankText: 'Created on Save',
+                                                                emptyText: 'Created on Save'
                                                             },
                                                             {
                                                                 xtype: 'datefield',
