@@ -906,7 +906,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         format: '0,000.##',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            itemId: 'txtQtyToReceive'
+                                                                            itemId: 'txtQtyToReceive',
+                                                                            minValue: 0
                                                                         }
                                                                     },
                                                                     {
@@ -1001,7 +1002,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         text: 'Unit Cost',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            itemId: 'txtUnitCost'
+                                                                            itemId: 'txtUnitCost',
+                                                                            minValue: 0
                                                                         }
                                                                     },
                                                                     {
@@ -1012,7 +1014,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         text: 'Unit Retail',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            itemId: 'txtUnitRetail'
+                                                                            itemId: 'txtUnitRetail',
+                                                                            minValue: 0
                                                                         }
                                                                     },
                                                                     {

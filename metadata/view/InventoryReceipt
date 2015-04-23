@@ -1445,7 +1445,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter113",
+                                                                    "name": "filter132",
                                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1789,7 +1789,8 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "itemId": "txtQtyToReceive"
+                                                                        "itemId": "txtQtyToReceive",
+                                                                        "minValue": 0
                                                                     },
                                                                     "name": "MyNumberField15",
                                                                     "designerId": "87ee2728-6433-4040-b5ae-83e6d3a906a7"
@@ -1980,7 +1981,8 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "itemId": "txtUnitCost"
+                                                                        "itemId": "txtUnitCost",
+                                                                        "minValue": 0
                                                                     },
                                                                     "name": "MyNumberField12",
                                                                     "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5"
@@ -2021,7 +2023,8 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "itemId": "txtUnitRetail"
+                                                                        "itemId": "txtUnitRetail",
+                                                                        "minValue": 0
                                                                     },
                                                                     "name": "MyNumberField13",
                                                                     "designerId": "843fb0c3-698d-43cc-8058-9d69203b3b49"
@@ -2371,7 +2374,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter114",
+                                                                            "name": "filter133",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3469,7 +3472,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter115",
+                                                    "name": "filter134",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4306,7 +4309,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter116",
+                                                    "name": "filter135",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
