@@ -282,6 +282,14 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Sales Order')
 	UNION ALL
+	SELECT	[intStartingNumberId]	= 30
+			,[strTransactionType]	= N'Inventory Adjustment'
+			,[strPrefix]			= N'ADJ-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Inventory'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inventory Adjustment')	
 	SELECT	[intStartingNumberId]	= 33
 			,[strTransactionType]	= N'Batch Production'
 			,[strPrefix]			= N''

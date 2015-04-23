@@ -942,6 +942,15 @@
     <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for zero weight.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for whole numbers.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for 25KgBag-LB-NULL.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for inventory adjustment table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Expiry Lot Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Item Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Lot Status Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Qty Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Split Lot Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling UOM Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment on getting the batch id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

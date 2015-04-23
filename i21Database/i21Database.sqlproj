@@ -1183,6 +1183,20 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateWarehouseReleaseLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWarehouseReleaseLot.sql" />
+    <Build Include="dbo\Tables\tblICInventoryAdjustment.sql" />
+    <Build Include="dbo\Tables\tblICInventoryAdjustmentDetail.sql" />
+    <Build Include="dbo\Tables\tblICInventoryAdjustmentNote.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentItemChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotStatusChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentQtyChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentSplitLotChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentUOMChange.sql" />
+    <Build Include="dbo\Views\vyuICGetPostedLot.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOM.sql" />
+    <Build Include="dbo\Views\vyuICGetLot.sql" />
+    <Build Include="dbo\Views\vyuICGetStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
