@@ -245,6 +245,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 //            });
 //        }
 
+        var colAvailableQty = grdInventoryTransfer.columns[7];
+        var colAvailableUOM = grdInventoryTransfer.columns[8];
+        colAvailableQty.renderer = this.AvailableQtyRenderer;
+        colAvailableUOM.renderer = this.AvailableUOMRenderer;
+
         return win.context;
     },
 
@@ -288,6 +293,60 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         record.set('dtmTransferDate', today);
 
         action(record);
+    },
+
+    AvailableQtyRenderer: function (value, metadata, record) {
+        var grid = metadata.column.up('grid');
+        var win = grid.up('window');
+        var items = win.viewModel.storeInfo.item;
+        var currentMaster = win.viewModel.data.current;
+
+        if (currentMaster) {
+            if (record) {
+                if (items) {
+                    var index = items.data.findIndexBy(function (row) {
+                        if (row.get('intItemId') === record.get('intItemId') &&
+                            row.get('intLocationId') === currentMaster.get('intFromLocationId') &&
+                            row.get('intItemUOMId') === record.get('intItemUOMId') &&
+                            row.get('intSubLocationId') === record.get('intFromSubLocationId') &&
+                            row.get('intStorageLocationId') === record.get('intFromStorageLocationId')) {
+                            return true;
+                        }
+                    });
+                    if (index >= 0) {
+                        var stockUOM = items.getAt(index);
+                        return stockUOM.get('dblOnHand');
+                    }
+                }
+            }
+        }
+    },
+
+    AvailableUOMRenderer: function (value, metadata, record) {
+        var grid = metadata.column.up('grid');
+        var win = grid.up('window');
+        var items = win.viewModel.storeInfo.item;
+        var currentMaster = win.viewModel.data.current;
+
+        if (currentMaster) {
+            if (record) {
+                if (items) {
+                    var index = items.data.findIndexBy(function (row) {
+                        if (row.get('intItemId') === record.get('intItemId') &&
+                            row.get('intLocationId') === currentMaster.get('intFromLocationId') &&
+                            row.get('intItemUOMId') === record.get('intItemUOMId') &&
+                            row.get('intSubLocationId') === record.get('intFromSubLocationId') &&
+                            row.get('intStorageLocationId') === record.get('intFromStorageLocationId')) {
+                            return true;
+                        }
+                    });
+                    if (index >= 0) {
+                        var stockUOM = items.getAt(index);
+                        return stockUOM.get('strUnitMeasure');
+                    }
+                }
+            }
+        }
     },
 
     onTransferDetailSelect: function(combo, records, eOpts) {
@@ -426,6 +485,32 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 //        }
     },
 
+    onDetailGridColumnBeforeRender: function(column) {
+        var me = this,
+            win = column.up('window'),
+            grid = column.up('grid'),
+            plugin = grid.getPlugin('cepItem'),
+            current = plugin.getActiveRecord();
+
+        if (!column) return false;
+
+        column.getRenderer = function(record) {
+            if (!record) return false;
+            if (!current) return false;
+
+            var columnId = column.itemId;
+
+            switch (columnId) {
+                case 'colAvailableQty':
+
+                    break;
+                case 'colAvailableUOM':
+
+                    break;
+            }
+        };
+    },
+
     init: function(application) {
         this.control({
             "#cboItem": {
@@ -469,6 +554,12 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             "#cboAccountId": {
                 select: this.onAccountSelect
+            },
+            "#colAvailableQty": {
+                beforerender: this.onDetailGridColumnBeforeRender
+            },
+            "#colAvailableUOM": {
+                beforerender: this.onDetailGridColumnBeforeRender
             }
         });
     }

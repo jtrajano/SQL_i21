@@ -574,19 +574,9 @@ Ext.define('Inventory.view.ItemViewController', {
             //Stock Tab//
             //---------//
             grdStock: {
-                colStockLocation: {
-                    dataIndex: 'strLocationName',
-                    editor: {
-                        store: '{stockLocation}'
-                    }
-                },
+                colStockLocation: 'strLocationName',
                 colStockSubLocation: 'strWarehouse',
-                colStockUOM: {
-                    dataIndex: 'strUnitMeasure',
-                    editor: {
-                        store: '{stockUOM}'
-                    }
-                },
+                colStockUOM: 'strUnitMeasure',
                 colStockOnHand: 'dblUnitOnHand',
                 colStockCommitted: 'dblOrderCommitted',
                 colStockOnOrder: 'dblOnOrder',
@@ -1030,6 +1020,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 scope: me
             });
         }
+
+        var colStockUOM = grdStock.columns[1];
+        colStockUOM.renderer = this.onRenderStockUOM;
 
         return win.context;
     },
@@ -1891,10 +1884,10 @@ Ext.define('Inventory.view.ItemViewController', {
         var grid = combo.up('grid');
         var grdPricing = win.down('#grdPricing');
         var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
-        var plugin = grid.getPlugin('cepPricingLevel');
+        var plugin = grid.getPlugin('cepPricing');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'cboPricingLocation'){
+        if (combo.itemId === 'cboPricingLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
         }
@@ -2064,19 +2057,23 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Stock Tab Methods and Event Handlers">
 
-    onStockSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
+    onRenderStockUOM: function(value, metadata, record) {
+        var grid = metadata.column.up('grid');
+        var win = grid.up('window');
+        var currentMaster = win.viewModel.data.current;
 
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepStock');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colStockLocation'){
-            current.set('intItemLocationId', records[0].get('intItemLocationId'));
-        }
-        else if (combo.column.itemId === 'colStockUOM') {
-            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
+        if (record) {
+            if(currentMaster) {
+                if (currentMaster.tblICItemUOMs()) {
+                    var itemUOMs = currentMaster.tblICItemUOMs().data.items;
+                    var stockUnit = Ext.Array.findBy(itemUOMs, function(row) {
+                        if (row.get('ysnStockUnit') === true) return true;
+                    })
+                    if (stockUnit) {
+                        return stockUnit.get('strUnitMeasure');
+                    }
+                }
+            }
         }
     },
 
@@ -2525,12 +2522,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboSpecialPricingDiscountBy": {
                 select: this.onSpecialPricingSelect
-            },
-            "#cboStockLocation": {
-                select: this.onStockSelect
-            },
-            "#cboStockUOM": {
-                select: this.onStockSelect
             },
             "#cboCommodity": {
                 select: this.onCommoditySelect

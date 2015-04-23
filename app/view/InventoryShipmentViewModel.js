@@ -6,6 +6,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'Inventory.store.BufferedCompactItem',
         'Inventory.store.BufferedItemUnitMeasure',
         'i21.store.CompanyLocationBuffered',
+        'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.FreightTermsBuffered',
         'i21.store.ShipViaBuffered',
         'EntityManagement.store.CustomerBuffered',
@@ -52,6 +53,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         items: {
             type: 'icbufferedcompactitem'
+        },
+        subLocation: {
+            type: 'smcompanylocationsublocationbuffered'
         },
         itemUOM: {
             type: 'icbuffereditemunitmeasure'

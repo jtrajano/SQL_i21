@@ -20,7 +20,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             bind: {
                 title: 'Inventory Shipment - {current.strBOLNumber}'
             },
-            txtBOLNumber: '{current.strBOLNumber}',
+            txtShipmentNo: '{current.strShipmentNumber}',
             dtmShipDate: '{current.dtmShipDate}',
             cboOrderType: {
                 value: '{current.intOrderType}',
@@ -50,8 +50,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             txtDeliveryInstructions: '{current.strDeliveryInstruction}',
             txtComments: '{current.strComment}',
             chkDirectShipment: '{current.ysnDirectShipment}',
-            cboCarrier: {
-                value: '{current.intCarrierId}',
+            txtBOLNo: '{current.strBOLNumber}',
+            cboShipVia: {
+                value: '{current.intShipViaId}',
                 store: '{shipVia}'
             },
             txtVesselVehicle: '{current.strVessel}',
@@ -66,7 +67,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             txtReceivedBy: '{current.strReceivedBy}',
 
             grdInventoryShipment: {
-                colOrderNumber: 'strReferenceNumber',
+                colOrderNumber: 'strSourceId',
                 colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -74,7 +75,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colDescription: 'strItemDescription',
-//                colSubLocation: '',
+                colSubLocation: {
+                    dataIndex: 'strSubLocationName',
+                    editor: {
+                        store: '{subLocation}'
+                    }
+                },
                 colQuantity: 'dblQuantity',
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
@@ -162,8 +168,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
     createRecord: function(config, action) {
         var today = new Date();
         var record = Ext.create('Inventory.model.Shipment');
-//        if (app.DefaultLocation > 0)
-//            record.set('intLocationId', app.DefaultLocation);
+        if (app.DefaultLocation > 0)
+            record.set('intShipFromLocationId', app.DefaultLocation);
         record.set('dtmShipDate', today);
         action(record);
     },

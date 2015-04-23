@@ -38,9 +38,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICManufacturingCellPackType> CapacityManufacturingCellPackTypes { get; set; }
 
         public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
-        public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
-        public ICollection<tblICInventoryShipmentItem> WeightInventoryShipmentItems { get; set; }
-
+        
         public ICollection<tblICItemUOM> WeightItemUOMs { get; set; }
         public ICollection<tblICItemUOM> DimensionItemUOMs { get; set; }
         public ICollection<tblICItemUOM> VolumeItemUOMs { get; set; }

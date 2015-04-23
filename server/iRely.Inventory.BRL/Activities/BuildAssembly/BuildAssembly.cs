@@ -65,6 +65,8 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICBuildAssembly>()
+                .Include("tblICBuildAssemblyDetails.tblICItem")
+                .Include("tblICBuildAssemblyDetails.tblICItemUOM.tblICUnitMeasure")
                 .Where(w => query.Where(predicate).Any(a => a.intBuildAssemblyId == w.intBuildAssemblyId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

@@ -136,7 +136,7 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             var finalQuery = _db.GetQuery<tblICItem>()
-                    .Include("tblICItemAssemblies.tblICItem")
+                    .Include("tblICItemAssemblies.AssemblyItem")
                     .Include("tblICItemAssemblies.tblICItemUOM.tblICUnitMeasure")
                     .Where(w => query.Where(predicate).Any(a => a.intItemId == w.intItemId)) //Filter the Main DataSource Based on Search Query
                     .Where(p => p.strType == "Assembly/Blend" && p.strLotTracking == "No")

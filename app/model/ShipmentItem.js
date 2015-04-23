@@ -29,21 +29,19 @@ Ext.define('Inventory.model.ShipmentItem', {
                 }
             }
         },
-        { name: 'strReferenceNumber', type: 'string'},
-        { name: 'intItemId', type: 'int'},
-        { name: 'intSubLocationId', type: 'int'},
-        { name: 'dblQuantity', type: 'float'},
-        { name: 'intUnitMeasureId', type: 'int'},
-        { name: 'intWeightUomId', type: 'int'},
-        { name: 'dblTareWeight', type: 'float'},
-        { name: 'dbNetWeight', type: 'float'},
-        { name: 'dblUnitPrice', type: 'float'},
-        { name: 'intDockDoorId', type: 'int'},
-        { name: 'strNotes', type: 'string'},
-        { name: 'intSort', type: 'int'},
+        { name: 'intSourceId', type: 'int', allowNull: true },
+        { name: 'intItemId', type: 'int', allowNull: true },
+        { name: 'intSubLocationId', type: 'int', allowNull: true },
+        { name: 'dblQuantity', type: 'float' },
+        { name: 'intItemUOMId', type: 'int', allowNull: true },
+        { name: 'dblUnitPrice', type: 'float' },
+        { name: 'intTaxCodeId', type: 'int', allowNull: true },
+        { name: 'intDockDoorId', type: 'int', allowNull: true },
+        { name: 'strNotes', type: 'string' },
+        { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strUnitMeasure', type: 'string'}
     ],
 
     validators: [

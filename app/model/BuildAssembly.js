@@ -29,7 +29,6 @@ Ext.define('Inventory.model.BuildAssembly', {
         { type: 'presence', field: 'dtmBuildDate' },
         { type: 'presence', field: 'intItemId' },
         { type: 'presence', field: 'intLocationId' },
-        { type: 'presence', field: 'intSubLocationId' },
         { type: 'presence', field: 'intItemUOMId' }
     ]
 });

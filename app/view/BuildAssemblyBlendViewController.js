@@ -50,37 +50,24 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
             txtBuildQuantity: '{current.dblBuildQuantity}',
             cboUOM: {
                 value: '{current.intItemUOMId}',
-                store: '{itemUOM}'
+                store: '{itemUOM}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}',
+                    conjunction: 'and'
+                }]
             },
             txtBuildNumber: '{current.strBuildNo}',
             txtCost: '{current.dblCost}',
             txtDescription: '{current.strDescription}',
 
             grdBuildAssemblyBlend: {
-                colItemNo: {
-                    dataIndex: 'strItemNo'
-//                    editor: {
-//                        store: '{uomUnitMeasure}'
-//                    }
-                },
-                colDescription: {
-                    dataIndex: 'strItemDescription'
-                },
-                colSubLocation: {
-                    dataIndex: 'strSubLocationName'
-//                    editor: {
-//                        store: '{uomUnitMeasure}'
-//                    }
-                },
-                colStock: {
-                    dataIndex: 'dblStock'
-                },
-                colQuantity: {
-                    dataIndex: 'dblQuantity'
-                },
-                colUOM: {
-                    dataIndex: 'strUnitMeasure'
-                },
+                colItemNo: 'strItemNo',
+                colDescription: 'strItemDescription',
+                colSubLocation: 'strSubLocationName',
+                colStock: 'dblStock',
+                colQuantity: 'dblQuantity',
+                colUOM: 'strUnitMeasure',
                 colCost: 'dblCost'
             }
         }
@@ -177,20 +164,19 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
         var record = records[0];
 
         if (current) {
-            var assemblyItem = record.tblICItemAssemblies();
+            var assemblyItem = record.data.tblICItemAssemblies;
             if (assemblyItem) {
-                var assemblyItems = assemblyItem.data.items;
-                Ext.Array.each(assemblyItems, function(row) {
+                Ext.Array.each(assemblyItem, function(row) {
                     var newRecord = Ext.create('Inventory.model.BuildAssemblyDetail');
-                    newRecord.set('intItemId', row.get('intAssemblyItemId'));
-                    newRecord.set('strItemNo', row.get('strItemNo'));
-                    newRecord.set('strItemDescription', row.get('strItemDescription'));
+                    newRecord.set('intItemId', row.intAssemblyItemId);
+                    newRecord.set('strItemNo', row.strItemNo);
+                    newRecord.set('strItemDescription', row.strItemDescription);
                     newRecord.set('intSubLocationId', null);
-                    newRecord.set('dblQuantity', row.get('dblQuantity'));
-                    newRecord.set('intItemUOMId', row.get('intItemUnitMeasureId'));
-                    newRecord.set('strUnitMeasure', row.get('strUnitMeasure'));
-                    newRecord.set('dblCost', row.get('dblCost'));
-                    newRecord.set('intSort', row.get('intSort'));
+                    newRecord.set('dblQuantity', row.dblQuantity);
+                    newRecord.set('intItemUOMId', row.intItemUnitMeasureId);
+                    newRecord.set('strUnitMeasure', row.strUnitMeasure);
+                    newRecord.set('dblCost', row.dblCost);
+                    newRecord.set('intSort', row.intSort);
                     current.tblICBuildAssemblyDetails().add(newRecord);
                 });
             }

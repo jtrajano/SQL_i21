@@ -67,6 +67,9 @@ namespace iRely.Inventory.BRL
 
         public void AddShipment(tblICInventoryShipment shipment)
         {
+            shipment.strShipmentNumber = Common.GetStartingNumber(Common.StartingNumber.InventoryShipment);
+            shipment.intCreatedUserId = iRely.Common.Security.GetUserId();
+            shipment.intEntityId = iRely.Common.Security.GetEntityId();
             _db.AddNew<tblICInventoryShipment>(shipment);
         }
 
