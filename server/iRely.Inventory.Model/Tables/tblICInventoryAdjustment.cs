@@ -25,6 +25,7 @@ namespace iRely.Inventory.Model
         public string strAdjustmentNo { get; set; }
         public string strDescription { get; set; }
         public int? intSort { get; set; }
+        public bool ysnPosted { get; set; }
 
         private string _location;
         [NotMapped]

@@ -7816,6 +7816,9 @@
                                     "id": "2a36b425-9058-4432-87ab-860c23ec1e46"
                                 },
                                 {
+                                    "id": "1f0007e6-e037-4ac6-abb2-c12006159db1"
+                                },
+                                {
                                     "id": "9b74fcda-2b58-41a6-9b04-3675ed8868ad"
                                 },
                                 {
@@ -8144,7 +8147,7 @@
     },
     "inspectorState": {
         "topInstance": "4c8bcd03-8b60-4f37-ae7c-1a05db5452be",
-        "selectedInstance": "4c8bcd03-8b60-4f37-ae7c-1a05db5452be"
+        "selectedInstance": "1f0007e6-e037-4ac6-abb2-c12006159db1"
     },
     "editMode": "design",
     "userSettings": {

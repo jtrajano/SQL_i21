@@ -167,6 +167,17 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                         text: 'Unpost'
                                     },
                                     {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnRecap',
+                                        width: 52,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-recap',
+                                        scale: 'large',
+                                        text: 'Recap'
+                                    },
+                                    {
                                         xtype: 'tbseparator',
                                         height: 30
                                     },
@@ -747,7 +758,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         tdCls: 'blue-text-column',
                                                         text: 'New Expiration Date',
                                                         editor: {
-                                                            xtype: 'datefield'
+                                                            xtype: 'datefield',
+                                                            itemId: 'dteNewExpiryDate'
                                                         }
                                                     },
                                                     {
