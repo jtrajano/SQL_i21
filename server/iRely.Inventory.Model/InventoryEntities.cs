@@ -213,6 +213,10 @@ namespace iRely.Inventory.Model
         public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
         public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
 
+        public DbSet<tblICInventoryAdjustment> tblICInventoryAdjustments { get; set; }
+        public DbSet<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
+        public DbSet<tblICInventoryAdjustmentNote> tblICInventoryAdjustmentNotes { get; set; }
+        public DbSet<vyuICGetPostedLot> vyuICGetPostedLots { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
@@ -355,6 +359,11 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetReceiptItemSourceMap());
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
+
+            modelBuilder.Configurations.Add(new tblICInventoryAdjustmentMap());
+            modelBuilder.Configurations.Add(new tblICInventoryAdjustmentDetailMap());
+            modelBuilder.Configurations.Add(new tblICInventoryAdjustmentNoteMap());
+            modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());
         }
     }
 }

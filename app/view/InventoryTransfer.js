@@ -588,9 +588,9 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strTaxCode',
                                                         itemId: 'colTaxCode',
                                                         width: 69,
+                                                        dataIndex: 'strTaxCode',
                                                         text: 'Tax Code'
                                                     },
                                                     {
