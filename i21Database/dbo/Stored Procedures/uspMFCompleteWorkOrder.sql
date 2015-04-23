@@ -88,13 +88,20 @@ BEGIN TRY
 			)
 
 	BEGIN TRANSACTION
-	If @intWorkOrderId is not null or @intWorkOrderId>0
+
+	if @intPhysicalItemUOMId is null
 	Begin
-		SELECT @intStatusId = intStatusId
-			FROM dbo.tblMFWorkOrderStatus
-			WHERE strName = 'Started'
-		Update tblMFWorkOrder Set intStatusId =@intStatusId  Where intWorkOrderId=@intWorkOrderId
+		SELECT @intPhysicalItemUOMId = intItemUOMId
+		FROM dbo.tblICItemUOM
+		WHERE intItemId = @intItemId
+		AND intUnitMeasureId in (Select intUnitMeasureId from dbo.tblICUnitMeasure Where strUnitMeasure like '%bag%')
 	End
+
+	SELECT @intStatusId = intStatusId
+	FROM dbo.tblMFWorkOrderStatus
+	WHERE strName = 'Started'
+
+	Update tblMFWorkOrder Set intStatusId =@intStatusId  Where intWorkOrderId=@intWorkOrderId
 
 	Select @dtmCurrentDate=GetDate()
 
