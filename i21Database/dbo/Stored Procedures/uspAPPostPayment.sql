@@ -238,7 +238,7 @@ BEGIN
 		 INNER JOIN #tmpPayablePostData B ON A.intPaymentId = B.intPaymentId
 
 		-- Calling the stored procedure
-		EXEC dbo.uspCMBankTransactionReversal @userId, @isSuccessful OUTPUT
+		EXEC dbo.uspCMBankTransactionReversal @userId, DEFAULT, @isSuccessful OUTPUT
 
 		--update payment record based on record from tblCMBankTransaction
 		UPDATE tblAPPayment
