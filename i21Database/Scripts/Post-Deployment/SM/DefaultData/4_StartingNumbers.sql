@@ -407,6 +407,24 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Entity Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 44
+			,[strTransactionType]	= N'Match No'
+			,[strPrefix]			= N'S-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Match No')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 45
+			,[strTransactionType]	= N'FutOpt Transaction'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'FutOpt Transaction')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
