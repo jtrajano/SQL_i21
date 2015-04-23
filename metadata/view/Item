@@ -6984,7 +6984,7 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLocationName",
                                                         "itemId": "cboPricingLocation",
-                                                        "valueField": "intItemLocationId"
+                                                        "valueField": "strLocationName"
                                                     },
                                                     "name": "MyComboBox21",
                                                     "configAlternates": {

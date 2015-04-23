@@ -1884,10 +1884,10 @@ Ext.define('Inventory.view.ItemViewController', {
         var grid = combo.up('grid');
         var grdPricing = win.down('#grdPricing');
         var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
-        var plugin = grid.getPlugin('cepPricingLevel');
+        var plugin = grid.getPlugin('cepPricing');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'cboPricingLocation'){
+        if (combo.itemId === 'cboPricingLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
             current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
         }

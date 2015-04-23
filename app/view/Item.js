@@ -3237,7 +3237,7 @@ Ext.define('Inventory.view.Item', {
                                                             ],
                                                             itemId: 'cboPricingLocation',
                                                             displayField: 'strLocationName',
-                                                            valueField: 'intItemLocationId'
+                                                            valueField: 'strLocationName'
                                                         }
                                                     },
                                                     {
@@ -3924,8 +3924,8 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colStockLocation',
+                                                        dataIndex: 'string',
                                                         text: 'Location',
                                                         flex: 1
                                                     },
