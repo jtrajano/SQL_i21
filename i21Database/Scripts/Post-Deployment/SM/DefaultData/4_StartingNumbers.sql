@@ -398,6 +398,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Will Call')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 43
+			,[strTransactionType]	= N'Entity Number'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1005001
+			,[strModule]			= 'Entity Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Entity Number')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
