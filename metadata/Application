@@ -9,7 +9,8 @@
         "name": "Inventory",
         "views": [
             "BuildAssemblyBlend",
-            "MaterialMovementMap"
+            "MaterialMovementMap",
+            "InventoryView"
         ]
     },
     "name": "Application",
