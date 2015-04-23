@@ -36,7 +36,7 @@
 	--CONSTRAINT [FK_tblAPVendor_tblEntity] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblEntity]([intEntityId]),
 	CONSTRAINT [FK_tblAPVendor_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblAPVendor_tblGLAccount] FOREIGN KEY ([intGLAccountExpenseId]) REFERENCES [tblGLAccount]([intAccountId]),
-	CONSTRAINT [FK_tblAPVendor_tblSMApprovalList] FOREIGN KEY ([intApprovalListId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),
+	CONSTRAINT [FK_tblAPVendor_tblSMApprovalList] FOREIGN KEY ([intApprovalListId]) REFERENCES [tblSMApprovalList]([intApprovalListId])
 	--CONSTRAINT [FK_tblAPVendor_tblAPVendorToContact] FOREIGN KEY ([intDefaultContactId]) REFERENCES [tblAPVendorToContact]([intVendorToContactId])
 );
 
