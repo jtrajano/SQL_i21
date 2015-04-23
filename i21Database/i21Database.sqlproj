@@ -1426,6 +1426,7 @@
     <Build Include="dbo\Tables\tblSMApprovalList.sql" />
     <Build Include="dbo\Tables\tblSMApprovalListUserSecurity.sql" />
     <Build Include="dbo\Views\vyuEMSalesperson.sql" />
+    <Build Include="dbo\Tables\tblSMShortcutKeys.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1474,6 +1475,7 @@
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckEntry.sql" />
     <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\QM\1_MasterTables.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\13_ShortcutKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
