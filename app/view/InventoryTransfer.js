@@ -857,27 +857,27 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblQuantity',
                                                         itemId: 'colAvailableQty',
                                                         width: 100,
                                                         align: 'right',
+                                                        dataIndex: 'dblQuantity',
                                                         text: 'Available Qty',
                                                         format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'strUOM',
                                                         itemId: 'colAvailableUOM',
                                                         width: 70,
+                                                        dataIndex: 'strUOM',
                                                         text: 'UOM'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblQuantity',
                                                         itemId: 'colTransferQty',
                                                         width: 100,
                                                         align: 'right',
+                                                        dataIndex: 'dblQuantity',
                                                         text: 'Transfer Qty',
                                                         format: '0,000.##',
                                                         editor: {
@@ -994,10 +994,10 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblNet',
                                                         itemId: 'colNet',
                                                         width: 65,
                                                         align: 'right',
+                                                        dataIndex: 'dblNet',
                                                         text: 'Net',
                                                         format: '0,000.##'
                                                     },

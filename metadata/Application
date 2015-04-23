@@ -8,7 +8,8 @@
     "userConfig": {
         "name": "Inventory",
         "views": [
-            "BuildAssemblyBlend"
+            "BuildAssemblyBlend",
+            "MaterialMovementMap"
         ]
     },
     "name": "Application",

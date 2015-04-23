@@ -21,7 +21,8 @@ Ext.Loader.setConfig({
 
 Ext.application({
     views: [
-        'BuildAssemblyBlend'
+        'BuildAssemblyBlend',
+        'MaterialMovementMap'
     ],
     name: 'Inventory',
 
