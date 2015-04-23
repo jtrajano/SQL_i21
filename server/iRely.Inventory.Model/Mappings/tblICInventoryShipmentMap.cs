@@ -47,7 +47,7 @@ namespace iRely.Inventory.Model
                 .WithMany(p => p.ShipFromLocations)
                 .HasForeignKey(p => p.intShipFromLocationId);
             this.HasOptional(p => p.ShipToLocation)
-                .WithMany(p => p.ShipToLocations)
+                .WithMany(p => p.tblICInventoryShipments)
                 .HasForeignKey(p => p.intShipToLocationId);
         }
     }

@@ -53,11 +53,11 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICInventoryShipment>()
                 .Include(p => p.ShipFromLocation)
+                .Include(p => p.tblARCustomer)
                 .Include(p => p.ShipToLocation)
                 .Include("tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot")
                 .Include("tblICInventoryShipmentItems.tblICItem")
-                .Include("tblICInventoryShipmentItems.tblICUnitMeasure")
-                .Include("tblICInventoryShipmentItems.WeightUnitMeasure")
+                .Include("tblICInventoryShipmentItems.tblICItemUOM.tblICUnitMeasure")
                 .Where(w => query.Where(predicate).Any(a => a.intInventoryShipmentId == w.intInventoryShipmentId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)

@@ -82,30 +82,30 @@ namespace iRely.Inventory.Model
                 _shipToAddress = value;
             }
         }
-        //private string _shipToAddress;
-        //[NotMapped]
-        //public string strShipToAddress
-        //{
-        //    get
-        //    {
-        //        if (string.IsNullOrEmpty(_shipToAddress))
-        //            if (tblARCustomer != null)
-        //                return tblARCustomer.strCus;
-        //            else
-        //                return null;
-        //        else
-        //            return _shipToAddress;
-        //    }
-        //    set
-        //    {
-        //        _shipToAddress = value;
-        //    }
-        //}
+        private string _custName;
+        [NotMapped]
+        public string strCustomerName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_custName))
+                    if (tblARCustomer != null)
+                        return tblARCustomer.strCustomerName;
+                    else
+                        return null;
+                else
+                    return _custName;
+            }
+            set
+            {
+                _custName = value;
+            }
+        }
         
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
         public tblSMCompanyLocation ShipFromLocation { get; set; }
-        public tblSMCompanyLocation ShipToLocation { get; set; }
-        //public tblARCustomer tblARCustomer { get; set; } 
+        public tblEntityLocation ShipToLocation { get; set; }
+        public tblARCustomer tblARCustomer { get; set; } 
     }
 
     public class InventoryShipmentView

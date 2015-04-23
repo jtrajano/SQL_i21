@@ -33,10 +33,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 store: '{freightTerm}'
             },
             cboCustomer: {
-                value: '{current.intCustomerId}',
+                value: '{current.intEntityCustomerId}',
                 store: '{customer}'
             },
-            txtCustomerName: '{current.strVendorName}',
+            txtCustomerName: '{current.strCustomerName}',
             cboShipFromAddress: {
                 value: '{current.intShipFromLocationId}',
                 store: '{shipFromLocation}'
@@ -44,7 +44,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             txtShipFromAddress: '{current.strShipFromAddress}',
             cboShipToAddress: {
                 value: '{current.intShipToLocationId}',
-                store: '{shipToLocation}'
+                store: '{shipToLocation}',
+                defaultFilters: [{
+                    column: 'intEntityId',
+                    value: '{current.intEntityCustomerId}'
+                }]
             },
             txtShipToAddress: '{current.strShipToAddress}',
             txtDeliveryInstructions: '{current.strDeliveryInstruction}',
@@ -199,7 +203,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var current = win.viewModel.data.current;
 
         if (current){
-//            current.set('strShipToAddress', records[0].get('strAddress'));
+            current.set('intEntityCustomerId', records[0].get('intEntityCustomerId'));
+            current.set('strCustomerName', records[0].get('strName'));
         }
     },
 

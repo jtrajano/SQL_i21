@@ -85,11 +85,11 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
     }
 
-    public class tblARCustomer : BaseEntity
+    public class tblARCustomer
     {
         public int intEntityCustomerId { get; set; }
+        public string strCustomerName { get; set; }
         public string strCustomerNumber { get; set; }
-        public string strType { get; set; }
 
         public ICollection<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
         public ICollection<tblICItemOwner> tblICItemOwners { get; set; }
@@ -267,5 +267,28 @@ namespace iRely.Inventory.Model
         public string strTaxableByOtherTaxes { get; set; }
 
         public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
+    }
+
+    public class tblEntityLocation : BaseEntity
+    {
+        public int intEntityLocationId { get; set; }
+        public int intEntityId { get; set; }
+        public string strLocationName { get; set; }
+        public string strAddress { get; set; }
+        public string strCity { get; set; }
+        public string strCountry { get; set; }
+        public string strState { get; set; }
+        public string strZipCode { get; set; }
+        public string strPhone { get; set; }
+        public string strFax { get; set; }
+        public string strPricingLevel { get; set; }
+        public string strNotes { get; set; }
+        public int? intShipViaId { get; set; }
+        public int? intTaxCodeId { get; set; }
+        public int? intTermsId { get; set; }
+        public int? intWarehouseId { get; set; }
+        public bool? ysnDefaultLocation { get; set; }
+
+        public ICollection<tblICInventoryShipment> tblICInventoryShipments { get; set; }
     }
 }

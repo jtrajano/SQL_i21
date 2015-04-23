@@ -82,10 +82,10 @@ namespace iRely.Inventory.Model
             this.HasKey(t => t.intEntityCustomerId);
 
             // Table & Column Mappings
-            this.ToTable("tblARCustomer");
+            this.ToTable("vyuARCustomerSearch");
             this.Property(t => t.intEntityCustomerId).HasColumnName("intEntityCustomerId");
             this.Property(t => t.strCustomerNumber).HasColumnName("strCustomerNumber");
-            this.Property(t => t.strType).HasColumnName("strType");
+            this.Property(t => t.strCustomerName).HasColumnName("strName");
         }
     }
 
@@ -353,6 +353,35 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSalesTaxAccountId).HasColumnName("intSalesTaxAccountId");
             this.Property(t => t.intPurchaseTaxAccountId).HasColumnName("intPurchaseTaxAccountId");
             this.Property(t => t.strTaxableByOtherTaxes).HasColumnName("strTaxableByOtherTaxes");
+        }
+    }
+
+    public class tblEntityLocationMap : EntityTypeConfiguration<tblEntityLocation>
+    {
+        public tblEntityLocationMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intEntityLocationId);
+
+            // Table & Column Mappings
+            this.ToTable("tblEntityLocation");
+            this.Property(t => t.intEntityLocationId).HasColumnName("intEntityLocationId");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.strAddress).HasColumnName("strAddress");
+            this.Property(t => t.strCity).HasColumnName("strCity");
+            this.Property(t => t.strCountry).HasColumnName("strCountry");
+            this.Property(t => t.strState).HasColumnName("strState");
+            this.Property(t => t.strZipCode).HasColumnName("strZipCode");
+            this.Property(t => t.strPhone).HasColumnName("strPhone");
+            this.Property(t => t.strFax).HasColumnName("strFax");
+            this.Property(t => t.strPricingLevel).HasColumnName("strPricingLevel");
+            this.Property(t => t.strNotes).HasColumnName("strNotes");
+            this.Property(t => t.intShipViaId).HasColumnName("intShipViaId");
+            this.Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
+            this.Property(t => t.intTermsId).HasColumnName("intTermsId");
+            this.Property(t => t.intWarehouseId).HasColumnName("intWarehouseId");
+            this.Property(t => t.ysnDefaultLocation).HasColumnName("ysnDefaultLocation");
         }
     }
 

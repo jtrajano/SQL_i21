@@ -141,6 +141,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblARCustomer> tblARCustomers { get; set; }
         public DbSet<tblSMCountry> tblSMCountries { get; set; }
         public DbSet<tblSMCurrency> tblSMCurrencies { get; set; }
+        public DbSet<tblEntityLocation> tblEntityLocations { get; set; }
 
         public DbSet<tblSTPaidOut> tblSTPaidOut { get; set; }
         public DbSet<tblSTStore> tblSTStore { get; set; }
@@ -300,6 +301,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblSMCurrencyMap());
             modelBuilder.Configurations.Add(new tblSMCompanyLocationSubLocationMap());
             modelBuilder.Configurations.Add(new tblSMTaxCodeMap());
+            modelBuilder.Configurations.Add(new tblEntityLocationMap());
 
             modelBuilder.Configurations.Add(new tblSTPaidOutMap());
             modelBuilder.Configurations.Add(new tblSTStoreMap());
