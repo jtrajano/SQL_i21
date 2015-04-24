@@ -128,12 +128,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             {
                                 column: 'intSubLocationId',
                                 value: '{grdInventoryAdjustment.selection.intSubLocationId}',
-                                conjunction: 'and'
+                                conjunction: 'and',
+                                condition: 'blk'
                             },
                             {
                                 column: 'intStorageLocationId',
                                 value: '{grdInventoryAdjustment.selection.intStorageLocationId}',
-                                conjunction: 'and'
+                                conjunction: 'and',
+                                condition: 'blk'
                             }
                         ],
                         readOnly: '{current.ysnPosted}'

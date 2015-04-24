@@ -52,12 +52,6 @@ namespace iRely.Invetory.WebAPI.Controllers
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
 
-            // Workaround for null values on integer fields. 
-            foreach (var deserializedFilter in searchFilters) 
-            {
-                deserializedFilter.v = string.IsNullOrEmpty(deserializedFilter.v) && deserializedFilter.c.StartsWith("int") ? "-1" : deserializedFilter.v;             
-            }
-
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
             var predicate = ExpressionBuilder.True<vyuICGetPostedLot>();
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intLotId", "DESC");
