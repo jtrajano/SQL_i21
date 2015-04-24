@@ -1428,6 +1428,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdatePOStatusOnReceiptSave.sql" />
     <Build Include="dbo\Tables\tblCFItem.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentItemSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTUpdateFuturePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
