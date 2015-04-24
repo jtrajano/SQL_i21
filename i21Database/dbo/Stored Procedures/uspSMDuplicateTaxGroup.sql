@@ -1,14 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMDuplicateTaxGroup]
-	@taxGroupId int,
-	@strTaxGroup NVARCHAR(100) OUTPUT
+	@taxGroupId INT,
+	@newTaxGroupId INT OUTPUT
 AS
 BEGIN
 
-	DECLARE @newTaxGroupId INT
-	DECLARE @newName VARCHAR(100) = CONVERT(nvarchar(MAX), GETDATE(), 20);
-
 	INSERT dbo.tblSMTaxGroup([strTaxGroup], [strDescription])
-	SELECT [strTaxGroup] + ' ' + @newName, [strDescription]
+	SELECT 'Duplicate of ' + [strTaxGroup], [strDescription]
 	FROM dbo.tblSMTaxGroup 
 	WHERE [intTaxGroupId] = @taxGroupId;
 	
@@ -18,7 +15,5 @@ BEGIN
 	SELECT @newTaxGroupId, [intTaxCodeId]
 	FROM dbo.tblSMTaxGroupCode
 	WHERE [intTaxGroupId] = @taxGroupId
-
-	SELECT @strTaxGroup = [strTaxGroup] FROM  dbo.tblSMTaxGroup WHERE [intTaxGroupId] = @newTaxGroupId
 
 END
