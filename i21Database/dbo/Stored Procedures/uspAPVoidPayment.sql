@@ -14,8 +14,7 @@ BEGIN
 
 	CREATE TABLE #tmpPayables (
 		[intPaymentId] INT,
-		[intNewPaymentId] INT
-	UNIQUE (intPaymentId));
+		[intNewPaymentId] INT);
 
 	INSERT INTO #tmpPayables(intPaymentId)
 	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
@@ -46,7 +45,7 @@ BEGIN
 	FROM tblAPPayment A
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
-	DELETE FROM #tmpPayables
+	--DELETE FROM #tmpPayables
 
 	--Insert new payment records
 	MERGE INTO tblAPPayment
@@ -101,7 +100,7 @@ BEGIN
 			p.[ysnDeleted],
 			p.[dtmDateDeleted]
 		)
-		OUTPUT p.intPaymentId, inserted.intPaymentId INTO #tmpPayables(intPaymentId, intNewPaymentId);
+		OUTPUT p.intPaymentId, inserted.intPaymentId INTO #tmpPayables(intPaymentId, intNewPaymentId); --get the new and old payment id
 	
 	--update the new payment
 	UPDATE A
@@ -110,7 +109,7 @@ BEGIN
 		,A.strPaymentRecordNum = A.strPaymentRecordNum + 'V'
 		,A.dblAmountPaid = A.dblAmountPaid * -1
 	FROM tblAPPayment A
-	WHERE intPaymentId IN (SELECT intNewPaymentId FROM #tmpPayables)
+	WHERE intPaymentId IN (SELECT intNewPaymentId FROM #tmpPayables WHERE intNewPaymentId IS NOT NULL)
 
 	SELECT
 	*
@@ -138,9 +137,10 @@ BEGIN
         [strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
         UNIQUE (strTransactionId))
 
+	--REVERSE ONLY THOSE ORIGINAL payments
 	INSERT INTO #tmpCMBankTransaction
 		SELECT strPaymentRecordNum FROM tblAPPayment A
-		INNER JOIN #tmpPayables B ON A.intPaymentId = B.intPaymentId
+		INNER JOIN #tmpPayables B ON A.intPaymentId = B.intPaymentId AND B.intNewPaymentId IS NULL
 
 	-- Calling the stored procedure
 	EXEC dbo.uspCMBankTransactionReversal @intUserId, @voidDate, @isSuccessful OUTPUT
