@@ -19,7 +19,7 @@ BEGIN
 			IF (@ysnOpenStatus = 1)
 				EXEC uspPOUpdateStatus @POId, 1
 			ELSE
-				EXEC uspPOUpdateStatus @POId
+				EXEC uspPOUpdateStatus @POId, null
 
 			DELETE FROM #tmpPOList WHERE intSourceId = @POId
 		END
