@@ -18,7 +18,7 @@ AS
 			CD.dblFutures,
 			CD.dblBasis,
 			CD.intFutureMarketId,			FM.strFutMarketName,
-			CD.strFuturesMonth,
+			CD.intFutureMonthId,			MO.strFutureMonth,
 			CD.dblCashPrice,
 			CD.intCurrencyId,				CU.strCurrency,
 			CD.dblRate,
@@ -76,7 +76,8 @@ AS
 	JOIN	tblCTFreightRate		FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
 	JOIN	tblCTRailGrade			RG	ON	RG.Value					=	CD.intGrade					LEFT
 	JOIN	tblRKFutureMarket		FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
-	JOIN	tblAPVendor				VR	ON	VR.[intEntityVendorId]				=	CD.intBillTo
+	JOIN	tblAPVendor				VR	ON	VR.[intEntityVendorId]		=	CD.intBillTo				LEFT
+	JOIN	tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId
 	
 	JOIN	tblEntity				EY	ON	EY.intEntityId				=	CH.intEntityId
 	JOIN	tblICCommodity			CY	ON	CY.intCommodityId			=	CH.intCommodityId

@@ -8,7 +8,7 @@ AS
 			CAST(NULL AS NVARCHAR(MAX)) AS strComment,
 			D.intContractSeq,
 			D.dblQuantity,
-			D.strFuturesMonth,
+			D.intFutureMonthId,
 			D.intConcurrencyId,
 			D.dblBalance,
 			D.dblBalance * -1 AS dblAdjAmount,
@@ -32,7 +32,8 @@ AS
 			H.intContractNumber,
 			E.strName	AS strCustomerVendor,
 			I.strItemNo,
-			T.Name	AS	strContractType
+			T.Name	AS	strContractType,
+			M.strFutureMonth
 			
 	FROM	tblCTContractDetail		D
 	JOIN	tblCTContractHeader		H	ON	D.intContractHeaderId	=	H.intContractHeaderId
@@ -41,6 +42,7 @@ AS
 	JOIN	tblICItem				I	ON	I.intItemId				=	D.intItemId
 	JOIN	tblCTPricingType		P	ON	P.Value					=	D.intPricingType
 	JOIN	tblICUnitMeasure		UM1 ON	UM1.intUnitMeasureId	=	D.intUnitMeasureId		LEFT
-	JOIN	tblICUnitMeasure		UM2 ON	UM2.intUnitMeasureId	=	D.intPriceUOMId
+	JOIN	tblICUnitMeasure		UM2 ON	UM2.intUnitMeasureId	=	D.intPriceUOMId			LEFT
+	JOIN	tblRKFuturesMonth		M	ON	M.intFutureMonthId		=	D.intFutureMonthId
 
 

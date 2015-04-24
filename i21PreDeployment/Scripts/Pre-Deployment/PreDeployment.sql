@@ -80,3 +80,6 @@
 
 --RK
 :r .\13_RK\01_DropTableScript.sql
+
+--CT
+:r .\14_CT\01_Make_Column_Null.sql

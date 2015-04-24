@@ -11,7 +11,7 @@ AS
 			D.dblBasis,
 			D.dblCashPrice,
 			D.intFutureMarketId,
-			D.strFuturesMonth,
+			D.intFutureMonthId,
 			D.intContractOptHeaderId,
 			D.intContractSeq,
 			D.intConcurrencyId,
@@ -26,12 +26,14 @@ AS
 				WHEN 3 THEN 'HTA'
 				WHEN 4 THEN 'TBD'
 				ELSE 'CanadianBasis'
-			END	AS strPricingType
+			END	AS strPricingType,
+			M.strFutureMonth
 			
 	FROM	tblCTContractDetail		D
 	JOIN	tblSMCompanyLocation	L	ON	L.intCompanyLocationId	=	D.intCompanyLocationId
 	JOIN	tblCTContractHeader		H	ON	H.intContractHeaderId	=	D.intContractHeaderId
 	JOIN	tblEntity				E	ON	E.intEntityId			=	H.intEntityId
 	JOIN	tblICCommodity			C	ON	C.intCommodityId		=	H.intCommodityId
-	JOIN	tblCTContractType		T	ON	T.Value					=	H.intPurchaseSale
+	JOIN	tblCTContractType		T	ON	T.Value					=	H.intPurchaseSale		LEFT
+	JOIN	tblRKFuturesMonth		M	ON	M.intFutureMonthId		=	D.intFutureMonthId
 	WHERE	D.intPricingType	<>	1
