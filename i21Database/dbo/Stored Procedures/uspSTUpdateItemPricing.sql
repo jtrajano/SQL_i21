@@ -28,7 +28,7 @@ BEGIN TRY
 			@ItemRetailPrice        DECIMAL (7,2),
 			@ItemSalesPrice         DECIMAL (5,2),
 			@ItemQuantity           INT,
-			@ItemUom                NVARCHAR(50),
+			@ItemUom                NVARCHAR(10),
 			@SalesStartDate		    DATETIME,
 			@SalesEndDate   		DATETIME
 		
@@ -73,7 +73,7 @@ BEGIN TRY
 			Retail		            DECIMAL (7,2),
 			SalesPrice       		DECIMAL (5,2),
 			QuantityCase			INT,
-			UOM                     NVARCHAR(50),
+			UOM                     NVARCHAR(10),
 			SalesStartingDate		DATETIME,
 			SalesEndingDate			DATETIME
 	)  
