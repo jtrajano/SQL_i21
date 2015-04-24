@@ -27,5 +27,5 @@ SELECT
  LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId 
  JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ba.intInstrumentTypeId=1
  AND ot.intBrokerageAccountId=bc.intBrokerageAccountId 
- JOIN tblCTBook b on b.intBookId=ot.intBookId
- JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId )t
+LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
+LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId )t
