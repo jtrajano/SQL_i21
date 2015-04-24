@@ -2758,4 +2758,53 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intFutureMonthId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="11aa76bc-2d99-4523-b0ce-03d18d75cc51" ChangeDateTime="04/24/2015 03:36:59">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[strBillToAttention]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strShipFromAttention]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="93390768-c500-447b-a962-94344d06cb50" ChangeDateTime="04/24/2015 03:39:36">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[strBillToAddress]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strShipFromAddress]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="81fdec69-3a4e-4062-a1c7-479046b30357" ChangeDateTime="04/24/2015 03:42:24">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[strBillToCity]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strShipFromCity]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6852d561-5db3-4f17-bc22-61a648d74036" ChangeDateTime="04/24/2015 03:44:59">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[strBillToState]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strShipFromState]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9978de9e-088b-4494-8bb9-81133a4a45d2" ChangeDateTime="04/24/2015 03:47:08">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[strBillToZipCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strShipFromZipCode]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="823ba8b7-26db-457e-b23f-f66900ea9cc3" ChangeDateTime="04/24/2015 03:49:19">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[strBillToCountry]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strShipFromCountry]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="971ce37a-edc9-4904-a6c2-75fb07c6fbbf" ChangeDateTime="04/24/2015 03:51:22">
+    <Property Name="ElementName" Value="[dbo].[tblAPBill].[strBillToPhone]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBill]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strShipFromPhone]" />
+  </Operation>
 </Operations>
