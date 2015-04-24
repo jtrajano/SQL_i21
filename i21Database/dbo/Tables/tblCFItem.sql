@@ -1,7 +1,7 @@
-﻿CREATE TABLE [dbo].[tblCFProduct] (
-    [intProductId]                  INT             IDENTITY (1, 1) NOT NULL,
+﻿CREATE TABLE [dbo].[tblCFItem] (
+    [intItemId]                     INT             IDENTITY (1, 1) NOT NULL,
     [intNetworkId]                  INT             NULL,
-    [intSiteID]                     INT             NULL,
+    [intSiteId]                     INT             NULL,
     [strProductNumber]              NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intARItemId]                   INT             NULL,
     [strProductDescription]         NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
@@ -26,6 +26,7 @@
     [intLastModifiedUserId]         INT             NULL,
     [dtmLastModified]               DATETIME        NULL,
     [intConcurrencyId]              INT             CONSTRAINT [DF_tblCFProduct_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblCFProduct] PRIMARY KEY CLUSTERED ([intProductId] ASC)
+    CONSTRAINT [PK_tblCFProduct] PRIMARY KEY CLUSTERED ([intItemId] ASC),
+    CONSTRAINT [FK_tblCFProduct_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId])
 );
 
