@@ -25,6 +25,7 @@ namespace iRely.Inventory.BRL
         {
             return _db.GetQuery<tblICInventoryShipment>().Select(p => new InventoryShipmentView { 
                 intInventoryShipmentId = p.intInventoryShipmentId,
+                strShipmentNumber = p.strShipmentNumber,
                 strBOLNumber = p.strBOLNumber,
                 intOrderType = p.intOrderType,
                 strOrderType = (p.intOrderType == 1 ? "Sales Contract" : (p.intOrderType == 2 ? "Sales Order" : (p.intOrderType == 3 ? "Transfer Order" : ""))),
@@ -55,6 +56,7 @@ namespace iRely.Inventory.BRL
                 .Include(p => p.ShipFromLocation)
                 .Include(p => p.tblARCustomer)
                 .Include(p => p.ShipToLocation)
+                .Include("tblICInventoryShipmentItems.vyuICGetShipmentItemSource")
                 .Include("tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot")
                 .Include("tblICInventoryShipmentItems.tblICItem")
                 .Include("tblICInventoryShipmentItems.tblICItemUOM.tblICUnitMeasure")

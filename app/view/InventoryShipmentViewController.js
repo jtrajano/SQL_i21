@@ -11,9 +11,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             columns: [
                 {dataIndex: 'intInventoryShipmentId',text: "Shipment Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strBOLNumber', text: 'BOL Number', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1,  dataType: 'string'},
                 {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1,  dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strOrderType',text: 'Order Type', flex: 1,  dataType: 'int'}
+                {dataIndex: 'strOrderType',text: 'Order Type', flex: 1,  dataType: 'int'},
+                {dataIndex: 'strBOLNumber', text: 'BOL Number', flex: 1,  dataType: 'string'}
             ]
         },
         binding: {
@@ -71,7 +72,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             txtReceivedBy: '{current.strReceivedBy}',
 
             grdInventoryShipment: {
-                colOrderNumber: 'strSourceId',
+                colOrderNumber: {
+                    dataIndex: 'strSourceId',
+                    editor: {
+                        store: '{soDetails}',
+                        defaultFilters: [{
+                            column: 'intEntityCustomerId',
+                            value: '{current.intEntityCustomerId}',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -175,6 +186,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (app.DefaultLocation > 0)
             record.set('intShipFromLocationId', app.DefaultLocation);
         record.set('dtmShipDate', today);
+        record.set('intOrderType', 2);
         action(record);
     },
 
@@ -208,6 +220,30 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onOrderNumberSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+
+        if (!current) return;
+
+        if (combo.itemId === 'cboOrderNumber')
+        {
+            current.set('intSourceId', records[0].get('intSalesOrderId'));
+            current.set('intLineNo', records[0].get('intSalesOrderDetailId'));
+            current.set('intItemId', records[0].get('intItemId'));
+            current.set('strItemNo', records[0].get('strItemNo'));
+            current.set('strItemDescription', records[0].get('strItemDescription'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+            current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+            current.set('dblQuantity', records[0].get('dblQtyOrdered'));
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -218,6 +254,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboCustomer": {
                 select: this.onCustomerSelect
+            },
+            "#cboOrderNumber": {
+                select: this.onOrderNumberSelect
             }
         })
     }

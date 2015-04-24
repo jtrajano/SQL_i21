@@ -11,7 +11,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'i21.store.ShipViaBuffered',
         'EntityManagement.store.CustomerBuffered',
         'EntityManagement.store.LocationBuffered',
-        'AccountsReceivable.store.SalesOrderDetailBuffered'
+        'AccountsReceivable.store.SalesOrderDetailCompactBuffered'
     ],
 
     stores: {
@@ -50,7 +50,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             type: 'shipviabuffered'
         },
         soDetails: {
-            type: 'salesorderdetailbuffered'
+            type: 'salesorderdetailcompactbuffered'
         },
         items: {
             type: 'icbufferedcompactitem'

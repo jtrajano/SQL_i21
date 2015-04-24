@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -154,6 +155,7 @@ namespace iRely.Inventory.Model
         public int intInventoryShipmentItemId { get; set; }
         public int intInventoryShipmentId { get; set; }
         public int? intSourceId { get; set; }
+        public int? intLineNo { get; set; }
         public int? intItemId { get; set; }
         public int? intSubLocationId { get; set; }
         public decimal? dblQuantity { get; set; }
@@ -164,6 +166,25 @@ namespace iRely.Inventory.Model
         public string strNotes { get; set; }
         public int? intSort { get; set; }
 
+        private string _sourceId;
+        [NotMapped]
+        public string strSourceId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_sourceId))
+                    if (vyuICGetShipmentItemSource != null)
+                        return vyuICGetShipmentItemSource.strSourceId;
+                    else
+                        return null;
+                else
+                    return _sourceId;
+            }
+            set
+            {
+                _sourceId = value;
+            }
+        }
         private string _itemNo;
         [NotMapped]
         public string strItemNo
@@ -244,6 +265,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
+        public vyuICGetShipmentItemSource vyuICGetShipmentItemSource { get; set; }
         public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public tblICItem tblICItem { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
@@ -282,6 +304,16 @@ namespace iRely.Inventory.Model
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
         public tblICLot tblICLot { get; set; }
 
+    }
+
+    public class vyuICGetShipmentItemSource
+    {
+        [Key]
+        public int intInventoryShipmentItemId { get; set; }
+        public int? intSourceId { get; set; }
+        public string strSourceId { get; set; }
+
+        public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
     }
 
 }

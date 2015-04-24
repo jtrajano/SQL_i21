@@ -64,6 +64,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
             this.Property(t => t.intInventoryShipmentId).HasColumnName("intInventoryShipmentId");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
+            this.Property(t => t.intLineNo).HasColumnName("intLineNo");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
@@ -78,6 +79,8 @@ namespace iRely.Inventory.Model
                 .WithRequired(p => p.tblICInventoryShipmentItem)
                 .HasForeignKey(p => p.intInventoryShipmentItemId);
 
+            this.HasOptional(p => p.vyuICGetShipmentItemSource)
+                .WithRequired(p => p.tblICInventoryShipmentItem);
             this.HasOptional(p => p.tblICItem)
                 .WithMany(p => p.tblICInventoryShipmentItems)
                 .HasForeignKey(p => p.intItemId);
@@ -106,6 +109,21 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSort).HasColumnName("intSort");
             this.Property(t => t.strWarehouseCargoNumber).HasColumnName("strWarehouseCargoNumber");
 
+        }
+    }
+
+    public class vyuICGetShipmentItemSourceMap : EntityTypeConfiguration<vyuICGetShipmentItemSource>
+    {
+        public vyuICGetShipmentItemSourceMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intInventoryShipmentItemId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetShipmentItemSource");
+            this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
+            this.Property(t => t.intSourceId).HasColumnName("intSourceId");
+            this.Property(t => t.strSourceId).HasColumnName("strSourceId");
         }
     }
 }

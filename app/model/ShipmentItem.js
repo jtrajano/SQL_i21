@@ -30,6 +30,7 @@ Ext.define('Inventory.model.ShipmentItem', {
             }
         },
         { name: 'intSourceId', type: 'int', allowNull: true },
+        { name: 'intLineNo', type: 'int', allowNull: true },
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'dblQuantity', type: 'float' },
