@@ -25,8 +25,8 @@
     [dtmCreated]                    DATETIME        NULL,
     [intLastModifiedUserId]         INT             NULL,
     [dtmLastModified]               DATETIME        NULL,
-    [intConcurrencyId]              INT             CONSTRAINT [DF_tblCFProduct_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblCFProduct] PRIMARY KEY CLUSTERED ([intItemId] ASC),
-    CONSTRAINT [FK_tblCFProduct_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId])
+    [intConcurrencyId]              INT             CONSTRAINT [DF_tblCFItem_intConcurrencyId] DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblCFItem] PRIMARY KEY CLUSTERED ([intItemId] ASC),
+    CONSTRAINT [FK_tblCFItem_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId])
 );
 
