@@ -954,6 +954,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransaction for inserting the supplied arguments.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentQtyChange on adjusting the Qty of a Lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentQtyChange on adjusting the Qty of a bagged Lot item.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

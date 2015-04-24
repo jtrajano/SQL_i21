@@ -11,15 +11,15 @@ SET ANSI_WARNINGS OFF
 /*
 	Kinds of Qty change: 
 	1. Qty only
-	2. UOM only
-	3. Weight only 
-	4. Cost only
-	5. Qty and UOM
-	6. Qty and Weight
-	7. Qty and Cost
-	8. UOM and Weight 
-	9. UOM and Cost
-	10. Weight and Cost 
+	2. UOM only - TODO
+	3. Weight only - TODO
+	4. Cost only - TODO
+	5. Qty and UOM - TODO
+	6. Qty and Weight - TODO
+	7. Qty and Cost - TODO
+	8. UOM and Weight - TODO
+	9. UOM and Cost - TODO
+	10. Weight and Cost  - TODO
 
 */
 
@@ -52,9 +52,35 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
-			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= Detail.dblCost
+			,dblQty					=	CASE	WHEN ISNULL(Detail.intLotId, 0) <> 0  THEN 
+												-- When item is a Lot 
+													CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) = 0  THEN 												
+																-- Lot has no weight UOM. Do regular computation on the Qty. 
+																ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
+															ELSE
+																-- The item has a weight UOM, convert the Qty to Weight.  																
+																dbo.fnCalculateQtyBetweenUOM(
+																	Detail.intItemUOMId, 
+																	Detail.intWeightUOMId, 
+																	ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
+																)
+													END 									
+												ELSE	
+													-- Else the item is just a regular item. Do regular computation on the Qty. 
+													ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
+										END 
+			,dblUOMQty				=	CASE	WHEN ISNULL(Detail.intLotId, 0) <> 0  THEN 
+													CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) = 0  THEN 																												
+																ItemUOM.dblUnitQty
+															ELSE
+																WeightUOM.dblUnitQty
+													END 									
+												ELSE	
+													ItemUOM.dblUnitQty
+										END 
+			,dblCost				=	ISNULL(Detail.dblNewCost, 
+											Detail.dblCost
+										)	
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -69,14 +95,15 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation ItemLocation 
 				ON ItemLocation.intLocationId = Header.intLocationId 
 				AND ItemLocation.intItemId = Detail.intItemId
-			INNER JOIN dbo.tblICItemUOM ItemUOM
+			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
+			LEFT JOIN dbo.tblICItemUOM WeightUOM
+				ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) <> 0 
 			AND Detail.intNewItemUOMId IS NULL 
 			AND Detail.intNewWeightUOMId IS NULL 
-			AND Detail.dblNewCost IS NULL 
 END
 
 
