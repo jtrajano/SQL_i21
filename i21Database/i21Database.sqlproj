@@ -1037,6 +1037,7 @@
     <Build Include="dbo\Stored Procedures\uspNRReportNotesStatement.sql" />
     <Build Include="dbo\Views\vyuICGetItemAccount.sql" />
     <Build Include="dbo\Views\vyuICGetItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTFuturesMonthList.sql" />
     <Build Include="dbo\Tables\tblCTAssociation.sql" />
     <Build Include="dbo\Tables\tblGRDiscountCalculationOption.sql" />
     <Build Include="dbo\Tables\tblGRShrinkCalculationOption.sql" />
@@ -1320,6 +1321,7 @@
     <Build Include="dbo\Tables\tblCFSiteGroup.sql" />
     <Build Include="dbo\Tables\tblCFSite.sql" />
     <Build Include="dbo\Tables\tblCFPurchaseOrder.sql" />
+    <Build Include="dbo\Tables\tblCFProduct.sql" />
     <Build Include="dbo\Tables\tblCFPriceRuleGroup.sql" />
     <Build Include="dbo\Tables\tblCFPriceProfileHeader.sql" />
     <Build Include="dbo\Tables\tblCFPriceProfileDetail.sql" />
@@ -1423,12 +1425,12 @@
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
     <Build Include="dbo\Tables\tblSMApprovalList.sql" />
     <Build Include="dbo\Tables\tblSMApprovalListUserSecurity.sql" />
-    <Build Include="dbo\Views\vyuEMSalesperson.sql" />
-    <Build Include="dbo\Tables\tblSMShortcutKeys.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUpdatePOStatusOnReceiptSave.sql" />
-    <Build Include="dbo\Tables\tblCFItem.sql" />
-    <Build Include="dbo\Views\vyuICGetShipmentItemSource.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTUpdateFuturePrice.sql" />
+    <Build Include="dbo\Views\vyuRKMatchedPSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKGetBrokerInstrumentType.sql" />
+    <Build Include="dbo\Views\vyuRKGetMarketCurrency.sql" />
+    <Build Include="dbo\Views\vyuRKGetBrokerTrader.sql" />
+    <Build Include="dbo\Views\vyuRKGetMarketCommodity.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureMarketName.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1477,7 +1479,6 @@
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckEntry.sql" />
     <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\QM\1_MasterTables.sql" />
-    <None Include="Scripts\Post-Deployment\SM\DefaultData\13_ShortcutKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
