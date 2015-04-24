@@ -15,7 +15,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedStorageLocation',
         'EntityManagement.store.VendorBuffered',
         'AccountsPayable.store.PurchaseOrderDetail',
-        'EntityManagement.store.VendorLocationBuffered',
+        'EntityManagement.store.LocationBuffered',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CurrencyBuffered',
         'i21.store.FreightTermsBuffered',
@@ -127,7 +127,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'purchaseorderdetail'
         },
         shipFrom: {
-            type: 'emvendorlocationbuffered'
+            type: 'emlocationbuffered'
         },
         transferor: {
             type: 'companylocationbuffered'

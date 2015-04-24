@@ -285,7 +285,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
                                                         displayField: 'strVendorId',
-                                                        valueField: 'intVendorId'
+                                                        valueField: 'intEntityVendorId'
                                                     },
                                                     {
                                                         xtype: 'textfield',
