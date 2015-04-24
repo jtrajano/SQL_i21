@@ -15,6 +15,7 @@ Type the overview for the table here.
 		[intInventoryShipmentItemId] INT NOT NULL IDENTITY, 
 		[intInventoryShipmentId] INT NOT NULL, 
 		[intSourceId] INT NULL,
+		[intLineNo] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[intSubLocationId] INT NULL, 
 		[dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
@@ -158,3 +159,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryShipmentItem',
     @level2type = N'COLUMN',
     @level2name = N'intTaxCodeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Line No',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipmentItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intLineNo'
