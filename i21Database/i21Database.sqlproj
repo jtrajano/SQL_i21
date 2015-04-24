@@ -1431,6 +1431,7 @@
     <Build Include="dbo\Views\vyuRKGetBrokerTrader.sql" />
     <Build Include="dbo\Views\vyuRKGetMarketCommodity.sql" />
     <Build Include="dbo\Views\vyuRKGetFutureMarketName.sql" />
+    <Build Include="dbo\Tables\tblPRWorkersCompensation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

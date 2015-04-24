@@ -16,6 +16,7 @@
 	[strSpouse] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strWorkPhone] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strEthnicity] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intWorkersCompensationId] [int] NULL,
 	[strEEOCCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strSocialSecurity] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[ysn1099Employee] [bit] NULL,
@@ -41,7 +42,8 @@
     CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEmployeeId]), 
     CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
 	CONSTRAINT [FK_tblPREmployee_tblPREmployee] FOREIGN KEY ([intSupervisorId]) REFERENCES [tblPREmployee]([intEmployeeId]),
-	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId])
+	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
+	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId])
 ) ON [PRIMARY]
 GO
 
@@ -388,3 +390,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'strTimeEntryPassword'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Workers Comp',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployee',
+    @level2type = N'COLUMN',
+    @level2name = N'intWorkersCompensationId'
