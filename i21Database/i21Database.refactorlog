@@ -2751,4 +2751,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intWeightUOMId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="69ad4753-34d1-4d5c-a5d6-43d04927c2e7" ChangeDateTime="04/24/2015 03:49:09">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[strFuturesMonth]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFutureMonthId" />
+  </Operation>
 </Operations>

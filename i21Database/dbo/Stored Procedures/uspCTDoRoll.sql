@@ -34,7 +34,7 @@ BEGIN TRY
 			dtmEndDate				DATETIME,
 			dblFutures				DECIMAL(12,4),
 			dblBasis				DECIMAL(12,4),
-			strFuturesMonth			NVARCHAR(50)
+			intFutureMonthId		INT
 	)  
 	
 	SELECT	@Count = COUNT(1) 
@@ -49,7 +49,7 @@ BEGIN TRY
 			CD.dtmEndDate		=	TD.dtmEndDate,
 			CD.dblFutures		=	CASE WHEN TD.dblFutures IS NULL THEN CD.dblFutures ELSE TD.dblFutures END,
 			CD.dblBasis			=	CASE WHEN TD.dblBasis IS NULL THEN CD.dblBasis ELSE TD.dblBasis END,
-			CD.strFuturesMonth	=	TD.strFuturesMonth
+			CD.intFutureMonthId	=	TD.intFutureMonthId
 			
 	FROM	tblCTContractDetail		CD
 	JOIN	#tblCTContractDetail	TD ON TD.intContractDetailId = CD.intContractDetailId

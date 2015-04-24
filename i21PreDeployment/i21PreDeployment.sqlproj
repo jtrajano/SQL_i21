@@ -76,6 +76,7 @@
     <Folder Include="Scripts\Pre-Deployment\11_IC" />
     <Folder Include="Scripts\Pre-Deployment\12_EM" />
     <Folder Include="Scripts\Pre-Deployment\13_RK" />
+    <Folder Include="Scripts\Pre-Deployment\14_CT" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -95,6 +96,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\Account_Category_Change_14_4.sql" />
     <None Include="Scripts\Pre-Deployment\7_AR\FixARTransactionsAccounts.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\AddPOVendorConstraint.sql" />
+    <None Include="Scripts\Pre-Deployment\14_CT\01_Make_Column_Null.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
