@@ -1427,6 +1427,7 @@
     <Build Include="dbo\Tables\tblSMShortcutKeys.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdatePOStatusOnReceiptSave.sql" />
     <Build Include="dbo\Tables\tblCFItem.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentItemSource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
