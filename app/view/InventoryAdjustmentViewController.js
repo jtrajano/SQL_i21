@@ -15,7 +15,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 {dataIndex: 'strLocationName', text: 'Location Id', flex: 1, dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
                 //{dataIndex: 'strAdjustmentType', text: 'Adjustment Type', flex: 1, dataType: 'string'},
-                {dataIndex: 'dtmAdjustmentDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn'}
+                {dataIndex: 'dtmAdjustmentDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                {dataIndex: 'ysnPosted',text: 'Posted', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
         binding: {
@@ -256,11 +257,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             grdNotes: {
                 colNoteDescription: {
                     dataIndex: 'strDescription',
-                    readOnly: '{current.ysnPosted}'
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
                 },
                 colNotes: {
                     dataIndex: 'strNotes',
-                    readOnly: '{current.ysnPosted}'
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
                 }
             }
         }
