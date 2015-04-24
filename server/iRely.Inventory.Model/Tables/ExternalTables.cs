@@ -33,8 +33,6 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryShipment> ShipFromLocations { get; set; }
 
-        public ICollection<tblICCommodityAccount> tblICCommodityAccounts { get; set; }
-
         public ICollection<tblICInventoryAdjustment> tblICInventoryAdjustments { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
 

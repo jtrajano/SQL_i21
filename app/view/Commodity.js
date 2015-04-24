@@ -1693,6 +1693,7 @@ Ext.define('Inventory.view.Commodity', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
+                                                reference: 'grdGlAccounts',
                                                 itemId: 'grdGlAccounts',
                                                 margin: -1,
                                                 dockedItems: [

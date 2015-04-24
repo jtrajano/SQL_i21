@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets25b3625e67b0a74795fc54d3716fec9166116552a667c9dfeda81584758d682e))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa3b8d7d8a2a32d93565a4ef503aa8f0a2126ea75337089a9222f92f57210952c))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets25b3625e67b0a74795fc54d3716fec9166116552a667c9dfeda81584758d682e : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsa3b8d7d8a2a32d93565a4ef503aa8f0a2126ea75337089a9222f92f57210952c : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "25b3625e67b0a74795fc54d3716fec9166116552a667c9dfeda81584758d682e"; }
+            get { return "a3b8d7d8a2a32d93565a4ef503aa8f0a2126ea75337089a9222f92f57210952c"; }
         }
 
         /// <summary>
@@ -2343,12 +2343,11 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityAccount
-        [CodeFirstDatabaseSchema.tblICCommodityAccount](T1.tblICCommodityAccount_intCommodityAccountId, T1.tblICCommodityAccount_intCommodityId, T1.tblICCommodityAccount_intLocationId, T1.tblICCommodityAccount_intAccountCategoryId, T1.tblICCommodityAccount_intAccountId, T1.tblICCommodityAccount_intSort, T1.tblICCommodityAccount_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICCommodityAccount](T1.tblICCommodityAccount_intCommodityAccountId, T1.tblICCommodityAccount_intCommodityId, T1.tblICCommodityAccount_intAccountCategoryId, T1.tblICCommodityAccount_intAccountId, T1.tblICCommodityAccount_intSort, T1.tblICCommodityAccount_intConcurrencyId)
     FROM (
         SELECT 
             T.intCommodityAccountId AS tblICCommodityAccount_intCommodityAccountId, 
             T.intCommodityId AS tblICCommodityAccount_intCommodityId, 
-            T.intLocationId AS tblICCommodityAccount_intLocationId, 
             T.intAccountCategoryId AS tblICCommodityAccount_intAccountCategoryId, 
             T.intAccountId AS tblICCommodityAccount_intAccountId, 
             T.intSort AS tblICCommodityAccount_intSort, 
@@ -5207,12 +5206,11 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityAccounts
-        [iRely.Inventory.Model.tblICCommodityAccount](T1.tblICCommodityAccount_intCommodityAccountId, T1.tblICCommodityAccount_intCommodityId, T1.tblICCommodityAccount_intLocationId, T1.tblICCommodityAccount_intAccountCategoryId, T1.tblICCommodityAccount_intAccountId, T1.tblICCommodityAccount_intSort, T1.tblICCommodityAccount_intConcurrencyId)
+        [iRely.Inventory.Model.tblICCommodityAccount](T1.tblICCommodityAccount_intCommodityAccountId, T1.tblICCommodityAccount_intCommodityId, T1.tblICCommodityAccount_intAccountCategoryId, T1.tblICCommodityAccount_intAccountId, T1.tblICCommodityAccount_intSort, T1.tblICCommodityAccount_intConcurrencyId)
     FROM (
         SELECT 
             T.intCommodityAccountId AS tblICCommodityAccount_intCommodityAccountId, 
             T.intCommodityId AS tblICCommodityAccount_intCommodityId, 
-            T.intLocationId AS tblICCommodityAccount_intLocationId, 
             T.intAccountCategoryId AS tblICCommodityAccount_intAccountCategoryId, 
             T.intAccountId AS tblICCommodityAccount_intAccountId, 
             T.intSort AS tblICCommodityAccount_intSort, 

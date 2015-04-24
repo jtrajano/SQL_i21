@@ -104,7 +104,8 @@ Ext.define('Inventory.view.CommodityViewController', {
                         store: '{accountCategory}',
                         defaultFilters: [{
                             column: 'strAccountCategoryGroupCode',
-                            value: 'INV'
+                            value: 'INV',
+                            conjunction: 'and'
                         }]
                     }
                 },
@@ -112,7 +113,12 @@ Ext.define('Inventory.view.CommodityViewController', {
                 colAccountId: {
                     dataIndex: 'strAccountId',
                     editor: {
-                        store: '{glAccount}'
+                        store: '{glAccount}',
+                        defaultFilters: [{
+                            column: 'intAccountCategoryId',
+                            value: '{grdGlAccounts.selection.intAccountCategoryId}',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colAccountDescription: 'strAccountDescription'
