@@ -1427,6 +1427,7 @@
     <Build Include="dbo\Tables\tblSMApprovalListUserSecurity.sql" />
     <Build Include="dbo\Views\vyuEMSalesperson.sql" />
     <Build Include="dbo\Tables\tblSMShortcutKeys.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdatePOStatusOnReceiptSave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
