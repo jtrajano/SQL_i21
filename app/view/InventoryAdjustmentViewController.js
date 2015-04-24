@@ -424,7 +424,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         {
             current.set('intNewWeightUOMId', record.get('intItemUOMId'));
         }
-        else if (combo.itemId === 'cboNewStatus')
+        else if (combo.itemId === 'cboNewLotStatus')
         {
             current.set('intNewLotStatusId', record.get('intLotStatusId'));
         }
@@ -483,6 +483,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var colLotStatus = this.getGridColumnByDataIndex(grid, 'strLotStatus');
         var colNewLotStatus = this.getGridColumnByDataIndex(grid, 'strNewLotStatus');
 
+        var colLineTotal = this.getGridColumnByDataIndex(grid, 'dblLineTotal');
+
         var QuantityChange = 1;
         var UOMChange = 2;
         var ItemChange = 3;
@@ -504,21 +506,21 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colLotStatus.setHidden(hide);
                 colNewLotStatus.setHidden(hide);
 
+                colNewUOM.setHidden(hide);
+                colNetWeight.setHidden(hide);
+                colNewNetWeight.setHidden(hide);
+
+                colWeightUOM.setHidden(hide);
+                colNewWeightUOM.setHidden(hide);
+
+                colWeightPerQty.setHidden(hide);
+                colNewWeightPerQty.setHidden(hide);
+                colLineTotal.setHidden(hide);
+
                 // Show columns:
                 colQuantity.setHidden(show);
                 colNewQuantity.setHidden(show);
-
                 colUOM.setHidden(show);
-                colNewUOM.setHidden(show);
-
-                colNetWeight.setHidden(show);
-                colNewNetWeight.setHidden(show);
-
-                colWeightUOM.setHidden(show);
-                colNewWeightUOM.setHidden(show);
-
-                colWeightPerQty.setHidden(show);
-                colNewWeightPerQty.setHidden(show);
 
                 colUnitCost.setHidden(show);
                 colNewUnitCost.setHidden(show);
@@ -570,30 +572,35 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         return true;
     },
 
-    calculateLineTotal: function(quantity, cost, record){
-        var lineTotal = 0.00;
+    calculateLineTotal: function(newQuantity, newCost, record){
+        var lineTotal = 0.00
+            ,originalQuantity = 0.00
+            ,originalCost = 0.00
+            ,cost;
+
 
         if (record){
             // Get the new quantity.
-            quantity = Ext.isNumeric(quantity) ? quantity : record.get('dblNewQuantity');
+            newQuantity = Ext.isNumeric(newQuantity) ? newQuantity : record.get('dblNewQuantity');
+            newQuantity = Ext.isNumeric(newQuantity) ? newQuantity : 0.00;
 
-            // if new quantity is invalid, get the original qty.
-            quantity = Ext.isNumeric(quantity) ? quantity : record.get('dblQuantity');
-
-            // if original quantity is invalid, use zero.
-            quantity = Ext.isNumeric(quantity) ? quantity : 0.00;
+            // Get the original qty.
+            originalQuantity = record.get('dblQuantity');
+            originalQuantity = Ext.isNumeric(originalQuantity) ? originalQuantity : 0.00;
 
             // Get the new cost.
-            cost = Ext.isNumeric(cost) ? cost : record.get('dblNewCost');
+            newCost = Ext.isNumeric(newCost) ? newCost : record.get('dblNewCost');
+            newCost = Ext.isNumeric(newCost) ? newCost : 0.00;
 
-            // if new cost is invalid, use original cost.
-            cost = Ext.isNumeric(cost) ? cost : record.get('dblCost');
+            // Get original cost.
+            originalCost = record.get('dblCost');
+            originalCost = Ext.isNumeric(originalCost) ? originalCost : 0.00;
 
-            // if original cost is invalid, use zero.
-            cost = Ext.isNumeric(cost) ? cost : 0.00;
+            // Determine the cost to use:
+            cost = newCost != 0 ? newCost : originalCost;
 
-            lineTotal = quantity * cost;
-
+            // Calculate the line total
+            lineTotal = (newQuantity - originalQuantity) * cost;
             record.set('dblLineTotal', lineTotal);
         }
     },
@@ -657,7 +664,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         if (current){
-            me.calculateLineTotal((newQuantity === null ? 0.00 : newQuantity), null, current);
+            me.calculateLineTotal(newQuantity, null, current);
             me.calculateNewNetWeight((newQuantity === null ? false : newQuantity), null, current);
         }
     },
@@ -668,7 +675,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         if (current){
-            me.calculateLineTotal(null, (newCost === null ? 0.00 : newCost), current);
+            me.calculateLineTotal(null, newCost, current);
         }
     },
 
@@ -703,7 +710,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
-                postURL             : '../Inventory/api/Receipt/Receive',
+                postURL             : '../Inventory/api/Adjustment/Post',
                 strTransactionId    : strAdjustmentNo,
                 isPost              : !posted,
                 isRecap             : false,
@@ -738,7 +745,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../Inventory/api/Receipt/Receive',
+                postURL: '../Inventory/api/Adjustment/Post',
                 strTransactionId: currentRecord.get('strAdjustmentNo'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,
@@ -785,6 +792,46 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         });
     },
 
+    onNewUOMChange: function(control, newUOM, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newUOM === null || newUOM === '')){
+            current.set('intNewItemUOMId', null);
+        }
+    },
+
+    onNewWeightUOMChange: function(control, newWeightUOM, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newWeightUOM === null || newWeightUOM === '')){
+            current.set('intNewWeightUOMId', null);
+        }
+    },
+
+    onNewWeightUOMChange: function(control, newWeightUOM, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newWeightUOM === null || newWeightUOM === '')){
+            current.set('intNewWeightUOMId', null);
+        }
+    },
+
+    onNewLotStatusChange: function(control, newLotStatus, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newLotStatus === null || newLotStatus === '')){
+            current.set('intNewLotStatusId', null);
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboItemNo": {
@@ -803,22 +850,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboNewUOM": {
-                select: this.onAdjustmentDetailSelect
+                select: this.onAdjustmentDetailSelect,
+                change: this.onNewUOMChange
             },
-            "#cboWeightUOM": {
-                select: this.onAdjustmentDetailSelect
+            "#cboNewWeightUOM": {
+                select: this.onAdjustmentDetailSelect,
+                change: this.onNewWeightUOMChange
             },
-            "#cboNewStatus": {
-                select: this.onAdjustmentDetailSelect
-            },
-            "#cboAccountCategory": {
-                select: this.onAdjustmentDetailSelect
-            },
-            "#cboCreditAccount": {
-                select: this.onAdjustmentDetailSelect
-            },
-            "#cboDebitAccount": {
-                select: this.onAdjustmentDetailSelect
+            "#cboNewLotStatus": {
+                select: this.onAdjustmentDetailSelect,
+                change: this.onNewLotStatusChange
             },
             "#cboAdjustmentType": {
                 change: this.onAdjustmentTypeChange,

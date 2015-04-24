@@ -2127,7 +2127,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "dataIndex": "strDescription",
+                                                                "dataIndex": "strSubLocationName",
                                                                 "itemId": "colSubLocation",
                                                                 "text": "Sub Location",
                                                                 "width": 90

@@ -493,6 +493,12 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'string',
                                                                     text: 'Lot Number',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblCost',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Cost',
+                                                                    flex: 1
                                                                 }
                                                             ],
                                                             itemId: 'cboLotNumber',
@@ -804,7 +810,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboNewStatus',
+                                                            itemId: 'cboNewLotStatus',
                                                             displayField: 'strStatus',
                                                             valueField: 'strStatus'
                                                         }
@@ -884,7 +890,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'Description',
                                                         flex: 1,
                                                         editor: {
-                                                            xtype: 'textfield'
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtNoteDescription'
                                                         }
                                                     },
                                                     {
@@ -894,7 +901,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'Notes',
                                                         flex: 3,
                                                         editor: {
-                                                            xtype: 'textareafield'
+                                                            xtype: 'textareafield',
+                                                            itemId: 'txtNotes'
                                                         }
                                                     }
                                                 ],

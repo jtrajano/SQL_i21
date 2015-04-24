@@ -1771,6 +1771,36 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onSubLocationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var record = records[0];
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+
+        if (record)
+        {
+            current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
+        }
+    },
+
+    onStorageLocationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var record = records[0];
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItemLots');
+        var current = plugin.getActiveRecord();
+
+        if (record)
+        {
+            current.set('intStorageLocationId', record.get('intStorageLocationId'));
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboVendor": {
@@ -1847,6 +1877,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboWeightUOM": {
                 select: this.onReceiptItemSelect
+            },
+            "#cboSubLocation": {
+                select: this.onSubLocationSelect
+            },
+            "#cboStorageLocation": {
+                select: this.onStorageLocationSelect
             }
         })
     }
