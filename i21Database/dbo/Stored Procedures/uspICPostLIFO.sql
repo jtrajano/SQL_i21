@@ -107,7 +107,6 @@ BEGIN
 					,@strBatchId = @strBatchId
 					,@intTransactionTypeId = @intTransactionTypeId
 					,@intLotId = NULL 
-					,@ysnIsUnposted = 0
 					,@intRelatedInventoryTransactionId = NULL 
 					,@intRelatedTransactionId = NULL 
 					,@strRelatedTransactionId = NULL 
@@ -161,7 +160,6 @@ BEGIN
 				,@strBatchId = @strBatchId
 				,@intTransactionTypeId = @intTransactionTypeId
 				,@intLotId = NULL 
-				,@ysnIsUnposted = 0
 				,@intRelatedInventoryTransactionId = NULL 
 				,@intRelatedTransactionId = NULL 
 				,@strRelatedTransactionId = NULL 
@@ -219,7 +217,6 @@ BEGIN
 						,@strBatchId = @strBatchId
 						,@intTransactionTypeId = @Inventory_Write_Off_Sold
 						,@intLotId = NULL 
-						,@ysnIsUnposted = 0
 						,@intRelatedInventoryTransactionId = NULL 
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
@@ -248,7 +245,6 @@ BEGIN
 						,@strBatchId = @strBatchId
 						,@intTransactionTypeId = @Inventory_Revalue_Sold
 						,@intLotId = NULL 
-						,@ysnIsUnposted = 0
 						,@intRelatedInventoryTransactionId = NULL 
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 

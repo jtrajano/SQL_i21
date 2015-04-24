@@ -17,7 +17,6 @@
 	,@strBatchId NVARCHAR(20)
 	,@intTransactionTypeId INT
 	,@intLotId INT
-	,@ysnIsUnposted BIT
 	,@intRelatedInventoryTransactionId INT
 	,@intRelatedTransactionId INT
 	,@strRelatedTransactionId NVARCHAR(40)
@@ -54,32 +53,40 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[strRelatedTransactionId]
 		,[intRelatedTransactionId]
 		,[strTransactionForm]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsUnposted]
+		,[intRelatedInventoryTransactionId]
 		,[dtmCreated] 
 		,[intCreatedUserId] 
 		,[intConcurrencyId] 
 )
-SELECT	[intItemId]						= @intItemId
-		,[intItemLocationId]			= @intItemLocationId
-		,[intItemUOMId]					= @intItemUOMId
-		,[intLotId]						= @intLotId
-		,[dtmDate]						= @dtmDate
-		,[dblQty]						= ISNULL(@dblQty, 0)
-		,[dblUOMQty]					= ISNULL(@dblUOMQty, 0)
-		,[dblCost]						= ISNULL(@dblCost, 0)
-		,[dblValue]						= ISNULL(@dblValue, 0)
-		,[dblSalesPrice]				= ISNULL(@dblSalesPrice, 0)
-		,[intCurrencyId]				= @intCurrencyId
-		,[dblExchangeRate]				= ISNULL(@dblExchangeRate, 1)
-		,[intTransactionId]				= @intTransactionId
-		,[strTransactionId]				= @strTransactionId
-		,[strBatchId]					= @strBatchId
-		,[intTransactionTypeId]			= @intTransactionTypeId
-		,[strRelatedTransactionId]		= @strRelatedTransactionId
-		,[intRelatedTransactionId]		= @intRelatedTransactionId
-		,[strTransactionForm]			= @strTransactionForm
-		,[dtmCreated]					= GETDATE()
-		,[intCreatedUserId]				= @intUserId
-		,[intConcurrencyId]				= 1
+SELECT	[intItemId]							= @intItemId
+		,[intItemLocationId]				= @intItemLocationId
+		,[intItemUOMId]						= @intItemUOMId
+		,[intLotId]							= @intLotId
+		,[dtmDate]							= @dtmDate
+		,[dblQty]							= ISNULL(@dblQty, 0)
+		,[dblUOMQty]						= ISNULL(@dblUOMQty, 0)
+		,[dblCost]							= ISNULL(@dblCost, 0)
+		,[dblValue]							= ISNULL(@dblValue, 0)
+		,[dblSalesPrice]					= ISNULL(@dblSalesPrice, 0)
+		,[intCurrencyId]					= @intCurrencyId
+		,[dblExchangeRate]					= ISNULL(@dblExchangeRate, 1)
+		,[intTransactionId]					= @intTransactionId
+		,[strTransactionId]					= @strTransactionId
+		,[strBatchId]						= @strBatchId
+		,[intTransactionTypeId]				= @intTransactionTypeId
+		,[strRelatedTransactionId]			= @strRelatedTransactionId
+		,[intRelatedTransactionId]			= @intRelatedTransactionId
+		,[strTransactionForm]				= @strTransactionForm
+		,[intSubLocationId]					= @intSubLocationId
+		,[intStorageLocationId]				= @intStorageLocationId
+		,[ysnIsUnposted]					= 0 
+		,[intRelatedInventoryTransactionId] = @intRelatedInventoryTransactionId
+		,[dtmCreated]						= GETDATE()
+		,[intCreatedUserId]					= @intUserId
+		,[intConcurrencyId]					= 1
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 
@@ -104,7 +111,6 @@ BEGIN
 		,@strBatchId 
 		,@ActiveLotStatus 
 		,@intTransactionTypeId 
-		,@ysnIsUnposted 
 		,@strTransactionForm 
 		,@intUserId 
 		,NULL  

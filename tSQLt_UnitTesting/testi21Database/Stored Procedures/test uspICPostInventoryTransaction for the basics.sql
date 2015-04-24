@@ -115,7 +115,6 @@ BEGIN
 				,@strBatchId
 				,@intTransactionTypeId
 				,@intLotId
-				,@ysnIsUnposted
 				,@intRelatedInventoryTransactionId
 				,@intRelatedTransactionId
 				,@strRelatedTransactionId

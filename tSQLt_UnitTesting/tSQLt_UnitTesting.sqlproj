@@ -951,6 +951,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling UOM Change.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment on getting the batch id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransaction for inserting the supplied arguments.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

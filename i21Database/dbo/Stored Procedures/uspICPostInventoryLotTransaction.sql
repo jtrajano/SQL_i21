@@ -13,7 +13,6 @@
 	,@strBatchId NVARCHAR(20)
 	,@intLotStatusId INT 
 	,@intTransactionTypeId INT
-	,@ysnIsUnposted BIT
 	,@strTransactionForm NVARCHAR (255)
 	,@intUserId INT
 	,@InventoryLotTransactionIdentityId INT OUTPUT 
@@ -37,8 +36,6 @@ INSERT INTO dbo.tblICInventoryLotTransaction (
 		,[dtmDate]
 		,[dblQty]
 		,[intItemUOMId]
-		--,[dblWeight]
-		--,[intWeightUOMId]
 		,[dblCost]
 		,[intTransactionId]
 		,[strTransactionId]
@@ -60,8 +57,6 @@ SELECT	[intItemId]					= @intItemId
 		,[dtmDate]					= @dtmDate
 		,[dblQty]					= ISNULL(@dblQty, 0)
 		,[intItemUOMId]				= @intItemUOMId
-		--,[dblWeight]
-		--,[intWeightUOMId]
 		,[dblCost]					= ISNULL(@dblCost, 0)
 		,[intTransactionId]			= @intTransactionId
 		,[strTransactionId]			= @strTransactionId
@@ -69,7 +64,7 @@ SELECT	[intItemId]					= @intItemId
 		,[strBatchId]				= @strBatchId
 		,[intLotStatusId]			= @intLotStatusId 
 		,[strTransactionForm]		= @strTransactionForm
-		,[ysnIsUnposted]			= @ysnIsUnposted
+		,[ysnIsUnposted]			= 0
 		,[dtmCreated]				= GETDATE()
 		,[intCreatedUserId]			= @intUserId
 		,[intConcurrencyId]			= 1
