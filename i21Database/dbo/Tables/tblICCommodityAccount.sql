@@ -14,7 +14,6 @@ Type the overview for the table here.
 	(
 		[intCommodityAccountId] INT NOT NULL IDENTITY, 
 		[intCommodityId] INT NOT NULL, 
-		[intLocationId] INT NOT NULL,
 		[intAccountCategoryId] INT NOT NULL,
 		[intAccountId] INT NULL, 
 		[intSort] INT NULL, 
@@ -22,7 +21,7 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICCommodityAccount] PRIMARY KEY ([intCommodityAccountId]), 
 		CONSTRAINT [FK_tblICCommodityAccount_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
 		CONSTRAINT [FK_tblICCommodityAccount_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
-		CONSTRAINT [AK_tblICCommodityAccount] UNIQUE ([intAccountCategoryId], [intLocationId], [intCommodityId])
+		CONSTRAINT [AK_tblICCommodityAccount] UNIQUE ([intAccountCategoryId], [intCommodityId])
 	)
 
 	GO
@@ -72,14 +71,7 @@ Type the overview for the table here.
 		@level2name = N'intConcurrencyId'
 	GO
 
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Location Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICCommodityAccount',
-    @level2type = N'COLUMN',
-    @level2name = N'intLocationId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Account Category Id',
