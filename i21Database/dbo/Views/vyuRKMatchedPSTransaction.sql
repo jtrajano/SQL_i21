@@ -15,8 +15,8 @@ SELECT psh.intMatchFuturesPSHeaderId,
 	   ot1.dtmTransactionDate dtmSTransDate,
 	   isnull(ot.dblPrice,0) dblLPrice,
 	   isnull(ot1.dblPrice,0) dblSPrice,
-	   ot.strBrokerTradeNo strLBrokerTradeNo,
-	   ot1.strBrokerTradeNo strSBrokerTradeNo,
+	   ot.strInternalTradeNo strLBrokerTradeNo,
+	   ot1.strInternalTradeNo strSBrokerTradeNo,
 	   fm.dblContractSize dblContractSize,0 as intConcurrencyId,
 	   CASE WHEN bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0)* isnull(psd.dblMatchQty,0) end as dblFutCommission 	   
  FROM tblRKMatchFuturesPSHeader psh

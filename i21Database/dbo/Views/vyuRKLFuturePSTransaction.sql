@@ -3,7 +3,7 @@ AS
 SELECT * FROM (
 SELECT strTotalLot-dblSelectedLot1 AS dblBalanceLot, Case WHEN dblSelectedLot1=0 THEN strTotalLot else dblSelectedLot1 end dblSelectedLot ,* from  (
 SELECT 
-      strBrokerTradeNo AS strTransactionNo
+      strInternalTradeNo AS strTransactionNo
       ,dtmTransactionDate as dtmTransactionDate
       ,ot.intNoOfContract as strTotalLot
       ,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD Group By AD.intLFutOptTransactionId 
