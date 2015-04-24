@@ -1320,7 +1320,6 @@
     <Build Include="dbo\Tables\tblCFSiteGroup.sql" />
     <Build Include="dbo\Tables\tblCFSite.sql" />
     <Build Include="dbo\Tables\tblCFPurchaseOrder.sql" />
-    <Build Include="dbo\Tables\tblCFProduct.sql" />
     <Build Include="dbo\Tables\tblCFPriceRuleGroup.sql" />
     <Build Include="dbo\Tables\tblCFPriceProfileHeader.sql" />
     <Build Include="dbo\Tables\tblCFPriceProfileDetail.sql" />
@@ -1427,6 +1426,7 @@
     <Build Include="dbo\Views\vyuEMSalesperson.sql" />
     <Build Include="dbo\Tables\tblSMShortcutKeys.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdatePOStatusOnReceiptSave.sql" />
+    <Build Include="dbo\Tables\tblCFItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
