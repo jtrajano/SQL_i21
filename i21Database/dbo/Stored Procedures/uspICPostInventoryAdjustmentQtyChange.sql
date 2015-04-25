@@ -50,7 +50,11 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= Detail.intItemUOMId
+			,intItemUOMId			= -- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
+										CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) <> 0 THEN Detail.intWeightUOMId 
+												ELSE Detail.intItemUOMId 
+										END
+
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					=	CASE	WHEN ISNULL(Detail.intLotId, 0) <> 0  THEN 
 												-- When item is a Lot 

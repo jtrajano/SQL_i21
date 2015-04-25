@@ -136,7 +136,7 @@ BEGIN
 		SELECT 
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/14/2015'
 				,dblQty					= -13778.875 -- <-- This value is -250.00 kg converted to pounds. 
 				,dblUOMQty				= @PoundUnitQty
