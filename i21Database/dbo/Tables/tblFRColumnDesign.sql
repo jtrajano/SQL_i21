@@ -18,6 +18,7 @@
     [dblWidth]                 NUMERIC (18, 6) NULL,
     [intBudgetCode]	           INT             NULL,
 	[intSegmentFilterGroupId]  INT             NULL,
+	[intPercentageId]		   INT             NULL,
     [intSort]                  INT             NULL,
     [intConcurrencyId]         INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRColumnDesign] PRIMARY KEY CLUSTERED ([intColumnDetailId] ASC),
