@@ -4,7 +4,6 @@ BEGIN
 	DECLARE @intCompanyLocationId INT
 		,@strLocationName NVARCHAR(50)
 		,@CurrentDate DATETIME
-		,@CurrentTime DATETIME
 		,@intShiftId INT
 
 	SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
@@ -13,13 +12,11 @@ BEGIN
 
 	SELECT @CurrentDate = Convert(CHAR, Getdate(), 101)
 
-	SELECT @CurrentTime = Convert(CHAR, Getdate(), 108)
-
 	SELECT @intShiftId = intShiftId
 	FROM dbo.tblMFShift
 	WHERE intLocationId = @intCompanyLocationId
-		AND @CurrentTime BETWEEN dtmShiftStartTime
-			AND dtmShiftEndTime + intEndOffset
+		AND Getdate() BETWEEN @CurrentDate+dtmShiftStartTime+intStartOffset
+					AND @CurrentDate+dtmShiftEndTime + intEndOffset
 
 	SELECT intManufacturingProcessId
 		,strProcessName

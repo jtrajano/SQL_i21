@@ -31,17 +31,21 @@
     CONSTRAINT [PK_tblICInventoryAdjustmentDetail] PRIMARY KEY ([intInventoryAdjustmentDetailId]), 
     CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICInventoryAdjustment] FOREIGN KEY ([intInventoryAdjustmentId]) REFERENCES [tblICInventoryAdjustment]([intInventoryAdjustmentId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItem_OldItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItem_NewItem] FOREIGN KEY ([intNewItemId]) REFERENCES [tblICItem]([intItemId]),	 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLot_OldLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLot_NewLot] FOREIGN KEY ([intNewLotId]) REFERENCES [tblICLot]([intLotId]), 
-    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM_OldItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+    CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItem_NewItem] FOREIGN KEY ([intNewItemId]) REFERENCES [tblICItem]([intItemId]),	    
+	CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM_OldItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
     CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM_NewItemUOM] FOREIGN KEY ([intNewItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
     CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM_OldWeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
     CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICItemUOM_NewWeightUOM] FOREIGN KEY ([intNewWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
     CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLotStatus_OldLotStatus] FOREIGN KEY ([intLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]), 
 	CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLotStatus_NewLotStatus] FOREIGN KEY ([intNewLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId]) 
+
+	-- Removed the following constraints because the source tables of these relationships can have no data. 
+	-- Ex: Zero record at tblSMCompanyLocationSubLocation and NULL value on tblICInventoryAdjustmentDetail.intSubLocationId will throw a foreign key constraint error. 
+	--CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),     
+	--CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
+    --CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLot_OldLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
+    --CONSTRAINT [FK_tblICInventoryAdjustmentDetail_tblICLot_NewLot] FOREIGN KEY ([intNewLotId]) REFERENCES [tblICLot]([intLotId]), 
+
 )
 
 GO

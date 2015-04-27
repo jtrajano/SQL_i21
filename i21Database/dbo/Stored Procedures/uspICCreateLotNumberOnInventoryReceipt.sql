@@ -159,7 +159,7 @@ BEGIN
 			,strLotAlias			= ItemLot.strLotAlias
 			,intItemId				= ReceiptItem.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intSubLocationId		= ItemLot.intSubLocationId
+			,intSubLocationId		= ReceiptItem.intSubLocationId
 			,intStorageLocationId	= ItemLot.intStorageLocationId
 			,dblQty					= ItemLot.dblQuantity * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
 			,intItemUOMId			= ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId) 

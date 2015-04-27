@@ -942,38 +942,24 @@
     <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for zero Qty.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for zero weight.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for whole numbers.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the basics.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+	<Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for inventory adjustment table.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks discontinued items.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and phased out items.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks negative stock on phased out lot items.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment on getting the batch id.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Qty Change.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Expiry Lot Change.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Item Change.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Lot Status Change.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Split Lot Change.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling UOM Change.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment on getting the batch id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Qty Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Expiry Lot Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Item Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Lot Status Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Split Lot Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling UOM Change.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks items with missing costing method setup.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateCostPerLot for 25KgBag-LB-NULL.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransaction for inserting the supplied arguments.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentQtyChange on adjusting the Qty of a Lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentQtyChange on adjusting the Qty of a bagged Lot item.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

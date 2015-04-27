@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblMFRecipeSubstituteItem]
 (
 	[intRecipeSubstituteItemId] INT NOT NULL IDENTITY(1,1) , 
-    [intRecipeItemId] INT NOT NULL, 
+    [intRecipeItemId] INT NOT NULL,
 	[intRecipeId] INT NOT NULL, 
     [intItemId] INT NOT NULL, 
     [intSubstituteItemId] INT NOT NULL, 

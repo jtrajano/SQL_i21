@@ -89,6 +89,20 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
+	if @intPhysicalItemUOMId is null
+	Begin
+		SELECT @intPhysicalItemUOMId = intItemUOMId
+		FROM dbo.tblICItemUOM
+		WHERE intItemId = @intItemId
+		AND intUnitMeasureId in (Select intUnitMeasureId from dbo.tblICUnitMeasure Where strUnitMeasure like '%bag%')
+	End
+
+	SELECT @intStatusId = intStatusId
+	FROM dbo.tblMFWorkOrderStatus
+	WHERE strName = 'Started'
+
+	Update tblMFWorkOrder Set intStatusId =@intStatusId  Where intWorkOrderId=@intWorkOrderId
+
 	Select @dtmCurrentDate=GetDate()
 
 	If @intSubLocationId is null
@@ -260,7 +274,7 @@ BEGIN TRY
 		,@intBatchId = @intBatchId
 		,@strBatchId=@strRetBatchId
 
-	Update dbo.tblICLot Set intLotStatusId =(Select intLotStatusId from tblICLotStatus Where strSecondaryStatus='Quarantine')Where strLotNumber =@strOutputLotNumber
+	Update dbo.tblICLot Set intLotStatusId =(Select intLotStatusId from tblICLotStatus Where strSecondaryStatus='Quarantined')Where strLotNumber =@strOutputLotNumber
 		
 	Select @strOutputLotNumber as strOutputLotNumber
 

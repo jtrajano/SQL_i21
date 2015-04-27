@@ -8,7 +8,7 @@
 	,@intLocationId INT
 	,@dblQuantity NUMERIC(18, 6)
 	,@intItemUOMId INT
-	,@dblUnitCount NUMERIC(18, 6) = NULL
+	,@dblUnitCount NUMERIC(18, 6) = 0
 	,@intItemUnitCountUOMId INT = NULL
 	,@ysnNegativeQtyAllowed BIT = 0
 	,@ysnSubLotAllowed BIT = 0
@@ -26,6 +26,10 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+
+	if @ysnNegativeQtyAllowed is null
+	Select @ysnNegativeQtyAllowed=0
+
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@strItemNo NVARCHAR(50)
 		,@strStatus NVARCHAR(50)

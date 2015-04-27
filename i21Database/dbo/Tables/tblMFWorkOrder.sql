@@ -63,5 +63,6 @@
 	CONSTRAINT [FK_tblMFWorkOrder_tblMFProductionType_intProductionTypeId] FOREIGN KEY ([intProductionTypeId]) REFERENCES [tblMFWorkOrderProductionType]([intProductionTypeId]), 
 	CONSTRAINT [FK_tblMFWorkOrder_tblMFBlendRequirement_intBlendRequirementId] FOREIGN KEY ([intBlendRequirementId]) REFERENCES [tblMFBlendRequirement]([intBlendRequirementId]), 
 	CONSTRAINT [FK_tblMFWorkOrder_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
-	CONSTRAINT [FK_tblMFWorkOrder_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
+	CONSTRAINT [FK_tblMFWorkOrder_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
+	CONSTRAINT [FK_tblMFWorkOrder_tblMFManufacturingProcess_intManufacturingProcessId] FOREIGN KEY([intManufacturingProcessId]) REFERENCES dbo.tblMFManufacturingProcess (intManufacturingProcessId)
 )
