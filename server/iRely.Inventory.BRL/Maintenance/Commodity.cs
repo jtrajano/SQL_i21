@@ -51,10 +51,9 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICCommodity>()
-                .Include("tblICCommodityUnitMeasures.tblICUnitMeasure")
+                .Include("tblICCommodityUnitMeasures.tblICUnitMeasure.vyuICGetUOMConversions")
                 .Include("tblICCommodityAccounts.tblGLAccount")
                 .Include("tblICCommodityAccounts.tblGLAccountCategory")
-                .Include("tblICCommodityAccounts.tblSMCompanyLocation")
                 .Include(p => p.tblICCommodityClassVariants)
                 .Include(p => p.tblICCommodityGrades)
                 .Include(p => p.tblICCommodityOrigins)

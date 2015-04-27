@@ -272,6 +272,31 @@ Ext.define('Inventory.view.CommodityViewController', {
         if (combo.column.itemId === 'colUOMCode')
         {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
+            current.set('tblICUnitMeasure', records[0]);
+
+            var uoms = grid.store.data.items;
+            var exists = Ext.Array.findBy(uoms, function (row) {
+                if (row.get('ysnStockUnit') === true) {
+                    return true;
+                }
+            });
+            if (exists) {
+                var currUOM = exists.get('tblICUnitMeasure');
+                if (currUOM) {
+                    var conversions = currUOM.vyuICGetUOMConversions;
+                    if (!conversions) {
+                        conversions = currUOM.data.vyuICGetUOMConversions;
+                    }
+                    var selectedUOM = Ext.Array.findBy(conversions, function (row) {
+                        if (row.intUnitMeasureId === records[0].get('intUnitMeasureId')) {
+                            return true;
+                        }
+                    });
+                    if (selectedUOM) {
+                        current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                    }
+                }
+            }
         }
     },
 
@@ -299,44 +324,43 @@ Ext.define('Inventory.view.CommodityViewController', {
         }
     },
 
-    onUOMBeforeCheckChange: function (obj, rowIndex, checked, eOpts) {
-        if (obj.dataIndex === 'ysnAllowPurchase' || obj.dataIndex === 'ysnAllowSale'){
-            var grid = obj.up('grid');
-            var selModel = grid.getSelectionModel();
-
-            if (selModel.hasSelection()){
-                var current = selModel.getSelection()[0];
-                if (current.data.ysnStockUnit !== true){
-                    return false;
-                }
-            }
-            else {
-                return false;
-            }
-        }
-    },
-
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
-            var selModel = grid.getSelectionModel();
 
-            var current = selModel.getSelection()[0];
+            var current = grid.view.getRecord(rowIndex);
 
             if (checked === true){
                 var uoms = grid.store.data.items;
-                uoms.forEach(function(uom){
-                    if (uom !== current && uom.dummy !== true){
-                        uom.set('ysnStockUnit', false);
-                        uom.set('ysnAllowPurchase', false);
-                        uom.set('ysnAllowSale', false);
+                var currUOM = current.get('tblICUnitMeasure');
+                if (currUOM) {
+                    var conversions = currUOM.vyuICGetUOMConversions;
+                    if (!conversions) {
+                        conversions = currUOM.data.vyuICGetUOMConversions;
                     }
-                });
+                    uoms.forEach(function(uom){
+                        if (uom === current){
+                            current.set('dblUnitQty', 1);
+                        }
+                        if (uom !== current){
+                            uom.set('ysnStockUnit', false);
+                        }
+                        if (conversions){
+                            var exists = Ext.Array.findBy(conversions, function(row) {
+                                if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
+                                    return true;
+                                }
+                            });
+                            if (exists) {
+                                uom.set('dblUnitQty', exists.dblConversionToStock);
+                            }
+                        }
+                    });
+                }
             }
             else {
                 if (current){
-                    current.set('ysnAllowPurchase', false);
-                    current.set('ysnAllowSale', false);
+                    current.set('dblUnitQty', 1);
                 }
             }
         }
@@ -358,12 +382,6 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
             "#colUOMStockUnit": {
                 beforecheckchange: this.onUOMStockUnitCheckChange
-            },
-            "#colUOMAllowPurchase": {
-                beforecheckchange: this.onUOMBeforeCheckChange
-            },
-            "#colUOMAllowSale": {
-                beforecheckchange: this.onUOMBeforeCheckChange
             }
         });
     }
