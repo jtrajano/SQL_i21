@@ -1439,6 +1439,9 @@
     <Build Include="dbo\Index\IX_tblGLJournalDetail_intJournalId.sql" />
     <Build Include="dbo\Functions\fnGetBusinessDate.sql" />
     <Build Include="dbo\Tables\tblARSpecialTax.sql" />
+    <Build Include="dbo\Tables\tblSOSalesOrderDetailTax.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceDetailTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetItemTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
