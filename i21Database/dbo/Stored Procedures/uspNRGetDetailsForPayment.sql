@@ -163,6 +163,9 @@ WHERE intNoteId = @intNoteId  and dtmExpectedPayDate <= GETDATE()
 	EXEC [dbo].[uspNRCalculateInterest] @intNoteId,@dtmCurrentDate, 4, ''
 	
 	
+	--Get Payment Methods
+	Exec uspNRGetPaymentType
+
 
 End
 

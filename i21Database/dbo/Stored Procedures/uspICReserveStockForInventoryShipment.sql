@@ -47,7 +47,7 @@ BEGIN
 				ON Shipment.intShipFromLocationId = ItemLocation.intLocationId
 				AND ShipmentItems.intItemId = ItemLocation.intItemId
 			INNER JOIN dbo.tblICItemUOM ItemUOM
-				ON ShipmentItems.intUnitMeasureId = ItemUOM.intItemUOMId
+				ON ShipmentItems.intItemUOMId = ItemUOM.intItemUOMId
 			LEFT JOiN dbo.tblICInventoryShipmentItemLot ShipmentItemLots
 				ON ShipmentItems.intInventoryShipmentItemId = ShipmentItemLots.intInventoryShipmentItemId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId

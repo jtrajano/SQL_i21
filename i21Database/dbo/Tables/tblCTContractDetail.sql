@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dblFutures] [numeric](8, 4) NULL,
 	[dblBasis] [numeric](8, 4) NULL,
 	[intFutureMarketId] [int] NULL,
-	[strFuturesMonth] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intFutureMonthId] INT NULL,
 	[dblCashPrice] [numeric](9, 4) NULL,
 	[intCurrencyId] [int] NOT NULL,
 	[dblRate] [numeric](8, 4) NOT NULL,
@@ -66,5 +66,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationPortId_intCityId] FOREIGN KEY ([intDestinationPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationCityId_intCityId] FOREIGN KEY ([intDestinationCityId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShippingLineId_intEntityId] FOREIGN KEY ([intShippingLineId]) REFERENCES [tblEntity]([intEntityId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShipperId_intEntityId] FOREIGN KEY ([intShipperId]) REFERENCES [tblEntity]([intEntityId])
+	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShipperId_intEntityId] FOREIGN KEY ([intShipperId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId])
 ) 

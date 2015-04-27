@@ -20,15 +20,15 @@ BEGIN TRY
 			@ItemClass              NVARCHAR(MAX),
 			@ItemManufacturer       NVARCHAR(MAX),
 			@ItemDescription        NVARCHAR(250),
-			@ItemRegion             NVARCHAR(MAX),
-			@ItemDistrict           NVARCHAR(MAX),
-			@ItemState              NVARCHAR(MAX),
+			@ItemRegion             NVARCHAR(6),
+			@ItemDistrict           NVARCHAR(6),
+			@ItemState              NVARCHAR(2),
 			@ItemUpcCode            NVARCHAR(MAX),
-			@ItemStandardCost       DECIMAL (18,6),
-			@ItemRetailPrice        DECIMAL (18,6),
-			@ItemSalesPrice         DECIMAL (18,6),
+			@ItemStandardCost       DECIMAL (7,6),
+			@ItemRetailPrice        DECIMAL (7,2),
+			@ItemSalesPrice         DECIMAL (5,2),
 			@ItemQuantity           INT,
-			@ItemUom                NVARCHAR(50),
+			@ItemUom                NVARCHAR(10),
 			@SalesStartDate		    DATETIME,
 			@SalesEndDate   		DATETIME
 		
@@ -65,15 +65,15 @@ BEGIN TRY
 			Class	     	        NVARCHAR(MAX),
 			Manufacturer	     	NVARCHAR(MAX),
 			ItmDescription		    NVARCHAR(250),
-			Region                  NVARCHAR(MAX),
-			District                NVARCHAR(MAX),
-			States                  NVARCHAR(MAX),
+			Region                  NVARCHAR(6),
+			District                NVARCHAR(6),
+			States                  NVARCHAR(2),
 			UPCCode		            NVARCHAR(MAX),
-			Cost		            DECIMAL (18,6),
-			Retail		            DECIMAL (18,6),
-			SalesPrice       		DECIMAL (18,6),
+			Cost		            DECIMAL (7,6),
+			Retail		            DECIMAL (7,2),
+			SalesPrice       		DECIMAL (5,2),
 			QuantityCase			INT,
-			UOM                     NVARCHAR(50),
+			UOM                     NVARCHAR(10),
 			SalesStartingDate		DATETIME,
 			SalesEndingDate			DATETIME
 	)  
@@ -199,6 +199,36 @@ BEGIN TRY
 			   BEGIN
 				 set @SQL1 = @SQL1 +  ' and  stpbk_item_desc like ''%' + LTRIM(@ItemDescription) + '%'''
 			   END
+
+         if ((@ItemLocation IS NULL) OR (@ItemLocation = ''))
+			  BEGIN
+			  if ((@ItemRegion IS NOT NULL)
+			  and(@ItemRegion != ''))
+			      BEGIN
+				       set @SQL1 = @SQL1 + ' and stpbk_store_name IN
+				       (select ststo_store_name from ststomst where ststo_region_id = '''+ LTRIM(@ItemRegion) +''')'  
+				  END
+              END 
+
+          if ((@ItemLocation IS NULL) OR (@ItemLocation = ''))
+			  BEGIN
+			  if ((@ItemDistrict IS NOT NULL)
+			  and(@ItemDistrict != ''))
+			      BEGIN
+				       set @SQL1 = @SQL1 + ' and stpbk_store_name IN
+				       (select ststo_store_name from ststomst where ststo_district_id = '''+ LTRIM(@ItemDistrict) +''')'  
+				  END
+              END 
+
+          if ((@ItemLocation IS NULL) OR (@ItemLocation = ''))
+			  BEGIN
+			  if ((@ItemState IS NOT NULL)
+			  and(@ItemState != ''))
+			      BEGIN
+				       set @SQL1 = @SQL1 + ' and stpbk_store_name IN
+				       (select ststo_store_name from ststomst where ststo_state_id = '''+ LTRIM(@ItemState) +''')'  
+				  END
+              END 
 		    
 	  exec (@SQL1)
 	  select (@@ROWCOUNT)

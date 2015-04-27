@@ -129,26 +129,26 @@ IF ISNULL(@ysnRecap, 0) = 0
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'Unable to find an open accounting period to match the reverse date.' AS strMessage
-				FROM tblGLJournal A 
-				WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE ISNULL([dbo].isOpenAccountingDate(A.dtmReverseDate), 0) END 
+					FROM tblGLJournal A 
+					WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE ISNULL([dbo].isOpenAccountingDate(A.dtmReverseDate), 0) END 
 					  AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'This transaction cannot be posted because the posting date is empty.' AS strMessage
-				FROM tblGLJournal A 
-				WHERE 0 = CASE WHEN ISNULL(A.dtmDate, '') = '' THEN 0 ELSE 1 END 
-					  AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
+					FROM tblGLJournal A 
+					WHERE 0 = CASE WHEN ISNULL(A.dtmDate, '') = '' THEN 0 ELSE 1 END 
+					AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'This transaction cannot be posted because the currency is missing.' AS strMessage
-				FROM tblGLJournal A 
-				WHERE 0 = CASE WHEN ISNULL(A.intCurrencyId, '') = '' THEN 0 ELSE 1 END 
+					FROM tblGLJournal A 
+					WHERE 0 = CASE WHEN ISNULL(A.intCurrencyId, '') = '' THEN 0 ELSE 1 END 
 					  AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'Reverse date must be later than Post Date.' AS strMessage
-				FROM tblGLJournal A 
-				WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE 
+					FROM tblGLJournal A 
+					WHERE 0 = CASE WHEN ISNULL(A.dtmReverseDate, '') = '' THEN 1 ELSE 
 							CASE WHEN A.dtmReverseDate <= A.dtmDate THEN 0 ELSE 1 END
 						END AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
 				UNION
@@ -164,31 +164,28 @@ IF ISNULL(@ysnRecap, 0) = 0
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 				WHERE (A.intAccountId IS NULL OR 0 = CASE WHEN ISNULL(A.intAccountId, '') = '' THEN 0 ELSE 1 END) AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)								
 				UNION
-				SELECT DISTINCT A.intJournalId,
-					'You cannot post empty transaction.' AS strMessage
-				FROM tblGLJournal A 
-				LEFT JOIN tblGLJournalDetail B ON A.intJournalId = B.intJournalId
-				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
-				GROUP BY A.intJournalId						
-				HAVING COUNT(B.intJournalId) < 1				
+					SELECT DISTINCT A.intJournalId,'You cannot post empty transaction.' AS strMessage
+					FROM tblGLJournal A 
+					LEFT JOIN tblGLJournalDetail B ON A.intJournalId = B.intJournalId
+					WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
+					GROUP BY A.intJournalId						
+					HAVING COUNT(B.intJournalId) < 1				
 				UNION 
-				SELECT DISTINCT A.intJournalId,
-					'Unable to post. The transaction is out of balance.' AS strMessage
-				FROM tblGLJournalDetail A 
-				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
-				GROUP BY A.intJournalId		
-				HAVING SUM(ISNULL(A.dblCredit,0)) <> SUM(ISNULL(A.dblDebit,0)) 
+				SELECT DISTINCT A.intJournalId,'Unable to post. The transaction is out of balance.' AS strMessage
+					FROM tblGLJournalDetail A 
+					WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
+					GROUP BY A.intJournalId		
+					HAVING SUM(ISNULL(A.dblCredit,0)) <> SUM(ISNULL(A.dblDebit,0)) 
 
 				UNION 
-				SELECT DISTINCT A.intJournalId,
-					'Unable to post. The transaction includes restricted accounts.' AS strMessage
-				FROM tblGLJournalDetail A JOIN tblGLAccount B
-				ON A.intAccountId = B.intAccountId
-				JOIN tblGLAccountCategory C
-				ON B.intAccountCategoryId = C.intAccountCategoryId
-				WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
-				AND C.strAccountCategory != 'General'
-				GROUP BY A.intJournalId	
+				SELECT DISTINCT A.intJournalId,'Unable to post. The transaction includes restricted accounts.' AS strMessage
+					FROM tblGLJournalDetail A JOIN tblGLAccount B
+					ON A.intAccountId = B.intAccountId
+					JOIN tblGLAccountCategory C
+					ON B.intAccountCategoryId = C.intAccountCategoryId
+					WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
+					AND C.strAccountCategory <> 'General'  AND @strJournalType <> 'Origin Journal'
+					GROUP BY A.intJournalId	
 				--UNION 
 				--SELECT DISTINCT B.intJournalId,
 				--	'You cannot post this transaction because Accounting Unit setup does not match account id ' + C.strAccountId + ' setup.' AS strMessage

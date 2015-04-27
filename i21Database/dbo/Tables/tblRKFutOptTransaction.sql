@@ -12,8 +12,8 @@
     [intLocationId] INT NOT NULL, 
     [intTraderId] INT NOT NULL, 
     [intCurrencyId] INT NOT NULL, 
-    [strInternalTradeNo] NVARCHAR(10) NOT NULL, 
-    [strBrokerTradeNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strInternalTradeNo] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strBrokerTradeNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strBuySell] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intNoOfContract] INT NOT NULL, 
     [intFutureMonthId] int NULL, 
@@ -38,6 +38,5 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCTSubBook_intBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]), 
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
-	CONSTRAINT [FK_tblRKFutOptTransaction_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
-    CONSTRAINT [UK_tblRKFutOptTransaction_strBrokerTradeNo] UNIQUE ([strBrokerTradeNo])
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
 )

@@ -1434,6 +1434,23 @@
     <Build Include="dbo\Stored Procedures\uspMFCompleteWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPickWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckEntry.sql" />
+    <Build Include="dbo\Views\vyuCTContractAdjustment.sql" />
+    <Build Include="dbo\Tables\cstGLAccount.sql" />
+    <Build Include="dbo\Tables\tblQMSampleTypeDetail.sql" />
+    <Build Include="dbo\Tables\tblQMSampleType.sql" />
+    <Build Include="dbo\Tables\tblQMControlPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRGetPaymentType.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalList.sql" />
+    <Build Include="dbo\Tables\tblSMApprovalListUserSecurity.sql" />
+    <Build Include="dbo\Views\vyuRKMatchedPSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKGetBrokerInstrumentType.sql" />
+    <Build Include="dbo\Views\vyuRKGetMarketCurrency.sql" />
+    <Build Include="dbo\Views\vyuRKGetBrokerTrader.sql" />
+    <Build Include="dbo\Views\vyuRKGetMarketCommodity.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureMarketName.sql" />
+    <Build Include="dbo\Tables\tblPRWorkersCompensation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

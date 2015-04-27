@@ -12,7 +12,7 @@ SELECT
     case when B.ysnPassedThruArCustomer is null then 'Company Owned' 
 	     when B.ysnPassedThruArCustomer = 1 then 'Company Owned Pass Thru' else 'Company Owned' 		 
 		 end strSiteType,
-	 0  as ysnPostNetToArCustomer,
+	 convert(bit,0)  as ysnPostNetToArCustomer,
 	 0  as intSharedFeePercentage
 FROM
      dbo.tblCCVendorDefault A

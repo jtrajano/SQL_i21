@@ -14,9 +14,10 @@ BEGIN
 	DECLARE @FullName NVARCHAR(100)
 	DECLARE @Email NVARCHAR(100)
 	DECLARE @Password NVARCHAR(100)
+	DECLARE @ContactNumber NVARCHAR(100)
 	DECLARE @NewId INT
 
-	SELECT strUserName, strFullName, strEmail, strPassword
+	SELECT strUserName, strFullName, strEmail, strPassword, strPhone
 	INTO #tmpUsers
 	FROM tblSMUserSecurity
 	WHERE ysnDisabled = 0
@@ -28,13 +29,14 @@ BEGIN
 		SELECT TOP 1 @UserName = strUserName, 
 			@FullName = strFullName,
 			@Email = strEmail,
-			@Password = strPassword
+			@Password = strPassword,
+			@ContactNumber = strPhone
 		FROM #tmpUsers
 		
 		IF NOT EXISTS(SELECT * FROM tblEntity WHERE strName = @FullName AND strEmail = @Email)
 		BEGIN
-			INSERT INTO tblEntity(strName, strEmail)
-			VALUES (@FullName, @Email)
+			INSERT INTO tblEntity(strName, strEmail, strContactNumber)
+			VALUES (@FullName, @Email, @ContactNumber)
 			SELECT @NewId = SCOPE_IDENTITY()
 		END
 		ELSE

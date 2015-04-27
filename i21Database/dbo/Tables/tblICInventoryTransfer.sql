@@ -1,11 +1,11 @@
 ﻿CREATE TABLE [dbo].[tblICInventoryTransfer]
 (
 	[intInventoryTransferId] INT NOT NULL IDENTITY, 
-    [strTransferNo] NVARCHAR(50) NOT NULL, 
+    [strTransferNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [dtmTransferDate] DATETIME NULL DEFAULT (getdate()), 
-    [strTransferType] NVARCHAR(50) NOT NULL, 
+    [strTransferType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intTransferredById] INT NULL, 
-    [strDescription] NVARCHAR(100) NULL, 
+    [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intFromLocationId] INT NULL, 
     [intToLocationId] INT NULL, 
     [ysnShipmentRequired] BIT NULL DEFAULT ((0)), 

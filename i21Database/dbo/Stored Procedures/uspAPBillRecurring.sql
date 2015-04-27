@@ -10,6 +10,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+BEGIN TRANSACTION
+
 CREATE TABLE #tmpRecurringData (
 	[intRecurringId] [int] PRIMARY KEY,
 	UNIQUE ([intRecurringId])
@@ -26,169 +28,186 @@ WHERE intRecurringId IN (SELECT intRecurringId FROM #tmpRecurringData)
 ALTER TABLE tblAPBill
 	DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
 
-INSERT INTO tblAPBill(
-	[strVendorOrderNumber], 
-	[intTermsId],
-	[intTaxId],
-	[dtmDate],            
-	[dtmDueDate],
-	[intAccountId],
-	[strReference],
-	[dblTotal],
-	[dblSubtotal],
-	[ysnPosted],
-	[ysnPaid],
-	[strBillId],
-	[dblAmountDue],
-	[dtmDatePaid],
-	[dtmDiscountDate],
-	[intUserId],
-	[intConcurrencyId],
-	[dtmBillDate],
-	[intEntityVendorId],
-	[dblWithheld],
-	[dblDiscount],
-	[dblBillTax],
-	[dblPayment],
-	[dblInterest],
-	[intTransactionType],
-	[intPurchaseOrderId],
-	[intShipFromId],
-	[intShipToId],
-	[intStoreLocationId],
-	[intContactId],
-	[intOrderById],
-	[intEntityId]
-)
-OUTPUT inserted.intBillId, inserted.intTransactionType INTO @InsertedData
-SELECT 
-	[strVendorOrderNumber], 
-	[intTermsId],
-	[intTaxId],
-	[dtmDate],            
-	[dtmDueDate],
-	[intAccountId],
-	[strReference],
-	[dblTotal],
-	[dblSubtotal],
-	0,
-	0,
-	NULL,
-	[dblAmountDue],
-	[dtmDatePaid],
-	[dtmDiscountDate],
-	[intUserId],
-	[intConcurrencyId],
-	GETDATE(),
-	[intEntityVendorId],
-	[dblWithheld],
-	[dblDiscount],
-	[dblBillTax],
-	0,
-	[dblInterest],
-	1,
-	[intPurchaseOrderId],
-	[intShipFromId],
-	[intShipToId],
-	[intStoreLocationId],
-	[intContactId],
-	[intOrderById],
-	@userId
-FROM tblAPBill
-WHERE intBillId IN (SELECT intTransactionId FROM #tmpRecurringBill)
+DECLARE @count INT = (SELECT COUNT(*) FROM #tmpRecurringBill);
+DECLARE @counter INT = 0;
+DECLARE @billId INT, @generatedBillId INT, @type INT;
+DECLARE @billRecordId NVARCHAR(50)
 
-INSERT INTO tblAPBillDetail(
-	[intBillId],
-	[strMiscDescription],
-	[strComment], 
-	[intAccountId],
-	[dblTotal],
-	[intConcurrencyId], 
-	[dblQtyOrdered], 
-	[dblQtyReceived], 
-	[dblDiscount], 
-	[dblCost], 
-	[dblLandedCost], 
-	[dblWeight], 
-	[dblVolume], 
-	[dtmExpectedDate], 
-	[int1099Code], 
-	[int1099Category], 
-	[intTaxId],
-	[intLineNo]
-)
-SELECT
-	[intBillId],
-	[strMiscDescription],
-	[strComment], 
-	[intAccountId],
-	[dblTotal],
-	[intConcurrencyId], 
-	[dblQtyOrdered], 
-	[dblQtyReceived], 
-	[dblDiscount], 
-	[dblCost], 
-	[dblLandedCost], 
-	[dblWeight], 
-	[dblVolume], 
-	[dtmExpectedDate], 
-	[int1099Code], 
-	[int1099Category], 
-	[intTaxId],
-	[intLineNo]
-FROM tblAPBillDetail
-WHERE intBillId IN (SELECT intTransactionId FROM #tmpRecurringBill)
-
---Update strBillId
-DECLARE @type INT, @billKey INT, @billId NVARCHAR(50);
-SELECT * INTO #tmpInsertedBill FROM @InsertedData
-
-WHILE EXISTS(SELECT	1 FROM #tmpInsertedBill)
+WHILE @count != @counter
 BEGIN
-		
-	SELECT TOP(1) @billKey = intBillId, @type = intType FROM #tmpInsertedBill
 
-	IF @type = 1
-		EXEC uspSMGetStartingNumber 9, @billId OUT
+	SET @counter = @counter + 1
+	SELECT TOP(@counter) @billId = intTransactionId FROM #tmpRecurringBill
+	
+	INSERT INTO tblAPBill(
+		[strVendorOrderNumber], 
+		[intTermsId],
+		[intTaxId],
+		[dtmDate],            
+		[dtmDueDate],
+		[intAccountId],
+		[strReference],
+		[dblTotal],
+		[dblSubtotal],
+		[ysnPosted],
+		[ysnPaid],
+		[strBillId],
+		[dblAmountDue],
+		[dtmDatePaid],
+		[dtmDiscountDate],
+		[intUserId],
+		[intConcurrencyId],
+		[dtmBillDate],
+		[intEntityVendorId],
+		[dblWithheld],
+		[dblDiscount],
+		[dblBillTax],
+		[dblPayment],
+		[dblInterest],
+		[intTransactionType],
+		[intPurchaseOrderId],
+		[intShipFromId],
+		[intShipToId],
+		[intStoreLocationId],
+		[intContactId],
+		[intOrderById],
+		[intEntityId]
+	)
+	SELECT 
+		[strVendorOrderNumber], 
+		[intTermsId],
+		[intTaxId],
+		[dtmDate],            
+		[dtmDueDate],
+		[intAccountId],
+		[strReference],
+		[dblTotal],
+		[dblSubtotal],
+		0,
+		0,
+		NULL,
+		[dblAmountDue],
+		[dtmDatePaid],
+		[dtmDiscountDate],
+		[intUserId],
+		[intConcurrencyId],
+		GETDATE(),
+		[intEntityVendorId],
+		[dblWithheld],
+		[dblDiscount],
+		[dblBillTax],
+		0,
+		[dblInterest],
+		1,
+		[intPurchaseOrderId],
+		[intShipFromId],
+		[intShipToId],
+		[intStoreLocationId],
+		[intContactId],
+		[intOrderById],
+		@userId
+	FROM tblAPBill
+	WHERE intBillId IN (@billId)
+
+	SET @generatedBillId = SCOPE_IDENTITY()
+
+	INSERT INTO tblAPBillDetail(
+		[intBillId],
+		[strMiscDescription],
+		[strComment], 
+		[intAccountId],
+		[dblTotal],
+		[intConcurrencyId], 
+		[dblQtyOrdered], 
+		[dblQtyReceived], 
+		[dblDiscount], 
+		[dblCost], 
+		[dblLandedCost], 
+		[dblWeight], 
+		[dblVolume], 
+		[dtmExpectedDate], 
+		[int1099Code], 
+		[int1099Category], 
+		[intTaxId],
+		[intLineNo]
+	)
+	SELECT
+		@generatedBillId,
+		[strMiscDescription],
+		[strComment], 
+		[intAccountId],
+		[dblTotal],
+		[intConcurrencyId], 
+		[dblQtyOrdered], 
+		[dblQtyReceived], 
+		[dblDiscount], 
+		[dblCost], 
+		[dblLandedCost], 
+		[dblWeight], 
+		[dblVolume], 
+		[dtmExpectedDate], 
+		[int1099Code], 
+		[int1099Category], 
+		[intTaxId],
+		[intLineNo]
+	FROM tblAPBillDetail
+	WHERE intBillId IN (@billId)
+
+	--Update strBillId
+
+	SELECT TOP(1) @type = intTransactionType FROM tblAPBill WHERE intBillId = @generatedBillId
+
+	IF @type = 1 OR @type = 6
+		EXEC uspSMGetStartingNumber 9, @billRecordId OUT
 	ELSE IF @type = 3
-		EXEC uspSMGetStartingNumber 18, @billId OUT
+		EXEC uspSMGetStartingNumber 18, @billRecordId OUT
 	ELSE IF @type = 2
-		EXEC uspSMGetStartingNumber 20, @billId OUT
+		EXEC uspSMGetStartingNumber 20, @billRecordId OUT
 
 	UPDATE A
-		SET A.strBillId = @billId
+		SET A.strBillId = @billRecordId
 	FROM tblAPBill A
-	WHERE A.intBillId = @billKey
+	WHERE A.intBillId = @generatedBillId
 
-	DELETE FROM #tmpInsertedBill
-	WHERE intBillId = @billKey
+	--Validate
+	IF (SELECT COUNT(*) FROM tblAPBillDetail WHERE intBillId = @generatedBillId) != (SELECT COUNT(*) FROM tblAPBillDetail WHERE intBillId = @billId)
+	BEGIN
+		RAISERROR('There was an error duplicating bill detail', 16, 1);
+	END
 
+	--Create History
+	INSERT INTO tblAPRecurringHistory(
+		[strTransactionId], 
+		[strTransactionCreated], 
+		[dtmDateProcessed], 
+		[strReference], 
+		[dtmNextProcess], 
+		[dtmLastProcess], 
+		[intTransactionType]
+	)
+	SELECT 
+		[strTransactionId]		= B.strBillId, 
+		[strTransactionCreated]	= @billRecordId, 
+		[dtmDateProcessed]		= GETDATE(), 
+		[strReference]			= D.strReference, 
+		[dtmNextProcess]		= D.dtmNextProcess, 
+		[dtmLastProcess]		= D.dtmLastProcess,
+		[intTransactionType]	= 1
+	FROM tblAPBill B
+		INNER JOIN #tmpRecurringBill D ON B.intBillId = D.intTransactionId
+		WHERE B.intBillId = @billId
 END
 	
 ALTER TABLE tblAPBill
 ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
---Create History
-INSERT INTO tblAPRecurringHistory(
-	[strTransactionId], 
-	[strTransactionCreated], 
-	[dtmDateProcessed], 
-	[strReference], 
-	[dtmNextProcess], 
-	[dtmLastProcess], 
-	[intTransactionType]
-)
-SELECT 
-	[strTransactionId]		= C.strBillId, 
-	[strTransactionCreated]	= B.strBillId, 
-	[dtmDateProcessed]		= GETDATE(), 
-	[strReference]			= D.strReference, 
-	[dtmNextProcess]		= D.dtmNextProcess, 
-	[dtmLastProcess]		= D.dtmLastProcess,
-	[intTransactionType]	= 1
-FROM @InsertedData A
-	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
-	INNER JOIN tblAPBill C ON B.strVendorOrderNumber = C.strVendorOrderNumber
-	INNER JOIN #tmpRecurringBill D ON C.intBillId = D.intTransactionId
+IF @@ERROR > 0
+BEGIN
+	ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+	COMMIT TRANSACTION
+END
 
 END

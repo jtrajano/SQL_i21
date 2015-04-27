@@ -64,9 +64,10 @@ BEGIN
 			BEGIN
 				DECLARE	@Length		INT
 						,@query		VARCHAR(500)	
+						,@generalCategoryId INT
 				SELECT TOP 1 @SegmentStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Segment''
 				SELECT TOP 1 @PrimaryStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary''
-					
+				SELECT @generalCategoryId=intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = ''General''
 				SET @Length = ISNULL((SELECT intLength FROM tblGLAccountStructure WHERE strType = ''Primary''),0)
 				SET @query = ''SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst WHERE LEN(glact_acct1_8) = '' + CAST(@Length AS NVARCHAR(10)) + '' GROUP BY glact_acct1_8,glact_type''		
 		
@@ -118,7 +119,8 @@ BEGIN
 					,ysnActive
 					,ysnSelected
 					,ysnBuild
-					,ysnIsNotExisting)
+					,ysnIsNotExisting
+					,intAccountCategoryId)
 				SELECT
 					SegmentCode
 					,CodeDescription
@@ -128,6 +130,7 @@ BEGIN
 					,0
 					,0
 					,null
+					,@generalCategoryId
 				FROM @tblQuery
 				WHERE SegmentCode not in (SELECT strCode FROM tblGLAccountSegment WHERE intAccountStructureId = @PrimaryStructureId)
 		

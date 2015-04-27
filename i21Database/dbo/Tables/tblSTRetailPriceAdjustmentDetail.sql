@@ -36,5 +36,5 @@
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]) ,
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTSubcategory_intFamilyId] FOREIGN KEY ([intFamilyId]) REFERENCES [tblSTSubcategory]([intSubcategoryId]), 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTSubcategory_intClassId] FOREIGN KEY ([intClassId]) REFERENCES [tblSTSubcategory]([intSubcategoryId]), 
-    CONSTRAINT [AK_tblSTRetailPriceAdjustmentDetail] UNIQUE NONCLUSTERED ([intCompanyLocationId],[strRegion],[strDestrict],[intVendorId],[intCategoryId],[intFamilyId],[intClassId],[strUpcCode]) 
+    CONSTRAINT [AK_tblSTRetailPriceAdjustmentDetail] UNIQUE NONCLUSTERED ([intCompanyLocationId],[strRegion],[strDestrict],[intVendorId],[intCategoryId],[intFamilyId],[intClassId],[strUpcCode],[strPriceType]) 
 )

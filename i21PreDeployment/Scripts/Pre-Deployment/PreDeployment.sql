@@ -33,6 +33,7 @@
 :r .\3_DB\1_1340_to_1410.sql
 
 -- SM
+:r .\4_SM\0_1510_MasterMenu.sql
 :r .\4_SM\1_DataCleanup.sql
 :r .\4_SM\2_DropProcedureUspCMPostMessages.sql
 :r .\4_SM\3_DataMigration.sql
@@ -80,3 +81,6 @@
 
 --RK
 :r .\13_RK\01_DropTableScript.sql
+
+--CT
+:r .\14_CT\01_Make_Column_Null.sql

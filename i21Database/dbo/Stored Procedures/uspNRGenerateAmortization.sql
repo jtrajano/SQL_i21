@@ -10,14 +10,20 @@ BEGIN TRY
 	Declare @Duration Int
 			, @Schd_Intv Int
 			, @Schd_Months Int
-			, @InterestRate Float --Decimal(18,2)
-			, @NoOfPayments Int
-			, @TranInterest Float --Decimal(18,6)
-			, @MonthlyAmount Float --Decimal(18,2)
-			, @CreditLimit Float --Decimal(18,2)
-			, @Amount Float --Decimal(18,2)
-			, @ExpectedPayDate DateTime
+			--, @InterestRate Decimal(18,2) --Float
+			--, @TranInterest Decimal(18,2) --Float
+			--, @MonthlyAmount Decimal(18,6) --Float
+			--, @CreditLimit Decimal(18,6) --Float
+			--, @Amount Decimal(18,6) --Float
+			--, @ForcePaymentAmount Decimal(18,6) --Float
+			, @InterestRate Float
+			, @TranInterest Float
+			, @MonthlyAmount Float
+			, @CreditLimit Float
+			, @Amount Float
 			, @ForcePaymentAmount Float
+			, @NoOfPayments Int
+			, @ExpectedPayDate DateTime
 			, @UserId Int
 			, @NoteType nvarchar(100)
 			, @NoteTransId Int
@@ -34,7 +40,8 @@ BEGIN TRY
 		, @NoteType = strNoteType
 	FROM  dbo.tblNRNote WHERE intNoteId = @NoteId
 	
-	Declare @Fee numeric(18,6)
+	--Declare @Fee numeric(18,6)
+	Declare @Fee Float
 	SELECT @Fee = strValue FROM dbo.tblSMPreferences WHERE RTRIM(strPreference) = 'NRFee'
 	
 	-- Fee transaction one time entry when note is created
@@ -89,9 +96,8 @@ BEGIN TRY
 		WHILE ((@NoOfPayments + 1) > @Cnt)
 		BEGIN
 					
-			--DECLARE @Principal Decimal(18,2), @Interest Decimal(18,2), @Balance Decimal(18,3)
-			DECLARE @Principal Float, @Interest Float, @Balance Float
-			DECLARE @PrevBalance Decimal(18,3)
+			--DECLARE @Principal Decimal(18,6), @Interest Decimal(18,6), @Balance Decimal(18,6), @PrevBalance Decimal(18,6)
+			DECLARE @Principal Float, @Interest Float, @Balance Float, @PrevBalance Float
 			
 			If ((@CntUpdated =  0) AND (@Cnt = 1)) or @CntUpdated = 1
 			BEGIN

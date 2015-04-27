@@ -19,6 +19,7 @@
     [intFontSize]             INT             NULL,
     [strOverrideFormatMask]   NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [ysnForceReversedExpense] BIT             DEFAULT 0 NULL,
+	[ysnOverrideFormula]	  BIT             DEFAULT 0 NULL,
     [intSort]                 INT             NULL,
     [intConcurrencyId]        INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRRowDesign] PRIMARY KEY CLUSTERED ([intRowDetailId] ASC),

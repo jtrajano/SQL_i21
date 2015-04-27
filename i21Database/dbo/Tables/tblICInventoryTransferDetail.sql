@@ -15,7 +15,7 @@
     [dblTareWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblNetWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intNewLotId] INT NULL, 
-    [strNewLotId] NVARCHAR(50) NULL, 
+    [strNewLotId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intCreditAccountId] INT NULL, 
     [intDebitAccountId] INT NULL, 

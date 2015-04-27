@@ -14,15 +14,14 @@ Type the overview for the table here.
 	(
 		[intInventoryShipmentItemId] INT NOT NULL IDENTITY, 
 		[intInventoryShipmentId] INT NOT NULL, 
-		[strReferenceNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[intSourceId] INT NULL,
+		[intLineNo] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[intSubLocationId] INT NULL, 
 		[dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
-		[intUnitMeasureId] INT NOT NULL, 
-		[intWeightUomId] INT NULL, 
-		[dblTareWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dbNetWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[intItemUOMId] INT NOT NULL, 
 		[dblUnitPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[intTaxCodeId] INT NULL,
 		[intDockDoorId] INT NULL, 
 		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intSort] INT NULL, 
@@ -30,7 +29,9 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICInventoryShipmentItem] PRIMARY KEY ([intInventoryShipmentItemId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
-		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId])
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId])
 	)
 
 	GO
@@ -52,14 +53,7 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intInventoryShipmentId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Reference Number',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryShipmentItem',
-		@level2type = N'COLUMN',
-		@level2name = N'strReferenceNumber'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Item Id',
@@ -89,40 +83,19 @@ Type the overview for the table here.
 		@level2name = N'dblQuantity'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Unit Measure Id',
+		@value = N'Item Unit of Measure Id',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
 		@level1name = N'tblICInventoryShipmentItem',
 		@level2type = N'COLUMN',
-		@level2name = N'intUnitMeasureId'
+		@level2name = 'intItemUOMId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Weight Unit Measure Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryShipmentItem',
-		@level2type = N'COLUMN',
-		@level2name = N'intWeightUomId'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Tare Weight',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryShipmentItem',
-		@level2type = N'COLUMN',
-		@level2name = N'dblTareWeight'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Net Weight',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryShipmentItem',
-		@level2type = N'COLUMN',
-		@level2name = N'dbNetWeight'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Unit Price',
@@ -168,3 +141,30 @@ Type the overview for the table here.
 		@level1name = N'tblICInventoryShipmentItem',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Source Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipmentItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intSourceId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tax Code Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipmentItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intTaxCodeId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Line No',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipmentItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intLineNo'

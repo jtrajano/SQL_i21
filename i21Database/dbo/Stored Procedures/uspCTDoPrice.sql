@@ -13,7 +13,7 @@ BEGIN TRY
 			@Futures				DECIMAL(12,4),
 			@Basis					DECIMAL(12,4),
 			@FutureMarketId			INT,
-			@FuturesMonth			NVARCHAR(50),
+			@intFutureMonthId		INT,
 			@ContractOptHeaderId	INT,
 			@CurrentQty				DECIMAL(12,4),
 			@ContractSeq			INT,
@@ -31,7 +31,7 @@ BEGIN TRY
 			@Futures				=	dblFutures,
 			@Basis					=	dblBasis,
 			@FutureMarketId			=	intFutureMarketId,
-			@FuturesMonth			=	strFuturesMonth,
+			@intFutureMonthId		=	intFutureMonthId,
 			@ContractOptHeaderId	=	intContractOptHeaderId
 			
 	FROM	OPENXML(@idoc, 'root',2)
@@ -45,7 +45,7 @@ BEGIN TRY
 			dblFutures				DECIMAL(12,4),
 			dblBasis				DECIMAL(12,4),
 			intFutureMarketId		INT,
-			strFuturesMonth			NVARCHAR(50),
+			intFutureMonthId		INT,
 			intContractOptHeaderId	INT
 	)  
 	  
@@ -80,26 +80,31 @@ BEGIN TRY
 	BEGIN
 		INSERT	INTO tblCTContractDetail
 		(
-				intConcurrencyId,	intContractHeaderId,	intContractSeq,			intCompanyLocationId,
-				dtmStartDate,		intItemId,				dtmEndDate,				intFreightTermId,
-				intShipViaId,		dblQuantity,			intUnitMeasureId,		intPricingType,
-				dblFutures,			dblBasis,				intFutureMarketId,		strFuturesMonth,
-				dblCashPrice,		intCurrencyId,			dblRate,				strCurrencyReference,
-				intMarketZoneId,	intDiscountType,		intDiscountId,			intContractOptHeaderId,
-				strBuyerSeller,		intBillTo,				intFreightRateId,		strFobBasis,
-				intGrade,			strRemark,				dblOriginalQty,			dblBalance,
-				dblIntransitQty,	dblScheduleQty
+				intConcurrencyId,		intContractHeaderId,	intContractSeq,			intCompanyLocationId,
+				dtmStartDate,			intItemId,				dtmEndDate,				intFreightTermId,
+				intShipViaId,			dblQuantity,			intUnitMeasureId,		intPricingType,
+				dblFutures,				dblBasis,				intFutureMarketId,		intFutureMonthId,
+				dblCashPrice,			intCurrencyId,			dblRate,				strCurrencyReference,
+				intMarketZoneId,		intDiscountType,		intDiscountId,			intContractOptHeaderId,
+				strBuyerSeller,			intBillTo,				intFreightRateId,		strFobBasis,
+				intGrade,				strRemark,				dblOriginalQty,			dblBalance,
+				dblIntransitQty,		dblScheduleQty,			intPriceUOMId,			intLoadingPortId,
+				intDestinationPortId,	strShippingTerm,		intShippingLineId,		strVessel,
+				intDestinationCityId,	intShipperId
 		)
 		SELECT 
-				1,					intContractHeaderId,	@ContractSeq,			intCompanyLocationId,
-				dtmStartDate,		intItemId,				dtmEndDate,				intFreightTermId,
-				intShipViaId,		@CurrentQty-@Quantity,	intUnitMeasureId,		intPricingType,
-				dblFutures,			dblBasis,				intFutureMarketId,		strFuturesMonth,
-				dblCashPrice,		intCurrencyId,			dblRate,				strCurrencyReference,
-				intMarketZoneId,	intDiscountType,		intDiscountId,			intContractOptHeaderId,
-				strBuyerSeller,		intBillTo,				intFreightRateId,		strFobBasis,
-				intGrade,			strRemark,				dblOriginalQty,			dblBalance,
-				dblIntransitQty,	dblScheduleQty
+				1,						intContractHeaderId,	@ContractSeq,			intCompanyLocationId,
+				dtmStartDate,			intItemId,				dtmEndDate,				intFreightTermId,
+				intShipViaId,			@CurrentQty-@Quantity,	intUnitMeasureId,		intPricingType,
+				dblFutures,				dblBasis,				intFutureMarketId,		intFutureMonthId,
+				dblCashPrice,			intCurrencyId,			dblRate,				strCurrencyReference,
+				intMarketZoneId,		intDiscountType,		intDiscountId,			intContractOptHeaderId,
+				strBuyerSeller,			intBillTo,				intFreightRateId,		strFobBasis,
+				intGrade,				strRemark,				dblOriginalQty,			dblBalance,
+				dblIntransitQty,		dblScheduleQty,			intPriceUOMId,			intLoadingPortId,
+				intDestinationPortId,	strShippingTerm,		intShippingLineId,		strVessel,
+				intDestinationCityId,	intShipperId
+
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId = @ContractDetailId
 		
@@ -135,7 +140,7 @@ BEGIN TRY
 				dblBasis				=	@Basis,
 				dblCashPrice			=	@Futures + @Basis,
 				intFutureMarketId		=	@FutureMarketId	,
-				strFuturesMonth			=	@FuturesMonth	,
+				intFutureMonthId		=	@intFutureMonthId	,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
 				intPricingType			=	@intPricingType	
@@ -149,7 +154,7 @@ BEGIN TRY
 				dblBasis				=	@Basis,
 				dblCashPrice			=	@Futures + @Basis,
 				intFutureMarketId		=	@FutureMarketId	,
-				strFuturesMonth			=	@FuturesMonth	,
+				intFutureMonthId		=	@intFutureMonthId,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
 				intPricingType			=	@intPricingType	
@@ -158,7 +163,7 @@ BEGIN TRY
 	
 END TRY      
 BEGIN CATCH       
- SET @ErrMsg = ERROR_MESSAGE()      
- IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
- RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
+	SET @ErrMsg = ERROR_MESSAGE()      
+	IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
+	RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 END CATCH

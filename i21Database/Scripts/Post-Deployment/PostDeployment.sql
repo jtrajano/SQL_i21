@@ -26,6 +26,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\10_Screen.sql
 :r .\SM\DefaultData\11_FreightTerms.sql
 :r .\SM\DefaultData\12_ReminderList.sql
+:r .\SM\DefaultData\13_ShortcutKey.sql
 :r .\SM\SMDataMigrations.sql
 
 -- Canned Report

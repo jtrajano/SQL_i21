@@ -27,6 +27,7 @@
 	[strHardwareOrderDateComment] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[dtmInitialUserGroupDuesInvoice] [datetime] null,
 	[ysnReceivedDownPayment] [bit] null,
+	[ysnGenerateTicket] [bit] null,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 
 	CONSTRAINT [PK_tblHDProject] PRIMARY KEY CLUSTERED ([intProjectId] ASC),
@@ -295,3 +296,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDProject',
     @level2type = N'COLUMN',
     @level2name = N'ysnReceivedDownPayment'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Generate Tickets',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDProject',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnGenerateTicket'
