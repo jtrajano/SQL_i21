@@ -274,7 +274,7 @@ BEGIN TRY
 		,@intBatchId = @intBatchId
 		,@strBatchId=@strRetBatchId
 
-	Update dbo.tblICLot Set intLotStatusId =(Select intLotStatusId from tblICLotStatus Where strSecondaryStatus='Quarantined')Where strLotNumber =@strOutputLotNumber
+	Update dbo.tblICLot Set intLotStatusId =3 Where strLotNumber =@strOutputLotNumber
 		
 	Select @strOutputLotNumber as strOutputLotNumber
 
