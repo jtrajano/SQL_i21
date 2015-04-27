@@ -28,11 +28,11 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 {dataIndex: 'intStorageLocationId',text: "Storage Location Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strName', text: 'Name', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strLocationName', text: 'Location Name', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strSubLocationName', text: 'Sub Location Name', flex: 1,  dataType: 'string'},
                 {dataIndex: 'strStorageUnitType', text: 'Storage Unit Type', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strParentStorageLocationName', text: 'Parent Storage Location', flex: 1.5,  dataType: 'string'},
-                {dataIndex: 'strRestrictionCode', text: 'Restriction Code', flex: 1,  dataType: 'string'}
+                {dataIndex: 'strLocationName', text: 'Location', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strParentStorageLocationName', text: 'Parent Unit', flex: 1.5,  dataType: 'string'},
+                {dataIndex: 'strRestrictionCode', text: 'Restriction Type', flex: 1,  dataType: 'string'}
             ]
         },
         binding: {

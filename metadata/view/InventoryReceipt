@@ -1445,7 +1445,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter12",
+                                                                    "name": "filter110",
                                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1704,6 +1704,22 @@
                                                             "designerId": "98fb0e70-0811-4919-bb71-b6def7e9a918"
                                                         },
                                                         {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strDescription",
+                                                                "itemId": "colOrderUOM",
+                                                                "text": "Ordered UOM",
+                                                                "width": 100
+                                                            },
+                                                            "name": "MyColumn23",
+                                                            "designerId": "d0c56a1b-a263-4124-859c-4de773418b6f"
+                                                        },
+                                                        {
                                                             "type": "Ext.grid.column.Number",
                                                             "reference": {
                                                                 "name": "columns",
@@ -1756,48 +1772,6 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Number",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "align": "right",
-                                                                "dataIndex": "dblQtyToReceive",
-                                                                "dataType": "numeric",
-                                                                "format": "0,000.##",
-                                                                "itemId": "colQtyToReceive",
-                                                                "text": "Qty to Receive",
-                                                                "width": 95
-                                                            },
-                                                            "name": "MyNumberColumn1",
-                                                            "designerId": "b7a74d23-a868-4512-8dd9-e42022442ce4",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "dataType",
-                                                                    "type": "string"
-                                                                }
-                                                            ],
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Number",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "itemId": "txtQtyToReceive",
-                                                                        "minValue": 0
-                                                                    },
-                                                                    "name": "MyNumberField15",
-                                                                    "designerId": "87ee2728-6433-4040-b5ae-83e6d3a906a7"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
                                                             "type": "Ext.grid.column.Column",
                                                             "reference": {
                                                                 "name": "columns",
@@ -1806,7 +1780,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "itemId": "colUOM",
-                                                                "text": "UOM"
+                                                                "text": "Receipt UOM"
                                                             },
                                                             "name": "MyColumn54",
                                                             "designerId": "a8805c3f-5f97-4ac3-8830-0e32c8effefb",
@@ -1865,6 +1839,48 @@
                                                                             "type": "string"
                                                                         }
                                                                     ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
+                                                                "dataIndex": "dblQtyToReceive",
+                                                                "dataType": "numeric",
+                                                                "format": "0,000.##",
+                                                                "itemId": "colQtyToReceive",
+                                                                "text": "Qty to Receive",
+                                                                "width": 95
+                                                            },
+                                                            "name": "MyNumberColumn1",
+                                                            "designerId": "b7a74d23-a868-4512-8dd9-e42022442ce4",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "itemId": "txtQtyToReceive",
+                                                                        "minValue": 0
+                                                                    },
+                                                                    "name": "MyNumberField15",
+                                                                    "designerId": "87ee2728-6433-4040-b5ae-83e6d3a906a7"
                                                                 }
                                                             ]
                                                         },
@@ -2374,7 +2390,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter13",
+                                                                            "name": "filter111",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3472,7 +3488,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter112",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4309,7 +4325,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter113",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4753,7 +4769,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging12",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

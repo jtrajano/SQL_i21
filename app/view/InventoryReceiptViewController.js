@@ -161,6 +161,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLotTracking: 'strLotTracking',
+                colOrderUOM: 'strOrderUOM',
                 colQtyOrdered: 'dblOrderQty',
                 colQtyToReceive: 'dblOpenReceive',
                 colReceived: 'dblReceived',
@@ -1178,6 +1179,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('strItemNo', po.get('strItemNo'));
         current.set('intUnitMeasureId', po.get('intUnitOfMeasureId'));
         current.set('strUnitMeasure', po.get('strUOM'));
+        current.set('strOrderUOM', po.get('strUOM'));
         current.set('dblUnitCost', po.get('dblCost'));
         current.set('dblLineTotal', po.get('dblTotal'));
         current.set('strLotTracking', po.get('strLotTracking'));
