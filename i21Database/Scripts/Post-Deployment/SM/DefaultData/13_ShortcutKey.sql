@@ -1,5 +1,5 @@
 ﻿GO
-	PRINT N'BEGIN INSERT DEFAULT SHORCUTKEY'
+	TRUNCATE TABLE [dbo].[tblSMShortcutKeys]
 GO
 SET IDENTITY_INSERT [dbo].[tblSMShortcutKeys] ON 
 
