@@ -143,37 +143,37 @@ BEGIN
 		INSERT INTO dbo.tblICInventoryShipmentItem (
 				intInventoryShipmentId 
 				,intItemId 
-				,intUnitMeasureId
+				,intItemUOMId
 				,dblQuantity
 				,dblUnitPrice
 		)
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @WetGrains
-				,intUnitMeasureId = @WetGrains_BushelUOMId
+				,intItemUOMId = @WetGrains_BushelUOMId
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
 		UNION ALL
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @StickyGrains
-				,intUnitMeasureId = @StickyGrains_BushelUOMId
+				,intItemUOMId = @StickyGrains_BushelUOMId
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
 		UNION ALL
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @PremiumGrains
-				,intUnitMeasureId = @PremiumGrains_BushelUOMId
+				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
 		UNION ALL
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @ColdGrains
-				,intUnitMeasureId = @ColdGrains_BushelUOMId
+				,intItemUOMId = @ColdGrains_BushelUOMId
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
 		UNION ALL
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @HotGrains
-				,intUnitMeasureId = @HotGrains_BushelUOMId
+				,intItemUOMId = @HotGrains_BushelUOMId
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
 

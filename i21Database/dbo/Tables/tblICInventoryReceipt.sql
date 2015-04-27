@@ -46,6 +46,7 @@ Type the overview for the table here.
 		[strSealStatus] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 		[dtmReceiveTime] [datetime] NULL,
 		[dblActualTempReading] [numeric](18, 6) NULL DEFAULT ((0)),
+		[intShipmentId] INT NULL,
 		[ysnPosted] [bit] NULL DEFAULT ((0)),
 		[intCreatedUserId] [int] NULL,
 		[intEntityId] [int] NULL,
@@ -359,3 +360,12 @@ Type the overview for the table here.
 		@level1name = N'tblICInventoryReceipt',
 		@level2type = N'COLUMN',
 		@level2name = N'dblActualTempReading'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Shipment Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryReceipt',
+    @level2type = N'COLUMN',
+    @level2name = N'intShipmentId'

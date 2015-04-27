@@ -602,37 +602,37 @@ BEGIN
 				,intItemId 
 				,dblQuantity
 				,dblUnitPrice
-				,intUnitMeasureId
+				,intItemUOMId
 		)
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @WetGrains
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
-				,intUnitMeasureId = @WetGrains_BushelUOMId
+				,intItemUOMId = @WetGrains_BushelUOMId
 		UNION ALL
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @StickyGrains
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
-				,intUnitMeasureId = @StickyGrains_BushelUOMId
+				,intItemUOMId = @StickyGrains_BushelUOMId
 		UNION ALL
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @PremiumGrains
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
-				,intUnitMeasureId = @PremiumGrains_BushelUOMId
+				,intItemUOMId = @PremiumGrains_BushelUOMId
 		UNION ALL
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @ColdGrains
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
-				,intUnitMeasureId = @ColdGrains_BushelUOMId
+				,intItemUOMId = @ColdGrains_BushelUOMId
 		UNION ALL
 		SELECT 	intInventoryShipmentId = 1
 				,intItemId = @HotGrains
 				,dblQuantity = 75
 				,dblUnitPrice = 55.23
-				,intUnitMeasureId = @HotGrains_BushelUOMId
+				,intItemUOMId = @HotGrains_BushelUOMId
 
 		-- Reduce stock qty from the Item Stock table 
 		UPDATE	ItemStock
