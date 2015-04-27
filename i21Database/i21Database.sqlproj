@@ -1442,6 +1442,8 @@
     <Build Include="dbo\Tables\tblSOSalesOrderDetailTax.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetailTax.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemTaxes.sql" />
+    <Build Include="dbo\Tables\tblPRTimecard.sql" />
+    <Build Include="dbo\Tables\tblPRTimeEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
