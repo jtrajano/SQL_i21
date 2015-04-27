@@ -17,7 +17,11 @@ SELECT
 	A.intBankAccountId,
 	H.strCbkNo,
 	A.strApType,
-	A.strEnterTotalsAsGrossOrNet
+	A.strEnterTotalsAsGrossOrNet,
+	A.strImportFilePath,
+	A.strImportFileName,
+	A.strImportAuxiliaryFileName,
+	A.intImportFileHeaderId
 
 FROM
      dbo.tblCCVendorDefault A
