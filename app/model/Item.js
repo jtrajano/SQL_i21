@@ -155,7 +155,7 @@ Ext.define('Inventory.model.Item', {
 
     validate: function(options){
         var errors = this.callParent(arguments);
-        if (this.get('strType') === 'Raw Material') {
+        if (this.get('strType') === 'Raw Material' || this.get('strType') === 'Finished Good') {
             if (this.get('intLifeTime') <= 0) {
                 errors.add({
                     field: 'intLifeTime',
