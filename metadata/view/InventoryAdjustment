@@ -1017,12 +1017,6 @@
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Lot Number',",
                                                             "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'dblCost',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Cost',",
-                                                            "\t\tflex: 1",
                                                             "\t}",
                                                             "]"
                                                         ],
@@ -1723,7 +1717,7 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strStatus",
-                                                        "itemId": "cboNewLotStatus",
+                                                        "itemId": "cboNewStatus",
                                                         "valueField": "strStatus"
                                                     },
                                                     "name": "MyComboBox82",
@@ -1937,9 +1931,6 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "txtNoteDescription"
-                                                    },
                                                     "name": "MyTextField5",
                                                     "designerId": "72ec1abd-d2e0-448a-9bd1-2a46e74ffb2b"
                                                 }
@@ -1968,9 +1959,6 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "txtNotes"
-                                                    },
                                                     "name": "MyTextArea2",
                                                     "designerId": "8e6807fa-9eef-4a69-ba90-500dc331d767"
                                                 }

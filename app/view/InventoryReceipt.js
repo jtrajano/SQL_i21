@@ -285,7 +285,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
                                                         displayField: 'strVendorId',
-                                                        valueField: 'intVendorId'
+                                                        valueField: 'intEntityVendorId'
                                                     },
                                                     {
                                                         xtype: 'textfield',
@@ -906,7 +906,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         format: '0,000.##',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            itemId: 'txtQtyToReceive'
+                                                                            itemId: 'txtQtyToReceive',
+                                                                            minValue: 0
                                                                         }
                                                                     },
                                                                     {
@@ -1001,7 +1002,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         text: 'Unit Cost',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            itemId: 'txtUnitCost'
+                                                                            itemId: 'txtUnitCost',
+                                                                            minValue: 0
                                                                         }
                                                                     },
                                                                     {
@@ -1012,7 +1014,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         text: 'Unit Retail',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            itemId: 'txtUnitRetail'
+                                                                            itemId: 'txtUnitRetail',
+                                                                            minValue: 0
                                                                         }
                                                                     },
                                                                     {
@@ -1040,7 +1043,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colSubLocation',
                                                                         width: 90,
-                                                                        dataIndex: 'strSubLocationName',
+                                                                        dataIndex: 'strDescription',
                                                                         text: 'Sub Location',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',

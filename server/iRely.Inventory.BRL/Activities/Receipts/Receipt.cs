@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Web;
@@ -99,7 +101,46 @@ namespace iRely.Inventory.BRL
 
         public SaveResult Save(bool continueOnConflict)
         {
-            return _db.Save(continueOnConflict);
+            SaveResult saveResult = new SaveResult();
+
+            using (var transaction = _db.ContextManager.Database.BeginTransaction())
+            {
+                var connection = _db.ContextManager.Database.Connection;
+                try
+                {
+                    foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
+                    {
+                        if (receipt.strReceiptType == "Purchase Order")
+                        {
+                            var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
+                            var openStatus = new SqlParameter("ysnOpenStatus", true);
+                            _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus", idParameter, openStatus);
+                        }
+                    }
+
+                    saveResult = _db.Save(false);
+
+                    foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
+                    {
+                        if (receipt.strReceiptType == "Purchase Order")
+                        {
+                            var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
+                            _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo", idParameter);
+                        }
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    saveResult.BaseException = ex;
+                    saveResult.Exception = new ServerException(ex);
+                    saveResult.HasError = true;
+                    transaction.Rollback();
+                }
+            }
+
+            return saveResult;
         }
         
         public void Dispose()

@@ -253,10 +253,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
-                                                                itemId: 'txtBOLNumber',
-                                                                fieldLabel: 'BOL No',
+                                                                itemId: 'txtShipmentNo',
+                                                                fieldLabel: 'Shipment No',
                                                                 labelAlign: 'top',
-                                                                labelWidth: 110
+                                                                labelWidth: 110,
+                                                                readOnly: true,
+                                                                blankText: 'Created on Save',
+                                                                emptyText: 'Created on Save'
                                                             },
                                                             {
                                                                 xtype: 'datefield',
@@ -322,7 +325,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 labelAlign: 'top',
                                                                 labelWidth: 60,
                                                                 displayField: 'strCustomerNumber',
-                                                                valueField: 'intCustomerId'
+                                                                valueField: 'intEntityCustomerId'
                                                             },
                                                             {
                                                                 xtype: 'textfield',
@@ -465,7 +468,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         xtype: 'gridcombobox',
                                                                                         columns: [
                                                                                             {
-                                                                                                dataIndex: 'intCompanyLocationId',
+                                                                                                dataIndex: 'intEntityLocationId',
                                                                                                 dataType: 'numeric',
                                                                                                 text: 'Location Id',
                                                                                                 hidden: true
@@ -474,12 +477,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                                 dataIndex: 'strLocationName',
                                                                                                 dataType: 'string',
                                                                                                 text: 'Location Name',
-                                                                                                flex: 1
-                                                                                            },
-                                                                                            {
-                                                                                                dataIndex: 'strLocationType',
-                                                                                                dataType: 'string',
-                                                                                                text: 'Location Type',
                                                                                                 flex: 1
                                                                                             },
                                                                                             {
@@ -493,7 +490,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                         fieldLabel: 'Ship To',
                                                                                         labelWidth: 50,
                                                                                         displayField: 'strLocationName',
-                                                                                        valueField: 'intCompanyLocationId'
+                                                                                        valueField: 'intEntityLocationId'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'textareafield',
@@ -537,6 +534,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 },
                                                                 items: [
                                                                     {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtBOLNo',
+                                                                        fieldLabel: 'BOL No',
+                                                                        labelWidth: 110
+                                                                    },
+                                                                    {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
@@ -558,8 +561,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        itemId: 'cboCarrier',
-                                                                        fieldLabel: 'Carrier',
+                                                                        itemId: 'cboShipVia',
+                                                                        fieldLabel: 'Ship Via',
                                                                         labelWidth: 110,
                                                                         displayField: 'strShipVia',
                                                                         valueField: 'strShipVia'
@@ -698,7 +701,77 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         text: 'Order No.',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
-                                                                            itemId: 'cboOrderNumber'
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intSalesOrderId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Sales Order Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSalesOrderDetailId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Sales Order Detail Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intItemId',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Item Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intItemUOMId',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Item UOM Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strSalesOrderNumber',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Sales Order',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strItemNo',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Item No',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strItemDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitMeasure',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Item UOM Id',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblQtyOrdered',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Qty Ordered',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strStorageLocation',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Storage Location',
+                                                                                    hidden: true
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboOrderNumber',
+                                                                            displayField: 'strSalesOrderNumber',
+                                                                            valueField: 'strSalesOrderNumber'
                                                                         }
                                                                     },
                                                                     {

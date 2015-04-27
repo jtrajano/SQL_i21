@@ -62,7 +62,15 @@ namespace iRely.Inventory.BRL
         {
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICInventoryTransfer>()
-                .Include(p => p.tblICInventoryTransferDetails)
+                .Include(p => p.tblGLAccount)
+                .Include("tblICInventoryTransferDetails.tblICItem")
+                .Include("tblICInventoryTransferDetails.tblICItemUOM")
+                .Include("tblICInventoryTransferDetails.tblICLot")
+                .Include("tblICInventoryTransferDetails.tblSMTaxCode")
+                .Include("tblICInventoryTransferDetails.FromSubLocation")
+                .Include("tblICInventoryTransferDetails.FromStorageLocation")
+                .Include("tblICInventoryTransferDetails.ToSubLocation")
+                .Include("tblICInventoryTransferDetails.ToStorageLocation")
                 .Include(p => p.tblICInventoryTransferNotes)
                 .Where(w => query.Where(predicate).Any(a => a.intInventoryTransferId == w.intInventoryTransferId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)

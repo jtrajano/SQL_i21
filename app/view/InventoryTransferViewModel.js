@@ -10,7 +10,7 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'i21.store.ShipViaBuffered',
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
-        'Inventory.store.BufferedItemStockView',
+        'Inventory.store.BufferedItemStockUOMView',
         'Inventory.store.BufferedStorageLocation',
         'Inventory.store.BufferedLot',
         'Inventory.store.BufferedItemUnitMeasure',
@@ -61,7 +61,8 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
 
 
         item: {
-            type: 'icbuffereditemstockview'
+            autoLoad: true,
+            type: 'icbuffereditemstockuomview'
         },
         lot: {
             type: 'icbufferedlot'

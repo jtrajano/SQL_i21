@@ -20,7 +20,6 @@ Ext.Loader.setConfig({
 
 
 Ext.application({
-    views: [],
     name: 'Inventory',
 
     launch: function() {

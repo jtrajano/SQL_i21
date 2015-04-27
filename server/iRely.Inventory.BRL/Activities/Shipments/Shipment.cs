@@ -25,6 +25,7 @@ namespace iRely.Inventory.BRL
         {
             return _db.GetQuery<tblICInventoryShipment>().Select(p => new InventoryShipmentView { 
                 intInventoryShipmentId = p.intInventoryShipmentId,
+                strShipmentNumber = p.strShipmentNumber,
                 strBOLNumber = p.strBOLNumber,
                 intOrderType = p.intOrderType,
                 strOrderType = (p.intOrderType == 1 ? "Sales Contract" : (p.intOrderType == 2 ? "Sales Order" : (p.intOrderType == 3 ? "Transfer Order" : ""))),
@@ -53,11 +54,12 @@ namespace iRely.Inventory.BRL
             var query = GetSearchQuery(); //Get Search Query
             return _db.GetQuery<tblICInventoryShipment>()
                 .Include(p => p.ShipFromLocation)
+                .Include(p => p.tblARCustomer)
                 .Include(p => p.ShipToLocation)
+                .Include("tblICInventoryShipmentItems.vyuICGetShipmentItemSource")
                 .Include("tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot")
                 .Include("tblICInventoryShipmentItems.tblICItem")
-                .Include("tblICInventoryShipmentItems.tblICUnitMeasure")
-                .Include("tblICInventoryShipmentItems.WeightUnitMeasure")
+                .Include("tblICInventoryShipmentItems.tblICItemUOM.tblICUnitMeasure")
                 .Where(w => query.Where(predicate).Any(a => a.intInventoryShipmentId == w.intInventoryShipmentId)) //Filter the Main DataSource Based on Search Query
                 .OrderBySelector(sortSelector)
                 .Skip(start)
@@ -67,6 +69,9 @@ namespace iRely.Inventory.BRL
 
         public void AddShipment(tblICInventoryShipment shipment)
         {
+            shipment.strShipmentNumber = Common.GetStartingNumber(Common.StartingNumber.InventoryShipment);
+            shipment.intCreatedUserId = iRely.Common.Security.GetUserId();
+            shipment.intEntityId = iRely.Common.Security.GetEntityId();
             _db.AddNew<tblICInventoryShipment>(shipment);
         }
 

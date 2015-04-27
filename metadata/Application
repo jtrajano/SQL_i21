@@ -6,10 +6,7 @@
     },
     "codeClass": null,
     "userConfig": {
-        "name": "Inventory",
-        "views": [
-            "InventoryAdjustment"
-        ]
+        "name": "Inventory"
     },
     "name": "Application",
     "designerId": "application"

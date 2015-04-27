@@ -577,9 +577,9 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colDetailShortUPC',
                                                         width: 70,
+                                                        dataIndex: 'string',
                                                         text: 'Short UPC',
                                                         editor: {
                                                             xtype: 'numberfield',
@@ -589,9 +589,9 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colDetailUpcCode',
                                                         minWidth: 110,
+                                                        dataIndex: 'string',
                                                         text: 'UPC Code',
                                                         flex: 2
                                                     },
@@ -3237,7 +3237,7 @@ Ext.define('Inventory.view.Item', {
                                                             ],
                                                             itemId: 'cboPricingLocation',
                                                             displayField: 'strLocationName',
-                                                            valueField: 'intItemLocationId'
+                                                            valueField: 'strLocationName'
                                                         }
                                                     },
                                                     {
@@ -3927,33 +3927,15 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colStockLocation',
                                                         dataIndex: 'string',
                                                         text: 'Location',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intCompanyLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Location Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLocationType',
-                                                                    dataType: 'string',
-                                                                    text: 'Location Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboStockLocation',
-                                                            displayField: 'strLocationName',
-                                                            valueField: 'strLocationName'
-                                                        }
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colStockUOM',
+                                                        width: 100,
+                                                        dataIndex: 'string',
+                                                        text: 'UOM',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -3968,48 +3950,28 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colStockOnHand',
                                                         width: 100,
                                                         align: 'right',
-                                                        text: 'On Hand',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
+                                                        text: 'On Hand'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colStockCommitted',
                                                         width: 100,
                                                         align: 'right',
-                                                        text: 'Committed',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
+                                                        text: 'Committed'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colStockOnOrder',
                                                         width: 100,
                                                         align: 'right',
-                                                        text: 'On Order',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
+                                                        text: 'On Order'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colStockBackOrder',
                                                         width: 100,
                                                         align: 'right',
-                                                        text: 'Back Order',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
+                                                        text: 'Back Order'
                                                     }
                                                 ],
                                                 viewConfig: {

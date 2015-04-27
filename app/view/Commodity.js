@@ -731,7 +731,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colUOMStockUnit',
                                                         text: 'Stock Unit',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        stopSelection: false
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',
@@ -1693,6 +1694,7 @@ Ext.define('Inventory.view.Commodity', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
+                                                reference: 'grdGlAccounts',
                                                 itemId: 'grdGlAccounts',
                                                 margin: -1,
                                                 dockedItems: [
