@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsa99566c59f6c2e804ad5de20494309a4ca23b51ac58bf70e51ad8e4daf2248db))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets256892876d8d70a0bdec3ba4a578b819e852bf9a725a597eb67f811b44101f34))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsa99566c59f6c2e804ad5de20494309a4ca23b51ac58bf70e51ad8e4daf2248db : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets256892876d8d70a0bdec3ba4a578b819e852bf9a725a597eb67f811b44101f34 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "a99566c59f6c2e804ad5de20494309a4ca23b51ac58bf70e51ad8e4daf2248db"; }
+            get { return "256892876d8d70a0bdec3ba4a578b819e852bf9a725a597eb67f811b44101f34"; }
         }
 
         /// <summary>
@@ -3469,7 +3469,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryAdjustment
-        [CodeFirstDatabaseSchema.tblICInventoryAdjustment](T1.tblICInventoryAdjustment_intInventoryAdjustmentId, T1.tblICInventoryAdjustment_intLocationId, T1.tblICInventoryAdjustment_dtmAdjustmentDate, T1.tblICInventoryAdjustment_intAdjustmentType, T1.tblICInventoryAdjustment_strAdjustmentNo, T1.tblICInventoryAdjustment_strDescription, T1.tblICInventoryAdjustment_intSort, T1.tblICInventoryAdjustment_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryAdjustment](T1.tblICInventoryAdjustment_intInventoryAdjustmentId, T1.tblICInventoryAdjustment_intLocationId, T1.tblICInventoryAdjustment_dtmAdjustmentDate, T1.tblICInventoryAdjustment_intAdjustmentType, T1.tblICInventoryAdjustment_strAdjustmentNo, T1.tblICInventoryAdjustment_strDescription, T1.tblICInventoryAdjustment_intSort, T1.tblICInventoryAdjustment_ysnPosted, T1.tblICInventoryAdjustment_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryAdjustmentId AS tblICInventoryAdjustment_intInventoryAdjustmentId, 
@@ -3479,6 +3479,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strAdjustmentNo AS tblICInventoryAdjustment_strAdjustmentNo, 
             T.strDescription AS tblICInventoryAdjustment_strDescription, 
             T.intSort AS tblICInventoryAdjustment_intSort, 
+            T.ysnPosted AS tblICInventoryAdjustment_ysnPosted, 
             T.intConcurrencyId AS tblICInventoryAdjustment_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICInventoryAdjustments AS T
@@ -6301,7 +6302,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryAdjustments
-        [iRely.Inventory.Model.tblICInventoryAdjustment](T1.tblICInventoryAdjustment_intInventoryAdjustmentId, T1.tblICInventoryAdjustment_intLocationId, T1.tblICInventoryAdjustment_dtmAdjustmentDate, T1.tblICInventoryAdjustment_intAdjustmentType, T1.tblICInventoryAdjustment_strAdjustmentNo, T1.tblICInventoryAdjustment_strDescription, T1.tblICInventoryAdjustment_intSort, T1.tblICInventoryAdjustment_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryAdjustment](T1.tblICInventoryAdjustment_intInventoryAdjustmentId, T1.tblICInventoryAdjustment_intLocationId, T1.tblICInventoryAdjustment_dtmAdjustmentDate, T1.tblICInventoryAdjustment_intAdjustmentType, T1.tblICInventoryAdjustment_strAdjustmentNo, T1.tblICInventoryAdjustment_strDescription, T1.tblICInventoryAdjustment_intSort, T1.tblICInventoryAdjustment_ysnPosted, T1.tblICInventoryAdjustment_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryAdjustmentId AS tblICInventoryAdjustment_intInventoryAdjustmentId, 
@@ -6311,6 +6312,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strAdjustmentNo AS tblICInventoryAdjustment_strAdjustmentNo, 
             T.strDescription AS tblICInventoryAdjustment_strDescription, 
             T.intSort AS tblICInventoryAdjustment_intSort, 
+            T.ysnPosted AS tblICInventoryAdjustment_ysnPosted, 
             T.intConcurrencyId AS tblICInventoryAdjustment_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICInventoryAdjustment AS T

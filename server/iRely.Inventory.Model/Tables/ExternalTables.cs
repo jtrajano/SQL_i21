@@ -41,7 +41,6 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryTransfer> FromInventoryTransfers { get; set; }
         public ICollection<tblICInventoryTransfer> ToInventoryTransfers { get; set; }
-
     }
 
     public class tblGLAccount

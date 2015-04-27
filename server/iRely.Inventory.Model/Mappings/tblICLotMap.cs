@@ -3,7 +3,7 @@ using System.Data.Entity.ModelConfiguration;
 
 namespace iRely.Inventory.Model
 {
-    public class tblICLotMap: EntityTypeConfiguration<tblICLot>
+    public class tblICLotMap : EntityTypeConfiguration<tblICLot>
     {
         public tblICLotMap()
         {
@@ -44,7 +44,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strReceiptNumber).HasColumnName("strReceiptNumber");
             this.Property(t => t.strMarkings).HasColumnName("strMarkings");
             this.Property(t => t.strNotes).HasColumnName("strNotes");
-            this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
+			this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.strVendorLotNo).HasColumnName("strVendorLotNo");
             this.Property(t => t.intVendorLocationId).HasColumnName("intVendorLocationId");
             this.Property(t => t.strVendorLocation).HasColumnName("strVendorLocation");

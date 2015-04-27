@@ -60,6 +60,5 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryAdjustmentDetail> NewAdjustmentDetails { get; set; }
         public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
         public ICollection<tblICInventoryTransferDetail> NewTransferDetails { get; set; }
-
     }
 }

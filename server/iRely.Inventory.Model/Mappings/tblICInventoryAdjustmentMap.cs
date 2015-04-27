@@ -19,6 +19,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strAdjustmentNo).HasColumnName("strAdjustmentNo");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
 
             this.HasOptional(p => p.tblSMCompanyLocation)
                 .WithMany(p => p.tblICInventoryAdjustments)
@@ -84,7 +85,8 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
                 .WithMany(p => p.tblICInventoryAdjustmentDetails)
                 .HasForeignKey(p => p.intSubLocationId);
-            this.HasOptional(p => p.tblICStorageLocation)
+
+			this.HasOptional(p => p.tblICStorageLocation)
                 .WithMany(p => p.tblICInventoryAdjustmentDetails)
                 .HasForeignKey(p => p.intStorageLocationId);
 

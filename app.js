@@ -20,9 +20,7 @@ Ext.Loader.setConfig({
 
 
 Ext.application({
-    views: [
-        'BuildAssemblyBlend'
-    ],
+    views: [],
     name: 'Inventory',
 
     launch: function() {

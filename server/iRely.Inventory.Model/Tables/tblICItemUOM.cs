@@ -142,16 +142,15 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
         public ICollection<tblICInventoryReceiptItem> WeightUOMs { get; set; }
-        public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }        
+        public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }        		
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
         public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
         public ICollection<tblICInventoryTransferDetail> WeightTransferDetails { get; set; }
-
         public ICollection<tblICInventoryAdjustmentDetail> OldItemUOMAdjustmentDetails { get; set; }        
         public ICollection<tblICInventoryAdjustmentDetail> NewItemUOMAdjustmentDetails { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> OldWeightUOMAdjustmentDetails { get; set; }        
-        public ICollection<tblICInventoryAdjustmentDetail> NewWeightUOMAdjustmentDetails { get; set; }
+        public ICollection<tblICInventoryAdjustmentDetail> NewWeightUOMAdjustmentDetails { get; set; }	
     }
 
 }

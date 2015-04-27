@@ -15,24 +15,54 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 {dataIndex: 'strLocationName', text: 'Location Id', flex: 1, dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
                 //{dataIndex: 'strAdjustmentType', text: 'Adjustment Type', flex: 1, dataType: 'string'},
-                {dataIndex: 'dtmAdjustmentDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn'}
+                {dataIndex: 'dtmAdjustmentDate', text: 'Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                {dataIndex: 'ysnPosted',text: 'Posted', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
         binding: {
             bind: {
                 title: 'Inventory Adjustment - {current.strAdjustmentNo}'
             },
+
+            btnPost: {
+                hidden: '{current.ysnPosted}'
+            },
+
+            btnUnpost: {
+                hidden: '{!current.ysnPosted}'
+            },
+
+            btnSave: {
+                disabled: '{current.ysnPosted}'
+            },
+
+            btnDelete: {
+                disabled: '{current.ysnPosted}'
+            },
+
+            btnUndo: {
+                disabled: '{current.ysnPosted}'
+            },
+
             cboLocation: {
                 value: '{current.intLocationId}',
-                store: '{location}'
+                store: '{location}',
+                readOnly: '{current.ysnPosted}'
             },
-            dtmDate: '{current.dtmAdjustmentDate}',
+            dtmDate: {
+                value: '{current.dtmAdjustmentDate}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboAdjustmentType: {
                 value: '{current.intAdjustmentType}',
-                store: '{adjustmentTypes}'
+                store: '{adjustmentTypes}',
+                readOnly: '{current.ysnPosted}'
             },
             txtAdjustmentNumber: '{current.strAdjustmentNo}',
-            txtDescription: '{current.strDescription}',
+            txtDescription: {
+                value: '{current.strDescription}',
+                readOnly: '{current.ysnPosted}'
+            },
 
             grdInventoryAdjustment: {
                 colItemNumber: {
@@ -43,7 +73,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             column: 'intLocationId',
                             value: '{current.intLocationId}',
                             conjunction: 'and'
-                        }]
+                        }],
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
 
@@ -61,7 +92,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             column: 'strClassification',
                             value: 'Inventory',
                             conjunction: 'and'
-                        }]
+                        }],
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
 
@@ -73,7 +105,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             column: 'intLocationId',
                             value: '{current.intLocationId}',
                             conjunction: 'and'
-                        }]
+                        }],
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
 
@@ -95,27 +128,36 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             {
                                 column: 'intSubLocationId',
                                 value: '{grdInventoryAdjustment.selection.intSubLocationId}',
-                                conjunction: 'and'
+                                conjunction: 'and',
+                                condition: 'blk'
                             },
                             {
                                 column: 'intStorageLocationId',
                                 value: '{grdInventoryAdjustment.selection.intStorageLocationId}',
-                                conjunction: 'and'
+                                conjunction: 'and',
+                                condition: 'blk'
                             }
-                        ]
+                        ],
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
 
                 colNewLotNumber: {
                     dataIndex: 'strNewLotNumber',
                     editor: {
-                        store: '{newLot}'
+                        store: '{newLot}',
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
 
                 colQuantity: 'dblQuantity',
 
-                colNewQuantity: 'dblNewQuantity',
+                colNewQuantity: {
+                    dataIndex: 'dblNewQuantity',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
 
                 colUOM: 'strItemUOM',
 
@@ -127,13 +169,19 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             column: 'intItemId',
                             value: '{grdInventoryAdjustment.selection.intItemId}',
                             conjunction: 'and'
-                        }]
+                        }],
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
 
                 colNetWeight: 'dblWeight',
 
-                colNewNetWeight: 'dblNewWeight',
+                colNewNetWeight: {
+                    dataIndex: 'dblNewWeight',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
 
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
@@ -143,7 +191,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             column: 'intItemId',
                             value: '{grdInventoryAdjustment.selection.intItemId}',
                             conjunction: 'and'
-                        }]
+                        }],
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
                 colNewWeightUOM: {
@@ -154,7 +203,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             column: 'intItemId',
                             value: '{grdInventoryAdjustment.selection.intItemId}',
                             conjunction: 'and'
-                        }]
+                        }],
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
 
@@ -164,7 +214,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colUnitCost: 'dblCost',
 
-                colNewUnitCost: 'dblNewCost',
+                colNewUnitCost: {
+                    dataIndex: 'dblNewCost',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
 
                 colNewItemNumber: {
                     dataIndex: 'strNewItemNo',
@@ -174,7 +229,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             column: 'intLocationId',
                             value: '{current.intLocationId}',
                             conjunction: 'and'
-                        }]
+                        }],
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
 
@@ -182,21 +238,37 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colExpiryDate: 'dtmExpiryDate',
 
-                colNewExpiryDate: 'dtmNewExpiryDate',
+                colNewExpiryDate: {
+                    dataIndex: 'dtmNewExpiryDate',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
 
                 colLotStatus: 'strLotStatus',
 
                 colNewLotStatus: {
                     dataIndex: 'strNewLotStatus',
                     editor: {
-                        store: '{newLotStatus}'
+                        store: '{newLotStatus}',
+                        readOnly: '{current.ysnPosted}'
                     }
                 }
             },
 
             grdNotes: {
-                colNoteDescription: 'strDescription',
-                colNotes: 'strNotes'
+                colNoteDescription: {
+                    dataIndex: 'strDescription',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
+                colNotes: {
+                    dataIndex: 'strNotes',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                }
             }
         }
     },
@@ -206,26 +278,26 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.Adjustment', { pageSize: 1 });
 
-        win.context = Ext.create('iRely.Engine', {
+        win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
             binding: me.config.binding,
-            attachment: Ext.create('iRely.attachment.Manager', {
+            attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.InventoryAdjustment',
                 window: win
             }),
             details: [
                 {
                     key: 'tblICInventoryAdjustmentDetails',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdInventoryAdjustment'),
                         deleteButton : win.down('#btnRemoveItem')
                     })
                 },
                 {
                     key: 'tblICInventoryAdjustmentNotes',
-                    component: Ext.create('iRely.grid.Manager', {
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdNotes'),
                         deleteButton : win.down('#btnRemoveNotes')
                     })
@@ -270,6 +342,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         record.set('dtmAdjustmentDate', today);
+        record.set('ysnPosted', false);
         action(record);
     },
 
@@ -353,7 +426,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         {
             current.set('intNewWeightUOMId', record.get('intItemUOMId'));
         }
-        else if (combo.itemId === 'cboNewStatus')
+        else if (combo.itemId === 'cboNewLotStatus')
         {
             current.set('intNewLotStatusId', record.get('intLotStatusId'));
         }
@@ -412,6 +485,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var colLotStatus = this.getGridColumnByDataIndex(grid, 'strLotStatus');
         var colNewLotStatus = this.getGridColumnByDataIndex(grid, 'strNewLotStatus');
 
+        var colLineTotal = this.getGridColumnByDataIndex(grid, 'dblLineTotal');
+
         var QuantityChange = 1;
         var UOMChange = 2;
         var ItemChange = 3;
@@ -433,21 +508,21 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colLotStatus.setHidden(hide);
                 colNewLotStatus.setHidden(hide);
 
+                colNewUOM.setHidden(hide);
+                colNetWeight.setHidden(hide);
+                colNewNetWeight.setHidden(hide);
+
+                colWeightUOM.setHidden(hide);
+                colNewWeightUOM.setHidden(hide);
+
+                colWeightPerQty.setHidden(hide);
+                colNewWeightPerQty.setHidden(hide);
+                colLineTotal.setHidden(hide);
+
                 // Show columns:
                 colQuantity.setHidden(show);
                 colNewQuantity.setHidden(show);
-
                 colUOM.setHidden(show);
-                colNewUOM.setHidden(show);
-
-                colNetWeight.setHidden(show);
-                colNewNetWeight.setHidden(show);
-
-                colWeightUOM.setHidden(show);
-                colNewWeightUOM.setHidden(show);
-
-                colWeightPerQty.setHidden(show);
-                colNewWeightPerQty.setHidden(show);
 
                 colUnitCost.setHidden(show);
                 colNewUnitCost.setHidden(show);
@@ -499,30 +574,35 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         return true;
     },
 
-    calculateLineTotal: function(quantity, cost, record){
-        var lineTotal = 0.00;
+    calculateLineTotal: function(newQuantity, newCost, record){
+        var lineTotal = 0.00
+            ,originalQuantity = 0.00
+            ,originalCost = 0.00
+            ,cost;
+
 
         if (record){
             // Get the new quantity.
-            quantity = Ext.isNumeric(quantity) ? quantity : record.get('dblNewQuantity');
+            newQuantity = Ext.isNumeric(newQuantity) ? newQuantity : record.get('dblNewQuantity');
+            newQuantity = Ext.isNumeric(newQuantity) ? newQuantity : 0.00;
 
-            // if new quantity is invalid, get the original qty.
-            quantity = Ext.isNumeric(quantity) ? quantity : record.get('dblQuantity');
-
-            // if original quantity is invalid, use zero.
-            quantity = Ext.isNumeric(quantity) ? quantity : 0.00;
+            // Get the original qty.
+            originalQuantity = record.get('dblQuantity');
+            originalQuantity = Ext.isNumeric(originalQuantity) ? originalQuantity : 0.00;
 
             // Get the new cost.
-            cost = Ext.isNumeric(cost) ? cost : record.get('dblNewCost');
+            newCost = Ext.isNumeric(newCost) ? newCost : record.get('dblNewCost');
+            newCost = Ext.isNumeric(newCost) ? newCost : 0.00;
 
-            // if new cost is invalid, use original cost.
-            cost = Ext.isNumeric(cost) ? cost : record.get('dblCost');
+            // Get original cost.
+            originalCost = record.get('dblCost');
+            originalCost = Ext.isNumeric(originalCost) ? originalCost : 0.00;
 
-            // if original cost is invalid, use zero.
-            cost = Ext.isNumeric(cost) ? cost : 0.00;
+            // Determine the cost to use:
+            cost = newCost != 0 ? newCost : originalCost;
 
-            lineTotal = quantity * cost;
-
+            // Calculate the line total
+            lineTotal = (newQuantity - originalQuantity) * cost;
             record.set('dblLineTotal', lineTotal);
         }
     },
@@ -586,8 +666,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         if (current){
-            me.calculateLineTotal(newQuantity === null ? 0.00 : newQuantity, null, current);
-            me.calculateNewNetWeight(newQuantity === null ? false : newQuantity, null, current);
+            me.calculateLineTotal(newQuantity, null, current);
+            me.calculateNewNetWeight((newQuantity === null ? false : newQuantity), null, current);
         }
     },
 
@@ -597,7 +677,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         if (current){
-            me.calculateLineTotal(null, newCost === null ? 0.00 : newCost, current);
+            me.calculateLineTotal(null, newCost, current);
         }
     },
 
@@ -607,23 +687,151 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         if (current) {
-            me.calculateNewNetWeight(null, (newNetWeight === null) ? false : newNetWeight, current);
+            me.calculateNewNetWeight(null, (newNetWeight === null ? false : newNetWeight), current);
         }
     },
 
-    /**
-     * Adds a renderer function to the "new" fields.
-     * It changes the text color to red so that we visually see the changes.
-     *
-     * @param column {Object}
-     */
-    onColumnBeforeRender: function(column){
-        "use strict";
+    onAfterPost: function(success, message) {
+        if (success === true) {
+            var me = this;
+            var win = me.view;
+            win.context.data.load();
+        }
+        else {
+            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
+        }
+    },
 
-        column.renderer = function(value, metaData, record){
-            metaData.style = 'color: red';
-            return value;
+    onPostOrUnPostClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doPost = function() {
+            var strAdjustmentNo = win.viewModel.data.current.get('strAdjustmentNo');
+            var posted = win.viewModel.data.current.get('ysnPosted');
+
+            var options = {
+                postURL             : '../Inventory/api/Adjustment/Post',
+                strTransactionId    : strAdjustmentNo,
+                isPost              : !posted,
+                isRecap             : false,
+                callback            : me.onAfterPost,
+                scope               : me
+            };
+
+            CashManagement.common.BusinessRules.callPostRequest(options);
         };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doPost();
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doPost();
+            }
+        });
+    },
+
+    onRecapClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var cboCurrency = null;
+        var context = win.context;
+
+        var doRecap = function(recapButton, currentRecord, currency){
+
+            // Call the buildRecapData to generate the recap data
+            CashManagement.common.BusinessRules.buildRecapData({
+                postURL: '../Inventory/api/Adjustment/Post',
+                strTransactionId: currentRecord.get('strAdjustmentNo'),
+                ysnPosted: currentRecord.get('ysnPosted'),
+                scope: me,
+                success: function(){
+                    // If data is generated, show the recap screen.
+                    CashManagement.common.BusinessRules.showRecap({
+                        strTransactionId: currentRecord.get('strAdjustmentNo'),
+                        ysnPosted: currentRecord.get('ysnPosted'),
+                        dtmDate: currentRecord.get('dtmAdjustmentDate'),
+                        strCurrencyId: currency,
+                        dblExchangeRate: 1,
+                        scope: me,
+                        postCallback: function(){
+                            me.onPostOrUnPostClick(recapButton);
+                        },
+                        unpostCallback: function(){
+                            me.onPostOrUnPostClick(recapButton);
+                        }
+                    });
+                },
+                failure: function(message){
+                    // Show why recap failed.
+                    var msgBox = iRely.Functions;
+                    msgBox.showCustomDialog(
+                        msgBox.dialogType.ERROR,
+                        msgBox.dialogButtonType.OK,
+                        message
+                    );
+                }
+            });
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doRecap(button, win.viewModel.data.current, cboCurrency);
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doRecap(button, win.viewModel.data.current, cboCurrency);
+            }
+        });
+    },
+
+    onNewUOMChange: function(control, newUOM, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newUOM === null || newUOM === '')){
+            current.set('intNewItemUOMId', null);
+        }
+    },
+
+    onNewWeightUOMChange: function(control, newWeightUOM, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newWeightUOM === null || newWeightUOM === '')){
+            current.set('intNewWeightUOMId', null);
+        }
+    },
+
+    onNewWeightUOMChange: function(control, newWeightUOM, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newWeightUOM === null || newWeightUOM === '')){
+            current.set('intNewWeightUOMId', null);
+        }
+    },
+
+    onNewLotStatusChange: function(control, newLotStatus, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newLotStatus === null || newLotStatus === '')){
+            current.set('intNewLotStatusId', null);
+        }
     },
 
     init: function(application) {
@@ -644,22 +852,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 select: this.onAdjustmentDetailSelect
             },
             "#cboNewUOM": {
-                select: this.onAdjustmentDetailSelect
+                select: this.onAdjustmentDetailSelect,
+                change: this.onNewUOMChange
             },
-            "#cboWeightUOM": {
-                select: this.onAdjustmentDetailSelect
+            "#cboNewWeightUOM": {
+                select: this.onAdjustmentDetailSelect,
+                change: this.onNewWeightUOMChange
             },
-            "#cboNewStatus": {
-                select: this.onAdjustmentDetailSelect
-            },
-            "#cboAccountCategory": {
-                select: this.onAdjustmentDetailSelect
-            },
-            "#cboCreditAccount": {
-                select: this.onAdjustmentDetailSelect
-            },
-            "#cboDebitAccount": {
-                select: this.onAdjustmentDetailSelect
+            "#cboNewLotStatus": {
+                select: this.onAdjustmentDetailSelect,
+                change: this.onNewLotStatusChange
             },
             "#cboAdjustmentType": {
                 change: this.onAdjustmentTypeChange,
@@ -673,13 +875,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#numNewNetWeight": {
                 change: this.onNumNewNetWeightChange
+            },
+            "#btnPost": {
+                click: this.onPostOrUnPostClick
+            },
+            "#btnUnpost": {
+                click: this.onPostOrUnPostClick
+            },
+            "#btnRecap": {
+                click: this.onRecapClick
             }
-            //,
-            //"#colNewQuantity": {
-            //    beforerender: this.onColumnBeforeRender
-            //}
-
         });
     }
 });
-

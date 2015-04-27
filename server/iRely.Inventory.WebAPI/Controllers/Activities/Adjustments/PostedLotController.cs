@@ -51,6 +51,7 @@ namespace iRely.Invetory.WebAPI.Controllers
             filter = string.IsNullOrEmpty(filter) ? "" : filter;
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
+
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
             var predicate = ExpressionBuilder.True<vyuICGetPostedLot>();
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intLotId", "DESC");

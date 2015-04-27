@@ -8,7 +8,7 @@
     "userConfig": {
         "name": "Inventory",
         "views": [
-            "BuildAssemblyBlend"
+            "InventoryAdjustment"
         ]
     },
     "name": "Application",

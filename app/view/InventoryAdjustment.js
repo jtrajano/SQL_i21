@@ -167,6 +167,17 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                         text: 'Unpost'
                                     },
                                     {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnRecap',
+                                        width: 52,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-recap',
+                                        scale: 'large',
+                                        text: 'Recap'
+                                    },
+                                    {
                                         xtype: 'tbseparator',
                                         height: 30
                                     },
@@ -482,6 +493,12 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'string',
                                                                     text: 'Lot Number',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblCost',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Cost',
+                                                                    flex: 1
                                                                 }
                                                             ],
                                                             itemId: 'cboLotNumber',
@@ -494,6 +511,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colNewLotNumber',
                                                         width: 90,
                                                         dataIndex: 'strNewLotNumber',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Lot ID',
                                                         editor: {
                                                             xtype: 'textfield',
@@ -535,6 +553,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colNewUOM',
                                                         width: 70,
                                                         dataIndex: 'strNewItemUOM',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -586,11 +605,11 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         width: 110,
                                                         align: 'right',
                                                         dataIndex: 'dblNewWeight',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Net Weight',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            itemId: 'numNewNetWeight',
-                                                            fieldStyle: 'color:red;'
+                                                            itemId: 'numNewNetWeight'
                                                         }
                                                     },
                                                     {
@@ -605,6 +624,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colNewWeightUOM',
                                                         width: 100,
                                                         dataIndex: 'strNewWeightUOM',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Wgt UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -646,10 +666,11 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblNewWeightPerQty',
                                                         itemId: 'colNewWeightPerQty',
                                                         width: 110,
                                                         align: 'right',
+                                                        dataIndex: 'dblNewWeightPerQty',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Wgt Per Qty'
                                                     },
                                                     {
@@ -668,6 +689,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         width: 95,
                                                         align: 'right',
                                                         dataIndex: 'dblNewCost',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Unit Cost',
                                                         editor: {
                                                             xtype: 'numberfield',
@@ -679,6 +701,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colNewItemNumber',
                                                         width: 90,
                                                         dataIndex: 'strNewItemNo',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Item No.',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -724,6 +747,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colNewItemDescription',
                                                         width: 150,
                                                         dataIndex: 'strNewItemDescription',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Item Description'
                                                     },
                                                     {
@@ -737,9 +761,11 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colNewExpiryDate',
                                                         width: 117,
                                                         dataIndex: 'dtmNewExpiryDate',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Expiration Date',
                                                         editor: {
-                                                            xtype: 'datefield'
+                                                            xtype: 'datefield',
+                                                            itemId: 'dteNewExpiryDate'
                                                         }
                                                     },
                                                     {
@@ -754,6 +780,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colNewLotStatus',
                                                         width: 75,
                                                         dataIndex: 'strNewLotStatus',
+                                                        tdCls: 'blue-text-column',
                                                         text: 'New Lot Status',
                                                         editor: {
                                                             xtype: 'gridcombobox',
@@ -783,7 +810,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboNewStatus',
+                                                            itemId: 'cboNewLotStatus',
                                                             displayField: 'strStatus',
                                                             valueField: 'strStatus'
                                                         }
@@ -863,7 +890,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'Description',
                                                         flex: 1,
                                                         editor: {
-                                                            xtype: 'textfield'
+                                                            xtype: 'textfield',
+                                                            itemId: 'txtNoteDescription'
                                                         }
                                                     },
                                                     {
@@ -873,7 +901,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         text: 'Notes',
                                                         flex: 3,
                                                         editor: {
-                                                            xtype: 'textareafield'
+                                                            xtype: 'textareafield',
+                                                            itemId: 'txtNotes'
                                                         }
                                                     }
                                                 ],

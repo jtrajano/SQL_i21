@@ -25,7 +25,7 @@
         "width": 950
     },
     "name": "InventoryTransfer1",
-    "designerId": "8c4061af-3167-4a61-b611-0066d80bac69",
+    "designerId": "4c8bcd03-8b60-4f37-ae7c-1a05db5452be",
     "customConfigs": [
         {
             "group": "(Custom Properties)",
@@ -59,7 +59,7 @@
                 "width": 450
             },
             "name": "MyForm3",
-            "designerId": "9c2979ec-4e8d-49fb-bfbc-06b70a3d1fa4",
+            "designerId": "c5b1dacc-8fb3-47ca-b864-d1b677d5d6d4",
             "cn": [
                 {
                     "type": "Ext.toolbar.Toolbar",
@@ -77,7 +77,7 @@
                         "width": 588
                     },
                     "name": "MyToolbar5",
-                    "designerId": "31c303ad-8608-4f07-bbdf-83cbbda9797a",
+                    "designerId": "e34b47c2-1fd2-404d-a732-201d76c86eee",
                     "cn": [
                         {
                             "type": "Ext.button.Button",
@@ -100,7 +100,7 @@
                                 "width": 45
                             },
                             "name": "MyButton11",
-                            "designerId": "b43aa8bb-50aa-47bb-ab61-b75032f4609e"
+                            "designerId": "3cb18b61-c2cc-4d60-8995-2330a7f846f2"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -123,7 +123,7 @@
                                 "width": 45
                             },
                             "name": "MyButton12",
-                            "designerId": "46843607-76f4-4507-9bb5-c32099dbca5d"
+                            "designerId": "ba6a545b-9e50-4d2d-88fa-504ce540289c"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -146,7 +146,7 @@
                                 "width": 45
                             },
                             "name": "MyButton13",
-                            "designerId": "1323e089-8f35-4910-85b6-397de6fcfafb"
+                            "designerId": "3a9c2fcf-cc19-40e9-ab64-36344dc22c36"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -169,7 +169,7 @@
                                 "width": 45
                             },
                             "name": "MyButton14",
-                            "designerId": "8b5a2fae-af9e-46a7-b2a1-52319e2251ed"
+                            "designerId": "403d05fc-48c0-49c2-a24b-0b4d82bce807"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -192,7 +192,7 @@
                                 "width": 45
                             },
                             "name": "MyButton15",
-                            "designerId": "e994b410-1ac1-4a9f-8677-aec1008525a9"
+                            "designerId": "1876ea5f-b69a-4486-9381-c73603dd4e4d"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -215,7 +215,7 @@
                                 "width": 52
                             },
                             "name": "MyButton16",
-                            "designerId": "7d52bfa6-dda9-4456-87cd-c7002a55a263"
+                            "designerId": "ffca854d-a87a-4f65-80b5-7322f13a75d8"
                         },
                         {
                             "type": "Ext.toolbar.Separator",
@@ -230,7 +230,7 @@
                                 "layout|flex": null
                             },
                             "name": "MySeparator5",
-                            "designerId": "02975550-d38e-4fbd-871e-54185918dc47"
+                            "designerId": "4d1a0cc9-d02e-4739-adec-90d0a152d210"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -253,7 +253,7 @@
                                 "width": 52
                             },
                             "name": "MyButton17",
-                            "designerId": "2cde3243-6193-49fc-ad0b-7977692da456"
+                            "designerId": "873bdad8-e7ef-47db-9f79-1e6367e0a9de"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -277,7 +277,30 @@
                                 "width": 52
                             },
                             "name": "MyButton18",
-                            "designerId": "00835ff1-c7e0-4043-aace-36769bb0b680"
+                            "designerId": "2a36b425-9058-4432-87ab-860c23ec1e46"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-recap",
+                                "itemId": "btnRecap",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Recap",
+                                "width": 52
+                            },
+                            "name": "MyButton8",
+                            "designerId": "1f0007e6-e037-4ac6-abb2-c12006159db1"
                         },
                         {
                             "type": "Ext.toolbar.Separator",
@@ -292,7 +315,7 @@
                                 "layout|flex": null
                             },
                             "name": "MySeparator6",
-                            "designerId": "977d845d-360e-4c32-970b-6eaff9f30f36"
+                            "designerId": "9b74fcda-2b58-41a6-9b04-3675ed8868ad"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -315,7 +338,7 @@
                                 "width": 45
                             },
                             "name": "MyButton20",
-                            "designerId": "f6330e70-afa9-4b72-bc8d-dc5f626c1c8d"
+                            "designerId": "ab649e18-2e18-432f-af4d-4a984f42ea17"
                         }
                     ]
                 },
@@ -332,7 +355,7 @@
                         "plain": true
                     },
                     "name": "MyTabPanel1",
-                    "designerId": "ebe1a015-2745-4f2d-80c3-870776474b08",
+                    "designerId": "ed98cf3b-237b-418b-b5f0-cca18131c0c5",
                     "cn": [
                         {
                             "type": "Ext.panel.Panel",
@@ -348,7 +371,7 @@
                                 "title": "Details"
                             },
                             "name": "MyPanel4",
-                            "designerId": "9d3037cd-193d-472e-bd49-362f1d409ab7",
+                            "designerId": "f97169a7-8d47-4226-8a00-027c713ac1fa",
                             "cn": [
                                 {
                                     "type": "Ext.tab.Tab",
@@ -358,7 +381,7 @@
                                     },
                                     "codeClass": null,
                                     "name": "TabConfig2",
-                                    "designerId": "0a99055f-bdac-4271-ac09-79c6e6624831"
+                                    "designerId": "398fe214-6258-4992-a92a-7840ff1c66a6"
                                 },
                                 {
                                     "type": "Ext.container.Container",
@@ -375,7 +398,7 @@
                                         "layout|flex": null
                                     },
                                     "name": "MyContainer11",
-                                    "designerId": "018c3b34-d404-45e7-9d99-450dcf6d6bbd",
+                                    "designerId": "122b0f49-3974-4dc0-b123-4bce27b072af",
                                     "cn": [
                                         {
                                             "type": "Ext.container.Container",
@@ -393,7 +416,7 @@
                                                 "margin": "0 0 5 0"
                                             },
                                             "name": "MyContainer3",
-                                            "designerId": "839aefc4-98b8-42d1-bc08-d8a1cd3c234d",
+                                            "designerId": "010a4731-f621-4ac4-89cd-bfaaacafde2b",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -444,7 +467,7 @@
                                                         "alwaysDisplayDecimals": "boolean",
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "7e9b36a1-3f62-4b99-b651-5593850a0b42",
+                                                    "designerId": "2af7fbdb-361b-496c-942e-7c9ce2469341",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -484,7 +507,7 @@
                                                     "configAlternates": {
                                                         "alwaysDisplayDecimals": "boolean"
                                                     },
-                                                    "designerId": "a2d03417-5f3f-4ab2-aa6b-d0ec33dd7726",
+                                                    "designerId": "2bc6c5ac-d150-440f-8a49-f1466355a47f",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -519,7 +542,7 @@
                                                     "configAlternates": {
                                                         "alwaysDisplayDecimals": "boolean"
                                                     },
-                                                    "designerId": "5d0a322e-110f-4813-a033-ff26372026fc",
+                                                    "designerId": "e3126210-9424-443a-be8d-0b58f29b2c25",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -556,7 +579,7 @@
                                                     "configAlternates": {
                                                         "alwaysDisplayDecimals": "boolean"
                                                     },
-                                                    "designerId": "7b3b6bab-00ce-4160-b816-8783ce9dc973",
+                                                    "designerId": "edc2c130-9686-4684-93ed-37735d2d5d6f",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -581,7 +604,7 @@
                                                 "layout|flex": 1
                                             },
                                             "name": "MyTextField22",
-                                            "designerId": "49f575b7-a226-4076-90e2-3c3625a5f132"
+                                            "designerId": "fb462bb2-0857-4150-8db3-e353f776d23d"
                                         }
                                     ]
                                 },
@@ -603,7 +626,7 @@
                                         "title": null
                                     },
                                     "name": "MyGridPanel2",
-                                    "designerId": "931a14f3-1a91-40c6-bad4-3cf993f6b80b",
+                                    "designerId": "1f34f752-0c21-41c7-af27-d27e4aaba03f",
                                     "cn": [
                                         {
                                             "type": "Ext.toolbar.Toolbar",
@@ -618,7 +641,7 @@
                                                 "itemId": "tlbToolbarGrid"
                                             },
                                             "name": "MyToolbar6",
-                                            "designerId": "a8f89f5a-cee7-42a5-97ac-6a286e292295",
+                                            "designerId": "bf15088d-ca37-472b-8140-388571791f8a",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.Label",
@@ -633,7 +656,7 @@
                                                         "text": "Items"
                                                     },
                                                     "name": "MyLabel3",
-                                                    "designerId": "367acf55-7505-447a-96a9-564a89ad0eea"
+                                                    "designerId": "236e6d8b-26aa-47ee-a2b9-5d55a236c3a0"
                                                 },
                                                 {
                                                     "type": "Ext.toolbar.Separator",
@@ -647,7 +670,7 @@
                                                         "layout|flex": null
                                                     },
                                                     "name": "MySeparator3",
-                                                    "designerId": "e288f216-936b-484b-a5c6-29605ec88ac2"
+                                                    "designerId": "afcab0d3-782f-4d20-8f08-abfb3fcba535"
                                                 },
                                                 {
                                                     "type": "Ext.button.Button",
@@ -665,7 +688,7 @@
                                                         "text": "Insert"
                                                     },
                                                     "name": "MyButton3",
-                                                    "designerId": "f4c13716-f052-42ce-b274-8b43398ac96f"
+                                                    "designerId": "17d48ff8-522a-422a-94bb-732cb719ba89"
                                                 },
                                                 {
                                                     "type": "Ext.button.Button",
@@ -683,7 +706,7 @@
                                                         "text": "Remove"
                                                     },
                                                     "name": "MyButton22",
-                                                    "designerId": "0c487774-3e99-49fa-9918-deb8a2ab1aa4"
+                                                    "designerId": "b4b275fd-c0f7-4a5b-9da9-0acce4db6ebf"
                                                 },
                                                 {
                                                     "type": "Ext.toolbar.Separator",
@@ -697,7 +720,7 @@
                                                         "layout|flex": null
                                                     },
                                                     "name": "MySeparator7",
-                                                    "designerId": "56eafd53-3650-49b8-8f7d-ae61ef3b0a1d"
+                                                    "designerId": "0c91dc4f-21ad-4fb3-877b-67f95da88d00"
                                                 },
                                                 {
                                                     "type": "linkedinstance",
@@ -709,8 +732,8 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
-                                                    "designerId": "f7c10b11-c359-49ba-99e8-69e1af636272",
+                                                    "name": "filter1",
+                                                    "designerId": "be0a06de-99ab-416d-ae5c-3a1068a87c05",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
                                             ]
@@ -723,7 +746,7 @@
                                             },
                                             "codeClass": "Ext.selection.CheckboxModel",
                                             "name": "MyCheckboxSelectionModel2",
-                                            "designerId": "e794ec23-a171-4edf-9a24-5e417a03ab9e"
+                                            "designerId": "481a0c75-0f90-4bfd-971b-8801617dad79"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -739,7 +762,7 @@
                                                 "width": 100
                                             },
                                             "name": "MyColumn7",
-                                            "designerId": "a8f9f8c8-d1cb-42ea-b54f-0e637d90d61e",
+                                            "designerId": "a4d443ea-1398-41ab-89cf-c039fb19e461",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -792,7 +815,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "c19f0d24-a9e9-4da7-9921-172395dd98a7",
+                                                    "designerId": "a96629b5-7dbd-4ff9-b7b6-2281b14d734c",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -817,7 +840,7 @@
                                                 "width": 150
                                             },
                                             "name": "MyColumn8",
-                                            "designerId": "66d19e05-ff90-4663-9dba-ca552eb51174"
+                                            "designerId": "7104c039-b8e0-42fc-a326-09a1277547e9"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -833,7 +856,7 @@
                                                 "width": 100
                                             },
                                             "name": "MyColumn37",
-                                            "designerId": "2b68c79b-6bd8-443e-87be-087be84d107a",
+                                            "designerId": "811f8610-422c-4a9f-8435-2990d122ef2c",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -880,7 +903,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "811d97c5-a41a-4103-9a2c-03bff18b734a",
+                                                    "designerId": "d1fa3bec-704b-4981-8c84-bc846da92ae8",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -905,7 +928,7 @@
                                                 "width": 100
                                             },
                                             "name": "MyColumn38",
-                                            "designerId": "25cc991e-6120-4e7b-b9cc-886c275ed399",
+                                            "designerId": "ac371495-75f1-4197-b720-a3a1f53a5c06",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -946,7 +969,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "e34d7bfa-81f9-4fa8-acc3-4b0e2da71578",
+                                                    "designerId": "531d2373-d67a-4ac2-9006-a44389ba3da6",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -971,7 +994,7 @@
                                                 "width": 90
                                             },
                                             "name": "MyColumn11",
-                                            "designerId": "6d679d9b-a44a-4f77-839e-7f1dd1322541",
+                                            "designerId": "3b294289-81fa-4faf-85c0-33ee7eef14e4",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -994,6 +1017,12 @@
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Lot Number',",
                                                             "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'dblCost',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Cost',",
+                                                            "\t\tflex: 1",
                                                             "\t}",
                                                             "]"
                                                         ],
@@ -1006,7 +1035,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "4803f043-75ec-4c70-8cee-5b82c43e3987",
+                                                    "designerId": "628337ce-74f7-4e6f-a48b-4cc5ff714f02",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -1027,11 +1056,12 @@
                                             "userConfig": {
                                                 "dataIndex": "strNewLotNumber",
                                                 "itemId": "colNewLotNumber",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Lot ID",
                                                 "width": 90
                                             },
                                             "name": "MyColumn35",
-                                            "designerId": "8b361119-7a45-4319-9525-c3894069c80b",
+                                            "designerId": "5ab6e288-6d15-42ca-bc35-9ac2e542a4ef",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.Text",
@@ -1044,7 +1074,7 @@
                                                         "itemId": "txtNewLotId"
                                                     },
                                                     "name": "MyTextField1",
-                                                    "designerId": "0ad8868b-9d02-46fe-92dd-aab12098cd82"
+                                                    "designerId": "74d4eaa4-5acf-49c8-9196-dd73bc826a56"
                                                 }
                                             ]
                                         },
@@ -1065,7 +1095,7 @@
                                                 "width": 65
                                             },
                                             "name": "MyNumberColumn",
-                                            "designerId": "54d2bc1b-bb63-4974-970c-5cf5c095a2cc",
+                                            "designerId": "c92954f8-bf7a-4320-98b1-ba0e5615eb87",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1092,7 +1122,7 @@
                                                 "width": 90
                                             },
                                             "name": "MyNumberColumn18",
-                                            "designerId": "cd5b87ad-c064-4b97-b241-f76365fff7ba",
+                                            "designerId": "22c946c0-abde-4813-ace5-dade1cef6fe2",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1112,7 +1142,7 @@
                                                         "itemId": "numNewQuantity"
                                                     },
                                                     "name": "MyNumberField49",
-                                                    "designerId": "2da8fa68-258d-416d-b995-0f781b6c1398"
+                                                    "designerId": "23f6df49-e2c2-40d3-963e-63f17227de5f"
                                                 }
                                             ]
                                         },
@@ -1130,7 +1160,7 @@
                                                 "width": 70
                                             },
                                             "name": "MyColumn16",
-                                            "designerId": "73e915f7-05a5-4239-afdd-7eaa5d2b95db"
+                                            "designerId": "61547e01-a543-425c-9bed-4b71d8fc6579"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -1142,11 +1172,12 @@
                                             "userConfig": {
                                                 "dataIndex": "strNewItemUOM",
                                                 "itemId": "colNewUOM",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New UOM",
                                                 "width": 70
                                             },
                                             "name": "MyColumn17",
-                                            "designerId": "2a2094ba-353d-4e43-abb3-8c1895388419",
+                                            "designerId": "f37f3130-2c51-4ef6-8339-882142f39bcf",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1194,7 +1225,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "4f49ecb1-5f3b-4fb5-b25d-76d141b9cb30",
+                                                    "designerId": "bd240312-d3b7-4e18-9615-1c7116a67baf",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -1222,7 +1253,7 @@
                                                 "width": 90
                                             },
                                             "name": "MyNumberColumn6",
-                                            "designerId": "fa6f1571-297e-49fa-aa56-b4de57778b6d",
+                                            "designerId": "03118e42-cd6c-4c6b-b182-b2c07506d490",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1244,11 +1275,12 @@
                                                 "dataType": "numeric",
                                                 "format": null,
                                                 "itemId": "colNewNetWeight",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Net Weight",
                                                 "width": 110
                                             },
                                             "name": "MyNumberColumn3",
-                                            "designerId": "4f9e39a3-c2bd-4cd2-a7a5-9f2af63ee49a",
+                                            "designerId": "3b04912f-a635-4a51-b279-f2d70dcdc462",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1265,11 +1297,11 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "fieldStyle": "color:red;",
+                                                        "fieldStyle": null,
                                                         "itemId": "numNewNetWeight"
                                                     },
                                                     "name": "MyNumberField2",
-                                                    "designerId": "3fbdcd0c-330a-4637-8057-bc639d95e4c5"
+                                                    "designerId": "5df18040-0248-457f-8718-8d0a98b19ee0"
                                                 }
                                             ]
                                         },
@@ -1287,7 +1319,7 @@
                                                 "width": 70
                                             },
                                             "name": "MyColumn3",
-                                            "designerId": "e8b2c8aa-68ea-48ad-9bec-fe3f9fe54d10"
+                                            "designerId": "7eb1cb5b-a960-4c3d-925b-bfc6e6f73d23"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -1299,11 +1331,12 @@
                                             "userConfig": {
                                                 "dataIndex": "strNewWeightUOM",
                                                 "itemId": "colNewWeightUOM",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Wgt UOM",
                                                 "width": 100
                                             },
                                             "name": "MyColumn",
-                                            "designerId": "fc5f8992-ab0e-4949-9656-caa11c551bf4",
+                                            "designerId": "3914aa61-f1b9-4d8d-b3b3-9e201de5eef3",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1345,7 +1378,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "d9e367bf-e30d-4e60-92fe-32f4c820d1d4",
+                                                    "designerId": "67a8eb06-6ec2-4b14-a903-d508892ecbb1",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -1373,7 +1406,7 @@
                                                 "width": 110
                                             },
                                             "name": "MyNumberColumn22",
-                                            "designerId": "5753b05b-a04e-4e4e-890e-10ff70f00831",
+                                            "designerId": "57d3eb81-9909-42c5-ab90-2f5643cd74be",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1395,11 +1428,12 @@
                                                 "dataType": "numeric",
                                                 "format": null,
                                                 "itemId": "colNewWeightPerQty",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Wgt Per Qty",
                                                 "width": 110
                                             },
                                             "name": "MyNumberColumn8",
-                                            "designerId": "926bbdd0-da78-4d32-b292-5f2c19dafc0b",
+                                            "designerId": "661621c0-c0a0-4217-9c6b-6ae05194f6e9",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1424,7 +1458,7 @@
                                                 "width": 95
                                             },
                                             "name": "MyNumberColumn23",
-                                            "designerId": "4b363813-e1fd-48ab-9d07-58a514efa807",
+                                            "designerId": "2cc61a11-e284-4104-9fa2-a0e29d9271fd",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1446,11 +1480,12 @@
                                                 "dataType": "numeric",
                                                 "format": null,
                                                 "itemId": "colNewUnitCost",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Unit Cost",
                                                 "width": 95
                                             },
                                             "name": "MyNumberColumn2",
-                                            "designerId": "5fd31973-ac44-44e7-b5e8-bd7e122e7b86",
+                                            "designerId": "3a727ec1-7949-4c2f-9b4e-8829e418bcd1",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -1470,7 +1505,7 @@
                                                         "itemId": "numNewUnitCost"
                                                     },
                                                     "name": "MyNumberField",
-                                                    "designerId": "5617e8c5-7df1-494b-938b-04dc55af1c25"
+                                                    "designerId": "a3e74a0c-53d1-4c38-9beb-38b5e655eaa1"
                                                 }
                                             ]
                                         },
@@ -1484,11 +1519,12 @@
                                             "userConfig": {
                                                 "dataIndex": "strNewItemNo",
                                                 "itemId": "colNewItemNumber",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Item No.",
                                                 "width": 90
                                             },
                                             "name": "MyColumn14",
-                                            "designerId": "c8791e6d-4a59-49e6-9807-93c3daffa7fc",
+                                            "designerId": "de538377-4d37-4fdc-8822-237bad715aa4",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1541,7 +1577,7 @@
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "3185c037-3a38-4688-b061-c8ed9e86feb3",
+                                                    "designerId": "9f574560-30e2-435a-9e5e-b1f7fc6b8bb0",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -1562,11 +1598,12 @@
                                             "userConfig": {
                                                 "dataIndex": "strNewItemDescription",
                                                 "itemId": "colNewItemDescription",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Item Description",
                                                 "width": 150
                                             },
                                             "name": "MyColumn22",
-                                            "designerId": "52e66cb4-c8d2-4ce1-b881-795681d7052b"
+                                            "designerId": "78e9dbc4-b365-4677-bd9c-9d3ccc84ef88"
                                         },
                                         {
                                             "type": "Ext.grid.column.Date",
@@ -1581,7 +1618,7 @@
                                                 "text": "Expiration Date"
                                             },
                                             "name": "MyDateColumn4",
-                                            "designerId": "d8f67c14-e7b3-45ef-af23-7023080e0109"
+                                            "designerId": "f001b7b1-33cf-4701-9b79-295924cf8275"
                                         },
                                         {
                                             "type": "Ext.grid.column.Date",
@@ -1593,11 +1630,12 @@
                                             "userConfig": {
                                                 "dataIndex": "dtmNewExpiryDate",
                                                 "itemId": "colNewExpiryDate",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Expiration Date",
                                                 "width": 117
                                             },
                                             "name": "MyDateColumn5",
-                                            "designerId": "a84889bd-111e-4dde-b7c2-9ea61d7ece79",
+                                            "designerId": "317ec67f-c89b-4c09-bbab-27c385ae51a5",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.Date",
@@ -1606,8 +1644,11 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "dteNewExpiryDate"
+                                                    },
                                                     "name": "MyDateField4",
-                                                    "designerId": "b8e88fe6-4433-44e0-aa90-9139b1ac55bd"
+                                                    "designerId": "1283a4ab-13f5-4c95-b4f5-88b10b3ac1e3"
                                                 }
                                             ]
                                         },
@@ -1625,7 +1666,7 @@
                                                 "width": 70
                                             },
                                             "name": "MyColumn1",
-                                            "designerId": "ad7134ef-0037-47b1-bbff-bcf24c1545bd"
+                                            "designerId": "39ca84b9-a94e-4757-b125-5baeeb777110"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -1637,11 +1678,12 @@
                                             "userConfig": {
                                                 "dataIndex": "strNewLotStatus",
                                                 "itemId": "colNewLotStatus",
+                                                "tdCls": "blue-text-column",
                                                 "text": "New Lot Status",
                                                 "width": 75
                                             },
                                             "name": "MyColumn40",
-                                            "designerId": "bd215e70-78be-4aad-bf3c-19f8bba30852",
+                                            "designerId": "3f5e436e-73b4-4703-9664-ad4de0a50583",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1681,14 +1723,14 @@
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strStatus",
-                                                        "itemId": "cboNewStatus",
+                                                        "itemId": "cboNewLotStatus",
                                                         "valueField": "strStatus"
                                                     },
                                                     "name": "MyComboBox82",
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
-                                                    "designerId": "46b4d06a-5efd-47bf-b6ee-36ccea86d50b",
+                                                    "designerId": "0113540a-3adc-4de2-af29-8db6a6b23f9f",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
@@ -1715,7 +1757,7 @@
                                                 "width": 75
                                             },
                                             "name": "MyNumberColumn1",
-                                            "designerId": "d205b92e-42ee-4b14-9023-21e7dfdb2dce"
+                                            "designerId": "88f244fd-35f0-4ffc-b5f2-278a6dc54d72"
                                         },
                                         {
                                             "type": "Ext.grid.plugin.CellEditing",
@@ -1730,7 +1772,7 @@
                                                 "pluginId": "cepItem"
                                             },
                                             "name": "MyCellEditingPlugin",
-                                            "designerId": "4388c0e0-5961-4e9e-b6b9-73d5e4786e2d"
+                                            "designerId": "545554ce-b4f9-41c3-93ce-61ff61e258a5"
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -1743,7 +1785,7 @@
                                                 "itemId": "grvInventoryAdjustment"
                                             },
                                             "name": "MyGridView2",
-                                            "designerId": "f2f66af4-537b-4b57-bdde-caa10dbaf768"
+                                            "designerId": "a53809b6-6c6e-4df1-adbb-cedf2dfbb5d6"
                                         }
                                     ]
                                 }
@@ -1762,7 +1804,7 @@
                                 "title": "Notes"
                             },
                             "name": "MyPanel",
-                            "designerId": "3e711fcf-2344-4e67-bd21-64da4977fa02",
+                            "designerId": "d2693b84-70b4-4af0-8754-67eda3160581",
                             "cn": [
                                 {
                                     "type": "Ext.tab.Tab",
@@ -1772,7 +1814,7 @@
                                     },
                                     "codeClass": null,
                                     "name": "TabConfig3",
-                                    "designerId": "9c7cf5b5-25d3-4ecd-b4e2-0ef2143884bf"
+                                    "designerId": "ed26bf0e-df65-465d-8d0f-001615f712c3"
                                 },
                                 {
                                     "type": "Ext.grid.Panel",
@@ -1789,7 +1831,7 @@
                                         "title": null
                                     },
                                     "name": "MyGridPanel18",
-                                    "designerId": "08d5956a-e77d-4992-ad04-a7165d89ce8e",
+                                    "designerId": "53cbfd91-9f75-4701-aecb-157c48dd36cc",
                                     "cn": [
                                         {
                                             "type": "Ext.toolbar.Toolbar",
@@ -1804,7 +1846,7 @@
                                                 "itemId": "tlbGridOptions"
                                             },
                                             "name": "MyToolbar11",
-                                            "designerId": "e51392c3-add6-4581-be42-9f6b0aa0b53f",
+                                            "designerId": "991ee0c9-257b-49b4-8eec-5dd9f4776d2c",
                                             "cn": [
                                                 {
                                                     "type": "Ext.button.Button",
@@ -1822,7 +1864,7 @@
                                                         "text": "Insert"
                                                     },
                                                     "name": "MyButton6",
-                                                    "designerId": "c23ff545-0e83-4087-91c0-79052f1ac4c4"
+                                                    "designerId": "b67f3980-6045-4cf9-a4c2-5936fd0e95f5"
                                                 },
                                                 {
                                                     "type": "Ext.button.Button",
@@ -1840,7 +1882,7 @@
                                                         "text": "Remove"
                                                     },
                                                     "name": "MyButton23",
-                                                    "designerId": "433d6c9e-c5a4-404b-bf2a-0cf2367bd136"
+                                                    "designerId": "37506642-1edc-4a95-898f-758ffaf31abd"
                                                 },
                                                 {
                                                     "type": "Ext.toolbar.Separator",
@@ -1854,7 +1896,7 @@
                                                         "layout|flex": null
                                                     },
                                                     "name": "MySeparator12",
-                                                    "designerId": "834a7476-7fb6-429d-93c1-050e2b4caef3"
+                                                    "designerId": "c344e1ef-0c19-4cb9-8095-c89e7bd55c43"
                                                 },
                                                 {
                                                     "type": "linkedinstance",
@@ -1866,8 +1908,8 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
-                                                    "designerId": "675f97e5-0409-46e6-8715-a4dc0129950a",
+                                                    "name": "filter11",
+                                                    "designerId": "db7aee6c-0f65-4c31-92b0-c61bf09fe226",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
                                             ]
@@ -1886,7 +1928,7 @@
                                                 "text": "Description"
                                             },
                                             "name": "MyColumn65",
-                                            "designerId": "0690bbd0-2c7b-4ca6-904d-c081e996e700",
+                                            "designerId": "1238a59d-fd63-4c73-8075-46747ac68019",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.Text",
@@ -1895,8 +1937,11 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "txtNoteDescription"
+                                                    },
                                                     "name": "MyTextField5",
-                                                    "designerId": "b2479402-a22b-44e0-9c4d-f9bc8dde4844"
+                                                    "designerId": "72ec1abd-d2e0-448a-9bd1-2a46e74ffb2b"
                                                 }
                                             ]
                                         },
@@ -1914,7 +1959,7 @@
                                                 "text": "Notes"
                                             },
                                             "name": "MyColumn66",
-                                            "designerId": "a88ac589-4dfe-4cde-8110-41d9a78cbf7c",
+                                            "designerId": "74d99fd7-acb9-4a8d-9246-453c667defb7",
                                             "cn": [
                                                 {
                                                     "type": "Ext.form.field.TextArea",
@@ -1923,8 +1968,11 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "txtNotes"
+                                                    },
                                                     "name": "MyTextArea2",
-                                                    "designerId": "d8130c2b-1d43-48ce-ac37-2b6afd5e608a"
+                                                    "designerId": "8e6807fa-9eef-4a69-ba90-500dc331d767"
                                                 }
                                             ]
                                         },
@@ -1939,7 +1987,7 @@
                                                 "itemId": "grvNotes"
                                             },
                                             "name": "MyGridView11",
-                                            "designerId": "d7e4333f-96a5-4b8e-8537-f15ea86731a4"
+                                            "designerId": "c1b98003-4f97-49fe-9ec8-10cbce186472"
                                         },
                                         {
                                             "type": "Ext.selection.CheckboxModel",
@@ -1949,7 +1997,7 @@
                                             },
                                             "codeClass": "Ext.selection.CheckboxModel",
                                             "name": "MyCheckboxSelectionModel8",
-                                            "designerId": "1d8cb319-1202-4e72-a5c7-7e07fac181e5"
+                                            "designerId": "9277050d-bf9d-4a7f-8f94-b0a21f984219"
                                         },
                                         {
                                             "type": "Ext.grid.plugin.CellEditing",
@@ -1964,7 +2012,7 @@
                                                 "pluginId": "cepNote"
                                             },
                                             "name": "MyCellEditingPlugin4",
-                                            "designerId": "28c018fd-c884-4a4f-84d0-9e39ee24f6f4"
+                                            "designerId": "4c8b9476-f9e9-4813-8694-370f745a808a"
                                         }
                                     ]
                                 }
@@ -1982,7 +2030,7 @@
                                 "title": "Attachments"
                             },
                             "name": "MyPanel5",
-                            "designerId": "c621174b-3da8-4cde-bff9-fa960067a6d7",
+                            "designerId": "afa648b7-a119-4f4f-a4c0-918762cf2d5a",
                             "cn": [
                                 {
                                     "type": "Ext.tab.Tab",
@@ -1992,7 +2040,7 @@
                                     },
                                     "codeClass": null,
                                     "name": "TabConfig3",
-                                    "designerId": "aa258502-b265-44a9-9263-02fbae3b7035"
+                                    "designerId": "dde3634c-5104-4080-90ac-3cb2a604ed9f"
                                 },
                                 {
                                     "type": "Ext.grid.Panel",
@@ -2008,7 +2056,7 @@
                                         "title": null
                                     },
                                     "name": "MyGridPanel3",
-                                    "designerId": "878e1203-91fc-4370-8250-75f42ca520f2",
+                                    "designerId": "90267c02-2dc9-4c69-90ba-8b749e0d0e1d",
                                     "cn": [
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2022,7 +2070,7 @@
                                                 "text": "String"
                                             },
                                             "name": "MyColumn15",
-                                            "designerId": "aca507e0-4d35-4f4c-a323-54097c51b023"
+                                            "designerId": "00589240-a06c-4627-8380-61ea9e4db469"
                                         },
                                         {
                                             "type": "Ext.grid.View",
@@ -2032,7 +2080,7 @@
                                             },
                                             "codeClass": null,
                                             "name": "MyGridView3",
-                                            "designerId": "a1dbbc9f-a1f4-459d-a7a6-78811898593c"
+                                            "designerId": "d5eefee5-b95d-4a46-8785-6ef3906cc7c5"
                                         }
                                     ]
                                 }
@@ -2051,8 +2099,8 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
-                    "designerId": "76244995-910a-41a2-86d9-d8e3a962e968",
+                    "name": "statusbarpaging1",
+                    "designerId": "fc46f0de-7c8f-4d13-8dd6-f03119153f7d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
             ]

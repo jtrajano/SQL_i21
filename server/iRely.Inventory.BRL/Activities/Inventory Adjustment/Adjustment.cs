@@ -12,7 +12,7 @@ using IdeaBlade.Linq;
 
 namespace iRely.Inventory.BRL
 {
-    public class Adjustment : IDisposable
+    public partial class Adjustment : IDisposable
     {
         private Repository _db;
 
@@ -34,7 +34,8 @@ namespace iRely.Inventory.BRL
                     strAdjustmentNo = p.strAdjustmentNo,
                     strDescription = p.strDescription,
                     intSort = p.intSort,
-                    strLocationName = p.tblSMCompanyLocation.strLocationName
+                    strLocationName = p.tblSMCompanyLocation.strLocationName,
+                    ysnPosted = p.ysnPosted
                 });
         }
 

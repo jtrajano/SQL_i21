@@ -163,10 +163,10 @@ namespace iRely.Inventory.Model
         public DbSet<vyuSMGetLocationPricingLevel> vyuSMGetLocationPricingLevels { get; set; }
         public DbSet<vyuICGetReceiptItemSource> vyuICGetReceiptItemSources { get; set; }
         public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
-        public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
+        public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }	
         public DbSet<vyuICGetStorageLocation> vyuICGetStorageLocations { get; set; }
         public DbSet<vyuICGetPostedLot> vyuICGetPostedLots { get; set; }
-                
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder) 
         {
             modelBuilder.Configurations.Add(new tblICBrandMap());
@@ -321,8 +321,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetReceiptItemSourceMap());
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
-            modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
-            modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());
+            modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());			
+            modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());			
         }
     }
 }

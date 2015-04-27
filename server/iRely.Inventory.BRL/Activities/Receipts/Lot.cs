@@ -72,7 +72,7 @@ namespace iRely.Inventory.BRL
         {
             return _db.Save(continueOnConflict);
         }
-        
+
         public void Dispose()
         {
             _db.Dispose();

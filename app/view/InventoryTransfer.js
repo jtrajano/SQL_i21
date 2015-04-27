@@ -15,7 +15,7 @@
 
 Ext.define('Inventory.view.InventoryTransfer', {
     extend: 'Ext.window.Window',
-    alias: 'widget.icinventorytransfer',
+    alias: 'widget.inventorytransfer',
 
     requires: [
         'Inventory.view.Filter1',
@@ -46,6 +46,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
     collapsible: true,
     iconCls: 'small-icon-i21',
     title: 'Inventory Transfer',
+    defaultFocus: 'cboTransferredBy',
     maximizable: true,
 
     initConfig: function(instanceConfig) {
@@ -166,6 +167,17 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                         text: 'Unpost'
                                     },
                                     {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnNotes',
+                                        width: 50,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-notes',
+                                        scale: 'large',
+                                        text: 'Notes'
+                                    },
+                                    {
                                         xtype: 'tbseparator',
                                         height: 30
                                     },
@@ -226,57 +238,18 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Transfer Type',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
+                                                                        xtype: 'combobox',
                                                                         flex: 1,
                                                                         itemId: 'cboTransferType',
                                                                         fieldLabel: 'Transfer Type',
-                                                                        labelWidth: 90,
-                                                                        displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
+                                                                        labelWidth: 90
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intEntityId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Entity Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'intUserSecurityID',
-                                                                                dataType: 'numeric',
-                                                                                text: 'User Security Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strUserName',
-                                                                                dataType: 'string',
-                                                                                text: 'User Name',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strFullName',
-                                                                                dataType: 'string',
-                                                                                text: 'Full Name',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
+                                                                        xtype: 'combobox',
                                                                         flex: 1,
                                                                         itemId: 'cboTransferredBy',
                                                                         fieldLabel: 'Transferred By',
-                                                                        labelWidth: 90,
-                                                                        readOnly: true,
-                                                                        displayField: 'strUserName',
-                                                                        valueField: 'intEntityId'
+                                                                        labelWidth: 90
                                                                     },
                                                                     {
                                                                         xtype: 'container',
@@ -308,15 +281,13 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                         flex: 1,
                                                                         itemId: 'txtTransferNumber',
                                                                         fieldLabel: 'Transfer No',
-                                                                        labelWidth: 90,
-                                                                        readOnly: true,
-                                                                        blankText: 'Created on Save',
-                                                                        emptyText: 'Created on Save'
+                                                                        labelWidth: 90
                                                                     }
                                                                 ]
                                                             },
                                                             {
                                                                 xtype: 'textfield',
+                                                                flex: 1,
                                                                 itemId: 'txtDescription',
                                                                 fieldLabel: 'Description',
                                                                 labelWidth: 90
@@ -329,62 +300,18 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intCompanyLocationId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Location Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strLocationName',
-                                                                                dataType: 'string',
-                                                                                text: 'Location Name',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strLocationType',
-                                                                                dataType: 'string',
-                                                                                text: 'Location Type',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
+                                                                        xtype: 'combobox',
                                                                         flex: 1,
                                                                         itemId: 'cboFromLocation',
                                                                         fieldLabel: 'From Location',
-                                                                        labelWidth: 90,
-                                                                        displayField: 'strLocationName',
-                                                                        valueField: 'intCompanyLocationId'
+                                                                        labelWidth: 90
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intCompanyLocationId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Location Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strLocationName',
-                                                                                dataType: 'string',
-                                                                                text: 'Location Name',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strLocationType',
-                                                                                dataType: 'string',
-                                                                                text: 'Location Type',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
+                                                                        xtype: 'combobox',
                                                                         flex: 1,
                                                                         itemId: 'cboToLocation',
                                                                         fieldLabel: 'To Location',
-                                                                        labelWidth: 90,
-                                                                        displayField: 'strLocationName',
-                                                                        valueField: 'intCompanyLocationId'
+                                                                        labelWidth: 90
                                                                     }
                                                                 ]
                                                             }
@@ -411,142 +338,40 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 },
                                                                 items: [
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intShipViaID',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Ship Via Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strShipVia',
-                                                                                dataType: 'string',
-                                                                                text: 'Ship Via',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strShippingService',
-                                                                                dataType: 'string',
-                                                                                text: 'Shipping Service',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboShipVia',
-                                                                        fieldLabel: 'Ship Via',
-                                                                        labelWidth: 120,
-                                                                        displayField: 'strShipVia',
-                                                                        valueField: 'intShipViaID'
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboCarrier',
+                                                                        fieldLabel: 'Carrier',
+                                                                        labelWidth: 120
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intUnitMeasureId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Unit Of Measure Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strUnitMeasure',
-                                                                                dataType: 'string',
-                                                                                text: 'Unit Measure',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strUnitType',
-                                                                                dataType: 'string',
-                                                                                text: 'Unit Type',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
+                                                                        xtype: 'combobox',
                                                                         itemId: 'cboFreightUOM',
                                                                         fieldLabel: 'Freight UOM',
-                                                                        labelWidth: 120,
-                                                                        displayField: 'strUnitMeasure',
-                                                                        valueField: 'intUnitMeasureId'
+                                                                        labelWidth: 120
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intAccountCategoryId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Account Category Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strAccountCategory',
-                                                                                dataType: 'string',
-                                                                                text: 'Account Category',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
+                                                                        xtype: 'combobox',
                                                                         itemId: 'cboAccountCategory',
                                                                         fieldLabel: 'Account Category',
-                                                                        labelWidth: 120,
-                                                                        displayField: 'strAccountCategory',
-                                                                        valueField: 'intAccountCategoryId'
+                                                                        labelWidth: 120
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intAccountId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Account Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strAccountId',
-                                                                                dataType: 'string',
-                                                                                text: 'Account Id',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'intAccountGroupId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Account Group Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strAccountGroup',
-                                                                                dataType: 'string',
-                                                                                text: 'Account Group',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strAccountType',
-                                                                                dataType: 'string',
-                                                                                text: 'Account Type',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
+                                                                        xtype: 'combobox',
                                                                         itemId: 'cboAccountID',
                                                                         fieldLabel: 'Account ID',
-                                                                        labelWidth: 120,
-                                                                        displayField: 'strAccountId',
-                                                                        valueField: 'intAccountId'
+                                                                        labelWidth: 120
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
                                                                         itemId: 'txtAccountDescription',
                                                                         fieldLabel: 'Account Description',
-                                                                        labelWidth: 120,
-                                                                        readOnly: true
+                                                                        labelWidth: 120
                                                                     },
                                                                     {
-                                                                        xtype: 'numeric',
+                                                                        xtype: 'numberfield',
                                                                         itemId: 'txtTaxAmount',
                                                                         fieldLabel: 'Tax Amount',
                                                                         labelWidth: 120,
-                                                                        readOnly: true,
                                                                         hideTrigger: true
                                                                     }
                                                                 ]
@@ -584,7 +409,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnAddItem',
                                                                 iconCls: 'small-add',
-                                                                text: 'Insert'
+                                                                text: 'Add'
                                                             },
                                                             {
                                                                 xtype: 'button',
@@ -618,45 +443,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         itemId: 'colItemNumber',
                                                         width: 100,
                                                         dataIndex: 'strItemNumber',
-                                                        text: 'Item No.',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strItemNo',
-                                                                    dataType: 'string',
-                                                                    text: 'Item Number',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strType',
-                                                                    dataType: 'string',
-                                                                    text: 'Item Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLotTracking',
-                                                                    dataType: 'string',
-                                                                    text: 'Lot Tracking',
-                                                                    hidden: true
-                                                                }
-                                                            ],
-                                                            itemId: 'cboItem',
-                                                            displayField: 'strItemNo',
-                                                            valueField: 'strItemNo'
-                                                        }
+                                                        text: 'Item No.'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -670,171 +457,35 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         itemId: 'colLotID',
                                                         width: 100,
                                                         dataIndex: 'strLotID',
-                                                        text: 'Lot ID',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intLotId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Lot Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLotNumber',
-                                                                    dataType: 'string',
-                                                                    text: 'Lot Number',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboLot',
-                                                            displayField: 'strLotNumber',
-                                                            valueField: 'strLotNumber'
-                                                        }
+                                                        text: 'Lot ID'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colFromSubLocation',
                                                         width: 110,
                                                         dataIndex: 'strFromSubLocation',
-                                                        text: 'From Sub Location',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intCompanyLocationSubLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Sub Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intCompanyLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strSubLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Sub Location Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strSubLocationDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboFromSubLocation',
-                                                            displayField: 'strSubLocationName',
-                                                            valueField: 'strSubLocationName'
-                                                        }
+                                                        text: 'From Sub Location'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colFromStorage',
                                                         width: 88,
                                                         dataIndex: 'strFromStorage',
-                                                        text: 'From Storage',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intStorageLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Country Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strName',
-                                                                    dataType: 'string',
-                                                                    text: 'Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboFromStorage',
-                                                            displayField: 'strName',
-                                                            valueField: 'strName'
-                                                        }
+                                                        text: 'From Storage'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colToSubLocation',
                                                         width: 96,
                                                         dataIndex: 'strToSubLocation',
-                                                        text: 'To Sub Location',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intCompanyLocationSubLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Sub Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intCompanyLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strSubLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Sub Location Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strSubLocationDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboToSubLocation',
-                                                            displayField: 'strSubLocationName',
-                                                            valueField: 'strSubLocationName'
-                                                        }
+                                                        text: 'To Sub Location'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colToStorage',
                                                         width: 88,
                                                         dataIndex: 'strToStorage',
-                                                        text: 'To Storage',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intStorageLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Country Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strName',
-                                                                    dataType: 'string',
-                                                                    text: 'Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboToStorage',
-                                                            displayField: 'strName',
-                                                            valueField: 'strName'
-                                                        }
+                                                        text: 'To Storage'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -844,90 +495,21 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblQuantity',
                                                         text: 'Quantity',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colUOM',
                                                         width: 70,
                                                         dataIndex: 'strUOM',
-                                                        text: 'UOM',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemUOMId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Unit Of Measure Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Measure',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitType',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    xtype: 'checkcolumn',
-                                                                    dataIndex: 'ysnStockUnit',
-                                                                    dataType: 'boolean',
-                                                                    text: 'Stock Unit',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
-                                                        }
+                                                        text: 'UOM'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colWeightUOM',
                                                         width: 75,
                                                         dataIndex: 'strWeightUOM',
-                                                        text: 'Weight UOM',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemUOMId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Unit Of Measure Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Measure',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitType',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    xtype: 'checkcolumn',
-                                                                    dataIndex: 'ysnStockUnit',
-                                                                    dataType: 'boolean',
-                                                                    text: 'Stock Unit',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboWeightUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
-                                                        }
+                                                        text: 'Weight UOM'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -937,10 +519,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblGross',
                                                         text: 'Gross',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -950,10 +529,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblTare',
                                                         text: 'Tare',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -963,20 +539,14 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblNet',
                                                         text: 'Net',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewLotID',
                                                         width: 75,
                                                         dataIndex: 'strNewLotID',
-                                                        text: 'New Lot ID',
-                                                        editor: {
-                                                            xtype: 'textfield'
-                                                        }
+                                                        text: 'New Lot ID'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -986,61 +556,14 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblCost',
                                                         text: 'Cost',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colCreditAccount',
                                                         width: 90,
                                                         dataIndex: 'strCreditAccount',
-                                                        text: 'Credit Account',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intAccountId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountId',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Id',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intAccountGroupId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Group Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountGroup',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Group',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountType',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboCreditAccount',
-                                                            displayField: 'strAccountId',
-                                                            valueField: 'strAccountId'
-                                                        }
+                                                        text: 'Credit Account'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -1054,51 +577,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         itemId: 'colDebitAccount',
                                                         width: 90,
                                                         dataIndex: 'strDebitAccount',
-                                                        text: 'Debit Account',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intAccountId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountId',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Id',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intAccountGroupId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Account Group Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountGroup',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Group',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strAccountType',
-                                                                    dataType: 'string',
-                                                                    text: 'Account Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboDebitAccount',
-                                                            displayField: 'strAccountId',
-                                                            valueField: 'strAccountId'
-                                                        }
+                                                        text: 'Debit Account'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -1112,39 +591,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         itemId: 'colTaxCode',
                                                         width: 69,
                                                         dataIndex: 'strTaxCode',
-                                                        text: 'Tax Code',
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intTaxCodeId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Tax Code Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strTaxCode',
-                                                                    dataType: 'string',
-                                                                    text: 'Tax Code',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Description',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strCalculationMethod',
-                                                                    dataType: 'string',
-                                                                    text: 'Calculation Method',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboTaxCode',
-                                                            displayField: 'strTaxCode',
-                                                            valueField: 'strTaxCode'
-                                                        }
+                                                        text: 'Tax Code'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -1164,10 +611,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblFreightRate',
                                                         text: 'Freight Rate',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -1177,10 +621,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         align: 'right',
                                                         dataIndex: 'dblFreightAmount',
                                                         text: 'Freight Amount',
-                                                        format: '0,000.##',
-                                                        editor: {
-                                                            xtype: 'numberfield'
-                                                        }
+                                                        format: '0,000.##'
                                                     }
                                                 ],
                                                 plugins: [
@@ -1223,7 +664,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnAddNotes',
                                                                 iconCls: 'small-add',
-                                                                text: 'Insert'
+                                                                text: 'Add'
                                                             },
                                                             {
                                                                 xtype: 'button',
