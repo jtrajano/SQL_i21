@@ -876,6 +876,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         text: 'Description'
                                                                     },
                                                                     {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colOrderUOM',
+                                                                        width: 100,
+                                                                        dataIndex: 'strDescription',
+                                                                        text: 'Ordered UOM'
+                                                                    },
+                                                                    {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
                                                                         itemId: 'colQtyOrdered',
@@ -896,24 +903,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         format: '0,000.##'
                                                                     },
                                                                     {
-                                                                        xtype: 'numbercolumn',
-                                                                        dataType: 'numeric',
-                                                                        itemId: 'colQtyToReceive',
-                                                                        width: 95,
-                                                                        align: 'right',
-                                                                        dataIndex: 'dblQtyToReceive',
-                                                                        text: 'Qty to Receive',
-                                                                        format: '0,000.##',
-                                                                        editor: {
-                                                                            xtype: 'numberfield',
-                                                                            itemId: 'txtQtyToReceive',
-                                                                            minValue: 0
-                                                                        }
-                                                                    },
-                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colUOM',
-                                                                        text: 'UOM',
+                                                                        text: 'Receipt UOM',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -946,6 +938,21 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             itemId: 'cboItemUOM',
                                                                             displayField: 'strUnitMeasure',
                                                                             valueField: 'strUnitMeasure'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataType: 'numeric',
+                                                                        itemId: 'colQtyToReceive',
+                                                                        width: 95,
+                                                                        align: 'right',
+                                                                        dataIndex: 'dblQtyToReceive',
+                                                                        text: 'Qty to Receive',
+                                                                        format: '0,000.##',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            itemId: 'txtQtyToReceive',
+                                                                            minValue: 0
                                                                         }
                                                                     },
                                                                     {

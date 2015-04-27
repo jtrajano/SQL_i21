@@ -266,6 +266,25 @@ namespace iRely.Inventory.Model
                 _lotTracking = value;
             }
         }
+        private string _orderUOM;
+        [NotMapped]
+        public string strOrderUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_orderUOM))
+                    if (vyuICGetReceiptItemSource != null)
+                        return vyuICGetReceiptItemSource.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _orderUOM;
+            }
+            set
+            {
+                _orderUOM = value;
+            }
+        }
         private string _uom;
         [NotMapped]
         public string strUnitMeasure
@@ -408,8 +427,12 @@ namespace iRely.Inventory.Model
         [Key]
         public int intInventoryReceiptItemId { get; set; }
         public int? intSourceId { get; set; }
+        public string strReceiptType { get; set; }
         public string strSourceId { get; set; }
         public DateTime? dtmDate { get; set; }
+        public string strUnitMeasure { get; set; }
+        public decimal? dblOrdered { get; set; }
+        public decimal? dblReceived { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }
