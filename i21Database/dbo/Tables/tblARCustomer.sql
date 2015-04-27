@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARCustomer] (
     [intEntityCustomerId]                     INT             NOT NULL,
     --[intEntityCustomerId]                   INT             IDENTITY (1, 1) NOT NULL,
-    [strCustomerNumber]               NVARCHAR (15)   COLLATE Latin1_General_CI_AS NOT NULL,
+    [strCustomerNumber]               NVARCHAR (15)   COLLATE Latin1_General_CI_AS NULL,
     [strType]                         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dblCreditLimit]                  NUMERIC (18, 6) NOT NULL,
     [dblARBalance]                    NUMERIC (18, 6) NOT NULL,
@@ -77,29 +77,16 @@
     CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
     CONSTRAINT [FK_tblARCustomer_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
 	 CONSTRAINT [FK_tblARCustomer_tblSMTaxCode] FOREIGN KEY([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
-    CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intEntityCustomerId] ASC),
-    CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
+    CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intEntityCustomerId] ASC)
+    --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 GO
-CREATE UNIQUE NONCLUSTERED INDEX [IX_tblARCustomer]
-    ON [dbo].[tblARCustomer]([strCustomerNumber] ASC);
+--CREATE UNIQUE NONCLUSTERED INDEX [IX_tblARCustomer]
+--    ON [dbo].[tblARCustomer]([strCustomerNumber] ASC);
 
 
-GO
+--GO
 
 
 
