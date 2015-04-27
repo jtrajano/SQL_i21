@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetManufacturingProcessDetail (@strProcessName NVARCHAR(50))
+﻿CREATE PROCEDURE uspMFGetManufacturingProcessDetail (@strProcessName NVARCHAR(50)='')
 AS
 BEGIN
 	DECLARE @intCompanyLocationId INT
@@ -10,7 +10,7 @@ BEGIN
 		,@strLocationName = strLocationName
 	FROM dbo.tblSMCompanyLocation
 
-	SELECT @CurrentDate = Convert(CHAR, Getdate(), 101)
+	SELECT @CurrentDate = dbo.fnGetBusinessDate(Getdate(),@intCompanyLocationId) 
 
 	SELECT @intShiftId = intShiftId
 	FROM dbo.tblMFShift
@@ -18,13 +18,26 @@ BEGIN
 		AND Getdate() BETWEEN @CurrentDate+dtmShiftStartTime+intStartOffset
 					AND @CurrentDate+dtmShiftEndTime + intEndOffset
 
-	SELECT intManufacturingProcessId
-		,strProcessName
-		,strDescription
-		,@intCompanyLocationId AS intCompanyLocationId
-		,@strLocationName AS strLocationName
-		,@CurrentDate AS dtmBusinessDate
-		,@intShiftId AS intRunningShift
-	FROM dbo.tblMFManufacturingProcess
-	WHERE strProcessName = @strProcessName
+	If @strProcessName=''
+	Begin
+		SELECT 0 As intManufacturingProcessId
+			,'' strProcessName
+			,'' strDescription
+			,@intCompanyLocationId AS intCompanyLocationId
+			,@strLocationName AS strLocationName
+			,@CurrentDate AS dtmBusinessDate
+			,@intShiftId AS intRunningShift
+	End
+	Else
+	Begin
+		SELECT intManufacturingProcessId
+			,strProcessName
+			,strDescription
+			,@intCompanyLocationId AS intCompanyLocationId
+			,@strLocationName AS strLocationName
+			,@CurrentDate AS dtmBusinessDate
+			,@intShiftId AS intRunningShift
+		FROM dbo.tblMFManufacturingProcess
+		WHERE strProcessName = @strProcessName
+	End
 END
