@@ -1098,6 +1098,7 @@
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_intAccountId_ysnIsUnposted.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_ysnIsUnposted.sql" />
+    <Build Include="dbo\Index\IX_tblGLJournalDetail_intJournalId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
