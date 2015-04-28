@@ -2807,4 +2807,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strShipFromPhone]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="946d49b3-7db0-468c-a917-15136e843229" ChangeDateTime="04/28/2015 08:05:38">
+    <Property Name="ElementName" Value="[dbo].[tblARInvoiceDetailTax].[strTaxCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARInvoiceDetailTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxClassId" />
+  </Operation>
 </Operations>
