@@ -15,5 +15,6 @@
     [dblCurrencyRate] NUMERIC(18, 6) NOT NULL, 
     CONSTRAINT [PK_tblGRStorageScheduleRule_intStorageScheduleRuleId] PRIMARY KEY ([intStorageScheduleRuleId]), 
     CONSTRAINT [FK_tblGRStorageScheduleRule_tblICCommodity] FOREIGN KEY ([intCommodity]) REFERENCES [tblICCommodity]([intCommodityId]), 
-    CONSTRAINT [FK_tblGRStorageScheduleRule_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocation]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 
+    CONSTRAINT [FK_tblGRStorageScheduleRule_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocation]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+    CONSTRAINT [FK_tblGRStorageScheduleRule_tblGRStorageType] FOREIGN KEY ([intStorageType]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]) 
 )
