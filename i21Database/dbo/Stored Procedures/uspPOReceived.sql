@@ -123,7 +123,7 @@ BEGIN
 	BEGIN
 		SET @count = @count + 1;
 		SET @purchaseId = (SELECT TOP(@count) intSourceId FROM #tmpReceivedPOItems)
-		EXEC uspPOUpdateStatus @purchaseId
+		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
 	END
 
 END

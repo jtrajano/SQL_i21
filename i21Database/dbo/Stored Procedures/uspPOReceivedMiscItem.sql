@@ -49,7 +49,7 @@ BEGIN
 	BEGIN
 		SET @count = @count + 1;
 		SET @purchaseId = (SELECT TOP(@count) intPurchaseId FROM #tmpReceivedPOMiscItems A INNER JOIN tblPOPurchaseDetail B ON A.intPODetailId = B.intPurchaseDetailId)
-		EXEC uspPOUpdateStatus @purchaseId
+		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
 	END
 
 END
