@@ -12,8 +12,6 @@ BEGIN TRY
 		,@strOutputLotNumber NVARCHAR(50)
 		,@strVendorLotNo NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
-		,@intStatusId INT
-		,@intItemUOMId INT
 		,@intInputLotId INT
 		,@intManufacturingCellId INT
 		,@intLocationId INT
@@ -99,11 +97,7 @@ BEGIN TRY
 		AND intUnitMeasureId in (Select intUnitMeasureId from dbo.tblICUnitMeasure Where strUnitMeasure like '%bag%')
 	End
 
-	SELECT @intStatusId = intStatusId
-	FROM dbo.tblMFWorkOrderStatus
-	WHERE strName = 'Started'
-
-	Update tblMFWorkOrder Set intStatusId =@intStatusId  Where intWorkOrderId=@intWorkOrderId
+	Update tblMFWorkOrder Set intStatusId =10  Where intWorkOrderId=@intWorkOrderId
 
 	Select @dtmCurrentDate=GetDate()
 
@@ -133,17 +127,11 @@ BEGIN TRY
 		EXEC dbo.uspSMGetStartingNumber 34
 			,@strWorkOrderNo OUTPUT
 
-		SELECT @intStatusId = intStatusId
-		FROM dbo.tblMFWorkOrderStatus
-		WHERE strName = 'Started'
-
 		SELECT @intManufacturingCellId = intManufacturingCellId
 		FROM dbo.tblMFRecipe
 		WHERE intItemId = @intItemId
 			AND intLocationId = @intLocationId
 			AND ysnActive = 1
-
-		SELECT @intItemUOMId = @intProduceUnitMeasureId
 
 		SELECT @intExecutionOrder = Max(intExecutionOrder) + 1
 		FROM dbo.tblMFWorkOrder
@@ -176,8 +164,8 @@ BEGIN TRY
 			,@intManufacturingProcessId
 			,@intItemId
 			,@dblProduceQty
-			,@intItemUOMId
-			,@intStatusId
+			,@intProduceUnitMeasureId
+			,10
 			,@intManufacturingCellId
 			,@intStorageLocationId
 			,@intLocationId
