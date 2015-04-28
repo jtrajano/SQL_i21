@@ -1,10 +1,12 @@
 ﻿CREATE TABLE [dbo].[tblGRStorageType]
 (
-	[intStorageTypeId] INT NOT NULL IDENTITY, 
-    [strStorageType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-    [intSort] INT NULL, 
-    [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblGRStorageType] PRIMARY KEY ([intStorageTypeId]), 
-    CONSTRAINT [AK_tblGRStorageType_strStorageType] UNIQUE ([strStorageType])
+	[intStorageScheduleTypeId] INT NOT NULL IDENTITY, 
+    [strStorageTypeDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strStorageTypeCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [ysnReceiptedStorage] BIT NOT NULL DEFAULT 0, 
+    [intConcurrencyId] INT NOT NULL, 
+    [ysnOwnedPhysicalStock] BIT NOT NULL DEFAULT 0, 
+    [ysnDPOwnedType] BIT NOT NULL DEFAULT 0, 
+    [ysnGrainBankType] BIT NOT NULL DEFAULT 0, 
+    CONSTRAINT [PK_tblGRStorageType_intStorageScheduleTypeId] PRIMARY KEY ([intStorageScheduleTypeId])  
 )
