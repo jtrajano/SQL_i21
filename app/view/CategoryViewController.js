@@ -80,7 +80,8 @@ Ext.define('Inventory.view.CategoryViewController', {
                     }
                 },
                 colDetailDescription: 'strDescription',
-                colDetailUpcCode: 'strUpcCode',
+                colDetailShortUPC: 'strUpcCode',
+                colDetailUpcCode: 'strFullUPC',
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: 'ysnAllowPurchase',
