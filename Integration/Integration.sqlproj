@@ -256,5 +256,6 @@
     <None Include="dbo\Functions\fnTMGetSpecialPricing.sql" />
     <None Include="dbo\Functions\fnTMGetSalesTax.sql" />
     <None Include="dbo\Views\vyuTMtrprcmst.sql" />
+    <None Include="dbo\Views\vyustpbkmst.sql" />
   </ItemGroup>
 </Project>
