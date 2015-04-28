@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets6f070c548d69c7655e3fd28d1d06183d1962a36775320ec20a84ac86048de301))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets2a900b6015aa60056d12323b57bf64bcdc174fd4c0f561a33a330fe065940fed))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets6f070c548d69c7655e3fd28d1d06183d1962a36775320ec20a84ac86048de301 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets2a900b6015aa60056d12323b57bf64bcdc174fd4c0f561a33a330fe065940fed : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "6f070c548d69c7655e3fd28d1d06183d1962a36775320ec20a84ac86048de301"; }
+            get { return "2a900b6015aa60056d12323b57bf64bcdc174fd4c0f561a33a330fe065940fed"; }
         }
 
         /// <summary>
@@ -3274,12 +3274,18 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentItemSource
-        [CodeFirstDatabaseSchema.vyuICGetShipmentItemSource](T1.vyuICGetShipmentItemSource_intInventoryShipmentItemId, T1.vyuICGetShipmentItemSource_intSourceId, T1.vyuICGetShipmentItemSource_strSourceId)
+        [CodeFirstDatabaseSchema.vyuICGetShipmentItemSource](T1.vyuICGetShipmentItemSource_intInventoryShipmentItemId, T1.vyuICGetShipmentItemSource_intSourceId, T1.vyuICGetShipmentItemSource_strSourceId, T1.vyuICGetShipmentItemSource_strOrderUOM, T1.vyuICGetShipmentItemSource_dblQtyOrdered, T1.vyuICGetShipmentItemSource_dblQtyAllocated, T1.vyuICGetShipmentItemSource_dblUnitPrice, T1.vyuICGetShipmentItemSource_dblDiscount, T1.vyuICGetShipmentItemSource_dblTotal)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS vyuICGetShipmentItemSource_intInventoryShipmentItemId, 
             T.intSourceId AS vyuICGetShipmentItemSource_intSourceId, 
             T.strSourceId AS vyuICGetShipmentItemSource_strSourceId, 
+            T.strOrderUOM AS vyuICGetShipmentItemSource_strOrderUOM, 
+            T.dblQtyOrdered AS vyuICGetShipmentItemSource_dblQtyOrdered, 
+            T.dblQtyAllocated AS vyuICGetShipmentItemSource_dblQtyAllocated, 
+            T.dblUnitPrice AS vyuICGetShipmentItemSource_dblUnitPrice, 
+            T.dblDiscount AS vyuICGetShipmentItemSource_dblDiscount, 
+            T.dblTotal AS vyuICGetShipmentItemSource_dblTotal, 
             True AS _from0
         FROM InventoryEntities.vyuICGetShipmentItemSources AS T
     ) AS T1");
@@ -6163,12 +6169,18 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentItemSources
-        [iRely.Inventory.Model.vyuICGetShipmentItemSource](T1.vyuICGetShipmentItemSource_intInventoryShipmentItemId, T1.vyuICGetShipmentItemSource_intSourceId, T1.vyuICGetShipmentItemSource_strSourceId)
+        [iRely.Inventory.Model.vyuICGetShipmentItemSource](T1.vyuICGetShipmentItemSource_intInventoryShipmentItemId, T1.vyuICGetShipmentItemSource_intSourceId, T1.vyuICGetShipmentItemSource_strSourceId, T1.vyuICGetShipmentItemSource_strOrderUOM, T1.vyuICGetShipmentItemSource_dblQtyOrdered, T1.vyuICGetShipmentItemSource_dblQtyAllocated, T1.vyuICGetShipmentItemSource_dblUnitPrice, T1.vyuICGetShipmentItemSource_dblDiscount, T1.vyuICGetShipmentItemSource_dblTotal)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS vyuICGetShipmentItemSource_intInventoryShipmentItemId, 
             T.intSourceId AS vyuICGetShipmentItemSource_intSourceId, 
             T.strSourceId AS vyuICGetShipmentItemSource_strSourceId, 
+            T.strOrderUOM AS vyuICGetShipmentItemSource_strOrderUOM, 
+            T.dblQtyOrdered AS vyuICGetShipmentItemSource_dblQtyOrdered, 
+            T.dblQtyAllocated AS vyuICGetShipmentItemSource_dblQtyAllocated, 
+            T.dblUnitPrice AS vyuICGetShipmentItemSource_dblUnitPrice, 
+            T.dblDiscount AS vyuICGetShipmentItemSource_dblDiscount, 
+            T.dblTotal AS vyuICGetShipmentItemSource_dblTotal, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetShipmentItemSource AS T
     ) AS T1");

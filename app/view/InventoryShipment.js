@@ -30,6 +30,7 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.grid.Panel',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.toolbar.Paging'
@@ -806,31 +807,49 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     dataIndex: 'strSalesOrderNumber',
                                                                                     dataType: 'string',
                                                                                     text: 'Sales Order',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strItemNo',
                                                                                     dataType: 'string',
                                                                                     text: 'Item No',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strItemDescription',
                                                                                     dataType: 'string',
                                                                                     text: 'Description',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 120
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLotTracking',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Lot Tracking',
+                                                                                    flex: 1,
+                                                                                    width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strUnitMeasure',
                                                                                     dataType: 'string',
                                                                                     text: 'Item UOM Id',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'dblQtyOrdered',
                                                                                     dataType: 'float',
                                                                                     text: 'Qty Ordered',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 100
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblPrice',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Unit Price',
+                                                                                    hidden: true
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strStorageLocation',
@@ -938,17 +957,37 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
-                                                                        itemId: 'colQuantity',
-                                                                        width: 65,
+                                                                        itemId: 'colOrderQty',
+                                                                        width: 80,
                                                                         align: 'right',
                                                                         dataIndex: 'dblQuantity',
-                                                                        text: 'Quantity',
+                                                                        text: 'Order Qty',
                                                                         format: '0,000.##'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colOrderUOM',
+                                                                        width: 100,
+                                                                        dataIndex: 'strDescription',
+                                                                        text: 'Order UOM'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataType: 'numeric',
+                                                                        itemId: 'colQuantity',
+                                                                        width: 80,
+                                                                        align: 'right',
+                                                                        dataIndex: 'dblQuantity',
+                                                                        text: 'Quantity',
+                                                                        format: '0,000.##',
+                                                                        editor: {
+                                                                            xtype: 'numeric'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colUOM',
-                                                                        width: 75,
+                                                                        width: 100,
                                                                         dataIndex: 'strUOM',
                                                                         text: 'UOM',
                                                                         editor: {
@@ -1003,7 +1042,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         align: 'right',
                                                                         dataIndex: 'dblUnitPrice',
                                                                         text: 'Unit Price',
-                                                                        format: '0,000.##'
+                                                                        format: '0,000.##',
+                                                                        editor: {
+                                                                            xtype: 'numeric'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -1051,6 +1093,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 xtype: 'advancefiltergrid',
                                                                 flex: 1,
                                                                 reference: 'grdLotTracking',
+                                                                hidden: true,
                                                                 itemId: 'grdLotTracking',
                                                                 margin: -1,
                                                                 dockedItems: [

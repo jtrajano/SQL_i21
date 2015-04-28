@@ -124,6 +124,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.strSourceId).HasColumnName("strSourceId");
+            this.Property(t => t.strOrderUOM).HasColumnName("strOrderUOM");
+            this.Property(t => t.dblQtyOrdered).HasColumnName("dblQtyOrdered").HasPrecision(18, 6);
+            this.Property(t => t.dblQtyAllocated).HasColumnName("dblQtyAllocated").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice").HasPrecision(18, 6);
+            this.Property(t => t.dblDiscount).HasColumnName("dblDiscount").HasPrecision(18, 6);
+            this.Property(t => t.dblTotal).HasColumnName("dblTotal").HasPrecision(18, 6);
         }
     }
 }

@@ -185,6 +185,80 @@ namespace iRely.Inventory.Model
                 _sourceId = value;
             }
         }
+        private string _orderUOM;
+        [NotMapped]
+        public string strOrderUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_orderUOM))
+                    if (vyuICGetShipmentItemSource != null)
+                        return vyuICGetShipmentItemSource.strOrderUOM;
+                    else
+                        return null;
+                else
+                    return _orderUOM;
+            }
+            set
+            {
+                _orderUOM = value;
+            }
+        }
+        [NotMapped]
+        public decimal dblQtyOrdered
+        {
+            get
+            {
+                if (vyuICGetShipmentItemSource != null)
+                    return vyuICGetShipmentItemSource.dblQtyOrdered ?? 0;
+                else
+                    return 0;
+            }
+        }
+        [NotMapped]
+        public decimal dblQtyAllocated
+        {
+            get
+            {
+                if (vyuICGetShipmentItemSource != null)
+                    return vyuICGetShipmentItemSource.dblQtyAllocated ?? 0;
+                else
+                    return 0;
+            }
+        }
+        [NotMapped]
+        public decimal dblOrderUnitPrice
+        {
+            get
+            {
+                if (vyuICGetShipmentItemSource != null)
+                    return vyuICGetShipmentItemSource.dblUnitPrice ?? 0;
+                else
+                    return 0;
+            }
+        }
+        [NotMapped]
+        public decimal dblOrderDiscount
+        {
+            get
+            {
+                if (vyuICGetShipmentItemSource != null)
+                    return vyuICGetShipmentItemSource.dblDiscount ?? 0;
+                else
+                    return 0;
+            }
+        }
+        [NotMapped]
+        public decimal dblOrderTotal
+        {
+            get
+            {
+                if (vyuICGetShipmentItemSource != null)
+                    return vyuICGetShipmentItemSource.dblTotal ?? 0;
+                else
+                    return 0;
+            }
+        }
         private string _itemNo;
         [NotMapped]
         public string strItemNo
@@ -221,6 +295,25 @@ namespace iRely.Inventory.Model
             set
             {
                 _description = value;
+            }
+        }
+        private string _lotTracking;
+        [NotMapped]
+        public string strLotTracking
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_lotTracking))
+                    if (tblICItem != null)
+                        return tblICItem.strLotTracking;
+                    else
+                        return null;
+                else
+                    return _lotTracking;
+            }
+            set
+            {
+                _lotTracking = value;
             }
         }
         private string _uom;
@@ -312,6 +405,12 @@ namespace iRely.Inventory.Model
         public int intInventoryShipmentItemId { get; set; }
         public int? intSourceId { get; set; }
         public string strSourceId { get; set; }
+        public string strOrderUOM { get; set; }
+        public decimal? dblQtyOrdered { get; set; }
+        public decimal? dblQtyAllocated { get; set; }
+        public decimal? dblUnitPrice { get; set; }
+        public decimal? dblDiscount { get; set; }
+        public decimal? dblTotal { get; set; }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
     }

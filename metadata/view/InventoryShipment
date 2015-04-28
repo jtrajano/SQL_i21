@@ -1727,31 +1727,49 @@
                                                                             "\t\tdataIndex: 'strSalesOrderNumber',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Sales Order',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
                                                                             "\t},",
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strItemNo',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Item No',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
                                                                             "\t},",
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strItemDescription',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Description',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 120",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'strLotTracking',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Lot Tracking',",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
                                                                             "\t},",
                                                                             "    {",
                                                                             "\t\tdataIndex: 'strUnitMeasure',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Item UOM Id',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
                                                                             "\t},",
                                                                             "    {",
                                                                             "\t\tdataIndex: 'dblQtyOrdered',",
                                                                             "\t\tdataType: 'float',",
                                                                             "\t\ttext: 'Qty Ordered',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'dblPrice',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\ttext: 'Unit Price',",
+                                                                            "\t\thidden: true",
                                                                             "\t},",
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strStorageLocation',",
@@ -1959,9 +1977,9 @@
                                                                 "dataIndex": "dblQuantity",
                                                                 "dataType": "numeric",
                                                                 "format": "0,000.##",
-                                                                "itemId": "colQuantity",
-                                                                "text": "Quantity",
-                                                                "width": 65
+                                                                "itemId": "colOrderQty",
+                                                                "text": "Order Qty",
+                                                                "width": 80
                                                             },
                                                             "name": "MyNumberColumn",
                                                             "designerId": "9c007814-decb-48ce-a077-237ccfcff662",
@@ -1981,10 +1999,67 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "dataIndex": "strDescription",
+                                                                "itemId": "colOrderUOM",
+                                                                "text": "Order UOM",
+                                                                "width": 100
+                                                            },
+                                                            "name": "MyColumn45",
+                                                            "designerId": "db9b69ee-90bd-41f9-9909-1e1cdd5e07ee"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
+                                                                "dataIndex": "dblQuantity",
+                                                                "dataType": "numeric",
+                                                                "format": "0,000.##",
+                                                                "itemId": "colQuantity",
+                                                                "text": "Quantity",
+                                                                "width": 80
+                                                            },
+                                                            "name": "MyNumberColumn18",
+                                                            "designerId": "07e8c5de-bd40-4af2-97ee-0a5c004be3bb",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "numeric"
+                                                                    },
+                                                                    "name": "MyNumberField14",
+                                                                    "designerId": "cb0c5d04-dfbf-4ade-a11a-c80ea1140424"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
                                                                 "dataIndex": "strUOM",
                                                                 "itemId": "colUOM",
                                                                 "text": "UOM",
-                                                                "width": 75
+                                                                "width": 100
                                                             },
                                                             "name": "MyColumn9",
                                                             "designerId": "a2a88ae4-34db-4b5e-8e3c-18035df9da40",
@@ -2095,6 +2170,21 @@
                                                                     "group": "(Custom Properties)",
                                                                     "name": "dataType",
                                                                     "type": "string"
+                                                                }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "numeric"
+                                                                    },
+                                                                    "name": "MyNumberField16",
+                                                                    "designerId": "0d637b1d-a899-4b60-affc-e8d277d3f33a"
                                                                 }
                                                             ]
                                                         },
@@ -2211,6 +2301,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
+                                                        "hidden": true,
                                                         "itemId": "grdLotTracking",
                                                         "layout|flex": 1,
                                                         "margin": -1,
