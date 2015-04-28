@@ -18,6 +18,7 @@
 		,ysnActive = c.ysnActive
 		,ysnActiveContact = ec.ysnActive
 		,ec.imgPhoto
+		,ysnBillable = c.ysnHDBillableSupport
 	  from
 		--tblEntityContact ec
 		tblARCustomerToContact etc 		
