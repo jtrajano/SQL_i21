@@ -1934,7 +1934,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 },
                                                                                 items: [
                                                                                     {
-                                                                                        xtype: 'numberfield',
+                                                                                        xtype: 'numeric',
                                                                                         flex: 2,
                                                                                         itemId: 'txtLifeTime',
                                                                                         fieldLabel: 'Life Time',
@@ -1953,7 +1953,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 ]
                                                                             },
                                                                             {
-                                                                                xtype: 'textfield',
+                                                                                xtype: 'numeric',
                                                                                 itemId: 'txtReceiveLife',
                                                                                 fieldLabel: 'Receive Life',
                                                                                 labelWidth: 125
