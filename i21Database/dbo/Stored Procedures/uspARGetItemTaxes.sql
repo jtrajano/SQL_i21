@@ -256,23 +256,28 @@ AS
 				END									
 					
 			SELECT
-				 TC.[intTaxCodeId]
-				,TC.[strTaxCode] 
-				,TC.[intTaxClassId]
+				0
+				,0 AS [intInvoiceDetailId]
+				,TGM.[intTaxGroupMasterId] 
+				,TG.[intTaxGroupId] 
+				,TC.[intTaxCodeId]
+				,TC.[intTaxClassId]				
+				,TC.[strTaxableByOtherTaxes]
 				,TC.[strCalculationMethod] 
 				,TC.[numRate]
-				,TC.[strTaxAgency] 
-				,TC.[strState] 
-				,TC.[strCity]
-				,TC.[strCountry] 
-				,TC.[strCounty] 
-				,TC.[intSalesTaxAccountId]
-				,TC.[strTaxableByOtherTaxes]
-				,TG.[intTaxGroupId] 
-				,TG.[strTaxGroup] 
-				,TGM.[intTaxGroupMasterId] 
-				,TGM.[strTaxGroupMaster] 
+				,0.00 AS [dblTax]
+				,0.00 AS [dblAdjustedTax]
 				,TGM.[ysnSeparateOnInvoice] 
+				,TC.[strTaxCode] 
+				
+				--,TC.[strTaxAgency] 
+				--,TC.[strState] 
+				--,TC.[strCity]
+				--,TC.[strCountry] 
+				--,TC.[strCounty] 
+				--,TC.[intSalesTaxAccountId]								
+				--,TG.[strTaxGroup] 				
+				--,TGM.[strTaxGroupMaster] 				
 			FROM
 				tblSMTaxCode TC
 			INNER JOIN
@@ -296,22 +301,27 @@ AS
 					
 
 	SELECT
-		 NULL AS [intTaxCodeId]
-		,NULL AS [strTaxCode]
-		,NULL AS [intTaxClassId] 
-		,NULL AS [strCalculationMethod] 
-		,NULL AS [numRate]
-		,NULL AS [strTaxAgency] 
-		,NULL AS [strState] 
-		,NULL AS [strCity]
-		,NULL AS [strCountry] 
-		,NULL AS [strCounty] 
-		,NULL AS [intSalesTaxAccountId]
-		,NULL AS [strTaxableByOtherTaxes]
-		,NULL AS [intTaxGroupId] 
-		,NULL AS [strTaxGroup] 
-		,NULL AS [intTaxGroupMasterId] 
-		,NULL AS [strTaxGroupMaster] 
-		,NULL AS [ysnSeparateOnInvoice] 
+		 0
+		,0		[intInvoiceDetailId]
+		,0		[intTaxGroupMasterId] 
+		,0		[intTaxGroupId] 
+		,0		[intTaxCodeId]
+		,0		[intTaxClassId]				
+		,NULL	[strTaxableByOtherTaxes]
+		,NULL	[strCalculationMethod] 
+		,NULL	[numRate]
+		,NULL	[dblTax]
+		,NULL	[dblAdjustedTax]
+		,0		[ysnSeparateOnInvoice] 
+		,NULL	[strTaxCode] 
+				
+		--,NULL	[strTaxAgency] 
+		--,NULL	[strState] 
+		--,NULL	[strCity]
+		--,NULL	[strCountry] 
+		--,NULL	[strCounty] 
+		--,0	[intSalesTaxAccountId]								
+		--,NULL	[strTaxGroup] 				
+		--,NULL	[strTaxGroupMaster] 	
 	
 	RETURN 0
