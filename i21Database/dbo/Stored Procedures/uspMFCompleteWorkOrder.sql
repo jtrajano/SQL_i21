@@ -34,6 +34,8 @@ BEGIN TRY
 		,@ysnNegativeQtyAllowed BIT
 		,@ysnSubLotAllowed Bit
 		,@strRetBatchId nvarchar(40)
+		,@intLotId INT
+		,@strLotTracking NVARCHAR(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -108,8 +110,15 @@ BEGIN TRY
 	If @intSubLocationId is null
 	Select @intSubLocationId=intSubLocationId From dbo.tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
 
-	IF @strOutputLotNumber = ''
-		OR @strOutputLotNumber IS NULL
+	SELECT @strLotTracking = strLotTracking
+	FROM dbo.tblICItem
+	WHERE intItemId = @intItemId
+
+	IF (
+			@strOutputLotNumber = ''
+			OR @strOutputLotNumber IS NULL
+			)
+		AND @strLotTracking <> 'Yes - Serial Number'
 	BEGIN
 		EXEC dbo.uspSMGetStartingNumber 24
 			,@strOutputLotNumber OUTPUT
@@ -135,9 +144,6 @@ BEGIN TRY
 			AND ysnActive = 1
 
 		SELECT @intItemUOMId = @intProduceUnitMeasureId
-		--FROM dbo.tblICItemUOM
-		--WHERE intItemId = @intItemId
-		--	AND intUnitMeasureId = @intProduceUnitMeasureId
 
 		SELECT @intExecutionOrder = Max(intExecutionOrder) + 1
 		FROM dbo.tblMFWorkOrder
@@ -273,8 +279,15 @@ BEGIN TRY
 		,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 		,@intBatchId = @intBatchId
 		,@strBatchId=@strRetBatchId
+		,@intLotId = @intLotId OUTPUT
 
-	Update dbo.tblICLot Set intLotStatusId =3 Where strLotNumber =@strOutputLotNumber
+	UPDATE dbo.tblICLot
+	SET intLotStatusId = 3
+	WHERE intLotId = @intLotId
+
+	SELECT @strOutputLotNumber = strLotNumber
+	FROM dbo.tblICLot
+	WHERE intLotId = @intLotId
 		
 	Select @strOutputLotNumber as strOutputLotNumber
 
