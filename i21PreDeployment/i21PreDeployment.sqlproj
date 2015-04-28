@@ -77,6 +77,7 @@
     <Folder Include="Scripts\Pre-Deployment\12_EM" />
     <Folder Include="Scripts\Pre-Deployment\13_RK" />
     <Folder Include="Scripts\Pre-Deployment\14_CT" />
+    <Folder Include="Scripts\Pre-Deployment\15_GR" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -107,6 +108,7 @@
     <None Include="Scripts\Pre-Deployment\4_SM\3_DataMigration.sql" />
     <None Include="Scripts\Pre-Deployment\13_RK\01_DropTableScript.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\0_1510_MasterMenu.sql" />
+    <None Include="Scripts\Pre-Deployment\15_GR\1_ConstraintDropQuery.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\1_TM\1_1320_to_1340.sql" />

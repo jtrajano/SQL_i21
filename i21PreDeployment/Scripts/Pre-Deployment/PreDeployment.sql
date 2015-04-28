@@ -84,3 +84,6 @@
 
 --CT
 :r .\14_CT\01_Make_Column_Null.sql
+
+--GR
+:r .\15_GR\1_ConstraintDropQuery.sql

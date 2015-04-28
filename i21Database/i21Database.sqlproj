@@ -1444,6 +1444,9 @@
     <Build Include="dbo\Stored Procedures\uspARGetItemTaxes.sql" />
     <Build Include="dbo\Tables\tblPRTimecard.sql" />
     <Build Include="dbo\Tables\tblPRTimeEntry.sql" />
+    <Build Include="dbo\Tables\tblGRStorageOption.sql" />
+    <Build Include="dbo\Tables\tblGRStorageSchedulePeriod.sql" />
+    <Build Include="dbo\Tables\tblGRStorageScheduleRule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
