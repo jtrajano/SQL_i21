@@ -5,7 +5,7 @@ AS
 BEGIN
 
 	INSERT dbo.tblSMTaxGroupMaster([strTaxGroupMaster], [strDescription], [ysnSeparateOnInvoice])
-	SELECT 'Duplicate of ' + [strTaxGroupMaster], [strDescription], [ysnSeparateOnInvoice]
+	SELECT 'DUP: ' + [strTaxGroupMaster], [strDescription], [ysnSeparateOnInvoice]
 	FROM dbo.tblSMTaxGroupMaster 
 	WHERE [intTaxGroupMasterId] = @taxGroupMasterId;
 	

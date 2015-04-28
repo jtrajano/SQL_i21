@@ -320,7 +320,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 34
 			,[strTransactionType]	= N'Work Order'
-			,[strPrefix]			= N''
+			,[strPrefix]			= N'WO-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1

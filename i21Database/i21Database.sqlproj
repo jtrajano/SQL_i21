@@ -1456,6 +1456,16 @@
     <Build Include="dbo\Views\vyuRKGetFutureMarketName.sql" />
     <Build Include="dbo\Tables\tblPRWorkersCompensation.sql" />
     <Build Include="dbo\Index\IX_tblGLJournalDetail_intJournalId.sql" />
+    <Build Include="dbo\Functions\fnGetBusinessDate.sql" />
+    <Build Include="dbo\Tables\tblARSpecialTax.sql" />
+    <Build Include="dbo\Tables\tblSOSalesOrderDetailTax.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceDetailTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetItemTaxes.sql" />
+    <Build Include="dbo\Tables\tblPRTimecard.sql" />
+    <Build Include="dbo\Tables\tblPRTimeEntry.sql" />
+    <Build Include="dbo\Tables\tblGRStorageOption.sql" />
+    <Build Include="dbo\Tables\tblGRStorageSchedulePeriod.sql" />
+    <Build Include="dbo\Tables\tblGRStorageScheduleRule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

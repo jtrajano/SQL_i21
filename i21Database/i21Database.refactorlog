@@ -2807,4 +2807,109 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strShipFromPhone]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6dcce82e-c1c4-4487-bbe4-c1468ee635cc" ChangeDateTime="04/28/2015 06:25:35">
+    <Property Name="ElementName" Value="[dbo].[PK_tblGRStorageSchedulePeriod]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageSchedulePeriod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblGRStorageSchedulePeriod_intStorageSchedulePeriodId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1f41202b-bf37-4a1f-9ed5-f74696ce16db" ChangeDateTime="04/28/2015 06:29:23">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageSchedulePeriod].[strStorageScheduleRule]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageSchedulePeriod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageScheduleRule" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8b83f4d6-78d1-45f6-9d89-0fbc8136adb1" ChangeDateTime="04/28/2015 07:26:55">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[intStorageTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageScheduleTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b0be96f7-dd62-43f3-b9bb-192617ce36b3" ChangeDateTime="04/28/2015 07:27:08">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[strStorageType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c7e370e0-cf02-4e83-bb08-bfc5dda40123" ChangeDateTime="04/28/2015 07:27:21">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[strDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strStorageTypeDescription" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b8570c46-6e3a-4e69-8b88-0bd366a2abd4" ChangeDateTime="04/28/2015 07:27:48">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[intSort]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strStorageTypeCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4ce94270-11e0-49ea-b093-1de463f3ff1e" ChangeDateTime="04/28/2015 07:28:22">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[intConcurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnReceiptedStorage" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="79d92426-1d44-4da0-9a83-6d4b952b5d37" ChangeDateTime="04/28/2015 07:32:20">
+    <Property Name="ElementName" Value="[dbo].[PK_tblGRStorageType]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblGRStorageType_intStorageScheduleTypeId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="aff6d309-1a3e-4a2f-96bc-fb7423d328eb" ChangeDateTime="04/28/2015 07:34:43">
+    <Property Name="ElementName" Value="[dbo].[FK_tblGRStorageScheduleRule_ToTable]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageScheduleRule]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblGRStorageScheduleRule_tblGRStorageType]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="946d49b3-7db0-468c-a917-15136e843229" ChangeDateTime="04/28/2015 08:05:38">
+    <Property Name="ElementName" Value="[dbo].[tblARInvoiceDetailTax].[strTaxCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARInvoiceDetailTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxClassId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cd32f0f7-150f-4f89-8965-6fa885438d99" ChangeDateTime="04/28/2015 12:21:53">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[intStorageTypeId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageScheduleTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d8eb311e-64e9-4dbb-aca0-ac6ffba75342" ChangeDateTime="04/28/2015 12:22:00">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[strStorageType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strStorageTypeDescription" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9b59e0e2-b9df-4613-8601-4e58a41aa87b" ChangeDateTime="04/28/2015 12:22:12">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[strDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strStorageTypeCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0e9f3fe6-a9a8-45fd-aee7-4635dba48590" ChangeDateTime="04/28/2015 12:22:32">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[intSort]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnReceiptedStorage" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ef8baad1-08a0-408e-89bb-8e29f57a7baa" ChangeDateTime="04/28/2015 12:24:39">
+    <Property Name="ElementName" Value="[dbo].[PK_tblGRStorageType]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblGRStorageType_intStorageScheduleTypeId]" />
+  </Operation>
 </Operations>

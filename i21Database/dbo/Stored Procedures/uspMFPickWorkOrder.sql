@@ -91,8 +91,8 @@ AND ri.intConsumptionMethodId in (2,3)
 	SELECT L.intLotId
 		,L.intItemId
 		,L.dblWeight
-		,L.dblWeight / L.dblWeightPerQty
-		,L.dblWeightPerQty
+		,L.dblWeight / (Case When L.dblWeightPerQty=0 or L.dblWeightPerQty is null Then 1 else L.dblWeightPerQty end)
+		,(Case When L.dblWeightPerQty=0 or L.dblWeightPerQty is null Then 1 else L.dblWeightPerQty end)
 		,L.intWeightUOMId
 		,L.intItemUOMId
 	FROM dbo.tblICLot L

@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblPRWorkersCompensation]
 (
-	[intWorkersCompensationId] INT NOT NULL PRIMARY KEY, 
+	[intWorkersCompensationId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [strWCCode] NVARCHAR(50) NOT NULL, 
     [strDescription] NVARCHAR(100) NULL, 
     [intTypeTaxStateId] INT NULL, 

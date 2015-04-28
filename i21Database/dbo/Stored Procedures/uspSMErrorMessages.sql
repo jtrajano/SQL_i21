@@ -252,7 +252,7 @@ SET @strmessage = 'Lot quantity and physical count should be equal when same UOM
 EXEC sp_addmessage 51062,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51063) EXEC sp_dropmessage 51063, 'us_english'	
-SET @strmessage = 'Lot quantity should be greater than zero.'
+SET @strmessage = 'It is required to enter number of unit and weight to produce the lot.'
 EXEC sp_addmessage 51063,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51064) EXEC sp_dropmessage 51064, 'us_english'	
@@ -358,3 +358,12 @@ EXEC sp_addmessage 51088,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51089) EXEC sp_dropmessage 51089, 'us_english'	
 SET @strmessage = 'The attempted consumption quantity of %d %s of material ''%s'' from lot ''%s'' is more than the lot''s queued quantity of %d %s. The transaction will not be allowed to proceed.'
 EXEC sp_addmessage 51089,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51090) EXEC sp_dropmessage 51090, 'us_english'	
+SET @strmessage = 'The status of %s is Discontinued.'
+EXEC sp_addmessage 51090,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51091) EXEC sp_dropmessage 51091, 'us_english'	
+SET @strmessage = 'Missing costing method setup for item %s.'
+EXEC sp_addmessage 51091,11,@strmessage,'us_english','False' 
+

@@ -20,11 +20,11 @@ FROM
 		ON A.intVendorDefaultId = B.intVendorDefaultId
 	JOIN dbo.tblCCSite C
 		ON B.intCompanyOwnedSiteId = C.intCompanyOwnedSiteId
-	JOIN dbo.tblSMPaymentMethod G
+	LEFT JOIN dbo.tblSMPaymentMethod G
 	    ON G.intPaymentMethodID = C.intPaymentMethodId
-    JOIN dbo.tblARCustomer H
+    LEFT JOIN dbo.tblARCustomer H
 	    ON H.intEntityCustomerId = C.intCustomerId
-	JOIN dbo.tblEntity I
+	LEFT JOIN dbo.tblEntity I
 	    ON I.intEntityId = H.intEntityCustomerId
 UNION ALL
 SELECT

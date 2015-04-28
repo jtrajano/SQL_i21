@@ -59,7 +59,13 @@ IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICItem') AND
 BEGIN
 	EXEC ('
 	UPDATE tblICItem
-	SET strType = ''Finished Goods''
+	SET strType = ''Finished Good''
 	WHERE strType = ''Manufacturing''
+	')
+
+	EXEC ('
+	UPDATE tblICItem
+	SET strType = ''Finished Good''
+	WHERE strType = ''Finished Goods''
 	')
 END

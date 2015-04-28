@@ -91,7 +91,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF @strSecondaryStatus <> 'Quarantined'
+	IF @intLotStatusId <> 3
 		OR (
 			@strSecondaryStatus = 'In_Warehouse'
 			AND @strPrimaryStatus = 'On_Hold'

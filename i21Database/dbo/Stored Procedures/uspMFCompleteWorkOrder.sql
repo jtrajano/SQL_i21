@@ -12,8 +12,6 @@ BEGIN TRY
 		,@strOutputLotNumber NVARCHAR(50)
 		,@strVendorLotNo NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
-		,@intStatusId INT
-		,@intItemUOMId INT
 		,@intInputLotId INT
 		,@intManufacturingCellId INT
 		,@intLocationId INT
@@ -34,6 +32,8 @@ BEGIN TRY
 		,@ysnNegativeQtyAllowed BIT
 		,@ysnSubLotAllowed Bit
 		,@strRetBatchId nvarchar(40)
+		,@intLotId INT
+		,@strLotTracking NVARCHAR(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -97,19 +97,22 @@ BEGIN TRY
 		AND intUnitMeasureId in (Select intUnitMeasureId from dbo.tblICUnitMeasure Where strUnitMeasure like '%bag%')
 	End
 
-	SELECT @intStatusId = intStatusId
-	FROM dbo.tblMFWorkOrderStatus
-	WHERE strName = 'Started'
-
-	Update tblMFWorkOrder Set intStatusId =@intStatusId  Where intWorkOrderId=@intWorkOrderId
+	Update tblMFWorkOrder Set intStatusId =10  Where intWorkOrderId=@intWorkOrderId
 
 	Select @dtmCurrentDate=GetDate()
 
 	If @intSubLocationId is null
 	Select @intSubLocationId=intSubLocationId From dbo.tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
 
-	IF @strOutputLotNumber = ''
-		OR @strOutputLotNumber IS NULL
+	SELECT @strLotTracking = strLotTracking
+	FROM dbo.tblICItem
+	WHERE intItemId = @intItemId
+
+	IF (
+			@strOutputLotNumber = ''
+			OR @strOutputLotNumber IS NULL
+			)
+		AND @strLotTracking <> 'Yes - Serial Number'
 	BEGIN
 		EXEC dbo.uspSMGetStartingNumber 24
 			,@strOutputLotNumber OUTPUT
@@ -124,20 +127,11 @@ BEGIN TRY
 		EXEC dbo.uspSMGetStartingNumber 34
 			,@strWorkOrderNo OUTPUT
 
-		SELECT @intStatusId = intStatusId
-		FROM dbo.tblMFWorkOrderStatus
-		WHERE strName = 'Started'
-
 		SELECT @intManufacturingCellId = intManufacturingCellId
 		FROM dbo.tblMFRecipe
 		WHERE intItemId = @intItemId
 			AND intLocationId = @intLocationId
 			AND ysnActive = 1
-
-		SELECT @intItemUOMId = @intProduceUnitMeasureId
-		--FROM dbo.tblICItemUOM
-		--WHERE intItemId = @intItemId
-		--	AND intUnitMeasureId = @intProduceUnitMeasureId
 
 		SELECT @intExecutionOrder = Max(intExecutionOrder) + 1
 		FROM dbo.tblMFWorkOrder
@@ -170,8 +164,8 @@ BEGIN TRY
 			,@intManufacturingProcessId
 			,@intItemId
 			,@dblProduceQty
-			,@intItemUOMId
-			,@intStatusId
+			,@intProduceUnitMeasureId
+			,10
 			,@intManufacturingCellId
 			,@intStorageLocationId
 			,@intLocationId
@@ -273,8 +267,15 @@ BEGIN TRY
 		,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 		,@intBatchId = @intBatchId
 		,@strBatchId=@strRetBatchId
+		,@intLotId = @intLotId OUTPUT
 
-	Update dbo.tblICLot Set intLotStatusId =(Select intLotStatusId from tblICLotStatus Where strSecondaryStatus='Quarantined')Where strLotNumber =@strOutputLotNumber
+	UPDATE dbo.tblICLot
+	SET intLotStatusId = 3
+	WHERE intLotId = @intLotId
+
+	SELECT @strOutputLotNumber = strLotNumber
+	FROM dbo.tblICLot
+	WHERE intLotId = @intLotId
 		
 	Select @strOutputLotNumber as strOutputLotNumber
 

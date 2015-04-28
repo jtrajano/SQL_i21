@@ -7,7 +7,6 @@
 	[strMiddleName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strLastName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strNameSuffix] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-	[intSupervisorId] [int] NULL,
 	[ysnActive] [bit] NOT NULL DEFAULT ((1)),
 	[dtmDateHired] [datetime] NULL,
 	[dtmBirthDate] [datetime] NULL,
@@ -41,7 +40,6 @@
 	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityId]),
     CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEmployeeId]), 
     CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
-	CONSTRAINT [FK_tblPREmployee_tblPREmployee] FOREIGN KEY ([intSupervisorId]) REFERENCES [tblPREmployee]([intEmployeeId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId])
 ) ON [PRIMARY]
@@ -298,17 +296,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'strNameSuffix'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Supervisor Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'intSupervisorId'
-GO
-
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'EEOC Code',
