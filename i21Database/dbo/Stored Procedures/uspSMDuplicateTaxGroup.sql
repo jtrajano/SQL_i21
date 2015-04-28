@@ -5,7 +5,7 @@ AS
 BEGIN
 
 	INSERT dbo.tblSMTaxGroup([strTaxGroup], [strDescription])
-	SELECT 'Duplicate of ' + [strTaxGroup], [strDescription]
+	SELECT 'DUP: ' + [strTaxGroup], [strDescription]
 	FROM dbo.tblSMTaxGroup 
 	WHERE [intTaxGroupId] = @taxGroupId;
 	

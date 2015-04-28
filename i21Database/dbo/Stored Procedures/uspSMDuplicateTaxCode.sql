@@ -7,7 +7,7 @@ BEGIN
 	INSERT dbo.tblSMTaxCode([strTaxCode], [intTaxClassId], [strDescription], [strCalculationMethod], [numRate], 
 							[strTaxAgency], [strAddress], [strZipCode], [strState], [strCity],
 							[strCountry], [strCounty], [intSalesTaxAccountId], [intPurchaseTaxAccountId], [strTaxableByOtherTaxes])
-	SELECT 'Duplicate of ' + [strTaxCode], [intTaxClassId], [strDescription], [strCalculationMethod], [numRate], 
+	SELECT 'DUP: ' + [strTaxCode], [intTaxClassId], [strDescription], [strCalculationMethod], [numRate], 
 		   [strTaxAgency], [strAddress], [strZipCode], [strState], [strCity],[strCountry], [strCounty], 
 		   [intSalesTaxAccountId], [intPurchaseTaxAccountId], [strTaxableByOtherTaxes]
 	FROM dbo.tblSMTaxCode 
