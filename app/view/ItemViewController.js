@@ -648,7 +648,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colAssemblyUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{assemblyUOM}'
+                        store: '{assemblyUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdAssembly.selection.intAssemblyItemId}'
+                        }]
                     }
                 },
                 colAssemblyUnit: 'dblUnit',

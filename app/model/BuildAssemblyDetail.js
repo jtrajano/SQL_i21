@@ -36,7 +36,8 @@ Ext.define('Inventory.model.BuildAssemblyDetail', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string' },
-        { name: 'strUnitMeasure', type: 'string' }
+        { name: 'strUnitMeasure', type: 'string' },
+        { name: 'strSubLocationName', type: 'string' }
     ],
 
     validators: [

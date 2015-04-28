@@ -4384,6 +4384,7 @@ Ext.define('Inventory.view.Item', {
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
+                                                reference: 'grdAssembly',
                                                 itemId: 'grdAssembly',
                                                 margin: -1,
                                                 dockedItems: [

@@ -5,6 +5,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewModel', {
     requires: [
         'Inventory.store.BufferedAssemblyItem',
         'Inventory.store.BufferedItemUnitMeasure',
+        'Inventory.store.BufferedItemStockUOMView',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered'
     ],
@@ -21,6 +22,13 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewModel', {
         },
         subLocation: {
             type: 'smcompanylocationsublocationbuffered'
+        },
+        itemSubLocation: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
+        stockUOM: {
+            autoLoad: true,
+            type: 'icbuffereditemstockuomview'
         }
     },
 
