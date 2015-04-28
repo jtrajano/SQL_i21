@@ -146,5 +146,10 @@
 :r "..\dbo\Stored Procedures\uspARImportPayments.sql"
 
 
+-- C-Store
+:r ..\dbo\Views\vyustpbkmst.sql
+
+
+
 
 

@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspPOUpdateStatus]
     @poId INT,
-	@status INT
+	@status INT = NULL
 AS
 BEGIN
 

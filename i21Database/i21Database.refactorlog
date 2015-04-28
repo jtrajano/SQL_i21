@@ -2807,6 +2807,7 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strShipFromPhone]" />
   </Operation>
+<<<<<<< HEAD
   <Operation Name="Rename Refactor" Key="6dcce82e-c1c4-4487-bbe4-c1468ee635cc" ChangeDateTime="04/28/2015 06:25:35">
     <Property Name="ElementName" Value="[dbo].[PK_tblGRStorageSchedulePeriod]" />
     <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
@@ -2869,5 +2870,13 @@
     <Property Name="ParentElementName" Value="[dbo].[tblGRStorageScheduleRule]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblGRStorageScheduleRule_tblGRStorageType]" />
+=======
+  <Operation Name="Rename Refactor" Key="946d49b3-7db0-468c-a917-15136e843229" ChangeDateTime="04/28/2015 08:05:38">
+    <Property Name="ElementName" Value="[dbo].[tblARInvoiceDetailTax].[strTaxCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARInvoiceDetailTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTaxClassId" />
+>>>>>>> e8b51bd62b244729dec08a294321301d0fd03118
   </Operation>
 </Operations>
