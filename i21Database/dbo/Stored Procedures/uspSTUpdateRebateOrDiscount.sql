@@ -21,16 +21,16 @@ BEGIN TRY
 			@PromotionType          NVARCHAR(8),
 			@BeginDate   			DATETIME,
 			@EndDate		 	    DATETIME,
-		    @ItemRebateAmount       DECIMAL (18,6),
+		    @ItemRebateAmount       DECIMAL (11,6),
 			@ItemAccumlatedQty      INT,
-			@ItemAccumAmount        DECIMAL (18,6),
+			@ItemAccumAmount        DECIMAL (7,2),
 			@ItemQuantity           INT,
-			@ItemUom                NVARCHAR(50),
+			@ItemUom                NVARCHAR(10),
 			@SalesStartDate		    DATETIME,
 			@SalesEndDate   		DATETIME,
-			@ItemDiscThroughAmount  DECIMAL (18,6),
+			@ItemDiscThroughAmount  DECIMAL (7,2),
 			@ItemDiscThroughQty     INT,
-			@ItemDiscAmountUnit     DECIMAL (18,6)
+			@ItemDiscAmountUnit     DECIMAL (11,6)
 		
 	                  
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
@@ -66,16 +66,16 @@ BEGIN TRY
 			PromotionTypeValue      NVARCHAR(8),
 			BeginingDate            DATETIME,     
 			EndingDate              DATETIME,
-			RebateAmount		    DECIMAL (18,6),
+			RebateAmount		    DECIMAL (11,6),
 			AccumlatedQuantity		INT,
-			AccumlatedAmount        DECIMAL (18,6),
+			AccumlatedAmount        DECIMAL (7,2),
 			QuantityCase			INT,
-			UOM                     NVARCHAR(50),
+			UOM                     NVARCHAR(10),
 			SalesStartingDate		DATETIME,
 			SalesEndingDate			DATETIME,
-			DiscThroughAmount       DECIMAL (18,6),
+			DiscThroughAmount       DECIMAL (7,2),
 			DiscThroughQty          INT,
-			DiscAmountUnit          DECIMAL (18,6)
+			DiscAmountUnit          DECIMAL (11,6)
 	)  
     -- Insert statements for procedure here
 
