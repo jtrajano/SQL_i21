@@ -14,7 +14,6 @@
     [dtmManufacturedDate]      DATETIME        DEFAULT 0 NULL,
     [strComment]               NVARCHAR (300)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
     [ysnUnderground]           BIT             DEFAULT 0 NOT NULL,
-    [dblTankSize]              NUMERIC(18, 6)             DEFAULT 0 NOT NULL,
     [dblTankCapacity]          NUMERIC(18, 6)             DEFAULT 0 NOT NULL,
     [dblTankReserve]           NUMERIC (18, 6) DEFAULT 0 NULL,
     [dblEstimatedGalTank]      NUMERIC (18, 6) DEFAULT 0 NULL,
@@ -181,14 +180,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'ysnUnderground'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Tank Size',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblTMDevice',
-    @level2type = N'COLUMN',
-    @level2name = N'dblTankSize'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Tank Capacity',

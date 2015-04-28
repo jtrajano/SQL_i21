@@ -177,4 +177,9 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\12_EM\01_EntitySchemaUpdate.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\1_TM\6_1510_to_1520.sql">
+      <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
