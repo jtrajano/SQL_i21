@@ -146,8 +146,8 @@ ELSE
 		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 
 		/* Insert created Void Check Transaction Ids to #tmpCMBankTransactionReversal */
-		SELECT strTransactionId, intEntityId INTO #tmpCMBankTransactionReversal FROM 
-			(SELECT F.strTransactionId + 'V' AS strTransactionId, F.intEntityId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+		SELECT strTransactionId, intEntityId, intBankTransactionTypeId INTO #tmpCMBankTransactionReversal FROM 
+			(SELECT F.strTransactionId + 'V' AS strTransactionId, F.intEntityId, F.intBankTransactionTypeId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 				ON F.strTransactionId = TMP.strTransactionId
 				WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
@@ -156,19 +156,32 @@ ELSE
 		/* Execute Posting Procedure for each Void Check entry*/
 		DECLARE @isPostingSuccessful BIT
 		DECLARE @strVoidTransactionId NVARCHAR(40)
+		DECLARE @intVoidBankTransactionTypeId INT
 		DECLARE @intEntityId INT
 		WHILE EXISTS (SELECT 1 FROM #tmpCMBankTransactionReversal) 
 			BEGIN
-				SELECT TOP 1 @strVoidTransactionId = strTransactionId, @intEntityId = intEntityId FROM #tmpCMBankTransactionReversal
+				SELECT TOP 1 @strVoidTransactionId = strTransactionId
+							,@intEntityId = intEntityId
+							,@intVoidBankTransactionTypeId = intBankTransactionTypeId 
+				FROM #tmpCMBankTransactionReversal
 
-				/* Post the Void Check entry*/
-				EXEC uspCMPostVoidCheck 1, 0, @strVoidTransactionId, @intUserId, @intEntityId, @isSuccessful = @isPostingSuccessful OUTPUT
+				IF (@intVoidBankTransactionTypeId = @AP_PAYMENT)
+					BEGIN
+						/* If Void Check entry for AP Payment, do not post the reversal*/
+						UPDATE tblCMBankTransaction SET ysnPosted = 1, ysnCheckVoid = 1, @isPostingSuccessful = 1 
+						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = @VOID_CHECK
+					END
+				ELSE
+					BEGIN
+						/* Post the Void Check entry*/
+						EXEC uspCMPostVoidCheck 1, 0, @strVoidTransactionId, @intUserId, @intEntityId, @isSuccessful = @isPostingSuccessful OUTPUT
+					END
 
 				/* Clear the Void Check entry if successfull posted*/
 				IF (@isPostingSuccessful = 1) 
 					BEGIN
 						UPDATE tblCMBankTransaction SET ysnClr = 1 
-						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = 19
+						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = @VOID_CHECK
 					END
 				/* Otherwise Delete the Void Check entry and abort the reversal */
 				ELSE 
