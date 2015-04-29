@@ -1705,6 +1705,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Generate 
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Logistics.view.GenerateLoad' WHERE strMenuName = 'Generate Loads' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inbound Shipments' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Inbound Shipments', N'Logistics', @LogisticsParentMenuId, N'Inbound Shipments', N'Activity', N'Screen', N'Logistics.view.InboundShipment', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Logistics.view.InboundShipment' WHERE strMenuName = 'Inbound Shipments' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Container Type' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Container Type', N'Logistics', @LogisticsParentMenuId, N'Container Type', N'Maintenance', N'Screen', N'Logistics.view.ContainerType', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)

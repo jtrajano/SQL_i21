@@ -1354,12 +1354,12 @@
     <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxGroup.sql" />
     <Build Include="dbo\Functions\fnCalculateCostPerLot.sql" />
     <Build Include="dbo\Functions\fnCalculateLotQty.sql" />
-    <Build Include="dbo\Functions\fnCalculateLotWeight.sql" />	
-	<Build Include="dbo\Stored Procedures\uspSMDuplicateTaxCode.sql" />
+    <Build Include="dbo\Functions\fnCalculateLotWeight.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxCode.sql" />
     <Build Include="dbo\Tables\tblSCTicketCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSCInventoryUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdationFromTicketDistribution.sql" />
-    <Build Include="dbo\Views\vyuICGetStorageLocation.sql" />	
+    <Build Include="dbo\Views\vyuICGetStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentExpiryLotChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentItemChange.sql" />
@@ -1373,14 +1373,14 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\DeliveryFill.sql" />
     <Build Include="dbo\Tables\tblICBuildAssembly.sql" />
     <Build Include="dbo\Tables\tblICBuildAssemblyDetail.sql" />
-    <Build Include="dbo\Views\vyuARBillableHoursForImport.sql" />	
+    <Build Include="dbo\Views\vyuARBillableHoursForImport.sql" />
     <Build Include="dbo\Tables\tblQMListItem.sql" />
     <Build Include="dbo\Tables\tblQMList.sql" />
     <Build Include="dbo\Views\vyuSMBatchPosting.sql" />
     <Build Include="dbo\Views\vyuSMBatchPostingRecap.sql" />
     <Build Include="dbo\Views\vyuSMBatchPostingResult.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateConsumeLot.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFValidateCreateLot.sql" />	
+    <Build Include="dbo\Stored Procedures\uspMFValidateCreateLot.sql" />
     <Build Include="dbo\Views\vyuRKLFuturePSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />
     <Build Include="dbo\Tables\tblMFManufacturingProcessMachine.sql" />
@@ -1401,7 +1401,7 @@
     <Build Include="dbo\Tables\tblQMAttribute.sql" />
     <Build Include="dbo\Tables\tblQMAttributeDataType.sql" />
     <Build Include="dbo\Stored Procedures\uspPOReceivedMiscItem.sql" />
-    <Build Include="dbo\Views\vyuHDItem.sql" />	
+    <Build Include="dbo\Views\vyuHDItem.sql" />
     <Build Include="dbo\Views\vyuAPBillForApproval.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetNextWillCallStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateEntityTables.sql" />
@@ -1414,7 +1414,7 @@
     <Build Include="dbo\Views\vyuICGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoAdjustment.sql" />
     <Build Include="dbo\Views\vyuICGetPostedLot.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetIngredientLotByProduct.sql" />	
+    <Build Include="dbo\Stored Procedures\uspMFGetIngredientLotByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetProductByProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShift.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainer.sql" />
@@ -1426,7 +1426,7 @@
     <Build Include="dbo\Tables\tblMFShift.sql" />
     <Build Include="dbo\Tables\tblMFShiftBreakType.sql" />
     <Build Include="dbo\Tables\tblMFShiftDetail.sql" />
-    <Build Include="dbo\Tables\tblMFFloorMovementType.sql" />	
+    <Build Include="dbo\Tables\tblMFFloorMovementType.sql" />
     <Build Include="dbo\Tables\tblMFStationType.sql" />
     <Build Include="dbo\Tables\tblMFFloorMovement.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCompleteWorkOrder.sql" />
@@ -1466,6 +1466,14 @@
     <Build Include="dbo\Tables\tblGRStorageOption.sql" />
     <Build Include="dbo\Tables\tblGRStorageSchedulePeriod.sql" />
     <Build Include="dbo\Tables\tblGRStorageScheduleRule.sql" />
+    <Build Include="dbo\Tables\tblLGShipmentContractQty.sql" />
+    <Build Include="dbo\Tables\tblLGShipment.sql" />
+    <Build Include="dbo\Tables\tblLGShipmentPurchaseSalesContract.sql" />
+    <Build Include="dbo\Tables\tblLGShipmentBLContainerContract.sql" />
+    <Build Include="dbo\Tables\tblLGShipmentBLContainer.sql" />
+    <Build Include="dbo\Tables\tblLGShipmentBL.sql" />
+    <Build Include="dbo\Views\vyuLGShipmentOpenAllocationDetails.sql" />
+    <Build Include="dbo\Views\vyuLGShipmentOpenContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
