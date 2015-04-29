@@ -1076,21 +1076,27 @@ Ext.define('Inventory.view.ItemViewController', {
                 action(true);
             }
             else {
-                var tabItem = win.down('#tabItem')
-                var tabSetup = win.down('#tabSetup')
-                if (iRely.Functions.isEmpty(config.viewModel.data.current.get('strLifeTimeType'))) {
-                    tabItem.setActiveTab('pgeSetup');
-                    tabSetup.setActiveTab('pgeManufacturing');
-                    action(false);
+                var tabItem = win.down('#tabItem');
+                var tabSetup = win.down('#tabSetup');
+                if (config.viewModel.data.current.get('strType') === 'Finished Good' || config.viewModel.data.current.get('strType') === 'Raw Material') {
+                    if (iRely.Functions.isEmpty(config.viewModel.data.current.get('strLifeTimeType'))) {
+                        tabItem.setActiveTab('pgeSetup');
+                        tabSetup.setActiveTab('pgeManufacturing');
+                        action(false);
+                    }
+                    else if (config.viewModel.data.current.get('intLifeTime') <= 0) {
+                        tabItem.setActiveTab('pgeSetup');
+                        tabSetup.setActiveTab('pgeManufacturing');
+                        action(false);
+                    }
+                    else if (config.viewModel.data.current.get('intReceiveLife') <= 0) {
+                        tabItem.setActiveTab('pgeSetup');
+                        tabSetup.setActiveTab('pgeManufacturing');
+                        action(false);
+                    }
                 }
-                else if (config.viewModel.data.current.get('intLifeTime') <= 0) {
-                    tabItem.setActiveTab('pgeSetup');
-                    tabSetup.setActiveTab('pgeManufacturing');
-                    action(false);
-                }
-                else if (config.viewModel.data.current.get('intReceiveLife') <= 0) {
-                    tabItem.setActiveTab('pgeSetup');
-                    tabSetup.setActiveTab('pgeManufacturing');
+                else {
+                    tabItem.setActiveTab('pgePricing');
                     action(false);
                 }
             }
