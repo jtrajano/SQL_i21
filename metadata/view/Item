@@ -4099,7 +4099,8 @@
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtLifeTime",
                                                                                 "labelWidth": 125,
-                                                                                "layout|flex": 2
+                                                                                "layout|flex": 2,
+                                                                                "modelValidation": true
                                                                             },
                                                                             "name": "MyNumberField48",
                                                                             "designerId": "c0831b70-ac20-46b0-aecb-839f88168b04"
@@ -4119,6 +4120,7 @@
                                                                                 "layout|flex": 1,
                                                                                 "layout|margins": null,
                                                                                 "margin": "0 0 0 5",
+                                                                                "modelValidation": true,
                                                                                 "valueField": "strDescription"
                                                                             },
                                                                             "name": "MyComboBox29",
@@ -4138,7 +4140,8 @@
                                                                         "fieldLabel": "Receive Life",
                                                                         "itemId": "txtReceiveLife",
                                                                         "labelWidth": 125,
-                                                                        "layout|flex": null
+                                                                        "layout|flex": null,
+                                                                        "modelValidation": true
                                                                     },
                                                                     "name": "MyTextField16",
                                                                     "designerId": "d788b1a5-9420-46f0-a492-bc52850a0b88"

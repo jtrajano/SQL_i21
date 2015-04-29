@@ -1937,6 +1937,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         xtype: 'numeric',
                                                                                         flex: 2,
                                                                                         itemId: 'txtLifeTime',
+                                                                                        modelValidation: true,
                                                                                         fieldLabel: 'Life Time',
                                                                                         labelWidth: 125,
                                                                                         hideTrigger: true
@@ -1946,6 +1947,7 @@ Ext.define('Inventory.view.Item', {
                                                                                         flex: 1,
                                                                                         itemId: 'cboLifetimeType',
                                                                                         margin: '0 0 0 5',
+                                                                                        modelValidation: true,
                                                                                         labelWidth: 125,
                                                                                         displayField: 'strDescription',
                                                                                         valueField: 'strDescription'
@@ -1955,6 +1957,7 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'numeric',
                                                                                 itemId: 'txtReceiveLife',
+                                                                                modelValidation: true,
                                                                                 fieldLabel: 'Receive Life',
                                                                                 labelWidth: 125
                                                                             }

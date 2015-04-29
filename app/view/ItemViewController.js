@@ -821,6 +821,7 @@ Ext.define('Inventory.view.ItemViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
+            validateRecord : me.validateRecord,
             onSaveClick: me.onSaveClick,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
@@ -1066,6 +1067,34 @@ Ext.define('Inventory.view.ItemViewController', {
                 });
             }
         }
+    },
+
+    validateRecord: function(config, action) {
+        var win = config.window;
+        this.validateRecord(config, function (result) {
+            if (result) {
+                action(true);
+            }
+            else {
+                var tabItem = win.down('#tabItem')
+                var tabSetup = win.down('#tabSetup')
+                if (iRely.Functions.isEmpty(config.viewModel.data.current.get('strLifeTimeType'))) {
+                    tabItem.setActiveTab('pgeSetup');
+                    tabSetup.setActiveTab('pgeManufacturing');
+                    action(false);
+                }
+                else if (config.viewModel.data.current.get('intLifeTime') <= 0) {
+                    tabItem.setActiveTab('pgeSetup');
+                    tabSetup.setActiveTab('pgeManufacturing');
+                    action(false);
+                }
+                else if (config.viewModel.data.current.get('intReceiveLife') <= 0) {
+                    tabItem.setActiveTab('pgeSetup');
+                    tabSetup.setActiveTab('pgeManufacturing');
+                    action(false);
+                }
+            }
+        });
     },
 
     onSaveClick: function(button, e, options) {
