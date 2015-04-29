@@ -530,8 +530,8 @@ UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.ImportFromCSV' WHER
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'GL Import Logs' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.ImportLogs' WHERE strMenuName = N'GL Import Logs' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Chart of Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.ChartOfAccounts' WHERE strMenuName = N'Chart of Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Chart of Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId AND strCategory = 'Maintenance')
+UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.ChartOfAccounts' WHERE strMenuName = N'Chart of Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId AND strCategory = 'Maintenance'
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Account Structure' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.AccountStructure' WHERE strMenuName = N'Account Structure' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
@@ -551,8 +551,8 @@ UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.AccountClone' WHERE
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Fiscal Year' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.FiscalYear' WHERE strMenuName = N'Fiscal Year' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.Reallocation' WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId and strCategory = 'Maintenance')
+UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.Reallocation' WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId and strCategory = 'Maintenance'
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Recurring Journal' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.RecurringJournal' WHERE strMenuName = N'Recurring Journal' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
@@ -563,8 +563,12 @@ UPDATE tblSMMasterMenu SET strCommand = N'GeneralLedger.view.RecurringJournalHis
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Account Adjustment' AND strModuleName ='General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId)
 	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Account Adjustment' AND strModuleName ='General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId
 
---IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Chart of Accounts' AND strModuleName = 'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId)
---	UPDATE tblSMMasterMenu set strCommand = 'GeneralLedger.view.ChartOfAccounts' where strModuleName = 'General Ledger' and strMenuName = 'Chart of Accounts' AND strCategory = 'Maintenance'
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Chart of Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId AND strCategory = 'Report')
+    UPDATE tblSMMasterMenu SET strCommand = N'Chart of Accounts' WHERE strMenuName = N'Chart of Accounts' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId AND strCategory = 'Report'
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId AND strCategory = 'Report')
+    UPDATE tblSMMasterMenu SET strCommand = N'Reallocation' WHERE strMenuName = N'Reallocation' AND strModuleName = N'General Ledger' AND intParentMenuID = @GeneralLedgerParentMenuId AND strCategory = 'Report'
+
 
 /* FINANCIAL REPORTS */
 
