@@ -63,6 +63,12 @@ BEGIN
     INSERT INTO tblMFWorkOrderProductionType(intProductionTypeId,strName)
     VALUES(1,'Make To Order')
 END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrderProductionType
+	SET strName = 'Make To Order'
+	WHERE intProductionTypeId = 1
+END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderProductionType WHERE intProductionTypeId = 2)
 BEGIN
