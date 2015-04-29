@@ -2006,48 +2006,6 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Number",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "align": null,
-                                                                "dataIndex": "dblUnitRetail",
-                                                                "dataType": null,
-                                                                "format": null,
-                                                                "itemId": "colUnitRetail",
-                                                                "text": "Unit Retail",
-                                                                "width": 85
-                                                            },
-                                                            "name": "MyNumberColumn16",
-                                                            "designerId": "923f766d-b560-41dc-9346-d7025a7ba983",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "dataType",
-                                                                    "type": "string"
-                                                                }
-                                                            ],
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Number",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "itemId": "txtUnitRetail",
-                                                                        "minValue": 0
-                                                                    },
-                                                                    "name": "MyNumberField13",
-                                                                    "designerId": "843fb0c3-698d-43cc-8058-9d69203b3b49"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
                                                             "type": "Ext.grid.column.Column",
                                                             "reference": {
                                                                 "name": "columns",
@@ -2086,6 +2044,48 @@
                                                                     "group": "(Custom Properties)",
                                                                     "name": "dataType",
                                                                     "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": null,
+                                                                "dataIndex": "dblUnitRetail",
+                                                                "dataType": null,
+                                                                "format": null,
+                                                                "itemId": "colUnitRetail",
+                                                                "text": "Unit Retail",
+                                                                "width": 85
+                                                            },
+                                                            "name": "MyNumberColumn16",
+                                                            "designerId": "923f766d-b560-41dc-9346-d7025a7ba983",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "itemId": "txtUnitRetail",
+                                                                        "minValue": 0
+                                                                    },
+                                                                    "name": "MyNumberField13",
+                                                                    "designerId": "843fb0c3-698d-43cc-8058-9d69203b3b49"
                                                                 }
                                                             ]
                                                         },
