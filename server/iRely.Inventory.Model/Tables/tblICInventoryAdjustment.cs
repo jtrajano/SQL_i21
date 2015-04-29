@@ -422,6 +422,7 @@ namespace iRely.Inventory.Model
                 _lotStatus = value;
             }
         }
+
         private string _newLotStatus;
         [NotMapped]
         public string strNewLotStatus
@@ -439,6 +440,26 @@ namespace iRely.Inventory.Model
             set
             {
                 _newLotStatus = value;
+            }
+        }
+
+        private string _strLotTracking;
+        [NotMapped]
+        public string strLotTracking
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strLotTracking))
+                    if (Item != null)
+                        return Item.strLotTracking;
+                    else
+                        return null;
+                else
+                    return _strLotTracking;
+            }
+            set
+            {
+                _strLotTracking = value;
             }
         }
 

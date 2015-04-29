@@ -138,7 +138,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 condition: 'blk'
                             }
                         ],
-                        readOnly: '{current.ysnPosted}'
+                        readOnly: '{formulaShowLotNumberEditor}'
                     }
                 },
 
@@ -364,6 +364,21 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('intItemId', record.get('intItemId'));
             current.set('strItemDescription', record.get('strDescription'));
 
+            // Check if selected item lot-tracking = NO.
+            // Non Lot items will need to use stock UOM.
+            if (record.get('strLotTracking') == 'No'){
+                current.set('dblQuantity', record.get('dblUnitOnHand'));
+                current.set('dblCost', record.get('dblLastCost'));
+                current.set('intItemUOMId', record.get('intStockUOMId'));
+                current.set('strItemUOM', record.get('strStockUOM'));
+            }
+            else {
+                current.set('dblQuantity', null);
+                current.set('dblCost', null);
+                current.set('intItemUOMId', null);
+                current.set('strItemUOM', null);
+            }
+
             // Clear the values for the following fields:
             current.set('strSubLocation', null);
             current.set('strStorageLocation', null);
@@ -371,12 +386,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strLotNumber', null);
             current.set('intNewLotId', null);
             current.set('strNewLotNumber', null);
-            current.set('dblQuantity', null);
             current.set('dblNewQuantity', null);
-            current.set('dblCost', null);
             current.set('dblNewCost', null);
-            current.set('intItemUOMId', null);
-            current.set('strItemUOM', null);
             current.set('intNewItemUOMId', null);
             current.set('strNewItemUOM', null);
             current.set('dblWeight', null);

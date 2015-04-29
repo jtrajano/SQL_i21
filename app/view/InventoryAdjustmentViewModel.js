@@ -83,7 +83,28 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
     },
 
     formulas: {
+        formulaShowLotNumberEditor: function(get){
+            var hide = true
+                ,show = false;
 
+            var posted = get('current.ysnPosted');
+            if (posted){
+                return hide;
+            }
+            else {
+                var itemId = get('grdInventoryAdjustment.selection.intItemId');
+                if (!Ext.isNumeric(itemId))
+                    return hide;
+
+                var lotTracking = get('grdInventoryAdjustment.selection.strLotTracking');
+                if (lotTracking == 'No'){
+                    return hide;
+                }
+                else {
+                    return show;
+                }
+            }
+        }
     }
 
 });
