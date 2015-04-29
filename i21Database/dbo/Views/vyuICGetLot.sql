@@ -10,6 +10,8 @@ SELECT Lot.intLotId
 	, Lot.intItemLocationId
 	, Lot.intItemUOMId
 	, strItemUOM = UOM.strUnitMeasure
+	, strItemUOMType = UOM.strUnitType
+	, dblItemUOMConv = ItemUOM.dblUnitQty
 	, Lot.strLotNumber
 	, Lot.intSubLocationId
 	, SubLocation.strSubLocationName
@@ -21,11 +23,13 @@ SELECT Lot.intLotId
 	, Lot.strLotAlias
 	, Lot.intLotStatusId
 	, strLotStatus = LotStatus.strSecondaryStatus
+	, strLotStatusType = LotStatus.strPrimaryStatus
 	, Lot.intParentLotId
 	, Lot.intSplitFromLotId
 	, Lot.dblWeight
 	, Lot.intWeightUOMId
 	, strWeightUOM = WeightUOM.strUnitMeasure
+	, dblWeightUOMConv = ItemWeightUOM.dblUnitQty
 	, Lot.dblWeightPerQty
 	, Lot.intOriginId
 	, Lot.strBOLNo
