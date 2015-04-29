@@ -1508,7 +1508,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numeric',
                                                                         itemId: 'txtUserGroupFee',
-                                                                        fieldLabel: 'User Group Fee',
+                                                                        fieldLabel: 'User Group Fee %',
                                                                         labelWidth: 125
                                                                     }
                                                                 ]
