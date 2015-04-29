@@ -1474,6 +1474,7 @@
     <Build Include="dbo\Tables\tblLGShipmentBL.sql" />
     <Build Include="dbo\Views\vyuLGShipmentOpenAllocationDetails.sql" />
     <Build Include="dbo\Views\vyuLGShipmentOpenContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMValidateEntityNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
