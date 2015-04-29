@@ -942,7 +942,7 @@
     <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for zero Qty.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for zero weight.sql" />
     <Build Include="testi21Database\Functions\test fnCalculateWeightUnitQty for whole numbers.sql" />
-	<Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type.sql" />
     <Build Include="testi21Database\Stored Procedures\Fake data for inventory adjustment table.sql" />
     <Build Include="testi21Database\Functions\test fnGetItemCostingOnPostErrors if it blocks discontinued items.sql" />
@@ -960,6 +960,18 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransaction for inserting the supplied arguments.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentQtyChange on adjusting the Qty of a Lot item.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentQtyChange on adjusting the Qty of a bagged Lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Revalue Sold.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Write-Off Sold.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Auto Negative.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Contra Account.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

@@ -48,38 +48,13 @@ FROM	(
 			FROM	dbo.tblICInventoryTransaction TRANS 
 			WHERE	TRANS.strBatchId = @strBatchId
 		) Query
---INSERT INTO @GLAccounts (
---	intItemId 
---	,intItemLocationId 
---	,intInventoryId 
---	,intContraInventoryId 
---	,intWriteOffSoldId 
---	,intRevalueSoldId 
---	,intAutoNegativeId 
---)
---SELECT	Query.intItemId
---		,Query.intItemLocationId
---		,intInventoryId = Inventory.intAccountId
---		,intContraInventoryId = ContraInventory.intAccountId
---		,intWriteOffSoldId = WriteOffSold.intAccountId
---		,intRevalueSoldId = RevalueSold.intAccountId
---		,intAutoNegativeId = AutoNegative.intAccountId
---FROM	(
---			SELECT DISTINCT intItemId, intItemLocationId 
---			FROM	dbo.tblICInventoryTransaction TRANS 
---			WHERE	TRANS.strBatchId = @strBatchId
---		) Query
---		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_Inventory) Inventory
---		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_ContraInventory) ContraInventory
---		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_WriteOffSold) WriteOffSold
---		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_RevalueSold) RevalueSold
---		OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @AccountCategory_AutoNegative) AutoNegative;
 
 -- Validate the GL Accounts
-BEGIN 
-	DECLARE @strItemNo AS NVARCHAR(50)
-	DECLARE @intItemId AS INT 
+DECLARE @strItemNo AS NVARCHAR(50)
+DECLARE @intItemId AS INT 
 
+-- Check for missing Inventory Account Id
+BEGIN 
 	SELECT	TOP 1 
 			@intItemId = Item.intItemId 
 			,@strItemNo = Item.strItemNo
@@ -89,8 +64,116 @@ BEGIN
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
-		-- G/L account setup is missing for {Item}
-		RAISERROR(51041, 11, 1, @strItemNo) 	
+		-- {Item} is missing a GL account setup for {Account Category} account category.
+		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_Inventory) 	
+		RETURN;
+	END 
+END 
+;
+
+-- Check for missing Contra-Account Id
+BEGIN 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL
+
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intContraInventoryId IS NULL 
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} is missing a GL account setup for {Account Category} account category.
+		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_ContraInventory) 	
+		RETURN;
+	END 
+END 
+;
+
+-- Check for missing Write-Off Sold Account Id
+BEGIN 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL
+
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intWriteOffSoldId IS NULL 
+			AND EXISTS (
+				SELECT	TOP 1 1 
+				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+				WHERE	TRANS.strBatchId = @strBatchId
+						AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_WriteOffSold 
+						AND TRANS.intItemId = Item.intItemId
+			)
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} is missing a GL account setup for {Account Category} account category.
+		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_WriteOffSold) 	
+		RETURN;
+	END 
+END 
+;
+
+-- Check for missing Revalue Sold Account id
+BEGIN 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL
+
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intRevalueSoldId IS NULL 
+			AND EXISTS (
+				SELECT	TOP 1 1 
+				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+				WHERE	TRANS.strBatchId = @strBatchId
+						AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_RevalueSold  
+						AND TRANS.intItemId = Item.intItemId
+			)
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} is missing a GL account setup for {Account Category} account category.
+		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_RevalueSold) 	
+		RETURN;
+	END 
+END 
+;
+
+-- Check for missing Auto Negative Account Id
+BEGIN 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL
+
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
+			AND EXISTS (
+				SELECT	TOP 1 1 
+				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+				WHERE	TRANS.strBatchId = @strBatchId
+						AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative 
+						AND TRANS.intItemId = Item.intItemId
+			)
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} is missing a GL account setup for {Account Category} account category.
+		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_AutoNegative) 	
 		RETURN;
 	END 
 END 
