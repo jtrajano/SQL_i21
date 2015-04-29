@@ -52,20 +52,23 @@
 				@ItemNewVendor             NVARCHAR(50), 
 				@ItemNewInventoryGroup     NVARCHAR(50), 
 				@ItemNewQuantityCase       INT,
-				@ItemNewQuantitySellUnit   INT,
+				@ItemNewQuantitySellUnit   BIGINT,
 				@ItemNewCountCode          NVARCHAR(1),     
 				@ItemNewItemSize           INT,
 				@ItemNewItemUOM            NVARCHAR(50), 
-				@ItemNewMixMatch           INT,
+				@ItemNewMixMatch           BIGINT,
 				@ItemNewMinAge             INT,
 				@ItemNewItemType           NVARCHAR(1),     
-				@ItemNewMinVendorOrderQty  INT,
-				@ItemNewVendorSuggestedQty INT,
-				@ItemNewMinQtyOnHand       INT,
+				@ItemNewMinVendorOrderQty  BIGINT,
+				@ItemNewVendorSuggestedQty BIGINT,
+				@ItemNewMinQtyOnHand       BIGINT,
 				@ItemNewBinLocation        NVARCHAR(10), 
-				@ItemNewGLPurchaseAccount  NVARCHAR(50),
-				@ItemNewGLSalesAccount     NVARCHAR(50),
-				@ItemNewGLVarianceAccount  NVARCHAR(50)
+				@ItemNewGLPurchaseAccount  INT,
+				@PurAcctProfitCenter       INT,
+				@ItemNewGLSalesAccount     INT,
+				@SalAcctProfitCenter       INT,
+				@ItemNewGLVarianceAccount  INT,
+				@VarAcctProfitCenter       INT
 
 	                  
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
@@ -122,8 +125,11 @@
 				@ItemNewMinQtyOnHand     = NewMinQtyOnHand,
 				@ItemNewBinLocation      = NewBinLocation,
 				@ItemNewGLPurchaseAccount  = NewGLPurchaseAccount,
+				@PurAcctProfitCenter   = PurAcctProfitCenter,
 				@ItemNewGLSalesAccount     = NewGLSalesAccount,
-				@ItemNewGLVarianceAccount  = NewGLVarianceAccount  
+				@SalAcctProfitCenter   =  SalAcctProfitCenter,
+				@ItemNewGLVarianceAccount  = NewGLVarianceAccount,  
+				@VarAcctProfitCenter   =  VarAcctProfitCenter
 		
 		
 		FROM	OPENXML(@idoc, 'root',2)
@@ -168,28 +174,34 @@
 				NewVendor               NVARCHAR(50), 
 				NewInventoryGroup       NVARCHAR(50), 
 				NewQuantityCase         INT,
-				NewQuantitySellUnit     INT,
+				NewQuantitySellUnit     BIGINT,
 				NewCountCode            NVARCHAR(1),
 				NewItemSize             INT,  
 				NewItemUOM              NVARCHAR(50), 
-				NewMixMatch             INT,
+				NewMixMatch             BIGINT,
 				NewMinAge               INT,
 				NewItemType             NVARCHAR(1),
-				NewMinVendorOrderQty    INT,
-				NewVendorSuggestedQty   INT,
-				NewMinQtyOnHand         INT,              			   
+				NewMinVendorOrderQty    BIGINT,
+				NewVendorSuggestedQty   BIGINT,
+				NewMinQtyOnHand         BIGINT,              			   
 				NewBinLocation          NVARCHAR(10),
-				NewGLPurchaseAccount    NVARCHAR(50),
-				NewGLSalesAccount       NVARCHAR(50),
-				NewGLVarianceAccount    NVARCHAR(50)
+				NewGLPurchaseAccount    INT,
+				PurAcctProfitCenter     INT,
+				NewGLSalesAccount       INT,
+				SalAcctProfitCenter     INT,
+				NewGLVarianceAccount    INT,
+				VarAcctProfitCenter     INT
 
 			
 		)  
 		-- Insert statements for procedure here
 
 		DECLARE @SQL1 NVARCHAR(MAX)
+		DECLARE @PurchaseAcct NVARCHAR(17)
+		DECLARE @SalAcct NVARCHAR(17)
+		DECLARE @VarAcct NVARCHAR(17)
 
-		   set @SQL1 = 'update stpbkmst set ' 
+		 set @SQL1 = 'update stpbkmst set ' 
 		 if (@ItemTaxFlag1ysn IS NOT NULL)
 			  BEGIN
 				set @SQL1 = @SQL1 + 'stpbk_taxflag1_yn = ''' + LTRIM(@ItemTaxFlag1ysn) + ''''
@@ -554,10 +566,10 @@
 			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
 			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
 			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_casesize = ''' + LTRIM(@ItemNewQuantityCase) + ''''
+ 				 set @SQL1 = @SQL1 + ' , stpbk_casesize = ' + LTRIM(@ItemNewQuantityCase) + ''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_casesize = ''' + LTRIM(@ItemNewQuantityCase) + '''' 
-			  END
+				 set @SQL1 = @SQL1 + ' stpbk_casesize = ' + LTRIM(@ItemNewQuantityCase) + '' 
+		      END
 
 		  if (@ItemNewQuantitySellUnit IS NOT NULL)  
 			  BEGIN
@@ -575,9 +587,9 @@
 			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
 			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
 			  OR (@ItemNewQuantityCase IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_packsize = ''' + LTRIM(@ItemNewQuantitySellUnit) + ''''
+ 				 set @SQL1 = @SQL1 + ' , stpbk_packsize = ' + LTRIM(@ItemNewQuantitySellUnit) + ''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_packsize = ''' + LTRIM(@ItemNewQuantitySellUnit) + '''' 
+				 set @SQL1 = @SQL1 + ' stpbk_packsize = ' + LTRIM(@ItemNewQuantitySellUnit) + ''
 			  END
 
 		 if (@ItemNewCountCode  IS NOT NULL)  
@@ -618,9 +630,9 @@
 			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
 			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
 			  OR (@ItemNewCountCode  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_itemsize = ''' + LTRIM(@ItemNewItemSize) + ''''
+ 				 set @SQL1 = @SQL1 + ' , stpbk_itemsize = ' + LTRIM(@ItemNewItemSize) + ''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_itemsize = ''' + LTRIM(@ItemNewItemSize) + '''' 
+				 set @SQL1 = @SQL1 + ' stpbk_itemsize = ' + LTRIM(@ItemNewItemSize) + '' 
 			  END
 
 		 if (@ItemNewItemUOM IS NOT NULL)  
@@ -686,9 +698,9 @@
 			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
 			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
 			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_min_age = ''' + LTRIM(@ItemNewMinAge) + ''''
+ 				 set @SQL1 = @SQL1 + ' , stpbk_min_age = ' + LTRIM(@ItemNewMinAge) + ''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_min_age = ''' + LTRIM(@ItemNewMinAge) + '''' 
+				 set @SQL1 = @SQL1 + ' stpbk_min_age = ' + LTRIM(@ItemNewMinAge) + ''
 			  END
 
 
@@ -735,9 +747,9 @@
 			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
 			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
 			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_min_ord_qty = ''' + LTRIM(@ItemNewMinVendorOrderQty) + ''''
+ 				 set @SQL1 = @SQL1 + ' , stpbk_min_ord_qty = ' + LTRIM(@ItemNewMinVendorOrderQty) + ''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_min_ord_qty = ''' + LTRIM(@ItemNewMinVendorOrderQty) + '''' 
+				 set @SQL1 = @SQL1 + ' stpbk_min_ord_qty = ' + LTRIM(@ItemNewMinVendorOrderQty) + '' 
 			  END
 
 		 if (@ItemNewVendorSuggestedQty IS NOT NULL)  
@@ -760,9 +772,9 @@
 			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
 			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
 			  OR (@ItemNewMinVendorOrderQty IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_sug_qty = ''' + LTRIM(@ItemNewVendorSuggestedQty) + ''''
+ 				 set @SQL1 = @SQL1 + ' , stpbk_sug_qty = ' + LTRIM(@ItemNewVendorSuggestedQty) + ''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_sug_qty = ''' + LTRIM(@ItemNewVendorSuggestedQty) + '''' 
+				 set @SQL1 = @SQL1 + ' stpbk_sug_qty = ' + LTRIM(@ItemNewVendorSuggestedQty) + '' 
 			  END
 
 		  if (@ItemNewMinQtyOnHand  IS NOT NULL)  
@@ -785,9 +797,9 @@
 			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
 			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
 			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_min_qty = ''' + LTRIM(@ItemNewMinQtyOnHand) + ''''
+ 				 set @SQL1 = @SQL1 + ' , stpbk_min_qty = ' + LTRIM(@ItemNewMinQtyOnHand) + ''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_min_qty = ''' + LTRIM(@ItemNewMinQtyOnHand) + '''' 
+				 set @SQL1 = @SQL1 + ' stpbk_min_qty = ' + LTRIM(@ItemNewMinQtyOnHand) + ''
 			  END
 
 		 if (@ItemNewBinLocation  IS NOT NULL)  
@@ -818,7 +830,10 @@
 
 		  if (@ItemNewGLPurchaseAccount IS NOT NULL)  
 			  BEGIN
-			  set @ItemNewGLPurchaseAccount = REPLACE(@ItemNewGLPurchaseAccount, '-','') 
+
+			  set @PurchaseAcct = CONVERT(DECIMAL(16,8),(CONVERT(NVARCHAR(8),@ItemNewGLPurchaseAccount) 
+			   + '.' + RIGHT('00000000' + CONVERT(NVARCHAR(8), @PurAcctProfitCenter),8)))			  
+
 			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
 			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
 			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
@@ -838,13 +853,19 @@
 			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
 			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL)
 			  OR (@ItemNewMinQtyOnHand  IS NOT NULL) OR (@ItemNewBinLocation  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_gl_pur_acct = ''' + CONVERT(NVARCHAR,(@ItemNewGLPurchaseAccount)) + ''''
+                 set @SQL1 = @SQL1 + ' , stpbk_gl_pur_acct  = convert(DECIMAL(16,8), '  + @PurchaseAcct + ')'			     
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_gl_pur_acct = ''' + CONVERT(NVARCHAR,(@ItemNewGLPurchaseAccount)) + '''' 
+				 set @SQL1 = @SQL1 + ' stpbk_gl_pur_acct  = convert(DECIMAL(16,8), '  + @PurchaseAcct + ')'
 			  END
+
+			  print @SQL1
 
 		  if (@ItemNewGLSalesAccount  IS NOT NULL)  
 			  BEGIN
+
+			   set @SalAcct = CONVERT(DECIMAL(16,8),(CONVERT(NVARCHAR(8),@ItemNewGLSalesAccount) 
+			   + '.' + RIGHT('00000000' + CONVERT(NVARCHAR(8), @SalAcctProfitCenter),8)))	
+
 			  set @ItemNewGLSalesAccount = REPLACE(@ItemNewGLSalesAccount, '-','') 
 			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
 			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
@@ -866,13 +887,17 @@
 			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL)
 			  OR (@ItemNewMinQtyOnHand  IS NOT NULL) OR (@ItemNewBinLocation  IS NOT NULL)
 			  OR (@ItemNewGLPurchaseAccount IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_gl_sls_acct = ''' + CONVERT(NVARCHAR,(@ItemNewGLSalesAccount)) + ''''
+			    set @SQL1 = @SQL1 + ' , stpbk_gl_sls_acct  = convert(DECIMAL(16,8), '  + @SalAcct + ')'			     
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_gl_sls_acct = ''' + CONVERT(NVARCHAR,(@ItemNewGLSalesAccount)) + '''' 
+				 set @SQL1 = @SQL1 + ' stpbk_gl_sls_acct  = convert(DECIMAL(16,8), '  + @SalAcct + ')'
 			  END
 
 		 if (@ItemNewGLVarianceAccount  IS NOT NULL)  
 			  BEGIN
+
+			  set @VarAcct = CONVERT(DECIMAL(16,8),(CONVERT(NVARCHAR(8),@ItemNewGLVarianceAccount) 
+			   + '.' + RIGHT('00000000' + CONVERT(NVARCHAR(8), @VarAcctProfitCenter),8)))	
+
 			  set @ItemNewGLVarianceAccount = REPLACE(@ItemNewGLVarianceAccount, '-','') 
 			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
 			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
@@ -894,9 +919,9 @@
 			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL)
 			  OR (@ItemNewMinQtyOnHand  IS NOT NULL) OR (@ItemNewBinLocation  IS NOT NULL)
 			  OR (@ItemNewGLPurchaseAccount IS NOT NULL) OR (@ItemNewGLSalesAccount  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_gl_var_acct = ''' + CONVERT(NVARCHAR,(@ItemNewGLVarianceAccount)) + ''''
+			      set @SQL1 = @SQL1 + ' , stpbk_gl_var_acct  = convert(DECIMAL(16,8), '  + @VarAcct + ')'			     
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_gl_var_acct = ''' + CONVERT(NVARCHAR,(@ItemNewGLVarianceAccount)) + '''' 
+				 set @SQL1 = @SQL1 + ' stpbk_gl_var_acct  = convert(DECIMAL(16,8), '  + @VarAcct + ')'
 			  END
 	 
 	    if (@ItemDepositPLU IS NOT NULL)  
@@ -1020,7 +1045,3 @@
 	 IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
 	 RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
 	END CATCH
-
-
-
-
