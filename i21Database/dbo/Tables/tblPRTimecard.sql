@@ -7,7 +7,7 @@
     [dtmTimeOut] DATETIME NULL, 
     [intEmployeeEarningId] INT NULL, 
     [intTimeEntryId] INT NULL, 
-    [strNotes] NVARCHAR(200) NULL, 
+    [strNotes] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [ysnApproved] BIT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NULL DEFAULT ((1))
 )

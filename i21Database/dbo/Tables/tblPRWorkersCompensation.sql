@@ -1,12 +1,12 @@
 ﻿CREATE TABLE [dbo].[tblPRWorkersCompensation]
 (
 	[intWorkersCompensationId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [strWCCode] NVARCHAR(50) NOT NULL, 
-    [strDescription] NVARCHAR(100) NULL, 
+    [strWCCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intTypeTaxStateId] INT NULL, 
     [intAccountId] INT NULL, 
     [dblRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [strCalculationType] NVARCHAR(20) NULL DEFAULT ('Amount'), 
+    [strCalculationType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Amount'), 
     [intConcurrencyId] INT NULL DEFAULT ((1))
 )
 
