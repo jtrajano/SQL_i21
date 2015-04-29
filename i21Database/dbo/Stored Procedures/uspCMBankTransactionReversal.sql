@@ -168,7 +168,9 @@ ELSE
 				IF (@intVoidBankTransactionTypeId = @AP_PAYMENT)
 					BEGIN
 						/* If Void Check entry for AP Payment, do not post the reversal*/
-						UPDATE tblCMBankTransaction SET ysnPosted = 1, ysnCheckVoid = 1, @isPostingSuccessful = 1 
+						UPDATE tblCMBankTransaction 
+							SET ysnPosted = 1, ysnCheckVoid = 1, ysnClr = 1, 
+								dtmReconciliationDate = dtmDate, dtmCheckPrinted = dtmDate, @isPostingSuccessful = 1 
 						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = @VOID_CHECK
 					END
 				ELSE
