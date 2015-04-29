@@ -10,7 +10,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 read: '../Inventory/api/Adjustment/SearchAdjustments'
             },
             columns: [
-                {dataIndex: 'intInventoryAdjustmentId', text: "Inventory Adjustment Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'intInventoryAdjustmentId', text: "Inventory Adjustment Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
                 {dataIndex: 'strAdjustmentNo', text: 'Adjustment No', flex: 1, dataType: 'string'},
                 {dataIndex: 'strLocationName', text: 'Location Id', flex: 1, dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
