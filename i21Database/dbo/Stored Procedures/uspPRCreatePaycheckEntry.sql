@@ -1,7 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRCreatePaycheckEntry]
 	@strPaycheckId NVARCHAR(50)
 	,@intUserId INT
-	,@intEntityId INT     
+	,@intEntityId INT
+	,@isSuccessful BIT = 0 OUTPUT
+	,@message_id INT = 0 OUTPUT
+
 AS
 BEGIN
 
@@ -251,13 +254,23 @@ WHERE T.strPaidBy = 'Company'
 
 DECLARE @ysnPost BIT = 1
 		,@ysnRecap BIT = 0
-		,@isSuccessful BIT
-		,@message_id BIT
 
 /* Execute Bank Transaction Post Procedure */
-EXEC dbo.uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId, @isSuccessful, @message_id
+EXEC dbo.uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId, @isSuccessful OUTPUT, @message_id OUTPUT
 
-UPDATE tblPRPaycheck SET ysnPosted = 1 WHERE strPaycheckId = @strTransactionId
+IF (@isSuccessful <> 0)
+	BEGIN
+		/* If Posting succeeds, mark transaction as posted */
+		UPDATE tblPRPaycheck SET ysnPosted = 1 WHERE strPaycheckId = @strTransactionId
+		SET @isSuccessful = 1
+	END
+ELSE
+	BEGIN
+		/* If Posting fails, delete the created bank transaction */
+		DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
+		DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
+		SET @isSuccessful = 0
+	END
 
 END
 GO
