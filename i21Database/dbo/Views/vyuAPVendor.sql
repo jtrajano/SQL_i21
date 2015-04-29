@@ -21,7 +21,7 @@ SELECT
 	A.strFederalTaxId,
 	B.strTaxState,
 	B.strVendorAccountNum,
-	B.strVendorId,
+	strVendorId= case when B.strVendorId = '' then A.strEntityNo else B.strVendorId end,
 	B.strVendorPayToId,
 	B.ysnPymtCtrlActive,
 	B.ysnPymtCtrlAlwaysDiscount,

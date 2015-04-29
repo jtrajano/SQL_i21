@@ -4,7 +4,7 @@ SELECT
  Entity.intEntityId
 ,Cus.[intEntityCustomerId]
 ,Entity.strName
-,Cus.strCustomerNumber
+,strCustomerNumber= case when Cus.strCustomerNumber = '' then Entity.strEntityNo else Cus.strCustomerNumber end 
 ,Con.strPhone
 ,Loc.strAddress
 ,Loc.strCity
