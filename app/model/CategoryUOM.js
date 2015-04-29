@@ -34,6 +34,14 @@ Ext.define('Inventory.model.CategoryUOM', {
         { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'strDescription', type: 'string' },
         { name: 'strUpcCode', type: 'string' },
+        { name: 'strFullUPC', type: 'string',
+            persist: false,
+            convert: function(value, record){
+                var shortUPC = record.get('strUpcCode');
+                return i21.ModuleMgr.Inventory.getFullUPCString(shortUPC);
+            },
+            depends: ['strUpcCode']
+        },
         { name: 'ysnStockUnit', type: 'boolean' },
         { name: 'ysnAllowPurchase', type: 'boolean' },
         { name: 'ysnAllowSale', type: 'boolean' },

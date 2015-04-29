@@ -30,6 +30,7 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.grid.Panel',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.toolbar.Paging'
@@ -374,168 +375,184 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 valueField: 'intFreightTermId'
                                                             }
                                                         ]
-                                                    },
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'tabpanel',
+                                                height: 110,
+                                                activeTab: 0,
+                                                items: [
                                                     {
-                                                        xtype: 'container',
-                                                        flex: 3,
-                                                        height: 196,
+                                                        xtype: 'panel',
+                                                        title: 'Shipping Details',
                                                         layout: {
-                                                            type: 'hbox',
+                                                            type: 'vbox',
                                                             align: 'stretch'
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'panel',
-                                                                flex: 2,
-                                                                bodyPadding: '5 5 0 5',
-                                                                title: 'Shipping Details',
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 0 5 0',
                                                                 layout: {
-                                                                    type: 'vbox',
+                                                                    type: 'hbox',
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
                                                                     {
                                                                         xtype: 'container',
-                                                                        flex: 2,
-                                                                        margin: '0 0 5 0',
+                                                                        flex: 1,
+                                                                        margin: '5 0 0 5',
                                                                         layout: {
-                                                                            type: 'hbox',
+                                                                            type: 'vbox',
                                                                             align: 'stretch'
                                                                         },
                                                                         items: [
                                                                             {
-                                                                                xtype: 'container',
-                                                                                flex: 1.1,
-                                                                                layout: {
-                                                                                    type: 'vbox',
-                                                                                    align: 'stretch'
-                                                                                },
-                                                                                items: [
+                                                                                xtype: 'gridcombobox',
+                                                                                columns: [
                                                                                     {
-                                                                                        xtype: 'gridcombobox',
-                                                                                        columns: [
-                                                                                            {
-                                                                                                dataIndex: 'intCompanyLocationId',
-                                                                                                dataType: 'numeric',
-                                                                                                text: 'Location Id',
-                                                                                                hidden: true
-                                                                                            },
-                                                                                            {
-                                                                                                dataIndex: 'strLocationName',
-                                                                                                dataType: 'string',
-                                                                                                text: 'Location Name',
-                                                                                                flex: 1
-                                                                                            },
-                                                                                            {
-                                                                                                dataIndex: 'strLocationType',
-                                                                                                dataType: 'string',
-                                                                                                text: 'Location Type',
-                                                                                                flex: 1
-                                                                                            },
-                                                                                            {
-                                                                                                dataIndex: 'strAddress',
-                                                                                                dataType: 'string',
-                                                                                                text: 'Address',
-                                                                                                hidden: true
-                                                                                            }
-                                                                                        ],
-                                                                                        itemId: 'cboShipFromAddress',
-                                                                                        fieldLabel: 'Ship From',
-                                                                                        labelWidth: 70,
-                                                                                        displayField: 'strLocationName',
-                                                                                        valueField: 'intCompanyLocationId'
+                                                                                        dataIndex: 'intCompanyLocationId',
+                                                                                        dataType: 'numeric',
+                                                                                        text: 'Location Id',
+                                                                                        hidden: true
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'textareafield',
-                                                                                        flex: 1,
-                                                                                        itemId: 'txtShipFromAddress',
-                                                                                        margin: '-6 0 0 75',
-                                                                                        labelWidth: 60,
-                                                                                        grow: true
+                                                                                        dataIndex: 'strLocationName',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Location Name',
+                                                                                        flex: 1
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strLocationType',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Location Type',
+                                                                                        flex: 1
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strAddress',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Address',
+                                                                                        hidden: true
                                                                                     }
-                                                                                ]
+                                                                                ],
+                                                                                margins: '0 0 0 5',
+                                                                                itemId: 'cboShipFromAddress',
+                                                                                fieldLabel: 'Ship From',
+                                                                                labelWidth: 70,
+                                                                                displayField: 'strLocationName',
+                                                                                valueField: 'intCompanyLocationId'
                                                                             },
                                                                             {
-                                                                                xtype: 'container',
+                                                                                xtype: 'textareafield',
                                                                                 flex: 1,
-                                                                                margin: '0 0 0 5',
-                                                                                layout: {
-                                                                                    type: 'vbox',
-                                                                                    align: 'stretch'
-                                                                                },
-                                                                                items: [
-                                                                                    {
-                                                                                        xtype: 'gridcombobox',
-                                                                                        columns: [
-                                                                                            {
-                                                                                                dataIndex: 'intEntityLocationId',
-                                                                                                dataType: 'numeric',
-                                                                                                text: 'Location Id',
-                                                                                                hidden: true
-                                                                                            },
-                                                                                            {
-                                                                                                dataIndex: 'strLocationName',
-                                                                                                dataType: 'string',
-                                                                                                text: 'Location Name',
-                                                                                                flex: 1
-                                                                                            },
-                                                                                            {
-                                                                                                dataIndex: 'strAddress',
-                                                                                                dataType: 'string',
-                                                                                                text: 'Address',
-                                                                                                hidden: true
-                                                                                            }
-                                                                                        ],
-                                                                                        itemId: 'cboShipToAddress',
-                                                                                        fieldLabel: 'Ship To',
-                                                                                        labelWidth: 50,
-                                                                                        displayField: 'strLocationName',
-                                                                                        valueField: 'intEntityLocationId'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'textareafield',
-                                                                                        flex: 1,
-                                                                                        itemId: 'txtShipToAddress',
-                                                                                        margin: '-6 0 0 55',
-                                                                                        labelWidth: 60,
-                                                                                        grow: true
-                                                                                    }
-                                                                                ]
+                                                                                itemId: 'txtShipFromAddress',
+                                                                                margin: '-6 0 0 75',
+                                                                                labelWidth: 60,
+                                                                                grow: true
                                                                             }
                                                                         ]
                                                                     },
                                                                     {
-                                                                        xtype: 'textareafield',
+                                                                        xtype: 'container',
                                                                         flex: 1,
-                                                                        itemId: 'txtDeliveryInstructions',
-                                                                        fieldLabel: 'Instructions',
-                                                                        labelWidth: 70,
-                                                                        grow: true
+                                                                        margin: '5 0 0 5',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'gridcombobox',
+                                                                                columns: [
+                                                                                    {
+                                                                                        dataIndex: 'intEntityLocationId',
+                                                                                        dataType: 'numeric',
+                                                                                        text: 'Location Id',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strLocationName',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Location Name',
+                                                                                        flex: 1
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strAddress',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Address',
+                                                                                        hidden: true
+                                                                                    }
+                                                                                ],
+                                                                                itemId: 'cboShipToAddress',
+                                                                                fieldLabel: 'Ship To',
+                                                                                labelWidth: 50,
+                                                                                displayField: 'strLocationName',
+                                                                                valueField: 'intEntityLocationId'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'textareafield',
+                                                                                flex: 1,
+                                                                                itemId: 'txtShipToAddress',
+                                                                                margin: '-6 0 0 55',
+                                                                                labelWidth: 60,
+                                                                                grow: true
+                                                                            }
+                                                                        ]
                                                                     },
                                                                     {
-                                                                        xtype: 'textareafield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtComments',
-                                                                        fieldLabel: 'Comments',
-                                                                        labelWidth: 70,
-                                                                        grow: true
+                                                                        xtype: 'container',
+                                                                        flex: 2,
+                                                                        margin: '5 5 0 5',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'textareafield',
+                                                                                flex: 1,
+                                                                                itemId: 'txtDeliveryInstructions',
+                                                                                fieldLabel: 'Instructions',
+                                                                                labelWidth: 70,
+                                                                                grow: true
+                                                                            },
+                                                                            {
+                                                                                xtype: 'textareafield',
+                                                                                flex: 1,
+                                                                                itemId: 'txtComments',
+                                                                                fieldLabel: 'Comments',
+                                                                                labelWidth: 70,
+                                                                                grow: true
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
-                                                            },
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        title: 'Shipping Company',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
                                                             {
-                                                                xtype: 'panel',
-                                                                flex: 1,
-                                                                margin: '0 5',
-                                                                bodyPadding: 5,
-                                                                title: 'Shipping Company',
+                                                                xtype: 'container',
+                                                                margin: '5 5 0 5',
                                                                 layout: {
-                                                                    type: 'vbox',
+                                                                    type: 'hbox',
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
+                                                                        flex: 1,
                                                                         itemId: 'txtBOLNo',
+                                                                        margin: '0 5 0 0',
                                                                         fieldLabel: 'BOL No',
                                                                         labelWidth: 110
                                                                     },
@@ -561,7 +578,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
+                                                                        flex: 1,
                                                                         itemId: 'cboShipVia',
+                                                                        margin: '0 5 0 0',
                                                                         fieldLabel: 'Ship Via',
                                                                         labelWidth: 110,
                                                                         displayField: 'strShipVia',
@@ -569,73 +588,121 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
+                                                                        flex: 1,
                                                                         itemId: 'txtVesselVehicle',
+                                                                        margin: '0 5 0 0',
                                                                         fieldLabel: 'Vessel/Vehicle',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtProNumber',
-                                                                        fieldLabel: 'Pro No',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtDriverID',
-                                                                        fieldLabel: 'Driver ID',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtSealNumber',
-                                                                        fieldLabel: 'Seal Number',
                                                                         labelWidth: 110
                                                                     }
                                                                 ]
                                                             },
                                                             {
-                                                                xtype: 'panel',
-                                                                flex: 0.9,
-                                                                bodyPadding: 5,
-                                                                title: 'Delivery',
+                                                                xtype: 'container',
+                                                                margin: '5 5 0 5',
                                                                 layout: {
-                                                                    type: 'vbox',
+                                                                    type: 'hbox',
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
                                                                     {
                                                                         xtype: 'textfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtProNumber',
+                                                                        margin: '0 5 0 0',
+                                                                        fieldLabel: 'Pro No',
+                                                                        labelWidth: 110
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtDriverID',
+                                                                        margin: '0 5 0 0',
+                                                                        fieldLabel: 'Driver ID',
+                                                                        labelWidth: 110
+                                                                    },
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtSealNumber',
+                                                                        margin: '0 5 0 0',
+                                                                        fieldLabel: 'Seal Number',
+                                                                        labelWidth: 110
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        title: 'Delivery',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'container',
+                                                                margin: '5 5 0 5',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        flex: 1,
                                                                         itemId: 'txtAppointmentTime',
+                                                                        margin: '0 5 0 0',
                                                                         fieldLabel: 'Appointment Time',
                                                                         labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
+                                                                        flex: 1,
                                                                         itemId: 'txtDepartureTime',
+                                                                        margin: '0 5 0 0',
                                                                         fieldLabel: 'Departure Time',
                                                                         labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
+                                                                        flex: 1,
                                                                         itemId: 'txtArrivalTime',
+                                                                        margin: '0 5 0 0',
                                                                         fieldLabel: 'Arrival Time',
                                                                         labelWidth: 110
-                                                                    },
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'container',
+                                                                margin: '5 5 0 5',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
                                                                     {
                                                                         xtype: 'datefield',
+                                                                        flex: 1,
                                                                         itemId: 'dtmDelivered',
+                                                                        margin: '0 5 0 0',
                                                                         fieldLabel: 'Delivered Date',
                                                                         labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'datefield',
+                                                                        flex: 1,
                                                                         itemId: 'dtmFreeTime',
+                                                                        margin: '0 5 0 0',
                                                                         fieldLabel: 'Free Time',
                                                                         labelWidth: 110
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
+                                                                        flex: 1,
                                                                         itemId: 'txtReceivedBy',
+                                                                        margin: '0 5 0 0',
                                                                         fieldLabel: 'Received By',
                                                                         labelWidth: 110
                                                                     }
@@ -647,7 +714,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             },
                                             {
                                                 xtype: 'tabpanel',
-                                                flex: 1,
+                                                flex: 2,
                                                 itemId: 'tabItemLot',
                                                 margin: '5 0 0 0',
                                                 activeTab: 0,
@@ -655,11 +722,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 items: [
                                                     {
                                                         xtype: 'panel',
-                                                        layout: 'fit',
                                                         title: 'Items',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
+                                                                flex: 2,
                                                                 reference: 'grdInventoryShipment',
                                                                 itemId: 'grdInventoryShipment',
                                                                 margin: -1,
@@ -736,31 +807,49 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     dataIndex: 'strSalesOrderNumber',
                                                                                     dataType: 'string',
                                                                                     text: 'Sales Order',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strItemNo',
                                                                                     dataType: 'string',
                                                                                     text: 'Item No',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strItemDescription',
                                                                                     dataType: 'string',
                                                                                     text: 'Description',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 120
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLotTracking',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Lot Tracking',
+                                                                                    flex: 1,
+                                                                                    width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strUnitMeasure',
                                                                                     dataType: 'string',
                                                                                     text: 'Item UOM Id',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'dblQtyOrdered',
                                                                                     dataType: 'float',
                                                                                     text: 'Qty Ordered',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    width: 100
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblPrice',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Unit Price',
+                                                                                    hidden: true
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strStorageLocation',
@@ -868,17 +957,37 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
-                                                                        itemId: 'colQuantity',
-                                                                        width: 65,
+                                                                        itemId: 'colOrderQty',
+                                                                        width: 80,
                                                                         align: 'right',
                                                                         dataIndex: 'dblQuantity',
-                                                                        text: 'Quantity',
+                                                                        text: 'Order Qty',
                                                                         format: '0,000.##'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colOrderUOM',
+                                                                        width: 100,
+                                                                        dataIndex: 'strDescription',
+                                                                        text: 'Order UOM'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataType: 'numeric',
+                                                                        itemId: 'colQuantity',
+                                                                        width: 80,
+                                                                        align: 'right',
+                                                                        dataIndex: 'dblQuantity',
+                                                                        text: 'Quantity',
+                                                                        format: '0,000.##',
+                                                                        editor: {
+                                                                            xtype: 'numeric'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colUOM',
-                                                                        width: 75,
+                                                                        width: 100,
                                                                         dataIndex: 'strUOM',
                                                                         text: 'UOM',
                                                                         editor: {
@@ -933,7 +1042,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         align: 'right',
                                                                         dataIndex: 'dblUnitPrice',
                                                                         text: 'Unit Price',
-                                                                        format: '0,000.##'
+                                                                        format: '0,000.##',
+                                                                        editor: {
+                                                                            xtype: 'numeric'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -976,17 +1088,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 viewConfig: {
                                                                     itemId: 'grvInventoryShipment'
                                                                 }
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'panel',
-                                                        layout: 'fit',
-                                                        title: 'Lot Tracking',
-                                                        items: [
+                                                            },
                                                             {
                                                                 xtype: 'advancefiltergrid',
+                                                                flex: 1,
                                                                 reference: 'grdLotTracking',
+                                                                hidden: true,
                                                                 itemId: 'grdLotTracking',
                                                                 margin: -1,
                                                                 dockedItems: [

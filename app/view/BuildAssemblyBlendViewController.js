@@ -64,7 +64,25 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
             grdBuildAssemblyBlend: {
                 colItemNo: 'strItemNo',
                 colDescription: 'strItemDescription',
-                colSubLocation: 'strSubLocationName',
+                colSubLocation: {
+                    dataIndex: 'strSubLocationName',
+                    editor: {
+                        store: '{stockUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdBuildAssemblyBlend.selection.intItemId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intLocationId',
+                            value: '{current.intLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intItemUOMId',
+                            value: '{grdBuildAssemblyBlend.selection.intItemUOMId}',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colStock: 'dblStock',
                 colQuantity: 'dblQuantity',
                 colUOM: 'strUnitMeasure',
@@ -78,6 +96,8 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
             win = options.window,
             store = Ext.create('Inventory.store.BuildAssembly', { pageSize: 1 });
 
+        var grdBuildAssemblyBlend = win.down('#grdBuildAssemblyBlend');
+
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
@@ -87,13 +107,16 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                 {
                     key: 'tblICBuildAssemblyDetails',
                     component: Ext.create('iRely.grid.Manager', {
-                        grid: win.down('#grdBuildAssemblyBlend'),
+                        grid: grdBuildAssemblyBlend,
                         deleteButton : win.down('#btnRemove'),
                         position: 'none'
                     })
                 }
             ]
         });
+
+        var colStock = grdBuildAssemblyBlend.columns[3];
+        colStock.renderer = this.AvailableStockRenderer;
 
         return win.context;
     },
@@ -183,10 +206,53 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
         }
     },
 
+    onItemSubLocationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+
+        if (current) {
+            current.set('intSubLocationId', records[0].get('intSubLocationId'));
+            current.set('dblStock', records[0].get('dblOnHand'));
+        }
+    },
+
+    AvailableStockRenderer: function (value, metadata, record) {
+        var grid = metadata.column.up('grid');
+        var win = grid.up('window');
+        var items = win.viewModel.storeInfo.stockUOM;
+        var currentMaster = win.viewModel.data.current;
+
+        if (currentMaster) {
+            if (record) {
+                if (items) {
+                    var index = items.data.findIndexBy(function (row) {
+                        if (row.get('intItemId') === record.get('intItemId') &&
+                            row.get('intLocationId') === currentMaster.get('intLocationId') &&
+                            row.get('intItemUOMId') === record.get('intItemUOMId') &&
+                            row.get('intSubLocationId') === record.get('intSubLocationId')) {
+                            return true;
+                        }
+                    });
+                    if (index >= 0) {
+                        var stockUOM = items.getAt(index);
+                        return stockUOM.get('dblOnHand');
+                    }
+                }
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboItemNumber" : {
                 select: this.onItemSelect
+            },
+            "#cboItemSubLocation" : {
+                select: this.onItemSubLocationSelect
             }
         });
     }

@@ -723,9 +723,26 @@
                                                     ]
                                                 }
                                             ]
-                                        },
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "Ext.tab.Panel",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "activeTab": 0,
+                                        "height": 110,
+                                        "layout|flex": null
+                                    },
+                                    "name": "MyTabPanel3",
+                                    "designerId": "460fca3f-7ee6-4b02-9667-c1ce855c535f",
+                                    "cn": [
                                         {
-                                            "type": "Ext.container.Container",
+                                            "type": "Ext.panel.Panel",
                                             "reference": {
                                                 "name": "items",
                                                 "type": "array"
@@ -733,31 +750,38 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "container|align": "stretch",
-                                                "designer|displayName": "container",
-                                                "height": 196,
-                                                "layout": "hbox",
-                                                "layout|flex": 3
+                                                "layout": "vbox",
+                                                "title": "Shipping Details"
                                             },
-                                            "name": "MyContainer11",
-                                            "designerId": "5cf3ce8c-1a78-48d1-a726-5ab0cf5282bf",
+                                            "name": "MyPanel6",
+                                            "designerId": "57f9ba40-dee9-4f2d-bef0-3a66a8f13bdd",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.panel.Panel",
+                                                    "type": "Ext.tab.Tab",
+                                                    "reference": {
+                                                        "name": "tabConfig",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "TabConfig",
+                                                    "designerId": "0d16ac69-80ef-479e-bd94-7eddb49894d3"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "bodyPadding": "5 5 0 5",
                                                         "container|align": "stretch",
                                                         "designer|displayName": "container",
-                                                        "layout": "vbox",
-                                                        "layout|flex": 2,
-                                                        "title": "Shipping Details"
+                                                        "layout": "hbox",
+                                                        "layout|flex": 1,
+                                                        "margin": "0 0 5 0"
                                                     },
-                                                    "name": "MyPanel33",
-                                                    "designerId": "b92730f5-e00f-44a7-94c3-26bbe28e8e44",
+                                                    "name": "MyContainer33",
+                                                    "designerId": "6d149e8c-bd76-494c-9b92-1f64f9b5df7e",
                                                     "cn": [
                                                         {
                                                             "type": "Ext.container.Container",
@@ -769,270 +793,293 @@
                                                             "userConfig": {
                                                                 "container|align": "stretch",
                                                                 "designer|displayName": "container",
-                                                                "layout": "hbox",
-                                                                "layout|flex": 2,
-                                                                "margin": "0 0 5 0"
+                                                                "layout": "vbox",
+                                                                "layout|flex": 1,
+                                                                "margin": "5 0 0 5"
                                                             },
-                                                            "name": "MyContainer33",
-                                                            "designerId": "6d149e8c-bd76-494c-9b92-1f64f9b5df7e",
+                                                            "name": "MyContainer9",
+                                                            "designerId": "0a2b32d1-9ccf-4d8d-a7e9-4cbf0d675c09",
                                                             "cn": [
                                                                 {
-                                                                    "type": "Ext.container.Container",
+                                                                    "type": "Ext.form.field.ComboBox",
                                                                     "reference": {
                                                                         "name": "items",
                                                                         "type": "array"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "container|align": "stretch",
-                                                                        "designer|displayName": "container",
-                                                                        "layout": "vbox",
-                                                                        "layout|flex": 1.1,
-                                                                        "layout|margins": null,
-                                                                        "margin": null
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Location Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strLocationName',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Location Name',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strLocationType',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Location Type',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strAddress',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Address',",
+                                                                            "\t\thidden: true",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strLocationName",
+                                                                        "fieldLabel": "Ship From",
+                                                                        "itemId": "cboShipFromAddress",
+                                                                        "labelWidth": 70,
+                                                                        "layout|flex": null,
+                                                                        "layout|margins": "0 0 0 5",
+                                                                        "name": null,
+                                                                        "readOnly": null,
+                                                                        "valueField": "intCompanyLocationId",
+                                                                        "width": null
                                                                     },
-                                                                    "name": "MyContainer9",
-                                                                    "designerId": "0a2b32d1-9ccf-4d8d-a7e9-4cbf0d675c09",
-                                                                    "cn": [
+                                                                    "name": "MyComboBox27",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "c1a71e89-19e5-4a45-836c-ecb960f015c0",
+                                                                    "customConfigs": [
                                                                         {
-                                                                            "type": "Ext.form.field.ComboBox",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "columns": [
-                                                                                    "[",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'intCompanyLocationId',",
-                                                                                    "\t\tdataType: 'numeric',",
-                                                                                    "\t\ttext: 'Location Id',",
-                                                                                    "\t\thidden: true",
-                                                                                    "\t},",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'strLocationName',",
-                                                                                    "\t\tdataType: 'string',",
-                                                                                    "\t\ttext: 'Location Name',",
-                                                                                    "\t\tflex: 1",
-                                                                                    "\t},",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'strLocationType',",
-                                                                                    "\t\tdataType: 'string',",
-                                                                                    "\t\ttext: 'Location Type',",
-                                                                                    "\t\tflex: 1",
-                                                                                    "\t},",
-                                                                                    "\t{",
-                                                                                    "\t\tdataIndex: 'strAddress',",
-                                                                                    "\t\tdataType: 'string',",
-                                                                                    "\t\ttext: 'Address',",
-                                                                                    "\t\thidden: true",
-                                                                                    "\t}",
-                                                                                    "]"
-                                                                                ],
-                                                                                "designer|createAlias": "gridcombobox",
-                                                                                "displayField": "strLocationName",
-                                                                                "fieldLabel": "Ship From",
-                                                                                "itemId": "cboShipFromAddress",
-                                                                                "labelWidth": 70,
-                                                                                "layout|flex": null,
-                                                                                "layout|margins": null,
-                                                                                "name": null,
-                                                                                "readOnly": null,
-                                                                                "valueField": "intCompanyLocationId",
-                                                                                "width": null
-                                                                            },
-                                                                            "name": "MyComboBox27",
-                                                                            "configAlternates": {
-                                                                                "columns": "array"
-                                                                            },
-                                                                            "designerId": "c1a71e89-19e5-4a45-836c-ecb960f015c0",
-                                                                            "customConfigs": [
-                                                                                {
-                                                                                    "group": "(Custom Properties)",
-                                                                                    "name": "columns",
-                                                                                    "type": "string"
-                                                                                }
-                                                                            ]
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.form.field.TextArea",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "fieldLabel": null,
-                                                                                "grow": true,
-                                                                                "itemId": "txtShipFromAddress",
-                                                                                "labelWidth": 60,
-                                                                                "layout|flex": 1,
-                                                                                "margin": "-6 0 0 75"
-                                                                            },
-                                                                            "name": "MyTextArea",
-                                                                            "designerId": "e3725739-d5eb-4d16-826d-79126db32bf0"
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
                                                                         }
                                                                     ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.container.Container",
+                                                                    "type": "Ext.form.field.TextArea",
                                                                     "reference": {
                                                                         "name": "items",
                                                                         "type": "array"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "container|align": "stretch",
-                                                                        "designer|displayName": "container",
-                                                                        "layout": "vbox",
+                                                                        "fieldLabel": null,
+                                                                        "grow": true,
+                                                                        "itemId": "txtShipFromAddress",
+                                                                        "labelWidth": 60,
                                                                         "layout|flex": 1,
-                                                                        "layout|margins": null,
-                                                                        "margin": "0 0 0 5"
+                                                                        "margin": "-6 0 0 75"
                                                                     },
-                                                                    "name": "MyContainer30",
-                                                                    "designerId": "b5de6751-4fd4-4d70-8ce3-27857636368c",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.form.field.ComboBox",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "columns": [
-                                                                                    "[",
-                                                                                    "{",
-                                                                                    "dataIndex: 'intEntityLocationId',",
-                                                                                    "dataType: 'numeric',",
-                                                                                    "text: 'Location Id',",
-                                                                                    "hidden: true",
-                                                                                    "},",
-                                                                                    "{",
-                                                                                    "dataIndex: 'strLocationName',",
-                                                                                    "dataType: 'string',",
-                                                                                    "text: 'Location Name',",
-                                                                                    "flex: 1",
-                                                                                    "},",
-                                                                                    "{",
-                                                                                    "dataIndex: 'strAddress',",
-                                                                                    "dataType: 'string',",
-                                                                                    "text: 'Address',",
-                                                                                    "hidden: true",
-                                                                                    "}",
-                                                                                    "]"
-                                                                                ],
-                                                                                "designer|createAlias": "gridcombobox",
-                                                                                "displayField": "strLocationName",
-                                                                                "fieldLabel": "Ship To",
-                                                                                "itemId": "cboShipToAddress",
-                                                                                "labelWidth": 50,
-                                                                                "layout|flex": null,
-                                                                                "layout|margins": null,
-                                                                                "name": null,
-                                                                                "readOnly": null,
-                                                                                "valueField": "intEntityLocationId",
-                                                                                "width": null
-                                                                            },
-                                                                            "name": "MyComboBox70",
-                                                                            "configAlternates": {
-                                                                                "columns": "array"
-                                                                            },
-                                                                            "designerId": "5efa6aca-a342-4b7c-891f-9c45582432b0",
-                                                                            "customConfigs": [
-                                                                                {
-                                                                                    "group": "(Custom Properties)",
-                                                                                    "name": "columns",
-                                                                                    "type": "string"
-                                                                                }
-                                                                            ]
-                                                                        },
-                                                                        {
-                                                                            "type": "Ext.form.field.TextArea",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "fieldLabel": null,
-                                                                                "grow": true,
-                                                                                "itemId": "txtShipToAddress",
-                                                                                "labelWidth": 60,
-                                                                                "layout|flex": 1,
-                                                                                "margin": "-6 0 0 55"
-                                                                            },
-                                                                            "name": "MyTextArea1",
-                                                                            "designerId": "b23c0c8a-0827-4e72-b7ee-4908ed8816e8"
-                                                                        }
-                                                                    ]
+                                                                    "name": "MyTextArea",
+                                                                    "designerId": "e3725739-d5eb-4d16-826d-79126db32bf0"
                                                                 }
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.TextArea",
+                                                            "type": "Ext.container.Container",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Instructions",
-                                                                "grow": true,
-                                                                "itemId": "txtDeliveryInstructions",
-                                                                "labelWidth": 70,
+                                                                "container|align": "stretch",
+                                                                "designer|displayName": "container",
+                                                                "layout": "vbox",
                                                                 "layout|flex": 1,
                                                                 "layout|margins": null,
-                                                                "name": null,
-                                                                "readOnly": null,
-                                                                "width": null
+                                                                "margin": "5 0 0 5"
                                                             },
-                                                            "name": "MyTextArea6",
-                                                            "designerId": "d10f217c-ac00-4a34-ac36-14532cbaa272"
+                                                            "name": "MyContainer30",
+                                                            "designerId": "b5de6751-4fd4-4d70-8ce3-27857636368c",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "{",
+                                                                            "dataIndex: 'intEntityLocationId',",
+                                                                            "dataType: 'numeric',",
+                                                                            "text: 'Location Id',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strLocationName',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Location Name',",
+                                                                            "flex: 1",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strAddress',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Address',",
+                                                                            "hidden: true",
+                                                                            "}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strLocationName",
+                                                                        "fieldLabel": "Ship To",
+                                                                        "itemId": "cboShipToAddress",
+                                                                        "labelWidth": 50,
+                                                                        "layout|flex": null,
+                                                                        "layout|margins": null,
+                                                                        "name": null,
+                                                                        "readOnly": null,
+                                                                        "valueField": "intEntityLocationId",
+                                                                        "width": null
+                                                                    },
+                                                                    "name": "MyComboBox70",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "5efa6aca-a342-4b7c-891f-9c45582432b0",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.TextArea",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": null,
+                                                                        "grow": true,
+                                                                        "itemId": "txtShipToAddress",
+                                                                        "labelWidth": 60,
+                                                                        "layout|flex": 1,
+                                                                        "margin": "-6 0 0 55"
+                                                                    },
+                                                                    "name": "MyTextArea1",
+                                                                    "designerId": "b23c0c8a-0827-4e72-b7ee-4908ed8816e8"
+                                                                }
+                                                            ]
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.TextArea",
+                                                            "type": "Ext.container.Container",
                                                             "reference": {
                                                                 "name": "items",
                                                                 "type": "array"
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "fieldLabel": "Comments",
-                                                                "grow": true,
-                                                                "itemId": "txtComments",
-                                                                "labelWidth": 70,
-                                                                "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "readOnly": null,
-                                                                "width": null
+                                                                "container|align": "stretch",
+                                                                "designer|displayName": "container",
+                                                                "layout": "vbox",
+                                                                "layout|flex": 2,
+                                                                "margin": "5 5 0 5"
                                                             },
-                                                            "name": "MyTextArea5",
-                                                            "designerId": "7c0805df-81a1-43bd-b06e-dacdcc30ab65"
+                                                            "name": "MyContainer12",
+                                                            "designerId": "d273fc58-e5e7-4072-b5f6-bed070e4898f",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.TextArea",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Instructions",
+                                                                        "grow": true,
+                                                                        "itemId": "txtDeliveryInstructions",
+                                                                        "labelWidth": 70,
+                                                                        "layout|flex": 1,
+                                                                        "layout|margins": null,
+                                                                        "name": null,
+                                                                        "readOnly": null,
+                                                                        "width": null
+                                                                    },
+                                                                    "name": "MyTextArea6",
+                                                                    "designerId": "d10f217c-ac00-4a34-ac36-14532cbaa272"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.TextArea",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "fieldLabel": "Comments",
+                                                                        "grow": true,
+                                                                        "itemId": "txtComments",
+                                                                        "labelWidth": 70,
+                                                                        "layout|flex": 1,
+                                                                        "layout|margins": null,
+                                                                        "name": null,
+                                                                        "readOnly": null,
+                                                                        "width": null
+                                                                    },
+                                                                    "name": "MyTextArea5",
+                                                                    "designerId": "7c0805df-81a1-43bd-b06e-dacdcc30ab65"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.panel.Panel",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "layout": "vbox",
+                                                "title": "Shipping Company"
+                                            },
+                                            "name": "MyPanel7",
+                                            "designerId": "4d8aecdb-67de-4fac-8deb-79ca428d901d",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.tab.Tab",
+                                                    "reference": {
+                                                        "name": "tabConfig",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "TabConfig1",
+                                                    "designerId": "55eca703-76fc-4360-b330-285ac036d432"
                                                 },
                                                 {
-                                                    "type": "Ext.panel.Panel",
+                                                    "type": "Ext.container.Container",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "bodyPadding": 5,
                                                         "container|align": "stretch",
                                                         "designer|displayName": "container",
-                                                        "layout": "vbox",
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "margin": "0 5",
-                                                        "title": "Shipping Company"
+                                                        "layout": "hbox",
+                                                        "layout|flex": null,
+                                                        "margin": "5 5 0 5"
                                                     },
-                                                    "name": "MyPanel31",
-                                                    "designerId": "9d0b6e29-27ba-4cc3-8856-78a2d657181b",
+                                                    "name": "MyContainer13",
+                                                    "designerId": "bf94e54c-47b0-4bc2-ae0d-ea12225b940a",
                                                     "cn": [
                                                         {
                                                             "type": "Ext.form.field.Text",
@@ -1045,8 +1092,9 @@
                                                                 "fieldLabel": "BOL No",
                                                                 "itemId": "txtBOLNo",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
@@ -1091,9 +1139,9 @@
                                                                 "hideTrigger": null,
                                                                 "itemId": "cboShipVia",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
-                                                                "margin": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "valueField": "strShipVia",
                                                                 "width": null
@@ -1128,15 +1176,35 @@
                                                                 "fieldLabel": "Vessel/Vehicle",
                                                                 "itemId": "txtVesselVehicle",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
                                                             },
                                                             "name": "MyTextField45",
                                                             "designerId": "c7533f0f-97e7-444d-b26f-5cf63585d710"
-                                                        },
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "hbox",
+                                                        "layout|flex": null,
+                                                        "margin": "5 5 0 5"
+                                                    },
+                                                    "name": "MyContainer17",
+                                                    "designerId": "dcd34b6e-4ae9-4641-a310-662f6cc1c889",
+                                                    "cn": [
                                                         {
                                                             "type": "Ext.form.field.Text",
                                                             "reference": {
@@ -1148,8 +1216,9 @@
                                                                 "fieldLabel": "Pro No",
                                                                 "itemId": "txtProNumber",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
@@ -1169,8 +1238,9 @@
                                                                 "hidden": null,
                                                                 "itemId": "txtDriverID",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
@@ -1190,8 +1260,9 @@
                                                                 "hidden": null,
                                                                 "itemId": "txtSealNumber",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
@@ -1200,26 +1271,50 @@
                                                             "designerId": "3c062956-672c-4292-9523-49c1bfd0b65d"
                                                         }
                                                     ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.panel.Panel",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "layout": "vbox",
+                                                "title": "Delivery"
+                                            },
+                                            "name": "MyPanel9",
+                                            "designerId": "2364aada-1c97-463a-a1ab-c1e192c98b66",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.tab.Tab",
+                                                    "reference": {
+                                                        "name": "tabConfig",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "TabConfig7",
+                                                    "designerId": "d06802db-ff73-4b69-929e-0f8458975d09"
                                                 },
                                                 {
-                                                    "type": "Ext.panel.Panel",
+                                                    "type": "Ext.container.Container",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "bodyPadding": 5,
                                                         "container|align": "stretch",
                                                         "designer|displayName": "container",
-                                                        "layout": "vbox",
-                                                        "layout|flex": 0.9,
-                                                        "layout|margins": null,
-                                                        "margin": null,
-                                                        "title": "Delivery"
+                                                        "layout": "hbox",
+                                                        "layout|flex": null,
+                                                        "margin": "5 5 0 5"
                                                     },
-                                                    "name": "MyPanel32",
-                                                    "designerId": "5a95fb3c-b3ec-4200-879e-81210d38a03f",
+                                                    "name": "MyContainer18",
+                                                    "designerId": "d36fb854-5838-452a-b392-ac5953fb0d88",
                                                     "cn": [
                                                         {
                                                             "type": "Ext.form.field.Text",
@@ -1233,8 +1328,9 @@
                                                                 "fieldLabel": "Appointment Time",
                                                                 "itemId": "txtAppointmentTime",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
@@ -1256,8 +1352,9 @@
                                                                 "hideTrigger": null,
                                                                 "itemId": "txtDepartureTime",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
@@ -1288,8 +1385,9 @@
                                                                 "fieldLabel": "Arrival Time",
                                                                 "itemId": "txtArrivalTime",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
@@ -1306,7 +1404,26 @@
                                                                     "type": "string"
                                                                 }
                                                             ]
-                                                        },
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "hbox",
+                                                        "layout|flex": null,
+                                                        "margin": "5 5 0 5"
+                                                    },
+                                                    "name": "MyContainer19",
+                                                    "designerId": "8c7be0b0-971a-4865-bcc9-a047aa518268",
+                                                    "cn": [
                                                         {
                                                             "type": "Ext.form.field.Date",
                                                             "reference": {
@@ -1321,8 +1438,9 @@
                                                                 "hideTrigger": null,
                                                                 "itemId": "dtmDelivered",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
@@ -1355,8 +1473,9 @@
                                                                 "hideTrigger": null,
                                                                 "itemId": "dtmFreeTime",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "readOnly": null,
                                                                 "width": null
@@ -1389,8 +1508,9 @@
                                                                 "hideTrigger": null,
                                                                 "itemId": "txtReceivedBy",
                                                                 "labelWidth": 110,
-                                                                "layout|flex": null,
+                                                                "layout|flex": 1,
                                                                 "layout|margins": null,
+                                                                "margin": "0 5 0 0",
                                                                 "name": null,
                                                                 "width": null
                                                             },
@@ -1423,7 +1543,7 @@
                                     "userConfig": {
                                         "activeTab": 0,
                                         "itemId": "tabItemLot",
-                                        "layout|flex": 1,
+                                        "layout|flex": 2,
                                         "margin": "5 0 0 0",
                                         "plain": true
                                     },
@@ -1438,7 +1558,8 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "layout": "fit",
+                                                "container|align": "stretch",
+                                                "layout": "vbox",
                                                 "title": "Items"
                                             },
                                             "name": "MyPanel3",
@@ -1465,6 +1586,7 @@
                                                         "designer|createAlias": "advancefiltergrid",
                                                         "dock": null,
                                                         "itemId": "grdInventoryShipment",
+                                                        "layout|flex": 2,
                                                         "margin": -1,
                                                         "reference": "grdInventoryShipment",
                                                         "title": null
@@ -1529,7 +1651,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter114",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1605,31 +1727,49 @@
                                                                             "\t\tdataIndex: 'strSalesOrderNumber',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Sales Order',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
                                                                             "\t},",
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strItemNo',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Item No',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
                                                                             "\t},",
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strItemDescription',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Description',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 120",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'strLotTracking',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Lot Tracking',",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
                                                                             "\t},",
                                                                             "    {",
                                                                             "\t\tdataIndex: 'strUnitMeasure',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Item UOM Id',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
                                                                             "\t},",
                                                                             "    {",
                                                                             "\t\tdataIndex: 'dblQtyOrdered',",
                                                                             "\t\tdataType: 'float',",
                                                                             "\t\ttext: 'Qty Ordered',",
-                                                                            "\t\tflex: 1",
+                                                                            "\t\tflex: 1,",
+                                                                            "        width: 100",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'dblPrice',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\ttext: 'Unit Price',",
+                                                                            "\t\thidden: true",
                                                                             "\t},",
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strStorageLocation',",
@@ -1837,9 +1977,9 @@
                                                                 "dataIndex": "dblQuantity",
                                                                 "dataType": "numeric",
                                                                 "format": "0,000.##",
-                                                                "itemId": "colQuantity",
-                                                                "text": "Quantity",
-                                                                "width": 65
+                                                                "itemId": "colOrderQty",
+                                                                "text": "Order Qty",
+                                                                "width": 80
                                                             },
                                                             "name": "MyNumberColumn",
                                                             "designerId": "9c007814-decb-48ce-a077-237ccfcff662",
@@ -1859,10 +1999,67 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "dataIndex": "strDescription",
+                                                                "itemId": "colOrderUOM",
+                                                                "text": "Order UOM",
+                                                                "width": 100
+                                                            },
+                                                            "name": "MyColumn45",
+                                                            "designerId": "db9b69ee-90bd-41f9-9909-1e1cdd5e07ee"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
+                                                                "dataIndex": "dblQuantity",
+                                                                "dataType": "numeric",
+                                                                "format": "0,000.##",
+                                                                "itemId": "colQuantity",
+                                                                "text": "Quantity",
+                                                                "width": 80
+                                                            },
+                                                            "name": "MyNumberColumn18",
+                                                            "designerId": "07e8c5de-bd40-4af2-97ee-0a5c004be3bb",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "numeric"
+                                                                    },
+                                                                    "name": "MyNumberField14",
+                                                                    "designerId": "cb0c5d04-dfbf-4ade-a11a-c80ea1140424"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
                                                                 "dataIndex": "strUOM",
                                                                 "itemId": "colUOM",
                                                                 "text": "UOM",
-                                                                "width": 75
+                                                                "width": 100
                                                             },
                                                             "name": "MyColumn9",
                                                             "designerId": "a2a88ae4-34db-4b5e-8e3c-18035df9da40",
@@ -1974,6 +2171,21 @@
                                                                     "name": "dataType",
                                                                     "type": "string"
                                                                 }
+                                                            ],
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "numeric"
+                                                                    },
+                                                                    "name": "MyNumberField16",
+                                                                    "designerId": "0d637b1d-a899-4b60-affc-e8d277d3f33a"
+                                                                }
                                                             ]
                                                         },
                                                         {
@@ -2079,32 +2291,6 @@
                                                             "designerId": "44f1e2ef-8d52-4283-8772-5295394d9f80"
                                                         }
                                                     ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.panel.Panel",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "layout": "fit",
-                                                "title": "Lot Tracking"
-                                            },
-                                            "name": "MyPanel12",
-                                            "designerId": "8780d138-bea9-47ba-bd08-db67b5b20182",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.tab.Tab",
-                                                    "reference": {
-                                                        "name": "tabConfig",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "TabConfig5",
-                                                    "designerId": "f0c5fb8d-8c94-4f53-99c2-875d35a1e6ae"
                                                 },
                                                 {
                                                     "type": "Ext.grid.Panel",
@@ -2115,7 +2301,9 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "designer|createAlias": "advancefiltergrid",
+                                                        "hidden": true,
                                                         "itemId": "grdLotTracking",
+                                                        "layout|flex": 1,
                                                         "margin": -1,
                                                         "reference": "grdLotTracking",
                                                         "title": null
@@ -2180,7 +2368,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter115",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2497,7 +2685,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter18",
+                                                                    "name": "filter116",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2751,7 +2939,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter117",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2928,7 +3116,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging13",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

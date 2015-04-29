@@ -442,21 +442,21 @@ Ext.define('Inventory.view.Category', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colDetailUpcCode',
-                                                        minWidth: 80,
+                                                        itemId: 'colDetailShortUPC',
+                                                        width: 80,
                                                         dataIndex: 'string',
-                                                        text: 'UPC Code',
-                                                        flex: 2,
+                                                        text: 'Short UPC',
                                                         editor: {
                                                             xtype: 'textfield'
                                                         }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colDetailShortUPC',
-                                                        width: 70,
                                                         dataIndex: 'string',
-                                                        text: 'Short UPC'
+                                                        itemId: 'colDetailUpcCode',
+                                                        minWidth: 110,
+                                                        text: 'UPC Code',
+                                                        flex: 2
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',

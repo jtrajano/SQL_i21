@@ -168,6 +168,12 @@ Ext.define('Inventory.model.Item', {
                     message: 'Receive Life must be greater than zero(0).'
                 })
             }
+            if (iRely.Functions.isEmpty(this.get('strLifeTimeType'))) {
+                errors.add({
+                    field: 'strLifeTimeType',
+                    message: 'Invalid Lifetime Type.'
+                })
+            }
         }
         return errors;
     }

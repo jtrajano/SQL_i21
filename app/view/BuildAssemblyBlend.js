@@ -30,6 +30,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
         'Ext.grid.column.Number',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing',
         'Ext.toolbar.Paging'
     ],
 
@@ -411,6 +412,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                 {
                     xtype: 'gridpanel',
                     flex: 1,
+                    reference: 'grdBuildAssemblyBlend',
                     itemId: 'grdBuildAssemblyBlend',
                     dockedItems: [
                         {
@@ -462,9 +464,41 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                         },
                         {
                             xtype: 'gridcolumn',
-                            itemId: 'colSubLocation',
                             dataIndex: 'string',
-                            text: 'Sub Location'
+                            itemId: 'colSubLocation',
+                            text: 'Sub Location',
+                            editor: {
+                                xtype: 'gridcombobox',
+                                columns: [
+                                    {
+                                        dataIndex: 'intSubLocationId',
+                                        dataType: 'numeric',
+                                        text: 'Sub Location Id',
+                                        hidden: true
+                                    },
+                                    {
+                                        dataIndex: 'strSubLocationName',
+                                        dataType: 'string',
+                                        text: 'Sub Location Name',
+                                        flex: 2
+                                    },
+                                    {
+                                        dataIndex: 'dblOnHand',
+                                        dataType: 'float',
+                                        text: 'On Hand',
+                                        flex: 1
+                                    },
+                                    {
+                                        dataIndex: 'dblOnOrder',
+                                        dataType: 'float',
+                                        text: 'On Order',
+                                        flex: 1
+                                    }
+                                ],
+                                itemId: 'cboItemSubLocation',
+                                displayField: 'strSubLocationName',
+                                valueField: 'strSubLocationName'
+                            }
                         },
                         {
                             xtype: 'numbercolumn',
@@ -493,7 +527,10 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                             itemId: 'colCost',
                             width: 85,
                             align: 'right',
-                            text: 'Cost'
+                            text: 'Cost',
+                            editor: {
+                                xtype: 'numeric'
+                            }
                         }
                     ],
                     viewConfig: {
@@ -501,7 +538,14 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                     },
                     selModel: {
                         selType: 'checkboxmodel'
-                    }
+                    },
+                    plugins: [
+                        {
+                            ptype: 'cellediting',
+                            pluginId: 'cepItem',
+                            clicksToEdit: 1
+                        }
+                    ]
                 }
             ]
         }
