@@ -25,6 +25,9 @@
 	[dblActualHours] [numeric](18, 6) NULL,
 	[strJiraKey] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strCompany] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strOperatingSystem] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strAcuVersion] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
+	[strDatabase] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDTicket] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
 	CONSTRAINT [UNQ_tblHDTicketNumber] UNIQUE ([strTicketNumber]),
@@ -462,3 +465,49 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDTicket',
     @level2type = N'COLUMN',
     @level2name = N'intMilestoneId'
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Associated JIRA Key',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strJiraKey'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Company',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strCompany'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Customer OS',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strOperatingSystem'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Customer Acu Version',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strAcuVersion'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Customer Database',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'strDatabase'
