@@ -1475,6 +1475,9 @@
     <Build Include="dbo\Views\vyuLGShipmentOpenAllocationDetails.sql" />
     <Build Include="dbo\Views\vyuLGShipmentOpenContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspEMValidateEntityNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAddScaleTicketToItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessToItemReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
