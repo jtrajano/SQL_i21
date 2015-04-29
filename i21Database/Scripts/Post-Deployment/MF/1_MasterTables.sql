@@ -250,17 +250,3 @@ BEGIN
 		,'Machine'
 END
 GO
-IF NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFWorkOrderProductionType
-		WHERE intProductionTypeId=1
-		)
-BEGIN
-	INSERT INTO dbo.tblMFWorkOrderProductionType (
-		intProductionTypeId
-		,strName
-		)
-	SELECT 1
-		,'Stock'
-END
-GO
