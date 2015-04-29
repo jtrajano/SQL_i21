@@ -3323,7 +3323,7 @@ Ext.define('Inventory.view.Item', {
                                                         }
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
+                                                        xtype: 'numbercolumn',
                                                         itemId: 'colPricingMSRP',
                                                         width: 80,
                                                         align: 'right',

@@ -7221,7 +7221,7 @@
                                             ]
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
+                                            "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
                                                 "type": "array"
@@ -7235,7 +7235,7 @@
                                                 "text": "MSRP",
                                                 "width": 80
                                             },
-                                            "name": "MyColumn25",
+                                            "name": "MyNumberColumn44",
                                             "designerId": "ff739ab3-f97e-4f1c-bba1-7bd6d5a79dd1",
                                             "cn": [
                                                 {

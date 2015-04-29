@@ -2116,6 +2116,36 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onPricingGridColumnBeforeRender: function(column) {
+        "use strict";
+        if (!column) return false;
+        var me = this,
+            win = column.up('window');
+
+        // Show or hide the editor based on the selected Field type.
+        column.getEditor = function(record) {
+            var vm = win.viewModel;
+            if (!record) return false;
+            var columnId = column.itemId;
+
+            switch (columnId) {
+                case 'colPricingAmount' :
+                    if (record.get('strPricingMethod') === 'None') {
+                        return false;
+                    }
+                    else {
+                        return Ext.create('Ext.grid.CellEditor', {
+                            field: Ext.widget({
+                                xtype: 'numberfield'
+                            })
+                        });
+                    }
+
+                    break;
+            }
+        };
+    },
+
     // </editor-fold>
 
     // <editor-fold desc="Stock Tab Methods and Event Handlers">
@@ -2651,6 +2681,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#btnBuildAssembly": {
                 click: this.onBuildAssemblyClick
+            },
+            "#colPricingAmount": {
+                beforerender: this.onPricingGridColumnBeforeRender
             }
         });
     }
