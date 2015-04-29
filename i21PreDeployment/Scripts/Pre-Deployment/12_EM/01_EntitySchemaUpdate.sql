@@ -2,8 +2,7 @@
 IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntity' AND [COLUMN_NAME] = 'strContactNumber') 
 BEGIN
 	PRINT 'DROPPING CONSTRAINT RELATED TO tblEntity'
-	
-	
+
 	declare @constraint varchar(500)
 	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblAPVendor' and OBJECT_NAME(referenced_object_id) = 'tblEntityContact' 
@@ -225,24 +224,126 @@ BEGIN
 	 END
 
 	print 'Moving Entity Contact Data to Entity'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strContactNumber') 
+BEGIN
 	exec(N'	
 			update a set
-					a.strContactNumber = b.strContactNumber,	
-					a.strTitle = b.strTitle,
-					a.strDepartment = b.strDepartment,
-					a.strMobile = b.strMobile,
-					a.strPhone = b.strPhone,
-					a.strPhone2 = b.strPhone2,
-					a.strEmail2 = b.strEmail2,
-					a.strFax = b.strFax,
-					a.strNotes = b.strNotes,
-					a.strContactMethod = b.strContactMethod,
-					a.strTimezone = b.strTimezone,
-					a.ysnActive = b.ysnActive
-							
+					a.strContactNumber = b.strContactNumber							
 				from tblEntity a
 					join tblEntityContact b
 						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strTitle') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strTitle = b.strTitle							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strDepartment') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strDepartment = b.strDepartment							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strMobile') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strMobile = b.strMobile							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strPhone') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strPhone = b.strPhone							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strPhone2') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strPhone2 = b.strPhone2							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strEmail2') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strEmail2 = b.strEmail2							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strFax') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strFax = b.strFax							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strNotes') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strNotes = b.strNotes							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strContactMethod') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strContactMethod = b.strContactMethod							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'strTimezone') 
+BEGIN
+	exec(N'	
+			update a set
+					a.strTimezone = b.strTimezone							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'ysnActive') 
+BEGIN
+	exec(N'	
+			update a set
+					a.ysnActive = b.ysnActive							
+				from tblEntity a
+					join tblEntityContact b
+						on a.intEntityId = b.intEntityId')
+END
+
 
 
 	print 'Moving linking to entity id instead of vendor id'
@@ -256,13 +357,21 @@ BEGIN
 	END
 
 	
-	print 'Adding Default Contact to Vendor To Contact'
-	exec(N'	ALTER TABLE tblAPVendorToContact
+	
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact') 
+	BEGIN	
+
+		print 'Adding Default Contact to Vendor To Contact'	
+		exec(N'	ALTER TABLE tblAPVendorToContact
 			add ysnDefaultContact bit')
 
-	print 'Adding user type to Vendor To Contact'
-	exec(N' ALTER TABLE tblAPVendorToContact
-			add strUserType [nvarchar](20) NOT NULL Default('''')')
+		print 'Adding user type to Vendor To Contact'
+		exec(N' ALTER TABLE tblAPVendorToContact
+				add strUserType [nvarchar](20) NOT NULL Default('''')')
+	END
+	
+
+	
 		
 	print 'Update vendor to contact default contact column'
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact' AND [COLUMN_NAME] = 'ysnDefaultContact') 
@@ -383,9 +492,14 @@ BEGIN
 	END
 
 	print 'Add ysnDefault column to ARCustomerToContact'
-	exec(N'	
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerToContact') 
+	BEGIN
+		exec(N'	
 			ALTER TABLE tblARCustomerToContact
 			add ysnDefaultContact bit')
+	END
+
+	
 
 
 	print 'Update ysnDefaultContact'
@@ -474,11 +588,16 @@ BEGIN
 	print 'Update Linking of tblAPVendor default contact from entity contact to entity id'
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendor' AND [COLUMN_NAME] = 'intDefaultContactId') 
 	BEGIN
-		exec(N'						
+
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'intContactId') 
+		BEGIN
+			exec(N'						
 				UPDATE a set a.intDefaultContactId = b.intEntityId
 					from tblAPVendor a 
 						join tblEntityContact b 
 							on a.intDefaultContactId = b.intContactId		')	
+		END
+				
 	END
 
 	print 'Update Linking of tblARCustomer salesperson from salespersonid to entityid '
@@ -510,7 +629,10 @@ BEGIN
 	END
 
 	print 'Delete orphan entity to contact'
-	exec(N'		
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityToContact') 
+	BEGIN
+
+		exec(N'		
 			delete from tblEntityToContact	where intEntityId not in ( select intEntityId from tblEntity)
 			
 			delete from tblEntityToContact	where intContactId not in ( select intEntityId from tblEntityContact)
@@ -518,100 +640,118 @@ BEGIN
 			')
 
 
-	print 'add locationid to tblEntityToContact'
-	exec(N'		
-			alter table tblEntityToContact
-			add [intEntityLocationId]        INT NULL ')
+		print 'add locationid to tblEntityToContact'
+		exec(N'		
+				alter table tblEntityToContact
+				add [intEntityLocationId]        INT NULL ')
 			
-	print 'Add strUserType tblEnttiyToContact'
-	exec(N'		
-			alter table tblEntityToContact
-			add [strUserType]              NVARCHAR (5) COLLATE Latin1_General_CI_AS NULL ')
-	print 'Add ysnPortalAccess to EntityToContact'
-	exec(N'		
-			alter table tblEntityToContact
-			add [ysnPortalAccess]          BIT          NULL ')
-	print 'Add ysnDefaultContact to EntityToContact'
-	exec(N'					
-			alter table tblEntityToContact
-			add [ysnDefaultContact] BIT NOT NULL DEFAULT ((0))')
-	print 'move tblARCustomerToContact to tblEntityToContact'
-	exec(N'		
-			INSERT INTO tblEntityToContact 
-			(
-			intEntityId
-			,intContactId
-			,intEntityLocationId
-			,strUserType
-			,ysnPortalAccess
-			,ysnDefaultContact
-			,intConcurrencyId
-			)
-			select 
-			intCustomerId
-			,intContactId
-			,intEntityLocationId
-			,strUserType
-			,ysnPortalAccess
-			,isnull(ysnDefaultContact,0)
-			,intConcurrencyId
-			from tblARCustomerToContact
+		print 'Add strUserType tblEnttiyToContact'
+		exec(N'		
+				alter table tblEntityToContact
+				add [strUserType]              NVARCHAR (5) COLLATE Latin1_General_CI_AS NULL ')
+		print 'Add ysnPortalAccess to EntityToContact'
+		exec(N'		
+				alter table tblEntityToContact
+				add [ysnPortalAccess]          BIT          NULL ')
+		print 'Add ysnDefaultContact to EntityToContact'
+		exec(N'					
+				alter table tblEntityToContact
+				add [ysnDefaultContact] BIT NOT NULL DEFAULT ((0))')
 
-			')
-	print 'move tblAPVendorToContact to tblEntityToContact'
-	exec(N'		
-			INSERT INTO tblEntityToContact 
-			(
-			intEntityId
-			,intContactId
-			,intEntityLocationId
-			,strUserType
-			,ysnPortalAccess
-			,ysnDefaultContact
-			,intConcurrencyId
-			)
-			select 
-			intVendorId
-			,intContactId
-			,intEntityLocationId
-			,strUserType
-			,0
-			,isnull(ysnDefaultContact,0)
-			,intConcurrencyId
-			from tblAPVendorToContact
-			')
+		print 'move tblARCustomerToContact to tblEntityToContact'
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerToContact') 
+		BEGIN
+				exec(N'		
+						INSERT INTO tblEntityToContact 
+						(
+						intEntityId
+						,intContactId
+						,intEntityLocationId
+						,strUserType
+						,ysnPortalAccess
+						,ysnDefaultContact
+						,intConcurrencyId
+						)
+						select 
+						intCustomerId
+						,intContactId
+						,intEntityLocationId
+						,strUserType
+						,ysnPortalAccess
+						,isnull(ysnDefaultContact,0)
+						,intConcurrencyId
+						from tblARCustomerToContact
+
+					')
+		END
 		
-	print 'Update entity type for customer '
-	exec(N'		
-			insert into tblEntityType(intEntityId,strType,intConcurrencyId)
-			select b.intEntityId,''Customer'',0 from tblARCustomer a
-				join tblEntity b
-					on a.intEntityId = b.intEntityId
-				where b.intEntityId not in (select intEntityId from tblEntityType)	')
+		print 'move tblAPVendorToContact to tblEntityToContact'
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact') 
+		BEGIN
+			exec(N'		
+				INSERT INTO tblEntityToContact 
+				(
+				intEntityId
+				,intContactId
+				,intEntityLocationId
+				,strUserType
+				,ysnPortalAccess
+				,ysnDefaultContact
+				,intConcurrencyId
+				)
+				select 
+				intVendorId
+				,intContactId
+				,intEntityLocationId
+				,strUserType
+				,0
+				,isnull(ysnDefaultContact,0)
+				,intConcurrencyId
+				from tblAPVendorToContact
+				')
+		END
+		
+	END
 	
-	print 'Update entity type for Vendor'
-	exec(N'		
-			insert into tblEntityType(intEntityId,strType,intConcurrencyId)
-			select b.intEntityId,''Vendor'',0 from tblAPVendor a
-				join tblEntity b
-					on a.intEntityId = b.intEntityId
-				where b.intEntityId not in (select intEntityId from tblEntityType)	')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityType') 	
+	BEGIN
+		print 'Update entity type for customer '
+		exec(N'		
+				insert into tblEntityType(intEntityId,strType,intConcurrencyId)
+				select b.intEntityId,''Customer'',0 from tblARCustomer a
+					join tblEntity b
+						on a.intEntityId = b.intEntityId
+					where b.intEntityId not in (select intEntityId from tblEntityType)	')
+	
+		print 'Update entity type for Vendor'
+		exec(N'		
+				insert into tblEntityType(intEntityId,strType,intConcurrencyId)
+				select b.intEntityId,''Vendor'',0 from tblAPVendor a
+					join tblEntity b
+						on a.intEntityId = b.intEntityId
+					where b.intEntityId not in (select intEntityId from tblEntityType)	')
 
-	print 'Update entity type for salesperson'
-	exec(N'		
-			insert into tblEntityType(intEntityId,strType,intConcurrencyId)
-			select b.intEntityId,''Salesperson'',0 from tblARSalesperson a
-				join tblEntity b
-					on a.intEntityId = b.intEntityId
-				where b.intEntityId not in (select intEntityId from tblEntityType)	')
+		print 'Update entity type for salesperson'
+		exec(N'		
+				insert into tblEntityType(intEntityId,strType,intConcurrencyId)
+				select b.intEntityId,''Salesperson'',0 from tblARSalesperson a
+					join tblEntity b
+						on a.intEntityId = b.intEntityId
+					where b.intEntityId not in (select intEntityId from tblEntityType)	')
 
-	print 'Update entity type for User'
-	exec(N'		
-			insert into tblEntityType(intEntityId,strType,intConcurrencyId)		
-			select b.intEntityId,''User'',0 from tblSMUserSecurity a
-				join tblEntity b
-					on a.intEntityId = b.intEntityId
-				where b.intEntityId not in (select intEntityId from tblEntityType)	')
+		print 'Update entity type for User'
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurity' AND [COLUMN_NAME] = 'intEntityId') 
+		BEGIN
+			exec(N'		
+				insert into tblEntityType(intEntityId,strType,intConcurrencyId)		
+				select b.intEntityId,''User'',0 from tblSMUserSecurity a
+					join tblEntity b
+						on a.intEntityId = b.intEntityId
+					where b.intEntityId not in (select intEntityId from tblEntityType)	')
+		END
+		
+	END
+	
 
 	print 'Update Linking of tblPOPurchase from vendor id to entity id'
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblPOPurchase' AND [COLUMN_NAME] = 'intVendorId') 
