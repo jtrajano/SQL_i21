@@ -1478,6 +1478,7 @@
     <Build Include="dbo\Stored Procedures\uspSCAddScaleTicketToItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessToItemReceipt.sql" />
+    <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
