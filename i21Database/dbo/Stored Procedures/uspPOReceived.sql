@@ -119,11 +119,13 @@ BEGIN
 				AND intPurchaseId = B.intSourceId
 				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
 
-	WHILE @count != (SELECT COUNT(*) FROM #tmpReceivedPOItems)
+	SELECT DISTINCT intSourceId INTO #poIds FROM #tmpReceivedPOItems
+
+	WHILE EXISTS(SELECT 1 FROM #poIds)
 	BEGIN
-		SET @count = @count + 1;
-		SET @purchaseId = (SELECT TOP(@count) intSourceId FROM #tmpReceivedPOItems)
+		SET @purchaseId = (SELECT TOP(1) intSourceId FROM #poIds)
 		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
+		DELETE FROM #poIds WHERE intSourceId = @purchaseId
 	END
 
 END
