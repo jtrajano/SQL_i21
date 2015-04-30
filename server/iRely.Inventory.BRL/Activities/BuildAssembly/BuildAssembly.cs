@@ -78,8 +78,8 @@ namespace iRely.Inventory.BRL
         public void AddBuildAssembly(tblICBuildAssembly build)
         {
             build.strBuildNo = Common.GetStartingNumber(Common.StartingNumber.BuildAssembly);
-            //build.intCreatedUserId = iRely.Common.Security.GetUserId();
-            //build.intEntityId = iRely.Common.Security.GetEntityId();
+            build.intCreatedUserId = iRely.Common.Security.GetUserId();
+            build.intEntityId = iRely.Common.Security.GetEntityId();
             _db.AddNew<tblICBuildAssembly>(build);
         }
 
