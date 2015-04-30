@@ -1014,18 +1014,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'numbercolumn',
-                                                                        itemId: 'colUnitRetail',
-                                                                        width: 85,
-                                                                        dataIndex: 'dblUnitRetail',
-                                                                        text: 'Unit Retail',
-                                                                        editor: {
-                                                                            xtype: 'numberfield',
-                                                                            itemId: 'txtUnitRetail',
-                                                                            minValue: 0
-                                                                        }
-                                                                    },
-                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colTax',
                                                                         width: 85,
@@ -1038,6 +1026,18 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         width: 85,
                                                                         dataIndex: 'dblLineTotal',
                                                                         text: 'Line Total'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colUnitRetail',
+                                                                        width: 85,
+                                                                        dataIndex: 'dblUnitRetail',
+                                                                        text: 'Unit Retail',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            itemId: 'txtUnitRetail',
+                                                                            minValue: 0
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',

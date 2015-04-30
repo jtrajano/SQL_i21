@@ -64,5 +64,18 @@ Ext.define('Inventory.model.ItemPricingLevel', {
         {type: 'presence', field: 'dblUnit'},
         {type: 'presence', field: 'strPricingMethod'},
         {type: 'presence', field: 'dblUnitPrice'}
-    ]
+    ],
+
+    validate: function(options){
+        var errors = this.callParent(arguments);
+        if (this.get('strPricingMethod') !== 'None' && iRely.Functions.isEmpty(this.get('strPricingMethod')) !== true) {
+            if (this.get('dblAmountRate') <= 0) {
+                errors.add({
+                    field: 'dblAmountRate',
+                    message: 'Amount/Rate must be greater than zero(0).'
+                })
+            }
+        }
+        return errors;
+    }
 });

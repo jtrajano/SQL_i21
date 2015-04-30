@@ -102,13 +102,26 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("tblICInventoryShipmentItemLot");
-            this.Property(t => t.dblQuantityShipped).HasColumnName("dblQuantityShipped").HasPrecision(18, 6);
-            this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
             this.Property(t => t.intInventoryShipmentItemLotId).HasColumnName("intInventoryShipmentItemLotId");
+            this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
             this.Property(t => t.intLotId).HasColumnName("intLotId");
-            this.Property(t => t.intSort).HasColumnName("intSort");
+            this.Property(t => t.dblQuantityShipped).HasColumnName("dblQuantityShipped").HasPrecision(18, 6);
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
+            this.Property(t => t.dblGrossWeight).HasColumnName("dblGrossWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight").HasPrecision(18, 6);
             this.Property(t => t.strWarehouseCargoNumber).HasColumnName("strWarehouseCargoNumber");
+            this.Property(t => t.intSort).HasColumnName("intSort");
 
+            this.HasOptional(p => p.tblICLot)
+                .WithMany(p => p.tblICInventoryShipmentItemLots)
+                .HasForeignKey(p => p.intLotId);
+            this.HasOptional(p => p.tblICItemUOM)
+                .WithMany(p => p.ShipmentItemLots)
+                .HasForeignKey(p => p.intItemUOMId);
+            this.HasOptional(p => p.WeightUOM)
+                .WithMany(p => p.WeightShipmentItemLot)
+                .HasForeignKey(p => p.intWeightUOMId);
         }
     }
 

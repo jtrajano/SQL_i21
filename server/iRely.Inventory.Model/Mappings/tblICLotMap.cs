@@ -21,6 +21,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
             this.Property(t => t.strItemUOM).HasColumnName("strItemUOM");
+            this.Property(t => t.strItemUOMType).HasColumnName("strItemUOMType");
+            this.Property(t => t.dblItemUOMConv).HasColumnName("dblItemUOMConv").HasPrecision(18, 6);
             this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
@@ -32,11 +34,13 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strLotAlias).HasColumnName("strLotAlias");
             this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
             this.Property(t => t.strLotStatus).HasColumnName("strLotStatus");
+            this.Property(t => t.strLotStatusType).HasColumnName("strLotStatusType");
             this.Property(t => t.intParentLotId).HasColumnName("intParentLotId");
             this.Property(t => t.intSplitFromLotId).HasColumnName("intSplitFromLotId");
             this.Property(t => t.dblWeight).HasColumnName("dblWeight").HasPrecision(18, 6);
             this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
+            this.Property(t => t.dblWeightUOMConv).HasColumnName("dblWeightUOMConv").HasPrecision(18, 6);
             this.Property(t => t.dblWeightPerQty).HasColumnName("dblWeightPerQty").HasPrecision(18, 6);
             this.Property(t => t.intOriginId).HasColumnName("intOriginId");
             this.Property(t => t.strBOLNo).HasColumnName("strBOLNo");
@@ -44,7 +48,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strReceiptNumber).HasColumnName("strReceiptNumber");
             this.Property(t => t.strMarkings).HasColumnName("strMarkings");
             this.Property(t => t.strNotes).HasColumnName("strNotes");
-			this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
+            this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.strVendorLotNo).HasColumnName("strVendorLotNo");
             this.Property(t => t.intVendorLocationId).HasColumnName("intVendorLocationId");
             this.Property(t => t.strVendorLocation).HasColumnName("strVendorLocation");

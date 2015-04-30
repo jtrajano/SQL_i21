@@ -821,6 +821,7 @@ Ext.define('Inventory.view.ItemViewController', {
             window : win,
             store  : store,
             createRecord : me.createRecord,
+            validateRecord : me.validateRecord,
             onSaveClick: me.onSaveClick,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
@@ -1066,6 +1067,40 @@ Ext.define('Inventory.view.ItemViewController', {
                 });
             }
         }
+    },
+
+    validateRecord: function(config, action) {
+        var win = config.window;
+        this.validateRecord(config, function (result) {
+            if (result) {
+                action(true);
+            }
+            else {
+                var tabItem = win.down('#tabItem');
+                var tabSetup = win.down('#tabSetup');
+                if (config.viewModel.data.current.get('strType') === 'Finished Good' || config.viewModel.data.current.get('strType') === 'Raw Material') {
+                    if (iRely.Functions.isEmpty(config.viewModel.data.current.get('strLifeTimeType'))) {
+                        tabItem.setActiveTab('pgeSetup');
+                        tabSetup.setActiveTab('pgeManufacturing');
+                        action(false);
+                    }
+                    else if (config.viewModel.data.current.get('intLifeTime') <= 0) {
+                        tabItem.setActiveTab('pgeSetup');
+                        tabSetup.setActiveTab('pgeManufacturing');
+                        action(false);
+                    }
+                    else if (config.viewModel.data.current.get('intReceiveLife') <= 0) {
+                        tabItem.setActiveTab('pgeSetup');
+                        tabSetup.setActiveTab('pgeManufacturing');
+                        action(false);
+                    }
+                }
+                else {
+                    tabItem.setActiveTab('pgePricing');
+                    action(false);
+                }
+            }
+        });
     },
 
     onSaveClick: function(button, e, options) {
@@ -2087,6 +2122,36 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onPricingGridColumnBeforeRender: function(column) {
+        "use strict";
+        if (!column) return false;
+        var me = this,
+            win = column.up('window');
+
+        // Show or hide the editor based on the selected Field type.
+        column.getEditor = function(record) {
+            var vm = win.viewModel;
+            if (!record) return false;
+            var columnId = column.itemId;
+
+            switch (columnId) {
+                case 'colPricingAmount' :
+                    if (record.get('strPricingMethod') === 'None') {
+                        return false;
+                    }
+                    else {
+                        return Ext.create('Ext.grid.CellEditor', {
+                            field: Ext.widget({
+                                xtype: 'numberfield'
+                            })
+                        });
+                    }
+
+                    break;
+            }
+        };
+    },
+
     // </editor-fold>
 
     // <editor-fold desc="Stock Tab Methods and Event Handlers">
@@ -2622,6 +2687,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#btnBuildAssembly": {
                 click: this.onBuildAssemblyClick
+            },
+            "#colPricingAmount": {
+                beforerender: this.onPricingGridColumnBeforeRender
             }
         });
     }

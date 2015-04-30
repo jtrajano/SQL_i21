@@ -20,6 +20,8 @@ namespace iRely.Inventory.Model
         public int? intItemLocationId { get; set; }
         public int? intItemUOMId { get; set; }
         public string strItemUOM { get; set; }
+        public string strItemUOMType { get; set; }
+        public decimal? dblItemUOMConv { get; set; }
         public string strLotNumber { get; set; }
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
@@ -31,11 +33,13 @@ namespace iRely.Inventory.Model
         public string strLotAlias { get; set; }
         public int? intLotStatusId { get; set; }
         public string strLotStatus { get; set; }
+        public string strLotStatusType { get; set; }
         public int? intParentLotId { get; set; }
         public int? intSplitFromLotId { get; set; }
         public decimal? dblWeight { get; set; }
         public int? intWeightUOMId { get; set; }
         public string strWeightUOM { get; set; }
+        public decimal? dblWeightUOMConv { get; set; }
         public decimal? dblWeightPerQty { get; set; }
         public int? intOriginId { get; set; }
         public string strBOLNo { get; set; }
@@ -55,6 +59,7 @@ namespace iRely.Inventory.Model
         public int? intCreatedUserId { get; set; }
 
         public tblICInventoryReceiptItemLot tblICInventoryReceiptItemLot { get; set; }
+        public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
 
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> NewAdjustmentDetails { get; set; }

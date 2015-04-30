@@ -28,16 +28,29 @@ Ext.define('Inventory.model.ShipmentItemLot', {
                 }
             }
         },
-        { name: 'intLotId', type: 'int'},
-        { name: 'dblQuantityShipped', type: 'float'},
-        { name: 'strWarehouseCargoNumber', type: 'string'},
-        { name: 'intSort', type: 'int'},
+        { name: 'intLotId', type: 'int', allowNull: true },
+        { name: 'dblQuantityShipped', type: 'float' },
+        { name: 'intItemUOMId', type: 'int', allowNull: true },
+        { name: 'intWeightUOMId', type: 'int', allowNull: true },
+        { name: 'dblGrossWeight', type: 'float' },
+        { name: 'dblTareWeight', type: 'float' },
+        { name: 'dblNetWeight', type: 'float',
+            persist: false,
+            convert: function(value, record){
+                return record.get('dblGrossWeight') - record.get('dblTareWeight');
+            },
+            depends: ['dblGrossWeight', 'dblTareWeight']
+        },
+        { name: 'strWarehouseCargoNumber', type: 'string' },
+        { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strLotId', type: 'string'}
+        { name: 'strLotId', type: 'string'},
+        { name: 'strUnitMeasure', type: 'string'}
     ],
 
     validators: [
         {type: 'presence', field: 'strLotId'},
+        {type: 'presence', field: 'strUnitMeasure'},
         {type: 'presence', field: 'dblQuantityShipped'}
     ]
 });
