@@ -24,7 +24,7 @@
     [strPrintRemittancePage]      NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceProgramName]       NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intPriceRuleGroup]           INT             NULL,
-    [strPrintPricePerGallon]      NVARCHAR (250)  NULL,
+    [strPrintPricePerGallon]      NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [ysnPPTransferCostForRemote]  BIT             NULL,
     [ysnPPTransferCostForNetwork] BIT             NULL,
     [ysnPrintMiscellaneous]       BIT             NULL,
