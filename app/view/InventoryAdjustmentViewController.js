@@ -23,27 +23,27 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             bind: {
                 title: 'Inventory Adjustment - {current.strAdjustmentNo}'
             },
-
             btnPost: {
                 hidden: '{current.ysnPosted}'
             },
-
             btnUnpost: {
                 hidden: '{!current.ysnPosted}'
             },
-
             btnSave: {
                 disabled: '{current.ysnPosted}'
             },
-
             btnDelete: {
                 disabled: '{current.ysnPosted}'
             },
-
             btnUndo: {
                 disabled: '{current.ysnPosted}'
             },
-
+            btnAddItem: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnRemoveItem: {
+                disabled: '{current.ysnPosted}'
+            },
             cboLocation: {
                 value: '{current.intLocationId}',
                 store: '{location}',
@@ -63,7 +63,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 value: '{current.strDescription}',
                 readOnly: '{current.ysnPosted}'
             },
-
             grdInventoryAdjustment: {
                 colItemNumber: {
                     dataIndex: 'strItemNo',
@@ -138,7 +137,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 condition: 'blk'
                             }
                         ],
-                        readOnly: '{formulaShowLotNumberEditor}'
+                        readOnly: '{current.ysnPosted}'
                     }
                 },
 
@@ -364,21 +363,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('intItemId', record.get('intItemId'));
             current.set('strItemDescription', record.get('strDescription'));
 
-            // Check if selected item lot-tracking = NO.
-            // Non Lot items will need to use stock UOM.
-            if (record.get('strLotTracking') == 'No'){
-                current.set('dblQuantity', record.get('dblUnitOnHand'));
-                current.set('dblCost', record.get('dblLastCost'));
-                current.set('intItemUOMId', record.get('intStockUOMId'));
-                current.set('strItemUOM', record.get('strStockUOM'));
-            }
-            else {
-                current.set('dblQuantity', null);
-                current.set('dblCost', null);
-                current.set('intItemUOMId', null);
-                current.set('strItemUOM', null);
-            }
-
             // Clear the values for the following fields:
             current.set('strSubLocation', null);
             current.set('strStorageLocation', null);
@@ -386,8 +370,12 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strLotNumber', null);
             current.set('intNewLotId', null);
             current.set('strNewLotNumber', null);
+            current.set('dblQuantity', null);
             current.set('dblNewQuantity', null);
+            current.set('dblCost', null);
             current.set('dblNewCost', null);
+            current.set('intItemUOMId', null);
+            current.set('strItemUOM', null);
             current.set('intNewItemUOMId', null);
             current.set('strNewItemUOM', null);
             current.set('dblWeight', null);
@@ -508,6 +496,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var hide = true;
         var show = false;
 
+        // Todo: Hide the line total for now.
+        colLineTotal.setHidden(hide);
+
         switch (newValue) {
             case QuantityChange:
                 // Hide columns:
@@ -528,7 +519,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colWeightPerQty.setHidden(hide);
                 colNewWeightPerQty.setHidden(hide);
-                colLineTotal.setHidden(hide);
 
                 // Show columns:
                 colQuantity.setHidden(show);
@@ -545,7 +535,29 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 // todo
                 break;
             case LotStatusChange:
-                // todo
+                // Hide Columns:
+                colNewLot.setHidden(hide);
+                colNewItemNumber.setHidden(hide);
+                colNewItemDescription.setHidden(hide);
+                colExpiryDate.setHidden(hide);
+                colNewExpiryDate.setHidden(hide);
+                colQuantity.setHidden(hide);
+                colNewQuantity.setHidden(hide);
+                colUOM.setHidden(hide);
+                colNewUOM.setHidden(hide);
+                colNetWeight.setHidden(hide);
+                colNewNetWeight.setHidden(hide);
+                colWeightUOM.setHidden(hide);
+                colNewWeightUOM.setHidden(hide);
+                colWeightPerQty.setHidden(hide);
+                colNewWeightPerQty.setHidden(hide);
+                colLineTotal.setHidden(hide);
+                colUnitCost.setHidden(hide);
+                colNewUnitCost.setHidden(hide);
+
+                //  Show Columns:
+                colLotStatus.setHidden(show);
+                colNewLotStatus.setHidden(show);
                 break;
             case LotIdChange:
                 // todo
@@ -568,19 +580,31 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
      */
     onAdjustmentTypeBeforeSelect: function(combo, record){
         var QuantityChange = 1;
+        var UOMChange = 2;
+        var ItemChange = 3;
+        var LotStatusChange = 4;
+        var LotIdChange = 5;
+        var ExpiryDateChange = 6;
 
         var data = record.getData();
         var adjustmentTypeId;
         if (data && (adjustmentTypeId = data.intAdjustmentTypeId)){
-            if (adjustmentTypeId !== QuantityChange){
-                var msgBox = iRely.Functions;
-                msgBox.showCustomDialog(
-                    msgBox.dialogType.ERROR,
-                    msgBox.dialogButtonType.OK,
-                    data.strDescription + ' is not yet supported.'
-                );
-                return false;
+
+            switch (adjustmentTypeId)
+            {
+                case QuantityChange:
+                case LotStatusChange:
+                    break;
+                default:
+                    var msgBox = iRely.Functions;
+                    msgBox.showCustomDialog(
+                        msgBox.dialogType.ERROR,
+                        msgBox.dialogButtonType.OK,
+                        data.strDescription + ' is not yet supported.'
+                    );
+                    return false;
             }
+
         }
         return true;
     },

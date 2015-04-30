@@ -1657,7 +1657,7 @@
                                                 "dataIndex": "strLotStatus",
                                                 "itemId": "colLotStatus",
                                                 "text": "Lot Status",
-                                                "width": 70
+                                                "width": 120
                                             },
                                             "name": "MyColumn1",
                                             "designerId": "39ca84b9-a94e-4757-b125-5baeeb777110"
@@ -1674,7 +1674,7 @@
                                                 "itemId": "colNewLotStatus",
                                                 "tdCls": "blue-text-column",
                                                 "text": "New Lot Status",
-                                                "width": 75
+                                                "width": 230
                                             },
                                             "name": "MyColumn40",
                                             "designerId": "3f5e436e-73b4-4703-9664-ad4de0a50583",
@@ -1716,9 +1716,9 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strStatus",
-                                                        "itemId": "cboNewStatus",
-                                                        "valueField": "strStatus"
+                                                        "displayField": "strSecondaryStatus",
+                                                        "itemId": "cboNewLotStatus",
+                                                        "valueField": "strSecondaryStatus"
                                                     },
                                                     "name": "MyComboBox82",
                                                     "configAlternates": {

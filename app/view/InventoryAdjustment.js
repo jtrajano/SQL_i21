@@ -765,14 +765,14 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colLotStatus',
-                                                        width: 70,
+                                                        width: 120,
                                                         dataIndex: 'strLotStatus',
                                                         text: 'Lot Status'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewLotStatus',
-                                                        width: 75,
+                                                        width: 230,
                                                         dataIndex: 'strNewLotStatus',
                                                         tdCls: 'blue-text-column',
                                                         text: 'New Lot Status',
@@ -804,9 +804,9 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 }
                                                             ],
-                                                            itemId: 'cboNewStatus',
-                                                            displayField: 'strStatus',
-                                                            valueField: 'strStatus'
+                                                            itemId: 'cboNewLotStatus',
+                                                            displayField: 'strSecondaryStatus',
+                                                            valueField: 'strSecondaryStatus'
                                                         }
                                                     },
                                                     {

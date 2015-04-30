@@ -69,6 +69,7 @@ namespace iRely.Inventory.BRL
                 .Include("tblICInventoryAdjustmentDetails.NewItemUOM.tblICUnitMeasure")
                 .Include("tblICInventoryAdjustmentDetails.WeightUOM.tblICUnitMeasure")
                 .Include("tblICInventoryAdjustmentDetails.NewWeightUOM.tblICUnitMeasure")
+                .Include("tblICInventoryAdjustmentDetails.OldLotStatus")
                 .Include("tblICInventoryAdjustmentDetails.NewLotStatus")
                 
                 .Include(p => p.tblICInventoryAdjustmentNotes)

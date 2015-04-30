@@ -410,8 +410,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_lotStatus))
-                    if (Lot != null)
-                        return Lot.strLotStatus;
+                    if (OldLotStatus != null)
+                        return OldLotStatus.strSecondaryStatus;
                     else
                         return null;
                 else
@@ -431,7 +431,7 @@ namespace iRely.Inventory.Model
             {
                 if (string.IsNullOrEmpty(_newLotStatus))
                     if (NewLotStatus != null)
-                        return NewLotStatus.strPrimaryStatus;
+                        return NewLotStatus.strSecondaryStatus;
                     else
                         return null;
                 else
@@ -474,6 +474,7 @@ namespace iRely.Inventory.Model
         public tblICItemUOM NewItemUOM { get; set; }
         public tblICItemUOM WeightUOM { get; set; }
         public tblICItemUOM NewWeightUOM { get; set; }
+        public tblICLotStatus OldLotStatus { get; set; }
         public tblICLotStatus NewLotStatus { get; set; }
     }
 

@@ -74,7 +74,7 @@ namespace iRely.Inventory.Model
 
             this.Property(t => t.intLotStatusId).HasColumnName("intLotStatusId");
             this.Property(t => t.intNewLotStatusId).HasColumnName("intNewLotStatusId");
-
+            
             this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(38,20);
             this.Property(t => t.dblNewCost).HasColumnName("dblNewCost").HasPrecision(38, 20);
 
@@ -118,7 +118,10 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.NewWeightUOM)
                 .WithMany(p => p.NewWeightUOMAdjustmentDetails)
                 .HasForeignKey(p => p.intNewWeightUOMId);
-
+            
+            this.HasOptional(p => p.OldLotStatus)
+                .WithMany(p => p.OldLotStatusAdjustmentDetails)
+                .HasForeignKey(p => p.intLotStatusId);            
             this.HasOptional(p => p.NewLotStatus)
                 .WithMany(p => p.NewLotStatusAdjustmentDetails)
                 .HasForeignKey(p => p.intNewLotStatusId);
