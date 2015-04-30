@@ -37,19 +37,30 @@ SET @ysnPost = ISNULL(@ysnPost, 0)
 DECLARE @LotType_Manual AS INT = 1
 	,@LotType_Serial AS INT = 2
 
+
+DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
+		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
+		,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
+		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
+		,@ADJUSTMENT_TYPE_LotIdChange AS INT = 5
+		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
 	DECLARE @intTransactionId AS INT  
 	DECLARE @intCreatedEntityId AS INT  
 	DECLARE @ysnAllowUserSelfPost AS BIT   
-	DECLARE @ysnTransactionPostedFlag AS BIT  
+	DECLARE @ysnTransactionPostedFlag AS BIT
+	DECLARE @adjustmentType AS INT
+
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryAdjustmentId
 			,@ysnTransactionPostedFlag = ysnPosted
 			,@dtmDate = dtmAdjustmentDate
 			,@intCreatedEntityId = intEntityId
+			,@adjustmentType = intAdjustmentType
 	FROM	dbo.tblICInventoryAdjustment
 	WHERE	strAdjustmentNo = @strTransactionId  
 END  
@@ -133,6 +144,7 @@ BEGIN
 	-----------------------------------
 	--  Call Quantity Change 
 	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_QuantityChange
 	BEGIN 
 		INSERT INTO @ItemsForAdjust (  
 				intItemId  
@@ -159,6 +171,7 @@ BEGIN
 	-----------------------------------
 	--  Call UOM Change 
 	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_UOMChange
 	BEGIN 
 		INSERT INTO @ItemsForAdjust (  
 				intItemId  
@@ -185,6 +198,7 @@ BEGIN
 	-----------------------------------
 	--  Call Item Change 
 	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_ItemChange
 	BEGIN 
 		INSERT INTO @ItemsForAdjust (  
 				intItemId  
@@ -211,32 +225,17 @@ BEGIN
 	-----------------------------------
 	--  Call Lot Status Change
 	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange
 	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
 		EXEC	dbo.uspICPostInventoryAdjustmentLotStatusChange
 				@intTransactionId
+				,@ysnPost
 	END 
 
 	-----------------------------------
 	--  Call Split Lot Change
 	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_LotIdChange
 	BEGIN 
 		INSERT INTO @ItemsForAdjust (  
 				intItemId  
@@ -263,6 +262,7 @@ BEGIN
 	-----------------------------------
 	--  Call Expiry Lot Change
 	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_ExpiryDateChange
 	BEGIN 
 		INSERT INTO @ItemsForAdjust (  
 				intItemId  
@@ -289,6 +289,7 @@ BEGIN
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
+	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
 	BEGIN 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -331,6 +332,7 @@ END
 IF @ysnPost = 0   
 BEGIN   
 	-- Call the unpost routine 
+	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
 	BEGIN 
 		-- Call the post routine 
 		INSERT INTO @GLEntries (
@@ -366,6 +368,13 @@ BEGIN
 				,@strBatchId
 				,@intUserId						
 	END 
+
+	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange
+	BEGIN 
+		EXEC	dbo.uspICPostInventoryAdjustmentLotStatusChange
+				@intTransactionId
+				,@ysnPost
+	END 	
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -375,11 +384,23 @@ END
 --
 -- 2.	Rollback the save point 
 --------------------------------------------------------------------------------------------  
-IF @ysnRecap = 1
+IF	@ysnRecap = 1	
 BEGIN 
-	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspCMPostRecap @GLEntries
-	COMMIT TRAN @TransactionName
+	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
+	BEGIN 
+		ROLLBACK TRAN @TransactionName
+		EXEC dbo.uspCMPostRecap @GLEntries
+		COMMIT TRAN @TransactionName
+	END 
+	ELSE 
+	BEGIN 
+		ROLLBACK TRAN @TransactionName
+		COMMIT TRAN @TransactionName
+
+		-- Recap is not applicable for this type of transaction.
+		RAISERROR(51093, 11, 1)  
+		GOTO Post_Exit  
+	END
 END 
 
 --------------------------------------------------------------------------------------------  

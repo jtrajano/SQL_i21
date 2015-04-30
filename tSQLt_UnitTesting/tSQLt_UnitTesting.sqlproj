@@ -972,6 +972,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Contra Account.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentLotStatusChange on adjusting the lot status.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

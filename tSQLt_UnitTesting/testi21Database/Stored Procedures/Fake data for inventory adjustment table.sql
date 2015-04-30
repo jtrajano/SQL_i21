@@ -148,6 +148,11 @@ BEGIN
 	DECLARE @ManualLotGrains_Lot_100001 AS INT = 1
 			,@ManualLotGrains_Lot_100002 AS INT = 2
 
+	-- Lot Status
+	DECLARE @LOT_STATUS_Active AS INT = 1
+			,@LOT_STATUS_On_Hold AS INT = 2
+			,@LOT_STATUS_Quarantine AS INT = 3
+
 	INSERT INTO dbo.tblICLot (
 		intLotId
 		,intItemId
@@ -179,7 +184,7 @@ BEGIN
 		,dblLastCost			= 2.50
 		,dtmExpiryDate			= '01/10/2018'
 		,strLotAlias			= 'Fine grade raw material'
-		,intLotStatusId			= 1 -- Active
+		,intLotStatusId			= @LOT_STATUS_Active
 		,dblWeight				= 55115.60
 		,intWeightUOMId			= @ManualGrains_PoundUOM
 		,dblWeightPerQty		= 55.1156
@@ -197,7 +202,7 @@ BEGIN
 		,dblLastCost			= 7.50
 		,dtmExpiryDate			= '12/11/2018'
 		,strLotAlias			= 'Bagged lot item'
-		,intLotStatusId			= 1 -- Active
+		,intLotStatusId			= @LOT_STATUS_Active
 		,dblWeight				= NULL 
 		,intWeightUOMId			= NULL 
 		,dblWeightPerQty		= NULL 
@@ -416,6 +421,51 @@ BEGIN
 				,dblLineTotal				= 660.00
 				,intSort					= 1
 
+	END
+
+	-- ADJ-4
+	BEGIN 
+		SET @intInventoryAdjustmentId = 4
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/14/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_LOT_STATUS_CHANGE
+				,strAdjustmentNo    = 'ADJ-4'                              
+				,strDescription     = 'Change lot status from Active to Quarantine.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId	
+				,intSubLocationId			
+				,intStorageLocationId		
+				,intItemId					
+				,intLotId					
+				,intLotStatusId				
+				,intNewLotStatusId			
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId		= @StorageSilo_RM_DL
+				,intItemId					= @ManualLotGrains
+				,intLotId					= @ManualLotGrains_Lot_100001
+				,intLotStatusId				= 1
+				,intNewLotStatusId			= @LOT_STATUS_Quarantine 
 	END
 
 END 
