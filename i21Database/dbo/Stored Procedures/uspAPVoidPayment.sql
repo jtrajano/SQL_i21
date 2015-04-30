@@ -11,6 +11,7 @@ BEGIN
 	DECLARE @description NVARCHAR(200) = 'Void transaction for ';
 	DECLARE @GLEntries AS RecapTableType 
 	DECLARE @batchId NVARCHAR(20)
+	DECLARE @createdPayments NVARCHAR(MAX)
 
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
@@ -105,6 +106,27 @@ BEGIN
 		)
 		OUTPUT p.intPaymentId, inserted.intPaymentId INTO #tmpPayables(intPaymentId, intNewPaymentId); --get the new and old payment id
 
+	--update the new payment
+	UPDATE A
+		SET A.dtmDatePaid = @voidDate
+		,A.strNotes = CASE WHEN ISNULL(A.strNotes,'') = '' THEN  @description + A.strPaymentRecordNum ELSE ' ' + @description + A.strPaymentRecordNum END
+		,A.strPaymentRecordNum = OldPayments.strPaymentRecordNum + 'V'
+		,A.strPaymentInfo = 'Voided-' + A.strPaymentInfo
+		,A.dblAmountPaid = A.dblAmountPaid * -1
+	FROM tblAPPayment A
+	INNER JOIN #tmpPayables B
+		ON A.intPaymentId = B.intNewPaymentId
+	CROSS APPLY
+	(
+		SELECT 
+			C.intPaymentId 
+			,D.strPaymentRecordNum
+		FROM #tmpPayables C
+			INNER JOIN tblAPPayment D ON C.intPaymentId = D.intPaymentId
+		WHERE intNewPaymentId IS NULL AND C.intPaymentId = B.intPaymentId
+	) OldPayments
+	WHERE B.intNewPaymentId IS NOT NULL
+
 	SELECT
 	*
 	INTO #tmpPaymentDetail
@@ -146,38 +168,21 @@ BEGIN
 		RETURN
 	END
 
+	--Create CSV of new payments
+	SELECT @createdPayments = COALESCE(@createdPayments + ',', '') +  CONVERT(VARCHAR(12),intNewPaymentId)
+	FROM #tmpPayables WHERE intNewPaymentId IS NOT NULL
+	ORDER BY intNewPaymentId
 	INSERT INTO @GLEntries
-	SELECT * FROM dbo.[fnAPReverseGLEntries](@paymentIds, 'Payable', @voidDate, @intUserId, @batchId)
+	SELECT * FROM [fnAPCreatePaymentGLEntries](@createdPayments, @intUserId, @batchId)
+	--SELECT * FROM dbo.[fnAPReverseGLEntries](@paymentIds, 'Payable', @voidDate, @intUserId, @batchId)
 
 	--Reversed gl entries of void check should be posted
 	UPDATE A
-		SET A.ysnIsUnposted = 0
+		SET A.ysnIsUnposted = 0,
+		A.dtmDate = @voidDate
 	FROM @GLEntries A
 
 	EXEC uspGLBookEntries @GLEntries, 1
-
-	--update the new payment
-	UPDATE A
-		SET A.dtmDatePaid = @voidDate
-		,A.strNotes = CASE WHEN ISNULL(A.strNotes,'') = '' THEN  @description + A.strPaymentRecordNum ELSE ' ' + @description + A.strPaymentRecordNum END
-		,A.strPaymentRecordNum = OldPayments.strPaymentRecordNum + 'V'
-		,A.strPaymentInfo = 'Voided-' + A.strPaymentInfo
-		,A.dblAmountPaid = A.dblAmountPaid * -1
-	FROM tblAPPayment A
-	INNER JOIN #tmpPayables B
-		ON A.intPaymentId = B.intNewPaymentId
-	INNER JOIN tblCMBankTransaction D
-		ON D.strTransactionId = A.strPaymentRecordNum
-	CROSS APPLY
-	(
-		SELECT 
-			C.intPaymentId 
-			,D.strPaymentRecordNum
-		FROM #tmpPayables C
-			INNER JOIN tblAPPayment D ON C.intPaymentId = D.intPaymentId
-		WHERE intNewPaymentId IS NULL AND C.intPaymentId = B.intPaymentId
-	) OldPayments
-	WHERE B.intNewPaymentId IS NOT NULL
 
 	--UPDATE Original Payments
 	UPDATE A
