@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARCustomerSpecialPrice] (
     [intSpecialPriceId] INT             IDENTITY (1, 1) NOT NULL,
-    [intEntityId]       INT             NOT NULL,
-    [intVendorId]       INT				NULL,
+    [intEntityCustomerId]       INT             NOT NULL,
+    [intEntityVendorId]       INT				NULL,
     [intItemId]			INT				NULL,
     [strClass]          NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strPriceBasis]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
