@@ -16,12 +16,18 @@ Type the overview for the table here.
 		[intInventoryShipmentItemId] INT NOT NULL, 
 		[intLotId] INT NOT NULL, 
 		[dblQuantityShipped] NUMERIC(18, 6) NULL, 
+		[intItemUOMId] INT NULL,
+		[intWeightUOMId] INT NULL,
+		[dblGrossWeight] NUMERIC(18,6) NULL DEFAULT((0)),
+		[dblTareWeight] NUMERIC(18,6) NULL DEFAULT((0)),
 		[strWarehouseCargoNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryShipmentItemLot] PRIMARY KEY ([intInventoryShipmentItemLotId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItemLot_tblICInventoryShipmentItem] FOREIGN KEY ([intInventoryShipmentItemId]) REFERENCES [tblICInventoryShipmentItem]([intInventoryShipmentItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICInventoryShipmentItemLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]) 
+		CONSTRAINT [FK_tblICInventoryShipmentItemLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
+		CONSTRAINT [FK_tblICInventoryShipmentItemLot_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+		CONSTRAINT [FK_tblICInventoryShipmentItemLot_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
 	)
 
 	GO
@@ -87,3 +93,39 @@ Type the overview for the table here.
 		@level1name = N'tblICInventoryShipmentItemLot',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item Unit of Measure Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipmentItemLot',
+    @level2type = N'COLUMN',
+    @level2name = N'intItemUOMId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Weight Unit of Measure Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipmentItemLot',
+    @level2type = N'COLUMN',
+    @level2name = N'intWeightUOMId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Gross Weight',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipmentItemLot',
+    @level2type = N'COLUMN',
+    @level2name = N'dblGrossWeight'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tare Weight',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipmentItemLot',
+    @level2type = N'COLUMN',
+    @level2name = N'dblTareWeight'

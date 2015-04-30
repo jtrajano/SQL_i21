@@ -63,6 +63,12 @@ BEGIN
     INSERT INTO tblMFWorkOrderProductionType(intProductionTypeId,strName)
     VALUES(1,'Make To Order')
 END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrderProductionType
+	SET strName = 'Make To Order'
+	WHERE intProductionTypeId = 1
+END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderProductionType WHERE intProductionTypeId = 2)
 BEGIN
@@ -248,19 +254,5 @@ BEGIN
 		)
 	SELECT 2
 		,'Machine'
-END
-GO
-IF NOT EXISTS (
-		SELECT *
-		FROM dbo.tblMFWorkOrderProductionType
-		WHERE intProductionTypeId=1
-		)
-BEGIN
-	INSERT INTO dbo.tblMFWorkOrderProductionType (
-		intProductionTypeId
-		,strName
-		)
-	SELECT 1
-		,'Stock'
 END
 GO
