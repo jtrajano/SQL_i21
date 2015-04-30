@@ -351,7 +351,7 @@ BEGIN
 			[dblExchangeRate] = 0,
 			[dtmDate] = A.dtmDatePaid,
 			[strPayee] = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityId),
-			[intPayeeID] = B.intEntityId,
+			[intPayeeId] = B.intEntityVendorId,
 			[strAddress] = '',
 			[strZipCode] = '',
 			[strCity] = '',
@@ -375,7 +375,7 @@ BEGIN
 			[intConcurrencyId] = 1
 			FROM tblAPPayment A
 				INNER JOIN tblAPVendor B
-					ON A.intVendorId = B.intVendorId
+					ON A.intEntityVendorId = B.intEntityVendorId
 				--LEFT JOIN tblSMPaymentMethod C ON A.intPaymentMethodId = C.intPaymentMethodID
 			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 			--AND C.strPaymentMethod = 'Check'

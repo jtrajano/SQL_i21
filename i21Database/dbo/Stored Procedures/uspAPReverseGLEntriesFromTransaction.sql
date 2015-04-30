@@ -96,7 +96,7 @@ BEGIN
 		[intConcurrencyId]				=	1
 	FROM	[dbo].tblAPBill A
 			LEFT JOIN tblAPVendor C
-				ON A.intVendorId = C.intVendorId
+				ON A.intEntityVendorId = C.intEntityVendorId
 			--CROSS APPLY
 			--(
 			--	SELECT * FROM #tmpGLUnits WHERE intAccountId = A.intAccountId
@@ -120,7 +120,7 @@ BEGIN
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
-		[strJournalLineDescription]		=	B.strDescription,
+		[strJournalLineDescription]		=	B.strMiscDescription,
 		[#tmpTransacions]				=	B.intBillDetailId,
 		[ysnIsUnposted]					=	CASE WHEN @setUnposted = 1 THEN 1 ELSE 0 END,
 		[intUserId]						=	@userId,
@@ -138,7 +138,7 @@ BEGIN
 			LEFT JOIN [dbo].tblAPBillDetail B
 				ON A.intBillId = B.intBillId
 			LEFT JOIN tblAPVendor C
-				ON A.intVendorId = C.intVendorId
+				ON A.intEntityVendorId = C.intEntityVendorId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM #tmpTransacions)
 END
 
