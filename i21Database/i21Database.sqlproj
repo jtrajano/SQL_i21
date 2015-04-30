@@ -1099,6 +1099,16 @@
     <Build Include="dbo\Index\IX_tblGLDetail_intAccountId_ysnIsUnposted.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_ysnIsUnposted.sql" />
     <Build Include="dbo\Index\IX_tblGLJournalDetail_intJournalId.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPVoidPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDuplicateRecord.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntriesFromTransaction.sql" />
+    <Build Include="dbo\Functions\fnAPReverseGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreateBillGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostPayment.sql" />
+    <Build Include="dbo\Functions\fnAPCreatePaymentGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
