@@ -371,6 +371,10 @@ namespace iRely.Inventory.Model
         public int intInventoryShipmentItemId { get; set; }
         public int? intLotId { get; set; }
         public decimal? dblQuantityShipped { get; set; }
+        public int? intItemUOMId { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public decimal? dblGrossWeight { get; set; }
+        public decimal? dblTareWeight { get; set; }
         public string strWarehouseCargoNumber { get; set; }
         public int? intSort { get; set; }
         
@@ -393,8 +397,92 @@ namespace iRely.Inventory.Model
                 _lotId = value;
             }
         }
+        [NotMapped]
+        public decimal dblLotQty
+        {
+            get
+            {
+                if (tblICLot != null)
+                    return tblICLot.dblQty ?? 0;
+                else
+                    return 0;
+            }
+        }
+        [NotMapped]
+        public decimal dblLotItemUOMConv
+        {
+            get
+            {
+                if (tblICLot != null)
+                    return tblICLot.dblItemUOMConv ?? 0;
+                else
+                    return 0;
+            }
+        }
+        private string _uom;
+        [NotMapped]
+        public string strUnitMeasure
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_uom))
+                    if (tblICItemUOM != null)
+                        return tblICItemUOM.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _uom;
+            }
+            set
+            {
+                _uom = value;
+            }
+        }
+        [NotMapped]
+        public decimal dblItemUOMConv
+        {
+            get
+            {
+                if (tblICItemUOM != null)
+                    return tblICItemUOM.dblUnitQty ?? 0;
+                else
+                    return 0;
+            }
+        }
+        private string _weightUOM;
+        [NotMapped]
+        public string strWeightUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_weightUOM))
+                    if (WeightUOM != null)
+                        return WeightUOM.strUnitMeasure;
+                    else
+                        return null;
+                else
+                    return _weightUOM;
+            }
+            set
+            {
+                _weightUOM = value;
+            }
+        }
+        [NotMapped]
+        public decimal dblWeightItemUOMConv
+        {
+            get
+            {
+                if (WeightUOM != null)
+                    return WeightUOM.dblUnitQty ?? 0;
+                else
+                    return 0;
+            }
+        }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
+        public tblICItemUOM tblICItemUOM { get; set; }
+        public tblICItemUOM WeightUOM { get; set; }
         public tblICLot tblICLot { get; set; }
 
     }

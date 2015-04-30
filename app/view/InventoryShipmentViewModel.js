@@ -5,6 +5,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
     requires: [
         'Inventory.store.BufferedCompactItem',
         'Inventory.store.BufferedItemUnitMeasure',
+        'Inventory.store.BufferedItemWeightUOM',
+        'Inventory.store.BufferedLot',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.FreightTermsBuffered',
@@ -61,8 +63,14 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         itemUOM: {
             type: 'icbuffereditemunitmeasure'
         },
-        weightUOM: {
+        lot: {
+            type: 'icbufferedlot'
+        },
+        lotUOM: {
             type: 'icbuffereditemunitmeasure'
+        },
+        lotWeightUOM: {
+            type: 'icbuffereditemweightuom'
         }
 
     }
