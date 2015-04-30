@@ -10,6 +10,9 @@
     [intSubLocationId] INT NULL, 
     [intItemUOMId] INT NULL, 
     [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[ysnPosted] BIT NULL DEFAULT((0)),
+	[intCreatedUserId] INT NULL,
+	[intEntityId] INT NULL,
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICBuildAssembly] PRIMARY KEY ([intBuildAssemblyId]), 
@@ -17,7 +20,8 @@
     CONSTRAINT [FK_tblICBuildAssembly_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICBuildAssembly_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICBuildAssembly_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
-    CONSTRAINT [FK_tblICBuildAssembly_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
+    CONSTRAINT [FK_tblICBuildAssembly_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+    CONSTRAINT [FK_tblICBuildAssembly_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) 
 )
 
 GO
@@ -128,3 +132,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICBuildAssembly',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Posted',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICBuildAssembly',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPosted'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Created User Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICBuildAssembly',
+    @level2type = N'COLUMN',
+    @level2name = N'intCreatedUserId'

@@ -13,6 +13,9 @@
     [intFreightUOMId] INT NULL, 
     [intAccountCategoryId] INT NULL, 
     [intAccountId] INT NULL, 
+	[ysnPosted] BIT NULL DEFAULT((0)),
+	[intCreatedUserId] INT NULL,
+	[intEntityId] INT NULL,
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICInventoryTransfer] PRIMARY KEY ([intInventoryTransferId]), 
@@ -23,7 +26,8 @@
     CONSTRAINT [FK_tblICInventoryTransfer_tblICUnitMeasure] FOREIGN KEY ([intFreightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblGLAccountCategory] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
-    CONSTRAINT [FK_tblICInventoryTransfer_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]) 
+    CONSTRAINT [FK_tblICInventoryTransfer_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
+    CONSTRAINT [FK_tblICInventoryTransfer_EntityCreator] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) 
 )
 
 GO
@@ -161,3 +165,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryTransfer',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Posted',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryTransfer',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnPosted'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Created User Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryTransfer',
+    @level2type = N'COLUMN',
+    @level2name = N'intCreatedUserId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Entity Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryTransfer',
+    @level2type = N'COLUMN',
+    @level2name = N'intEntityId'
