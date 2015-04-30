@@ -374,3 +374,15 @@ EXEC sp_addmessage 51092,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51093) EXEC sp_dropmessage 51093, 'us_english'	
 SET @strmessage =  'Please configure the Packing UOM in the Item maintence.'
 EXEC sp_addmessage 51093,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51094) EXEC sp_dropmessage 51094, 'us_english'	
+SET @strmessage =  'Please configure stock unit in the item maintence.'
+EXEC sp_addmessage 51094,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51095) EXEC sp_dropmessage 51095, 'us_english'	
+SET @strmessage =  'One of the input items could not be consumed. Cannot produce.'
+EXEC sp_addmessage 51095,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51096) EXEC sp_dropmessage 51096, 'us_english'	
+SET @strmessage =  'There is no sufficient quantity for the item %s.'
+EXEC sp_addmessage 51096,11,@strmessage,'us_english','False' 
