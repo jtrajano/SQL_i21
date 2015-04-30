@@ -10,7 +10,6 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @posted BIT = 0;
-	DECLARE @count INT = 0;
 	DECLARE @purchaseId INT;
 
 	SELECT @posted = ysnPosted FROM tblAPBill WHERE intBillId = @billId;
@@ -28,7 +27,7 @@ BEGIN
 	WHERE	A.intBillId= @billId
 	AND C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 
-	SELECT TOP 1 @posted = ysnPosted FROM #tmpReceivedPOMiscItems
+	--SELECT TOP 1 @posted = ysnPosted FROM #tmpReceivedPOMiscItems
 
 	UPDATE	A
 	SET		A.dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (A.dblQtyReceived + B.dblQtyReceived) 
@@ -45,11 +44,15 @@ BEGIN
 	END
 
 	--Update PO Status
-	WHILE @count != (SELECT COUNT(*) FROM #tmpReceivedPOMiscItems)
+	DECLARE @counter INT = 0, @countReceivedMisc INT, @purchaseDetailId INT;
+	SET @countReceivedMisc = (SELECT COUNT(*) FROM #tmpReceivedPOMiscItems)
+
+	WHILE @counter != @countReceivedMisc
 	BEGIN
-		SET @count = @count + 1;
-		SET @purchaseId = (SELECT TOP(@count) intPurchaseId FROM #tmpReceivedPOMiscItems A INNER JOIN tblPOPurchaseDetail B ON A.intPODetailId = B.intPurchaseDetailId)
+		SET @counter = @counter + 1;
+		SELECT TOP(1) @purchaseId = intPurchaseId, @purchaseDetailId = intPODetailId FROM #tmpReceivedPOMiscItems A INNER JOIN tblPOPurchaseDetail B ON A.intPODetailId = B.intPurchaseDetailId
 		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
+		DELETE FROM #tmpReceivedPOMiscItems WHERE intPODetailId = @purchaseDetailId
 	END
 
 END

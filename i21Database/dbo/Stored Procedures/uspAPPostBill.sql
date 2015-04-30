@@ -63,7 +63,8 @@ DECLARE @GLEntries AS RecapTableType
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 DECLARE @validBillIds NVARCHAR(MAX)
-DECLARE @billIds NVARCHAR(MAX) = @param
+DECLARE @billIds NVARCHAR(MAX)
+DECLARE @totalRecords INT
 
 SET @recapId = '1'
 --=====================================================================================================================================
@@ -77,7 +78,7 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		INSERT INTO #tmpPostBillData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@billIds)
+		INSERT INTO #tmpPostBillData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@param)
 	END
 END
 
@@ -149,7 +150,6 @@ BEGIN
 
 	END
 
-	DECLARE @totalRecords INT
 	SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
 
 	COMMIT TRANSACTION --COMMIT inserted invalid transaction
@@ -253,6 +253,23 @@ BEGIN
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
 	END
+
+	--UPDATE PO Status
+	IF EXISTS(SELECT 1 FROM tblAPBillDetail A INNER JOIN tblICItem B 
+				ON A.intItemId = B.intItemId 
+				WHERE B.strType IN ('Service','Software','Non-Inventory','Other Charge')
+				AND A.intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+	BEGIN
+		DECLARE @countReceivedMisc INT = 0, @billIdReceived INT;
+		WHILE @countReceivedMisc != @totalRecords
+		BEGIN
+			SET @countReceivedMisc = @countReceivedMisc + 1;
+			SELECT TOP(1) @billIdReceived = intBillId FROM #tmpPostBillData
+			EXEC [uspPOReceivedMiscItem] @billIdReceived
+			DELETE FROM #tmpPostBillData WHERE intBillId = @billIdReceived
+		END
+	END
+
 END
 ELSE
 	BEGIN
@@ -328,7 +345,7 @@ Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
 	SET @successfulCount = @totalRecords
-	SELECT * FROM #tmpPostBillData
+	--SELECT * FROM #tmpPostBillData
 	GOTO Post_Cleanup
 	GOTO Post_Exit
 

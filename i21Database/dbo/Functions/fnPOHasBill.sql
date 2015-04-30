@@ -3,7 +3,7 @@
 	@poId INT,
 	@posted BIT = NULL
 )
-RETURNS INT
+RETURNS BIT
 AS
 BEGIN
 	RETURN CASE WHEN @posted IS NULL
@@ -13,8 +13,7 @@ BEGIN
 							INNER JOIN (tblAPBill D1 INNER JOIN tblAPBillDetail D2 ON D1.intBillId = D2.intBillId)
 								 ON B.intPurchaseDetailId = D2.intPODetailId
 							WHERE strType IN ('Service','Software','Non-Inventory','Other Charge')
-								AND A.intPurchaseId = @poId
-								AND D1.ysnPosted = @posted)
+								AND A.intPurchaseId = @poId)
 					THEN 1
 				WHEN @posted IS NOT NULL
 					AND EXISTS(SELECT 1 FROM tblPOPurchase A 
