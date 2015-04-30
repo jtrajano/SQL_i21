@@ -81,7 +81,7 @@ BEGIN
 	UPDATE s SET intAccountCategoryId = @intAccountCategoryId
 	FROM tblGLAccount s join @tmpTbl1 b
 	on s.intAccountGroupId = b.intAccountGroupId
-
+	AND s.intAccountCategoryId IS NULL
 
 	;WITH GLAccount(intAccountId)AS
 	(
@@ -100,6 +100,7 @@ BEGIN
 	UPDATE t SET intAccountCategoryId = @intAccountCategoryId  FROM tblGLAccountSegment t
 	JOIN GLSegment g
 	ON t.intAccountSegmentId = g.intAccountSegmentId
+	AND t.intAccountCategoryId IS NULL
  
 
 	SELECT @i = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'General' 
