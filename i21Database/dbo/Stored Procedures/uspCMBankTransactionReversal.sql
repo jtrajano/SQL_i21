@@ -62,87 +62,6 @@ DECLARE	@CHECK_NUMBER_STATUS_UNUSED AS INT = 1
 -- 	REVERSAL PROCESS 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
-/**
-* If the transaction has a check number in the check audit table, update the check number status. 
-* Conditions:
-*	1. If it is a "check" record. Cash payments are not logged. 
-*	2. If check is already printed. 
-*	3. Update only the unused check numbers. 
-*	4. Audit record is not assigned to any other transaction. 
-*	5. Check number is not an empty string. 
-*/
-UPDATE	tblCMCheckNumberAudit
-SET		intCheckNoStatus = @CHECK_NUMBER_STATUS_VOID
-		,intTransactionId = F.intTransactionId
-		,strTransactionId = F.strTransactionId
-		,strRemarks = ''
-		,intUserId = @intUserId
-		,intConcurrencyId += 1 
-FROM	tblCMCheckNumberAudit AUDIT INNER JOIN tblCMBankTransaction F
-			ON AUDIT.intBankAccountId = F.intBankAccountId
-			AND AUDIT.strCheckNo = F.strReferenceNo
-		INNER JOIN #tmpCMBankTransaction TMP
-			ON F.strTransactionId = TMP.strTransactionId
-WHERE	-- Condition #1:
-		F.strReferenceNo NOT IN (@CASH_PAYMENT)	
-		-- Condition #2:
-		AND F.dtmCheckPrinted IS NOT NULL 
-		-- Condition #3:
-		AND AUDIT.intCheckNoStatus NOT IN (
-			@CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION
-			,@CHECK_NUMBER_STATUS_PRINTED
-			,@CHECK_NUMBER_STATUS_VOID
-			,@CHECK_NUMBER_STATUS_WASTED
-		)
-		-- Condition #4:
-		AND AUDIT.intTransactionId IS NULL 
-		-- Condition #5:
-		AND ISNULL(F.strReferenceNo, '') <> ''
-IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors		
-
-/**
-* If check number audit record is NOT found, create it. 
-* Conditions:
-*	1. None was updated from the existing check audit records. 
-*	2. It is a 'check' transaction. 
-*	3. It is a valid check number (not an empty string)
-*	4. Check report has been printed on it. 
-*/
-INSERT INTO tblCMCheckNumberAudit (
-		intBankAccountId
-		,strCheckNo
-		,intCheckNoStatus
-		,strRemarks
-		,strTransactionId
-		,intTransactionId
-		,intUserId
-		,dtmCreated
-		,dtmCheckPrinted
-)
-SELECT	intBankAccountId = F.intBankAccountId
-		,strCheckNo = F.strReferenceNo
-		,intCheckNoStatus = @CHECK_NUMBER_STATUS_VOID
-		,strRemarks = ''
-		,strTransactionId = F.strTransactionId
-		,intTransactionId = F.intTransactionId
-		,intUserId = @intUserId
-		,dtmCreated = GETDATE()
-		,dtmCheckPrinted = NULL 
-FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
-			ON F.strTransactionId = TMP.strTransactionId
-WHERE	NOT EXISTS (
-			SELECT	TOP 1 1
-			FROM	tblCMCheckNumberAudit AUDIT
-			WHERE	AUDIT.intBankAccountId = F.intBankAccountId
-					AND AUDIT.strCheckNo = F.strReferenceNo
-					AND AUDIT.intTransactionId = F.intTransactionId
-					AND AUDIT.intCheckNoStatus = @CHECK_NUMBER_STATUS_VOID
-		)
-		AND F.strReferenceNo NOT IN (@CASH_PAYMENT)		
-		AND ISNULL(F.strReferenceNo, '') <> ''
-		AND F.dtmCheckPrinted IS NOT NULL 
-IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
-
 /** Check if Reversing Date is specified. 
 *	-If no Reversing Date specified, do the default Voiding procedure
 *	-Otherwise, do the Void Check Reversal Procedure 
@@ -227,8 +146,8 @@ ELSE
 		IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 
 		/* Insert created Void Check Transaction Ids to #tmpCMBankTransactionReversal */
-		SELECT strTransactionId, intEntityId INTO #tmpCMBankTransactionReversal FROM 
-			(SELECT F.strTransactionId + 'V' AS strTransactionId, F.intEntityId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+		SELECT strTransactionId, intEntityId, intBankTransactionTypeId INTO #tmpCMBankTransactionReversal FROM 
+			(SELECT F.strTransactionId + 'V' AS strTransactionId, F.intEntityId, F.intBankTransactionTypeId FROM tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
 				ON F.strTransactionId = TMP.strTransactionId
 				WHERE F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @MISC_CHECKS, @ORIGIN_CHECKS)		
 				AND F.strReferenceNo NOT IN (@CASH_PAYMENT)
@@ -237,19 +156,34 @@ ELSE
 		/* Execute Posting Procedure for each Void Check entry*/
 		DECLARE @isPostingSuccessful BIT
 		DECLARE @strVoidTransactionId NVARCHAR(40)
+		DECLARE @intVoidBankTransactionTypeId INT
 		DECLARE @intEntityId INT
 		WHILE EXISTS (SELECT 1 FROM #tmpCMBankTransactionReversal) 
 			BEGIN
-				SELECT TOP 1 @strVoidTransactionId = strTransactionId, @intEntityId = intEntityId FROM #tmpCMBankTransactionReversal
+				SELECT TOP 1 @strVoidTransactionId = strTransactionId
+							,@intEntityId = intEntityId
+							,@intVoidBankTransactionTypeId = intBankTransactionTypeId 
+				FROM #tmpCMBankTransactionReversal
 
-				/* Post the Void Check entry*/
-				EXEC uspCMPostVoidCheck 1, 0, @strVoidTransactionId, @intUserId, @intEntityId, @isSuccessful = @isPostingSuccessful OUTPUT
+				IF (@intVoidBankTransactionTypeId = @AP_PAYMENT)
+					BEGIN
+						/* If Void Check entry for AP Payment, do not post the reversal*/
+						UPDATE tblCMBankTransaction 
+							SET ysnPosted = 1, ysnCheckVoid = 1, ysnClr = 1, 
+								dtmDateReconciled = dtmDate, dtmCheckPrinted = dtmDate, @isPostingSuccessful = 1 
+						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = @VOID_CHECK
+					END
+				ELSE
+					BEGIN
+						/* Post the Void Check entry*/
+						EXEC uspCMPostVoidCheck 1, 0, @strVoidTransactionId, @intUserId, @intEntityId, @isSuccessful = @isPostingSuccessful OUTPUT
+					END
 
 				/* Clear the Void Check entry if successfull posted*/
 				IF (@isPostingSuccessful = 1) 
 					BEGIN
 						UPDATE tblCMBankTransaction SET ysnClr = 1 
-						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = 19
+						WHERE strTransactionId = @strVoidTransactionId AND intBankTransactionTypeId = @VOID_CHECK
 					END
 				/* Otherwise Delete the Void Check entry and abort the reversal */
 				ELSE 
@@ -287,6 +221,87 @@ ELSE
 EXEC dbo.uspCMBankTransactionReversalOrigin @intUserId, @isSuccessful OUTPUT 
 IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 IF @isSuccessful = 0 GOTO Exit_BankTransactionReversal_WithErrors
+
+/**
+* If the transaction has a check number in the check audit table, update the check number status. 
+* Conditions:
+*	1. If it is a "check" record. Cash payments are not logged. 
+*	2. If check is already printed. 
+*	3. Update only the unused check numbers. 
+*	4. Audit record is not assigned to any other transaction. 
+*	5. Check number is not an empty string. 
+*/
+UPDATE	tblCMCheckNumberAudit
+SET		intCheckNoStatus = @CHECK_NUMBER_STATUS_VOID
+		,intTransactionId = F.intTransactionId
+		,strTransactionId = F.strTransactionId
+		,strRemarks = ''
+		,intUserId = @intUserId
+		,intConcurrencyId += 1 
+FROM	tblCMCheckNumberAudit AUDIT INNER JOIN tblCMBankTransaction F
+			ON AUDIT.intBankAccountId = F.intBankAccountId
+			AND AUDIT.strCheckNo = F.strReferenceNo
+		INNER JOIN #tmpCMBankTransaction TMP
+			ON F.strTransactionId = TMP.strTransactionId
+WHERE	-- Condition #1:
+		F.strReferenceNo NOT IN (@CASH_PAYMENT)	
+		-- Condition #2:
+		AND F.dtmCheckPrinted IS NOT NULL 
+		-- Condition #3:
+		AND AUDIT.intCheckNoStatus NOT IN (
+			@CHECK_NUMBER_STATUS_FOR_PRINT_VERIFICATION
+			,@CHECK_NUMBER_STATUS_PRINTED
+			,@CHECK_NUMBER_STATUS_VOID
+			,@CHECK_NUMBER_STATUS_WASTED
+		)
+		-- Condition #4:
+		AND AUDIT.intTransactionId IS NULL 
+		-- Condition #5:
+		AND ISNULL(F.strReferenceNo, '') <> ''
+IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors		
+
+/**
+* If check number audit record is NOT found, create it. 
+* Conditions:
+*	1. None was updated from the existing check audit records. 
+*	2. It is a 'check' transaction. 
+*	3. It is a valid check number (not an empty string)
+*	4. Check report has been printed on it. 
+*/
+INSERT INTO tblCMCheckNumberAudit (
+		intBankAccountId
+		,strCheckNo
+		,intCheckNoStatus
+		,strRemarks
+		,strTransactionId
+		,intTransactionId
+		,intUserId
+		,dtmCreated
+		,dtmCheckPrinted
+)
+SELECT	intBankAccountId = F.intBankAccountId
+		,strCheckNo = F.strReferenceNo
+		,intCheckNoStatus = @CHECK_NUMBER_STATUS_VOID
+		,strRemarks = ''
+		,strTransactionId = F.strTransactionId
+		,intTransactionId = F.intTransactionId
+		,intUserId = @intUserId
+		,dtmCreated = GETDATE()
+		,dtmCheckPrinted = NULL 
+FROM	tblCMBankTransaction F INNER JOIN #tmpCMBankTransaction TMP
+			ON F.strTransactionId = TMP.strTransactionId
+WHERE	NOT EXISTS (
+			SELECT	TOP 1 1
+			FROM	tblCMCheckNumberAudit AUDIT
+			WHERE	AUDIT.intBankAccountId = F.intBankAccountId
+					AND AUDIT.strCheckNo = F.strReferenceNo
+					AND AUDIT.intTransactionId = F.intTransactionId
+					AND AUDIT.intCheckNoStatus = @CHECK_NUMBER_STATUS_VOID
+		)
+		AND F.strReferenceNo NOT IN (@CASH_PAYMENT)		
+		AND ISNULL(F.strReferenceNo, '') <> ''
+		AND F.dtmCheckPrinted IS NOT NULL 
+IF @@ERROR <> 0	GOTO Exit_BankTransactionReversal_WithErrors
 
 /**
 * Delete the bank transactions

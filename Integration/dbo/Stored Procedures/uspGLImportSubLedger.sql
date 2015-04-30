@@ -47,7 +47,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     			glije_src_no char(5)
     		)
     		
-
+			INSERT INTO  @tmpID (ID,glije_date,glije_acct_no,glije_period,glije_src_no)
+    			SELECT A4GLIdentity,glije_date,glije_acct_no,glije_period,glije_src_no FROM glijemst WITH (HOLDLOCK)
+    			WHERE glije_period between @startingPeriod and @endingPeriod
 
     		IF EXISTS (SELECT * FROM @tmpID WHERE glije_date = 0)
     		BEGIN
@@ -67,9 +69,6 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     		BEGIN TRANSACTION
     		DECLARE @uid UNIQUEIDENTIFIER
     		SELECT @uid =NEWID()
-    		INSERT INTO  @tmpID (ID,glije_date,glije_acct_no,glije_period,glije_src_no)
-    			SELECT A4GLIdentity,glije_date,glije_acct_no,glije_period,glije_src_no FROM glijemst WITH (HOLDLOCK)
-    			WHERE glije_period between @startingPeriod and @endingPeriod
 			
 			INSERT INTO tblGLIjemst(glije_period,glije_acct_no,glije_src_sys,glije_src_no, glije_line_no,glije_date,glije_time,glije_ref,glije_doc,glije_comments,
     		glije_dr_cr_ind,glije_amt,glije_units,glije_correcting,glije_source_pgm,glije_work_area,glije_cbk_no,glije_user_id,glije_user_rev_dt,A4GLIdentity,glije_uid)
@@ -298,7 +297,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     					IF @importLogId = 0
     						EXEC dbo.uspGLCreateImportLogHeader ''Successful Transaction'', @intUserId,@version ,@importLogId OUTPUT
     					--EXEC dbo.uspGLCreateImportLogDetail @importLogId,''Posted'',@postdate,@strJournalId,@glije_period
-						EXEC uspGLCreateImportLogDetail @importLogId,''Posted'',@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
+						INSERT INTO tblGLCOAImportLogDetail(strEventDescription,intImportLogId,dtePostDate,strPeriod,strSourceSystem,strSourceNumber,strJournalId)
+    					SELECT strDescription,@importLogId,@postdate,@glije_period,@glije_src_sys,@glije_src_no,strTransactionId from tblGLPostResult
+    					WHERE strBatchId = @strBatchId and intEntityId = @intUserId
     					UPDATE tblGLCOAImportLog SET strEvent = ''Successful Transaction'' WHERE intImportLogId = @importLogId
     				END
     				ELSE
@@ -306,7 +307,10 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     					IF @importLogId = 0
     						EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'', @intUserId,@version ,@importLogId OUTPUT
     					--EXEC dbo.uspGLCreateImportLogDetail @importLogId,@strBatchId,@postdate,@strJournalId,@glije_period
-						EXEC uspGLCreateImportLogDetail @importLogId,@strBatchId,@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
+						INSERT INTO tblGLCOAImportLogDetail(strEventDescription,intImportLogId,dtePostDate,strPeriod,strSourceSystem,strSourceNumber,strJournalId)
+    					SELECT strDescription,@importLogId,@postdate,@glije_period,@glije_src_sys,@glije_src_no,strTransactionId from tblGLPostResult
+    					WHERE strBatchId = @strBatchId and intEntityId = @intUserId
+						--EXEC uspGLCreateImportLogDetail @importLogId,@strBatchId,@postdate,@strJournalId,@glije_period,@glije_src_sys,@glije_src_no
     					UPDATE tblGLCOAImportLog SET strEvent = ''Failed Transaction'' WHERE intImportLogId = @importLogId
     				END
 
