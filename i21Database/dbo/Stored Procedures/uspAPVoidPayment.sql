@@ -5,6 +5,8 @@
 AS
 BEGIN
 
+	BEGIN TRANSACTION
+
 	DECLARE @newPaymentId INT;
 	DECLARE @description NVARCHAR(200) = 'Void transaction for ';
 	DECLARE @GLEntries AS RecapTableType 
@@ -23,18 +25,19 @@ BEGIN
 	--Do not allow to void if not yet posted
 	IF EXISTS(SELECT 1 FROM tblAPPayment WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND ysnPosted = 0)
 	BEGIN
-		RAISERROR('One of the payment cannot be void.', 16, 1);
+		RAISERROR('Void failed. Payment not yet posted', 16, 1);
 	END
 
 	IF EXISTS(SELECT 1 FROM tblAPPayment A
 				INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
 				WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND A.ysnPosted = 1 AND (B.dtmCheckPrinted IS NULL OR B.ysnCheckVoid = 1))
 	BEGIN
-		RAISERROR('One of the payment cannot be void.', 16, 1);
+		RAISERROR('Void failed. Payment already void or not yet printed.', 16, 1);
 	END
 
 	IF @@ERROR != 0
 	BEGIN
+		ROLLBACK TRANSACTION
 		RETURN;
 	END
 
@@ -101,15 +104,6 @@ BEGIN
 			p.[dtmDateDeleted]
 		)
 		OUTPUT p.intPaymentId, inserted.intPaymentId INTO #tmpPayables(intPaymentId, intNewPaymentId); --get the new and old payment id
-	
-	--update the new payment
-	UPDATE A
-		SET A.dtmDatePaid = @voidDate
-		,A.strNotes = CASE WHEN ISNULL(A.strNotes,'') = '' THEN  @description + A.strPaymentRecordNum ELSE ' ' + @description + A.strPaymentRecordNum END
-		,A.strPaymentRecordNum = A.strPaymentRecordNum + 'V'
-		,A.dblAmountPaid = A.dblAmountPaid * -1
-	FROM tblAPPayment A
-	WHERE intPaymentId IN (SELECT intNewPaymentId FROM #tmpPayables WHERE intNewPaymentId IS NOT NULL)
 
 	SELECT
 	*
@@ -148,12 +142,59 @@ BEGIN
 	IF @isSuccessful = 0
 	BEGIN
 		RAISERROR('There was an error on reversing bank transaction.', 16, 1);
-		RETURN;
+		ROLLBACK TRANSACTION
+		RETURN
 	END
 
 	INSERT INTO @GLEntries
 	SELECT * FROM dbo.[fnAPReverseGLEntries](@paymentIds, 'Payable', @voidDate, @intUserId, @batchId)
 
+	--Reversed gl entries of void check should be posted
+	UPDATE A
+		SET A.ysnIsUnposted = 0
+	FROM @GLEntries A
+
 	EXEC uspGLBookEntries @GLEntries, 1
+
+	--update the new payment
+	UPDATE A
+		SET A.dtmDatePaid = @voidDate
+		,A.strNotes = CASE WHEN ISNULL(A.strNotes,'') = '' THEN  @description + A.strPaymentRecordNum ELSE ' ' + @description + A.strPaymentRecordNum END
+		,A.strPaymentRecordNum = OldPayments.strPaymentRecordNum + 'V'
+		,A.strPaymentInfo = 'Voided-' + A.strPaymentInfo
+		,A.dblAmountPaid = A.dblAmountPaid * -1
+	FROM tblAPPayment A
+	INNER JOIN #tmpPayables B
+		ON A.intPaymentId = B.intNewPaymentId
+	INNER JOIN tblCMBankTransaction D
+		ON D.strTransactionId = A.strPaymentRecordNum
+	CROSS APPLY
+	(
+		SELECT 
+			C.intPaymentId 
+			,D.strPaymentRecordNum
+		FROM #tmpPayables C
+			INNER JOIN tblAPPayment D ON C.intPaymentId = D.intPaymentId
+		WHERE intNewPaymentId IS NULL AND C.intPaymentId = B.intPaymentId
+	) OldPayments
+	WHERE B.intNewPaymentId IS NOT NULL
+
+	--UPDATE Original Payments
+	UPDATE A
+		SET A.strNotes = 'Transaction Voided on ' + A.strPaymentRecordNum + 'V'
+		,A.strPaymentInfo = C.strReferenceNo
+	FROM tblAPPayment A
+		INNER JOIN #tmpPayables B
+		ON A.intPaymentId = B.intPaymentId
+		INNER JOIN tblCMBankTransaction C
+		ON A.strPaymentRecordNum = C.strTransactionId
+	WHERE B.intNewPaymentId IS NULL
+
+	IF @@ERROR != 0
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
+
+	COMMIT TRANSACTION
 
 END
