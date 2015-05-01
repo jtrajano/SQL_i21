@@ -39,6 +39,7 @@ BEGIN
 	DECLARE @SCREEN_NAME NVARCHAR(25) = 'Payable'
 	DECLARE @WithholdAccount INT = (SELECT intWithholdAccountId FROM tblAPPreference)
 	DECLARE @DiscountAccount INT = (SELECT intDiscountAccountId FROM tblAPPreference)
+	DECLARE @InterestAccount INT = (SELECT intInterestAccountId FROM tblAPPreference)
 
 	DECLARE @tmpTransacions TABLE (
 		[intTransactionId] [int] PRIMARY KEY,
@@ -144,8 +145,8 @@ BEGIN
 				INNER JOIN tblAPVendor C
 					ON A.intEntityVendorId = C.intEntityVendorId
 		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
-		AND 1 = (CASE WHEN B.dblAmountDue = (B.dblPayment + B.dblDiscount) THEN 1 ELSE 0 END)
-		AND B.dblDiscount <> 0
+		AND 1 = (CASE WHEN B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) THEN 1 ELSE 0 END)
+		AND B.dblDiscount <> 0 AND B.dblPayment > 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
 		C.strVendorId,
@@ -158,8 +159,8 @@ BEGIN
 			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 			[strBatchId]				=	@batchId,
 			[intAccountId]				=	B.intAccountId,
-			[dblDebit]					=	SUM(CASE WHEN (B.dblAmountDue = (B.dblPayment + B.dblDiscount)) --add discount only if fully paid
-												THEN B.dblPayment + B.dblDiscount
+			[dblDebit]					=	SUM(CASE WHEN (B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest)) --add discount only if fully paid
+												THEN B.dblPayment + B.dblDiscount - B.dblInterest
 												ELSE B.dblPayment END),
 			[dblCredit]					=	0,
 			[dblDebitUnit]				=	0,
@@ -196,7 +197,49 @@ BEGIN
 		A.strNotes,
 		B.intPaymentDetailId,
 		A.dblAmountPaid,
-		B.intAccountId;
+		B.intAccountId
+		UNION
+		--Interest
+		SELECT
+			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
+			[strBatchId]				=	@batchId,
+			[intAccountId]				=	@InterestAccount,
+			[dblDebit]					=	SUM(B.dblInterest),
+			[dblCredit]					=	0,
+			[dblDebitUnit]				=	0,
+			[dblCreditUnit]				=	0,
+			[strDescription]			=	'Posted Payment - Interest',
+			[strCode]					=	'AP',
+			[strReference]				=	A.strNotes,
+			[intCurrencyId]				=	A.intCurrencyId,
+			[dblExchangeRate]			=	1,
+			[dtmDateEntered]			=	GETDATE(),
+			[dtmTransactionDate]		=	NULL,
+			[strJournalLineDescription]	=	'Interest',
+			[intJournalLineNo]			=	3,
+			[ysnIsUnposted]				=	0,
+			[intUserId]					=	@intUserId,
+			[intEntityId]				=	@intUserId,
+			[strTransactionId]			=	A.strPaymentRecordNum,
+			[intTransactionId]			=	A.intPaymentId,
+			[strTransactionType]		=	@SCREEN_NAME,
+			[strTransactionForm]		=	@SCREEN_NAME,
+			[strModuleName]				=	@MODULE_NAME,
+			[intConcurrencyId]			=	1
+		FROM [dbo].tblAPPayment A 
+				INNER JOIN tblAPPaymentDetail B
+					ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPVendor C
+					ON A.intEntityVendorId = C.intEntityVendorId
+		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+		AND 1 = (CASE WHEN B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) THEN 1 ELSE 0 END)
+		AND B.dblInterest <> 0 AND B.dblPayment > 0
+		GROUP BY A.[strPaymentRecordNum],
+		A.intPaymentId,
+		C.strVendorId,
+		A.intCurrencyId,
+		A.strNotes,
+		A.dtmDatePaid;
 
 	RETURN
 END

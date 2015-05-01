@@ -350,7 +350,7 @@ BEGIN
 			[intCurrencyID] = A.intCurrencyId,
 			[dblExchangeRate] = 0,
 			[dtmDate] = A.dtmDatePaid,
-			[strPayee] = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityId),
+			[strPayee] = (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.intEntityVendorId),
 			[intPayeeId] = B.intEntityVendorId,
 			[strAddress] = '',
 			[strZipCode] = '',
