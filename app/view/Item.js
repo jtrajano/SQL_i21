@@ -511,6 +511,13 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnInsertUom',
+                                                                iconCls: 'small-add',
+                                                                text: 'Insert'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
                                                                 itemId: 'btnDeleteUom',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
@@ -858,8 +865,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnEditLocation',
-                                                                                iconCls: 'small-edit',
-                                                                                text: 'Edit'
+                                                                                iconCls: 'small-view',
+                                                                                text: 'View'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
@@ -938,6 +945,13 @@ Ext.define('Inventory.view.Item', {
                                                                             padding: '0 0 0 1'
                                                                         },
                                                                         items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertGlAccounts',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
@@ -1719,6 +1733,13 @@ Ext.define('Inventory.view.Item', {
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
+                                                                                        itemId: 'btnInsertCategories',
+                                                                                        iconCls: 'small-add',
+                                                                                        text: 'Insert'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
                                                                                         itemId: 'btnDeleteCategories',
                                                                                         iconCls: 'small-delete',
                                                                                         text: 'Remove'
@@ -1796,6 +1817,13 @@ Ext.define('Inventory.view.Item', {
                                                                                     padding: '0 0 0 1'
                                                                                 },
                                                                                 items: [
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnInsertSLA',
+                                                                                        iconCls: 'small-add',
+                                                                                        text: 'Insert'
+                                                                                    },
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
@@ -2452,351 +2480,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'panel',
-                                                        itemId: 'pgeXref',
-                                                        title: 'Xref',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'advancefiltergrid',
-                                                                flex: 1,
-                                                                itemId: 'grdCustomerXref',
-                                                                margin: '-1 -1 4 -1',
-                                                                title: 'Customer Item Cross Reference Grid',
-                                                                dockedItems: [
-                                                                    {
-                                                                        xtype: 'toolbar',
-                                                                        dock: 'top',
-                                                                        itemId: 'tlbGridOptions',
-                                                                        layout: {
-                                                                            type: 'hbox',
-                                                                            padding: '0 0 0 1'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnDeleteCustomerXref',
-                                                                                iconCls: 'small-delete',
-                                                                                text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'filter1'
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ],
-                                                                columns: [
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colCustomerXrefLocation',
-                                                                        width: 215,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Location',
-                                                                        flex: 1.5,
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intCompanyLocationId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Location Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strLocationName',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Location Name',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strLocationType',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Location Type',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            itemId: 'cboCustXrefLocation',
-                                                                            displayField: 'strLocationName',
-                                                                            valueField: 'strLocationName'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colCustomerXrefCustomer',
-                                                                        width: 215,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Customer',
-                                                                        flex: 1.5,
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intCustomerId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Customer Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strCustomerNumber',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Customer No',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strName',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Name',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            itemId: 'cboCustXrefCustomer',
-                                                                            displayField: 'strCustomerNumber',
-                                                                            valueField: 'strCustomerNumber'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colCustomerXrefProduct',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Customer Product',
-                                                                        flex: 1,
-                                                                        editor: {
-                                                                            xtype: 'textfield'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colCustomerXrefDescription',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Product Description',
-                                                                        flex: 2,
-                                                                        editor: {
-                                                                            xtype: 'textfield'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colCustomerXrefPickTicketNotes',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Pick Ticket Notes',
-                                                                        flex: 2,
-                                                                        editor: {
-                                                                            xtype: 'textfield'
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                viewConfig: {
-                                                                    itemId: 'grvCustomerXref'
-                                                                },
-                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                                    selType: 'checkboxmodel'
-                                                                }),
-                                                                plugins: [
-                                                                    {
-                                                                        ptype: 'cellediting',
-                                                                        pluginId: 'cepCustomerXref',
-                                                                        clicksToEdit: 1
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'advancefiltergrid',
-                                                                flex: 1,
-                                                                itemId: 'grdVendorXref',
-                                                                margin: '4 -1 -1 -1',
-                                                                title: 'Vendor Item Cross Reference Grid',
-                                                                dockedItems: [
-                                                                    {
-                                                                        xtype: 'toolbar',
-                                                                        dock: 'top',
-                                                                        itemId: 'tlbGridOptions',
-                                                                        layout: {
-                                                                            type: 'hbox',
-                                                                            padding: '0 0 0 1'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnDeleteVendorXref',
-                                                                                iconCls: 'small-delete',
-                                                                                text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'filter1'
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ],
-                                                                columns: [
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colVendorXrefLocation',
-                                                                        width: 215,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Location',
-                                                                        flex: 1.5,
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intCompanyLocationId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Location Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strLocationName',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Location Name',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strLocationType',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Location Type',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            itemId: 'cboVendorXrefLocation',
-                                                                            displayField: 'strLocationName',
-                                                                            valueField: 'strLocationName'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colVendorXrefVendor',
-                                                                        width: 215,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Vendor',
-                                                                        flex: 1.5,
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intVendorId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Vendor Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strVendorId',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Vendor No',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strName',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Vendor Name',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            itemId: 'cboVendorXrefVendor',
-                                                                            displayField: 'strVendorId',
-                                                                            valueField: 'strVendorId'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colVendorXrefProduct',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Vendor Product',
-                                                                        flex: 1,
-                                                                        editor: {
-                                                                            xtype: 'textfield'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colVendorXrefDescription',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Product Description',
-                                                                        flex: 2,
-                                                                        editor: {
-                                                                            xtype: 'textfield'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colVendorXrefConversionFactor',
-                                                                        align: 'right',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Conversion Factor',
-                                                                        flex: 1,
-                                                                        editor: {
-                                                                            xtype: 'numberfield',
-                                                                            fieldStyle: 'text-align:right',
-                                                                            hideTrigger: true
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colVendorXrefUnitMeasure',
-                                                                        dataIndex: 'string',
-                                                                        text: 'UOM',
-                                                                        flex: 1,
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intUnitMeasureId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Unit Of Measure ID',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strUnitMeasure',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Unit Measure',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strUnitType',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Unit Type',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'ysnDefault',
-                                                                                    dataType: 'boolean',
-                                                                                    text: 'Default',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            itemId: 'cboVendorXrefUOM',
-                                                                            displayField: 'strUnitMeasure',
-                                                                            valueField: 'strUnitMeasure'
-                                                                        }
-                                                                    }
-                                                                ],
-                                                                viewConfig: {
-                                                                    itemId: 'grvVendorXref'
-                                                                },
-                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                                    selType: 'checkboxmodel'
-                                                                }),
-                                                                plugins: [
-                                                                    {
-                                                                        ptype: 'cellediting',
-                                                                        pluginId: 'cepVendorXref',
-                                                                        clicksToEdit: 1
-                                                                    }
-                                                                ]
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'panel',
                                                         itemId: 'pgeContract',
                                                         title: 'Contract Item',
                                                         layout: {
@@ -2821,6 +2504,13 @@ Ext.define('Inventory.view.Item', {
                                                                             padding: '0 0 0 1'
                                                                         },
                                                                         items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertContractItem',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
@@ -3022,6 +2712,13 @@ Ext.define('Inventory.view.Item', {
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
+                                                                                        itemId: 'btnInsertDocumentAssociation',
+                                                                                        iconCls: 'small-add',
+                                                                                        text: 'Insert'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
                                                                                         itemId: 'btnDeleteDocumentAssociation',
                                                                                         iconCls: 'small-delete',
                                                                                         text: 'Remove'
@@ -3104,6 +2801,13 @@ Ext.define('Inventory.view.Item', {
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
+                                                                                        itemId: 'btnInsertCertification',
+                                                                                        iconCls: 'small-add',
+                                                                                        text: 'Insert'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
                                                                                         itemId: 'btnDeleteCertification',
                                                                                         iconCls: 'small-delete',
                                                                                         text: 'Remove'
@@ -3164,6 +2868,365 @@ Ext.define('Inventory.view.Item', {
                                                                 ]
                                                             }
                                                         ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        itemId: 'pgeXref',
+                                                        title: 'Xref',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                flex: 1,
+                                                                itemId: 'grdCustomerXref',
+                                                                margin: '-1 -1 4 -1',
+                                                                title: 'Customer Item Cross Reference Grid',
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertCustomerXref',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteCustomerXref',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Remove'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefLocation',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Location',
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboCustXrefLocation',
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'strLocationName'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefCustomer',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Customer',
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCustomerId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Customer Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strCustomerNumber',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Customer No',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Name',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboCustXrefCustomer',
+                                                                            displayField: 'strCustomerNumber',
+                                                                            valueField: 'strCustomerNumber'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefProduct',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Customer Product',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefDescription',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Product Description',
+                                                                        flex: 2,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colCustomerXrefPickTicketNotes',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Pick Ticket Notes',
+                                                                        flex: 2,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvCustomerXref'
+                                                                },
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel'
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepCustomerXref',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                flex: 1,
+                                                                itemId: 'grdVendorXref',
+                                                                margin: '4 -1 -1 -1',
+                                                                title: 'Vendor Item Cross Reference Grid',
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertVendorXref',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteVendorXref',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Remove'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefLocation',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Location',
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Name',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strLocationType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Location Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboVendorXrefLocation',
+                                                                            displayField: 'strLocationName',
+                                                                            valueField: 'strLocationName'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefVendor',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Vendor',
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intVendorId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Vendor Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strVendorId',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Vendor No',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strName',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Vendor Name',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboVendorXrefVendor',
+                                                                            displayField: 'strVendorId',
+                                                                            valueField: 'strVendorId'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefProduct',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Vendor Product',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefDescription',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Product Description',
+                                                                        flex: 2,
+                                                                        editor: {
+                                                                            xtype: 'textfield'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefConversionFactor',
+                                                                        align: 'right',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Conversion Factor',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            fieldStyle: 'text-align:right',
+                                                                            hideTrigger: true
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colVendorXrefUnitMeasure',
+                                                                        dataIndex: 'string',
+                                                                        text: 'UOM',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intUnitMeasureId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Unit Of Measure ID',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitMeasure',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Measure',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Type',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnDefault',
+                                                                                    dataType: 'boolean',
+                                                                                    text: 'Default',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboVendorXrefUOM',
+                                                                            displayField: 'strUnitMeasure',
+                                                                            valueField: 'strUnitMeasure'
+                                                                        }
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvVendorXref'
+                                                                },
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel'
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepVendorXref',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
                                                     }
                                                 ]
                                             }
@@ -3193,6 +3256,13 @@ Ext.define('Inventory.view.Item', {
                                                             padding: '0 0 0 1'
                                                         },
                                                         items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnInsertPricing',
+                                                                iconCls: 'small-add',
+                                                                text: 'Insert'
+                                                            },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
@@ -3373,6 +3443,13 @@ Ext.define('Inventory.view.Item', {
                                                                             padding: '0 0 0 1'
                                                                         },
                                                                         items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertPricingLevel',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
@@ -4269,6 +4346,13 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
+                                                                                itemId: 'btnInsertCommodityCost',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
                                                                                 itemId: 'btnDeleteCommodityCost',
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Remove'
@@ -4400,6 +4484,13 @@ Ext.define('Inventory.view.Item', {
                                                             padding: '0 0 0 1'
                                                         },
                                                         items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnInsertAssembly',
+                                                                iconCls: 'small-add',
+                                                                text: 'Insert'
+                                                            },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
@@ -4592,6 +4683,13 @@ Ext.define('Inventory.view.Item', {
                                                             padding: '0 0 0 1'
                                                         },
                                                         items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnInsertBundle',
+                                                                iconCls: 'small-add',
+                                                                text: 'Insert'
+                                                            },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
@@ -4793,6 +4891,13 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnInsertKit',
+                                                                iconCls: 'small-add',
+                                                                text: 'Insert'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
                                                                 itemId: 'btnDeleteKit',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
@@ -4862,6 +4967,13 @@ Ext.define('Inventory.view.Item', {
                                                             padding: '0 0 0 1'
                                                         },
                                                         items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnInsertKitDetail',
+                                                                iconCls: 'small-add',
+                                                                text: 'Insert'
+                                                            },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
@@ -5060,6 +5172,13 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
+                                                                                itemId: 'btnInsertFactory',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
                                                                                 itemId: 'btnDeleteFactory',
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Remove'
@@ -5149,6 +5268,13 @@ Ext.define('Inventory.view.Item', {
                                                                             padding: '0 0 0 1'
                                                                         },
                                                                         items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertManufacturingCellAssociation',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,

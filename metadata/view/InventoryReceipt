@@ -2230,7 +2230,7 @@
                                                                     "userConfig": {
                                                                         "altText": "View",
                                                                         "designer|displayName": "btnViewTaxDetail",
-                                                                        "iconCls": "small-edit",
+                                                                        "iconCls": "small-view",
                                                                         "tooltip": "View Tax Details"
                                                                     },
                                                                     "name": "MyActionColumnItem1",

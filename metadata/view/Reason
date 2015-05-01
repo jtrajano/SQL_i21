@@ -551,11 +551,11 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-edit",
+                                                        "iconCls": "small-view",
                                                         "itemId": "btnEditWorkCenterMapping",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Edit"
+                                                        "text": "View"
                                                     },
                                                     "name": "MyButton24",
                                                     "designerId": "7d0f5763-9b1b-4717-bc5a-50d05ab6eb8d"
