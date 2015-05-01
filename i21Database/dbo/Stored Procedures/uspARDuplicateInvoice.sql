@@ -96,41 +96,106 @@ BEGIN
 	DECLARE @NewId int
 
 	SET @NewId = SCOPE_IDENTITY()
-
-	INSERT INTO tblARInvoiceDetail(
-		intInvoiceId
-		,intCompanyLocationId
-		,intItemId
-		,strItemDescription
-		,intItemUOMId
-		,dblQtyOrdered
-		,dblQtyShipped
-		,dblPrice
-		,dblTotal
-		,intAccountId
-		,intCOGSAccountId
-		,intSalesAccountId
-		,intInventoryAccountId
-		,intConcurrencyId)
-	SELECT
-		@NewId
-		,intCompanyLocationId
-		,intItemId
-		,strItemDescription
-		,intItemUOMId
-		,dblQtyOrdered
-		,dblQtyShipped
-		,dblPrice
-		,dblTotal
-		,intAccountId
-		,intCOGSAccountId
-		,intSalesAccountId
-		,intInventoryAccountId
-		,0
+	
+	DECLARE @InvoiceDetails TABLE(intInvoiceDetailId INT)
+		
+	INSERT INTO @InvoiceDetails
+		([intInvoiceDetailId])
+	SELECT 	
+		 [intInvoiceDetailId]
 	FROM
 		tblARInvoiceDetail
 	WHERE
-		intInvoiceId = @InvoiceId	
+		[intInvoiceId] = @InvoiceId
+	ORDER BY
+		[intInvoiceDetailId]
+						
+	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceDetails)
+		BEGIN
+			DECLARE @InvoiceDetailId INT
+					,@NewInvoiceDetailId INT
+					
+			SELECT TOP 1 @InvoiceDetailId = [intInvoiceDetailId] FROM @InvoiceDetails ORDER BY [intInvoiceDetailId]
+			
+			INSERT INTO [tblARInvoiceDetail]
+				([intInvoiceId]
+				,[intCompanyLocationId]
+				,[intItemId]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyOrdered]
+				,[dblQtyShipped]
+				,[dblPrice]
+				,[dblTotalTax]
+				,[dblTotal]
+				,[intAccountId]
+				,[intCOGSAccountId]
+				,[intSalesAccountId]
+				,[intInventoryAccountId]
+				,[intConcurrencyId])
+			SELECT 	
+				 @NewId						--[intInvoiceId]
+				,[intCompanyLocationId]		--[intCompanyLocationId]
+				,[intItemId]				--[intItemId]
+				,[strItemDescription]		--[strItemDescription]
+				,[intItemUOMId]				--[intItemUOMId]
+				,[dblQtyOrdered]			--[dblQtyOrdered]
+				,[dblQtyOrdered]			--[dblQtyShipped]
+				,[dblPrice]					--[dblPrice]
+				,[dblTotalTax]				--[dblTotalTax]
+				,[dblTotal]					--[dblTotal]
+				,[intAccountId]				--[intAccountId]
+				,[intCOGSAccountId]			--[intCOGSAccountId]
+				,[intSalesAccountId]		--[intSalesAccountId]
+				,[intInventoryAccountId]	--[intInventoryAccountId]
+				,0							--[intConcurrencyId]
+			FROM
+				[tblARInvoiceDetail]
+			WHERE
+				[intInvoiceDetailId] = @InvoiceDetailId
+												
+			SET @NewInvoiceDetailId = SCOPE_IDENTITY()
+						
+			INSERT INTO [tblARInvoiceDetailTax]
+				([intInvoiceDetailId]
+				,[intTaxGroupMasterId]
+				,[intTaxGroupId]
+				,[intTaxCodeId]
+				,[intTaxClassId]
+				,[strTaxableByOtherTaxes]
+				,[strCalculationMethod]
+				,[numRate]
+				,[intSalesTaxAccountId]
+				,[dblTax]
+				,[dblAdjustedTax]
+				,[ysnTaxAdjusted]
+				,[ysnSeparateOnInvoice]
+				,[ysnCheckoffTax]
+				,[intConcurrencyId])
+			SELECT
+			    @NewInvoiceDetailId
+			   ,[intTaxGroupMasterId]
+			   ,[intTaxGroupId]
+			   ,[intTaxCodeId]
+			   ,[intTaxClassId]
+			   ,[strTaxableByOtherTaxes]
+			   ,[strCalculationMethod]
+			   ,[numRate]
+			   ,[intSalesTaxAccountId]
+			   ,[dblTax]
+			   ,[dblAdjustedTax]
+			   ,[ysnTaxAdjusted]
+			   ,[ysnSeparateOnInvoice]
+			   ,[ysnCheckoffTax]
+			   ,0
+			FROM 
+				[tblARInvoiceDetailTax]
+			WHERE
+				[intInvoiceDetailId] = @InvoiceDetailId
+			   	
+           			
+			DELETE FROM @InvoiceDetails WHERE [intInvoiceDetailId] = @InvoiceDetailId
+		END		
 
 	SET  @NewInvoiceNumber = (SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewId)
 

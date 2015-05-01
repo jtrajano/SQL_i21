@@ -87,39 +87,108 @@ BEGIN
 	WHERE intSalesOrderId = @SalesOrderId
 
 	SET @NewInvoiceId = SCOPE_IDENTITY()
-
-	INSERT INTO [dbo].[tblARInvoiceDetail]
-	   ([intInvoiceId]
-	   ,[intCompanyLocationId]
-	   ,[intItemId]
-	   ,[strItemDescription]
-	   ,[intItemUOMId]
-	   ,[dblQtyOrdered]
-	   ,[dblQtyShipped]
-	   ,[dblPrice]
-	   ,[dblTotal]
-	   ,[intAccountId]
-	   ,[intCOGSAccountId]
-	   ,[intSalesAccountId]
-	   ,[intInventoryAccountId]
-	   )		
-	SELECT 
-		 @NewInvoiceId
-		,intCompanyLocationId
-		,intItemId
-		,strItemDescription
-		,intItemUOMId
-		,dblQtyOrdered
-		,dblQtyOrdered
-		,ROUND(dblPrice,2)
-		,ROUND(dblTotal,2)
-		,intAccountId
-	    ,intCOGSAccountId
-		,intSalesAccountId
-	    ,intInventoryAccountId
+	
+	
+	DECLARE @OrderDetails TABLE(intSalesOrderDetailId INT)
+		
+	INSERT INTO @OrderDetails
+		([intSalesOrderDetailId])
+	SELECT 	
+		 [intSalesOrderDetailId]
 	FROM
-	tblSOSalesOrderDetail
-	WHERE intSalesOrderId = @SalesOrderId
+		tblSOSalesOrderDetail
+	WHERE
+		[intSalesOrderId] = @SalesOrderId
+	ORDER BY
+		[intSalesOrderDetailId]
+						
+	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderDetails)
+		BEGIN
+			DECLARE @SalesOrderDetailId INT
+					,@InvoiceDetailId INT
+					
+			SELECT TOP 1 @SalesOrderDetailId = [intSalesOrderDetailId] FROM @OrderDetails ORDER BY [intSalesOrderDetailId]
+			
+			INSERT INTO [tblARInvoiceDetail]
+				([intInvoiceId]
+				,[intCompanyLocationId]
+				,[intItemId]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyOrdered]
+				,[dblQtyShipped]
+				,[dblPrice]
+				,[dblTotalTax]
+				,[dblTotal]
+				,[intAccountId]
+				,[intCOGSAccountId]
+				,[intSalesAccountId]
+				,[intInventoryAccountId]
+				,[intConcurrencyId])
+			SELECT 	
+				 @NewInvoiceId				--[intInvoiceId]
+				,[intCompanyLocationId]		--[intCompanyLocationId]
+				,[intItemId]				--[intItemId]
+				,[strItemDescription]		--[strItemDescription]
+				,[intItemUOMId]				--[intItemUOMId]
+				,[dblQtyOrdered]			--[dblQtyOrdered]
+				,[dblQtyOrdered]			--[dblQtyShipped]
+				,[dblPrice]					--[dblPrice]
+				,[dblTotalTax]				--[dblTotalTax]
+				,[dblTotal]					--[dblTotal]
+				,[intAccountId]				--[intAccountId]
+				,[intCOGSAccountId]			--[intCOGSAccountId]
+				,[intSalesAccountId]		--[intSalesAccountId]
+				,[intInventoryAccountId]	--[intInventoryAccountId]
+				,0							--[intConcurrencyId]
+			FROM
+				tblSOSalesOrderDetail
+			WHERE
+				[intSalesOrderDetailId] = @SalesOrderDetailId
+												
+			SET @InvoiceDetailId = SCOPE_IDENTITY()
+						
+			INSERT INTO [tblARInvoiceDetailTax]
+				([intInvoiceDetailId]
+				,[intTaxGroupMasterId]
+				,[intTaxGroupId]
+				,[intTaxCodeId]
+				,[intTaxClassId]
+				,[strTaxableByOtherTaxes]
+				,[strCalculationMethod]
+				,[numRate]
+				,[intSalesTaxAccountId]
+				,[dblTax]
+				,[dblAdjustedTax]
+				,[ysnTaxAdjusted]
+				,[ysnSeparateOnInvoice]
+				,[ysnCheckoffTax]
+				,[intConcurrencyId])
+			SELECT
+			    @InvoiceDetailId
+			   ,[intTaxGroupMasterId]
+			   ,[intTaxGroupId]
+			   ,[intTaxCodeId]
+			   ,[intTaxClassId]
+			   ,[strTaxableByOtherTaxes]
+			   ,[strCalculationMethod]
+			   ,[numRate]
+			   ,[intSalesTaxAccountId]
+			   ,[dblTax]
+			   ,[dblAdjustedTax]
+			   ,[ysnTaxAdjusted]
+			   ,[ysnSeparateOnInvoice]
+			   ,[ysnCheckoffTax]
+			   ,0
+			FROM 
+				[tblSOSalesOrderDetailTax]
+			WHERE
+				[intSalesOrderDetailId] = @SalesOrderDetailId
+			   	
+           			
+			DELETE FROM @OrderDetails WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
+		END
+			
 	
 	UPDATE tblSOSalesOrder SET strOrderStatus = 'Complete', ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
 	
