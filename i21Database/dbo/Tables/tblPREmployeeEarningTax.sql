@@ -1,11 +1,13 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeEarningTax] (
     [intEmployeeEarningTaxId] INT IDENTITY (1, 1) NOT NULL,
     [intEmployeeEarningId]    INT NOT NULL,
+	[intEmployeeTaxId]		  INT NULL,
     [intTypeTaxId]            INT NOT NULL,
     [intSort]                 INT NULL,
     [intConcurrencyId]        INT NULL,
     CONSTRAINT [PK_tblPREmployeeEarningTax] PRIMARY KEY CLUSTERED ([intEmployeeEarningTaxId] ASC),
     CONSTRAINT [FK_tblPREmployeeEarningTax_tblPREmployeeEarning] FOREIGN KEY ([intEmployeeEarningId]) REFERENCES [dbo].[tblPREmployeeEarning] ([intEmployeeEarningId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPREmployeeEarningTax_tblPREmployeeTax] FOREIGN KEY ([intEmployeeTaxId]) REFERENCES [dbo].[tblPREmployeeTax] ([intEmployeeTaxId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeEarningTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId])
 );
 
@@ -59,3 +61,13 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
 GO
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployeeEarningTax] ON [dbo].[tblPREmployeeEarningTax] ([intEmployeeEarningId], [intTypeTaxId]) WITH (IGNORE_DUP_KEY = OFF)
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Employee Tax Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeEarningTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intEmployeeTaxId'
