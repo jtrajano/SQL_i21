@@ -6,8 +6,7 @@
     [intEmployeeTaxId] INT NOT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRPaycheckEarningTax] PRIMARY KEY ([intPaycheckEarningTaxId]), 
-    CONSTRAINT [FK_tblPRPaycheckEarningTax_tblPRPaycheckEarning] FOREIGN KEY ([intPaycheckEarningId]) REFERENCES [tblPRPaycheckEarning]([intPaycheckEarningId]) ON DELETE CASCADE, 
-	CONSTRAINT [FK_tblPRPaycheckEarningTax_tblPRPaycheckTax] FOREIGN KEY ([intPaycheckTaxId]) REFERENCES [tblPRPaycheckTax]([intPaycheckTaxId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblPRPaycheckEarningTax_tblPRPaycheckEarning] FOREIGN KEY ([intPaycheckEarningId]) REFERENCES [tblPRPaycheckEarning]([intPaycheckEarningId]) ON DELETE CASCADE
 )
 
 GO

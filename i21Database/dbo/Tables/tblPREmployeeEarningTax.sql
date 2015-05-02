@@ -7,7 +7,6 @@
     [intConcurrencyId]        INT NULL,
     CONSTRAINT [PK_tblPREmployeeEarningTax] PRIMARY KEY CLUSTERED ([intEmployeeEarningTaxId] ASC),
     CONSTRAINT [FK_tblPREmployeeEarningTax_tblPREmployeeEarning] FOREIGN KEY ([intEmployeeEarningId]) REFERENCES [dbo].[tblPREmployeeEarning] ([intEmployeeEarningId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblPREmployeeEarningTax_tblPREmployeeTax] FOREIGN KEY ([intEmployeeTaxId]) REFERENCES [dbo].[tblPREmployeeTax] ([intEmployeeTaxId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeEarningTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId])
 );
 

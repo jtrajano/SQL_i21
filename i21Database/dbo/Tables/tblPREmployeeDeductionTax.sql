@@ -8,7 +8,6 @@
     [intConcurrencyId] INT NOT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPREmployeeDeductionTax] PRIMARY KEY ([intEmployeeDeductionTaxId]), 
     CONSTRAINT [FK_tblPREmployeeDeductionTax_tblPREmployeeDeduction] FOREIGN KEY ([intEmployeeDeductionId]) REFERENCES [tblPREmployeeDeduction]([intEmployeeDeductionId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblPREmployeeDeductionTax_tblPREmployeeTax] FOREIGN KEY ([intEmployeeTaxId]) REFERENCES [tblPREmployeeTax]([intEmployeeTaxId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeDeductionTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId])
 )
 
