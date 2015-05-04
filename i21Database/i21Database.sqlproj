@@ -1334,7 +1334,6 @@
     <Build Include="dbo\Tables\tblCFDepartment.sql" />
     <Build Include="dbo\Tables\tblCFCreditCard.sql" />
     <Build Include="dbo\Tables\tblCFCityCountyCode.sql" />
-    <Build Include="dbo\Tables\tblCFCFNTaxCode.sql" />
     <Build Include="dbo\Tables\tblCFCardType.sql" />
     <Build Include="dbo\Tables\tblCFCard.sql" />
     <Build Include="dbo\Tables\tblCFAccount.sql" />
