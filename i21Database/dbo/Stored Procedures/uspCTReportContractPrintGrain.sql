@@ -120,6 +120,8 @@ BEGIN TRY
 	JOIN	tblCTContractText	TX	ON	TX.intContractTextId	=	CH.intContractTextId
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	
+	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
+
 END TRY
 
 BEGIN CATCH
