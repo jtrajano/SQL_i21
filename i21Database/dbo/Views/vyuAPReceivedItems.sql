@@ -67,7 +67,7 @@ A.[intEntityVendorId]
 ,C.strItemNo
 ,C.strDescription
 ,B.dblQtyOrdered
-,B.dblQtyOrdered
+,B.dblQtyOrdered -B.dblQtyReceived
 ,B.dblQtyOrdered
 ,B.intPurchaseDetailId
 ,NULL

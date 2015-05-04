@@ -1,4 +1,10 @@
-﻿CREATE FUNCTION [dbo].[fnPOHasItemReceipt]
+﻿/*
+	@poId = The intPurchaseId of tblPOPurchase table
+	@posted = a. DEFAULT if wanted to know if PO has item receipt wether posted or not
+			  b. Pass 1 to check if PO has item receipt that was posted else 0
+
+*/
+CREATE FUNCTION [dbo].[fnPOHasItemReceipt]
 (
 	@poId INT,
 	@posted BIT = NULL

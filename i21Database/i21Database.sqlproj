@@ -1493,6 +1493,7 @@
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
     <Build Include="dbo\Views\vyuHDMention.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSortOriginMenus.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateBillFromIR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
