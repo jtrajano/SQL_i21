@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICPostBuildAssembly]
+﻿CREATE PROCEDURE uspICPostBuildAssembly
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
@@ -19,7 +19,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @TransactionName AS VARCHAR(500) = 'Build Assembly Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
-DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 11
+DECLARE @BUILD_ASSEMBLY_TYPE AS INT = 11
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3 
 
 -- Get the Inventory Receipt batch number
@@ -155,7 +155,7 @@ BEGIN
 			, 1
 			, @intTransactionId
 			, @strTransactionId
-			, NULL
+			, @BUILD_ASSEMBLY_TYPE
 			, NULL
 			, Detail.intSubLocationId
 			, NULL
@@ -232,7 +232,7 @@ BEGIN
 			, 1
 			, @intTransactionId
 			, @strTransactionId
-			, NULL
+			, @BUILD_ASSEMBLY_TYPE
 			, NULL
 			, Item.intSubLocationId
 			, NULL
