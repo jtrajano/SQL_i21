@@ -88,7 +88,8 @@ FROM tblPOPurchase A
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 AND B.dblQtyOrdered != B.dblQtyReceived
---UNION ALL
+UNION ALL
+--DIRECT TYPE
 SELECT
 A.intEntityVendorId
 ,A.dtmReceiptDate
@@ -117,3 +118,4 @@ INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
 INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
+WHERE A.strReceiptType = 'Direct'
