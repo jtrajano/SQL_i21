@@ -122,8 +122,9 @@ GO
 		EXEC('UPDATE tblSMMasterMenu SET strMenuName = ''Purchasing'', strDescription = ''Purchasing''  WHERE strMenuName = ''Accounts Payable'' AND strModuleName = ''Accounts Payable'' AND intParentMenuID = 0')
 
 GO
+	
 	/* CHANGE ACCOUNTS RECEIVABLE MENU NAME TO SALES */
 	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMMASTERMENU')
-		EXEC('UPDATE tblSMMasterMenu SET strMenuName = ''Sales'', strDescription = ''Sales'' WHERE strMenuName = ''Accounts Receivable'' AND intParentMenuID = 0')
+		EXEC('UPDATE tblSMMasterMenu SET strMenuName = ''Sales'', strDescription = ''Sales'' WHERE strMenuName = ''Accounts Receivable'' AND strModuleName = ''Accounts Receivable'' AND intParentMenuID = 0')
 
 GO
