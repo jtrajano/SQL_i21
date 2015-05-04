@@ -118,4 +118,4 @@ INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
 INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
-WHERE A.strReceiptType = 'Direct'
+WHERE A.strReceiptType = 'Direct' AND A.ysnPosted = 1
