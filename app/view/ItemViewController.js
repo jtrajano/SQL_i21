@@ -1561,6 +1561,37 @@ Ext.define('Inventory.view.ItemViewController', {
 
     },
 
+    onInventoryTypeSelect: function(combo, records) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            if (records[0].get('strType') == 'Assembly/Blend') {
+                current.set('strLotTracking', 'No');
+            }
+        }
+    },
+
+    onLotTrackingSelect: function(combo, records) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            if (current.get('strType') == 'Assembly/Blend') {
+                if (records[0].get('strLotTracking') !== 'No') {
+                    combo.setValue('No');
+                    iRely.Functions.showCustomDialog('warning', 'ok', '"Assembly/Blend" items should not be lot tracked. Select Inventory Type "Finished Goods" and use the Recipe screen.');
+                }
+            }
+        }
+    },
+
     onUOMUnitMeasureSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -2551,7 +2582,8 @@ Ext.define('Inventory.view.ItemViewController', {
     init: function(application) {
         this.control({
             "#cboType": {
-                change: this.onInventoryTypeChange
+                change: this.onInventoryTypeChange,
+                select: this.onInventoryTypeSelect
             },
             "#cboDetailUnitMeasure": {
                 select: this.onUOMUnitMeasureSelect
@@ -2690,6 +2722,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#colPricingAmount": {
                 beforerender: this.onPricingGridColumnBeforeRender
+            },
+            "#cboLotTracking" : {
+                select: this.onLotTrackingSelect
             }
         });
     }
