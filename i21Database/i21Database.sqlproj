@@ -1498,6 +1498,8 @@
     <Build Include="dbo\Stored Procedures\uspPORecur.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetailGrain.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrain.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
