@@ -73,7 +73,7 @@ BEGIN
 			[intUserId],
 			[intConcurrencyId],
 			[intEntityId],
-			[intEntityVendorId],
+			[intVendorId],
 			[ysnOrigin],
 			[ysnVoid],
 			[ysnPrinted],

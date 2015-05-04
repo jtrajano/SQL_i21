@@ -75,7 +75,7 @@ BEGIN
 			[intConcurrencyId]			=	1
 		FROM	[dbo].tblAPPayment A 
 		INNER JOIN tblAPVendor C
-			ON A.intEntityVendorId = C.intEntityVendorId
+			ON A.intVendorId = C.intVendorId
 		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
 		--Withheld
 		UNION
@@ -108,7 +108,7 @@ BEGIN
 			FROM [dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
 					ON A.intAccountId = GLAccnt.intAccountId
 				INNER JOIN tblAPVendor B
-					ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
+					ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
 		--Discount
 		UNION
@@ -142,7 +142,7 @@ BEGIN
 				INNER JOIN tblAPPaymentDetail B
 					ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPVendor C
-					ON A.intEntityVendorId = C.intEntityVendorId
+					ON A.intVendorId = C.intVendorId
 		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
 		AND 1 = (CASE WHEN B.dblAmountDue = (B.dblPayment + B.dblDiscount) THEN 1 ELSE 0 END)
 		AND B.dblDiscount <> 0
@@ -184,7 +184,7 @@ BEGIN
 			[intConcurrencyId]			=	1
 		FROM	[dbo].tblAPPayment A 
 				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
+				INNER JOIN tblAPVendor D ON A.intVendorId = D.intVendorId 
 		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
 		AND B.dblPayment <> 0
 		GROUP BY A.[strPaymentRecordNum],

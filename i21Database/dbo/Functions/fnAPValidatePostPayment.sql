@@ -29,7 +29,7 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A 
 		INNER JOIN tblAPVendor B
-			ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
+			ON A.intVendorId = B.intVendorId AND B.ysnWithholding = 1
 		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
 		AND 1 = (CASE WHEN (SELECT intWithholdAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
 
@@ -44,7 +44,7 @@ BEGIN
 			INNER JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPVendor C
-				ON A.intEntityVendorId = C.intEntityVendorId
+				ON A.intVendorId = C.intVendorId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM @tmpPayments)
 		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
 		AND B.dblDiscount <> 0
@@ -169,7 +169,7 @@ BEGIN
 			ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblAPBill C
 			ON B.intBillId = C.intBillId
-		WHERE C.intEntityVendorId <> A.intEntityVendorId
+		WHERE C.intVendorId <> A.intVendorId
 		AND A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
 	END
 	ELSE
