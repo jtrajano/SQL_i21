@@ -543,6 +543,20 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colAdjustByQuantity',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        dataIndex: 'dblAdjustByQuantity',
+                                                        tdCls: 'blue-text-column',
+                                                        text: 'Adjust Qty By',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            itemId: 'numAdjustByQuantity'
+                                                        }
+                                                    },
+                                                    {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colUOM',
                                                         width: 70,
