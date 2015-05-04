@@ -379,10 +379,11 @@ END
 
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 
--- 1.	Store all the GL entries in a holding table. It will be used later as data  
---		for the recap screen.
---
--- 2.	Rollback the save point 
+-- 1. Store all the GL entries in a holding table. It will be used later as data  
+--	  for the recap screen.
+-- 2. Rollback the save point 
+-- 3. Book the G/L entries
+-- 4. Commit the save point.
 --------------------------------------------------------------------------------------------  
 IF	@ysnRecap = 1	
 BEGIN 
@@ -425,6 +426,14 @@ BEGIN
 
 	COMMIT TRAN @TransactionName
 END 
-    
+
+GOTO Post_Exit
+
+-- This is an exit if stock is outdated. 
+OutdatedStockOnHand_Exit: 
+BEGIN 
+	COMMIT TRAN @TransactionName
+END
+
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:

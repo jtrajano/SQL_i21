@@ -394,3 +394,7 @@ EXEC sp_addmessage 51097,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51098) EXEC sp_dropmessage 51098, 'us_english'	
 SET @strmessage = 'Recap is not applicable for this type of transaction.'
 EXEC sp_addmessage 51098,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51099) EXEC sp_dropmessage 51099, 'us_english'	
+SET @strmessage = 'The stock on hand is outdated for %s. Please review your quantity adjustments after the system reloads the latest stock on hand.'
+EXEC sp_addmessage 51099,11,@strmessage,'us_english','False' 
