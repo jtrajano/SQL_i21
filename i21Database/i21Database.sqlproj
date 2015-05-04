@@ -1511,6 +1511,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetProductionLine.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetConsumptionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetProductionDetail.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkTaxCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
