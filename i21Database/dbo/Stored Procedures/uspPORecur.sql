@@ -125,7 +125,7 @@ BEGIN
 		[dblDiscount], 
 		[dblCost], 
 		[dblTotal], 
-		[strDescription], 
+		[strMiscDescription], 
 		[strPONumber], 
 		[dtmExpectedDate],
 		[intLineNo]
@@ -147,7 +147,7 @@ BEGIN
 		[dblDiscount], 
 		[dblCost], 
 		[dblTotal], 
-		[strDescription], 
+		[strMiscDescription], 
 		[strPONumber], 
 		[dtmExpectedDate],
 		[intLineNo]
