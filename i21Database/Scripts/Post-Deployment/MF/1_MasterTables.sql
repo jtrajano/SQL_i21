@@ -256,3 +256,76 @@ BEGIN
 		,'Machine'
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFAttributeDataType
+		WHERE intAttributeDataTypeId = 1
+		)
+	INSERT INTO tblMFAttributeDataType (
+		intAttributeDataTypeId
+		,strAttributeDataTypeName
+		)
+	SELECT 1
+		,'Bit'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFAttributeDataType
+		WHERE intAttributeDataTypeId = 2
+		)
+	INSERT INTO tblMFAttributeDataType (
+		intAttributeDataTypeId
+		,strAttributeDataTypeName
+		)
+	SELECT 2
+		,'Integer'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFAttributeDataType
+		WHERE intAttributeDataTypeId = 3
+		)
+	INSERT INTO tblMFAttributeDataType (
+		intAttributeDataTypeId
+		,strAttributeDataTypeName
+		)
+	SELECT 3
+		,'Decimal'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFAttributeDataType
+		WHERE intAttributeDataTypeId = 4
+		)
+	INSERT INTO tblMFAttributeDataType (
+		intAttributeDataTypeId
+		,strAttributeDataTypeName
+		)
+	SELECT 4
+		,'DateTime'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFAttributeDataType
+		WHERE intAttributeDataTypeId = 5
+		)
+	INSERT INTO tblMFAttributeDataType (
+		intAttributeDataTypeId
+		,strAttributeDataTypeName
+		)
+	SELECT 5
+		,'List'
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFAttributeDataType
+		WHERE intAttributeDataTypeId = 6
+		)
+	INSERT INTO tblMFAttributeDataType (
+		intAttributeDataTypeId
+		,strAttributeDataTypeName
+		)
+	SELECT 6
+		,'String'
+GO

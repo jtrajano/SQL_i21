@@ -1500,6 +1500,17 @@
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrain.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryTransfer.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderProductSpecification.sql" />
+    <Build Include="dbo\Tables\tblMFProcessCycleCountSession.sql" />
+    <Build Include="dbo\Tables\tblMFProcessCycleCount.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderItem.sql" />
+    <Build Include="dbo\Tables\tblMFAttributeDataType.sql" />
+    <Build Include="dbo\Tables\tblMFAttribute.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingProcessAttribute.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductBySubLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductionLine.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetConsumptionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductionDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

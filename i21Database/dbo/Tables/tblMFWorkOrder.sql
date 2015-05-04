@@ -54,7 +54,11 @@
     [strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intBatchID] INT NULL,
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrder_intConcurrencyId] DEFAULT 0,
-	intManufacturingProcessId INT CONSTRAINT FK_tblMFWorkOrder_tblMFManufacturingProcess_intManufacturingProcessId_intManufacturingProcessId REFERENCES dbo.tblMFManufacturingProcess (intManufacturingProcessId),
+	intManufacturingProcessId INT, 
+	intSupervisorId INT,
+	intSubLocationId INT,
+	strVendorLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	ysnTrueUp BIT CONSTRAINT DF_tblMFWorkOrder_strVendorLotNumber DEFAULT((0))
 	CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -64,5 +68,6 @@
 	CONSTRAINT [FK_tblMFWorkOrder_tblMFBlendRequirement_intBlendRequirementId] FOREIGN KEY ([intBlendRequirementId]) REFERENCES [tblMFBlendRequirement]([intBlendRequirementId]), 
 	CONSTRAINT [FK_tblMFWorkOrder_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
 	CONSTRAINT [FK_tblMFWorkOrder_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-	CONSTRAINT [FK_tblMFWorkOrder_tblMFManufacturingProcess_intManufacturingProcessId] FOREIGN KEY([intManufacturingProcessId]) REFERENCES dbo.tblMFManufacturingProcess (intManufacturingProcessId)
+	CONSTRAINT [FK_tblMFWorkOrder_tblMFManufacturingProcess_intManufacturingProcessId] FOREIGN KEY([intManufacturingProcessId]) REFERENCES dbo.tblMFManufacturingProcess (intManufacturingProcessId),
+	 CONSTRAINT FK_tblMFWorkOrder_tblSMCompanyLocationSubLocation_intSubLocationId FOREIGN KEY(intSubLocationId) REFERENCES dbo.tblSMCompanyLocationSubLocation (intCompanyLocationSubLocationId)
 )
