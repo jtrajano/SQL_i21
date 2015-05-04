@@ -1249,7 +1249,6 @@
     <Build Include="dbo\Views\vyuPOStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateFuturesMonthList.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesMonthList.sql" />
-    <None Include="Scripts\Post-Deployment\IC\PatchFor_1510_RemoveOn_1520.sql" />
     <Build Include="dbo\Functions\fnCalculateQtyBetweenUOM.sql" />
     <Build Include="dbo\Functions\fnGetItemUnitType.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateStatusFromInventoryReceipt.sql" />
@@ -1493,6 +1492,7 @@
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
     <Build Include="dbo\Views\vyuHDMention.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSortOriginMenus.sql" />
+    <None Include="Scripts\Post-Deployment\IC\PatchFor_1510_to_1520.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

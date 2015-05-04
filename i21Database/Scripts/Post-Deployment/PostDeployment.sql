@@ -100,7 +100,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\4_CostingMethods.sql 
 :r .\IC\5_LotStatus.sql
 :r .\IC\6_FixBlankLotNumber.sql
-:r .\IC\PatchFor_1510_RemoveOn_1520.sql
+:r .\IC\PatchFor_1510_to_1520.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
