@@ -2912,4 +2912,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[PK_tblGRStorageType_intStorageScheduleTypeId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="42508d1b-cbf5-4a87-b420-8e041658599e" ChangeDateTime="05/04/2015 02:09:10">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryAdjustmentDetail].[dblAdjustQuantity]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryAdjustmentDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblAdjustByQuantity" />
+  </Operation>
 </Operations>
