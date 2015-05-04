@@ -97,7 +97,7 @@ BEGIN
 			p.[intUserId],
 			p.[intConcurrencyId],
 			p.[intEntityId],
-			p.[intEntityVendorId],
+			p.[intVendorId],
 			p.[ysnOrigin],
 			p.[ysnVoid],
 			p.[ysnPrinted],
