@@ -20,6 +20,5 @@
     [intConcurrencyId]			INT		NOT NULL	DEFAULT 1, 
     CONSTRAINT [FK_tblSMTaxCode_tblSMTaxClass] FOREIGN KEY ([intTaxClassId]) REFERENCES tblSMTaxClass(intTaxClassId),
     CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_salesTax] FOREIGN KEY ([intSalesTaxAccountId]) REFERENCES tblGLAccount(intAccountId),
-    CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_purchaseTax] FOREIGN KEY ([intPurchaseTaxAccountId]) REFERENCES tblGLAccount(intAccountId), 
-    CONSTRAINT [AK_tblSMTaxCode_strTaxCode] UNIQUE ([strTaxCode])
+    CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_purchaseTax] FOREIGN KEY ([intPurchaseTaxAccountId]) REFERENCES tblGLAccount(intAccountId) 
 )
