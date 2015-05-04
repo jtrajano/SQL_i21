@@ -53,3 +53,7 @@ GO
 	--EXEC uspSMUpdateUserRoleMenus @UserId
 
 GO
+	-- UPDATE ORIGIN MENUS SORT ORDER
+	EXEC uspSMSortOriginMenus
+
+GO

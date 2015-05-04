@@ -787,14 +787,14 @@ UNION ALL
 	SELECT	
 		strTransactionId = A.strInvoiceNumber, 
 		intTransactionId = A.intInvoiceId, 
-		intAccountId = TC.intSalesTaxAccountId,
+		intAccountId = ISNULL(DT.intSalesTaxAccountId,TC.intTaxCodeId),
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
-		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE (A.dblInvoiceSubtotal * (TC.numRate/100.00))  END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE (A.dblInvoiceSubtotal * (TC.numRate/100.00))  END) END, 
-		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN (A.dblInvoiceSubtotal * (TC.numRate/100.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN (A.dblInvoiceSubtotal * (TC.numRate/100.00)) ELSE 0 END) END, 
-		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL((A.dblInvoiceSubtotal * (TC.numRate/100.00)), 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL((A.dblInvoiceSubtotal * (TC.numRate/100.00)), 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
-		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL((A.dblInvoiceSubtotal * (TC.numRate/100.00)), 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL((A.dblInvoiceSubtotal * (TC.numRate/100.00)), 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,		
+		dblDebit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE DT.dblAdjustedTax  END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE DT.dblAdjustedTax  END) END, 
+		dblCredit				= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN DT.dblAdjustedTax ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN DT.dblAdjustedTax ELSE 0 END) END, 
+		dblDebitUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE ISNULL(DT.dblAdjustedTax, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE ISNULL(DT.dblAdjustedTax, 0)  * ISNULL(U.dblLbsPerUnit, 0) END) END,
+		dblCreditUnit			= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN ISNULL(DT.dblAdjustedTax, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN ISNULL(DT.dblAdjustedTax, 0) * ISNULL(U.dblLbsPerUnit, 0) ELSE 0 END) END,		
 		dtmDate = DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		ysnIsUnposted = CASE WHEN @post = 1 THEN 0 ELSE 1 END,
 		intConcurrencyId = 1,
@@ -808,18 +808,24 @@ UNION ALL
 		strTransactionForm = @SCREEN_NAME,
 		strTransactionType = A.strTransactionType
 	FROM
+		tblARInvoiceDetailTax DT
+	INNER JOIN
+		tblARInvoiceDetail D
+			ON DT.intInvoiceDetailId = D.intInvoiceDetailId
+	INNER JOIN			
 		tblARInvoice A 
-	INNER JOIN 
+			ON D.intInvoiceId = A.intInvoiceId
+	INNER JOIN
 		tblARCustomer C
-			ON A.[intEntityCustomerId] = C.intEntityCustomerId
-	LEFT OUTER JOIN
-		vyuARCustomerTaxCode TC
-			ON C.intEntityCustomerId = TC.intEntityCustomerId 			
-	LEFT JOIN Units U
-			ON A.intAccountId = U.intAccountId 		
+			ON A.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN 
 		#tmpPostInvoiceData	P
-			ON A.intInvoiceId = P.intInvoiceId	
+			ON A.intInvoiceId = P.intInvoiceId				
+	LEFT JOIN Units U
+			ON A.intAccountId = U.intAccountId
+	LEFT OUTER JOIN
+		tblSMTaxCode TC
+			ON DT.intTaxCodeId = TC.intTaxCodeId	
 	WHERE
 		A.dblTax <> 0.0				
 
@@ -1455,14 +1461,14 @@ ELSE
 		SELECT	
 			strTransactionId = A.strInvoiceNumber, 
 			intTransactionId = A.intInvoiceId,
-			intAccountId = TC.intSalesTaxAccountId,
+			intAccountId = ISNULL(DT.intSalesTaxAccountId,TC.intTaxCodeId),
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
 			dtmTransactionDate = A.dtmDate,
-			dblDebit		= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE (A.dblInvoiceSubtotal * (TC.numRate/100.00)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE (A.dblInvoiceSubtotal * (TC.numRate/100.00)) END) END,
-			dblCredit		= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN (A.dblInvoiceSubtotal * (TC.numRate/100.00)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN (A.dblInvoiceSubtotal * (TC.numRate/100.00)) ELSE 0 END) END,
-			dblDebitUnit	= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE (ISNULL((A.dblInvoiceSubtotal * (TC.numRate/100.00)), 0)  * ISNULL(U.dblLbsPerUnit, 0)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE (ISNULL((A.dblInvoiceSubtotal * (TC.numRate/100.00)), 0)  * ISNULL(U.dblLbsPerUnit, 0)) END) END,
-			dblCreditUnit	= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN (ISNULL((A.dblInvoiceSubtotal * (TC.numRate/100.00)), 0) * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN (ISNULL((A.dblInvoiceSubtotal * (TC.numRate/100.00)), 0) * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END) END,
+			dblDebit		= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE DT.dblAdjustedTax END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE DT.dblAdjustedTax END) END,
+			dblCredit		= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN DT.dblAdjustedTax ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN DT.dblAdjustedTax ELSE 0 END) END,
+			dblDebitUnit	= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN 0 ELSE (ISNULL(DT.dblAdjustedTax, 0)  * ISNULL(U.dblLbsPerUnit, 0)) END) ELSE (CASE WHEN @post = 0 THEN 0 ELSE (ISNULL(DT.dblAdjustedTax, 0)  * ISNULL(U.dblLbsPerUnit, 0)) END) END,
+			dblCreditUnit	= CASE WHEN A.strTransactionType = 'Invoice' THEN (CASE WHEN @post = 1 THEN (ISNULL(DT.dblAdjustedTax, 0) * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END) ELSE (CASE WHEN @post = 0 THEN (ISNULL(DT.dblAdjustedTax, 0) * ISNULL(U.dblLbsPerUnit, 0)) ELSE 0 END) END,
 			dtmDate = A.dtmDate,
 			ysnIsUnposted = 0,
 			intConcurrencyId = 1,
@@ -1476,18 +1482,24 @@ ELSE
 			strTransactionForm = @SCREEN_NAME,
 			strTransactionType = A.strTransactionType 
 		FROM
-			tblARInvoice A 
-		INNER JOIN 
-			tblARCustomer C
-				ON A.[intEntityCustomerId] = C.intEntityCustomerId
+			tblARInvoiceDetailTax DT
 		INNER JOIN
-			vyuARCustomerTaxCode TC
-				ON C.intEntityCustomerId = TC.intEntityCustomerId 				
-		LEFT JOIN Units U
-				ON A.intAccountId = U.intAccountId 		
+			tblARInvoiceDetail D
+				ON DT.intInvoiceDetailId = D.intInvoiceDetailId
+		INNER JOIN			
+			tblARInvoice A 
+				ON D.intInvoiceId = A.intInvoiceId
+		INNER JOIN
+			tblARCustomer C
+				ON A.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN 
 			#tmpPostInvoiceData	P
-				ON A.intInvoiceId = P.intInvoiceId	
+				ON A.intInvoiceId = P.intInvoiceId				
+		LEFT JOIN Units U
+				ON A.intAccountId = U.intAccountId
+		LEFT OUTER JOIN
+			tblSMTaxCode TC
+				ON DT.intTaxCodeId = TC.intTaxCodeId	
 		WHERE
 			A.dblTax <> 0.0								
 				

@@ -11,6 +11,7 @@ BEGIN
 	BEGIN
 		SELECT DISTINCT intSourceId INTO #tmpPOList FROM tblICInventoryReceiptItem
 		WHERE intInventoryReceiptId = @intReceiptNo
+			AND ISNULL(intSourceId, '') <> ''
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpPOList)
 		BEGIN
