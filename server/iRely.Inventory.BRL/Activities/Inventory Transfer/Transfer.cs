@@ -82,8 +82,8 @@ namespace iRely.Inventory.BRL
         public void AddTransfer(tblICInventoryTransfer transfer)
         {
             transfer.strTransferNo = Common.GetStartingNumber(Common.StartingNumber.InventoryTransfer);
-            //transfer.intCreatedUserId = iRely.Common.Security.GetUserId();
-            //transfer.intEntityId = iRely.Common.Security.GetEntityId();
+            transfer.intCreatedUserId = iRely.Common.Security.GetUserId();
+            transfer.intEntityId = iRely.Common.Security.GetEntityId();
             _db.AddNew<tblICInventoryTransfer>(transfer);
         }
 

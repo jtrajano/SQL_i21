@@ -30,6 +30,9 @@ namespace iRely.Inventory.Model
         public int? intFreightUOMId { get; set; }
         public int? intAccountCategoryId { get; set; }
         public int? intAccountId { get; set; }
+        public bool? ysnPosted { get; set; }
+        public int? intEntityId { get; set; }
+        public int? intCreatedUserId { get; set; }
         public int? intSort { get; set; }
 
         private string _accountDesc;

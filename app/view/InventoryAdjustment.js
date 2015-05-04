@@ -332,6 +332,13 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
+                                                                itemId: 'btnViewItem',
+                                                                iconCls: 'small-view',
+                                                                text: 'View'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
                                                                 itemId: 'btnRemoveItem',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'

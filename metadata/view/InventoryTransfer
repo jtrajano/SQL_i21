@@ -1253,11 +1253,11 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
-                                                        "iconCls": "small-edit",
+                                                        "iconCls": "small-view",
                                                         "itemId": "btnEditItem",
                                                         "layout|flex": null,
                                                         "tabIndex": -1,
-                                                        "text": "Edit"
+                                                        "text": "View"
                                                     },
                                                     "name": "MyButton7",
                                                     "designerId": "2d247d87-e805-4635-a28d-5a51eea28060"

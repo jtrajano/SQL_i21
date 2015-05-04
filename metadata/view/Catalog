@@ -221,11 +221,11 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "icon": null,
-                                        "iconCls": "small-edit",
+                                        "iconCls": "small-view",
                                         "itemId": "btnEditCatalog",
                                         "layout|flex": null,
                                         "tabIndex": -1,
-                                        "text": "Edit"
+                                        "text": "View"
                                     },
                                     "name": "MyButton6",
                                     "designerId": "b35ff674-a2e3-4f8c-9a17-b7644cbf4543"

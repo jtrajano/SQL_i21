@@ -26,6 +26,9 @@ namespace iRely.Inventory.Model
         public int? intSubLocationId { get; set; }
         public int? intItemUOMId { get; set; }
         public string strDescription { get; set; }
+        public bool? ysnPosted { get; set; }
+        public int? intEntityId { get; set; }
+        public int? intCreatedUserId { get; set; }
         public int? intSort { get; set; }
 
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }

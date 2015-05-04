@@ -24,7 +24,7 @@ namespace iRely.Inventory.Model
         // On this contructor function, comment the ": base(iRely.Common.Security.GetCompanyName())" when generating a new view. 
         // If compiling for QC or Production, uncomment it. 
         public InventoryEntities()
-            : base(iRely.Common.Security.GetCompanyName())
+            //: base(iRely.Common.Security.GetCompanyName())
         {
             this.Configuration.ProxyCreationEnabled = false;
         }

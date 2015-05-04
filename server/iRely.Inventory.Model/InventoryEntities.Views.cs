@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets809ba1decb3f9a6883e27ef632b46e8dd56e60d0962cadeedeb4f94349f1727e))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets2eb8b3ca1870a431211f332618c1476c2135337b8f25cca268112048d80f8a44))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets809ba1decb3f9a6883e27ef632b46e8dd56e60d0962cadeedeb4f94349f1727e : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets2eb8b3ca1870a431211f332618c1476c2135337b8f25cca268112048d80f8a44 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "809ba1decb3f9a6883e27ef632b46e8dd56e60d0962cadeedeb4f94349f1727e"; }
+            get { return "2eb8b3ca1870a431211f332618c1476c2135337b8f25cca268112048d80f8a44"; }
         }
 
         /// <summary>
@@ -1704,7 +1704,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransfer
-        [CodeFirstDatabaseSchema.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_ysnPosted, T1.tblICInventoryTransfer_intEntityId, T1.tblICInventoryTransfer_intCreatedUserId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferId AS tblICInventoryTransfer_intInventoryTransferId, 
@@ -1720,6 +1720,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.intFreightUOMId AS tblICInventoryTransfer_intFreightUOMId, 
             T.intAccountCategoryId AS tblICInventoryTransfer_intAccountCategoryId, 
             T.intAccountId AS tblICInventoryTransfer_intAccountId, 
+            T.ysnPosted AS tblICInventoryTransfer_ysnPosted, 
+            T.intEntityId AS tblICInventoryTransfer_intEntityId, 
+            T.intCreatedUserId AS tblICInventoryTransfer_intCreatedUserId, 
             T.intSort AS tblICInventoryTransfer_intSort, 
             T.intConcurrencyId AS tblICInventoryTransfer_intConcurrencyId, 
             True AS _from0
@@ -3104,7 +3107,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICBuildAssembly
-        [CodeFirstDatabaseSchema.tblICBuildAssembly](T1.tblICBuildAssembly_intBuildAssemblyId, T1.tblICBuildAssembly_dtmBuildDate, T1.tblICBuildAssembly_intItemId, T1.tblICBuildAssembly_strBuildNo, T1.tblICBuildAssembly_intLocationId, T1.tblICBuildAssembly_dblBuildQuantity, T1.tblICBuildAssembly_dblCost, T1.tblICBuildAssembly_intSubLocationId, T1.tblICBuildAssembly_intItemUOMId, T1.tblICBuildAssembly_strDescription, T1.tblICBuildAssembly_intSort, T1.tblICBuildAssembly_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICBuildAssembly](T1.tblICBuildAssembly_intBuildAssemblyId, T1.tblICBuildAssembly_dtmBuildDate, T1.tblICBuildAssembly_intItemId, T1.tblICBuildAssembly_strBuildNo, T1.tblICBuildAssembly_intLocationId, T1.tblICBuildAssembly_dblBuildQuantity, T1.tblICBuildAssembly_dblCost, T1.tblICBuildAssembly_intSubLocationId, T1.tblICBuildAssembly_intItemUOMId, T1.tblICBuildAssembly_strDescription, T1.tblICBuildAssembly_ysnPosted, T1.tblICBuildAssembly_intEntityId, T1.tblICBuildAssembly_intCreatedUserId, T1.tblICBuildAssembly_intSort, T1.tblICBuildAssembly_intConcurrencyId)
     FROM (
         SELECT 
             T.intBuildAssemblyId AS tblICBuildAssembly_intBuildAssemblyId, 
@@ -3117,6 +3120,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSubLocationId AS tblICBuildAssembly_intSubLocationId, 
             T.intItemUOMId AS tblICBuildAssembly_intItemUOMId, 
             T.strDescription AS tblICBuildAssembly_strDescription, 
+            T.ysnPosted AS tblICBuildAssembly_ysnPosted, 
+            T.intEntityId AS tblICBuildAssembly_intEntityId, 
+            T.intCreatedUserId AS tblICBuildAssembly_intCreatedUserId, 
             T.intSort AS tblICBuildAssembly_intSort, 
             T.intConcurrencyId AS tblICBuildAssembly_intConcurrencyId, 
             True AS _from0
@@ -4586,7 +4592,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransfers
-        [iRely.Inventory.Model.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_ysnPosted, T1.tblICInventoryTransfer_intEntityId, T1.tblICInventoryTransfer_intCreatedUserId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferId AS tblICInventoryTransfer_intInventoryTransferId, 
@@ -4602,6 +4608,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.intFreightUOMId AS tblICInventoryTransfer_intFreightUOMId, 
             T.intAccountCategoryId AS tblICInventoryTransfer_intAccountCategoryId, 
             T.intAccountId AS tblICInventoryTransfer_intAccountId, 
+            T.ysnPosted AS tblICInventoryTransfer_ysnPosted, 
+            T.intEntityId AS tblICInventoryTransfer_intEntityId, 
+            T.intCreatedUserId AS tblICInventoryTransfer_intCreatedUserId, 
             T.intSort AS tblICInventoryTransfer_intSort, 
             T.intConcurrencyId AS tblICInventoryTransfer_intConcurrencyId, 
             True AS _from0
@@ -6008,7 +6017,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICBuildAssemblies
-        [iRely.Inventory.Model.tblICBuildAssembly](T1.tblICBuildAssembly_intBuildAssemblyId, T1.tblICBuildAssembly_dtmBuildDate, T1.tblICBuildAssembly_intItemId, T1.tblICBuildAssembly_strBuildNo, T1.tblICBuildAssembly_intLocationId, T1.tblICBuildAssembly_dblBuildQuantity, T1.tblICBuildAssembly_dblCost, T1.tblICBuildAssembly_intSubLocationId, T1.tblICBuildAssembly_intItemUOMId, T1.tblICBuildAssembly_strDescription, T1.tblICBuildAssembly_intSort, T1.tblICBuildAssembly_intConcurrencyId)
+        [iRely.Inventory.Model.tblICBuildAssembly](T1.tblICBuildAssembly_intBuildAssemblyId, T1.tblICBuildAssembly_dtmBuildDate, T1.tblICBuildAssembly_intItemId, T1.tblICBuildAssembly_strBuildNo, T1.tblICBuildAssembly_intLocationId, T1.tblICBuildAssembly_dblBuildQuantity, T1.tblICBuildAssembly_dblCost, T1.tblICBuildAssembly_intSubLocationId, T1.tblICBuildAssembly_intItemUOMId, T1.tblICBuildAssembly_strDescription, T1.tblICBuildAssembly_ysnPosted, T1.tblICBuildAssembly_intEntityId, T1.tblICBuildAssembly_intCreatedUserId, T1.tblICBuildAssembly_intSort, T1.tblICBuildAssembly_intConcurrencyId)
     FROM (
         SELECT 
             T.intBuildAssemblyId AS tblICBuildAssembly_intBuildAssemblyId, 
@@ -6021,6 +6030,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSubLocationId AS tblICBuildAssembly_intSubLocationId, 
             T.intItemUOMId AS tblICBuildAssembly_intItemUOMId, 
             T.strDescription AS tblICBuildAssembly_strDescription, 
+            T.ysnPosted AS tblICBuildAssembly_ysnPosted, 
+            T.intEntityId AS tblICBuildAssembly_intEntityId, 
+            T.intCreatedUserId AS tblICBuildAssembly_intCreatedUserId, 
             T.intSort AS tblICBuildAssembly_intSort, 
             T.intConcurrencyId AS tblICBuildAssembly_intConcurrencyId, 
             True AS _from0

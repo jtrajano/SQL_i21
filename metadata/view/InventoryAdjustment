@@ -699,6 +699,24 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "icon": null,
+                                                        "iconCls": "small-view",
+                                                        "itemId": "btnViewItem",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "View"
+                                                    },
+                                                    "name": "MyButton41",
+                                                    "designerId": "268fa259-b0ba-4be7-9a3b-c1b54a8e2d4c"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
                                                         "iconCls": "small-delete",
                                                         "itemId": "btnRemoveItem",
                                                         "layout|flex": null,
