@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuAPReceivedItems]
 AS
+--PO Items
 SELECT
 A.[intEntityVendorId]
 ,A.dtmDate
@@ -87,3 +88,32 @@ FROM tblPOPurchase A
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 AND B.dblQtyOrdered != B.dblQtyReceived
+--UNION ALL
+SELECT
+A.intEntityVendorId
+,A.dtmReceiptDate
+,A.strVendorRefNo
+,A.strReceiptNumber
+,B.intInventoryReceiptItemId
+,B.intItemId
+,C.strItemNo
+,C.strDescription
+,B.dblOrderQty
+,B.dblReceived
+,B.dblOpenReceive
+,B.intInventoryReceiptItemId
+,NULL
+,B.dblUnitCost
+,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
+,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
+,D2.strName
+,D1.strVendorId
+,E.strShipVia
+,NULL
+FROM tblICInventoryReceipt A
+INNER JOIN tblICInventoryReceiptItem B
+	ON A.intInventoryReceiptId = B.intInventoryReceiptId
+INNER JOIN tblICItem C ON B.intItemId = C.intItemId
+	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
+INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
+LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
