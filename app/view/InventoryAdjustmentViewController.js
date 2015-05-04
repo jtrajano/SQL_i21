@@ -466,6 +466,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         var colQuantity = this.getGridColumnByDataIndex(grid, 'dblQuantity');
         var colNewQuantity = this.getGridColumnByDataIndex(grid, 'dblNewQuantity');
+        var colAdjustByQuantity = this.getGridColumnByDataIndex(grid, 'dblAdjustByQuantity');
 
         var colUOM = this.getGridColumnByDataIndex(grid, 'strItemUOM');
         var colNewUOM = this.getGridColumnByDataIndex(grid, 'strNewItemUOM');
@@ -530,6 +531,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 // Show columns:
                 colQuantity.setHidden(show);
                 colNewQuantity.setHidden(show);
+                colAdjustByQuantity.setHidden(show);
                 colUOM.setHidden(show);
 
                 colUnitCost.setHidden(show);
@@ -550,6 +552,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewExpiryDate.setHidden(hide);
                 colQuantity.setHidden(hide);
                 colNewQuantity.setHidden(hide);
+                colAdjustByQuantity.setHidden(hide);
                 colUOM.setHidden(hide);
                 colNewUOM.setHidden(hide);
                 colNetWeight.setHidden(hide);
