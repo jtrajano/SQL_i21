@@ -38,5 +38,33 @@ namespace iRely.Inventory.Model
                 new SqlParameter("@intEntityId", entityId)
             );
         }
+
+        public bool ValidateOutdatedStockOnHand(string transactionId)
+        {
+            var param_transactionId = new SqlParameter("@strTransactionId", transactionId);
+
+            var param_passed = new SqlParameter();
+            param_passed.ParameterName = "@ysnPassed";
+            param_passed.Direction = ParameterDirection.Output;
+            param_passed.SqlDbType = SqlDbType.Bit;
+            
+            this.Database.ExecuteSqlCommand(
+                "dbo.uspICInventoryAdjustmentGetOutdatedStockOnHand @strTransactionId, @ysnPassed out",
+                param_transactionId,
+                param_passed
+            );
+
+            return Convert.ToBoolean(param_passed.Value);
+        }
+
+        public void UpdateOutdatedStockOnHand(string transactionId)
+        {
+            var param_transactionId = new SqlParameter("@strTransactionId", transactionId);
+
+            this.Database.ExecuteSqlCommand(
+                "dbo.uspICInventoryAdjustmentUpdatedOutdatedStockOnHand @strTransactionId",
+                param_transactionId
+            );
+        }
     }
 }

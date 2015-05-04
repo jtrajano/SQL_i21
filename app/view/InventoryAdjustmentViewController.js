@@ -774,13 +774,25 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
     },
 
     onAfterPost: function(success, message) {
+        var me = this;
+        var win = me.view;
+
         if (success === true) {
-            var me = this;
-            var win = me.view;
             win.context.data.load();
         }
         else {
-            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
+            iRely.Functions.showCustomDialog(
+                iRely.Functions.dialogType.ERROR,
+                iRely.Functions.dialogButtonType.OK,
+                message,
+                function(){
+                    message = message ? message : '';
+                    var outdatedStock = message.indexOf('The stock on hand is outdated for');
+                    if (outdatedStock !== -1) {
+                        win.context.data.load();
+                    }
+                }
+            );
         }
     },
 

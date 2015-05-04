@@ -16,7 +16,6 @@ namespace iRely.Inventory.BRL
     {
         public SaveResult PostTransaction(Inventory.BRL.Common.Posting_RequestModel receipt, bool isRecap)
         {
-            // TODO for Lawrence
             // Save the record first 
             var result = _db.Save(false);
 
