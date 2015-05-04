@@ -1492,7 +1492,10 @@
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
     <Build Include="dbo\Views\vyuHDMention.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSortOriginMenus.sql" />
-    <None Include="Scripts\Post-Deployment\IC\PatchFor_1510_to_1520.sql" />
+	<None Include="Scripts\Post-Deployment\IC\PatchFor_1510_to_1520.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateBillFromIR.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRecurBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspPORecur.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
