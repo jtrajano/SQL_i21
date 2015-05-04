@@ -1494,6 +1494,8 @@
     <Build Include="dbo\Views\vyuHDMention.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSortOriginMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateBillFromIR.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRecurBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspPORecur.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
