@@ -178,6 +178,108 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
         action(record);
     },
 
+    onBuildClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doPost = function() {
+            var strBuildNo = win.viewModel.data.current.get('strBuildNo');
+            var posted = win.viewModel.data.current.get('ysnPosted');
+
+            var options = {
+                postURL             : '../Inventory/api/BuildAssembly/Post',
+                strTransactionId    : strBuildNo,
+                isPost              : !posted,
+                isRecap             : false,
+                callback            : me.onAfterBuild,
+                scope               : me
+            };
+
+            CashManagement.common.BusinessRules.callPostRequest(options);
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doPost();
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doPost();
+            }
+        });
+    },
+
+    onRecapClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doRecap = function(recapButton, currentRecord){
+
+            // Call the buildRecapData to generate the recap data
+            CashManagement.common.BusinessRules.buildRecapData({
+                postURL: '../Inventory/api/BuildAssembly/Post',
+                strTransactionId: currentRecord.get('strBuildNo'),
+                ysnPosted: currentRecord.get('ysnPosted'),
+                scope: me,
+                success: function(){
+                    // If data is generated, show the recap screen.
+                    CashManagement.common.BusinessRules.showRecap({
+                        strTransactionId: currentRecord.get('strBuildNo'),
+                        ysnPosted: currentRecord.get('ysnPosted'),
+                        dtmDate: currentRecord.get('dtmBuildDate'),
+                        strCurrencyId: null,
+                        dblExchangeRate: 1,
+                        scope: me,
+                        postCallback: function(){
+                            me.onBuildClick(recapButton);
+                        },
+                        unpostCallback: function(){
+                            me.onBuildClick(recapButton);
+                        }
+                    });
+                },
+                failure: function(message){
+                    // Show why recap failed.
+                    var msgBox = iRely.Functions;
+                    msgBox.showCustomDialog(
+                        msgBox.dialogType.ERROR,
+                        msgBox.dialogButtonType.OK,
+                        message
+                    );
+                }
+            });
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doRecap(button, win.viewModel.data.current);
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doRecap(button, win.viewModel.data.current);
+            }
+        });
+    },
+
+    onAfterBuild: function(success, message) {
+        if (success === true) {
+            var me = this;
+            var win = me.view;
+            win.context.data.load();
+        }
+        else {
+            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
+        }
+    },
+
     onItemSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -223,7 +325,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
     AvailableStockRenderer: function (value, metadata, record) {
         var grid = metadata.column.up('grid');
         var win = grid.up('window');
-        var items = win.viewModel.storeInfo.stockUOM;
+        var items = win.viewModel.storeInfo.stockUOMList;
         var currentMaster = win.viewModel.data.current;
 
         if (currentMaster) {
@@ -253,6 +355,12 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
             },
             "#cboItemSubLocation" : {
                 select: this.onItemSubLocationSelect
+            },
+            "#btnPost": {
+                click: this.onBuildClick
+            },
+            "#btnRecap": {
+                click: this.onRecapClick
             }
         });
     }

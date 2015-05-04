@@ -22,6 +22,9 @@ Ext.define('Inventory.model.BuildAssembly', {
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intItemUOMId', type: 'int', allowNull: true },
         { name: 'strDescription', type: 'string' },
+        { name: 'ysnPosted', type: 'boolean'},
+        { name: 'intCreatedUserId', type: 'int', allowNull: true },
+        { name: 'intEntityId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true }
     ],
 

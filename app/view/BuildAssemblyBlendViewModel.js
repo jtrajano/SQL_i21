@@ -27,6 +27,9 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewModel', {
             type: 'smcompanylocationsublocationbuffered'
         },
         stockUOM: {
+            type: 'icbuffereditemstockuomview'
+        },
+        stockUOMList: {
             autoLoad: true,
             type: 'icbuffereditemstockuomview'
         }

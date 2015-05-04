@@ -63,9 +63,10 @@
   <ItemGroup>
     <Compile Include="Activities\BuildAssembly\BuildAssembly.cs" />
     <Compile Include="Activities\Inventory Adjustment\Adjustment.cs" />
+    <Compile Include="Activities\BuildAssembly\BuildAssembly_Posting.cs" />
     <Compile Include="Activities\Inventory Adjustment\PostedLot.cs" />
-    <Compile Include="Activities\Inventory Adjustment\Adjustment_Posting.cs" />	
-    <Compile Include="Activities\Inventory Transfer\Transfer.cs" />  
+    <Compile Include="Activities\Inventory Adjustment\Adjustment_Posting.cs" />
+    <Compile Include="Activities\Inventory Transfer\Transfer.cs" />
     <Compile Include="Activities\Receipts\Lot.cs" />
     <Compile Include="Activities\Receipts\Receipt_Posting.cs" />
     <Compile Include="Activities\Shipments\Shipment.cs" />
@@ -141,7 +142,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Activities\Inventory Transfer\" />
     <Folder Include="Activities\Physical Count\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
