@@ -1159,6 +1159,48 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblAdjustByQuantity",
+                                                "dataType": "numeric",
+                                                "format": null,
+                                                "itemId": "colAdjustByQuantity",
+                                                "tdCls": "blue-text-column",
+                                                "text": "Adjust Qty By",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn4",
+                                            "designerId": "31bae25c-7bf2-4273-9828-605b69b7c242",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "numAdjustByQuantity"
+                                                    },
+                                                    "name": "MyNumberField49",
+                                                    "designerId": "73d42251-a876-40a1-bbef-a0cba5a5318c"
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Column",
                                             "reference": {
                                                 "name": "columns",

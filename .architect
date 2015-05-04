@@ -8363,11 +8363,9 @@
         },
         "4c8bcd03-8b60-4f37-ae7c-1a05db5452be": {
             "id": "4c8bcd03-8b60-4f37-ae7c-1a05db5452be",
-            "expanded": false,
             "cn": [
                 {
                     "id": "c5b1dacc-8fb3-47ca-b864-d1b677d5d6d4",
-                    "expanded": false,
                     "cn": [
                         {
                             "id": "e34b47c2-1fd2-404d-a732-201d76c86eee",
@@ -8412,7 +8410,6 @@
                         },
                         {
                             "id": "ed98cf3b-237b-418b-b5f0-cca18131c0c5",
-                            "expanded": false,
                             "cn": [
                                 {
                                     "id": "f97169a7-8d47-4226-8a00-027c713ac1fa",
@@ -8528,6 +8525,14 @@
                                                     "cn": [
                                                         {
                                                             "id": "23f6df49-e2c2-40d3-963e-63f17227de5f"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "id": "31bae25c-7bf2-4273-9828-605b69b7c242",
+                                                    "cn": [
+                                                        {
+                                                            "id": "73d42251-a876-40a1-bbef-a0cba5a5318c"
                                                         }
                                                     ]
                                                 },
@@ -8725,14 +8730,16 @@
         }
     },
     "tabState": {
-        "openTabs": []
+        "openTabs": [
+            "4c8bcd03-8b60-4f37-ae7c-1a05db5452be"
+        ]
     },
     "canvasState": {
         "topInstance": "4c8bcd03-8b60-4f37-ae7c-1a05db5452be"
     },
     "inspectorState": {
-        "topInstance": null,
-        "selectedInstance": null
+        "topInstance": "4c8bcd03-8b60-4f37-ae7c-1a05db5452be",
+        "selectedInstance": "31bae25c-7bf2-4273-9828-605b69b7c242"
     },
     "editMode": "design",
     "userSettings": {

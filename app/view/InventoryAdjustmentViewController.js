@@ -158,6 +158,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     }
                 },
 
+                colAdjustByQuantity: {
+                    dataIndex: 'dblAdjustByQuantity',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
+
                 colUOM: 'strItemUOM',
 
                 colNewUOM: {
@@ -703,6 +710,32 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         if (current){
             me.calculateLineTotal(newQuantity, null, current);
             me.calculateNewNetWeight((newQuantity === null ? false : newQuantity), null, current);
+
+            var qty = current.get('dblQuantity'),
+                adjustByQty  = null;
+
+            if (Ext.isNumeric(qty) && Ext.isNumeric(newQuantity))
+            {
+                adjustByQty = newQuantity - qty;
+            }
+            current.set('dblAdjustByQuantity', adjustByQty);
+        }
+    },
+
+    onNumAdjustByQuantityChange: function(control, newAdjustByQty, oldValue, eOpts ){
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current){
+            var qty = current.get('dblQuantity'),
+                newQty = null;
+
+            if (Ext.isNumeric(qty) && Ext.isNumeric(newAdjustByQty))
+            {
+                newQty = qty + newAdjustByQty;
+            }
+
+            current.set('dblNewQuantity', newQty);
         }
     },
 
@@ -904,6 +937,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#numNewQuantity": {
                 change: this.onNumNewQuantityChange
+            },
+            "#numAdjustByQuantity": {
+                change: this.onNumAdjustByQuantityChange
             },
             "#numNewUnitCost": {
                 change: this.onNumNewUnitCostChange

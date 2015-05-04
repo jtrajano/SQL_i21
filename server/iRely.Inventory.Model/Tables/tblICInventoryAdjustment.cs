@@ -83,6 +83,7 @@ namespace iRely.Inventory.Model
 
         public decimal? dblQuantity { get; set; }
         public decimal? dblNewQuantity { get; set; }
+        public decimal? dblAdjustByQuantity { get; set; }
 
         public int? intItemUOMId { get; set; }
         public int? intNewItemUOMId { get; set; }
