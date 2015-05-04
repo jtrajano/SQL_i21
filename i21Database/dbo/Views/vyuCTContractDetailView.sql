@@ -13,7 +13,7 @@ AS
 			CD.intFreightTermId,			FT.strFreightTerm,
 			CD.intShipViaId,				SV.strShipVia,
 			CD.dblQuantity													AS	dblDetailQuantity,
-			CD.intUnitMeasureId,
+			CD.intUnitMeasureId,			U1.strUnitMeasure				AS	strDetailUnitMeasure,
 			CD.intPricingType,				PT.Name							AS	strPricingType,
 			CD.dblFutures,
 			CD.dblBasis,
@@ -43,7 +43,7 @@ AS
 			CH.intEntityId,					EY.strName						AS	strCustomerVendor,
 			CH.intCommodityId,
 			CH.dblQuantity													AS	dblHeaderQuantity,
-			CH.intCommodityUnitMeasureId,	U2.strUnitMeasure,
+			CH.intCommodityUnitMeasureId,	U2.strUnitMeasure				AS	strHeaderUnitMeasure,
 			CH.intContractNumber,
 			CH.dtmContractDate,
 			CH.strCustomerContract,
@@ -89,4 +89,3 @@ AS
 	JOIN	tblCTWeightGrade		W2	ON	W2.intWeightGradeId			=	CH.intWeightId
 	JOIN	tblCTAssociation		AN	ON	AN.intAssociationId			=	CH.intAssociationId
 	JOIN	tblSMTerm				TM	ON	TM.intTermID				=	CH.intTermId
-
