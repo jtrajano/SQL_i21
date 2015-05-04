@@ -1491,6 +1491,7 @@
     <Build Include="dbo\Functions\fnAPValidatePostPayment.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
+    <Build Include="dbo\Views\vyuHDMention.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
