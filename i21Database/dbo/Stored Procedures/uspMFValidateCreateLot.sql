@@ -131,6 +131,37 @@ BEGIN TRY
 				,1
 				)
 	END
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM dbo.tblICItemUOM
+			WHERE intItemId = @intItemId
+				AND intItemUOMId = @intItemUOMId and ysnStockUnit=1
+			)
+	BEGIN
+
+		RAISERROR (
+				51094
+				,11
+				,1
+				)
+	END
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM dbo.tblICItemUOM
+			WHERE intItemId = @intItemId
+				AND intItemUOMId = @intItemUnitCountUOMId 
+			)
+	BEGIN
+
+		RAISERROR (
+				51093
+				,11
+				,1
+				)
+	END
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM dbo.tblSMCompanyLocation
@@ -458,6 +489,46 @@ BEGIN TRY
 
 			RETURN
 		END
+
+		IF EXISTS (
+		SELECT *
+		FROM dbo.tblMFRecipeItem ri
+		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		WHERE r.intItemId = @intProductId
+			AND ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intConsumptionMethodId IN (
+				2
+				,3
+				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderConsumedLot WC
+				JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
+				WHERE L.intItemId = ri.intItemId and WC.intWorkOrderId =@intWorkOrderId 
+				)
+		)
+		BEGIN
+			RAISERROR (
+					51095
+					,11
+					,1
+					)
+
+			RETURN
+		END
+
 	END
 END TRY
 

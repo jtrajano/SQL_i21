@@ -12,6 +12,7 @@ BEGIN TRY
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @ErrMsg NVARCHAR(Max)
+		,@strItemNo nvarchar(50)
 
 	BEGIN TRAN
 
@@ -58,7 +59,7 @@ BEGIN TRY
 		,intStorageLocationId
 		)
 	SELECT ri.intItemId
-		,(ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity)) AS RequiredQty
+		,CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))) AS RequiredQty
 		,ri.intStorageLocationId
 	FROM tblMFRecipeItem ri
 	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
@@ -90,25 +91,26 @@ AND ri.intConsumptionMethodId in (2,3)
 		)
 	SELECT L.intLotId
 		,L.intItemId
-		,L.dblWeight
-		,L.dblWeight / (Case When L.dblWeightPerQty=0 or L.dblWeightPerQty is null Then 1 else L.dblWeightPerQty end)
-		,(Case When L.dblWeightPerQty=0 or L.dblWeightPerQty is null Then 1 else L.dblWeightPerQty end)
-		,L.intWeightUOMId
+		,Case When L.dblWeight=0 or L.dblWeight is null then L.dblQty else L.dblWeight end
+		,Case When L.dblWeight=0 or L.dblWeight is null then L.dblQty else (L.dblWeight / (Case When L.dblWeightPerQty=0 or L.dblWeightPerQty is null then 1 else L.dblWeightPerQty end ) ) end
+		,Case When L.dblWeight=0 or L.dblWeight is null or L.dblWeightPerQty is null or L.dblWeightPerQty=0 then 1 else L.dblWeightPerQty end
+		,Case When L.dblWeight=0 or L.dblWeight is null or L.intWeightUOMId is null or L.intWeightUOMId=0 then L.intItemUOMId else L.intWeightUOMId end  
 		,L.intItemUOMId
 	FROM dbo.tblICLot L
 	JOIN @tblItem I ON L.intItemId = I.intItemId
 	JOIN dbo.tblICLotStatus LS on LS.intLotStatusId =L.intLotStatusId 
 	WHERE LS.strSecondaryStatus ='Active'
 		AND dtmExpiryDate >= Getdate()
-		AND L.intStorageLocationId = (
-			CASE 
-				WHEN I.intStorageLocationId IS NULL
-					THEN L.intStorageLocationId
-				ELSE I.intStorageLocationId
-				END
-			)
+		--AND L.intStorageLocationId = (
+		--	CASE 
+		--		WHEN I.intStorageLocationId IS NULL
+		--			THEN L.intStorageLocationId
+		--		ELSE I.intStorageLocationId
+		--		END
+		--	)
+	AND (L.dblWeight>0 or L.dblQty>0)
 	ORDER BY L.dtmDateCreated ASC
-	--select *from @tblLot --Where intItemId in (Select intItemId from @tblItem )
+
 	SELECT @intItemRecordKey = Min(intItemRecordKey)
 	FROM @tblItem
 
@@ -120,6 +122,20 @@ AND ri.intConsumptionMethodId in (2,3)
 			,@dblReqQty = dblReqQty
 		FROM @tblItem
 		WHERE intItemRecordKey = @intItemRecordKey
+
+		IF EXISTS(SELECT SUM(dblQty)FROM @tblLot WHERE intItemId=@intItemId Having SUM(dblQty)<@dblReqQty)
+		BEGIN
+			SELECT @strItemNo = strItemNo
+			FROM dbo.tblICItem
+			WHERE intItemId = @intItemId
+
+			RAISERROR (
+				51096
+				,11
+				,1
+				,@strItemNo
+				)
+		END
 		
 		SELECT @intLotRecordKey = Min(intLotRecordKey)
 		FROM @tblLot
@@ -156,7 +172,7 @@ AND ri.intConsumptionMethodId in (2,3)
 					,intLotId
 					,@dblReqQty
 					,intItemUOMId
-					,@dblReqQty / dblWeightPerUnit
+					,@dblReqQty / (Case when dblWeightPerUnit=0 or dblWeightPerUnit is null then 1 else dblWeightPerUnit end)
 					,intItemIssuedUOMId
 					,@intBatchId
 					,Isnull(@intSequenceNo,1)
@@ -193,7 +209,7 @@ AND ri.intConsumptionMethodId in (2,3)
 					,intLotId
 					,@dblQty
 					,intItemUOMId
-					,@dblQty / dblWeightPerUnit
+					,@dblQty / (Case when dblWeightPerUnit=0 or dblWeightPerUnit is null then 1 else dblWeightPerUnit end)
 					,intItemIssuedUOMId
 					,@intBatchId
 					,Isnull(@intSequenceNo,1)
