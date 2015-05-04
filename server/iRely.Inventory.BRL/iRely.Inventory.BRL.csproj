@@ -66,6 +66,7 @@
     <Compile Include="Activities\BuildAssembly\BuildAssembly_Posting.cs" />
     <Compile Include="Activities\Inventory Adjustment\PostedLot.cs" />
     <Compile Include="Activities\Inventory Adjustment\Adjustment_Posting.cs" />
+    <Compile Include="Activities\Inventory Transfer\Transfer_Posting.cs" />
     <Compile Include="Activities\Inventory Transfer\Transfer.cs" />
     <Compile Include="Activities\Receipts\Lot.cs" />
     <Compile Include="Activities\Receipts\Receipt_Posting.cs" />

@@ -157,13 +157,12 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                         xtype: 'button',
                                         tabIndex: -1,
                                         height: 57,
-                                        hidden: true,
-                                        itemId: 'btnUnpost',
+                                        itemId: 'btnRecap',
                                         width: 52,
                                         iconAlign: 'top',
-                                        iconCls: 'large-unpost',
+                                        iconCls: 'large-recap',
                                         scale: 'large',
-                                        text: 'Unpost'
+                                        text: 'Recap'
                                     },
                                     {
                                         xtype: 'tbseparator',
@@ -590,8 +589,8 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnEditItem',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
+                                                                iconCls: 'small-view',
+                                                                text: 'View'
                                                             },
                                                             {
                                                                 xtype: 'button',
