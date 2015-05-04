@@ -267,6 +267,7 @@ AS
 				,TC.[numRate]
 				,0.00 AS [dblTax]
 				,0.00 AS [dblAdjustedTax]				
+				,TC.[intSalesTaxAccountId]								
 				,TGM.[ysnSeparateOnInvoice] 
 				,TC.[ysnCheckoffTax]
 				,TC.[strTaxCode] 
@@ -275,8 +276,7 @@ AS
 				--,TC.[strState] 
 				--,TC.[strCity]
 				--,TC.[strCountry] 
-				--,TC.[strCounty] 
-				--,TC.[intSalesTaxAccountId]								
+				--,TC.[strCounty] 				
 				--,TG.[strTaxGroup] 				
 				--,TGM.[strTaxGroupMaster] 				
 			FROM
@@ -313,6 +313,7 @@ AS
 		,NULL	[numRate]
 		,NULL	[dblTax]
 		,NULL	[dblAdjustedTax]
+		,0		[intSalesTaxAccountId]								
 		,0		[ysnSeparateOnInvoice] 
 		,0		[ysnCheckoffTax]
 		,NULL	[strTaxCode] 
@@ -322,7 +323,7 @@ AS
 		--,NULL	[strCity]
 		--,NULL	[strCountry] 
 		--,NULL	[strCounty] 
-		--,0	[intSalesTaxAccountId]								
+		
 		--,NULL	[strTaxGroup] 				
 		--,NULL	[strTaxGroupMaster] 	
 	
