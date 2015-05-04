@@ -46,7 +46,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipment_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
 		CONSTRAINT [FK_tblICInventoryShipment_ShipFromLocation] FOREIGN KEY ([intShipFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipment_tblEntityLocation] FOREIGN KEY ([intShipToLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]), 
-		CONSTRAINT [AK_tblICInventoryShipment_strShipmentNumber] UNIQUE ([strShipmentNumber]) 
+		CONSTRAINT [AK_tblICInventoryShipment_strShipmentNumber] UNIQUE ([strShipmentNumber]), 
+		CONSTRAINT [FK_tblICInventoryShipment_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) 
 	)
 
 	GO

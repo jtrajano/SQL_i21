@@ -36,7 +36,7 @@ FROM tblEntity a
 	LEFT JOIN tblARSalesperson d  
 		on a.intEntityId = d.intEntitySalespersonId --and d.ysnActive = 1
 	left join tblEntityLocation e  
-		on a.intDefaultLocationId = e.intEntityLocationId  
+		on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
 	left join tblEntityToContact f  
 		on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
 	left join tblEntity g  

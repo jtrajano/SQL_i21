@@ -40,6 +40,12 @@ USING	(
 		UNION ALL 
 		SELECT	id = 10
 				,name = 'Inventory Adjustment'
+		UNION ALL 
+		SELECT	id = 11
+				,name = 'Build Assembly'
+		UNION ALL 
+		SELECT	id = 12
+				,name = 'Inventory Transfer'
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
 

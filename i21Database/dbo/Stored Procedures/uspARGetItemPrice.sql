@@ -66,8 +66,8 @@ AS
 		,dblCustomerPrice)
 	SELECT
 		SP.intSpecialPriceId
-		,SP.intEntityId
-		,SP.intVendorId
+		,SP.intEntityCustomerId
+		,SP.intEntityVendorId
 		,SP.intItemId
 		,SP.strClass
 		,SP.strPriceBasis
@@ -83,7 +83,7 @@ AS
 		tblARCustomerSpecialPrice SP
 	INNER JOIN
 		tblARCustomer C
-			ON SP.intEntityId = C.intEntityCustomerId
+			ON SP.intEntityCustomerId = C.intEntityCustomerId
 	WHERE
 		C.intEntityCustomerId = @CustomerId
 		AND @TransactionDate BETWEEN SP.dtmBeginDate AND SP.dtmEndDate

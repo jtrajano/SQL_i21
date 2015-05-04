@@ -37,7 +37,7 @@ FROM	(
 IF @ysnPost = 1 AND (@strItemNo IS NOT NULL AND @strLotNumber IS NOT NULL)
 BEGIN   
 	-- 'Lot status for {Lot Number} for item {Item No} is going to be updated more than once. Please remove the duplicate.'
-	RAISERROR(51092, 11, 1, @strLotNumber, @strItemNo)  
+	RAISERROR(51097, 11, 1, @strLotNumber, @strItemNo)  
 	GOTO Post_Exit  
 END   
 

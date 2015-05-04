@@ -1307,9 +1307,6 @@
     <Build Include="dbo\Tables\tblRKFutOptTransaction.sql" />
     <Build Include="dbo\Tables\tblRKFutOptTransactionHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetOptionsMonthList.sql" />
-    <Build Include="dbo\uspICDuplicateItem.sql" />
-    <Build Include="dbo\fnICGetItemLocationIdFromDuplicateItem.sql" />
-    <Build Include="dbo\fnICGetItemUOMIdFromDuplicateItem.sql" />
     <Build Include="dbo\Tables\tblCFVehicle.sql" />
     <Build Include="dbo\Tables\tblCFTransaction.sql" />
     <Build Include="dbo\Tables\tblCFTaxException.sql" />
@@ -1479,6 +1476,21 @@
     <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessToItemReceipt.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
+    <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
+    <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
+    <Build Include="dbo\Functions\uspICDuplicateItem.sql" />
+    <Build Include="dbo\Functions\fnICGetItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostBuildAssembly.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPVoidPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDuplicateRecord.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntriesFromTransaction.sql" />
+    <Build Include="dbo\Functions\fnAPReverseGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreateBillGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostPayment.sql" />
+    <Build Include="dbo\Functions\fnAPCreatePaymentGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

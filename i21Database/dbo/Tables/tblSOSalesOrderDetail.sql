@@ -19,7 +19,6 @@
     [intSalesAccountId]     INT             NULL,
     [intInventoryAccountId] INT             NULL,
 	[intStorageLocationId]  INT             NULL,
-	[ysnTax]				BIT NULL DEFAULT ((0)), 
     [intConcurrencyId]      INT             CONSTRAINT [DF_tblSOSalesOrderDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblSOSalesOrderDetail] PRIMARY KEY CLUSTERED ([intSalesOrderDetailId] ASC),
     CONSTRAINT [FK_tblSOSalesOrderDetail_tblSOSalesOrder] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId]) ON DELETE CASCADE,

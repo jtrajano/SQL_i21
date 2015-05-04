@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMGridLayout]
 (
 	[intGridLayoutId] INT IDENTITY (1, 1) NOT NULL, 
-    [strGridLayoutName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strGridLayoutName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strGridLayoutFields] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[strGridLayoutFilters] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strScreen] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

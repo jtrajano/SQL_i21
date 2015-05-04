@@ -2,11 +2,12 @@
 (
 	[intEmployeeDeductionTaxId] INT NOT NULL IDENTITY , 
     [intEmployeeDeductionId] INT NOT NULL, 
+	[intEmployeeTaxId] INT NULL,
     [intTypeTaxId] INT NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPREmployeeDeductionTax] PRIMARY KEY ([intEmployeeDeductionTaxId]), 
-    CONSTRAINT [FK_tblPREmployeeDeductionTax_tblPREmployeeDeduction] FOREIGN KEY ([intEmployeeDeductionId]) REFERENCES [tblPREmployeeDeduction]([intEmployeeDeductionId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblPREmployeeDeductionTax_tblPREmployeeDeduction] FOREIGN KEY ([intEmployeeDeductionId]) REFERENCES [tblPREmployeeDeduction]([intEmployeeDeductionId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeDeductionTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId])
 )
 
@@ -48,7 +49,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intTypeTaxId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Deduction Group Detail Id',
+    @value = N'Deduction Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
@@ -76,3 +77,13 @@ EXEC sp_addextendedproperty @name=N'MS_Description',
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblPREmployeeDeductionTax] ON [dbo].[tblPREmployeeDeductionTax] ([intEmployeeDeductionId], [intTypeTaxId]) WITH (IGNORE_DUP_KEY = OFF)
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Employee Tax Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeDeductionTax',
+    @level2type = N'COLUMN',
+    @level2name = N'intEmployeeTaxId'

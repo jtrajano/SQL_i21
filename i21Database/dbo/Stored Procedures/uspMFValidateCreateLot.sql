@@ -43,6 +43,8 @@ BEGIN TRY
 		,@CasesPerPallet INT
 		,@dblUpperToleranceQuantity NUMERIC(18, 6)
 		,@dblLowerToleranceQuantity NUMERIC(18, 6)
+		,@strLocationName nvarchar(50)
+
 
 	IF @strLotNumber LIKE '%[@~$\`^&*()%?/<>!|\+;:",.{}'']%'
 	BEGIN
@@ -101,6 +103,34 @@ BEGIN TRY
 				)
 	END
 
+	IF NOT EXISTS (
+			SELECT *
+			FROM dbo.tblICItemLocation
+			WHERE intItemId = @intItemId
+				AND intLocationId = @intLocationId
+			)
+	BEGIN
+
+		SELECT @strLocationName=strLocationName
+		FROM dbo.tblSMCompanyLocation
+		WHERE intCompanyLocationId = @intLocationId
+
+		RAISERROR (
+				51092
+				,11
+				,1
+				,@strLocationName
+				)
+	END
+
+	IF @intItemUnitCountUOMId is null
+	BEGIN
+		RAISERROR (
+				51093
+				,11
+				,1
+				)
+	END
 	IF NOT EXISTS (
 			SELECT *
 			FROM dbo.tblSMCompanyLocation

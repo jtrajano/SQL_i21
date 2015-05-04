@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICPostInventoryAdjustment  
+﻿CREATE PROCEDURE [dbo].[uspICPostBuildAssembly]
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
@@ -16,14 +16,13 @@ SET ANSI_WARNINGS OFF
 -- Initialize   
 --------------------------------------------------------------------------------------------    
 -- Create a unique transaction name. 
-DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Adjustment Transaction' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @TransactionName AS VARCHAR(500) = 'Build Assembly Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
-DECLARE @INVENTORY_ADJUSTMENT_TYPE AS INT = 10
-DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
+DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 11
+DECLARE @STARTING_NUMBER_BATCH AS INT = 3 
 
--- Get the Inventory Adjustment batch number
+-- Get the Inventory Receipt batch number
 DECLARE @strBatchId AS NVARCHAR(40) 
 DECLARE @strItemNo AS NVARCHAR(50)
 
@@ -33,36 +32,21 @@ DECLARE @GLEntries AS RecapTableType
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
  
--- Create the type of lot numbers
-DECLARE @LotType_Manual AS INT = 1
-	,@LotType_Serial AS INT = 2
-
-
-DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
-		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
-		,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
-		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
-		,@ADJUSTMENT_TYPE_LotIdChange AS INT = 5
-		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
-
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
 	DECLARE @intTransactionId AS INT  
 	DECLARE @intCreatedEntityId AS INT  
 	DECLARE @ysnAllowUserSelfPost AS BIT   
-	DECLARE @ysnTransactionPostedFlag AS BIT
-	DECLARE @adjustmentType AS INT
-
+	DECLARE @ysnTransactionPostedFlag AS BIT  
   
 	SELECT TOP 1   
-			@intTransactionId = intInventoryAdjustmentId
+			@intTransactionId = intBuildAssemblyId
 			,@ysnTransactionPostedFlag = ysnPosted
-			,@dtmDate = dtmAdjustmentDate
+			,@dtmDate = dtmBuildDate
 			,@intCreatedEntityId = intEntityId
-			,@adjustmentType = intAdjustmentType
-	FROM	dbo.tblICInventoryAdjustment
-	WHERE	strAdjustmentNo = @strTransactionId  
+	FROM	dbo.tblICBuildAssembly
+	WHERE	strBuildNo = @strTransactionId
 END  
 
 -- Read the user preference  
@@ -76,7 +60,7 @@ END
 --------------------------------------------------------------------------------------------  
 -- Validate  
 --------------------------------------------------------------------------------------------  
--- Validate if the Inventory Adjustment exists   
+-- Validate if the Inventory Receipt exists   
 IF @intTransactionId IS NULL  
 BEGIN   
 	-- Cannot find the transaction.  
@@ -100,14 +84,14 @@ BEGIN
 	GOTO Post_Exit  
 END   
   
--- Check if the transaction is already unposted  
+-- Check if the transaction is already posted  
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
 BEGIN   
 	-- The transaction is already unposted.  
 	RAISERROR(50008, 11, 1)  
 	GOTO Post_Exit  
 END   
- 
+
 -- Check Company preference: Allow User Self Post  
 IF @ysnAllowUserSelfPost = 1 AND @intEntityId <> @intCreatedEntityId AND @ysnRecap = 0   
 BEGIN   
@@ -139,158 +123,49 @@ EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1  
 BEGIN  
-	DECLARE @ItemsForAdjust AS ItemCostingTableType  
+	-- Get the items to post  
+	DECLARE @ItemsForPost AS ItemCostingTableType  
+	INSERT INTO @ItemsForPost (  
+			intItemId  
+			,intItemLocationId 
+			,intItemUOMId  
+			,dtmDate  
+			,dblQty  
+			,dblUOMQty  
+			,dblCost  
+			,dblSalesPrice  
+			,intCurrencyId  
+			,dblExchangeRate  
+			,intTransactionId  
+			,strTransactionId  
+			,intTransactionTypeId  
+			,intLotId 
+			,intSubLocationId
+			,intStorageLocationId
+	) 
+	SELECT Detail.intItemId
+			, dbo.fnICGetItemLocation(Detail.intItemId, AssemblyItem.intLocationId)
+			, Detail.intItemUOMId
+			, AssemblyItem.dtmBuildDate
+			, (ISNULL(Detail.dblQuantity, 0) * ISNULL(AssemblyItem.dblBuildQuantity, 0)) * -1
+			, (ISNULL(Detail.dblQuantity, 0) * ISNULL(AssemblyItem.dblBuildQuantity, 0)) * -1
+			, Detail.dblCost
+			, 0
+			, NULL
+			, 1
+			, @intTransactionId
+			, @strTransactionId
+			, NULL
+			, NULL
+			, Detail.intSubLocationId
+			, NULL
+	FROM tblICBuildAssemblyDetail Detail
+	LEFT JOIN tblICBuildAssembly AssemblyItem ON AssemblyItem.intBuildAssemblyId = Detail.intBuildAssemblyId
+	WHERE Detail.intBuildAssemblyId = @intTransactionId
 
-	-----------------------------------
-	--  Call Quantity Change 
-	-----------------------------------
-	IF @adjustmentType = @ADJUSTMENT_TYPE_QuantityChange
+	-- Call the post routine 
 	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
-		EXEC	dbo.uspICPostInventoryAdjustmentQtyChange
-				@intTransactionId
-	END 
-
-	-----------------------------------
-	--  Call UOM Change 
-	-----------------------------------
-	IF @adjustmentType = @ADJUSTMENT_TYPE_UOMChange
-	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
-		EXEC	dbo.uspICPostInventoryAdjustmentUOMChange
-				@intTransactionId
-	END 
-
-	-----------------------------------
-	--  Call Item Change 
-	-----------------------------------
-	IF @adjustmentType = @ADJUSTMENT_TYPE_ItemChange
-	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
-		EXEC	dbo.uspICPostInventoryAdjustmentItemChange
-				@intTransactionId
-	END 
-
-	-----------------------------------
-	--  Call Lot Status Change
-	-----------------------------------
-	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange
-	BEGIN 
-		EXEC	dbo.uspICPostInventoryAdjustmentLotStatusChange
-				@intTransactionId
-				,@ysnPost
-	END 
-
-	-----------------------------------
-	--  Call Split Lot Change
-	-----------------------------------
-	IF @adjustmentType = @ADJUSTMENT_TYPE_LotIdChange
-	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
-		EXEC	dbo.uspICPostInventoryAdjustmentSplitLotChange
-				@intTransactionId
-	END 
-
-	-----------------------------------
-	--  Call Expiry Lot Change
-	-----------------------------------
-	IF @adjustmentType = @ADJUSTMENT_TYPE_ExpiryDateChange
-	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
-		EXEC	dbo.uspICPostInventoryAdjustmentExpiryLotChange
-				@intTransactionId
-	END 
-	
-	-----------------------------------
-	--  Call the costing routine 
-	-----------------------------------
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
-	BEGIN 
+		-- Call the post routine 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
 				,[strBatchId]
@@ -319,11 +194,88 @@ BEGIN
 				,[intConcurrencyId]
 		)
 		EXEC	dbo.uspICPostCosting  
-				@ItemsForAdjust  
+				@ItemsForPost  
 				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId		
-	END 
+				,NULL
+				,@intUserId
+	END
+
+	-- Get the assembly item to post  
+	DECLARE @AssemblyItemForPost AS ItemCostingTableType  
+	INSERT INTO @AssemblyItemForPost (  
+			intItemId  
+			,intItemLocationId 
+			,intItemUOMId  
+			,dtmDate  
+			,dblQty  
+			,dblUOMQty  
+			,dblCost  
+			,dblSalesPrice  
+			,intCurrencyId  
+			,dblExchangeRate  
+			,intTransactionId  
+			,strTransactionId  
+			,intTransactionTypeId  
+			,intLotId 
+			,intSubLocationId
+			,intStorageLocationId
+	) 
+	SELECT Item.intItemId
+			, dbo.fnICGetItemLocation(Item.intItemId, Item.intLocationId)
+			, Item.intItemUOMId
+			, Item.dtmBuildDate
+			, ISNULL(Item.dblBuildQuantity, 0)
+			, ISNULL(Item.dblBuildQuantity, 0)
+			, dbo.fnGetTotalStockValueFromTransactionBatch(@intTransactionId, @strBatchId) / ISNULL(Item.dblBuildQuantity, 0)
+			, 0
+			, NULL
+			, 1
+			, @intTransactionId
+			, @strTransactionId
+			, NULL
+			, NULL
+			, Item.intSubLocationId
+			, NULL
+	FROM tblICBuildAssembly Item
+	WHERE Item.intBuildAssemblyId = @intTransactionId
+
+	-- Call the post routine 
+	BEGIN 
+		-- Call the post routine 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+		)
+		EXEC	dbo.uspICPostCosting  
+				@AssemblyItemForPost  
+				,@strBatchId  
+				,NULL
+				,@intUserId
+	END
+
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -332,7 +284,6 @@ END
 IF @ysnPost = 0   
 BEGIN   
 	-- Call the unpost routine 
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
 	BEGIN 
 		-- Call the post routine 
 		INSERT INTO @GLEntries (
@@ -368,13 +319,6 @@ BEGIN
 				,@strBatchId
 				,@intUserId						
 	END 
-
-	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange
-	BEGIN 
-		EXEC	dbo.uspICPostInventoryAdjustmentLotStatusChange
-				@intTransactionId
-				,@ysnPost
-	END 	
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -384,23 +328,11 @@ END
 --
 -- 2.	Rollback the save point 
 --------------------------------------------------------------------------------------------  
-IF	@ysnRecap = 1	
+IF @ysnRecap = 1
 BEGIN 
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
-	BEGIN 
-		ROLLBACK TRAN @TransactionName
-		EXEC dbo.uspCMPostRecap @GLEntries
-		COMMIT TRAN @TransactionName
-	END 
-	ELSE 
-	BEGIN 
-		ROLLBACK TRAN @TransactionName
-		COMMIT TRAN @TransactionName
-
-		-- Recap is not applicable for this type of transaction.
-		RAISERROR(51098, 11, 1)  
-		GOTO Post_Exit  
-	END
+	ROLLBACK TRAN @TransactionName
+	EXEC dbo.uspCMPostRecap @GLEntries
+	COMMIT TRAN @TransactionName
 END 
 
 --------------------------------------------------------------------------------------------  
@@ -410,18 +342,14 @@ END
 -- 3. Update the PO (if it exists)
 -- 4. Commit the save point 
 --------------------------------------------------------------------------------------------  
-IF @ysnRecap = 0 
+IF @ysnRecap = 0
 BEGIN 
-	-- If there are items for adjust, expect it to have g/l entries. 
-	IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust) 
-	BEGIN 
-		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
-	END
+	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 
-	UPDATE	dbo.tblICInventoryAdjustment  
+	UPDATE	dbo.tblICBuildAssembly  
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
-	WHERE	strAdjustmentNo = @strTransactionId  
+	WHERE	strBuildNo = @strTransactionId  
 
 	COMMIT TRAN @TransactionName
 END 

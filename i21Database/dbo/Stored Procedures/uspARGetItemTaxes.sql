@@ -266,8 +266,9 @@ AS
 				,TC.[strCalculationMethod] 
 				,TC.[numRate]
 				,0.00 AS [dblTax]
-				,0.00 AS [dblAdjustedTax]
+				,0.00 AS [dblAdjustedTax]				
 				,TGM.[ysnSeparateOnInvoice] 
+				,TC.[ysnCheckoffTax]
 				,TC.[strTaxCode] 
 				
 				--,TC.[strTaxAgency] 
@@ -313,6 +314,7 @@ AS
 		,NULL	[dblTax]
 		,NULL	[dblAdjustedTax]
 		,0		[ysnSeparateOnInvoice] 
+		,0		[ysnCheckoffTax]
 		,NULL	[strTaxCode] 
 				
 		--,NULL	[strTaxAgency] 

@@ -14,7 +14,6 @@
 	[intCOGSAccountId]	INT             NULL,
 	[intSalesAccountId]	INT             NULL,
 	[intInventoryAccountId]		 INT             NULL,
-	[ysnTax]				BIT NULL DEFAULT ((0)), 
     [intConcurrencyId]   INT             CONSTRAINT [DF_tblARInvoiceDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,    
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
