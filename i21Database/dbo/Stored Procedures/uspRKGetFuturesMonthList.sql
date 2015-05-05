@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE uspRKGetFuturesMonthList 
+﻿CREATE PROCEDURE uspRKGetFuturesMonthList 
 	@FutureMarketId		INT
 AS
 BEGIN
