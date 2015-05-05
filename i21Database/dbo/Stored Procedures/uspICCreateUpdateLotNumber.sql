@@ -262,10 +262,10 @@ BEGIN
 				INNER JOIN dbo.tblICLot Lot 
 					ON ItemUOM.intItemUOMId = Lot.intItemUOMId
 		WHERE	ItemUOM.intItemId = @intItemId
-				AND Lot.intLotId = @intLotId
+				AND Lot.strLotNumber = @strLotNumber
 				AND Lot.intLocationId = @intLocationId
 				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
-				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(intStorageLocationId, 0)
+				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 
 		-- Get the Weight UOM String (old value)
 		SELECT	@strUnitMeasureWeightUOMFrom = UOM.strUnitMeasure
@@ -274,17 +274,17 @@ BEGIN
 				INNER JOIN dbo.tblICLot Lot 
 					ON ItemUOM.intItemUOMId = Lot.intWeightUOMId
 		WHERE	ItemUOM.intItemId = @intItemId
-				AND Lot.intLotId = @intLotId
+				AND Lot.strLotNumber = @strLotNumber
 				AND Lot.intLocationId = @intLocationId
 				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
-				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(intStorageLocationId, 0)
+				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 
 		-- Get the Sub Location String (old value)
 		SELECT @strSubLocatioNameFrom = SubLocation.strSubLocationName
 		FROM	 dbo.tblSMCompanyLocationSubLocation SubLocation INNER JOIN dbo.tblICLot Lot
 					ON SubLocation.intCompanyLocationSubLocationId = Lot.intSubLocationId
 		WHERE	Lot.intItemId = @intItemId
-				AND Lot.intLotId = @intLotId
+				AND Lot.strLotNumber = @strLotNumber
 				AND Lot.intLocationId = @intLocationId
 				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
@@ -294,7 +294,7 @@ BEGIN
 		FROM	 dbo.tblICStorageLocation StorageLocation INNER JOIN dbo.tblICLot Lot
 					ON StorageLocation.intStorageLocationId = Lot.intStorageLocationId
 		WHERE	Lot.intItemId = @intItemId
-				AND Lot.intLotId = @intLotId
+				AND Lot.strLotNumber = @strLotNumber
 				AND Lot.intLocationId = @intLocationId
 				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
