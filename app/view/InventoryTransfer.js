@@ -249,6 +249,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 fieldLabel: 'Transfer Type',
                                                                 labelWidth: 90,
                                                                 displayField: 'strDescription',
+                                                                queryMode: 'local',
                                                                 valueField: 'strDescription'
                                                             },
                                                             {

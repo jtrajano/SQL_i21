@@ -490,6 +490,7 @@
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "name": null,
+                                                        "queryMode": "local",
                                                         "valueField": "strDescription",
                                                         "width": null
                                                     },

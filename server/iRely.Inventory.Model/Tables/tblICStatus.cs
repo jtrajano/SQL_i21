@@ -13,7 +13,7 @@ namespace iRely.Inventory.Model
     {
         public int intStatusId { get; set; }
         public string strStatus { get; set; }
-        public int intSort { get; set; }
+        public int? intSort { get; set; }
 
         public ICollection<tblICInventoryTransfer> tblICInventoryTransfers { get; set; }
     }

@@ -376,28 +376,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         else if (combo.itemId === 'cboNewLotID') {
             current.set('intNewLotId', records[0].get('intLotId'));
         }
-        else if (combo.itemId === 'cboCreditAccount') {
-            current.set('intCreditAccountId', records[0].get('intAccountId'));
-            current.set('strCreditAccountDescription', records[0].get('strDescription'));
-        }
-        else if (combo.itemId === 'cboDebitAccount') {
-            current.set('intDebitAccountId', records[0].get('intAccountId'));
-            current.set('strDebitAccountDescription', records[0].get('strDescription'));
-        }
         else if (combo.itemId === 'cboTaxCode') {
             current.set('intTaxCodeId', records[0].get('intTaxCodeId'));
-        }
-    },
-
-    onAccountSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var win = combo.up('window');
-        var current = win.viewModel.data.current;
-
-        if (current) {
-            current.set('strAccountDescription', records[0].get('strDescription'));
         }
     },
 
@@ -406,25 +386,17 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         var pnlFreight = win.down('#pnlFreight');
         var grdInventoryTransfer = win.down('#grdInventoryTransfer');
         var colCost = grdInventoryTransfer.columns[16];
-        var colCreditAccount = grdInventoryTransfer.columns[17];
-        var colCreditAccountDescription = grdInventoryTransfer.columns[18];
-        var colDebitAccount = grdInventoryTransfer.columns[19];
-        var colDebitAccountDescription = grdInventoryTransfer.columns[20];
-        var colTaxCode = grdInventoryTransfer.columns[21];
-        var colTaxAmount = grdInventoryTransfer.columns[22];
+        var colTaxCode = grdInventoryTransfer.columns[17];
+        var colTaxAmount = grdInventoryTransfer.columns[18];
 
-        var colFreightRate = grdInventoryTransfer.columns[23];
-        var colFreightAmount = grdInventoryTransfer.columns[24];
+        var colFreightRate = grdInventoryTransfer.columns[19];
+        var colFreightAmount = grdInventoryTransfer.columns[20];
 
         switch (newValue) {
             case 'Location to Location':
                 pnlFreight.setHidden(false);
 
                 colCost.setHidden(true);
-                colCreditAccount.setHidden(true);
-                colCreditAccountDescription.setHidden(true);
-                colDebitAccount.setHidden(true);
-                colDebitAccountDescription.setHidden(true);
                 colTaxCode.setHidden(true);
                 colTaxAmount.setHidden(true);
 
@@ -435,29 +407,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 pnlFreight.setHidden(true);
 
                 colCost.setHidden(true);
-                colCreditAccount.setHidden(true);
-                colCreditAccountDescription.setHidden(true);
-                colDebitAccount.setHidden(true);
-                colDebitAccountDescription.setHidden(true);
                 colTaxCode.setHidden(true);
                 colTaxAmount.setHidden(true);
 
                 colFreightRate.setHidden(true);
                 colFreightAmount.setHidden(true);
-                break
-            case 'Location to External':
-                pnlFreight.setHidden(false);
-
-                colCost.setHidden(false);
-                colCreditAccount.setHidden(false);
-                colCreditAccountDescription.setHidden(false);
-                colDebitAccount.setHidden(false);
-                colDebitAccountDescription.setHidden(false);
-                colTaxCode.setHidden(false);
-                colTaxAmount.setHidden(false);
-
-                colFreightRate.setHidden(false);
-                colFreightAmount.setHidden(false);
                 break
         }
     },
@@ -626,20 +580,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             "#cboNewLotID": {
                 select: this.onTransferDetailSelect
             },
-            "#cboCreditAccount": {
-                select: this.onTransferDetailSelect
-            },
-            "#cboDebitAccount": {
-                select: this.onTransferDetailSelect
-            },
             "#cboTaxCode": {
                 select: this.onTransferDetailSelect
             },
             "#cboTransferType": {
                 change: this.onTransferTypeChange
-            },
-            "#cboAccountId": {
-                select: this.onAccountSelect
             },
             "#colAvailableQty": {
                 beforerender: this.onDetailGridColumnBeforeRender
