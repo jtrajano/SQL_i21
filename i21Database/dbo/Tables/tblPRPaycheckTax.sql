@@ -25,6 +25,7 @@
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL, 
     CONSTRAINT [PK_tblPRPaycheckTax] PRIMARY KEY ([intPaycheckTaxId]), 
+	CONSTRAINT [FK_tblPRPaycheckTax_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblPRPaycheckTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [tblPRTypeTax]([intTypeTaxId]),
 ) ON [PRIMARY]
 GO
