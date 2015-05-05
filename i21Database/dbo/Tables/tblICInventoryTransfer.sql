@@ -9,10 +9,9 @@
     [intFromLocationId] INT NULL, 
     [intToLocationId] INT NULL, 
     [ysnShipmentRequired] BIT NULL DEFAULT ((0)), 
+	[intStatusId] INT NOT NULL,
     [intShipViaId] INT NULL, 
     [intFreightUOMId] INT NULL, 
-    [intAccountCategoryId] INT NULL, 
-    [intAccountId] INT NULL, 
 	[ysnPosted] BIT NULL DEFAULT((0)),
 	[intCreatedUserId] INT NULL,
 	[intEntityId] INT NULL,
@@ -24,10 +23,9 @@
     CONSTRAINT [FK_tblICInventoryTransfer_FromLocation] FOREIGN KEY ([intFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_ToLocation] FOREIGN KEY ([intToLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblICUnitMeasure] FOREIGN KEY ([intFreightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-    CONSTRAINT [FK_tblICInventoryTransfer_tblGLAccountCategory] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId]), 
-    CONSTRAINT [FK_tblICInventoryTransfer_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
-    CONSTRAINT [FK_tblICInventoryTransfer_EntityCreator] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]) 
+    CONSTRAINT [FK_tblICInventoryTransfer_EntityCreator] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]), 
+    CONSTRAINT [FK_tblICInventoryTransfer_tblICStatus] FOREIGN KEY ([intStatusId]) REFERENCES [tblICStatus]([intStatusId]) 
 )
 
 GO
@@ -130,23 +128,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intFreightUOMId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Category Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryTransfer',
-    @level2type = N'COLUMN',
-    @level2name = N'intAccountCategoryId'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryTransfer',
-    @level2type = N'COLUMN',
-    @level2name = N'intAccountId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort Field',
@@ -192,3 +176,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryTransfer',
     @level2type = N'COLUMN',
     @level2name = N'intEntityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Status Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryTransfer',
+    @level2type = N'COLUMN',
+    @level2name = N'intStatusId'

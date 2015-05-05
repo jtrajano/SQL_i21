@@ -1512,6 +1512,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetProductionDetail.sql" />
     <Build Include="dbo\Tables\tblCFNetworkTaxCode.sql" />
     <Build Include="dbo\Stored Procedures\uspSTBackUpPromotions.sql" />
+    <Build Include="dbo\Tables\tblICStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1543,6 +1544,7 @@
     <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\QM\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\13_ShortcutKey.sql" />
+    <None Include="Scripts\Post-Deployment\IC\7_Status.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
