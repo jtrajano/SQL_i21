@@ -258,7 +258,8 @@ BEGIN
 	IF EXISTS(SELECT 1 FROM tblAPBillDetail A INNER JOIN tblICItem B 
 				ON A.intItemId = B.intItemId 
 				WHERE B.strType IN ('Service','Software','Non-Inventory','Other Charge')
-				AND A.intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+				AND A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+				AND A.intPODetailId > 0)
 	BEGIN
 		DECLARE @countReceivedMisc INT = 0, @billIdReceived INT;
 		WHILE @countReceivedMisc != @totalRecords

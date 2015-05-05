@@ -104,4 +104,8 @@ BEGIN
 						and e.strType = a.strType
 				join tblEntityToContact f
 					on f.intEntityContactId = c.intEntityContactId')
+END
+ELSE
+BEGIN
+	EXEC(N'update tblEntityPortalMenu set strCommand = ''EntityManagement.controller.CustomerContactList'' where strPortalMenuName = ''Customer Contact List'' AND intPortalParentMenuId = 4')
 END 

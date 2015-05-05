@@ -92,6 +92,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DefaultData\POOrderStatus.sql
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
+:r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 
