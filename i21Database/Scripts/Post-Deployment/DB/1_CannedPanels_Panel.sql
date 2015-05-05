@@ -67,9 +67,10 @@ INSERT INTO #TempCannedPanels VALUES (3, 0, 10, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Sub
 INSERT INTO #TempCannedPanels VALUES (4, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely Petro - Invoice Margins Below 0 - Detail', N'Grid', N'', N'iRely Petro - Invoice Margins Below 0 - Detail', N'', N'', N'', N'i21 PT - Berry Oil ', N'All Dates', N'All Dates', N'ptstmmst.ptstm_rev_dt', N'', N'Select ptstmmst.ptstm_bill_to_cus, ptstm_ivc_no, ptstmmst.ptstm_ship_rev_dt, ptstmmst.ptstm_itm_no, ptstmmst.ptstm_loc_no, ptstmmst.ptstm_class, ptstmmst.ptstm_un, ptstmmst.ptstm_un_prc, ptstmmst.ptstm_net, ptstmmst.ptstm_cgs, ptstmmst.ptstm_slsmn_id, ptstmmst.ptstm_pak_desc, ptstmmst.ptstm_un_desc, ptstmmst.ptstm_net - ptstmmst.ptstm_cgs As ''Profit Amount'', (ptstmmst.ptstm_net - ptstmmst.ptstm_cgs) / ptstmmst.ptstm_net*100 As ''Profit Percent'' From ptstmmst Where (ptstmmst.ptstm_net - ptstmmst.ptstm_cgs) / ptstmmst.ptstm_net Is Not Null And @DATE@ And ptstmmst.ptstm_net <> 0 And (ptstmmst.ptstm_net - ptstmmst.ptstm_cgs) / ptstmmst.ptstm_net*100 < ''0'' Order By (ptstmmst.ptstm_net - ptstmmst.ptstm_cgs) / ptstmmst.ptstm_net', N'', N'@DATE@', N'', N'', N'', N'iRely Petro - Invoice Margins Below 0 - Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 57, NULL)
 INSERT INTO #TempCannedPanels VALUES (5, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely Petro - Inventory Overview Detail', N'Grid', N'', N'iRely Petro - Inventory Overview Detail', N'', N'', N'', N'i21 PT - Berry Oil ', N'None', N'', N'', N'', N'Select ptitmmst.ptitm_itm_no, ptitmmst.ptitm_desc, ptitmmst.ptitm_loc_no, ptitmmst.ptitm_class, ptitmmst.ptitm_unit, ptitmmst.ptitm_cost1, ptitmmst.ptitm_avg_cost, ptitmmst.ptitm_std_cost, ptitmmst.ptitm_on_hand, ptitmmst.ptitm_std_cost From ptitmmst Where ptitmmst.ptitm_phys_inv_yno = ''Y''', N'', N'', N'', N'', N'', N'iRely Petro - Inventory Overview Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 63, NULL)
 INSERT INTO #TempCannedPanels VALUES (6, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely AG - Open Contracts Detail', N'Grid', N'', N'iRely AG - Open Contracts Detail', N'', N'', N'', N'FortBooks', N'None', N'', N'', N'', N'Select agcntmst.agcnt_cus_no, agcusmst.agcus_last_name, agcusmst.agcus_first_name, agcntmst.agcnt_loc_no, agcntmst.agcnt_cnt_no, agcntmst.agcnt_cnt_rev_dt, agcntmst.agcnt_due_rev_dt, agcntmst.agcnt_itm_or_cls, agcntmst.agcnt_prc_lvl, agcntmst.agcnt_ppd_yndm, agcntmst.agcnt_un_orig, agcntmst.agcnt_un_prc, agcntmst.agcnt_un_bal, agcntmst.agcnt_slsmn_id From agcntmst Left Join agcusmst ON agcntmst.agcnt_cus_no = agcusmst.agcus_key Where (agcntmst.agcnt_itm_or_cls <> ''*'' And agcntmst.agcnt_un_bal > 0.0)', N'', N'', N'', N'', N'', N'iRely AG - Open Contracts Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 50, NULL)
-INSERT INTO #TempCannedPanels VALUES (7, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely GL - General Ledger History Detail', N'Grid', N'', N'iRely GL - General Ledger History Detail', N'', N'', N'', N'i21 PT - Berry Oil ', N'Last Month', N'Last Month', N'glhstmst.glhst_trans_dt', N'', N'Select glhstmst.glhst_acct1_8, glhstmst.glhst_acct9_16, glhstmst.glhst_period, glhstmst.glhst_trans_dt, glhstmst.glhst_src_id, glhstmst.glhst_src_seq, glhstmst.glhst_dr_cr_ind, glhstmst.glhst_jrnl_no, glhstmst.glhst_ref, glhstmst.glhst_doc, Case When glhstmst.glhst_dr_cr_ind = ''C'' Then glhstmst.glhst_amt * -1 When glhstmst.glhst_dr_cr_ind = ''D'' Then glhstmst.glhst_amt End As Amount, glhstmst.glhst_units, glhstmst.glhst_date From glhstmst Where @DATE@', N'', N'@DATE@', N'', N'', N'', N'iRely GL - General Ledger History Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.2.2', NULL, 1, 26, NULL)
 INSERT INTO #TempCannedPanels VALUES (8, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely AG - Inventory Available for Sale Detail', N'Grid', N'', N'iRely AG - Inventory Available for Sale Detail', N'', N'', N'', N'i21 AG - Demo Test', N'None', N'', N'', N'', N'Select agitmmst.agitm_no, agitmmst.agitm_loc_no, agitmmst.agitm_desc, agitmmst.agitm_class, agitmmst.agitm_un_desc, agitmmst.agitm_un_on_hand, agitmmst.agitm_un_pend_ivcs, agitmmst.agitm_un_on_order, agitmmst.agitm_un_mfg_in_prs, agitmmst.agitm_un_fert_committed, agitmmst.agitm_un_ord_committed, agitmmst.agitm_un_cnt_committed,  agitmmst.agitm_un_on_hand-agitmmst.agitm_un_pend_ivcs+agitmmst.agitm_un_on_order+agitmmst.agitm_un_mfg_in_prs-agitmmst.agitm_un_fert_committed-agitmmst.agitm_un_cnt_committed-agitmmst.agitm_un_ord_committed As [Available] From agitmmst', N'', N'', N'', N'', N'', N'iRely AG - Inventory Available for Sale Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.2.2', NULL, 1, 53, NULL)
  
+INSERT INTO #TempCannedPanels VALUES (7, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely GL - General Ledger History Detail', N'Grid', N'', N'iRely GL - General Ledger History Detail', N'', N'', N'', N'i21 PT - Berry Oil ', N'Last Month', N'Last Month', N'glhstmst.glhst_trans_dt', N'', N'Select glhstmst.glhst_acct1_8, glhstmst.glhst_acct9_16, glhstmst.glhst_period, glhstmst.glhst_trans_dt, glhstmst.glhst_src_id, glhstmst.glhst_src_seq, glhstmst.glhst_dr_cr_ind, glhstmst.glhst_jrnl_no, glhstmst.glhst_ref, glhstmst.glhst_doc, Case When glhstmst.glhst_dr_cr_ind = ''C'' Then glhstmst.glhst_amt * -1 When glhstmst.glhst_dr_cr_ind = ''D'' Then glhstmst.glhst_amt End As Amount, glhstmst.glhst_units, glhstmst.glhst_date From glhstmst Where @DATE@', N'', N'@DATE@', N'', N'', N'', N'iRely GL - General Ledger History Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.2.2', NULL, 1, 26, NULL)
+
 INSERT INTO #TempCannedPanels VALUES (9, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely AG - A/R Customers 120 Days Past Due', N'Grid', N'', N'iRely AG - A/R Customers 120 Days Past Due **MUST REAGE DAILY TO BE ACCURATELY UPDATED**', N'', N'', N'', N'i21 AG - Demo Test', N'None', N'', N'', N'', N'select agcusmst.agcus_last_name, agcusmst.agcus_first_name, agcusmst.agcus_key,
 agcusmst.agcus_ar_per5 as ''Amount''
 from agcusmst where (agcusmst.agcus_ar_per5>0)', N'', N'', N'', N'', N'', N'iRely AG - A/R Customers 120 Days Past Due', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 44, NULL)
@@ -655,7 +656,63 @@ inner join tblEntityCredential on tblAPBill.intEntityId = tblEntityCredential.in
 where ysnPosted = ''0''', N'', N'', N'', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.1', NULL, 6, 111, NULL)
  
 INSERT INTO #TempCannedPanels VALUES (264, 0, 10, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 General Ledger - Chart of Accounts', N'Grid', N'', N'i21 General Ledger - Chart of Accounts', N'Line', N'', N'Chameleon', N'Fort Books - i21', N'None', N'None', N'', N'', N'select strAccountId, strDescription from tblGLAccount', N'', N'', N'', N'', N'', N'', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.1', NULL, 1, 112, NULL)
-
+ 
+INSERT INTO #TempCannedPanels VALUES (267, 0, 10, 100, 250, 0, NULL, NULL, NULL, 0, 1, 0, N'Master', N'i21 Tank Mgt - Deliveries for Review', N'Grid', N'', N'i21 Tank Mgt - Deliveries for Review', N'Line', NULL, N'Chameleon', N'i21 Demo', N'None', N'None', NULL, NULL, N'SELECT 
+	vwcusmst.vwcus_key as ''Cust Number'',
+	CASE 
+		WHEN vwcusmst.vwcus_co_per_ind_cp = ''C''
+			THEN (RTRIM(ISNULL(vwcusmst.vwcus_last_name,'''')) + RTRIM(ISNULL(vwcusmst.vwcus_first_name,'''')) + RTRIM(ISNULL(vwcusmst.vwcus_mid_init,'''')) + RTRIM(ISNULL(vwcusmst.vwcus_name_suffix,'''')))
+		ELSE
+		    CASE 
+				WHEN vwcusmst.vwcus_first_name IS NULL OR RTRIM(vwcusmst.vwcus_first_name) = ''''
+					THEN RTRIM(vwcusmst.vwcus_last_name) + RTRIM(vwcusmst.vwcus_name_suffix)
+				ELSE RTRIM(vwcusmst.vwcus_last_name) + RTRIM(vwcusmst.vwcus_name_suffix) + '', '' + RTRIM(vwcusmst.vwcus_first_name) + RTRIM(vwcusmst.vwcus_mid_init)
+			END
+		END as ''Cust Name'',
+	tblTMSite.intSiteNumber as ''Site Number'',
+	tblTMDeliveryHistory.strProductDelivered as ''Item'',
+	tblTMDeliveryHistory.dtmMarkForReviewDate ''Date Marked As For Review'',
+	tblTMDeliveryHistory.dblGallonsInTankAfterDelivery as ''Gallons'',
+	CASE 
+		WHEN tblTMDeliveryHistory.dblQuantityDelivered < 0 
+			THEN ''C'' 
+		ELSE ''I'' 
+	END as ''Transaction Type''
+FROM tblTMDeliveryHistory
+	INNER JOIN tblTMSite ON tblTMDeliveryHistory.intSiteID = tblTMSite.intSiteID
+	INNER JOIN tblTMCustomer ON tblTMSite.intCustomerID = tblTMCustomer.intCustomerID
+	INNER JOIN vwcusmst ON tblTMCustomer.intCustomerNumber = vwcusmst.A4GLIdentity
+WHERE tblTMDeliveryHistory.ysnForReview = 1', NULL, N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.1', NULL, 17, 113, NULL)
+ 
+INSERT INTO #TempCannedPanels VALUES (270, 0, 10, 100, 250, 0, NULL, NULL, NULL, 0, 1, 0, N'Master', N'i21 Tank Mgt - Tank Township Details for Property Tax', N'Grid', N'', N'i21 Tank Mgt - Tank Township Details for Property Tax', N'Line', NULL, N'Chameleon', N'Fort Books - i21', N'None', N'None', NULL, NULL, N'select 
+	vwcusmst.vwcus_last_name, 
+	vwcusmst.vwcus_first_name, 
+	tblTMTankTownship.strTankTownship, 
+	tblTMSite.strSiteAddress, 
+	tblTMSite.strCity, 
+	tblTMSite.strState, 
+	tblTMDevice.strBulkPlant, 
+	tblTMDevice.dblPurchasePrice, 
+	tblTMDevice.dtmPurchaseDate, 
+	tblTMDevice.dtmManufacturedDate,
+	tblTMDevice.strManufacturerID, 
+	tblTMDevice.dblTankCapacity, 
+	tblTMDevice.strSerialNumber, 
+	tblTMInventoryStatusType.strInventoryStatusType, 
+	tblTMDevice.strOwnership, 
+	tblTMTankType.strTankType, 
+	tblTMDeviceType.strDeviceType
+from tblTMDevice
+	left outer join tblTMSiteDevice on tblTMDevice.intDeviceId = tblTMSiteDevice.intDeviceId
+	left outer join tblTMSite on tblTMSiteDevice.intSiteID = tblTMSite.intSiteID
+	left outer join tblTMCustomer on tblTMSite.intCustomerID = tblTMCustomer.intCustomerID
+	left outer join vwcusmst on tblTMCustomer.intCustomerNumber = vwcusmst.A4GLIdentity
+	left outer join tblTMTankTownship on tblTMTankTownship.intTankTownshipId = tblTMSite.intTankTownshipId
+	left outer join tblTMInventoryStatusType on tblTMInventoryStatusType.intInventoryStatusTypeId = tblTMDevice.intInventoryStatusTypeId
+	left outer join tblTMTankType on tblTMTankType.intTankTypeId = tblTMDevice.intTankTypeId
+	left outer join tblTMDeviceType on tblTMDeviceType.intDeviceTypeId = tblTMDevice.intDeviceTypeId
+where strOwnership = ''Company Owned''', NULL, N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.1', NULL, 13, 114, NULL)
+ 
 
 print('/*******************  END INSERTING canned panels on temporary panel table  *******************/')
 
