@@ -2933,4 +2933,74 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strStatus" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a7539659-986f-4d5f-9880-43234d35145f" ChangeDateTime="05/05/2015 12:43:56">
+    <Property Name="ElementName" Value="[dbo].[tblGRCustomerStorage].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCustomerStorage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCustomerStorageId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9d011118-d7b8-47ca-adcb-809d8e2fdf61" ChangeDateTime="05/05/2015 12:50:41">
+    <Property Name="ElementName" Value="[dbo].[tblGRCustomerStorage].[intStorageSchedule]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCustomerStorage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageScheduleId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ce7db053-2fa4-43e6-9cd6-8d924df4c970" ChangeDateTime="05/05/2015 12:54:50">
+    <Property Name="ElementName" Value="[dbo].[tblGRCustomerStorage].[intTicketNumber]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCustomerStorage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTicketId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0b64c14a-0f2c-43a6-aa23-e9ef01be78cd" ChangeDateTime="05/05/2015 12:56:02">
+    <Property Name="ElementName" Value="[dbo].[tblGRCustomerStorage].[intDiscountScheduleID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCustomerStorage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDiscountScheduleId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="897cd3bd-7630-4f35-b51d-d6233f010035" ChangeDateTime="05/05/2015 12:57:03">
+    <Property Name="ElementName" Value="[dbo].[tblGRCustomerStorage].[intTotalPriceShrink]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCustomerStorage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblTotalPriceShrink" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="40b78fda-57db-478e-a005-41280d33da31" ChangeDateTime="05/05/2015 13:00:12">
+    <Property Name="ElementName" Value="[dbo].[tblGRCustomerStorage].[intTotalWeightShrink]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCustomerStorage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblTotalWeightShrink" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b2ae6f81-147a-46f6-8a92-8a67340effa4" ChangeDateTime="05/05/2015 13:37:08">
+    <Property Name="ElementName" Value="[dbo].[tblGRCustomerStorage].[intCompanyLocationid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCustomerStorage]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ce705639-fa69-488d-8cb7-9367cc65c5bb" ChangeDateTime="05/05/2015 13:40:13">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageDiscount].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageDiscount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageDiscountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b54fcc3f-79bc-486d-b7d0-27ae3487b67e" ChangeDateTime="05/05/2015 14:07:25">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageHistory].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageHistoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d1d580f1-e23a-4e8b-8c4d-c96e95d93bb5" ChangeDateTime="05/05/2015 14:22:41">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageHistory].[intContractSequenceId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intContractDetailId" />
+  </Operation>
 </Operations>

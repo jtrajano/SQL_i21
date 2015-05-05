@@ -1520,6 +1520,9 @@
     <Build Include="dbo\Views\vyuAPRptCashRequirements.sql" />
     <Build Include="dbo\Stored Procedures\uspSOProcessToItemShipment.sql" />
     <Build Include="dbo\Views\vyuARShippedItems.sql" />
+    <Build Include="dbo\Tables\tblGRCustomerStorage.sql" />
+    <Build Include="dbo\Tables\tblGRStorageDiscount.sql" />
+    <Build Include="dbo\Tables\tblGRStorageHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
