@@ -254,6 +254,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 ],
                                                                 flex: 1,
                                                                 itemId: 'cboLocation',
+                                                                margin: '0 5 0 0',
                                                                 fieldLabel: 'Location',
                                                                 labelWidth: 70,
                                                                 displayField: 'strLocationName',
@@ -262,7 +263,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                             {
                                                                 xtype: 'datefield',
                                                                 itemId: 'dtmDate',
-                                                                margin: '0 5',
+                                                                margin: '0 5 0 0',
                                                                 maxWidth: 150,
                                                                 fieldLabel: 'Date',
                                                                 labelWidth: 40
@@ -271,6 +272,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 xtype: 'combobox',
                                                                 flex: 1,
                                                                 itemId: 'cboAdjustmentType',
+                                                                margin: '0 5 0 0',
                                                                 fieldLabel: 'Adjustment Type',
                                                                 labelWidth: 110,
                                                                 displayField: 'strDescription',
@@ -280,7 +282,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
                                                                 itemId: 'txtAdjustmentNumber',
-                                                                margin: '0 0 0 5',
                                                                 fieldLabel: 'Adjustment No',
                                                                 labelWidth: 90,
                                                                 readOnly: true,
@@ -334,7 +335,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnViewItem',
                                                                 iconCls: 'small-view',
-                                                                text: 'View'
+                                                                text: 'View Item'
                                                             },
                                                             {
                                                                 xtype: 'button',

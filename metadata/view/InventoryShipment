@@ -313,29 +313,6 @@
                                 "height": 57,
                                 "icon": null,
                                 "iconAlign": "top",
-                                "iconCls": "large-pallet",
-                                "itemId": "btnInventory",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Inventory",
-                                "width": 60
-                            },
-                            "name": "MyButton",
-                            "designerId": "14d62d72-72f6-43b9-b110-5919ff4910dc"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
                                 "iconCls": "large-notes",
                                 "itemId": "btnNotes",
                                 "layout|flex": null,
@@ -463,52 +440,6 @@
                                             "designerId": "246f74e4-2456-40d1-b8d9-5476871e3bbd",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "blankText": "Created on Save",
-                                                        "emptyText": "Created on Save",
-                                                        "fieldLabel": "Shipment No",
-                                                        "itemId": "txtShipmentNo",
-                                                        "labelAlign": "top",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "name": null,
-                                                        "readOnly": true,
-                                                        "width": null
-                                                    },
-                                                    "name": "MyTextField24",
-                                                    "designerId": "7c423f41-ae7b-4826-b951-aceebb24c919"
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Date",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Ship Date",
-                                                        "itemId": "dtmShipDate",
-                                                        "labelAlign": "top",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null,
-                                                        "layout|margins": null,
-                                                        "margin": "0 5",
-                                                        "maxWidth": 100,
-                                                        "name": null,
-                                                        "readOnly": null,
-                                                        "width": null
-                                                    },
-                                                    "name": "MyDateField3",
-                                                    "designerId": "b7490c97-8d85-4e1c-83fd-3e17859eb8c9"
-                                                },
-                                                {
                                                     "type": "Ext.form.field.ComboBox",
                                                     "reference": {
                                                         "name": "items",
@@ -524,6 +455,7 @@
                                                         "labelWidth": 110,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
+                                                        "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
                                                         "valueField": "intOrderType",
@@ -531,6 +463,29 @@
                                                     },
                                                     "name": "MyComboBox72",
                                                     "designerId": "d9f975dc-6232-4bd5-bfc4-d4b94a2f14d5"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Ship Date",
+                                                        "itemId": "dtmShipDate",
+                                                        "labelAlign": "top",
+                                                        "labelWidth": 110,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "margin": "0 5 0 0",
+                                                        "maxWidth": 100,
+                                                        "name": null,
+                                                        "readOnly": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyDateField3",
+                                                    "designerId": "b7490c97-8d85-4e1c-83fd-3e17859eb8c9"
                                                 },
                                                 {
                                                     "type": "Ext.form.field.Text",
@@ -547,7 +502,7 @@
                                                         "labelWidth": 110,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
-                                                        "margin": "0 5",
+                                                        "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
                                                         "width": null
@@ -569,6 +524,7 @@
                                                         "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
+                                                        "margin": "0 5 0 0",
                                                         "maxWidth": 115,
                                                         "name": null,
                                                         "readOnly": null,
@@ -615,7 +571,7 @@
                                                         "labelWidth": 60,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "margin": "0 5",
+                                                        "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
                                                         "valueField": "intEntityCustomerId",
@@ -651,7 +607,7 @@
                                                         "labelWidth": 110,
                                                         "layout|flex": 1.5,
                                                         "layout|margins": null,
-                                                        "margin": null,
+                                                        "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": true,
                                                         "width": null
@@ -703,7 +659,7 @@
                                                         "labelWidth": 110,
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
-                                                        "margin": "0 0 0 5",
+                                                        "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
                                                         "valueField": "intFreightTermId",
@@ -721,6 +677,29 @@
                                                             "type": "string"
                                                         }
                                                     ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "blankText": "Created on Save",
+                                                        "emptyText": "Created on Save",
+                                                        "fieldLabel": "Shipment No",
+                                                        "itemId": "txtShipmentNo",
+                                                        "labelAlign": "top",
+                                                        "labelWidth": 110,
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "name": null,
+                                                        "readOnly": true,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyTextField24",
+                                                    "designerId": "7c423f41-ae7b-4826-b951-aceebb24c919"
                                                 }
                                             ]
                                         }
@@ -1618,6 +1597,42 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
+                                                                        "iconCls": "small-add",
+                                                                        "itemId": "btnInsertItem",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Insert"
+                                                                    },
+                                                                    "name": "MyButton24",
+                                                                    "designerId": "3e1a0566-a654-456e-bdf5-351465cc1187"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-view",
+                                                                        "itemId": "btnViewItem",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "View Item"
+                                                                    },
+                                                                    "name": "MyButton25",
+                                                                    "designerId": "5634229d-b93c-417d-89d9-2f97aff3c703"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "itemId": "btnRemoveItem",
                                                                         "layout|flex": null,
@@ -1651,7 +1666,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter131",
+                                                                    "name": "filter14",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2368,7 +2383,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter132",
+                                                                    "name": "filter15",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2934,7 +2949,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter133",
+                                                                    "name": "filter16",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3188,7 +3203,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter134",
+                                                    "name": "filter17",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3365,7 +3380,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging11",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

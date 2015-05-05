@@ -452,9 +452,9 @@ Ext.define('Inventory.view.Category', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colDetailUpcCode',
                                                         minWidth: 110,
+                                                        dataIndex: 'string',
                                                         text: 'UPC Code',
                                                         flex: 2
                                                     },
@@ -702,8 +702,8 @@ Ext.define('Inventory.view.Category', {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
                                                                 itemId: 'btnEditLocation',
-                                                                iconCls: 'small-edit',
-                                                                text: 'Edit'
+                                                                iconCls: 'small-view',
+                                                                text: 'View'
                                                             },
                                                             {
                                                                 xtype: 'button',

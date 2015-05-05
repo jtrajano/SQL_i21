@@ -24,8 +24,8 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
-        'Ext.form.field.Date',
         'Ext.form.field.ComboBox',
+        'Ext.form.field.Date',
         'Ext.form.field.TextArea',
         'Ext.grid.Panel',
         'Ext.selection.CheckboxModel',
@@ -179,17 +179,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         xtype: 'button',
                                         tabIndex: -1,
                                         height: 57,
-                                        itemId: 'btnInventory',
-                                        width: 60,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-pallet',
-                                        scale: 'large',
-                                        text: 'Inventory'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
                                         itemId: 'btnNotes',
                                         width: 50,
                                         iconAlign: 'top',
@@ -252,29 +241,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'textfield',
-                                                                flex: 1,
-                                                                itemId: 'txtShipmentNo',
-                                                                fieldLabel: 'Shipment No',
-                                                                labelAlign: 'top',
-                                                                labelWidth: 110,
-                                                                readOnly: true,
-                                                                blankText: 'Created on Save',
-                                                                emptyText: 'Created on Save'
-                                                            },
-                                                            {
-                                                                xtype: 'datefield',
-                                                                itemId: 'dtmShipDate',
-                                                                margin: '0 5',
-                                                                maxWidth: 100,
-                                                                fieldLabel: 'Ship Date',
-                                                                labelAlign: 'top',
-                                                                labelWidth: 110
-                                                            },
-                                                            {
                                                                 xtype: 'combobox',
                                                                 flex: 1,
                                                                 itemId: 'cboOrderType',
+                                                                margin: '0 5 0 0',
                                                                 fieldLabel: 'Order Type',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
@@ -282,10 +252,19 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 valueField: 'intOrderType'
                                                             },
                                                             {
+                                                                xtype: 'datefield',
+                                                                itemId: 'dtmShipDate',
+                                                                margin: '0 5 0 0',
+                                                                maxWidth: 100,
+                                                                fieldLabel: 'Ship Date',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110
+                                                            },
+                                                            {
                                                                 xtype: 'textfield',
                                                                 flex: 1,
                                                                 itemId: 'txtReferenceNumber',
-                                                                margin: '0 5',
+                                                                margin: '0 5 0 0',
                                                                 fieldLabel: 'Reference Number',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110
@@ -293,6 +272,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             {
                                                                 xtype: 'datefield',
                                                                 itemId: 'dtmRequestedArrival',
+                                                                margin: '0 5 0 0',
                                                                 maxWidth: 115,
                                                                 fieldLabel: 'Requested Arrival',
                                                                 labelAlign: 'top',
@@ -321,7 +301,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     }
                                                                 ],
                                                                 itemId: 'cboCustomer',
-                                                                margin: '0 5',
+                                                                margin: '0 5 0 0',
                                                                 fieldLabel: 'Customer',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 60,
@@ -332,6 +312,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 xtype: 'textfield',
                                                                 flex: 1.5,
                                                                 itemId: 'txtCustomerName',
+                                                                margin: '0 5 0 0',
                                                                 fieldLabel: 'Customer Name',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
@@ -367,12 +348,23 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                 ],
                                                                 flex: 1,
                                                                 itemId: 'cboFreightTerms',
-                                                                margin: '0 0 0 5',
+                                                                margin: '0 5 0 0',
                                                                 fieldLabel: 'Freight Terms',
                                                                 labelAlign: 'top',
                                                                 labelWidth: 110,
                                                                 displayField: 'strFreightTerm',
                                                                 valueField: 'intFreightTermId'
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                flex: 1,
+                                                                itemId: 'txtShipmentNo',
+                                                                fieldLabel: 'Shipment No',
+                                                                labelAlign: 'top',
+                                                                labelWidth: 110,
+                                                                readOnly: true,
+                                                                blankText: 'Created on Save',
+                                                                emptyText: 'Created on Save'
                                                             }
                                                         ]
                                                     }
@@ -744,6 +736,20 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             padding: '0 0 0 1'
                                                                         },
                                                                         items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertItem',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnViewItem',
+                                                                                iconCls: 'small-view',
+                                                                                text: 'View Item'
+                                                                            },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,

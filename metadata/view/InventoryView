@@ -502,7 +502,7 @@
                                         "hidden": null,
                                         "layout|flex": null
                                     },
-                                    "name": "filter114",
+                                    "name": "filter113",
                                     "designerId": "17ef8d94-ba58-4dcf-b57f-6946ed2320bd",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }
@@ -913,7 +913,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar13",
+                    "name": "statusbar1",
                     "designerId": "53424c2a-59f3-42b0-b966-bbbcef39f41e",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

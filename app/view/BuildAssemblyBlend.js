@@ -434,6 +434,13 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                 {
                                     xtype: 'button',
                                     tabIndex: -1,
+                                    itemId: 'btnViewItem',
+                                    iconCls: 'small-view',
+                                    text: 'View Item'
+                                },
+                                {
+                                    xtype: 'button',
+                                    tabIndex: -1,
                                     itemId: 'btnRemove',
                                     iconCls: 'small-delete',
                                     text: 'Remove'
@@ -464,8 +471,8 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                         },
                         {
                             xtype: 'gridcolumn',
-                            dataIndex: 'string',
                             itemId: 'colSubLocation',
+                            dataIndex: 'string',
                             text: 'Sub Location',
                             editor: {
                                 xtype: 'gridcombobox',

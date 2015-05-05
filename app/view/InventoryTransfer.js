@@ -588,9 +588,9 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnEditItem',
+                                                                itemId: 'btnViewItem',
                                                                 iconCls: 'small-view',
-                                                                text: 'View'
+                                                                text: 'View Item'
                                                             },
                                                             {
                                                                 xtype: 'button',
