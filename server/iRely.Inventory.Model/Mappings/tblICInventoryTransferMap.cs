@@ -21,15 +21,17 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intFromLocationId).HasColumnName("intFromLocationId");
             this.Property(t => t.intToLocationId).HasColumnName("intToLocationId");
             this.Property(t => t.ysnShipmentRequired).HasColumnName("ysnShipmentRequired");
+            this.Property(t => t.intStatusId).HasColumnName("intStatusId");
             this.Property(t => t.intShipViaId).HasColumnName("intShipViaId");
             this.Property(t => t.intFreightUOMId).HasColumnName("intFreightUOMId");
-            this.Property(t => t.intAccountCategoryId).HasColumnName("intAccountCategoryId");
-            this.Property(t => t.intAccountId).HasColumnName("intAccountId");
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
             this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.intCreatedUserId).HasColumnName("intCreatedUserId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
+            this.HasRequired(p => p.tblICStatus)
+                .WithMany(p => p.tblICInventoryTransfers)
+                .HasForeignKey(p => p.intStatusId);
             this.HasMany(p => p.tblICInventoryTransferDetails)
                 .WithRequired(p => p.tblICInventoryTransfer)
                 .HasForeignKey(p => p.intInventoryTransferId);
@@ -67,12 +69,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemWeightUOMId).HasColumnName("intItemWeightUOMId");
             this.Property(t => t.dblGrossWeight).HasColumnName("dblGrossWeight").HasPrecision(18, 6);
             this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight").HasPrecision(18, 6);
-            this.Property(t => t.dblNetWeight).HasColumnName("dblNetWeight").HasPrecision(18, 6);
             this.Property(t => t.intNewLotId).HasColumnName("intNewLotId");
             this.Property(t => t.strNewLotId).HasColumnName("strNewLotId");
             this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(18, 6);
-            this.Property(t => t.intCreditAccountId).HasColumnName("intCreditAccountId");
-            this.Property(t => t.intDebitAccountId).HasColumnName("intDebitAccountId");
             this.Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
             this.Property(t => t.dblFreightRate).HasColumnName("dblFreightRate").HasPrecision(18, 6);
             this.Property(t => t.dblFreightAmount).HasColumnName("dblFreightAmount").HasPrecision(18, 6);
@@ -105,12 +104,6 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.WeightUOM)
                 .WithMany(p => p.WeightTransferDetails)
                 .HasForeignKey(p => p.intItemWeightUOMId);
-            this.HasOptional(p => p.CreditAccount)
-                .WithMany(p => p.CreditTransferDetails)
-                .HasForeignKey(p => p.intCreditAccountId);
-            this.HasOptional(p => p.DebitAccount)
-                .WithMany(p => p.DebitTransferDetails)
-                .HasForeignKey(p => p.intDebitAccountId);
             this.HasOptional(p => p.tblSMTaxCode)
                 .WithMany(p => p.tblICInventoryTransferDetails)
                 .HasForeignKey(p => p.intTaxCodeId);

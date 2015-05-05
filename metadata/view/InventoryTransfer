@@ -9,14 +9,14 @@
         "collapsible": true,
         "designer|userAlias": "icinventorytransfer",
         "designer|userClassName": "InventoryTransfer",
-        "height": 700,
+        "height": 580,
         "helpURL": null,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 510,
+        "minHeight": 580,
         "minWidth": 860,
         "minimizable": null,
         "mixins": null,
@@ -392,249 +392,193 @@
                                             "designerId": "2dee4c8e-b245-4517-83c9-6f91c5cb2e41",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.container.Container",
+                                                    "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "vbox",
-                                                        "layout|flex": null,
+                                                        "alwaysDisplayDecimals": null,
+                                                        "blankText": "Created on Save",
+                                                        "designer|createAlias": null,
+                                                        "emptyText": "Created on Save",
+                                                        "fieldLabel": "Transfer No",
+                                                        "hidden": null,
+                                                        "hideTrigger": null,
+                                                        "itemId": "txtTransferNumber",
+                                                        "labelWidth": 90,
+                                                        "layout|flex": 1,
                                                         "layout|margins": null,
-                                                        "margin": null
+                                                        "name": null,
+                                                        "readOnly": true,
+                                                        "width": null
                                                     },
-                                                    "name": "MyContainer3",
-                                                    "designerId": "40c4984f-3f76-4622-b458-b775f94d6cb2",
-                                                    "cn": [
+                                                    "name": "MyTextField20",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean"
+                                                    },
+                                                    "designerId": "ca070701-b51b-464f-9ada-5bb6572bf51d",
+                                                    "customConfigs": [
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strDescription',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Transfer Type',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strDescription",
-                                                                "fieldLabel": "Transfer Type",
-                                                                "hidden": null,
-                                                                "hideTrigger": null,
-                                                                "itemId": "cboTransferType",
-                                                                "labelWidth": 90,
-                                                                "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "valueField": "strDescription",
-                                                                "width": null
-                                                            },
-                                                            "name": "MyComboBox",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "764226c7-ebde-49c6-a124-2b069ef8007a",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "alwaysDisplayDecimals": null,
+                                                        "designer|createAlias": null,
+                                                        "fieldLabel": "Transfer Date",
+                                                        "hideTrigger": null,
+                                                        "itemId": "dtmTransferDate",
+                                                        "labelWidth": 90,
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "margin": null,
+                                                        "name": null,
+                                                        "readOnly": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyDateField10",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean"
+                                                    },
+                                                    "designerId": "e312af20-ad91-4bed-b078-eabc86873d47",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "alwaysDisplayDecimals": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Transfer Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strDescription",
+                                                        "fieldLabel": "Transfer Type",
+                                                        "hidden": null,
+                                                        "hideTrigger": null,
+                                                        "itemId": "cboTransferType",
+                                                        "labelWidth": 90,
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "name": null,
+                                                        "valueField": "strDescription",
+                                                        "width": null
+                                                    },
+                                                    "name": "MyComboBox",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean",
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "764226c7-ebde-49c6-a124-2b069ef8007a",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intEntityId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Entity Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intUserSecurityID',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'User Security Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strUserName',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'User Name',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strFullName',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Full Name',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strUserName",
-                                                                "fieldLabel": "Transferred By",
-                                                                "hidden": null,
-                                                                "hideTrigger": null,
-                                                                "itemId": "cboTransferredBy",
-                                                                "labelWidth": 90,
-                                                                "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "readOnly": true,
-                                                                "valueField": "intEntityId",
-                                                                "width": null
-                                                            },
-                                                            "name": "MyComboBox18",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "46eade8b-1cc6-4f7f-acaf-572ed494bc1a",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "alwaysDisplayDecimals": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intEntityId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Entity Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intUserSecurityID',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'User Security Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUserName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'User Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strFullName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Full Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUserName",
+                                                        "fieldLabel": "Transferred By",
+                                                        "hidden": null,
+                                                        "hideTrigger": null,
+                                                        "itemId": "cboTransferredBy",
+                                                        "labelWidth": 90,
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "name": null,
+                                                        "readOnly": true,
+                                                        "valueField": "intEntityId",
+                                                        "width": null
+                                                    },
+                                                    "name": "MyComboBox18",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean",
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "46eade8b-1cc6-4f7f-acaf-572ed494bc1a",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
                                                         },
                                                         {
-                                                            "type": "Ext.container.Container",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "container|align": "stretch",
-                                                                "layout": "hbox",
-                                                                "layout|flex": 1,
-                                                                "margin": "0 0 5 0 "
-                                                            },
-                                                            "name": "MyContainer18",
-                                                            "designerId": "def8d940-6498-4412-8200-4bcd61babdce",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Date",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "alwaysDisplayDecimals": null,
-                                                                        "designer|createAlias": null,
-                                                                        "fieldLabel": "Transfer Date",
-                                                                        "hideTrigger": null,
-                                                                        "itemId": "dtmTransferDate",
-                                                                        "labelWidth": 90,
-                                                                        "layout|flex": 1,
-                                                                        "layout|margins": null,
-                                                                        "margin": null,
-                                                                        "name": null,
-                                                                        "readOnly": null,
-                                                                        "width": null
-                                                                    },
-                                                                    "name": "MyDateField10",
-                                                                    "configAlternates": {
-                                                                        "alwaysDisplayDecimals": "boolean"
-                                                                    },
-                                                                    "designerId": "e312af20-ad91-4bed-b078-eabc86873d47",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "alwaysDisplayDecimals",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.Checkbox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "boxLabel": null,
-                                                                        "fieldLabel": "Shipment Required",
-                                                                        "itemId": "chkShipmentRequired",
-                                                                        "labelWidth": 110,
-                                                                        "layout|flex": null,
-                                                                        "margin": "0 0 0 5"
-                                                                    },
-                                                                    "name": "MyCheckbox4",
-                                                                    "designerId": "e2853660-7bfe-49b1-881f-5f7453f5ea3f"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "blankText": "Created on Save",
-                                                                "designer|createAlias": null,
-                                                                "emptyText": "Created on Save",
-                                                                "fieldLabel": "Transfer No",
-                                                                "hidden": null,
-                                                                "hideTrigger": null,
-                                                                "itemId": "txtTransferNumber",
-                                                                "labelWidth": 90,
-                                                                "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "readOnly": true,
-                                                                "width": null
-                                                            },
-                                                            "name": "MyTextField20",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean"
-                                                            },
-                                                            "designerId": "ca070701-b51b-464f-9ada-5bb6572bf51d",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
                                                         }
                                                     ]
                                                 },
@@ -653,151 +597,224 @@
                                                     },
                                                     "name": "MyTextField22",
                                                     "designerId": "41b9c35c-73f3-4c0e-a119-2f601680bc73"
-                                                },
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": 1,
+                                                "margin": "0 0 0 5"
+                                            },
+                                            "name": "MyContainer17",
+                                            "designerId": "5aa92c00-c448-42f6-b961-9b0cae8e06e0",
+                                            "cn": [
                                                 {
-                                                    "type": "Ext.container.Container",
+                                                    "type": "Ext.form.field.ComboBox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "vbox",
+                                                        "alwaysDisplayDecimals": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strLocationName",
+                                                        "fieldLabel": "From Location",
+                                                        "hidden": null,
+                                                        "hideTrigger": null,
+                                                        "itemId": "cboFromLocation",
+                                                        "labelWidth": 110,
                                                         "layout|flex": null,
                                                         "layout|margins": null,
-                                                        "margin": null
+                                                        "name": null,
+                                                        "valueField": "intCompanyLocationId",
+                                                        "width": null
                                                     },
-                                                    "name": "MyContainer12",
-                                                    "designerId": "476b0bf4-335f-4c8c-8b8a-f2394b22bf78",
-                                                    "cn": [
+                                                    "name": "MyComboBox18",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean",
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "72e3ff13-6f2d-4f16-9add-dc772d76d9f7",
+                                                    "customConfigs": [
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intCompanyLocationId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Location Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strLocationName',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Location Name',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strLocationType',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Location Type',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strLocationName",
-                                                                "fieldLabel": "From Location",
-                                                                "hidden": null,
-                                                                "hideTrigger": null,
-                                                                "itemId": "cboFromLocation",
-                                                                "labelWidth": 90,
-                                                                "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "valueField": "intCompanyLocationId",
-                                                                "width": null
-                                                            },
-                                                            "name": "MyComboBox18",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "72e3ff13-6f2d-4f16-9add-dc772d76d9f7",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intCompanyLocationId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Location Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strLocationName',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Location Name',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strLocationType',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Location Type',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strLocationName",
-                                                                "fieldLabel": "To Location",
-                                                                "hidden": null,
-                                                                "hideTrigger": null,
-                                                                "itemId": "cboToLocation",
-                                                                "labelWidth": 90,
-                                                                "layout|flex": 1,
-                                                                "layout|margins": null,
-                                                                "margin": null,
-                                                                "name": null,
-                                                                "valueField": "intCompanyLocationId",
-                                                                "width": null
-                                                            },
-                                                            "name": "MyComboBox20",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "74b1e33a-fd6c-4309-b85b-f992e36a7614",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "alwaysDisplayDecimals": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strLocationName",
+                                                        "fieldLabel": "To Location",
+                                                        "hidden": null,
+                                                        "hideTrigger": null,
+                                                        "itemId": "cboToLocation",
+                                                        "labelWidth": 110,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "margin": null,
+                                                        "name": null,
+                                                        "valueField": "intCompanyLocationId",
+                                                        "width": null
+                                                    },
+                                                    "name": "MyComboBox20",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean",
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "74b1e33a-fd6c-4309-b85b-f992e36a7614",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Shipment Required",
+                                                        "itemId": "chkShipmentRequired",
+                                                        "labelWidth": 110,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox4",
+                                                    "designerId": "e2853660-7bfe-49b1-881f-5f7453f5ea3f"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "alwaysDisplayDecimals": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intStatusId',",
+                                                            "\t\tdataType: 'int',",
+                                                            "\t\ttext: 'Status Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "    {",
+                                                            "\t\tdataIndex: 'strStatus',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Status',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strStatus",
+                                                        "fieldLabel": "Status",
+                                                        "hidden": null,
+                                                        "hideTrigger": null,
+                                                        "itemId": "cboStatus",
+                                                        "labelWidth": 110,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "name": null,
+                                                        "valueField": "intStatusId",
+                                                        "width": null
+                                                    },
+                                                    "name": "MyComboBox9",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean",
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "df0a0a48-0833-48e4-9b9b-0a328798b02c",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
                                                         }
                                                     ]
                                                 }
@@ -814,10 +831,12 @@
                                                 "container|align": "stretch",
                                                 "designer|displayName": "container",
                                                 "layout": "vbox",
-                                                "layout|flex": 1
+                                                "layout|flex": null,
+                                                "layout|margins": null,
+                                                "margin": "0 0 0 5"
                                             },
-                                            "name": "MyContainer17",
-                                            "designerId": "5aa92c00-c448-42f6-b961-9b0cae8e06e0",
+                                            "name": "MyContainer12",
+                                            "designerId": "476b0bf4-335f-4c8c-8b8a-f2394b22bf78",
                                             "cn": [
                                                 {
                                                     "type": "Ext.panel.Panel",
@@ -831,8 +850,8 @@
                                                         "container|align": "stretch",
                                                         "itemId": "pnlFreight",
                                                         "layout": "vbox",
-                                                        "layout|flex": 1,
-                                                        "margin": "0 0 0 5",
+                                                        "layout|flex": null,
+                                                        "margin": "",
                                                         "title": "Freight & Taxes"
                                                     },
                                                     "name": "MyPanel6",
@@ -960,178 +979,6 @@
                                                                 {
                                                                     "group": "(Custom Properties)",
                                                                     "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intAccountCategoryId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Account Category Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strAccountCategory',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Account Category',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strAccountCategory",
-                                                                "fieldLabel": "Account Category",
-                                                                "hidden": null,
-                                                                "hideTrigger": null,
-                                                                "itemId": "cboAccountCategory",
-                                                                "labelWidth": 120,
-                                                                "layout|flex": null,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "valueField": "intAccountCategoryId",
-                                                                "width": null
-                                                            },
-                                                            "name": "MyComboBox19",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "a99f3052-24da-4c95-bbbf-4b11bca7d6ee",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intAccountId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Account Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strAccountId',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Account Id',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strDescription',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Description',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intAccountGroupId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Account Group Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strAccountGroup',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Account Group',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strAccountType',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Account Type',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strAccountId",
-                                                                "fieldLabel": "Account ID",
-                                                                "hidden": null,
-                                                                "hideTrigger": null,
-                                                                "itemId": "cboAccountId",
-                                                                "labelWidth": 120,
-                                                                "layout|flex": null,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "valueField": "intAccountId",
-                                                                "width": null
-                                                            },
-                                                            "name": "MyComboBox21",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "59e1941f-73c3-49bb-8f24-5dee2ce34967",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Text",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "designer|createAlias": null,
-                                                                "fieldLabel": "Account Description",
-                                                                "hidden": null,
-                                                                "hideTrigger": null,
-                                                                "itemId": "txtAccountDescription",
-                                                                "labelWidth": 120,
-                                                                "layout|flex": null,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "readOnly": true,
-                                                                "width": null
-                                                            },
-                                                            "name": "MyTextField7",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean"
-                                                            },
-                                                            "designerId": "20ea93d7-640e-4dbd-a5f6-9f6e9e4cc68a",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
                                                                     "type": "string"
                                                                 }
                                                             ]
@@ -2163,206 +2010,6 @@
                                                     "designerId": "a50b6383-555d-48f5-9688-cecbf0b546d0"
                                                 }
                                             ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strCreditAccount",
-                                                "itemId": "colCreditAccount",
-                                                "text": "Credit Account",
-                                                "width": 90
-                                            },
-                                            "name": "MyColumn3",
-                                            "designerId": "44813fae-ef3e-44e9-ad3d-9dd3978e8305",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intAccountId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Account Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strAccountId',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Account Id',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intAccountGroupId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Account Group Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strAccountGroup',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Account Group',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strAccountType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Account Type',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strAccountId",
-                                                        "itemId": "cboCreditAccount",
-                                                        "valueField": "strAccountId"
-                                                    },
-                                                    "name": "MyComboBox9",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "df8e25ce-2d85-4bb5-9c2b-90bed77197e2",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strCreditAccountDescription",
-                                                "itemId": "colCreditAccountDescription",
-                                                "text": "Description",
-                                                "width": 90
-                                            },
-                                            "name": "MyColumn4",
-                                            "designerId": "3f349928-b246-4f7f-a096-f033e292ff39"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strDebitAccount",
-                                                "itemId": "colDebitAccount",
-                                                "text": "Debit Account",
-                                                "width": 90
-                                            },
-                                            "name": "MyColumn12",
-                                            "designerId": "aa963510-52cf-4419-995d-b814c367900d",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intAccountId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Account Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strAccountId',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Account Id',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strDescription',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intAccountGroupId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Account Group Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strAccountGroup',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Account Group',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strAccountType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Account Type',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strAccountId",
-                                                        "itemId": "cboDebitAccount",
-                                                        "valueField": "strAccountId"
-                                                    },
-                                                    "name": "MyComboBox10",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "8b02980e-bb97-4591-b7f2-7813a76dd40c",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strDebitAccountDescription",
-                                                "itemId": "colDebitAccountDescription",
-                                                "text": "Description",
-                                                "width": 90
-                                            },
-                                            "name": "MyColumn13",
-                                            "designerId": "248a3c9d-5b93-4ace-bc60-91d4a7f01ef3"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
