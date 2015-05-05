@@ -1518,6 +1518,8 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustmentGetOutdatedExpiryDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustmentUpdateOutdatedExpiryDate.sql" />
     <Build Include="dbo\Views\vyuAPRptCashRequirements.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOProcessToItemShipment.sql" />
+    <Build Include="dbo\Views\vyuARShippedItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
