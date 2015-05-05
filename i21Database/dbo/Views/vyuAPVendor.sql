@@ -9,8 +9,8 @@ SELECT
 	B.[intEntityVendorId],
 	B.intCurrencyId,
 	B.intGLAccountExpenseId,
-	B.intDefaultContactId,
-	B.intDefaultLocationId,
+	D.intEntityId AS intDefaultContactId,
+	C.intEntityLocationId AS intDefaultLocationId,
 	F.strAccountId AS strExpenseAccountId,
 	B.intPaymentMethodId,
 	A.str1099Form,
@@ -56,11 +56,13 @@ FROM
 	INNER JOIN dbo.tblAPVendor B
 		ON A.intEntityId = B.[intEntityVendorId]
 	INNER JOIN dbo.tblEntityLocation C
-		ON B.intDefaultLocationId = C.intEntityLocationId
+		ON B.intEntityVendorId = C.intEntityId and C.ysnDefaultLocation = 1
 	--INNER JOIN (dbo.tblEntityContact D INNER JOIN dbo.tblEntity D2 ON D.[intEntityContactId] = D2.intEntityId)
 	--	ON B.intDefaultContactId = D.[intEntityContactId]
+	INNER JOIN dbo.tblEntityToContact G
+		ON G.intEntityId = A.intEntityId
 	INNER JOIN dbo.tblEntity D
-		ON B.intDefaultContactId = D.[intEntityId]
+		ON G.intEntityContactId = D.[intEntityId] AND G.ysnDefaultContact = 1
 	LEFT JOIN dbo.tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN dbo.tblGLAccount F 
