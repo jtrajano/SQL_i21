@@ -4,8 +4,8 @@
     [intNetworkTaxCode]     INT            NULL,
     [strTaxCodeDescription] NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strSSITaxCode]         NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyId]      INT            CONSTRAINT [DF_tblCFCFNTaxCode_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblCFCFNTaxCode] PRIMARY KEY CLUSTERED ([intNetworkTaxCodeId] ASC),
+    [intConcurrencyId]      INT            CONSTRAINT [DF_tblCFNetworkTaxCode_intConcurrencyId] DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblCFNetworkTaxCode] PRIMARY KEY CLUSTERED ([intNetworkTaxCodeId] ASC),
     CONSTRAINT [FK_tblCFNetworkTaxCode_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]) ON DELETE CASCADE
 );
 
