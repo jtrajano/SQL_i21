@@ -19,7 +19,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		')
 GO
 -- PT VIEW
-IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1 AND EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'trprcmst')
+IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1 AND EXISTS(select top 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'trprcmst')
 	EXEC ('
 		CREATE VIEW [dbo].[vyuTMtrprcmst]
 		AS
