@@ -54,19 +54,19 @@ BEGIN
 		C.strVendorId,
 		A.dtmDatePaid
 
-		--Payment without payment on detail
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			'There was no bill to pay on this payment.',
-			'Payable',
-			A.strPaymentRecordNum,
-			A.intPaymentId
-		FROM tblAPPayment A 
-		LEFT JOIN tblAPPaymentDetail B
-			ON A.intPaymentId = B.intPaymentId
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
-		GROUP BY A.intPaymentId, A.strPaymentRecordNum
-		HAVING SUM(B.dblPayment) = 0
+		----Payment without payment on detail
+		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		--SELECT 
+		--	'There was no bill to pay on this payment.',
+		--	'Payable',
+		--	A.strPaymentRecordNum,
+		--	A.intPaymentId
+		--FROM tblAPPayment A 
+		--LEFT JOIN tblAPPaymentDetail B
+		--	ON A.intPaymentId = B.intPaymentId
+		--WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		--GROUP BY A.intPaymentId, A.strPaymentRecordNum
+		--HAVING SUM(B.dblPayment) = 0
 
 		--Payment without detail
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)

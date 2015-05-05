@@ -1547,6 +1547,7 @@
     <None Include="Scripts\Post-Deployment\QM\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\13_ShortcutKey.sql" />
     <None Include="Scripts\Post-Deployment\IC\7_Status.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\InsertWriteOffPaymentMethod.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

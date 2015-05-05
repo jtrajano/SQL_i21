@@ -435,8 +435,8 @@ ELSE
 			,[strJournalLineDescription]
 			,[strReference]	
 			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
+			,Debit.Value--[dblDebit]
+			,Credit.Value--[dblCredit]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[dtmDate]
@@ -450,7 +450,9 @@ ELSE
 			,[strModuleName]
 			,[strTransactionForm]
 			,[strTransactionType]
-		FROM @GLEntries
+		FROM @GLEntries GLEntries
+		CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
+		CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit;
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
