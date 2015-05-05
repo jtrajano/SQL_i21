@@ -531,20 +531,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        itemId: 'colNewQuantity',
-                                                        width: 90,
-                                                        align: 'right',
-                                                        dataIndex: 'dblNewQuantity',
-                                                        tdCls: 'blue-text-column',
-                                                        text: 'New Quantity',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'numNewQuantity'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
                                                         itemId: 'colAdjustByQuantity',
                                                         width: 100,
                                                         align: 'right',
@@ -554,6 +540,20 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             itemId: 'numAdjustByQuantity'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colNewQuantity',
+                                                        width: 90,
+                                                        align: 'right',
+                                                        dataIndex: 'dblNewQuantity',
+                                                        tdCls: 'blue-text-column',
+                                                        text: 'New Quantity',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            itemId: 'numNewQuantity'
                                                         }
                                                     },
                                                     {

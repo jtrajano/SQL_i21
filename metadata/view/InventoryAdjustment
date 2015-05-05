@@ -1125,48 +1125,6 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
-                                                "dataIndex": "dblNewQuantity",
-                                                "dataType": "numeric",
-                                                "format": null,
-                                                "itemId": "colNewQuantity",
-                                                "tdCls": "blue-text-column",
-                                                "text": "New Quantity",
-                                                "width": 90
-                                            },
-                                            "name": "MyNumberColumn18",
-                                            "designerId": "22c946c0-abde-4813-ace5-dade1cef6fe2",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "dataType",
-                                                    "type": "string"
-                                                }
-                                            ],
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "numNewQuantity"
-                                                    },
-                                                    "name": "MyNumberField49",
-                                                    "designerId": "23f6df49-e2c2-40d3-963e-63f17227de5f"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
                                                 "dataIndex": "dblAdjustByQuantity",
                                                 "dataType": "numeric",
                                                 "format": null,
@@ -1197,6 +1155,48 @@
                                                     },
                                                     "name": "MyNumberField49",
                                                     "designerId": "73d42251-a876-40a1-bbef-a0cba5a5318c"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "dataIndex": "dblNewQuantity",
+                                                "dataType": "numeric",
+                                                "format": null,
+                                                "itemId": "colNewQuantity",
+                                                "tdCls": "blue-text-column",
+                                                "text": "New Quantity",
+                                                "width": 90
+                                            },
+                                            "name": "MyNumberColumn18",
+                                            "designerId": "22c946c0-abde-4813-ace5-dade1cef6fe2",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "dataType",
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "numNewQuantity"
+                                                    },
+                                                    "name": "MyNumberField49",
+                                                    "designerId": "23f6df49-e2c2-40d3-963e-63f17227de5f"
                                                 }
                                             ]
                                         },
