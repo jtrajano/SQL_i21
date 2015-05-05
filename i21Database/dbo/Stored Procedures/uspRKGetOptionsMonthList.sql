@@ -119,7 +119,8 @@ BEGIN
 	)t
 	WHERE ISNULL(strMonth,'') <> ''
 	ORDER BY strMonth	
-	SELECT DISTINCT strMonthName as strOptionMonth FROM #Temp
+	SELECT DISTINCT strMonthName into #temp1 FROM #Temp 
+	SELECT strMonthName as strOptionMonth FROM #temp1 order by convert(datetime,'01 '+strMonthName+'15') asc
 END 
 
 
