@@ -292,6 +292,7 @@ BEGIN
 				,strNewLotNumber
 				,dblQuantity
 				,dblNewQuantity
+				,dblAdjustByQuantity
 				,intItemUOMId
 				,intNewItemUOMId
 				,intWeightUOMId
@@ -320,6 +321,7 @@ BEGIN
 				,strNewLotNumber			= NULL 
 				,dblQuantity				= 1000.00
 				,dblNewQuantity				= 750.00 -- Bring down qty from 1,000 to 750.00
+				,dblAdjustByQuantity		= -250.00
 				,intItemUOMId				= @ManualGrains_25KgBagUOM
 				,intNewItemUOMId			= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM
@@ -376,6 +378,7 @@ BEGIN
 				,strNewLotNumber
 				,dblQuantity
 				,dblNewQuantity
+				,dblAdjustByQuantity
 				,intItemUOMId
 				,intNewItemUOMId
 				,intWeightUOMId
@@ -404,6 +407,7 @@ BEGIN
 				,strNewLotNumber			= NULL 
 				,dblQuantity				= 300.00
 				,dblNewQuantity				= 212 -- Bring down qty from 300 to 212
+				,dblAdjustByQuantity		= -88
 				,intItemUOMId				= @ManualGrains_25KgBagUOM
 				,intNewItemUOMId			= NULL 
 				,intWeightUOMId				= NULL 
@@ -466,6 +470,92 @@ BEGIN
 				,intLotId					= @ManualLotGrains_Lot_100001
 				,intLotStatusId				= 1
 				,intNewLotStatusId			= @LOT_STATUS_Quarantine 
+	END
+
+	-- ADJ-5
+	BEGIN 
+		SET @intInventoryAdjustmentId = 5
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/14/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+				,strAdjustmentNo    = 'ADJ-5'                              
+				,strDescription     = 'Qty Adjustment for Non lot items.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId
+				,intSubLocationId
+				,intStorageLocationId
+				,intItemId
+				,intNewItemId
+				,intLotId
+				,intNewLotId
+				,strNewLotNumber
+				,dblQuantity
+				,dblNewQuantity
+				,dblAdjustByQuantity
+				,intItemUOMId
+				,intNewItemUOMId
+				,intWeightUOMId
+				,intNewWeightUOMId
+				,dblWeight
+				,dblNewWeight
+				,dblWeightPerQty
+				,dblNewWeightPerQty
+				,dtmExpiryDate
+				,dtmNewExpiryDate
+				,intLotStatusId
+				,intNewLotStatusId
+				,dblCost
+				,dblNewCost
+				,dblLineTotal
+				,intSort
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= NULL 
+				,intStorageLocationId		= NULL
+				,intItemId					= @WetGrains
+				,intNewItemId				= NULL 
+				,intLotId					= NULL 
+				,intNewLotId				= NULL 
+				,strNewLotNumber			= NULL 
+				,dblQuantity				= 100
+				,dblNewQuantity				= 400
+				,dblAdjustByQuantity		= 300
+				,intItemUOMId				= @WetGrains_PoundUOMId
+				,intNewItemUOMId			= NULL 
+				,intWeightUOMId				= NULL 
+				,intNewWeightUOMId			= NULL 
+				,dblWeight					= 0.00
+				,dblNewWeight				= NULL 
+				,dblWeightPerQty			= 0.00
+				,dblNewWeightPerQty			= NULL 
+				,dtmExpiryDate				= NULL 
+				,dtmNewExpiryDate			= NULL 
+				,intLotStatusId				= NULL 
+				,intNewLotStatusId			= NULL 
+				,dblCost					= 7.50
+				,dblNewCost					= NULL 
+				,dblLineTotal				= 2250.00
+				,intSort					= 1
+
 	END
 
 END 

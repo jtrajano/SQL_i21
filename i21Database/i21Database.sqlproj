@@ -1496,7 +1496,8 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateBillFromIR.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRecurBill.sql" />
     <Build Include="dbo\Stored Procedures\uspPORecur.sql" />
-    <Build Include="dbo\Stored Procedures\uspICValidateInventoryAdjustmentOutdatedStockOnHand.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustmentGetOutdatedStockOnHand.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustmentUpdateOutdatedStockOnHand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

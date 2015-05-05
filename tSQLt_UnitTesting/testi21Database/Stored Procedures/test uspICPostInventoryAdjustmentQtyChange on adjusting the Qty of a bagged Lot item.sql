@@ -107,7 +107,7 @@ BEGIN
 	BEGIN 
 		EXEC testi21Database.[Fake data for inventory adjustment table]
 			
-		DECLARE @intTransactionId AS INT = 3 -- For ADJ-3				
+		DECLARE @intTransactionId AS INT = 3 -- For ADJ-3
 		DECLARE @ItemsForQtyChangeResult AS dbo.ItemCostingTableType
 
 		-- Create the expected table

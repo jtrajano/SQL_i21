@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICInventoryAdjustmentUpdatedOutdatedStockOnHand
+﻿CREATE PROCEDURE uspICInventoryAdjustmentUpdateOutdatedStockOnHand
 	@strTransactionId NVARCHAR(50) = NULL
 AS  
   
