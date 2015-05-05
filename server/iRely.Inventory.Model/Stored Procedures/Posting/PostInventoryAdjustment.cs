@@ -62,7 +62,7 @@ namespace iRely.Inventory.Model
             var param_transactionId = new SqlParameter("@strTransactionId", transactionId);
 
             this.Database.ExecuteSqlCommand(
-                "dbo.uspICInventoryAdjustmentUpdatedOutdatedStockOnHand @strTransactionId",
+                "dbo.uspICInventoryAdjustmentUpdateOutdatedStockOnHand @strTransactionId",
                 param_transactionId
             );
         }
