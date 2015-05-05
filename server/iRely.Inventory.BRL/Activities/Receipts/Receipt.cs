@@ -142,6 +142,33 @@ namespace iRely.Inventory.BRL
 
             return saveResult;
         }
+
+        public SaveResult ProcessBill(int receiptId)
+        {
+            SaveResult saveResult = new SaveResult();
+
+            using (var transaction = _db.ContextManager.Database.BeginTransaction())
+            {
+                var connection = _db.ContextManager.Database.Connection;
+                try
+                {
+                    var idParameter = new SqlParameter("receiptIds", receiptId.ToString());
+                    var userId = new SqlParameter("userId", iRely.Common.Security.GetUserId());
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspAPCreateBillFromIR @receiptIds, @userId", idParameter, userId);
+                    saveResult = _db.Save(false);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    saveResult.BaseException = ex;
+                    saveResult.Exception = new ServerException(ex);
+                    saveResult.HasError = true;
+                    transaction.Rollback();
+                }
+            }
+
+            return saveResult;
+        }
         
         public void Dispose()
         {

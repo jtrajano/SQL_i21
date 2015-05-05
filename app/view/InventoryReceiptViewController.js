@@ -820,35 +820,32 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onBillClick: function(button, e, eOpts) {
         var win = button.up('window');
-        var context = win.context;
         var current = win.viewModel.data.current;
 
-//        if (current) {
-//            Ext.Ajax.request({
-//                timeout: 120000,
-//                url: '../Inventory/api/Receipt/DuplicateItem?ItemId=' + current.get('intItemId'),
-//                method: 'GET',
-//                success: function(response){
-//                    var jsonData = Ext.decode(response.responseText);
-//                    context.configuration.store.addFilter([{ column: 'intItemId', value: jsonData.id }]);
-//                    context.configuration.paging.moveFirst();
-//                }
-//            });
-//        }
-//
-//        if (selected) {
-//            if (selected.length > 0){
-//                var current = selected[0];
-//                if (!current.dummy)
-//                    iRely.Functions.openScreen('Inventory.view.Item', current.get('intItemId'));
-//            }
-//            else {
-//                iRely.Functions.showErrorDialog('Please select an Item to view.');
-//            }
-//        }
-//        else {
-//            iRely.Functions.showErrorDialog('Please select an Item to view.');
-//        }
+        if (current) {
+            Ext.Ajax.request({
+                timeout: 120000,
+                url: '../Inventory/api/Receipt/ProcessBill?id=' + current.get('intInventoryReceiptId'),
+                method: 'post',
+                success: function(response){
+                    var jsonData = Ext.decode(response.responseText);
+                    var buttonAction = function(button) {
+                        if (button === 'yes') {
+                            iRely.Functions.openScreen('AccountsPayable.view.Bill', {
+                                filters: [
+                                    {
+                                        column: 'intBillId',
+                                        value: jsonData.intBillId
+                                    }
+                                ],
+                                action: 'view'
+                            });
+                        }
+                    };
+                    iRely.Functions.showQuestionDialog('Bill succesfully processed. Do you want to view this bill?', buttonAction);
+                }
+            });
+        }
     },
 
     onVendorClick: function(button, e, eOpts) {

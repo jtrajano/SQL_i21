@@ -110,6 +110,24 @@ namespace iRely.Invetory.WebAPI.Controllers
             });
         }
 
+        [HttpPost]
+        public HttpResponseMessage ProcessBill(int id)
+        {
+            var result = _ReceiptBRL.ProcessBill(id);
+            _ReceiptBRL.Dispose();
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
 
         [HttpPut]
         public HttpResponseMessage PutReceipts(IEnumerable<tblICInventoryReceipt> receipts, bool continueOnConflict = false)
