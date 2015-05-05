@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuAPCashRequirements]
+﻿CREATE VIEW [dbo].[vyuAPRptCashRequirements]
 WITH SCHEMABINDING
 AS
 SELECT
