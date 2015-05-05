@@ -93,6 +93,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
+:r .\AP\UpdatePOAddressInfo.sql
 
 -- Inventory 
 :r .\IC\1_InventoryTransactionTypes.sql 
