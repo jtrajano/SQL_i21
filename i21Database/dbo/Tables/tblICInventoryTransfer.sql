@@ -9,7 +9,7 @@
     [intFromLocationId] INT NULL, 
     [intToLocationId] INT NULL, 
     [ysnShipmentRequired] BIT NULL DEFAULT ((0)), 
-	[intStatusId] INT NULL,
+	[intStatusId] INT NOT NULL,
     [intShipViaId] INT NULL, 
     [intFreightUOMId] INT NULL, 
 	[ysnPosted] BIT NULL DEFAULT((0)),

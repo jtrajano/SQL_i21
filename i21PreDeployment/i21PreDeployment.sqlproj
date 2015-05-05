@@ -98,6 +98,7 @@
     <None Include="Scripts\Pre-Deployment\7_AR\FixARTransactionsAccounts.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\AddPOVendorConstraint.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\01_Make_Column_Null.sql" />
+    <None Include="Scripts\Pre-Deployment\11_IC\StatusImplementation.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

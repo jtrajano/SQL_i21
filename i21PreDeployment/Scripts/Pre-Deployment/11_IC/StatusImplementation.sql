@@ -1,5 +1,16 @@
-﻿print('/*******************  BEGIN Populate Inventory Status *******************/')
+﻿/****************** Implement Inventory Status on Transactions **************/
+IF NOT EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tblICStatus'))
+BEGIN
+	CREATE TABLE [dbo].[tblICStatus]
+	(
+		[intStatusId] INT NOT NULL IDENTITY, 
+		[strStatus] NVARCHAR(50) NOT NULL, 
+		[intSort] INT NULL, 
+		[intConcurrencyId] INT NULL DEFAULT ((0)), 
+	)
+END
 GO
+
 -- Use UPSERT to populate the inventory statuses
 SET IDENTITY_INSERT tblICStatus ON
 MERGE 
@@ -39,4 +50,17 @@ WHEN NOT MATCHED THEN
 ;
 SET IDENTITY_INSERT tblICStatus OFF
 GO
-print('/*******************  END Populate Inventory Status *******************/')
+
+-- Implement on Inventory Transfer
+IF NOT EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intStatusId' AND object_id = object_id('tblICInventoryTransfer'))
+BEGIN
+	ALTER TABLE tblICInventoryTransfer
+	ADD intStatusId INT NULL
+END
+GO
+
+UPDATE tblICInventoryTransfer
+SET intStatusId = 1
+WHERE ISNULL(intStatusId, 0) = 0
+
+/****************** End Implement Inventory Status on Transactions **************/
