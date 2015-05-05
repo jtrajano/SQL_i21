@@ -469,7 +469,13 @@ AS
 
 	--Item Special Pricing
 	SET @Price =	(	SELECT 
-							dblUnitAfterDiscount
+							--dblUnitAfterDiscount
+							(CASE
+								WHEN strDiscountBy = 'Amount'
+									THEN dblUnitAfterDiscount - ISNULL(dblDiscount, 0.00)
+								ELSE	
+									dblUnitAfterDiscount - (dblUnitAfterDiscount * (ISNULL(dblDiscount, 0.00)/100.00) )
+							END)
 						FROM
 							tblICItemSpecialPricing 
 						WHERE
@@ -490,22 +496,23 @@ AS
 	DECLARE @PricingLevel NVARCHAR(100)
 	SET @Price =	( 
 							SELECT
-								(CASE
-									WHEN PL.strPricingMethod = 'Fixed Dollar Amount'
-										THEN PL.dblUnitPrice
-									WHEN PL.strPricingMethod = 'Markup Standard Cost'
-										THEN VIS.dblStandardCost + (PL.dblUnitPrice * (PL.dblAmountRate/100.00))
-									WHEN PL.strPricingMethod = 'Percent of Margin'
-										THEN VIS.dblSalePrice / (1 - (PL.dblAmountRate/100.00))
-									WHEN PL.strPricingMethod = 'Discount Sales Price'
-										THEN VIS.dblSalePrice - (PL.dblUnitPrice * (PL.dblAmountRate/100.00))
-									WHEN PL.strPricingMethod = 'MSRP Discount'
-										THEN VIS.dblMSRPPrice - (PL.dblUnitPrice * (PL.dblAmountRate/100.00))
-									WHEN PL.strPricingMethod = 'Percent of Margin (MSRP)'
-										THEN VIS.dblMSRPPrice / (1 - (PL.dblAmountRate/100.00))
-									WHEN PL.strPricingMethod = 'None'
-										THEN NULL
-								END)
+								--(CASE
+								--	WHEN PL.strPricingMethod = 'Fixed Dollar Amount'
+								--		THEN PL.dblUnitPrice
+								--	WHEN PL.strPricingMethod = 'Markup Standard Cost'
+								--		THEN VIS.dblStandardCost + (PL.dblUnitPrice * (PL.dblAmountRate/100.00))
+								--	WHEN PL.strPricingMethod = 'Percent of Margin'
+								--		THEN VIS.dblSalePrice / (1 - (PL.dblAmountRate/100.00))
+								--	WHEN PL.strPricingMethod = 'Discount Sales Price'
+								--		THEN VIS.dblSalePrice - (PL.dblUnitPrice * (PL.dblAmountRate/100.00))
+								--	WHEN PL.strPricingMethod = 'MSRP Discount'
+								--		THEN VIS.dblMSRPPrice - (PL.dblUnitPrice * (PL.dblAmountRate/100.00))
+								--	WHEN PL.strPricingMethod = 'Percent of Margin (MSRP)'
+								--		THEN VIS.dblMSRPPrice / (1 - (PL.dblAmountRate/100.00))
+								--	WHEN PL.strPricingMethod = 'None'
+								--		THEN NULL
+								--END)
+								PL.dblUnitPrice
 							FROM
 								tblICItemPricingLevel PL
 							INNER JOIN
@@ -535,22 +542,23 @@ AS
 	--Item Standard Pricing
 	SET @Price =	( 
 							SELECT
-								(CASE
-									WHEN P.strPricingMethod = 'Fixed Dollar Amount'
-										THEN P.dblSalePrice 
-									WHEN P.strPricingMethod = 'Markup Standard Cost'
-										THEN P.dblStandardCost + (P.dblSalePrice * (P.dblAmountPercent/100.00))
-									WHEN P.strPricingMethod = 'Percent of Margin'
-										THEN P.dblSalePrice / (1 - (P.dblAmountPercent/100.00))
-									WHEN P.strPricingMethod = 'Discount Sales Price'
-										THEN P.dblSalePrice - (P.dblSalePrice * (P.dblAmountPercent/100.00))
-									WHEN P.strPricingMethod = 'MSRP Discount'
-										THEN P.dblMSRPPrice - (P.dblSalePrice * (P.dblAmountPercent/100.00))
-									WHEN P.strPricingMethod = 'Percent of Margin (MSRP)'
-										THEN P.dblMSRPPrice / (1 - (P.dblAmountPercent/100.00))
-									WHEN P.strPricingMethod = 'None'
-										THEN NULL
-								END)
+								--(CASE
+								--	WHEN P.strPricingMethod = 'Fixed Dollar Amount'
+								--		THEN P.dblSalePrice 
+								--	WHEN P.strPricingMethod = 'Markup Standard Cost'
+								--		THEN P.dblStandardCost + (P.dblSalePrice * (P.dblAmountPercent/100.00))
+								--	WHEN P.strPricingMethod = 'Percent of Margin'
+								--		THEN P.dblSalePrice / (1 - (P.dblAmountPercent/100.00))
+								--	WHEN P.strPricingMethod = 'Discount Sales Price'
+								--		THEN P.dblSalePrice - (P.dblSalePrice * (P.dblAmountPercent/100.00))
+								--	WHEN P.strPricingMethod = 'MSRP Discount'
+								--		THEN P.dblMSRPPrice - (P.dblSalePrice * (P.dblAmountPercent/100.00))
+								--	WHEN P.strPricingMethod = 'Percent of Margin (MSRP)'
+								--		THEN P.dblMSRPPrice / (1 - (P.dblAmountPercent/100.00))
+								--	WHEN P.strPricingMethod = 'None'
+								--		THEN NULL
+								--END)
+								P.dblSalePrice
 							FROM
 								tblICItemPricing P
 							WHERE
