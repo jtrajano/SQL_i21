@@ -368,15 +368,15 @@ SET @strmessage = 'Missing costing method setup for item %s.'
 EXEC sp_addmessage 51091,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51092) EXEC sp_dropmessage 51092, 'us_english'	
-SET @strmessage =  'Please configure the location %s in the Item maintence.'
+SET @strmessage =  'Please configure the location %s in the Item maintenance.'
 EXEC sp_addmessage 51092,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51093) EXEC sp_dropmessage 51093, 'us_english'	
-SET @strmessage =  'Please configure the Packing UOM in the Item maintence.'
+SET @strmessage =  'Please configure the Packing UOM in the Item maintenance.'
 EXEC sp_addmessage 51093,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51094) EXEC sp_dropmessage 51094, 'us_english'	
-SET @strmessage =  'Please configure stock unit in the item maintence.'
+SET @strmessage =  'Please configure stock unit in the item maintenance.'
 EXEC sp_addmessage 51094,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51095) EXEC sp_dropmessage 51095, 'us_english'	
@@ -396,5 +396,9 @@ SET @strmessage = 'Recap is not applicable for this type of transaction.'
 EXEC sp_addmessage 51098,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51099) EXEC sp_dropmessage 51099, 'us_english'	
-SET @strmessage = 'The stock on hand is outdated for %s. Please review your quantity adjustments after the system reloads the latest stock on hand.'
+SET @strmessage = 'Item %s is not available on location %s.'
 EXEC sp_addmessage 51099,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51100) EXEC sp_dropmessage 51100, 'us_english'	
+SET @strmessage = 'The stock on hand is outdated for %s. Please review your quantity adjustments after the system reloads the latest stock on hand.'
+EXEC sp_addmessage 51100,11,@strmessage,'us_english','False' 

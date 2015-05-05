@@ -30,7 +30,7 @@
     [intConcurrencyId]        INT             CONSTRAINT [DF_tblARSalesperson_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARSalesperson_intEntityId] PRIMARY KEY CLUSTERED ([intEntitySalespersonId] ASC),
     CONSTRAINT [FK_tblARSalesperson_tblARTerritory_intTerritoryId] FOREIGN KEY ([intTerritoryId]) REFERENCES [dbo].[tblARTerritory] ([intTerritoryId]),
-    CONSTRAINT [FK_tblARSalesperson_tblEntity_intEntityId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
+    CONSTRAINT [FK_tblARSalesperson_tblEntity_intEntityId] FOREIGN KEY ([intEntitySalespersonId]) REFERENCES [dbo].[tblEntity] ([intEntityId])  ON DELETE CASCADE
     --CONSTRAINT [UQ_tblARSalesperson_intSalespersonId] UNIQUE NONCLUSTERED ([intSalespersonId] ASC),
     --CONSTRAINT [UQ_tblARSalesperson_strSalespersonId] UNIQUE NONCLUSTERED ([strSalespersonId] ASC)
 

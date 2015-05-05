@@ -71,7 +71,7 @@ BEGIN
 
 	--Contact
 	insert into tblEntityPortalMenu(strPortalMenuName,intPortalParentMenuId,strType,strCommand)
-	select ''Customer Contact List'',intEntityPortalMenuId,''Screen'',''AccountsReceivable.controller.CustomerContactList'' from tblEntityPortalMenu where strPortalMenuName = ''Contact'' and intPortalParentMenuId = 0
+	select ''Customer Contact List'',intEntityPortalMenuId,''Screen'',''EntityManagement.controller.CustomerContactList'' from tblEntityPortalMenu where strPortalMenuName = ''Contact'' and intPortalParentMenuId = 0
 
 
 	--Vendor

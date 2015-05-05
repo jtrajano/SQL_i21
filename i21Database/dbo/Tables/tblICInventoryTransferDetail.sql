@@ -13,12 +13,9 @@
     [intItemWeightUOMId] INT NULL, 
     [dblGrossWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblTareWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [dblNetWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intNewLotId] INT NULL, 
     [strNewLotId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [intCreditAccountId] INT NULL, 
-    [intDebitAccountId] INT NULL, 
     [intTaxCodeId] INT NULL, 
     [dblFreightRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblFreightAmount] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -35,8 +32,6 @@
     CONSTRAINT [FK_tblICInventoryTransferDetail_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
     CONSTRAINT [FK_tblICInventoryTransferDetail_ItemWeightUOM] FOREIGN KEY ([intItemWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
     CONSTRAINT [FK_tblICInventoryTransferDetail_NewLot] FOREIGN KEY ([intNewLotId]) REFERENCES [tblICLot]([intLotId]), 
-    CONSTRAINT [FK_tblICInventoryTransferDetail_CreditAccount] FOREIGN KEY ([intCreditAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
-    CONSTRAINT [FK_tblICInventoryTransferDetail_DebitAccount] FOREIGN KEY ([intDebitAccountId]) REFERENCES [tblGLAccount]([intAccountId]), 
     CONSTRAINT [FK_tblICInventoryTransferDetail_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId])
 )
 
@@ -158,14 +153,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblTareWeight'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Net Weight',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryTransferDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'dblNetWeight'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'New Lot Id',
@@ -194,23 +182,9 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblCost'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Credit Account Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryTransferDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'intCreditAccountId'
+
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Debit Account Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICInventoryTransferDetail',
-    @level2type = N'COLUMN',
-    @level2name = N'intDebitAccountId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Tax Code Id',

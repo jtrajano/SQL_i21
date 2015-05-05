@@ -4,6 +4,9 @@
     [intNetworkId]     INT            NULL,
     [intConcurrencyId] INT            CONSTRAINT [DF_tblCFCardType_intConcurrencyId] DEFAULT ((1)) NULL,
     [strDescription]   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
-    CONSTRAINT [PK_tblCFCardType] PRIMARY KEY CLUSTERED ([intCardTypeId] ASC)
+    CONSTRAINT [PK_tblCFCardType] PRIMARY KEY CLUSTERED ([intCardTypeId] ASC),
+    CONSTRAINT [FK_tblCFCardType_tblCFNetwork] FOREIGN KEY ([intNetworkId]) REFERENCES [dbo].[tblCFNetwork] ([intNetworkId]) ON DELETE CASCADE
 );
+
+
 

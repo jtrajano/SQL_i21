@@ -55,7 +55,6 @@
 
 CONSTRAINT [PK_tblLGShipment_intShipmentId] PRIMARY KEY ([intShipmentId]), 
 CONSTRAINT [UK_tblLGShipment_intTrackingNumber] UNIQUE ([intTrackingNumber]),
-CONSTRAINT [UK_tblLGShipmentInStore_intDeliveryNoticeNumber] UNIQUE ([intDeliveryNoticeNumber]),
 
 CONSTRAINT [FK_tblLGShipment_tblEntity_intVendorEntityId_intEntityId] FOREIGN KEY ([intVendorEntityId]) REFERENCES [tblEntity]([intEntityId]),
 CONSTRAINT [FK_tblLGShipment_tblICUnitMeasure_intWeightUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

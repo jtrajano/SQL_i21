@@ -975,10 +975,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentLotStatusChange on adjusting the lot status.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedStockOnHand for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 51099 on lot items.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 51099 on lot items.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 51099 on non-lot items.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 51099 on non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 51100 on lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 51100 on lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 51100 on non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 51100 on non-lot items.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedStockOnHand for updating non-lot item in the adjustment detail.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedStockOnHand for updating a lot item in the adjustment detail.sql" />
   </ItemGroup>

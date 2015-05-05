@@ -25,11 +25,17 @@
 	[dtmLastModified] DATETIME NULL, 
     [intLastModifiedUserId] INT NULL,
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderProducedLot_intConcurrencyId] DEFAULT 0,
-	intContainerId INT CONSTRAINT FK_tblMFWorkOrderProducedLot_tblICContainer_intContainerId_intContainerId REFERENCES dbo.tblICContainer (intContainerId),
+	intContainerId INT,
+	intStorageLocationId INT,
+	intShiftId INT,
+	ysnProductionReversed BIT,
+	strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	CONSTRAINT [PK_tblMFWorkOrderProducedLot_intWorkOrderProducedLotId] PRIMARY KEY ([intWorkOrderProducedLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICLot_inLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICItemUOM_intItemUOMId_intPhysicalItemUOMId] FOREIGN KEY ([intPhysicalItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICContainer_intContainerId] FOREIGN KEY([intContainerId]) REFERENCES dbo.tblICContainer (intContainerId)
+	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICContainer_intContainerId] FOREIGN KEY([intContainerId]) REFERENCES dbo.tblICContainer (intContainerId),
+	CONSTRAINT FK_tblMFWorkOrderProducedLot_tblICStorageLocation_intStorageLocationId FOREIGN KEY(intStorageLocationId) REFERENCES dbo.tblICStorageLocation (intStorageLocationId),
+	CONSTRAINT FK_tblMFWorkOrderProducedLot_tblMFShift_intShiftId FOREIGN KEY(intShiftId) REFERENCES dbo.tblMFShift (intShiftId)
 )

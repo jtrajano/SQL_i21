@@ -1334,7 +1334,6 @@
     <Build Include="dbo\Tables\tblCFDepartment.sql" />
     <Build Include="dbo\Tables\tblCFCreditCard.sql" />
     <Build Include="dbo\Tables\tblCFCityCountyCode.sql" />
-    <Build Include="dbo\Tables\tblCFCFNTaxCode.sql" />
     <Build Include="dbo\Tables\tblCFCardType.sql" />
     <Build Include="dbo\Tables\tblCFCard.sql" />
     <Build Include="dbo\Tables\tblCFAccount.sql" />
@@ -1498,6 +1497,24 @@
     <Build Include="dbo\Stored Procedures\uspPORecur.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustmentGetOutdatedStockOnHand.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustmentUpdateOutdatedStockOnHand.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractDetailGrain.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrain.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryTransfer.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderProductSpecification.sql" />
+    <Build Include="dbo\Tables\tblMFProcessCycleCountSession.sql" />
+    <Build Include="dbo\Tables\tblMFProcessCycleCount.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderItem.sql" />
+    <Build Include="dbo\Tables\tblMFAttributeDataType.sql" />
+    <Build Include="dbo\Tables\tblMFAttribute.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingProcessAttribute.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductBySubLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductionLine.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetConsumptionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductionDetail.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkTaxCode.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTBackUpPromotions.sql" />
+    <Build Include="dbo\Tables\tblICStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1529,6 +1546,7 @@
     <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\QM\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\13_ShortcutKey.sql" />
+    <None Include="Scripts\Post-Deployment\IC\7_Status.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

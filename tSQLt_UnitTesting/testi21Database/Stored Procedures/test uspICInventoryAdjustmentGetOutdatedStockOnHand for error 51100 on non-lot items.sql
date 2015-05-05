@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 51099 on non-lot items]
+﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 51100 on non-lot items]
 AS
 BEGIN
 	-- Constant for Adjustment Types
@@ -33,7 +33,7 @@ BEGIN
 
 	-- Assert 
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51099;
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51100;
 	END
 	
 	-- Act

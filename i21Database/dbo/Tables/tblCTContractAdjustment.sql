@@ -2,9 +2,9 @@
 (
 	intAdjustmentId INT IDENTITY,
 	intContractDetailId INT NOT NULL,
-	strAdjustmentNo NVARCHAR(50) NOT NULL,
+	strAdjustmentNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	dtmAdjustmentDate DATETIME NOT NULL,
-	strComment NVARCHAR(MAX),
+	strComment NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	ysnAdjustment BIT,
 	dblOldQuantity NUMERIC(12, 4),
 	dblOldBalance NUMERIC(12, 4),

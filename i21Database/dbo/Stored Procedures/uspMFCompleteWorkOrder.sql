@@ -12,6 +12,8 @@ BEGIN TRY
 		,@strOutputLotNumber NVARCHAR(50)
 		,@strVendorLotNo NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
+
+		,@intItemUOMId INT
 		,@intInputLotId INT
 		,@intManufacturingCellId INT
 		,@intLocationId INT
@@ -133,6 +135,23 @@ BEGIN TRY
 			AND intLocationId = @intLocationId
 			AND ysnActive = 1
 
+		SELECT @intItemUOMId = @intProduceUnitMeasureId
+
+		IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblICItemUOM
+		WHERE intItemId = @intItemId
+			AND intItemUOMId = @intItemUOMId and ysnStockUnit=1
+		)
+		BEGIN
+
+			RAISERROR (
+					51094
+					,11
+					,1
+					)
+		END
+
 		SELECT @intExecutionOrder = Max(intExecutionOrder) + 1
 		FROM dbo.tblMFWorkOrder
 		WHERE dtmExpectedDate = @dtmPlannedDate
@@ -164,7 +183,7 @@ BEGIN TRY
 			,@intManufacturingProcessId
 			,@intItemId
 			,@dblProduceQty
-			,@intProduceUnitMeasureId
+			,@intItemUOMId
 			,10
 			,@intManufacturingCellId
 			,@intStorageLocationId

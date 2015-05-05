@@ -51,22 +51,14 @@ BEGIN TRY
 
 	  select @MiXMatchCount = 0,  @ComboCount = 0, @ItemListCount = 0
 
+	  PRINT @PromoItemListysn
+
 
 	    if (@PromoItemListysn = 'Y')
 	      BEGIN
-	          set @SQL1 = 'delete from stitlmst '
-		  
-		      set @SQL1 = @SQL1 + ' where 1=1 ' 
-
- 	          if (@PromoLocation IS NOT NULL)
-		      BEGIN 
-		        set @SQL1 = @SQL1 +  ' and  stitl_store_name IN 
-		 	     (''' + replace((SELECT (CAST(@PromoLocation AS NVARCHAR(MAX)))),',',''',''') +''')'
-		      END
-
-              exec (@SQL1)
-	          set @ItemListCount = (select (@@ROWCOUNT))
 			  
+			  PRINT @PromoEndingPeriodDate
+
               set @SQL1 = 'delete from stmixmst '
 		  
 		      set @SQL1 = @SQL1 + ' where 1=1 ' 
@@ -85,6 +77,7 @@ BEGIN TRY
                   END  
 
               exec (@SQL1)
+
 	          set @MiXMatchCount = (select (@@ROWCOUNT))
 
 			  set @SQL1 = 'delete from stcbomst '
@@ -105,7 +98,37 @@ BEGIN TRY
                   END  
 
               exec (@SQL1)
+
 		      set @ComboCount = (select (@@ROWCOUNT))
+
+			  set @SQL1 = 'delete from stitlmst '
+
+		      set @SQL1 = @SQL1 + ' where 1=1 ' 
+
+			  if (@PromoLocation IS NOT NULL)
+		      BEGIN 
+		          set @SQL1 = @SQL1 +  ' and  stitl_store_name IN 
+		 	       (''' + replace((SELECT (CAST(@PromoLocation AS NVARCHAR(MAX)))),',',''',''') +''')'
+              END
+		      set @SQL1 = @SQL1 + ' and stitl_xml_list_id NOT IN (' + ' 
+                  select stitl_xml_list_id from stitlmst a 
+                  join stmixmst b on a.stitl_xml_list_id=b.stmix_itemlist_id_1 
+                  or a.stitl_xml_list_id=b.stmix_itemlist_id_2 
+                  or a.stitl_xml_list_id=b.stmix_itemlist_id_3
+                  or a.stitl_xml_list_id=b.stmix_itemlist_id_4
+                  or a.stitl_xml_list_id=b.stmix_itemlist_id_5
+                  union
+                  select stitl_xml_list_id from stitlmst a 
+                  join stcbomst c on a.stitl_xml_list_id=c.stcbo_itemlist_id_1
+                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_1
+                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_2
+                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_3
+                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_4
+                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_5 '
+				  + ')' 
+
+              exec (@SQL1)
+	          set @ItemListCount = (select (@@ROWCOUNT))
 	       END      
 
 

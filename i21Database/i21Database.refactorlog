@@ -2919,4 +2919,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dblAdjustByQuantity" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0cf134d9-c1c9-4cc1-aff0-b59e394d32ff" ChangeDateTime="05/05/2015 01:24:11">
+    <Property Name="ElementName" Value="[dbo].[tblICStatus].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStatusId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a3083cf1-a0b1-453b-808c-8142eefa6c95" ChangeDateTime="05/05/2015 01:25:37">
+    <Property Name="ElementName" Value="[dbo].[tblICStatus].[strStatusId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strStatus" />
+  </Operation>
 </Operations>

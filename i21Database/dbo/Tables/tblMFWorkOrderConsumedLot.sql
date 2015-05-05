@@ -12,6 +12,15 @@
 	[intLotTransactionId] INT NULL,
     [intSequenceNo] INT NULL,
 	[intBatchId] INT NULL,
+	intShiftId INT,
+	intStorageLocationId INT,
+	intMachineId INT,
+	ysnConsumptionReversed BIT,
+	intContainerId INT,
+	strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	ysnFeedSent BIT,
+	intTransactionId INT,
+	dtmActualInputDateTime DATETIME,
 	[dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL,
 	[dtmLastModified] DATETIME NULL, 
@@ -21,5 +30,8 @@
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICLot_inLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICItemUOM_intIssuedItemUOMId] FOREIGN KEY ([intItemIssuedUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICItemUOM_intIssuedItemUOMId] FOREIGN KEY ([intItemIssuedUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	 CONSTRAINT FK_tblMFWorkOrderConsumedLot_tblMFShift_intShiftId FOREIGN KEY (intShiftId) REFERENCES dbo.tblMFShift (intShiftId),
+	 CONSTRAINT FK_tblMFWorkOrderConsumedLot_tblICStorageLocation_intStorageLocationId FOREIGN KEY (intStorageLocationId) REFERENCES dbo.tblICStorageLocation (intStorageLocationId),
+	 CONSTRAINT FK_tblMFWorkOrderConsumedLot_tblMFMachine_intMachineId FOREIGN KEY (intMachineId) REFERENCES dbo.tblMFMachine (intMachineId)
 )
