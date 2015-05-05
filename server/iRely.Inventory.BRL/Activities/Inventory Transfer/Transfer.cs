@@ -12,7 +12,7 @@ using IdeaBlade.Linq;
 
 namespace iRely.Inventory.BRL
 {
-    public class Transfer : IDisposable
+    public partial class Transfer : IDisposable
     {
         private Repository _db;
 

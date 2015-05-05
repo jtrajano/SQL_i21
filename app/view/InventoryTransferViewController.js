@@ -249,8 +249,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         var colAvailableUOM = grdInventoryTransfer.columns[8];
         colAvailableQty.renderer = this.AvailableQtyRenderer;
         colAvailableUOM.renderer = this.AvailableUOMRenderer;
-
         return win.context;
+
     },
 
     show : function(config) {
@@ -511,6 +511,108 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         };
     },
 
+    onPostClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doPost = function() {
+            var strTransferNo = win.viewModel.data.current.get('strTransferNo');
+            var posted = win.viewModel.data.current.get('ysnPosted');
+
+            var options = {
+                postURL             : '../Inventory/api/Transfer/Post',
+                strTransactionId    : strTransferNo,
+                isPost              : !posted,
+                isRecap             : false,
+                callback            : me.onAfterReceive,
+                scope               : me
+            };
+
+            CashManagement.common.BusinessRules.callPostRequest(options);
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doPost();
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doPost();
+            }
+        });
+    },
+
+    onRecapClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doRecap = function(recapButton, currentRecord){
+
+            // Call the buildRecapData to generate the recap data
+            CashManagement.common.BusinessRules.buildRecapData({
+                postURL: '../Inventory/api/Transfer/Post',
+                strTransactionId: currentRecord.get('strTransferNo'),
+                ysnPosted: currentRecord.get('ysnPosted'),
+                scope: me,
+                success: function(){
+                    // If data is generated, show the recap screen.
+                    CashManagement.common.BusinessRules.showRecap({
+                        strTransactionId: currentRecord.get('strTransferNo'),
+                        ysnPosted: currentRecord.get('ysnPosted'),
+                        dtmDate: currentRecord.get('dtmTransferDate'),
+                        strCurrencyId: null,
+                        dblExchangeRate: 1,
+                        scope: me,
+                        postCallback: function(){
+                            me.onPostClick(recapButton);
+                        },
+                        unpostCallback: function(){
+                            me.onPostClick(recapButton);
+                        }
+                    });
+                },
+                failure: function(message){
+                    // Show why recap failed.
+                    var msgBox = iRely.Functions;
+                    msgBox.showCustomDialog(
+                        msgBox.dialogType.ERROR,
+                        msgBox.dialogButtonType.OK,
+                        message
+                    );
+                }
+            });
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doRecap(button, win.viewModel.data.current);
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doRecap(button, win.viewModel.data.current);
+            }
+        });
+    },
+
+    onAfterReceive: function(success, message) {
+        if (success === true) {
+            var me = this;
+            var win = me.view;
+            win.context.data.load();
+        }
+        else {
+            iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboItem": {
@@ -560,6 +662,12 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             "#colAvailableUOM": {
                 beforerender: this.onDetailGridColumnBeforeRender
+            },
+            "#btnPost": {
+                click: this.onPostClick
+            },
+            "#btnRecap": {
+                click: this.onRecapClick
             }
         });
     }
