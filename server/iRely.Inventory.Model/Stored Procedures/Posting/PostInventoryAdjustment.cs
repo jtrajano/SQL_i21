@@ -66,5 +66,34 @@ namespace iRely.Inventory.Model
                 param_transactionId
             );
         }
+
+        public bool ValidateOutdatedExpiryDate(string transactionId)
+        {
+            var param_transactionId = new SqlParameter("@strTransactionId", transactionId);
+
+            var param_passed = new SqlParameter();
+            param_passed.ParameterName = "@ysnPassed";
+            param_passed.Direction = ParameterDirection.Output;
+            param_passed.SqlDbType = SqlDbType.Bit;
+
+            this.Database.ExecuteSqlCommand(
+                "dbo.uspICInventoryAdjustmentGetOutdatedExpiryDate @strTransactionId, @ysnPassed out",
+                param_transactionId,
+                param_passed
+            );
+
+            return Convert.ToBoolean(param_passed.Value);
+        }
+
+        public void UpdateOutdatedExpiryDate(string transactionId)
+        {
+            var param_transactionId = new SqlParameter("@strTransactionId", transactionId);
+
+            this.Database.ExecuteSqlCommand(
+                "dbo.uspICInventoryAdjustmentUpdateOutdatedExpiryDate @strTransactionId",
+                param_transactionId
+            );
+        }
+
     }
 }

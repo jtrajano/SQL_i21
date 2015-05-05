@@ -1669,7 +1669,8 @@
                                             "userConfig": {
                                                 "dataIndex": "dtmExpiryDate",
                                                 "itemId": "colExpiryDate",
-                                                "text": "Expiration Date"
+                                                "text": "Expiration Date",
+                                                "width": 175
                                             },
                                             "name": "MyDateColumn4",
                                             "designerId": "f001b7b1-33cf-4701-9b79-295924cf8275"
@@ -1686,7 +1687,7 @@
                                                 "itemId": "colNewExpiryDate",
                                                 "tdCls": "blue-text-column",
                                                 "text": "New Expiration Date",
-                                                "width": 117
+                                                "width": 175
                                             },
                                             "name": "MyDateColumn5",
                                             "designerId": "317ec67f-c89b-4c09-bbab-27c385ae51a5",

@@ -24,13 +24,26 @@ namespace iRely.Inventory.BRL
                 return result;
             }
 
-            // Check for outdated stock-on hand before the actual posting. 
-            // If validation failed, auto-Update any outdated onhand qty in the adjustment detail. 
+            // Pre-post validation
             if (isRecap == false && Adjustment.isPost)
             {
+                // Check for outdated stock-on hand before the actual posting. 
+                // If validation failed, auto-update any outdated on hand qty in the adjustment detail.                
                 var validateResult = ValidateOutdatedStockOnHand(Adjustment.strTransactionId);
                 if (validateResult.HasError) {
                     var updateResult = UpdateOutdatedStockOnHand(Adjustment.strTransactionId);
+                    if (updateResult.HasError)
+                        return updateResult;
+                    else
+                        return validateResult;
+                }
+
+                // Check for outdated expiry date before the actual posting. 
+                // If validation failed, auto-update the outdated expiry dates in the adjustment detail. 
+                validateResult = ValidateOutdatedExpiryDate(Adjustment.strTransactionId);
+                if (validateResult.HasError)
+                {
+                    var updateResult = UpdateOutdatedExpiryDate(Adjustment.strTransactionId);
                     if (updateResult.HasError)
                         return updateResult;
                     else
@@ -88,6 +101,41 @@ namespace iRely.Inventory.BRL
             {
                 var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
                 db.UpdateOutdatedStockOnHand(transactionId);
+            }
+            catch (Exception ex)
+            {
+                updateResult.BaseException = ex;
+                updateResult.HasError = true;
+                updateResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return updateResult;
+        }
+
+        public SaveResult ValidateOutdatedExpiryDate(string transactionId)
+        {
+            // Post the Adjustment transaction 
+            var validateResult = new SaveResult();
+            try
+            {
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                db.ValidateOutdatedExpiryDate(transactionId);
+            }
+            catch (Exception ex)
+            {
+                validateResult.BaseException = ex;
+                validateResult.HasError = true;
+                validateResult.Exception = new ServerException(ex, Error.OtherException, Button.Ok);
+            }
+            return validateResult;
+        }
+
+        public SaveResult UpdateOutdatedExpiryDate(string transactionId)
+        {
+            var updateResult = new SaveResult();
+            try
+            {
+                var db = (Inventory.Model.InventoryEntities)_db.ContextManager;
+                db.UpdateOutdatedExpiryDate(transactionId);
             }
             catch (Exception ex)
             {

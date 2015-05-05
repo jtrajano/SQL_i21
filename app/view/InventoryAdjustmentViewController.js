@@ -584,7 +584,32 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 // todo
                 break;
             case ExpiryDateChange:
-                // todo
+                // Hide Columns:
+                colNewLot.setHidden(hide);
+                colNewItemNumber.setHidden(hide);
+                colNewItemDescription.setHidden(hide);
+                colQuantity.setHidden(hide);
+                colNewQuantity.setHidden(hide);
+                colAdjustByQuantity.setHidden(hide);
+                colUOM.setHidden(hide);
+                colNewUOM.setHidden(hide);
+                colNetWeight.setHidden(hide);
+                colNewNetWeight.setHidden(hide);
+                colWeightUOM.setHidden(hide);
+                colNewWeightUOM.setHidden(hide);
+                colWeightPerQty.setHidden(hide);
+                colNewWeightPerQty.setHidden(hide);
+                colLineTotal.setHidden(hide);
+                colUnitCost.setHidden(hide);
+                colNewUnitCost.setHidden(hide);
+                colLotStatus.setHidden(hide);
+                colNewLotStatus.setHidden(hide);
+
+                //  Show Columns:
+                colExpiryDate.setHidden(show);
+                colNewExpiryDate.setHidden(show);
+
+                break;
                 break;
         }
     },
@@ -615,6 +640,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             {
                 case QuantityChange:
                 case LotStatusChange:
+                case ExpiryDateChange:
                     break;
                 default:
                     var msgBox = iRely.Functions;
@@ -787,7 +813,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 message,
                 function(){
                     message = message ? message : '';
-                    var outdatedStock = message.indexOf('The stock on hand is outdated for');
+
+                    var outdatedStock;
+
+                    outdatedStock = message.indexOf('The stock on hand is outdated for');
+                    if (outdatedStock == -1){
+                        outdatedStock = message.indexOf('The lot expiry dates are outdated for');
+                    }
+
                     if (outdatedStock !== -1) {
                         win.context.data.load();
                     }

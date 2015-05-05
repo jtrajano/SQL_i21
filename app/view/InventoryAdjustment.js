@@ -768,13 +768,14 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'datecolumn',
                                                         itemId: 'colExpiryDate',
+                                                        width: 175,
                                                         dataIndex: 'dtmExpiryDate',
                                                         text: 'Expiration Date'
                                                     },
                                                     {
                                                         xtype: 'datecolumn',
                                                         itemId: 'colNewExpiryDate',
-                                                        width: 117,
+                                                        width: 175,
                                                         dataIndex: 'dtmNewExpiryDate',
                                                         tdCls: 'blue-text-column',
                                                         text: 'New Expiration Date',
