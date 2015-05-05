@@ -10,7 +10,7 @@ BEGIN
 
 EXEC(
 '
-CREATE PROCEDURE [dbo].[uspARImportCustomer]
+ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		@CustomerId NVARCHAR(50) = NULL,
 		@Update BIT = 0,
 		@Total INT = 0 OUTPUT
@@ -25,12 +25,13 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			--UPDATE IF EXIST IN THE ORIGIN
 			IF(EXISTS(SELECT 1 FROM agcusmst WHERE agcus_key = @CustomerId))
 			BEGIN
+							
 				UPDATE agcusmst
 				SET 
 				--Entity
 				agcus_last_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),''''),
 				agcus_first_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),''''),
-				agcus_comments = SUBSTRING(Ent.strInternalNotes,1,30),
+				agcus_comments = SUBSTRING(Con.strInternalNotes,1,30),
 				agcus_1099_name = SUBSTRING(Ent.str1099Name,1,50),
 				--Location
 				agcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END,
@@ -39,15 +40,15 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_state = SUBSTRING(Loc.strState,1,2),
 				agcus_zip = SUBSTRING(Loc.strZipCode,1,10),
 				agcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END),
-				agcus_terms_cd = (SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
+				agcus_terms_cd = Loc.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
 				--Contact
-				agcus_contact = SUBSTRING((SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityContactId),1,20),
+				agcus_contact = SUBSTRING((Con.strName),1,20),
 				agcus_phone = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END),
 				agcus_phone_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX(''x'',Con.strPhone) + 1, LEN(Con.strPhone))END),
 				agcus_phone2 = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END),
 				agcus_phone2_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,30),CHARINDEX(''x'',Con.strPhone2) + 1, LEN(Con.strPhone2))END),
 				--Customer
-				agcus_key = SUBSTRING(Cus.strCustomerNumber,1,10),
+				agcus_key = SUBSTRING(Ent.strEntityNo,1,10),
 				agcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END,
 				agcus_cred_limit = Cus.dblCreditLimit,
 				agcus_tax_exempt = SUBSTRING(Cus.strTaxNumber,1,15),
@@ -55,7 +56,11 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END,
 				agcus_req_po_yn = CASE WHEN Cus.ysnPORequired = 1 THEN ''Y'' ELSE ''N'' END,
 				agcus_stmt_dtl_yn = CASE WHEN Cus.ysnStatementDetail = 1 THEN ''Y'' ELSE ''N'' END,
-				agcus_stmt_fmt = CASE WHEN Cus.strStatementFormat = ''Open Item'' THEN ''O'' WHEN Cus.strStatementFormat = ''Balance Forward'' THEN ''B'' WHEN Cus.strStatementFormat = ''Budget Reminder'' THEN ''R'' WHEN Cus.strStatementFormat = ''None'' THEN ''N'' WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END,
+				agcus_stmt_fmt = CASE WHEN Cus.strStatementFormat = ''Open Item'' THEN ''O''
+									 WHEN Cus.strStatementFormat = ''Balance Forward'' THEN ''B'' 
+									 WHEN Cus.strStatementFormat = ''Budget Reminder'' THEN ''R'' 
+									 WHEN Cus.strStatementFormat = ''None'' THEN ''N'' 
+									 WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END,
 				agcus_cred_stop_days = Cus.intCreditStopDays,
 				agcus_tax_auth_id1 = SUBSTRING(Cus.strTaxAuthority1,1,3),
 				agcus_tax_auth_id2 = SUBSTRING(Cus.strTaxAuthority2,1,3),
@@ -78,14 +83,22 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_srvchr_cd		= (SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				agcus_dflt_mkt_zone = (SELECT strMarketZoneCode FROM tblARMarketZone WHERE intMarketZoneId = Cus.intMarketZoneId)	
 			FROM tblEntity Ent
-				INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityCustomerId
-				INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
-				INNER JOIN tblEntityContact Con ON CustToCon.intEntityContactId = Con.intEntityContactId
-				INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
-				WHERE strCustomerNumber = @CustomerId AND agcus_key = @CustomerId
+				INNER JOIN tblARCustomer Cus 
+					ON Ent.intEntityId = Cus.intEntityCustomerId
+				INNER JOIN tblEntityToContact CustToCon 
+					ON Cus.intEntityCustomerId = CustToCon.intEntityId 
+						and CustToCon.ysnDefaultContact = 1
+				INNER JOIN tblEntity Con 
+					ON CustToCon.intEntityContactId = Con.intEntityId
+				INNER JOIN tblEntityLocation Loc 
+					ON Ent.intEntityId = Loc.intEntityId 
+						and Loc.ysnDefaultLocation = 1
+				WHERE Ent.strEntityNo = @CustomerId AND agcus_key = @CustomerId
 			END
 			--INSERT IF NOT EXIST IN THE ORIGIN	
 			ELSE
+			BEGIN
+
 				INSERT INTO agcusmst(
 				--Entity
 				agcus_last_name,
@@ -144,10 +157,10 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				--Entity
 				ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),'''') AS strLastName,
 				ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),'''') AS strFirsName,
-				SUBSTRING(Ent.strInternalNotes,1,30) as strInternalNotes ,
+				SUBSTRING(Con.strInternalNotes,1,30) as strInternalNotes ,
 				SUBSTRING(Ent.str1099Name,1,50) as str1099Name,
 				--Contact
-				SUBSTRING((SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityContactId),1,20) AS strContactName,
+				SUBSTRING((Con.strName),1,20) AS strContactName,
 				(CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END) as strPhone,
 				(CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX(''x'',Con.strPhone) + 1, LEN(Con.strPhone))END) as strPhoneExt,
 				(CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END) as strPhone2,
@@ -159,9 +172,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Loc.strState,1,2) as strState,
 				SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
 				(CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)as strCountry,
-				(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
+				Loc.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
 				--Customer
-				SUBSTRING(Cus.strCustomerNumber,1,10) as strCustomerNumber,
+				SUBSTRING(Ent.strEntityNo,1,10) as strCustomerNumber,
 				(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
 				Cus.dblCreditLimit,
 				SUBSTRING(Cus.strTaxNumber,1,15) as strTaxNumber,
@@ -192,25 +205,36 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				(SELECT strMarketZoneCode FROM tblARMarketZone WHERE intMarketZoneId = Cus.intMarketZoneId)
 				FROM tblEntity Ent
-				INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityCustomerId
-				INNER JOIN tblARCustomerToContact CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
-				INNER JOIN tblEntityContact Con ON CusToCon.intEntityContactId = Con.intEntityContactId
-				INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
-				WHERE strCustomerNumber = @CustomerId
+				INNER JOIN tblARCustomer Cus 
+					ON Ent.intEntityId = Cus.intEntityCustomerId
+				INNER JOIN tblEntityToContact CusToCon 
+					ON Cus.intEntityCustomerId = CusToCon.intEntityId 
+						and CusToCon.ysnDefaultContact = 1
+				INNER JOIN tblEntity Con 
+					ON CusToCon.intEntityContactId = Con.intEntityId
+				INNER JOIN tblEntityLocation Loc 
+					ON Ent.intEntityId = Loc.intEntityId 
+						and Loc.ysnDefaultLocation = 1
+				WHERE Ent.strEntityNo = @CustomerId
+			END
 
 				-- INSERT Contact to ssonmst
 				DECLARE @ContactNumber nvarchar(20)
 			
-				select top 1 @ContactNumber = substring(isnull((SELECT top 1 strName FROM tblEntity WHERE intEntityId = Con.intEntityContactId), ''''), 1,20)
+				select top 1 @ContactNumber = substring(Con.strContactNumber,1,20)
 				FROM tblEntity Ent
-				INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityCustomerId
-				INNER JOIN tblARCustomerToContact CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
-				INNER JOIN tblEntityContact Con ON CusToCon.intEntityContactId = Con.intEntityContactId
-				INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
-				WHERE strCustomerNumber = @CustomerId
-
+				INNER JOIN tblARCustomer Cus 
+					ON Ent.intEntityId = Cus.intEntityCustomerId
+				INNER JOIN tblEntityToContact CusToCon 
+					ON Cus.intEntityCustomerId = CusToCon.intEntityId 
+						and CusToCon.ysnDefaultContact = 1
+				INNER JOIN tblEntity Con 
+					ON CusToCon.intEntityContactId = Con.intEntityId									
+				WHERE Ent.strEntityNo = @CustomerId
+								
 				EXEC uspARContactOriginSync @ContactNumber
-			
+				
+				
 
 		RETURN;
 		END
@@ -419,15 +443,15 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			
 				FROM agcusmst
 				WHERE agcus_key = @originCustomer
-			
+				
 				--INSERT Entity record for Customer
-				INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber])
-				VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''')
+				INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo])
+				VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @originCustomer)
 
 				DECLARE @EntityId INT
 				SET @EntityId = SCOPE_IDENTITY()
 			
-				INSERT INTO [dbo].[tblEntityType]([intEntityId],[strType]) values( @EntityId, ''Customer'' )
+				INSERT INTO [dbo].[tblEntityType]([intEntityId],[strType], [intConcurrencyId]) values( @EntityId, ''Customer'', 1 )
 				--INSERT into Customer
 				INSERT [dbo].[tblARCustomer](
 				[intEntityCustomerId], 
@@ -512,11 +536,15 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				IF(@strContactName IS NOT NULL)
 				BEGIN
 					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-					VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes,'''',@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+					VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes, 
+												UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
+												@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 				END
 				ELSE
 					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-					VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes,'''',@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+					VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes, 
+												UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
+												@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 			
 				
 
@@ -531,8 +559,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				
 		
 				--INSERT into Location
-				INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
-				VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId)
+				INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
+				VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId, 1)
 
 				DECLARE @EntityLocationId INT
 				SET @EntityLocationId = SCOPE_IDENTITY()
@@ -593,7 +621,6 @@ END
 IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1
 BEGIN
 EXEC(
-
 '
 CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		@CustomerId NVARCHAR(50) = NULL,
@@ -616,7 +643,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				--Entity
 				ptcus_last_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),''''),
 				ptcus_first_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),''''),
-				ptcus_comment = SUBSTRING(Ent.strInternalNotes,1,30),
+				ptcus_comment = SUBSTRING(Con.strInternalNotes,1,30),
 				--ptcus_1099_name = SUBSTRING(Ent.str1099Name,1,50),
 				--Location
 				ptcus_addr = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END,
@@ -626,13 +653,13 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_zip = SUBSTRING(Loc.strZipCode,1,10),
 				ptcus_country = (CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END),
 				--Contact
-				ptcus_contact = SUBSTRING((SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityContactId),1,20),
+				ptcus_contact = SUBSTRING((Con.strName),1,20),
 				ptcus_phone = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END),
 				ptcus_phone_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX(''x'',Con.strPhone) + 1, LEN(Con.strPhone))END),
 				ptcus_phone2 = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END),
 				ptcus_phone_ext2 = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,30),CHARINDEX(''x'',Con.strPhone2) + 1, LEN(Con.strPhone2))END),
 				--Customer
-				ptcus_cus_no = SUBSTRING(Cus.strCustomerNumber,1,10),
+				ptcus_cus_no = SUBSTRING(Ent.strEntityNo,1,10),
 				ptcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END,
 				ptcus_credit_limit = Cus.dblCreditLimit,
 				ptcus_sales_tax_id = SUBSTRING(Cus.strTaxNumber,1,15),
@@ -664,10 +691,15 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				--agcus_ga_wthhld_yn = CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END
 			FROM tblEntity Ent
 				INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityCustomerId
-				INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
-				INNER JOIN tblEntityContact Con ON CustToCon.intEntityContactId = Con.intEntityContactId
-				INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
-				WHERE strCustomerNumber = @CustomerId AND ptcus_cus_no = @CustomerId
+				INNER JOIN tblEntityToContact CustToCon 
+					ON Cus.intEntityCustomerId = CustToCon.intEntityId 
+						and CustToCon.ysnDefaultContact = 1
+				INNER JOIN tblEntity Con 
+					ON CustToCon.intEntityContactId = Con.intEntityId
+				INNER JOIN tblEntityLocation Loc 
+					ON Ent.intEntityId = Loc.intEntityId 
+						and Loc.ysnDefaultLocation = 1
+				WHERE Ent.strEntityNo = @CustomerId AND ptcus_cus_no = @CustomerId
 			END
 			--INSERT IF NOT EXIST IN THE ORIGIN
 			ELSE
@@ -732,7 +764,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Ent.strInternalNotes,1,30) as strInternalNotes,
 				--Ent.str1099Name,
 				--Contact
-				SUBSTRING((SELECT strName FROM tblEntity WHERE intEntityId = Con.intEntityContactId),1,20) AS strContactName,
+				SUBSTRING((Con.strName),1,20) AS strContactName,
 				(CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END) as strPhone,
 				(CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX(''x'',Con.strPhone) + 1, LEN(Con.strPhone))END) as strPhoneExt,
 				(CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END) as strPhone2,
@@ -745,7 +777,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
 				(CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END)as strCountry,
 				--Customer
-				SUBSTRING(Cus.strCustomerNumber,1,10) as strCustomerNumber,
+				SUBSTRING(Ent.strEntityNo,1,10) as strCustomerNumber,
 				(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
 				Cus.dblCreditLimit,
 				SUBSTRING(Cus.strTaxNumber,1,15) as strTaxNumber,
@@ -774,11 +806,17 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				--(CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END) as ysnHoldBatchGrainPayment,
 				--(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding
 				FROM tblEntity Ent
-				INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.intEntityCustomerId
-				INNER JOIN tblARCustomerToContact CustToCon ON Cus.intDefaultContactId = CustToCon.intARCustomerToContactId
-				INNER JOIN tblEntityContact Con ON CustToCon.intEntityContactId = Con.intEntityContactId
-				INNER JOIN tblEntityLocation Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
-				WHERE strCustomerNumber = @CustomerId
+				INNER JOIN tblARCustomer Cus 
+					ON Ent.intEntityId = Cus.intEntityCustomerId
+				INNER JOIN tblEntityToContact CusToCon 
+					ON Cus.intEntityCustomerId = CusToCon.intEntityId 
+						and CusToCon.ysnDefaultContact = 1
+				INNER JOIN tblEntity Con 
+					ON CusToCon.intEntityContactId = Con.intEntityId
+				INNER JOIN tblEntityLocation Loc 
+					ON Ent.intEntityId = Loc.intEntityId 
+						and Loc.ysnDefaultLocation = 1
+				WHERE Ent.strEntityNo =  @CustomerId
 
 
 		RETURN;
@@ -880,7 +918,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @Counter INT = 0
 
 			--Import only those are not yet imported
-			SELECT ptcus_cus_no INTO #tmpptcusmst
+			SELECT TOP 10 ptcus_cus_no INTO #tmpptcusmst
 				FROM ptcusmst
 			LEFT JOIN tblARCustomer
 				ON ptcusmst.ptcus_cus_no COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
@@ -987,13 +1025,13 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				WHERE ptcus_cus_no = @originCustomer
 
 				--INSERT Entity record for Customer
-				INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber])
-				VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''')
+				INSERT [dbo].[tblEntity]	([strName],[strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[imgPhoto],[strContactNumber], [strEntityNo])
+				VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed, @imgPhoto,'''', @strCustomerNumber)
 
 				DECLARE @EntityId INT
 				SET @EntityId = SCOPE_IDENTITY()
 
-				INSERT INTO [dbo].[tblEntityType]([intEntityId],[strType]) values( @EntityId, ''Customer'' )
+				INSERT INTO [dbo].[tblEntityType]([intEntityId],[strType],[intConcurrencyId]) values( @EntityId, ''Customer'', 0 )
 
 				--INSERT into Customer
 				INSERT [dbo].[tblARCustomer](
@@ -1083,11 +1121,15 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				IF(@strContactName IS NOT NULL)
 				BEGIN
 					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-					VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes,'''',@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+					VALUES					 (@strContactName, @strEmail, @strWebsite, @strInternalNotes,
+					UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
+					@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 				END
 				ELSE
 					INSERT [dbo].[tblEntity] ([strName], [strEmail], [strWebsite], [strInternalNotes],[strContactNumber],[strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes])
-					VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes,'''',@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
+					VALUES					 (@strName, @strEmail, @strWebsite, @strInternalNotes,
+					UPPER(CASE WHEN @strContactName IS NOT NULL THEN SUBSTRING(@strContactName, 1, 20) ELSE SUBSTRING(@strName, 1, 20) END), 
+					@strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes)
 			
 
 				DECLARE @ContactEntityId INT
@@ -1100,8 +1142,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 
 
 				--INSERT into Location
-				INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
-				VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId)
+				INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
+				VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId, 1)
 
 				DECLARE @EntityLocationId INT
 				SET @EntityLocationId = SCOPE_IDENTITY()
@@ -1155,8 +1197,6 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			WHERE tblARCustomer.strCustomerNumber IS NULL
 		END
 	END
-
 '
-
 )
 END
