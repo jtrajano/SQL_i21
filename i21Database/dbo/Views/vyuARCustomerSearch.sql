@@ -29,7 +29,7 @@ SELECT
 ,BillToLoc.strCountry as strBillToCountry
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
-LEFT JOIN tblARCustomerToContact as CusToCon ON Cus.intDefaultContactId = CusToCon.intARCustomerToContactId
+LEFT JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
 --LEFT JOIN tblEntityContact as Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
 LEFT JOIN tblEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]
 LEFT JOIN tblEntityLocation as Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
