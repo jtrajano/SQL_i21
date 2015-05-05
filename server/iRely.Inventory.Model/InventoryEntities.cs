@@ -132,6 +132,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
         public DbSet<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
 
+        public DbSet<tblICStatus> tblICStatuses { get; set; }
         public DbSet<tblICStockReservation> tblICStockReservations { get; set; }
 
         public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
@@ -292,6 +293,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICBuildAssemblyDetailMap());
 
             modelBuilder.Configurations.Add(new tblICStockReservationMap());
+            modelBuilder.Configurations.Add(new tblICStatusMap());
 
             modelBuilder.Configurations.Add(new tblSMCompanyLocationMap());
             modelBuilder.Configurations.Add(new tblGLAccountMap());

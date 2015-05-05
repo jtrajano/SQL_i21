@@ -8,11 +8,10 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'i21.store.TaxCodeBuffered',
         'i21.store.UserListBuffered',
         'i21.store.ShipViaBuffered',
-        'GeneralLedger.store.BufAccountId',
-        'GeneralLedger.store.BufAccountCategoryGroup',
         'Inventory.store.BufferedItemStockUOMView',
         'Inventory.store.BufferedStorageLocation',
         'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedStatus',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedItemWeightUOM',
         'Inventory.store.BufferedUnitMeasure'
@@ -26,8 +25,6 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
                     strDescription: 'Location to Location'
                 },{
                     strDescription: 'Storage to Storage'
-                },{
-                    strDescription: 'Location to External'
                 }
             ],
             fields: [
@@ -49,14 +46,11 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         uom: {
             type: 'icbuffereduom'
         },
-        accountCategory: {
-            type: 'glbufaccountcategorygroup'
-        },
         shipVia: {
             type: 'shipviabuffered'
         },
-        glAccount: {
-            type: 'glbufaccountid'
+        status: {
+            type: 'icbufferedstatus'
         },
 
 
@@ -87,12 +81,6 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         },
         newLot: {
             type: 'icbufferedlot'
-        },
-        creditGLAccount: {
-            type: 'glbufaccountid'
-        },
-        debitGLAccount: {
-            type: 'glbufaccountid'
         },
         taxCode: {
             type: 'smtaxcodebuffered'

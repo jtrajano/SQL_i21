@@ -323,29 +323,6 @@
                             "designerId": "0e5c0d3d-9a61-4190-8746-7332e6ea19ce"
                         },
                         {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-pallet",
-                                "itemId": "btnInventory",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Inventory",
-                                "width": 60
-                            },
-                            "name": "MyButton",
-                            "designerId": "f581ef92-f4e2-4d2f-979c-18379e19d008"
-                        },
-                        {
                             "type": "Ext.toolbar.Separator",
                             "reference": {
                                 "name": "items",
@@ -461,7 +438,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": null,
+                                                "margin": "0 5 0 0",
                                                 "name": null,
                                                 "valueField": "strDescription",
                                                 "width": null
@@ -507,7 +484,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": "0 5",
+                                                "margin": "0 5 0 0",
                                                 "name": null,
                                                 "valueField": "intEntityVendorId",
                                                 "width": null
@@ -540,6 +517,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1.2,
                                                 "layout|margins": null,
+                                                "margin": "0 5 0 0",
                                                 "name": null,
                                                 "readOnly": true,
                                                 "width": null
@@ -591,7 +569,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": "0 0 0 5",
+                                                "margin": "0 5 0 0",
                                                 "name": null,
                                                 "valueField": "intCompanyLocationId",
                                                 "width": null
@@ -647,7 +625,7 @@
                                                 "labelWidth": 80,
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": "0 5",
+                                                "margin": "0 5 0 0",
                                                 "name": null,
                                                 "readOnly": null,
                                                 "valueField": "intCompanyLocationId",
@@ -679,7 +657,7 @@
                                                 "labelAlign": "top",
                                                 "labelWidth": 75,
                                                 "layout|flex": null,
-                                                "margin": null,
+                                                "margin": "0 5 0 0",
                                                 "minWidth": 100,
                                                 "name": null,
                                                 "width": 100
@@ -724,7 +702,7 @@
                                                 "labelAlign": "top",
                                                 "labelWidth": 105,
                                                 "layout|flex": null,
-                                                "margin": "0 5",
+                                                "margin": "0 5 0 0",
                                                 "name": null,
                                                 "valueField": "intCurrencyID",
                                                 "width": 60
@@ -829,6 +807,7 @@
                                                             "userConfig": {
                                                                 "allowDecimals": false,
                                                                 "fieldLabel": "Blanket Release No",
+                                                                "hideTrigger": true,
                                                                 "itemId": "txtBlanketReleaseNumber",
                                                                 "labelWidth": 110,
                                                                 "layout|flex": null,
@@ -896,7 +875,7 @@
                                                         "layout": "vbox",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
-                                                        "margin": "0 0 0 5"
+                                                        "margin": "0 5 0 0"
                                                     },
                                                     "name": "MyContainer10",
                                                     "designerId": "8c0a03b2-e976-4409-b87f-1e8edad40e65",
@@ -1095,7 +1074,7 @@
                                                         "layout": "vbox",
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
-                                                        "margin": "0 0 0 5"
+                                                        "margin": "0 5 0 0"
                                                     },
                                                     "name": "MyContainer6",
                                                     "designerId": "321a5983-f0af-418e-90b7-8fecef19b6f6",
@@ -1227,7 +1206,7 @@
                                                 "layout": "vbox",
                                                 "layout|flex": 1,
                                                 "layout|margins": null,
-                                                "margin": "0 0 0 5"
+                                                "margin": null
                                             },
                                             "name": "MyContainer7",
                                             "designerId": "880c165c-0c37-4c61-9cf4-e2442b775ca2",
@@ -1412,6 +1391,42 @@
                                                                     "codeClass": null,
                                                                     "userConfig": {
                                                                         "icon": null,
+                                                                        "iconCls": "small-add",
+                                                                        "itemId": "btnInsertInventoryReceipt",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Insert"
+                                                                    },
+                                                                    "name": "MyButton7",
+                                                                    "designerId": "6f0e12ec-eeb1-4083-847e-e3305baa0d63"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-view",
+                                                                        "itemId": "btnViewItem",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "View Item"
+                                                                    },
+                                                                    "name": "MyButton9",
+                                                                    "designerId": "477a1fe3-31aa-4a0f-a6ff-b5286c6357a2"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
                                                                         "iconCls": "small-delete",
                                                                         "itemId": "btnRemoveInventoryReceipt",
                                                                         "layout|flex": null,
@@ -1445,7 +1460,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter110",
+                                                                    "name": "filter1",
                                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2357,6 +2372,24 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
+                                                                                "iconCls": "small-add",
+                                                                                "itemId": "btnInsertLot",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Insert"
+                                                                            },
+                                                                            "name": "MyButton21",
+                                                                            "designerId": "cd5b96f2-a00f-459b-82b5-db6d2534db5d"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
                                                                                 "iconCls": "small-delete",
                                                                                 "itemId": "btnRemoveLot",
                                                                                 "layout|flex": null,
@@ -2390,7 +2423,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter111",
+                                                                            "name": "filter11",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3488,7 +3521,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter12",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4325,7 +4358,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter113",
+                                                    "name": "filter13",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4769,7 +4802,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging1",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

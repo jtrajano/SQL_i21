@@ -189,17 +189,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         text: 'Vendor'
                                     },
                                     {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        itemId: 'btnInventory',
-                                        width: 60,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-pallet',
-                                        scale: 'large',
-                                        text: 'Inventory'
-                                    },
-                                    {
                                         xtype: 'tbseparator',
                                         height: 30
                                     },
@@ -250,6 +239,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'combobox',
                                                         flex: 1,
                                                         itemId: 'cboReceiptType',
+                                                        margin: '0 5 0 0',
                                                         fieldLabel: 'Receipt Type',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
@@ -280,7 +270,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         ],
                                                         flex: 1,
                                                         itemId: 'cboVendor',
-                                                        margin: '0 5',
+                                                        margin: '0 5 0 0',
                                                         fieldLabel: 'Vendor ID',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
@@ -291,6 +281,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'textfield',
                                                         flex: 1.2,
                                                         itemId: 'txtVendorName',
+                                                        margin: '0 5 0 0',
                                                         fieldLabel: 'Vendor Name',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
@@ -326,7 +317,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         ],
                                                         flex: 1,
                                                         itemId: 'cboTransferor',
-                                                        margin: '0 0 0 5',
+                                                        margin: '0 5 0 0',
                                                         fieldLabel: 'Transferor',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
@@ -357,7 +348,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         ],
                                                         flex: 1,
                                                         itemId: 'cboLocation',
-                                                        margin: '0 5',
+                                                        margin: '0 5 0 0',
                                                         fieldLabel: 'Location',
                                                         labelAlign: 'top',
                                                         labelWidth: 80,
@@ -367,6 +358,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'datefield',
                                                         itemId: 'dtmReceiptDate',
+                                                        margin: '0 5 0 0',
                                                         minWidth: 100,
                                                         width: 100,
                                                         fieldLabel: 'Receipt Date',
@@ -396,7 +388,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             }
                                                         ],
                                                         itemId: 'cboCurrency',
-                                                        margin: '0 5',
+                                                        margin: '0 5 0 0',
                                                         width: 60,
                                                         fieldLabel: 'Currency',
                                                         labelAlign: 'top',
@@ -446,6 +438,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'txtBlanketReleaseNumber',
                                                                         fieldLabel: 'Blanket Release No',
                                                                         labelWidth: 110,
+                                                                        hideTrigger: true,
                                                                         allowDecimals: false
                                                                     },
                                                                     {
@@ -465,7 +458,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 1,
-                                                                margin: '0 0 0 5',
+                                                                margin: '0 5 0 0',
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
@@ -562,7 +555,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 1,
-                                                                margin: '0 0 0 5',
+                                                                margin: '0 5 0 0',
                                                                 layout: {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
@@ -616,7 +609,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                     {
                                                         xtype: 'container',
                                                         flex: 1,
-                                                        margin: '0 0 0 5',
                                                         layout: {
                                                             type: 'vbox',
                                                             align: 'stretch'
@@ -690,6 +682,20 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             padding: '0 0 0 1'
                                                                         },
                                                                         items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertInventoryReceipt',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnViewItem',
+                                                                                iconCls: 'small-view',
+                                                                                text: 'View Item'
+                                                                            },
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
@@ -1102,7 +1108,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         items: [
                                                                             {
                                                                                 altText: 'View',
-                                                                                iconCls: 'small-edit',
+                                                                                iconCls: 'small-view',
                                                                                 tooltip: 'View Tax Details'
                                                                             }
                                                                         ]
@@ -1151,6 +1157,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     },
                                                                                     {
                                                                                         xtype: 'tbseparator'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnInsertLot',
+                                                                                        iconCls: 'small-add',
+                                                                                        text: 'Insert'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',

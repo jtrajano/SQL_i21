@@ -16,13 +16,17 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 {dataIndex: 'strTransferType', text: 'Transfer Type', flex: 1, dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
                 {dataIndex: 'strFromLocation', text: 'From Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strToLocation', text: 'To Location', flex: 1, dataType: 'string'}
+                {dataIndex: 'strToLocation', text: 'To Location', flex: 1, dataType: 'string'},
+                {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string'},
+                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
         binding: {
             bind: {
                 title: 'Inventory Transfer - {current.strTransferNo}'
             },
+            txtTransferNumber: '{current.strTransferNo}',
+            dtmTransferDate: '{current.dtmTransferDate}',
             cboTransferType: {
                 value: '{current.strTransferType}',
                 store: '{transferTypes}'
@@ -31,9 +35,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.intTransferredById}',
                 store: '{userList}'
             },
-            dtmTransferDate: '{current.dtmTransferDate}',
-            chkShipmentRequired: '{current.ysnShipmentRequired}',
-            txtTransferNumber: '{current.strTransferNo}',
             txtDescription: '{current.strDescription}',
             cboFromLocation: {
                 value: '{current.intFromLocationId}',
@@ -43,6 +44,12 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.intToLocationId}',
                 store: '{toLocation}'
             },
+            chkShipmentRequired: '{current.ysnShipmentRequired}',
+            cboStatus: {
+                value: '{current.intStatusId}',
+                store: '{status}'
+            },
+
             cboShipVia: {
                 value: '{current.intShipViaId}',
                 store: '{shipVia}'
@@ -51,15 +58,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.intFreightUOMId}',
                 store: '{uom}'
             },
-            cboAccountCategory: {
-                value: '{current.intAccountCategoryId}',
-                store: '{accountCategory}'
-            },
-            cboAccountId: {
-                value: '{current.intAccountId}',
-                store: '{glAccount}'
-            },
-            txtAccountDescription: '{current.strAccountDescription}',
             txtTaxAmount: '{current.dblTaxAmount}',
 
             grdInventoryTransfer: {
@@ -171,20 +169,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     }
                 },
                 colCost: 'dblCost',
-                colCreditAccount: {
-                    dataIndex: 'strCreditAccountId',
-                    editor: {
-                        store: '{creditGLAccount}'
-                    }
-                },
-                colCreditAccountDescription: 'strCreditAccountDescription',
-                colDebitAccount: {
-                    dataIndex: 'strDebitAccountId',
-                    editor: {
-                        store: '{debitGLAccount}'
-                    }
-                },
-                colDebitAccountDescription: 'strDebitAccountDescription',
                 colTaxCode: {
                     dataIndex: 'strTaxCode',
                     editor: {
@@ -392,28 +376,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         else if (combo.itemId === 'cboNewLotID') {
             current.set('intNewLotId', records[0].get('intLotId'));
         }
-        else if (combo.itemId === 'cboCreditAccount') {
-            current.set('intCreditAccountId', records[0].get('intAccountId'));
-            current.set('strCreditAccountDescription', records[0].get('strDescription'));
-        }
-        else if (combo.itemId === 'cboDebitAccount') {
-            current.set('intDebitAccountId', records[0].get('intAccountId'));
-            current.set('strDebitAccountDescription', records[0].get('strDescription'));
-        }
         else if (combo.itemId === 'cboTaxCode') {
             current.set('intTaxCodeId', records[0].get('intTaxCodeId'));
-        }
-    },
-
-    onAccountSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var win = combo.up('window');
-        var current = win.viewModel.data.current;
-
-        if (current) {
-            current.set('strAccountDescription', records[0].get('strDescription'));
         }
     },
 
@@ -422,25 +386,17 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         var pnlFreight = win.down('#pnlFreight');
         var grdInventoryTransfer = win.down('#grdInventoryTransfer');
         var colCost = grdInventoryTransfer.columns[16];
-        var colCreditAccount = grdInventoryTransfer.columns[17];
-        var colCreditAccountDescription = grdInventoryTransfer.columns[18];
-        var colDebitAccount = grdInventoryTransfer.columns[19];
-        var colDebitAccountDescription = grdInventoryTransfer.columns[20];
-        var colTaxCode = grdInventoryTransfer.columns[21];
-        var colTaxAmount = grdInventoryTransfer.columns[22];
+        var colTaxCode = grdInventoryTransfer.columns[17];
+        var colTaxAmount = grdInventoryTransfer.columns[18];
 
-        var colFreightRate = grdInventoryTransfer.columns[23];
-        var colFreightAmount = grdInventoryTransfer.columns[24];
+        var colFreightRate = grdInventoryTransfer.columns[19];
+        var colFreightAmount = grdInventoryTransfer.columns[20];
 
         switch (newValue) {
             case 'Location to Location':
                 pnlFreight.setHidden(false);
 
                 colCost.setHidden(true);
-                colCreditAccount.setHidden(true);
-                colCreditAccountDescription.setHidden(true);
-                colDebitAccount.setHidden(true);
-                colDebitAccountDescription.setHidden(true);
                 colTaxCode.setHidden(true);
                 colTaxAmount.setHidden(true);
 
@@ -451,29 +407,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 pnlFreight.setHidden(true);
 
                 colCost.setHidden(true);
-                colCreditAccount.setHidden(true);
-                colCreditAccountDescription.setHidden(true);
-                colDebitAccount.setHidden(true);
-                colDebitAccountDescription.setHidden(true);
                 colTaxCode.setHidden(true);
                 colTaxAmount.setHidden(true);
 
                 colFreightRate.setHidden(true);
                 colFreightAmount.setHidden(true);
-                break
-            case 'Location to External':
-                pnlFreight.setHidden(false);
-
-                colCost.setHidden(false);
-                colCreditAccount.setHidden(false);
-                colCreditAccountDescription.setHidden(false);
-                colDebitAccount.setHidden(false);
-                colDebitAccountDescription.setHidden(false);
-                colTaxCode.setHidden(false);
-                colTaxAmount.setHidden(false);
-
-                colFreightRate.setHidden(false);
-                colFreightAmount.setHidden(false);
                 break
         }
     },
@@ -642,20 +580,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             "#cboNewLotID": {
                 select: this.onTransferDetailSelect
             },
-            "#cboCreditAccount": {
-                select: this.onTransferDetailSelect
-            },
-            "#cboDebitAccount": {
-                select: this.onTransferDetailSelect
-            },
             "#cboTaxCode": {
                 select: this.onTransferDetailSelect
             },
             "#cboTransferType": {
                 change: this.onTransferTypeChange
-            },
-            "#cboAccountId": {
-                select: this.onAccountSelect
             },
             "#colAvailableQty": {
                 beforerender: this.onDetailGridColumnBeforeRender

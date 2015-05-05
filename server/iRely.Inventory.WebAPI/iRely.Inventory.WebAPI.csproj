@@ -157,6 +157,7 @@
     <Compile Include="Controllers\Activities\Receipts\ReceiptItemTaxController.cs" />
     <Compile Include="Controllers\Maintenance\CategoryAccountController.cs" />
     <Compile Include="Controllers\Maintenance\CategoryVendorController.cs" />
+    <Compile Include="Controllers\Maintenance\StatusController.cs" />
     <Compile Include="Controllers\Maintenance\ItemCommodityCostController.cs" />
     <Compile Include="Controllers\Maintenance\StockReservationController.cs" />
     <Compile Include="Controllers\Maintenance\ItemStockController.cs" />
