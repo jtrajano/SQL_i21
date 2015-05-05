@@ -427,13 +427,6 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                 {
                                     xtype: 'button',
                                     tabIndex: -1,
-                                    itemId: 'btnInsert',
-                                    iconCls: 'small-add',
-                                    text: 'Insert'
-                                },
-                                {
-                                    xtype: 'button',
-                                    tabIndex: -1,
                                     itemId: 'btnViewItem',
                                     iconCls: 'small-view',
                                     text: 'View Item'
