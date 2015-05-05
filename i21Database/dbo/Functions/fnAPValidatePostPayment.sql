@@ -48,6 +48,7 @@ BEGIN
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM @tmpPayments)
 		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest)--fully paid
 		AND B.dblDiscount <> 0
+		AND B.dblPayment <> 0
 		AND 1 = (CASE WHEN (SELECT intDiscountAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
@@ -69,6 +70,7 @@ BEGIN
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM @tmpPayments)
 		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) --fully paid
 		AND B.dblInterest <> 0
+		AND B.dblPayment <> 0
 		AND 1 = (CASE WHEN (SELECT intInterestAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
