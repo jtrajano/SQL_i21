@@ -402,3 +402,7 @@ EXEC sp_addmessage 51099,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51100) EXEC sp_dropmessage 51100, 'us_english'	
 SET @strmessage = 'The stock on hand is outdated for %s. Please review your quantity adjustments after the system reloads the latest stock on hand.'
 EXEC sp_addmessage 51100,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51101) EXEC sp_dropmessage 51101, 'us_english'	
+SET @strmessage = 'The lot expiry dates are outdated for %s. Please review your quantity adjustments after the system reloads the latest expiry dates.'
+EXEC sp_addmessage 51101,11,@strmessage,'us_english','False' 

@@ -227,7 +227,7 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange
 	BEGIN 
-		EXEC	dbo.uspICPostInventoryAdjustmentLotStatusChange
+		EXEC dbo.uspICPostInventoryAdjustmentLotStatusChange
 				@intTransactionId
 				,@ysnPost
 	END 
@@ -255,7 +255,7 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 		)  	
-		EXEC	dbo.uspICPostInventoryAdjustmentSplitLotChange
+		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
 				@intTransactionId
 	END 
 
@@ -264,26 +264,9 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_ExpiryDateChange
 	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
-		EXEC	dbo.uspICPostInventoryAdjustmentExpiryLotChange
+		EXEC dbo.uspICPostInventoryAdjustmentExpiryLotChange
 				@intTransactionId
+				,@ysnPost
 	END 
 	
 	-----------------------------------
@@ -375,6 +358,14 @@ BEGIN
 				@intTransactionId
 				,@ysnPost
 	END 	
+
+	IF @adjustmentType = @ADJUSTMENT_TYPE_ExpiryDateChange
+	BEGIN 
+		EXEC	dbo.uspICPostInventoryAdjustmentExpiryLotChange
+				@intTransactionId
+				,@ysnPost
+	END 	
+	
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -422,6 +413,8 @@ BEGIN
 	UPDATE	dbo.tblICInventoryAdjustment  
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+			,dtmPostedDate = CASE WHEN @ysnPost = 1 THEN GETDATE() ELSE dtmPostedDate	END
+			,dtmUnpostedDate = CASE WHEN @ysnPost = 0 THEN GETDATE() ELSE dtmUnpostedDate	END
 	WHERE	strAdjustmentNo = @strTransactionId  
 
 	COMMIT TRAN @TransactionName

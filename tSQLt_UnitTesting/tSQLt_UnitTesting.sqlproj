@@ -981,6 +981,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 51100 on non-lot items.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedStockOnHand for updating non-lot item in the adjustment detail.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedStockOnHand for updating a lot item in the adjustment detail.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentExpiryLotChange on adjusting the expiry date.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedExpiryDate for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedExpiryDate for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedExpiryDate for error 51101.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedExpiryDate for updating items in the adjustment detail.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

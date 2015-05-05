@@ -558,4 +558,49 @@ BEGIN
 
 	END
 
+	-- ADJ-6
+	BEGIN 
+		SET @intInventoryAdjustmentId = 6
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/14/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE
+				,strAdjustmentNo    = 'ADJ-6'                              
+				,strDescription     = 'Changes the expiry date of a lot item.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId	
+				,intSubLocationId			
+				,intStorageLocationId		
+				,intItemId					
+				,intLotId					
+				,dtmExpiryDate
+				,dtmNewExpiryDate
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId		= @StorageSilo_RM_DL
+				,intItemId					= @ManualLotGrains
+				,intLotId					= @ManualLotGrains_Lot_100001
+				,dtmExpiryDate				= '01/10/2018'
+				,dtmNewExpiryDate			= '05/12/2018'
+	END
+
 END 

@@ -1515,6 +1515,8 @@
     <Build Include="dbo\Tables\tblCFNetworkTaxCode.sql" />
     <Build Include="dbo\Stored Procedures\uspSTBackUpPromotions.sql" />
     <Build Include="dbo\Tables\tblICStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustmentGetOutdatedExpiryDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustmentUpdateOutdatedExpiryDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
