@@ -4,10 +4,15 @@ GO
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblSMCompanySetup)
 	BEGIN
+		IF EXISTS(SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblSMPreferences]'))
+			IF EXISTS(SELECT TOP 1 1 FROM tblSMPreferences WHERE strPreference = 'isLegacyIntegration' AND strValue = 'false')
+				GOTO Check_Exit;
+
 		PRINT N'BEGIN UPDATING EXISTING COMPANY SETUP'
 			UPDATE tblSMCompanySetup 
 			SET strCompanyName = (SELECT TOP 1 coctl_co_name FROM [coctlmst])
 		PRINT N'END UPDATING EXISTING COMPANY SETUP'
+
 	END
 	ELSE
 	BEGIN
