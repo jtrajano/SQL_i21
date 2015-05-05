@@ -6,11 +6,11 @@ intJournalId						AS	intTransactionId,
 strJournalId						AS	strTransactionId, 
 BatchPosting.intEntityId			AS	intEntityId, 
 UserSecurity.strUserName			AS	strUserName,
-strReference						AS	strReference,
+strDescription						AS	strDescription,
 dtmDate								AS	dtmDate
 FROM 
 (
-	SELECT strJournalType as strTransactionType, intJournalId, strJournalId, intEntityId, dtmDate, NULL as strReference  
+	SELECT strJournalType as strTransactionType, intJournalId, strJournalId, intEntityId, dtmDate, strDescription
 	FROM tblGLJournal 
 	WHERE strJournalType IN ('Adjusted Origin Journal', 'General Journal', 'Audit Adjustment', 'Imported Journal', 'Origin Journal', 'Recurring Journal' ) 
 	AND ysnPosted = 0
