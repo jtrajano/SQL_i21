@@ -46,9 +46,30 @@ BEGIN
 			INNER JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
 		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM @tmpPayments)
-		AND B.dblAmountDue = (B.dblPayment + B.dblDiscount) --fully paid
+		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest)--fully paid
 		AND B.dblDiscount <> 0
 		AND 1 = (CASE WHEN (SELECT intDiscountAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
+		GROUP BY A.[strPaymentRecordNum],
+		A.intPaymentId,
+		C.strVendorId,
+		A.dtmDatePaid
+
+		--Make sure it ha setup for default discount account
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'There is no account setup for interest.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM	[dbo].tblAPPayment A 
+			INNER JOIN tblAPPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPVendor C
+				ON A.intEntityVendorId = C.intEntityVendorId
+		WHERE	A.intPaymentId IN (SELECT intPaymentId FROM @tmpPayments)
+		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) --fully paid
+		AND B.dblInterest <> 0
+		AND 1 = (CASE WHEN (SELECT intInterestAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
 		C.strVendorId,
