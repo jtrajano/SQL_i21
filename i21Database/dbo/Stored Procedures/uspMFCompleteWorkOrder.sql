@@ -12,7 +12,6 @@ BEGIN TRY
 		,@strOutputLotNumber NVARCHAR(50)
 		,@strVendorLotNo NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
-
 		,@intItemUOMId INT
 		,@intInputLotId INT
 		,@intManufacturingCellId INT
@@ -23,6 +22,7 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@intContainerId INT
 		,@dblTareWeight NUMERIC(18, 6)
+		,@dblUnitQty NUMERIC(18, 6)
 		,@dblPhysicalCount NUMERIC(18, 6)
 		,@intPhysicalItemUOMId INT
 		,@ysnEmptyOutSource BIT
@@ -37,6 +37,7 @@ BEGIN TRY
 		,@intLotId INT
 		,@strLotTracking NVARCHAR(50)
 
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
@@ -48,6 +49,7 @@ BEGIN TRY
 		,@dblProduceQty = dblProduceQty
 		,@intProduceUnitMeasureId = intProduceUnitMeasureId
 		,@dblTareWeight = dblTareWeight
+		,@dblUnitQty=dblUnitQty
 		,@dblPhysicalCount = dblPhysicalCount
 		,@intPhysicalItemUOMId = (case When intPhysicalItemUOMId=0 Then NULL else intPhysicalItemUOMId End)
 		,@strVesselNo = strVesselNo
@@ -72,6 +74,7 @@ BEGIN TRY
 			,dblProduceQty NUMERIC(18, 6)
 			,intProduceUnitMeasureId INT
 			,dblTareWeight NUMERIC(18, 6)
+			,dblUnitQty NUMERIC(18, 6)
 			,dblPhysicalCount NUMERIC(18, 6)
 			,intPhysicalItemUOMId INT
 			,strVesselNo NVARCHAR(50)
@@ -282,6 +285,7 @@ BEGIN TRY
 		,@strLotNumber = @strOutputLotNumber
 		,@intContainerId = @intContainerId
 		,@dblTareWeight = @dblTareWeight
+		,@dblUnitQty=@dblUnitQty
 		,@dblPhysicalCount = @dblPhysicalCount
 		,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 		,@intBatchId = @intBatchId
