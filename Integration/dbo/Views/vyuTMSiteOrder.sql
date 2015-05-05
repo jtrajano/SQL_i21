@@ -46,6 +46,7 @@ BEGIN
 		,A.intDeliveryTermID
 		,ISNULL(G.ysnDispatched,0) AS ysnDispatched
 		,A.intTaxStateID
+		,ISNULL(G.strWillCallStatus,'''') AS strWillCallStatus
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID

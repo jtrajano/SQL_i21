@@ -52,15 +52,25 @@ SET IDENTITY_INSERT tblICStatus OFF
 GO
 
 -- Implement on Inventory Transfer
-IF NOT EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intStatusId' AND object_id = object_id('tblICInventoryTransfer'))
+IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tblICInventoryTransfer'))
 BEGIN
-	ALTER TABLE tblICInventoryTransfer
-	ADD intStatusId INT NULL
+	IF NOT EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intStatusId' AND object_id = object_id('tblICInventoryTransfer'))
+	BEGIN
+		EXEC('
+			ALTER TABLE tblICInventoryTransfer
+			ADD intStatusId INT NULL
+		')
+	END	
 END
 GO
 
-UPDATE tblICInventoryTransfer
-SET intStatusId = 1
-WHERE ISNULL(intStatusId, 0) = 0
-
+IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tblICInventoryTransfer'))
+BEGIN
+	EXEC('
+		UPDATE tblICInventoryTransfer
+		SET intStatusId = 1
+		WHERE ISNULL(intStatusId, 0) = 0
+	')
+END
+GO
 /****************** End Implement Inventory Status on Transactions **************/
