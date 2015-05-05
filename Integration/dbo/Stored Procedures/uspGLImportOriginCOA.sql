@@ -214,16 +214,17 @@ BEGIN
 				tblGLAccountSegment				
 		
 				EXEC uspGLBuildOriginAccount  0
-				EXEC uspGLBuildAccount 0				
+				EXEC uspGLBuildAccount 0			
+				EXEC uspGLConvertAccountGroupToCategory				
 			END	
-	
+			IF @@TRANCOUNT > 0 COMMIT TRANSACTION
 			SET @result = ''SUCCESSFULLY IMPORTED''
 	
 		END
 		END TRY
 		BEGIN CATCH
-			ROLLBACK TRANSACTION
-    				SELECT @result = ERROR_MESSAGE()
+			IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
+    		SELECT @result = ERROR_MESSAGE()
 		END CATCH
 
 	')
