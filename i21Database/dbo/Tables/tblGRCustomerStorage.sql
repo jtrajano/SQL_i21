@@ -7,7 +7,7 @@
     [intStorageScheduleId] INT NULL, 
     [intStorageTypeId] INT NULL, 
     [intCompanyLocationId] INT NOT NULL, 
-    [intTicketId] INT NOT NULL, 
+    [intTicketId] INT NULL, 
     [intDiscountScheduleId] INT NOT NULL, 
     [dblTotalPriceShrink] NUMERIC(6, 2) NULL, 
     [dblTotalWeightShrink] NUMERIC(7, 4) NULL, 
