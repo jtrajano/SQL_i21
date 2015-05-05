@@ -2,8 +2,7 @@
 	@ContactNumber NVARCHAR(20) = NULL
 
 	AS
-
-	
+		
 	--================================================
 	--     UPDATE/INSERT IN ORIGIN	
 	--================================================
@@ -11,11 +10,11 @@
 	BEGIN
 		--UPDATE IF EXIST IN THE ORIGIN
 		IF(EXISTS(SELECT 1 FROM ssconmst WHERE sscon_contact_id = UPPER(@ContactNumber)))
-		BEGIN
+		BEGIN			
 			UPDATE ssconmst
 				SET 
-				sscon_last_name = SUBSTRING((CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30), 0, CHARINDEX(', ',E.strName)) ELSE SUBSTRING(E.strName,1,30)END), 1, 20),
-				sscon_first_name = SUBSTRING((CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30),CHARINDEX(', ',E.strName) + 2, LEN(E.strName))END), 1, 20),
+				sscon_last_name = SUBSTRING((CASE WHEN CHARINDEX(', ', Contact.strName) > 0 THEN SUBSTRING(SUBSTRING(Contact.strName,1,30), 0, CHARINDEX(', ',Contact.strName)) ELSE SUBSTRING(Contact.strName,1,30)END), 1, 20),
+				sscon_first_name = SUBSTRING((CASE WHEN CHARINDEX(', ', Contact.strName) > 0 THEN SUBSTRING(SUBSTRING(Contact.strName,1,30),CHARINDEX(', ',Contact.strName) + 2, LEN(Contact.strName))END), 1, 20),
 				sscon_contact_title = Contact.strTitle,
 				sscon_work_no = (CASE WHEN CHARINDEX('x', Contact.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Contact.strPhone,1,30), 0, CHARINDEX('x',Contact.strPhone)) ELSE SUBSTRING(Contact.strPhone,1,30)END),
 				sscon_work_ext = (CASE WHEN CHARINDEX('x', Contact.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Contact.strPhone,1,30),CHARINDEX('x',Contact.strPhone) + 1, LEN(Contact.strPhone))END),
@@ -25,13 +24,17 @@
 				sscon_fax_ext = (CASE WHEN CHARINDEX('x', Contact.strFax) > 0 THEN SUBSTRING(SUBSTRING(Contact.strFax,1,30),CHARINDEX('x',Contact.strFax) + 1, LEN(Contact.strFax))END),
 
 				sscon_email = E.strEmail
-			FROM tblEntityContact Contact
-				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityContactId
+			FROM tblEntity Contact
+				INNER JOIN tblEntityToContact EntToCon
+					on EntToCon.intEntityContactId = Contact.intEntityId
+				INNER JOIN tblEntity E ON E.intEntityId = EntToCon.intEntityId
 				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND UPPER(sscon_contact_id) = UPPER(@ContactNumber)
 
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
 		ELSE
+		BEGIN
+
 			INSERT INTO ssconmst(
 				sscon_contact_id,
 				sscon_cus_no,
@@ -52,7 +55,7 @@
 			)
 			SELECT
 				UPPER(Contact.strContactNumber),
-				Cus.strCustomerNumber,
+				E.strEntityNo,
 				--Substring names to avoid SQL truncation error
 				SUBSTRING((CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30), 0, CHARINDEX(', ',E.strName)) ELSE SUBSTRING(E.strName,1,30)END), 1, 20) AS LastName,
 				SUBSTRING((CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30),CHARINDEX(', ',E.strName) + 2, LEN(E.strName))END), 1, 20) AS FirstName,
@@ -67,12 +70,17 @@
 				'',
 				'',
 				''
-			FROM tblEntityContact Contact
-				INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityContactId
-				INNER JOIN tblARCustomerToContact  CusToCon ON Contact.intEntityContactId = CusToCon.intEntityContactId
-				INNER JOIN tblARCustomer Cus ON CusToCon.intEntityContactId = Cus.[intEntityCustomerId]
-				WHERE Contact.strContactNumber = @ContactNumber
-	
+			FROM tblEntity Contact
+				INNER JOIN tblEntityToContact EntToCon
+					on EntToCon.intEntityContactId = Contact.intEntityId
+				INNER JOIN tblEntity E ON E.intEntityId = EntToCon.intEntityId
+				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber)
+			--FROM tblEntityContact Contact
+			--	INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityContactId
+			--	INNER JOIN tblARCustomerToContact  CusToCon ON Contact.intEntityContactId = CusToCon.intEntityContactId
+			--	INNER JOIN tblARCustomer Cus ON CusToCon.intEntityContactId = Cus.[intEntityCustomerId]
+			--	WHERE Contact.strContactNumber = @ContactNumber			
+		END
 
 	RETURN;
 	END

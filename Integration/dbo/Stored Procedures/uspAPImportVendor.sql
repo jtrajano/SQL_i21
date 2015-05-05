@@ -7,7 +7,7 @@ GO
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
-	EXEC ('
+EXEC('
 CREATE PROCEDURE [dbo].[uspAPImportVendor]
 	@VendorId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
@@ -31,12 +31,12 @@ SET ANSI_WARNINGS OFF
 --	RAISERROR(''Some of the vendor default expense account do not exists in i21 Accounts.'', 16, 1);
 --	RETURN;
 --END
-
 IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
 
 	IF(EXISTS(SELECT 1 FROM ssvndmst WHERE ssvnd_vnd_no = @VendorId))
-	BEGIN
+	BEGIN	
+
 		UPDATE ssvndmst
 		SET 
 		--ssvnd_vnd_no					=	CAST(B.strVendorId AS VARCHAR(10)),
@@ -52,11 +52,11 @@ BEGIN
 													THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) 
 													ELSE NULL END AS VARCHAR(30)),
 		ssvnd_city						=	CAST(strCity AS VARCHAR(20)),
-		ssvnd_st						=	CAST(strState AS VARCHAR(2)),
-		ssvnd_zip						=	CAST(strZipCode AS VARCHAR(10)),
+		ssvnd_st						=	CAST(C.strState AS VARCHAR(2)),
+		ssvnd_zip						=	CAST(C.strZipCode AS VARCHAR(10)),
 		ssvnd_phone						=	CAST(ISNULL(D.strPhone,'''') AS VARCHAR(15)),
-		ssvnd_phone2					=	CAST(ISNULL(A.strName,'''') AS VARCHAR(15)),
-		ssvnd_contact					=	CAST(A.strName AS VARCHAR(15)),
+		ssvnd_phone2					=	CAST(ISNULL(D.strPhone2,'''') AS VARCHAR(15)),
+		ssvnd_contact					=	CAST(D.strName AS VARCHAR(15)),
 		ssvnd_1099_yn					=	CASE WHEN A.ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
 		ssvnd_wthhld_yn					=	CASE WHEN ysnWithholding = 0 THEN ''N'' ELSE ''Y'' END,
 		ssvnd_pay_ctl_ind				=	CASE WHEN ysnPymtCtrlActive = 1 THEN ''A''
@@ -65,18 +65,18 @@ BEGIN
 												WHEN ysnPymtCtrlHold = 1 THEN ''H'' END,
 		ssvnd_fed_tax_id				=	CAST(A.strFederalTaxId AS VARCHAR(20)),
 		ssvnd_w9_signed_rev_dt			=	CONVERT(VARCHAR(8), GETDATE(), 112),
-		ssvnd_pay_to					=	CAST(strVendorPayToId AS VARCHAR(10)),
-
+		ssvnd_pay_to					=	CAST(strVendorPayToId AS VARCHAR(10)),		
+		ssvnd_currency					=	E.strCurrency,
 		ssvnd_1099_name					=	CAST(A.str1099Name AS VARCHAR(50)),
 		ssvnd_gl_pur					=	CAST(F.strExternalId AS DECIMAL(16,8)),
 		ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2))
 		FROM ssvndmst 
-		INNER JOIN tblAPVendor B
-			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS
 		INNER JOIN tblEntity A
+			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = A.strEntityNo COLLATE Latin1_General_CI_AS
+		INNER JOIN tblAPVendor B
 			ON A.intEntityId = B.intEntityVendorId
 		INNER JOIN tblEntityLocation C
-			ON B.intDefaultLocationId = C.intEntityLocationId
+			ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 		INNER JOIN tblEntityToContact G
 			ON A.intEntityId = G.intEntityId and G.ysnDefaultContact = 1
 		INNER JOIN tblEntity D
@@ -88,7 +88,7 @@ BEGIN
 		WHERE ssvndmst.ssvnd_vnd_no = @VendorId
 	END
 	ELSE
-	BEGIN
+	BEGIN		
 		INSERT INTO ssvndmst(
 		ssvnd_vnd_no,
 		ssvnd_co_per_ind,
@@ -113,36 +113,36 @@ BEGIN
 		ssvnd_tax_st
 		)
 		SELECT 
-			ssvnd_vnd_no					=	B.strVendorId,
+			ssvnd_vnd_no					=	A.strEntityNo,
 			ssvnd_co_per_ind				=	CASE WHEN B.intVendorType = 0 THEN ''C'' ELSE ''P'' END,
 			ssvnd_name						=	A.strName,
 			ssvnd_addr_1					=	CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
 			ssvnd_addr_2					=	CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, CHARINDEX(CHAR(10),C.strAddress), LEN(C.strAddress)) ELSE NULL END,
 			ssvnd_city						=	strCity,
-			ssvnd_st						=	strState,
-			ssvnd_zip						=	strZipCode,
-			ssvnd_phone						=	ISNULL(D.strPhone,''''),
-			ssvnd_phone2					=	D.strPhone2,
-			ssvnd_contact					=	A.strName,
+			ssvnd_st						=	CAST(C.strState AS VARCHAR(2)),
+			ssvnd_zip						=	CAST(C.strZipCode AS VARCHAR(10)),
+			ssvnd_phone						=	CAST(ISNULL(D.strPhone,'''') AS VARCHAR(15)),
+			ssvnd_phone2					=	CAST(ISNULL(D.strPhone2,'''') AS VARCHAR(15)),
+			ssvnd_contact					=	CAST(D.strName AS VARCHAR(15)),
 			ssvnd_1099_yn					=	CASE WHEN A.ysnPrint1099 = 0 THEN ''N'' ELSE ''Y'' END,
 			ssvnd_wthhld_yn					=	CASE WHEN ysnWithholding = 0 THEN ''N'' ELSE ''Y'' END,
 			ssvnd_pay_ctl_ind				=	CASE WHEN ysnPymtCtrlActive = 1 THEN ''A''
 												 WHEN ysnPymtCtrlAlwaysDiscount = 1 THEN ''D''
 												 WHEN ysnPymtCtrlEFTActive = 1  THEN ''E''
 												 WHEN ysnPymtCtrlHold = 1 THEN ''H'' END,
-			ssvnd_fed_tax_id				=	A.strFederalTaxId,
+			ssvnd_fed_tax_id				=	CAST(A.strFederalTaxId AS VARCHAR(20)),
 			ssvnd_w9_signed_rev_dt			=	CONVERT(VARCHAR(8), GETDATE(), 112),
-			ssvnd_pay_to					=	strVendorPayToId,
+			ssvnd_pay_to					=	CAST(strVendorPayToId AS VARCHAR(10)),
 			ssvnd_currency					=	E.strCurrency,
-			ssvnd_1099_name					=	A.str1099Name,
-			ssvnd_gl_pur					=	F.strExternalId,
-			ssvnd_tax_st					=	B.strTaxState
+			ssvnd_1099_name					=	CAST(A.str1099Name AS VARCHAR(50)),
+			ssvnd_gl_pur					=	CAST(F.strExternalId AS DECIMAL(16,8)),
+			ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2))
 		FROM
 			tblEntity A
 		INNER JOIN tblAPVendor B
 			ON A.intEntityId = B.intEntityVendorId
 		INNER JOIN tblEntityLocation C		
-			ON B.intDefaultLocationId = C.intEntityLocationId
+			ON  A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
 		INNER JOIN tblEntityToContact G
 			ON A.intEntityId = G.intEntityId and G.ysnDefaultContact = 1
 		INNER JOIN tblEntity D
@@ -151,7 +151,7 @@ BEGIN
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
-		WHERE strVendorId = @VendorId
+		WHERE A.strEntityNo = @VendorId
 
 		--Insert new record to tblAPImportedVendors
 		INSERT INTO tblAPImportedVendors
@@ -162,8 +162,7 @@ RETURN;
 END
 
 IF(@Update = 0 AND @VendorId IS NULL)
-BEGIN
-	
+BEGIN	
 	--1 Time synchronization here
 	PRINT ''1 Time Vendor Synchronization''
 
@@ -269,8 +268,7 @@ BEGIN
 	FROM ssvndmst A
 	LEFT JOIN tblAPImportedVendors B
 	ON A.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS AND B.strVendorId IS NULL
-		
-
+	
 	WHILE (EXISTS(SELECT 1 FROM #tmpssvndmst))
 	BEGIN
 		
@@ -450,14 +448,15 @@ BEGIN
 
 		IF(@continue = 1)
 		BEGIN
-
+		PRINT ''INSERT Entity Record''
 		--INSERT Entity record for Vendor
-		INSERT [dbo].[tblEntity]	([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[strContactNumber])
-		VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed,'''')
+		INSERT [dbo].[tblEntity]	([strName], [strEmail], [strWebsite], [strInternalNotes],[ysnPrint1099],[str1099Name],[str1099Form],[str1099Type],[strFederalTaxId],[dtmW9Signed],[strContactNumber], [strEntityNo])
+		VALUES						(@strName, @strEmail, @strWebsite, @strInternalNotes, @ysnPrint1099, @str1099Name, @str1099Form, @str1099Type, @strFederalTaxId, @dtmW9Signed,'''',  @originVendor)
 
 		DECLARE @EntityId INT
 		SET @EntityId = SCOPE_IDENTITY()
 
+		PRINT ''INSERT Entity Contact Record''
 		--INSERT ENTITY record for Contact
 		IF(@strContactName IS NOT NULL)
 		BEGIN
@@ -474,24 +473,22 @@ BEGIN
 
 		DECLARE @ContactEntityId INT
 		--Create contact record only if there is contact for vendor
-		IF(@strContactName IS NOT NULL)
-		BEGIN
-			SET @ContactEntityId = SCOPE_IDENTITY()
+		SET @ContactEntityId = SCOPE_IDENTITY()		
 		
-			/*INSERT [dbo].[tblEntity] ([intEntityId], [strTitle], [strDepartment], [strMobile], [strPhone], [strPhone2], [strEmail2], [strFax], [strNotes], [strName])
-			VALUES							 (@ContactEntityId, @strTitle, @strDepartment, @strMobile, @strPhone, @strPhone2, @strEmail2, @strFax, @strNotes, @strContactName)*/
-			
-			INSERT INTO tblEntityToContact(intEntityId,intEntityContactId,ysnPortalAccess)
-			select @EntityId, @ContactEntityId,0
-			
 
-		END
-		
+		INSERT INTO tblEntityToContact( intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact)
+		VALUES (@EntityId, @ContactEntityId, 0, 1)
+
+
+		--insert into tblEntityType
+		INSERT INTO tblEntityType ( intEntityId, strType, intConcurrencyId)
+		VALUES (@EntityId, ''Vendor'', 0)
+
 		DECLARE @EntityContactId INT
 		SET @EntityContactId = SCOPE_IDENTITY()
 
-		INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId])
-		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId)
+		INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
+		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId, 1)
 
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
@@ -519,7 +516,5 @@ BEGIN
 SET @Total = @@ROWCOUNT
 
 END
-
-		
-	')
+')
 END
