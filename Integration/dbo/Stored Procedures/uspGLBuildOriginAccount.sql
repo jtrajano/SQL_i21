@@ -181,6 +181,20 @@ BEGIN
 		END
 
 		INSERT INTO tblGLTempAccount
+		(
+			strAccountId,
+			strPrimary,
+			strSegment,
+			strDescription,
+			strAccountGroup,
+			intAccountGroupId,
+			strAccountSegmentId,
+			intAccountUnitId,
+			ysnSystem,
+			ysnActive,
+			intUserId,
+			dtmCreated
+		)
 		SELECT strCode AS strAccountId, 
 			   strPrimary, 
 			   strSegment,

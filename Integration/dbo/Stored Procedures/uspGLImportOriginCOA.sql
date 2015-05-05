@@ -22,7 +22,13 @@ BEGIN
 		SET QUOTED_IDENTIFIER OFF
 		SET ANSI_NULLS ON
 		SET NOCOUNT ON
-
+		BEGIN TRY
+		BEGIN TRANSACTION
+		IF NOT EXISTS(SELECT * FROM glactmst)
+		BEGIN
+			RAISERROR (''Origin account table (glactmst) is empty'',11,1);
+		END
+		ELSE
 		IF (EXISTS(SELECT SegmentCode FROM (SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst GROUP BY glact_acct1_8,glact_type) tblX group by SegmentCode HAVING COUNT(*) > 1) and @ysnOverride = 0)
 		BEGIN
 			SET @result = ''invalid-1''
@@ -62,6 +68,11 @@ BEGIN
 			-- IMPORT PRIMARY ACCOUNT
 			IF @ysnPrimary = 1
 			BEGIN
+				IF NOT EXISTS(SELECT * FROM tblGLAccountGroup)
+				BEGIN
+					RAISERROR (N''Account Group table is empty'',11,1);
+				END
+
 				DECLARE	@Length		INT
 						,@query		VARCHAR(500)	
 						,@generalCategoryId INT
@@ -209,6 +220,11 @@ BEGIN
 			SET @result = ''SUCCESSFULLY IMPORTED''
 	
 		END
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRANSACTION
+    				SELECT @result = ERROR_MESSAGE()
+		END CATCH
 
 	')
 END 
