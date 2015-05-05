@@ -16,13 +16,17 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 {dataIndex: 'strTransferType', text: 'Transfer Type', flex: 1, dataType: 'string'},
                 {dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string'},
                 {dataIndex: 'strFromLocation', text: 'From Location', flex: 1, dataType: 'string'},
-                {dataIndex: 'strToLocation', text: 'To Location', flex: 1, dataType: 'string'}
+                {dataIndex: 'strToLocation', text: 'To Location', flex: 1, dataType: 'string'},
+                {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string'},
+                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
         binding: {
             bind: {
                 title: 'Inventory Transfer - {current.strTransferNo}'
             },
+            txtTransferNumber: '{current.strTransferNo}',
+            dtmTransferDate: '{current.dtmTransferDate}',
             cboTransferType: {
                 value: '{current.strTransferType}',
                 store: '{transferTypes}'
@@ -31,9 +35,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.intTransferredById}',
                 store: '{userList}'
             },
-            dtmTransferDate: '{current.dtmTransferDate}',
-            chkShipmentRequired: '{current.ysnShipmentRequired}',
-            txtTransferNumber: '{current.strTransferNo}',
             txtDescription: '{current.strDescription}',
             cboFromLocation: {
                 value: '{current.intFromLocationId}',
@@ -43,6 +44,12 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.intToLocationId}',
                 store: '{toLocation}'
             },
+            chkShipmentRequired: '{current.ysnShipmentRequired}',
+            cboStatus: {
+                value: '{current.intStatusId}',
+                store: '{status}'
+            },
+
             cboShipVia: {
                 value: '{current.intShipViaId}',
                 store: '{shipVia}'
@@ -51,15 +58,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 value: '{current.intFreightUOMId}',
                 store: '{uom}'
             },
-            cboAccountCategory: {
-                value: '{current.intAccountCategoryId}',
-                store: '{accountCategory}'
-            },
-            cboAccountId: {
-                value: '{current.intAccountId}',
-                store: '{glAccount}'
-            },
-            txtAccountDescription: '{current.strAccountDescription}',
             txtTaxAmount: '{current.dblTaxAmount}',
 
             grdInventoryTransfer: {
@@ -171,20 +169,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     }
                 },
                 colCost: 'dblCost',
-                colCreditAccount: {
-                    dataIndex: 'strCreditAccountId',
-                    editor: {
-                        store: '{creditGLAccount}'
-                    }
-                },
-                colCreditAccountDescription: 'strCreditAccountDescription',
-                colDebitAccount: {
-                    dataIndex: 'strDebitAccountId',
-                    editor: {
-                        store: '{debitGLAccount}'
-                    }
-                },
-                colDebitAccountDescription: 'strDebitAccountDescription',
                 colTaxCode: {
                     dataIndex: 'strTaxCode',
                     editor: {

@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Mappings\tblICStatusMap.cs" />
     <Compile Include="Mappings\vyuICGetPostedLotMap.cs" />
     <Compile Include="Mappings\tblICInventoryTransferMap.cs" />
     <Compile Include="Mappings\tblICBuildAssemblyMap.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Stored Procedures\Posting\PostInventoryAdjustment.cs" />
     <Compile Include="Stored Procedures\Posting\PostInventoryReceipt.cs" />
     <Compile Include="Stored Procedures\DuplicateItem.cs" />
+    <Compile Include="Tables\tblICStatus.cs" />
     <Compile Include="Tables\tblICInventoryTransfer.cs" />
     <Compile Include="Tables\tblICBuildAssembly.cs" />
     <Compile Include="Tables\tblICInventoryAdjustment.cs" />

@@ -26,38 +26,17 @@ namespace iRely.Inventory.Model
         public int? intFromLocationId { get; set; }
         public int? intToLocationId { get; set; }
         public bool? ysnShipmentRequired { get; set; }
+        public int? intStatusId { get; set; }
         public int? intShipViaId { get; set; }
         public int? intFreightUOMId { get; set; }
-        public int? intAccountCategoryId { get; set; }
-        public int? intAccountId { get; set; }
         public bool? ysnPosted { get; set; }
         public int? intEntityId { get; set; }
         public int? intCreatedUserId { get; set; }
         public int? intSort { get; set; }
 
-        private string _accountDesc;
-        [NotMapped]
-        public string strAccountDescription
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_accountDesc))
-                    if (tblGLAccount != null)
-                        return tblGLAccount.strDescription;
-                    else
-                        return null;
-                else
-                    return _accountDesc;
-            }
-            set
-            {
-                _accountDesc = value;
-            }
-        }
-
         public tblSMCompanyLocation FromLocation { get; set; }
         public tblSMCompanyLocation ToLocation { get; set; }
-        public tblGLAccount tblGLAccount { get; set; }
+        public tblICStatus tblICStatus { get; set; }
         public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
         public ICollection<tblICInventoryTransferNote> tblICInventoryTransferNotes { get; set; }
     }
@@ -77,12 +56,9 @@ namespace iRely.Inventory.Model
         public int? intItemWeightUOMId { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
-        public decimal? dblNetWeight { get; set; }
         public int? intNewLotId { get; set; }
         public string strNewLotId { get; set; }
         public decimal? dblCost { get; set; }
-        public int? intCreditAccountId { get; set; }
-        public int? intDebitAccountId { get; set; }
         public int? intTaxCodeId { get; set; }
         public decimal? dblFreightRate { get; set; }
         public decimal? dblFreightAmount { get; set; }
@@ -278,82 +254,6 @@ namespace iRely.Inventory.Model
                 _weightUOM = value;
             }
         }
-        private string _creditAccount;
-        [NotMapped]
-        public string strCreditAccountId
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_creditAccount))
-                    if (CreditAccount != null)
-                        return CreditAccount.strAccountId;
-                    else
-                        return null;
-                else
-                    return _creditAccount;
-            }
-            set
-            {
-                _creditAccount = value;
-            }
-        }
-        private string _creditAccountDescription;
-        [NotMapped]
-        public string strCreditAccountDescription
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_creditAccountDescription))
-                    if (CreditAccount != null)
-                        return CreditAccount.strDescription;
-                    else
-                        return null;
-                else
-                    return _creditAccountDescription;
-            }
-            set
-            {
-                _creditAccountDescription = value;
-            }
-        }
-        private string _debitAccount;
-        [NotMapped]
-        public string strDebitAccountId
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_debitAccount))
-                    if (DebitAccount != null)
-                        return DebitAccount.strAccountId;
-                    else
-                        return null;
-                else
-                    return _debitAccount;
-            }
-            set
-            {
-                _debitAccount = value;
-            }
-        }
-        private string _debitAccountDescription;
-        [NotMapped]
-        public string strDebitAccountDescription
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_debitAccountDescription))
-                    if (DebitAccount != null)
-                        return DebitAccount.strDescription;
-                    else
-                        return null;
-                else
-                    return _debitAccountDescription;
-            }
-            set
-            {
-                _debitAccountDescription = value;
-            }
-        }
         private string _taxCode;
         [NotMapped]
         public string strTaxCode
@@ -385,8 +285,6 @@ namespace iRely.Inventory.Model
         public tblICStorageLocation ToStorageLocation { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
         public tblICItemUOM WeightUOM { get; set; }
-        public tblGLAccount CreditAccount { get; set; }
-        public tblGLAccount DebitAccount { get; set; }
         public tblSMTaxCode tblSMTaxCode { get; set; }
     }
 
@@ -408,12 +306,15 @@ namespace iRely.Inventory.Model
         public DateTime? dtmTransferDate { get; set; }
         public string strTransferType { get; set; }
         public string strDescription { get; set; }
+        public int? intStatusId { get; set; }
+        public string strStatus { get; set; }
         public int? intFromLocationId { get; set; }
         public string strFromLocation { get; set; }
         public int? intToLocationId { get; set; }
         public string strToLocation { get; set; }
         public bool? ysnShipmentRequired { get; set; }
         public int? intSort { get; set; }
+        public bool? ysnPosted { get; set; }
     }
 
 }

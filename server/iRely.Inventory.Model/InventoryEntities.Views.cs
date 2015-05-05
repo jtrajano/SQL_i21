@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets52d880cafafdace7955438162862e4943c2134d704048776582613cd79e3cfda))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsba100ee0ba8fed27738ed8ccab3f1caec5eb2f55c634178127f538ee82b2dbaf))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets52d880cafafdace7955438162862e4943c2134d704048776582613cd79e3cfda : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsba100ee0ba8fed27738ed8ccab3f1caec5eb2f55c634178127f538ee82b2dbaf : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "52d880cafafdace7955438162862e4943c2134d704048776582613cd79e3cfda"; }
+            get { return "ba100ee0ba8fed27738ed8ccab3f1caec5eb2f55c634178127f538ee82b2dbaf"; }
         }
 
         /// <summary>
@@ -107,147 +107,147 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView11();
             }
 
-            if (extentName == "CodeFirstDatabase.tblGLAccount")
+            if (extentName == "CodeFirstDatabase.tblICInventoryTransferDetail")
             {
                 return GetView12();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICInventoryTransferDetail")
+            if (extentName == "CodeFirstDatabase.tblICStorageLocation")
             {
                 return GetView13();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICStorageLocation")
+            if (extentName == "CodeFirstDatabase.tblICInventoryAdjustmentDetail")
             {
                 return GetView14();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICInventoryAdjustmentDetail")
+            if (extentName == "CodeFirstDatabase.tblICLot")
             {
                 return GetView15();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICLot")
+            if (extentName == "CodeFirstDatabase.tblICInventoryReceiptItemLot")
             {
                 return GetView16();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICInventoryReceiptItemLot")
+            if (extentName == "CodeFirstDatabase.tblICInventoryReceiptItem")
             {
                 return GetView17();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICInventoryReceiptItem")
+            if (extentName == "CodeFirstDatabase.tblICInventoryReceipt")
             {
                 return GetView18();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICInventoryReceipt")
+            if (extentName == "CodeFirstDatabase.tblICInventoryReceiptInspection")
             {
                 return GetView19();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICInventoryReceiptInspection")
+            if (extentName == "CodeFirstDatabase.tblMFQAProperty")
             {
                 return GetView20();
             }
 
-            if (extentName == "CodeFirstDatabase.tblMFQAProperty")
+            if (extentName == "CodeFirstDatabase.tblSMFreightTerm")
             {
                 return GetView21();
             }
 
-            if (extentName == "CodeFirstDatabase.tblSMFreightTerm")
+            if (extentName == "CodeFirstDatabase.vyuAPVendor")
             {
                 return GetView22();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuAPVendor")
+            if (extentName == "CodeFirstDatabase.tblICCategoryVendor")
             {
                 return GetView23();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCategoryVendor")
+            if (extentName == "CodeFirstDatabase.tblSTSubcategoryFamily")
             {
                 return GetView24();
             }
 
-            if (extentName == "CodeFirstDatabase.tblSTSubcategoryFamily")
+            if (extentName == "CodeFirstDatabase.tblSTSubcategoryClass")
             {
                 return GetView25();
             }
 
-            if (extentName == "CodeFirstDatabase.tblSTSubcategoryClass")
+            if (extentName == "CodeFirstDatabase.tblICCategory")
             {
                 return GetView26();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCategory")
+            if (extentName == "CodeFirstDatabase.tblICCatalog")
             {
                 return GetView27();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCatalog")
+            if (extentName == "CodeFirstDatabase.tblICCategoryAccount")
             {
                 return GetView28();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCategoryAccount")
+            if (extentName == "CodeFirstDatabase.tblGLAccount")
             {
                 return GetView29();
             }
 
-            if (extentName == "CodeFirstDatabase.tblGLAccountCategory")
+            if (extentName == "CodeFirstDatabase.tblICCommodityAccount")
             {
                 return GetView30();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCommodityAccount")
+            if (extentName == "CodeFirstDatabase.tblGLAccountCategory")
             {
                 return GetView31();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCommodity")
+            if (extentName == "CodeFirstDatabase.tblICItemAccount")
             {
                 return GetView32();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICPatronageCategory")
+            if (extentName == "CodeFirstDatabase.tblICCommodity")
             {
                 return GetView33();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCertificationCommodity")
+            if (extentName == "CodeFirstDatabase.tblICPatronageCategory")
             {
                 return GetView34();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCertification")
+            if (extentName == "CodeFirstDatabase.tblICCertificationCommodity")
             {
                 return GetView35();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemCertification")
+            if (extentName == "CodeFirstDatabase.tblICCertification")
             {
                 return GetView36();
             }
 
-            if (extentName == "CodeFirstDatabase.tblSMCurrency")
+            if (extentName == "CodeFirstDatabase.tblICItemCertification")
             {
                 return GetView37();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCommodityGroup")
+            if (extentName == "CodeFirstDatabase.tblSMCurrency")
             {
                 return GetView38();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCommodityUnitMeasure")
+            if (extentName == "CodeFirstDatabase.tblICCommodityGroup")
             {
                 return GetView39();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemAccount")
+            if (extentName == "CodeFirstDatabase.tblICCommodityUnitMeasure")
             {
                 return GetView40();
             }
@@ -447,172 +447,172 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView79();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICPackType")
+            if (extentName == "CodeFirstDatabase.tblICStatus")
             {
                 return GetView80();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICPackTypeDetail")
+            if (extentName == "CodeFirstDatabase.tblICPackType")
             {
                 return GetView81();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICStorageUnitType")
+            if (extentName == "CodeFirstDatabase.tblICPackTypeDetail")
             {
                 return GetView82();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICUnitMeasureConversion")
+            if (extentName == "CodeFirstDatabase.tblICStorageUnitType")
             {
                 return GetView83();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemManufacturingUOM")
+            if (extentName == "CodeFirstDatabase.tblICUnitMeasureConversion")
             {
                 return GetView84();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICRinFeedStockUOM")
+            if (extentName == "CodeFirstDatabase.tblICItemManufacturingUOM")
             {
                 return GetView85();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICFuelType")
+            if (extentName == "CodeFirstDatabase.tblICRinFeedStockUOM")
             {
                 return GetView86();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICRinFeedStock")
+            if (extentName == "CodeFirstDatabase.tblICFuelType")
             {
                 return GetView87();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICRinFuel")
+            if (extentName == "CodeFirstDatabase.tblICRinFeedStock")
             {
                 return GetView88();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICRinFuelCategory")
+            if (extentName == "CodeFirstDatabase.tblICRinFuel")
             {
                 return GetView89();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICRinProcess")
+            if (extentName == "CodeFirstDatabase.tblICRinFuelCategory")
             {
                 return GetView90();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetUOMConversion")
+            if (extentName == "CodeFirstDatabase.tblICRinProcess")
             {
                 return GetView91();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemBundle")
+            if (extentName == "CodeFirstDatabase.vyuICGetUOMConversion")
             {
                 return GetView92();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemKitDetail")
+            if (extentName == "CodeFirstDatabase.tblICItemBundle")
             {
                 return GetView93();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemKit")
+            if (extentName == "CodeFirstDatabase.tblICItemKitDetail")
             {
                 return GetView94();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemUPC")
+            if (extentName == "CodeFirstDatabase.tblICItemKit")
             {
                 return GetView95();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICBrand")
+            if (extentName == "CodeFirstDatabase.tblICItemUPC")
             {
                 return GetView96();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICManufacturer")
+            if (extentName == "CodeFirstDatabase.tblICBrand")
             {
                 return GetView97();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemOwner")
+            if (extentName == "CodeFirstDatabase.tblICManufacturer")
             {
                 return GetView98();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemPOSCategory")
+            if (extentName == "CodeFirstDatabase.tblICItemOwner")
             {
                 return GetView99();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemPOSSLA")
+            if (extentName == "CodeFirstDatabase.tblICItemPOSCategory")
             {
                 return GetView100();
             }
 
-            if (extentName == "InventoryEntities.tblARCustomers")
+            if (extentName == "CodeFirstDatabase.tblICItemPOSSLA")
             {
                 return GetView101();
             }
 
-            if (extentName == "InventoryEntities.tblICItemCustomerXrefs")
+            if (extentName == "InventoryEntities.tblARCustomers")
             {
                 return GetView102();
             }
 
-            if (extentName == "InventoryEntities.tblICItems")
+            if (extentName == "InventoryEntities.tblICItemCustomerXrefs")
             {
                 return GetView103();
             }
 
-            if (extentName == "InventoryEntities.tblICItemAssemblys")
+            if (extentName == "InventoryEntities.tblICItems")
             {
                 return GetView104();
             }
 
-            if (extentName == "InventoryEntities.tblICItemUOMs")
+            if (extentName == "InventoryEntities.tblICItemAssemblys")
             {
                 return GetView105();
             }
 
-            if (extentName == "InventoryEntities.tblICUnitMeasures")
+            if (extentName == "InventoryEntities.tblICItemUOMs")
             {
                 return GetView106();
             }
 
-            if (extentName == "InventoryEntities.tblICManufacturingCellPackTypes")
+            if (extentName == "InventoryEntities.tblICUnitMeasures")
             {
                 return GetView107();
             }
 
-            if (extentName == "InventoryEntities.tblICManufacturingCells")
+            if (extentName == "InventoryEntities.tblICManufacturingCellPackTypes")
             {
                 return GetView108();
             }
 
-            if (extentName == "InventoryEntities.tblICItemFactoryManufacturingCells")
+            if (extentName == "InventoryEntities.tblICManufacturingCells")
             {
                 return GetView109();
             }
 
-            if (extentName == "InventoryEntities.tblICItemFactories")
+            if (extentName == "InventoryEntities.tblICItemFactoryManufacturingCells")
             {
                 return GetView110();
             }
 
-            if (extentName == "InventoryEntities.tblSMCompanyLocations")
+            if (extentName == "InventoryEntities.tblICItemFactories")
             {
                 return GetView111();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryTransfers")
+            if (extentName == "InventoryEntities.tblSMCompanyLocations")
             {
                 return GetView112();
             }
 
-            if (extentName == "InventoryEntities.tblGLAccounts")
+            if (extentName == "InventoryEntities.tblICInventoryTransfers")
             {
                 return GetView113();
             }
@@ -702,7 +702,7 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView130();
             }
 
-            if (extentName == "InventoryEntities.tblGLAccountCategories")
+            if (extentName == "InventoryEntities.tblGLAccounts")
             {
                 return GetView131();
             }
@@ -712,624 +712,634 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView132();
             }
 
-            if (extentName == "InventoryEntities.tblICCommoditys")
+            if (extentName == "InventoryEntities.tblGLAccountCategories")
             {
                 return GetView133();
             }
 
-            if (extentName == "InventoryEntities.tblICPatronageCategorys")
+            if (extentName == "InventoryEntities.tblICItemAccounts")
             {
                 return GetView134();
             }
 
-            if (extentName == "InventoryEntities.tblICCertificationCommoditys")
+            if (extentName == "InventoryEntities.tblICCommoditys")
             {
                 return GetView135();
             }
 
-            if (extentName == "InventoryEntities.tblICCertifications")
+            if (extentName == "InventoryEntities.tblICPatronageCategorys")
             {
                 return GetView136();
             }
 
-            if (extentName == "InventoryEntities.tblICItemCertifications")
+            if (extentName == "InventoryEntities.tblICCertificationCommoditys")
             {
                 return GetView137();
             }
 
-            if (extentName == "InventoryEntities.tblSMCurrencies")
+            if (extentName == "InventoryEntities.tblICCertifications")
             {
                 return GetView138();
             }
 
-            if (extentName == "InventoryEntities.tblICCommodityGroups")
+            if (extentName == "InventoryEntities.tblICItemCertifications")
             {
                 return GetView139();
             }
 
-            if (extentName == "InventoryEntities.tblICCommodityUnitMeasures")
+            if (extentName == "InventoryEntities.tblSMCurrencies")
             {
                 return GetView140();
             }
 
-            if (extentName == "InventoryEntities.tblICItemAccounts")
+            if (extentName == "InventoryEntities.tblICCommodityGroups")
             {
                 return GetView141();
             }
 
-            if (extentName == "InventoryEntities.tblICCategoryLocations")
+            if (extentName == "InventoryEntities.tblICCommodityUnitMeasures")
             {
                 return GetView142();
             }
 
-            if (extentName == "InventoryEntities.tblICCategoryUOMs")
+            if (extentName == "InventoryEntities.tblICCategoryLocations")
             {
                 return GetView143();
             }
 
-            if (extentName == "InventoryEntities.tblICStorageLocationCategories")
+            if (extentName == "InventoryEntities.tblICCategoryUOMs")
             {
                 return GetView144();
             }
 
-            if (extentName == "InventoryEntities.tblICItemLocations")
+            if (extentName == "InventoryEntities.tblICStorageLocationCategories")
             {
                 return GetView145();
             }
 
-            if (extentName == "InventoryEntities.tblICCountGroups")
+            if (extentName == "InventoryEntities.tblICItemLocations")
             {
                 return GetView146();
             }
 
-            if (extentName == "InventoryEntities.tblICItemCommodityCosts")
+            if (extentName == "InventoryEntities.tblICCountGroups")
             {
                 return GetView147();
             }
 
-            if (extentName == "InventoryEntities.tblICItemContracts")
+            if (extentName == "InventoryEntities.tblICItemCommodityCosts")
             {
                 return GetView148();
             }
 
-            if (extentName == "InventoryEntities.tblICItemContractDocuments")
+            if (extentName == "InventoryEntities.tblICItemContracts")
             {
                 return GetView149();
             }
 
-            if (extentName == "InventoryEntities.tblICDocuments")
+            if (extentName == "InventoryEntities.tblICItemContractDocuments")
             {
                 return GetView150();
             }
 
-            if (extentName == "InventoryEntities.tblSMCountries")
+            if (extentName == "InventoryEntities.tblICDocuments")
             {
                 return GetView151();
             }
 
-            if (extentName == "InventoryEntities.tblICItemNotes")
+            if (extentName == "InventoryEntities.tblSMCountries")
             {
                 return GetView152();
             }
 
-            if (extentName == "InventoryEntities.tblICItemPricingLevels")
+            if (extentName == "InventoryEntities.tblICItemNotes")
             {
                 return GetView153();
             }
 
-            if (extentName == "InventoryEntities.tblICItemPricings")
+            if (extentName == "InventoryEntities.tblICItemPricingLevels")
             {
                 return GetView154();
             }
 
-            if (extentName == "InventoryEntities.tblICItemSpecialPricings")
+            if (extentName == "InventoryEntities.tblICItemPricings")
             {
                 return GetView155();
             }
 
-            if (extentName == "InventoryEntities.tblICItemStocks")
+            if (extentName == "InventoryEntities.tblICItemSpecialPricings")
             {
                 return GetView156();
             }
 
-            if (extentName == "InventoryEntities.tblSMCompanyLocationSubLocation_tblICItemStocks")
+            if (extentName == "InventoryEntities.tblICItemStocks")
             {
                 return GetView157();
             }
 
-            if (extentName == "InventoryEntities.tblSMCompanyLocationSubLocations")
+            if (extentName == "InventoryEntities.tblSMCompanyLocationSubLocation_tblICItemStocks")
             {
                 return GetView158();
             }
 
-            if (extentName == "InventoryEntities.tblICBuildAssemblies")
+            if (extentName == "InventoryEntities.tblSMCompanyLocationSubLocations")
             {
                 return GetView159();
             }
 
-            if (extentName == "InventoryEntities.tblICBuildAssemblyDetails")
+            if (extentName == "InventoryEntities.tblICBuildAssemblies")
             {
                 return GetView160();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryShipmentItems")
+            if (extentName == "InventoryEntities.tblICBuildAssemblyDetails")
             {
                 return GetView161();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryShipments")
+            if (extentName == "InventoryEntities.tblICInventoryShipmentItems")
             {
                 return GetView162();
             }
 
-            if (extentName == "InventoryEntities.tblEntityLocations")
+            if (extentName == "InventoryEntities.tblICInventoryShipments")
             {
                 return GetView163();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryShipmentItemLots")
+            if (extentName == "InventoryEntities.tblEntityLocations")
             {
                 return GetView164();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetShipmentItemSources")
+            if (extentName == "InventoryEntities.tblICInventoryShipmentItemLots")
             {
                 return GetView165();
             }
 
-            if (extentName == "InventoryEntities.tblICItemVendorXrefs")
+            if (extentName == "InventoryEntities.vyuICGetShipmentItemSources")
             {
                 return GetView166();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryReceiptItemTaxes")
+            if (extentName == "InventoryEntities.tblICItemVendorXrefs")
             {
                 return GetView167();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetReceiptItemSources")
+            if (extentName == "InventoryEntities.tblICInventoryReceiptItemTaxes")
             {
                 return GetView168();
             }
 
-            if (extentName == "InventoryEntities.tblICLotStatuss")
+            if (extentName == "InventoryEntities.vyuICGetReceiptItemSources")
             {
                 return GetView169();
             }
 
-            if (extentName == "InventoryEntities.tblICStorageLocationSkus")
+            if (extentName == "InventoryEntities.tblICLotStatuss")
             {
                 return GetView170();
             }
 
-            if (extentName == "InventoryEntities.tblICContainers")
+            if (extentName == "InventoryEntities.tblICStorageLocationSkus")
             {
                 return GetView171();
             }
 
-            if (extentName == "InventoryEntities.tblICContainerTypes")
+            if (extentName == "InventoryEntities.tblICContainers")
             {
                 return GetView172();
             }
 
-            if (extentName == "InventoryEntities.tblICStorageLocationContainers")
+            if (extentName == "InventoryEntities.tblICContainerTypes")
             {
                 return GetView173();
             }
 
-            if (extentName == "InventoryEntities.tblICSkus")
+            if (extentName == "InventoryEntities.tblICStorageLocationContainers")
             {
                 return GetView174();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryAdjustments")
+            if (extentName == "InventoryEntities.tblICSkus")
             {
                 return GetView175();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryAdjustmentNotes")
+            if (extentName == "InventoryEntities.tblICInventoryAdjustments")
             {
                 return GetView176();
             }
 
-            if (extentName == "InventoryEntities.tblICStorageLocationMeasurements")
+            if (extentName == "InventoryEntities.tblICInventoryAdjustmentNotes")
             {
                 return GetView177();
             }
 
-            if (extentName == "InventoryEntities.tblICMeasurements")
+            if (extentName == "InventoryEntities.tblICStorageLocationMeasurements")
             {
                 return GetView178();
             }
 
-            if (extentName == "InventoryEntities.tblICReadingPoints")
+            if (extentName == "InventoryEntities.tblICMeasurements")
             {
                 return GetView179();
             }
 
-            if (extentName == "InventoryEntities.tblSMTaxCodes")
+            if (extentName == "InventoryEntities.tblICReadingPoints")
             {
                 return GetView180();
             }
 
-            if (extentName == "InventoryEntities.tblICInventoryTransferNotes")
+            if (extentName == "InventoryEntities.tblSMTaxCodes")
             {
                 return GetView181();
             }
 
-            if (extentName == "InventoryEntities.tblICPackTypes")
+            if (extentName == "InventoryEntities.tblICInventoryTransferNotes")
             {
                 return GetView182();
             }
 
-            if (extentName == "InventoryEntities.tblICPackTypeDetails")
+            if (extentName == "InventoryEntities.tblICStatuses")
             {
                 return GetView183();
             }
 
-            if (extentName == "InventoryEntities.tblICStorageUnitTypes")
+            if (extentName == "InventoryEntities.tblICPackTypes")
             {
                 return GetView184();
             }
 
-            if (extentName == "InventoryEntities.tblICUnitMeasureConversions")
+            if (extentName == "InventoryEntities.tblICPackTypeDetails")
             {
                 return GetView185();
             }
 
-            if (extentName == "InventoryEntities.tblICItemManufacturingUOMs")
+            if (extentName == "InventoryEntities.tblICStorageUnitTypes")
             {
                 return GetView186();
             }
 
-            if (extentName == "InventoryEntities.tblICRinFeedStockUOMs")
+            if (extentName == "InventoryEntities.tblICUnitMeasureConversions")
             {
                 return GetView187();
             }
 
-            if (extentName == "InventoryEntities.tblICFuelTypes")
+            if (extentName == "InventoryEntities.tblICItemManufacturingUOMs")
             {
                 return GetView188();
             }
 
-            if (extentName == "InventoryEntities.tblICRinFeedStocks")
+            if (extentName == "InventoryEntities.tblICRinFeedStockUOMs")
             {
                 return GetView189();
             }
 
-            if (extentName == "InventoryEntities.tblICRinFuels")
+            if (extentName == "InventoryEntities.tblICFuelTypes")
             {
                 return GetView190();
             }
 
-            if (extentName == "InventoryEntities.tblICRinFuelCategorys")
+            if (extentName == "InventoryEntities.tblICRinFeedStocks")
             {
                 return GetView191();
             }
 
-            if (extentName == "InventoryEntities.tblICRinProcesss")
+            if (extentName == "InventoryEntities.tblICRinFuels")
             {
                 return GetView192();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetUOMConversions")
+            if (extentName == "InventoryEntities.tblICRinFuelCategorys")
             {
                 return GetView193();
             }
 
-            if (extentName == "InventoryEntities.tblICItemBundles")
+            if (extentName == "InventoryEntities.tblICRinProcesss")
             {
                 return GetView194();
             }
 
-            if (extentName == "InventoryEntities.tblICItemKitDetails")
+            if (extentName == "InventoryEntities.vyuICGetUOMConversions")
             {
                 return GetView195();
             }
 
-            if (extentName == "InventoryEntities.tblICItemKits")
+            if (extentName == "InventoryEntities.tblICItemBundles")
             {
                 return GetView196();
             }
 
-            if (extentName == "InventoryEntities.tblICItemUPCs")
+            if (extentName == "InventoryEntities.tblICItemKitDetails")
             {
                 return GetView197();
             }
 
-            if (extentName == "InventoryEntities.tblICBrands")
+            if (extentName == "InventoryEntities.tblICItemKits")
             {
                 return GetView198();
             }
 
-            if (extentName == "InventoryEntities.tblICManufacturers")
+            if (extentName == "InventoryEntities.tblICItemUPCs")
             {
                 return GetView199();
             }
 
-            if (extentName == "InventoryEntities.tblICItemOwners")
+            if (extentName == "InventoryEntities.tblICBrands")
             {
                 return GetView200();
             }
 
-            if (extentName == "InventoryEntities.tblICItemPOSCategorys")
+            if (extentName == "InventoryEntities.tblICManufacturers")
             {
                 return GetView201();
             }
 
-            if (extentName == "InventoryEntities.tblICItemPOSSLAs")
+            if (extentName == "InventoryEntities.tblICItemOwners")
             {
                 return GetView202();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCommodityAttribute")
+            if (extentName == "InventoryEntities.tblICItemPOSCategorys")
             {
                 return GetView203();
             }
 
-            if (extentName == "InventoryEntities.tblICCommodityAttributes")
+            if (extentName == "InventoryEntities.tblICItemPOSSLAs")
             {
                 return GetView204();
             }
 
-            if (extentName == "CodeFirstDatabase.tblGRStorageType")
+            if (extentName == "CodeFirstDatabase.tblICCommodityAttribute")
             {
                 return GetView205();
             }
 
-            if (extentName == "InventoryEntities.tblGRStorageTypes")
+            if (extentName == "InventoryEntities.tblICCommodityAttributes")
             {
                 return GetView206();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICEquipmentLength")
+            if (extentName == "CodeFirstDatabase.tblGRStorageType")
             {
                 return GetView207();
             }
 
-            if (extentName == "InventoryEntities.tblICEquipmentLengths")
+            if (extentName == "InventoryEntities.tblGRStorageTypes")
             {
                 return GetView208();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICFuelTaxClassProductCode")
+            if (extentName == "CodeFirstDatabase.tblICEquipmentLength")
             {
                 return GetView209();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICFuelTaxClass")
+            if (extentName == "InventoryEntities.tblICEquipmentLengths")
             {
                 return GetView210();
             }
 
-            if (extentName == "InventoryEntities.tblICFuelTaxClassProductCodes")
+            if (extentName == "CodeFirstDatabase.tblICFuelTaxClassProductCode")
             {
                 return GetView211();
             }
 
-            if (extentName == "InventoryEntities.tblICFuelTaxClasss")
+            if (extentName == "CodeFirstDatabase.tblICFuelTaxClass")
             {
                 return GetView212();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemSubstitutionDetail")
+            if (extentName == "InventoryEntities.tblICFuelTaxClassProductCodes")
             {
                 return GetView213();
             }
 
-            if (extentName == "InventoryEntities.tblICItemSubstitutionDetails")
+            if (extentName == "InventoryEntities.tblICFuelTaxClasss")
             {
                 return GetView214();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICItemSubstitution")
+            if (extentName == "CodeFirstDatabase.tblICItemSubstitutionDetail")
             {
                 return GetView215();
             }
 
-            if (extentName == "InventoryEntities.tblICItemSubstitutions")
+            if (extentName == "InventoryEntities.tblICItemSubstitutionDetails")
             {
                 return GetView216();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICLineOfBusiness")
+            if (extentName == "CodeFirstDatabase.tblICItemSubstitution")
             {
                 return GetView217();
             }
 
-            if (extentName == "InventoryEntities.tblICLineOfBusinesss")
+            if (extentName == "InventoryEntities.tblICItemSubstitutions")
             {
                 return GetView218();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICMaterialNMFC")
+            if (extentName == "CodeFirstDatabase.tblICLineOfBusiness")
             {
                 return GetView219();
             }
 
-            if (extentName == "InventoryEntities.tblICMaterialNMFCs")
+            if (extentName == "InventoryEntities.tblICLineOfBusinesss")
             {
                 return GetView220();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICReasonCode")
+            if (extentName == "CodeFirstDatabase.tblICMaterialNMFC")
             {
                 return GetView221();
             }
 
-            if (extentName == "InventoryEntities.tblICReasonCodes")
+            if (extentName == "InventoryEntities.tblICMaterialNMFCs")
             {
                 return GetView222();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICReasonCodeWorkCenter")
+            if (extentName == "CodeFirstDatabase.tblICReasonCode")
             {
                 return GetView223();
             }
 
-            if (extentName == "InventoryEntities.tblICReasonCodeWorkCenters")
+            if (extentName == "InventoryEntities.tblICReasonCodes")
             {
                 return GetView224();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICRestriction")
+            if (extentName == "CodeFirstDatabase.tblICReasonCodeWorkCenter")
             {
                 return GetView225();
             }
 
-            if (extentName == "InventoryEntities.tblICRestrictions")
+            if (extentName == "InventoryEntities.tblICReasonCodeWorkCenters")
             {
                 return GetView226();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICStockReservation")
+            if (extentName == "CodeFirstDatabase.tblICRestriction")
             {
                 return GetView227();
             }
 
-            if (extentName == "InventoryEntities.tblICStockReservations")
+            if (extentName == "InventoryEntities.tblICRestrictions")
             {
                 return GetView228();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICTag")
+            if (extentName == "CodeFirstDatabase.tblICStockReservation")
             {
                 return GetView229();
             }
 
-            if (extentName == "InventoryEntities.tblICTags")
+            if (extentName == "InventoryEntities.tblICStockReservations")
             {
                 return GetView230();
             }
 
-            if (extentName == "CodeFirstDatabase.tblSMStartingNumber")
+            if (extentName == "CodeFirstDatabase.tblICTag")
             {
                 return GetView231();
             }
 
-            if (extentName == "InventoryEntities.tblSMStartingNumbers")
+            if (extentName == "InventoryEntities.tblICTags")
             {
                 return GetView232();
             }
 
-            if (extentName == "CodeFirstDatabase.tblSTPaidOut")
+            if (extentName == "CodeFirstDatabase.tblSMStartingNumber")
             {
                 return GetView233();
             }
 
-            if (extentName == "InventoryEntities.tblSTPaidOut")
+            if (extentName == "InventoryEntities.tblSMStartingNumbers")
             {
                 return GetView234();
             }
 
-            if (extentName == "CodeFirstDatabase.tblSTPromotionSalesList")
+            if (extentName == "CodeFirstDatabase.tblSTPaidOut")
             {
                 return GetView235();
             }
 
-            if (extentName == "InventoryEntities.tblSTPromotionSalesLists")
+            if (extentName == "InventoryEntities.tblSTPaidOut")
             {
                 return GetView236();
             }
 
-            if (extentName == "CodeFirstDatabase.tblSTStore")
+            if (extentName == "CodeFirstDatabase.tblSTPromotionSalesList")
             {
                 return GetView237();
             }
 
-            if (extentName == "InventoryEntities.tblSTStore")
+            if (extentName == "InventoryEntities.tblSTPromotionSalesLists")
             {
                 return GetView238();
             }
 
-            if (extentName == "CodeFirstDatabase.tblSTSubcategoryRegProd")
+            if (extentName == "CodeFirstDatabase.tblSTStore")
             {
                 return GetView239();
             }
 
-            if (extentName == "InventoryEntities.tblSTSubcategoryRegProds")
+            if (extentName == "InventoryEntities.tblSTStore")
             {
                 return GetView240();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemAccount")
+            if (extentName == "CodeFirstDatabase.tblSTSubcategoryRegProd")
             {
                 return GetView241();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemStock")
+            if (extentName == "InventoryEntities.tblSTSubcategoryRegProds")
             {
                 return GetView242();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemPricing")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemAccount")
             {
                 return GetView243();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemAccounts")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemStock")
             {
                 return GetView244();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemStocks")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemPricing")
             {
                 return GetView245();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemPricings")
+            if (extentName == "InventoryEntities.vyuICGetItemAccounts")
             {
                 return GetView246();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOM")
+            if (extentName == "InventoryEntities.vyuICGetItemStocks")
             {
                 return GetView247();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemStockUOMs")
+            if (extentName == "InventoryEntities.vyuICGetItemPricings")
             {
                 return GetView248();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetPackedUOM")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemStockUOM")
             {
                 return GetView249();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetPackedUOMs")
+            if (extentName == "InventoryEntities.vyuICGetItemStockUOMs")
             {
                 return GetView250();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetPostedLot")
+            if (extentName == "CodeFirstDatabase.vyuICGetPackedUOM")
             {
                 return GetView251();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetPostedLots")
+            if (extentName == "InventoryEntities.vyuICGetPackedUOMs")
             {
                 return GetView252();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetStorageLocation")
+            if (extentName == "CodeFirstDatabase.vyuICGetPostedLot")
             {
                 return GetView253();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetStorageLocations")
+            if (extentName == "InventoryEntities.vyuICGetPostedLots")
             {
                 return GetView254();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuSMGetLocationPricingLevel")
+            if (extentName == "CodeFirstDatabase.vyuICGetStorageLocation")
             {
                 return GetView255();
             }
 
-            if (extentName == "InventoryEntities.vyuSMGetLocationPricingLevels")
+            if (extentName == "InventoryEntities.vyuICGetStorageLocations")
             {
                 return GetView256();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuSMGetLocationPricingLevel")
+            {
+                return GetView257();
+            }
+
+            if (extentName == "InventoryEntities.vyuSMGetLocationPricingLevels")
+            {
+                return GetView258();
             }
 
             return null;
@@ -1704,7 +1714,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransfer
-        [CodeFirstDatabaseSchema.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_ysnPosted, T1.tblICInventoryTransfer_intEntityId, T1.tblICInventoryTransfer_intCreatedUserId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intStatusId, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_ysnPosted, T1.tblICInventoryTransfer_intEntityId, T1.tblICInventoryTransfer_intCreatedUserId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferId AS tblICInventoryTransfer_intInventoryTransferId, 
@@ -1716,10 +1726,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.intFromLocationId AS tblICInventoryTransfer_intFromLocationId, 
             T.intToLocationId AS tblICInventoryTransfer_intToLocationId, 
             T.ysnShipmentRequired AS tblICInventoryTransfer_ysnShipmentRequired, 
+            T.intStatusId AS tblICInventoryTransfer_intStatusId, 
             T.intShipViaId AS tblICInventoryTransfer_intShipViaId, 
             T.intFreightUOMId AS tblICInventoryTransfer_intFreightUOMId, 
-            T.intAccountCategoryId AS tblICInventoryTransfer_intAccountCategoryId, 
-            T.intAccountId AS tblICInventoryTransfer_intAccountId, 
             T.ysnPosted AS tblICInventoryTransfer_ysnPosted, 
             T.intEntityId AS tblICInventoryTransfer_intEntityId, 
             T.intCreatedUserId AS tblICInventoryTransfer_intCreatedUserId, 
@@ -1731,34 +1740,14 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblGLAccount.
+        /// Gets the view for CodeFirstDatabase.tblICInventoryTransferDetail.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView12()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblGLAccount
-        [CodeFirstDatabaseSchema.tblGLAccount](T1.tblGLAccount_intAccountId, T1.tblGLAccount_strAccountId, T1.tblGLAccount_strDescription, T1.tblGLAccount_strAccountGroup)
-    FROM (
-        SELECT 
-            T.intAccountId AS tblGLAccount_intAccountId, 
-            T.strAccountId AS tblGLAccount_strAccountId, 
-            T.strDescription AS tblGLAccount_strDescription, 
-            T.strAccountGroup AS tblGLAccount_strAccountGroup, 
-            True AS _from0
-        FROM InventoryEntities.tblGLAccounts AS T
-    ) AS T1");
-        }
-
-        /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICInventoryTransferDetail.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView13()
-        {
-            return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransferDetail
-        [CodeFirstDatabaseSchema.tblICInventoryTransferDetail](T1.tblICInventoryTransferDetail_intInventoryTransferDetailId, T1.tblICInventoryTransferDetail_intInventoryTransferId, T1.tblICInventoryTransferDetail_intItemId, T1.tblICInventoryTransferDetail_intLotId, T1.tblICInventoryTransferDetail_intFromSubLocationId, T1.tblICInventoryTransferDetail_intToSubLocationId, T1.tblICInventoryTransferDetail_intFromStorageLocationId, T1.tblICInventoryTransferDetail_intToStorageLocationId, T1.tblICInventoryTransferDetail_dblQuantity, T1.tblICInventoryTransferDetail_intItemUOMId, T1.tblICInventoryTransferDetail_intItemWeightUOMId, T1.tblICInventoryTransferDetail_dblGrossWeight, T1.tblICInventoryTransferDetail_dblTareWeight, T1.tblICInventoryTransferDetail_dblNetWeight, T1.tblICInventoryTransferDetail_intNewLotId, T1.tblICInventoryTransferDetail_strNewLotId, T1.tblICInventoryTransferDetail_dblCost, T1.tblICInventoryTransferDetail_intCreditAccountId, T1.tblICInventoryTransferDetail_intDebitAccountId, T1.tblICInventoryTransferDetail_intTaxCodeId, T1.tblICInventoryTransferDetail_dblFreightRate, T1.tblICInventoryTransferDetail_dblFreightAmount, T1.tblICInventoryTransferDetail_intSort, T1.tblICInventoryTransferDetail_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryTransferDetail](T1.tblICInventoryTransferDetail_intInventoryTransferDetailId, T1.tblICInventoryTransferDetail_intInventoryTransferId, T1.tblICInventoryTransferDetail_intItemId, T1.tblICInventoryTransferDetail_intLotId, T1.tblICInventoryTransferDetail_intFromSubLocationId, T1.tblICInventoryTransferDetail_intToSubLocationId, T1.tblICInventoryTransferDetail_intFromStorageLocationId, T1.tblICInventoryTransferDetail_intToStorageLocationId, T1.tblICInventoryTransferDetail_dblQuantity, T1.tblICInventoryTransferDetail_intItemUOMId, T1.tblICInventoryTransferDetail_intItemWeightUOMId, T1.tblICInventoryTransferDetail_dblGrossWeight, T1.tblICInventoryTransferDetail_dblTareWeight, T1.tblICInventoryTransferDetail_intNewLotId, T1.tblICInventoryTransferDetail_strNewLotId, T1.tblICInventoryTransferDetail_dblCost, T1.tblICInventoryTransferDetail_intTaxCodeId, T1.tblICInventoryTransferDetail_dblFreightRate, T1.tblICInventoryTransferDetail_dblFreightAmount, T1.tblICInventoryTransferDetail_intSort, T1.tblICInventoryTransferDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferDetailId AS tblICInventoryTransferDetail_intInventoryTransferDetailId, 
@@ -1774,12 +1763,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.intItemWeightUOMId AS tblICInventoryTransferDetail_intItemWeightUOMId, 
             T.dblGrossWeight AS tblICInventoryTransferDetail_dblGrossWeight, 
             T.dblTareWeight AS tblICInventoryTransferDetail_dblTareWeight, 
-            T.dblNetWeight AS tblICInventoryTransferDetail_dblNetWeight, 
             T.intNewLotId AS tblICInventoryTransferDetail_intNewLotId, 
             T.strNewLotId AS tblICInventoryTransferDetail_strNewLotId, 
             T.dblCost AS tblICInventoryTransferDetail_dblCost, 
-            T.intCreditAccountId AS tblICInventoryTransferDetail_intCreditAccountId, 
-            T.intDebitAccountId AS tblICInventoryTransferDetail_intDebitAccountId, 
             T.intTaxCodeId AS tblICInventoryTransferDetail_intTaxCodeId, 
             T.dblFreightRate AS tblICInventoryTransferDetail_dblFreightRate, 
             T.dblFreightAmount AS tblICInventoryTransferDetail_dblFreightAmount, 
@@ -1794,7 +1780,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICStorageLocation.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView14()
+        private static DbMappingView GetView13()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageLocation
@@ -1838,7 +1824,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICInventoryAdjustmentDetail.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView15()
+        private static DbMappingView GetView14()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryAdjustmentDetail
@@ -1883,7 +1869,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICLot.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView16()
+        private static DbMappingView GetView15()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICLot
@@ -1946,7 +1932,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICInventoryReceiptItemLot.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView17()
+        private static DbMappingView GetView16()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItemLot
@@ -1993,7 +1979,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICInventoryReceiptItem.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView18()
+        private static DbMappingView GetView17()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItem
@@ -2025,7 +2011,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICInventoryReceipt.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView19()
+        private static DbMappingView GetView18()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceipt
@@ -2079,7 +2065,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICInventoryReceiptInspection.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView20()
+        private static DbMappingView GetView19()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptInspection
@@ -2101,7 +2087,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblMFQAProperty.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView21()
+        private static DbMappingView GetView20()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblMFQAProperty
@@ -2127,7 +2113,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblSMFreightTerm.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView22()
+        private static DbMappingView GetView21()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMFreightTerm
@@ -2148,7 +2134,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuAPVendor.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView23()
+        private static DbMappingView GetView22()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuAPVendor
@@ -2169,7 +2155,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCategoryVendor.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView24()
+        private static DbMappingView GetView23()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCategoryVendor
@@ -2200,7 +2186,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblSTSubcategoryFamily.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView25()
+        private static DbMappingView GetView24()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTSubcategoryFamily
@@ -2221,7 +2207,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblSTSubcategoryClass.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView26()
+        private static DbMappingView GetView25()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTSubcategoryClass
@@ -2242,7 +2228,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCategory.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView27()
+        private static DbMappingView GetView26()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCategory
@@ -2294,7 +2280,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCatalog.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView28()
+        private static DbMappingView GetView27()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCatalog
@@ -2317,7 +2303,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCategoryAccount.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView29()
+        private static DbMappingView GetView28()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCategoryAccount
@@ -2336,20 +2322,22 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblGLAccountCategory.
+        /// Gets the view for CodeFirstDatabase.tblGLAccount.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView30()
+        private static DbMappingView GetView29()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblGLAccountCategory
-        [CodeFirstDatabaseSchema.tblGLAccountCategory](T1.tblGLAccountCategory_intAccountCategoryId, T1.tblGLAccountCategory_strAccountCategory)
+    SELECT VALUE -- Constructing tblGLAccount
+        [CodeFirstDatabaseSchema.tblGLAccount](T1.tblGLAccount_intAccountId, T1.tblGLAccount_strAccountId, T1.tblGLAccount_strDescription, T1.tblGLAccount_strAccountGroup)
     FROM (
         SELECT 
-            T.intAccountCategoryId AS tblGLAccountCategory_intAccountCategoryId, 
-            T.strAccountCategory AS tblGLAccountCategory_strAccountCategory, 
+            T.intAccountId AS tblGLAccount_intAccountId, 
+            T.strAccountId AS tblGLAccount_strAccountId, 
+            T.strDescription AS tblGLAccount_strDescription, 
+            T.strAccountGroup AS tblGLAccount_strAccountGroup, 
             True AS _from0
-        FROM InventoryEntities.tblGLAccountCategories AS T
+        FROM InventoryEntities.tblGLAccounts AS T
     ) AS T1");
         }
 
@@ -2357,7 +2345,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCommodityAccount.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView31()
+        private static DbMappingView GetView30()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityAccount
@@ -2376,10 +2364,50 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICCommodity.
+        /// Gets the view for CodeFirstDatabase.tblGLAccountCategory.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView31()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblGLAccountCategory
+        [CodeFirstDatabaseSchema.tblGLAccountCategory](T1.tblGLAccountCategory_intAccountCategoryId, T1.tblGLAccountCategory_strAccountCategory)
+    FROM (
+        SELECT 
+            T.intAccountCategoryId AS tblGLAccountCategory_intAccountCategoryId, 
+            T.strAccountCategory AS tblGLAccountCategory_strAccountCategory, 
+            True AS _from0
+        FROM InventoryEntities.tblGLAccountCategories AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.tblICItemAccount.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView32()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblICItemAccount
+        [CodeFirstDatabaseSchema.tblICItemAccount](T1.tblICItemAccount_intItemAccountId, T1.tblICItemAccount_intItemId, T1.tblICItemAccount_intAccountCategoryId, T1.tblICItemAccount_intAccountId, T1.tblICItemAccount_intSort, T1.tblICItemAccount_intConcurrencyId)
+    FROM (
+        SELECT 
+            T.intItemAccountId AS tblICItemAccount_intItemAccountId, 
+            T.intItemId AS tblICItemAccount_intItemId, 
+            T.intAccountCategoryId AS tblICItemAccount_intAccountCategoryId, 
+            T.intAccountId AS tblICItemAccount_intAccountId, 
+            T.intSort AS tblICItemAccount_intSort, 
+            T.intConcurrencyId AS tblICItemAccount_intConcurrencyId, 
+            True AS _from0
+        FROM InventoryEntities.tblICItemAccounts AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.tblICCommodity.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView33()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodity
@@ -2426,7 +2454,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICPatronageCategory.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView33()
+        private static DbMappingView GetView34()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICPatronageCategory
@@ -2449,7 +2477,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCertificationCommodity.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView34()
+        private static DbMappingView GetView35()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCertificationCommodity
@@ -2474,7 +2502,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCertification.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView35()
+        private static DbMappingView GetView36()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCertification
@@ -2497,7 +2525,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemCertification.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView36()
+        private static DbMappingView GetView37()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemCertification
@@ -2518,7 +2546,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblSMCurrency.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView37()
+        private static DbMappingView GetView38()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMCurrency
@@ -2538,7 +2566,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCommodityGroup.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView38()
+        private static DbMappingView GetView39()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityGroup
@@ -2560,7 +2588,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCommodityUnitMeasure.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView39()
+        private static DbMappingView GetView40()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityUnitMeasure
@@ -2577,28 +2605,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.intConcurrencyId AS tblICCommodityUnitMeasure_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICCommodityUnitMeasures AS T
-    ) AS T1");
-        }
-
-        /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICItemAccount.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView40()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICItemAccount
-        [CodeFirstDatabaseSchema.tblICItemAccount](T1.tblICItemAccount_intItemAccountId, T1.tblICItemAccount_intItemId, T1.tblICItemAccount_intAccountCategoryId, T1.tblICItemAccount_intAccountId, T1.tblICItemAccount_intSort, T1.tblICItemAccount_intConcurrencyId)
-    FROM (
-        SELECT 
-            T.intItemAccountId AS tblICItemAccount_intItemAccountId, 
-            T.intItemId AS tblICItemAccount_intItemId, 
-            T.intAccountCategoryId AS tblICItemAccount_intAccountCategoryId, 
-            T.intAccountId AS tblICItemAccount_intAccountId, 
-            T.intSort AS tblICItemAccount_intSort, 
-            T.intConcurrencyId AS tblICItemAccount_intConcurrencyId, 
-            True AS _from0
-        FROM InventoryEntities.tblICItemAccounts AS T
     ) AS T1");
         }
 
@@ -3737,10 +3743,30 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICPackType.
+        /// Gets the view for CodeFirstDatabase.tblICStatus.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView80()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblICStatus
+        [CodeFirstDatabaseSchema.tblICStatus](T1.tblICStatus_intStatusId, T1.tblICStatus_strStatus, T1.tblICStatus_intSort, T1.tblICStatus_intConcurrencyId)
+    FROM (
+        SELECT 
+            T.intStatusId AS tblICStatus_intStatusId, 
+            T.strStatus AS tblICStatus_strStatus, 
+            T.intSort AS tblICStatus_intSort, 
+            T.intConcurrencyId AS tblICStatus_intConcurrencyId, 
+            True AS _from0
+        FROM InventoryEntities.tblICStatuses AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.tblICPackType.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView81()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICPackType
@@ -3760,7 +3786,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICPackTypeDetail.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView81()
+        private static DbMappingView GetView82()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICPackTypeDetail
@@ -3783,7 +3809,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICStorageUnitType.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView82()
+        private static DbMappingView GetView83()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageUnitType
@@ -3814,7 +3840,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICUnitMeasureConversion.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView83()
+        private static DbMappingView GetView84()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICUnitMeasureConversion
@@ -3836,7 +3862,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemManufacturingUOM.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView84()
+        private static DbMappingView GetView85()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemManufacturingUOM
@@ -3857,7 +3883,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICRinFeedStockUOM.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView85()
+        private static DbMappingView GetView86()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinFeedStockUOM
@@ -3878,7 +3904,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICFuelType.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView86()
+        private static DbMappingView GetView87()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICFuelType
@@ -3908,7 +3934,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICRinFeedStock.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView87()
+        private static DbMappingView GetView88()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinFeedStock
@@ -3929,7 +3955,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICRinFuel.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView88()
+        private static DbMappingView GetView89()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinFuel
@@ -3950,7 +3976,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICRinFuelCategory.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView89()
+        private static DbMappingView GetView90()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinFuelCategory
@@ -3972,7 +3998,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICRinProcess.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView90()
+        private static DbMappingView GetView91()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinProcess
@@ -3993,7 +4019,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetUOMConversion.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView91()
+        private static DbMappingView GetView92()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetUOMConversion
@@ -4015,7 +4041,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemBundle.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView92()
+        private static DbMappingView GetView93()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemBundle
@@ -4041,7 +4067,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemKitDetail.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView93()
+        private static DbMappingView GetView94()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemKitDetail
@@ -4066,7 +4092,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemKit.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView94()
+        private static DbMappingView GetView95()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemKit
@@ -4088,7 +4114,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemUPC.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView95()
+        private static DbMappingView GetView96()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemUPC
@@ -4111,7 +4137,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICBrand.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView96()
+        private static DbMappingView GetView97()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICBrand
@@ -4133,7 +4159,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICManufacturer.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView97()
+        private static DbMappingView GetView98()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICManufacturer
@@ -4163,7 +4189,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemOwner.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView98()
+        private static DbMappingView GetView99()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemOwner
@@ -4185,7 +4211,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemPOSCategory.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView99()
+        private static DbMappingView GetView100()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPOSCategory
@@ -4206,7 +4232,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemPOSSLA.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView100()
+        private static DbMappingView GetView101()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPOSSLA
@@ -4228,7 +4254,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblARCustomers.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView101()
+        private static DbMappingView GetView102()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblARCustomers
@@ -4247,7 +4273,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemCustomerXrefs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView102()
+        private static DbMappingView GetView103()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemCustomerXrefs
@@ -4272,7 +4298,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItems.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView103()
+        private static DbMappingView GetView104()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItems
@@ -4382,7 +4408,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemAssemblys.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView104()
+        private static DbMappingView GetView105()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemAssemblys
@@ -4408,7 +4434,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemUOMs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView105()
+        private static DbMappingView GetView106()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemUOMs
@@ -4443,7 +4469,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICUnitMeasures.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView106()
+        private static DbMappingView GetView107()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICUnitMeasures
@@ -4464,7 +4490,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICManufacturingCellPackTypes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView107()
+        private static DbMappingView GetView108()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICManufacturingCellPackTypes
@@ -4489,7 +4515,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICManufacturingCells.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView108()
+        private static DbMappingView GetView109()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICManufacturingCells
@@ -4516,7 +4542,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemFactoryManufacturingCells.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView109()
+        private static DbMappingView GetView110()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemFactoryManufacturingCells
@@ -4539,7 +4565,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemFactories.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView110()
+        private static DbMappingView GetView111()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemFactories
@@ -4561,7 +4587,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSMCompanyLocations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView111()
+        private static DbMappingView GetView112()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMCompanyLocations
@@ -4589,11 +4615,11 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryTransfers.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView112()
+        private static DbMappingView GetView113()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransfers
-        [iRely.Inventory.Model.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_intAccountCategoryId, T1.tblICInventoryTransfer_intAccountId, T1.tblICInventoryTransfer_ysnPosted, T1.tblICInventoryTransfer_intEntityId, T1.tblICInventoryTransfer_intCreatedUserId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryTransfer](T1.tblICInventoryTransfer_intInventoryTransferId, T1.tblICInventoryTransfer_strTransferNo, T1.tblICInventoryTransfer_dtmTransferDate, T1.tblICInventoryTransfer_strTransferType, T1.tblICInventoryTransfer_intTransferredById, T1.tblICInventoryTransfer_strDescription, T1.tblICInventoryTransfer_intFromLocationId, T1.tblICInventoryTransfer_intToLocationId, T1.tblICInventoryTransfer_ysnShipmentRequired, T1.tblICInventoryTransfer_intStatusId, T1.tblICInventoryTransfer_intShipViaId, T1.tblICInventoryTransfer_intFreightUOMId, T1.tblICInventoryTransfer_ysnPosted, T1.tblICInventoryTransfer_intEntityId, T1.tblICInventoryTransfer_intCreatedUserId, T1.tblICInventoryTransfer_intSort, T1.tblICInventoryTransfer_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferId AS tblICInventoryTransfer_intInventoryTransferId, 
@@ -4605,10 +4631,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.intFromLocationId AS tblICInventoryTransfer_intFromLocationId, 
             T.intToLocationId AS tblICInventoryTransfer_intToLocationId, 
             T.ysnShipmentRequired AS tblICInventoryTransfer_ysnShipmentRequired, 
+            T.intStatusId AS tblICInventoryTransfer_intStatusId, 
             T.intShipViaId AS tblICInventoryTransfer_intShipViaId, 
             T.intFreightUOMId AS tblICInventoryTransfer_intFreightUOMId, 
-            T.intAccountCategoryId AS tblICInventoryTransfer_intAccountCategoryId, 
-            T.intAccountId AS tblICInventoryTransfer_intAccountId, 
             T.ysnPosted AS tblICInventoryTransfer_ysnPosted, 
             T.intEntityId AS tblICInventoryTransfer_intEntityId, 
             T.intCreatedUserId AS tblICInventoryTransfer_intCreatedUserId, 
@@ -4620,26 +4645,6 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.tblGLAccounts.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView113()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblGLAccounts
-        [iRely.Inventory.Model.tblGLAccount](T1.tblGLAccount_intAccountId, T1.tblGLAccount_strAccountId, T1.tblGLAccount_strDescription, T1.tblGLAccount_strAccountGroup)
-    FROM (
-        SELECT 
-            T.intAccountId AS tblGLAccount_intAccountId, 
-            T.strAccountId AS tblGLAccount_strAccountId, 
-            T.strDescription AS tblGLAccount_strDescription, 
-            T.strAccountGroup AS tblGLAccount_strAccountGroup, 
-            True AS _from0
-        FROM CodeFirstDatabase.tblGLAccount AS T
-    ) AS T1");
-        }
-
-        /// <summary>
         /// Gets the view for InventoryEntities.tblICInventoryTransferDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
@@ -4647,7 +4652,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransferDetails
-        [iRely.Inventory.Model.tblICInventoryTransferDetail](T1.tblICInventoryTransferDetail_intInventoryTransferDetailId, T1.tblICInventoryTransferDetail_intInventoryTransferId, T1.tblICInventoryTransferDetail_intItemId, T1.tblICInventoryTransferDetail_intLotId, T1.tblICInventoryTransferDetail_intFromSubLocationId, T1.tblICInventoryTransferDetail_intToSubLocationId, T1.tblICInventoryTransferDetail_intFromStorageLocationId, T1.tblICInventoryTransferDetail_intToStorageLocationId, T1.tblICInventoryTransferDetail_dblQuantity, T1.tblICInventoryTransferDetail_intItemUOMId, T1.tblICInventoryTransferDetail_intItemWeightUOMId, T1.tblICInventoryTransferDetail_dblGrossWeight, T1.tblICInventoryTransferDetail_dblTareWeight, T1.tblICInventoryTransferDetail_dblNetWeight, T1.tblICInventoryTransferDetail_intNewLotId, T1.tblICInventoryTransferDetail_strNewLotId, T1.tblICInventoryTransferDetail_dblCost, T1.tblICInventoryTransferDetail_intCreditAccountId, T1.tblICInventoryTransferDetail_intDebitAccountId, T1.tblICInventoryTransferDetail_intTaxCodeId, T1.tblICInventoryTransferDetail_dblFreightRate, T1.tblICInventoryTransferDetail_dblFreightAmount, T1.tblICInventoryTransferDetail_intSort, T1.tblICInventoryTransferDetail_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryTransferDetail](T1.tblICInventoryTransferDetail_intInventoryTransferDetailId, T1.tblICInventoryTransferDetail_intInventoryTransferId, T1.tblICInventoryTransferDetail_intItemId, T1.tblICInventoryTransferDetail_intLotId, T1.tblICInventoryTransferDetail_intFromSubLocationId, T1.tblICInventoryTransferDetail_intToSubLocationId, T1.tblICInventoryTransferDetail_intFromStorageLocationId, T1.tblICInventoryTransferDetail_intToStorageLocationId, T1.tblICInventoryTransferDetail_dblQuantity, T1.tblICInventoryTransferDetail_intItemUOMId, T1.tblICInventoryTransferDetail_intItemWeightUOMId, T1.tblICInventoryTransferDetail_dblGrossWeight, T1.tblICInventoryTransferDetail_dblTareWeight, T1.tblICInventoryTransferDetail_intNewLotId, T1.tblICInventoryTransferDetail_strNewLotId, T1.tblICInventoryTransferDetail_dblCost, T1.tblICInventoryTransferDetail_intTaxCodeId, T1.tblICInventoryTransferDetail_dblFreightRate, T1.tblICInventoryTransferDetail_dblFreightAmount, T1.tblICInventoryTransferDetail_intSort, T1.tblICInventoryTransferDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryTransferDetailId AS tblICInventoryTransferDetail_intInventoryTransferDetailId, 
@@ -4663,12 +4668,9 @@ namespace Edm_EntityMappingGeneratedViews
             T.intItemWeightUOMId AS tblICInventoryTransferDetail_intItemWeightUOMId, 
             T.dblGrossWeight AS tblICInventoryTransferDetail_dblGrossWeight, 
             T.dblTareWeight AS tblICInventoryTransferDetail_dblTareWeight, 
-            T.dblNetWeight AS tblICInventoryTransferDetail_dblNetWeight, 
             T.intNewLotId AS tblICInventoryTransferDetail_intNewLotId, 
             T.strNewLotId AS tblICInventoryTransferDetail_strNewLotId, 
             T.dblCost AS tblICInventoryTransferDetail_dblCost, 
-            T.intCreditAccountId AS tblICInventoryTransferDetail_intCreditAccountId, 
-            T.intDebitAccountId AS tblICInventoryTransferDetail_intDebitAccountId, 
             T.intTaxCodeId AS tblICInventoryTransferDetail_intTaxCodeId, 
             T.dblFreightRate AS tblICInventoryTransferDetail_dblFreightRate, 
             T.dblFreightAmount AS tblICInventoryTransferDetail_dblFreightAmount, 
@@ -5225,20 +5227,22 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.tblGLAccountCategories.
+        /// Gets the view for InventoryEntities.tblGLAccounts.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView131()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblGLAccountCategories
-        [iRely.Inventory.Model.tblGLAccountCategory](T1.tblGLAccountCategory_intAccountCategoryId, T1.tblGLAccountCategory_strAccountCategory)
+    SELECT VALUE -- Constructing tblGLAccounts
+        [iRely.Inventory.Model.tblGLAccount](T1.tblGLAccount_intAccountId, T1.tblGLAccount_strAccountId, T1.tblGLAccount_strDescription, T1.tblGLAccount_strAccountGroup)
     FROM (
         SELECT 
-            T.intAccountCategoryId AS tblGLAccountCategory_intAccountCategoryId, 
-            T.strAccountCategory AS tblGLAccountCategory_strAccountCategory, 
+            T.intAccountId AS tblGLAccount_intAccountId, 
+            T.strAccountId AS tblGLAccount_strAccountId, 
+            T.strDescription AS tblGLAccount_strDescription, 
+            T.strAccountGroup AS tblGLAccount_strAccountGroup, 
             True AS _from0
-        FROM CodeFirstDatabase.tblGLAccountCategory AS T
+        FROM CodeFirstDatabase.tblGLAccount AS T
     ) AS T1");
         }
 
@@ -5265,10 +5269,50 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.tblICCommoditys.
+        /// Gets the view for InventoryEntities.tblGLAccountCategories.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView133()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblGLAccountCategories
+        [iRely.Inventory.Model.tblGLAccountCategory](T1.tblGLAccountCategory_intAccountCategoryId, T1.tblGLAccountCategory_strAccountCategory)
+    FROM (
+        SELECT 
+            T.intAccountCategoryId AS tblGLAccountCategory_intAccountCategoryId, 
+            T.strAccountCategory AS tblGLAccountCategory_strAccountCategory, 
+            True AS _from0
+        FROM CodeFirstDatabase.tblGLAccountCategory AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.tblICItemAccounts.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView134()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblICItemAccounts
+        [iRely.Inventory.Model.tblICItemAccount](T1.tblICItemAccount_intItemAccountId, T1.tblICItemAccount_intItemId, T1.tblICItemAccount_intAccountCategoryId, T1.tblICItemAccount_intAccountId, T1.tblICItemAccount_intSort, T1.tblICItemAccount_intConcurrencyId)
+    FROM (
+        SELECT 
+            T.intItemAccountId AS tblICItemAccount_intItemAccountId, 
+            T.intItemId AS tblICItemAccount_intItemId, 
+            T.intAccountCategoryId AS tblICItemAccount_intAccountCategoryId, 
+            T.intAccountId AS tblICItemAccount_intAccountId, 
+            T.intSort AS tblICItemAccount_intSort, 
+            T.intConcurrencyId AS tblICItemAccount_intConcurrencyId, 
+            True AS _from0
+        FROM CodeFirstDatabase.tblICItemAccount AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.tblICCommoditys.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView135()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommoditys
@@ -5315,7 +5359,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICPatronageCategorys.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView134()
+        private static DbMappingView GetView136()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICPatronageCategorys
@@ -5338,7 +5382,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICCertificationCommoditys.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView135()
+        private static DbMappingView GetView137()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCertificationCommoditys
@@ -5363,7 +5407,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICCertifications.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView136()
+        private static DbMappingView GetView138()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCertifications
@@ -5386,7 +5430,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemCertifications.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView137()
+        private static DbMappingView GetView139()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemCertifications
@@ -5407,7 +5451,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSMCurrencies.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView138()
+        private static DbMappingView GetView140()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMCurrencies
@@ -5427,7 +5471,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICCommodityGroups.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView139()
+        private static DbMappingView GetView141()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityGroups
@@ -5449,7 +5493,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICCommodityUnitMeasures.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView140()
+        private static DbMappingView GetView142()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityUnitMeasures
@@ -5470,32 +5514,10 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.tblICItemAccounts.
-        /// </summary>
-        /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView141()
-        {
-            return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICItemAccounts
-        [iRely.Inventory.Model.tblICItemAccount](T1.tblICItemAccount_intItemAccountId, T1.tblICItemAccount_intItemId, T1.tblICItemAccount_intAccountCategoryId, T1.tblICItemAccount_intAccountId, T1.tblICItemAccount_intSort, T1.tblICItemAccount_intConcurrencyId)
-    FROM (
-        SELECT 
-            T.intItemAccountId AS tblICItemAccount_intItemAccountId, 
-            T.intItemId AS tblICItemAccount_intItemId, 
-            T.intAccountCategoryId AS tblICItemAccount_intAccountCategoryId, 
-            T.intAccountId AS tblICItemAccount_intAccountId, 
-            T.intSort AS tblICItemAccount_intSort, 
-            T.intConcurrencyId AS tblICItemAccount_intConcurrencyId, 
-            True AS _from0
-        FROM CodeFirstDatabase.tblICItemAccount AS T
-    ) AS T1");
-        }
-
-        /// <summary>
         /// Gets the view for InventoryEntities.tblICCategoryLocations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView142()
+        private static DbMappingView GetView143()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCategoryLocations
@@ -5547,7 +5569,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICCategoryUOMs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView143()
+        private static DbMappingView GetView144()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCategoryUOMs
@@ -5584,7 +5606,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICStorageLocationCategories.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView144()
+        private static DbMappingView GetView145()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageLocationCategories
@@ -5605,7 +5627,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemLocations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView145()
+        private static DbMappingView GetView146()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemLocations
@@ -5680,7 +5702,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICCountGroups.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView146()
+        private static DbMappingView GetView147()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCountGroups
@@ -5700,7 +5722,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemCommodityCosts.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView147()
+        private static DbMappingView GetView148()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemCommodityCosts
@@ -5725,7 +5747,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemContracts.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView148()
+        private static DbMappingView GetView149()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemContracts
@@ -5754,7 +5776,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemContractDocuments.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView149()
+        private static DbMappingView GetView150()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemContractDocuments
@@ -5775,7 +5797,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICDocuments.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView150()
+        private static DbMappingView GetView151()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICDocuments
@@ -5797,7 +5819,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSMCountries.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView151()
+        private static DbMappingView GetView152()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMCountries
@@ -5816,7 +5838,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemNotes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView152()
+        private static DbMappingView GetView153()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemNotes
@@ -5839,7 +5861,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemPricingLevels.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView153()
+        private static DbMappingView GetView154()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPricingLevels
@@ -5870,7 +5892,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemPricings.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView154()
+        private static DbMappingView GetView155()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPricings
@@ -5899,7 +5921,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemSpecialPricings.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView155()
+        private static DbMappingView GetView156()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemSpecialPricings
@@ -5932,7 +5954,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemStocks.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView156()
+        private static DbMappingView GetView157()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemStocks
@@ -5961,7 +5983,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSMCompanyLocationSubLocation_tblICItemStocks.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView157()
+        private static DbMappingView GetView158()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMCompanyLocationSubLocation_tblICItemStocks
@@ -5990,7 +6012,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSMCompanyLocationSubLocations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView158()
+        private static DbMappingView GetView159()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMCompanyLocationSubLocations
@@ -6015,7 +6037,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICBuildAssemblies.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView159()
+        private static DbMappingView GetView160()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICBuildAssemblies
@@ -6046,7 +6068,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICBuildAssemblyDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView160()
+        private static DbMappingView GetView161()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICBuildAssemblyDetails
@@ -6071,7 +6093,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryShipmentItems.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView161()
+        private static DbMappingView GetView162()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItems
@@ -6101,7 +6123,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryShipments.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView162()
+        private static DbMappingView GetView163()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipments
@@ -6145,7 +6167,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblEntityLocations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView163()
+        private static DbMappingView GetView164()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblEntityLocations
@@ -6179,7 +6201,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryShipmentItemLots.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView164()
+        private static DbMappingView GetView165()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItemLots
@@ -6206,7 +6228,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetShipmentItemSources.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView165()
+        private static DbMappingView GetView166()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetShipmentItemSources
@@ -6231,7 +6253,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemVendorXrefs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView166()
+        private static DbMappingView GetView167()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemVendorXrefs
@@ -6257,7 +6279,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryReceiptItemTaxes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView167()
+        private static DbMappingView GetView168()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryReceiptItemTaxes
@@ -6279,7 +6301,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetReceiptItemSources.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView168()
+        private static DbMappingView GetView169()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptItemSources
@@ -6303,7 +6325,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICLotStatuss.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView169()
+        private static DbMappingView GetView170()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICLotStatuss
@@ -6325,7 +6347,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICStorageLocationSkus.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView170()
+        private static DbMappingView GetView171()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageLocationSkus
@@ -6352,7 +6374,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICContainers.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView171()
+        private static DbMappingView GetView172()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICContainers
@@ -6377,7 +6399,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICContainerTypes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView172()
+        private static DbMappingView GetView173()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICContainerTypes
@@ -6416,7 +6438,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICStorageLocationContainers.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView173()
+        private static DbMappingView GetView174()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageLocationContainers
@@ -6441,7 +6463,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICSkus.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView174()
+        private static DbMappingView GetView175()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICSkus
@@ -6484,7 +6506,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryAdjustments.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView175()
+        private static DbMappingView GetView176()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryAdjustments
@@ -6509,7 +6531,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryAdjustmentNotes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView176()
+        private static DbMappingView GetView177()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryAdjustmentNotes
@@ -6531,7 +6553,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICStorageLocationMeasurements.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView177()
+        private static DbMappingView GetView178()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageLocationMeasurements
@@ -6554,7 +6576,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICMeasurements.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView178()
+        private static DbMappingView GetView179()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICMeasurements
@@ -6576,7 +6598,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICReadingPoints.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView179()
+        private static DbMappingView GetView180()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICReadingPoints
@@ -6596,7 +6618,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSMTaxCodes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView180()
+        private static DbMappingView GetView181()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMTaxCodes
@@ -6629,7 +6651,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICInventoryTransferNotes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView181()
+        private static DbMappingView GetView182()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryTransferNotes
@@ -6648,10 +6670,30 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
+        /// Gets the view for InventoryEntities.tblICStatuses.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView183()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblICStatuses
+        [iRely.Inventory.Model.tblICStatus](T1.tblICStatus_intStatusId, T1.tblICStatus_strStatus, T1.tblICStatus_intSort, T1.tblICStatus_intConcurrencyId)
+    FROM (
+        SELECT 
+            T.intStatusId AS tblICStatus_intStatusId, 
+            T.strStatus AS tblICStatus_strStatus, 
+            T.intSort AS tblICStatus_intSort, 
+            T.intConcurrencyId AS tblICStatus_intConcurrencyId, 
+            True AS _from0
+        FROM CodeFirstDatabase.tblICStatus AS T
+    ) AS T1");
+        }
+
+        /// <summary>
         /// Gets the view for InventoryEntities.tblICPackTypes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView182()
+        private static DbMappingView GetView184()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICPackTypes
@@ -6671,7 +6713,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICPackTypeDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView183()
+        private static DbMappingView GetView185()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICPackTypeDetails
@@ -6694,7 +6736,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICStorageUnitTypes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView184()
+        private static DbMappingView GetView186()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageUnitTypes
@@ -6725,7 +6767,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICUnitMeasureConversions.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView185()
+        private static DbMappingView GetView187()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICUnitMeasureConversions
@@ -6747,7 +6789,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemManufacturingUOMs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView186()
+        private static DbMappingView GetView188()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemManufacturingUOMs
@@ -6768,7 +6810,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICRinFeedStockUOMs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView187()
+        private static DbMappingView GetView189()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinFeedStockUOMs
@@ -6789,7 +6831,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICFuelTypes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView188()
+        private static DbMappingView GetView190()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICFuelTypes
@@ -6819,7 +6861,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICRinFeedStocks.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView189()
+        private static DbMappingView GetView191()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinFeedStocks
@@ -6840,7 +6882,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICRinFuels.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView190()
+        private static DbMappingView GetView192()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinFuels
@@ -6861,7 +6903,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICRinFuelCategorys.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView191()
+        private static DbMappingView GetView193()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinFuelCategorys
@@ -6883,7 +6925,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICRinProcesss.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView192()
+        private static DbMappingView GetView194()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRinProcesss
@@ -6904,7 +6946,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetUOMConversions.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView193()
+        private static DbMappingView GetView195()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetUOMConversions
@@ -6926,7 +6968,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemBundles.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView194()
+        private static DbMappingView GetView196()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemBundles
@@ -6952,7 +6994,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemKitDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView195()
+        private static DbMappingView GetView197()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemKitDetails
@@ -6977,7 +7019,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemKits.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView196()
+        private static DbMappingView GetView198()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemKits
@@ -6999,7 +7041,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemUPCs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView197()
+        private static DbMappingView GetView199()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemUPCs
@@ -7022,7 +7064,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICBrands.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView198()
+        private static DbMappingView GetView200()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICBrands
@@ -7044,7 +7086,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICManufacturers.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView199()
+        private static DbMappingView GetView201()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICManufacturers
@@ -7074,7 +7116,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemOwners.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView200()
+        private static DbMappingView GetView202()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemOwners
@@ -7096,7 +7138,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemPOSCategorys.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView201()
+        private static DbMappingView GetView203()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPOSCategorys
@@ -7117,7 +7159,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemPOSSLAs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView202()
+        private static DbMappingView GetView204()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemPOSSLAs
@@ -7139,7 +7181,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICCommodityAttribute.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView203()
+        private static DbMappingView GetView205()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityAttribute
@@ -7270,7 +7312,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICCommodityAttributes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView204()
+        private static DbMappingView GetView206()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCommodityAttributes
@@ -7313,7 +7355,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblGRStorageType.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView205()
+        private static DbMappingView GetView207()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblGRStorageType
@@ -7334,7 +7376,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblGRStorageTypes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView206()
+        private static DbMappingView GetView208()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblGRStorageTypes
@@ -7355,7 +7397,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICEquipmentLength.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView207()
+        private static DbMappingView GetView209()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICEquipmentLength
@@ -7376,7 +7418,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICEquipmentLengths.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView208()
+        private static DbMappingView GetView210()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICEquipmentLengths
@@ -7397,7 +7439,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICFuelTaxClassProductCode.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView209()
+        private static DbMappingView GetView211()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICFuelTaxClassProductCode
@@ -7419,7 +7461,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICFuelTaxClass.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView210()
+        private static DbMappingView GetView212()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICFuelTaxClass
@@ -7440,7 +7482,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICFuelTaxClassProductCodes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView211()
+        private static DbMappingView GetView213()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICFuelTaxClassProductCodes
@@ -7462,7 +7504,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICFuelTaxClasss.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView212()
+        private static DbMappingView GetView214()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICFuelTaxClasss
@@ -7483,7 +7525,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemSubstitutionDetail.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView213()
+        private static DbMappingView GetView215()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemSubstitutionDetail
@@ -7509,7 +7551,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemSubstitutionDetails.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView214()
+        private static DbMappingView GetView216()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemSubstitutionDetails
@@ -7535,7 +7577,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICItemSubstitution.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView215()
+        private static DbMappingView GetView217()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemSubstitution
@@ -7557,7 +7599,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICItemSubstitutions.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView216()
+        private static DbMappingView GetView218()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemSubstitutions
@@ -7579,7 +7621,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICLineOfBusiness.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView217()
+        private static DbMappingView GetView219()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICLineOfBusiness
@@ -7599,7 +7641,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICLineOfBusinesss.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView218()
+        private static DbMappingView GetView220()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICLineOfBusinesss
@@ -7619,7 +7661,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICMaterialNMFC.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView219()
+        private static DbMappingView GetView221()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICMaterialNMFC
@@ -7645,7 +7687,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICMaterialNMFCs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView220()
+        private static DbMappingView GetView222()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICMaterialNMFCs
@@ -7671,7 +7713,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICReasonCode.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView221()
+        private static DbMappingView GetView223()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICReasonCode
@@ -7698,7 +7740,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICReasonCodes.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView222()
+        private static DbMappingView GetView224()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICReasonCodes
@@ -7725,7 +7767,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICReasonCodeWorkCenter.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView223()
+        private static DbMappingView GetView225()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICReasonCodeWorkCenter
@@ -7746,7 +7788,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICReasonCodeWorkCenters.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView224()
+        private static DbMappingView GetView226()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICReasonCodeWorkCenters
@@ -7767,7 +7809,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICRestriction.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView225()
+        private static DbMappingView GetView227()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRestriction
@@ -7792,7 +7834,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICRestrictions.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView226()
+        private static DbMappingView GetView228()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICRestrictions
@@ -7817,7 +7859,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICStockReservation.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView227()
+        private static DbMappingView GetView229()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStockReservation
@@ -7842,7 +7884,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICStockReservations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView228()
+        private static DbMappingView GetView230()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStockReservations
@@ -7867,7 +7909,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblICTag.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView229()
+        private static DbMappingView GetView231()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICTag
@@ -7889,7 +7931,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblICTags.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView230()
+        private static DbMappingView GetView232()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICTags
@@ -7911,7 +7953,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblSMStartingNumber.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView231()
+        private static DbMappingView GetView233()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMStartingNumber
@@ -7934,7 +7976,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSMStartingNumbers.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView232()
+        private static DbMappingView GetView234()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMStartingNumbers
@@ -7957,7 +7999,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblSTPaidOut.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView233()
+        private static DbMappingView GetView235()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTPaidOut
@@ -7980,7 +8022,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSTPaidOut.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView234()
+        private static DbMappingView GetView236()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTPaidOut
@@ -8003,7 +8045,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblSTPromotionSalesList.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView235()
+        private static DbMappingView GetView237()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTPromotionSalesList
@@ -8026,7 +8068,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSTPromotionSalesLists.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView236()
+        private static DbMappingView GetView238()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTPromotionSalesLists
@@ -8049,7 +8091,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblSTStore.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView237()
+        private static DbMappingView GetView239()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTStore
@@ -8072,7 +8114,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSTStore.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView238()
+        private static DbMappingView GetView240()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTStore
@@ -8095,7 +8137,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.tblSTSubcategoryRegProd.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView239()
+        private static DbMappingView GetView241()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTSubcategoryRegProd
@@ -8117,7 +8159,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.tblSTSubcategoryRegProds.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView240()
+        private static DbMappingView GetView242()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSTSubcategoryRegProds
@@ -8139,7 +8181,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemAccount.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView241()
+        private static DbMappingView GetView243()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemAccount
@@ -8167,7 +8209,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemStock.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView242()
+        private static DbMappingView GetView244()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStock
@@ -8246,7 +8288,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemPricing.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView243()
+        private static DbMappingView GetView245()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemPricing
@@ -8289,7 +8331,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemAccounts.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView244()
+        private static DbMappingView GetView246()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemAccounts
@@ -8317,7 +8359,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemStocks.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView245()
+        private static DbMappingView GetView247()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStocks
@@ -8396,7 +8438,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemPricings.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView246()
+        private static DbMappingView GetView248()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemPricings
@@ -8439,7 +8481,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemStockUOM.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView247()
+        private static DbMappingView GetView249()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOM
@@ -8473,7 +8515,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemStockUOMs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView248()
+        private static DbMappingView GetView250()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemStockUOMs
@@ -8507,7 +8549,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetPackedUOM.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView249()
+        private static DbMappingView GetView251()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetPackedUOM
@@ -8531,7 +8573,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetPackedUOMs.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView250()
+        private static DbMappingView GetView252()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetPackedUOMs
@@ -8555,7 +8597,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetPostedLot.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView251()
+        private static DbMappingView GetView253()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetPostedLot
@@ -8596,7 +8638,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetPostedLots.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView252()
+        private static DbMappingView GetView254()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetPostedLots
@@ -8637,7 +8679,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetStorageLocation.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView253()
+        private static DbMappingView GetView255()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageLocation
@@ -8686,7 +8728,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetStorageLocations.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView254()
+        private static DbMappingView GetView256()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageLocations
@@ -8735,7 +8777,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuSMGetLocationPricingLevel.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView255()
+        private static DbMappingView GetView257()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuSMGetLocationPricingLevel
@@ -8754,7 +8796,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuSMGetLocationPricingLevels.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView256()
+        private static DbMappingView GetView258()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuSMGetLocationPricingLevels
