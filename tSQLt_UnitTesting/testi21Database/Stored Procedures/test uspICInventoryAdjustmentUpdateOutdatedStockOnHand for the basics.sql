@@ -21,7 +21,7 @@ BEGIN
 	
 	-- Act
 	BEGIN 
-		EXEC dbo.uspICInventoryAdjustmentUpdatedOutdatedStockOnHand 
+		EXEC dbo.uspICInventoryAdjustmentUpdateOutdatedStockOnHand 
 			@strTransactionId
 	END 
 
