@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblICStatus]
 (
 	[intStatusId] INT NOT NULL IDENTITY, 
-    [strStatus] NVARCHAR(50) NOT NULL, 
+    [strStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblICStatus] PRIMARY KEY ([intStatusId]), 
