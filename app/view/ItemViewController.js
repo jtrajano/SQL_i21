@@ -2069,7 +2069,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 var grdPricing = win.down('#grdPricing');
                 var pricingItems = grdPricing.store.data.items;
                 var pricingMethod = context.record.get('strPricingMethod');
-                var amount = context.record.get('dblCommissionRate');
+                var amount = context.record.get('dblAmountRate');
 
                 if (context.field === 'strPricingMethod') {
                     pricingMethod = context.value;
@@ -2087,27 +2087,44 @@ Ext.define('Inventory.view.ItemViewController', {
                             }
                         });
                         if (selectedLoc) {
-                            var dblSalePrice = selectedLoc.get('dblSalePrice') * (context.record.get('dblUnit'));
-                            var amountRate = 0;
+                            var unitPrice = selectedLoc.get('dblSalePrice');
+                            var msrpPrice = selectedLoc.get('dblMSRPPrice');
+                            var standardCost = selectedLoc.get('dblStandardCost');
+                            var qty = context.record.get('dblUnit');
+                            var retailPrice = 0;
                             switch (pricingMethod) {
-                                case 'Fixed Dollar Amount':
-                                case 'Markup Standard Cost':
-                                case 'Discount Sales Price':
-                                case 'MSRP Discount':
-                                    amountRate = amount;
+                                case 'Discount Retail Price':
+                                    unitPrice = unitPrice - (unitPrice * (amount / 100));
+                                    retailPrice = unitPrice * qty
                                     break;
-                                case 'Percent of Margin':
+                                case 'MSRP Discount':
+                                    msrpPrice = msrpPrice - (msrpPrice * (amount / 100));
+                                    retailPrice = msrpPrice * qty
+                                    break;
                                 case 'Percent of Margin (MSRP)':
                                     var percent = amount / 100;
-                                    amountRate = dblSalePrice * percent;
+                                    unitPrice = ((msrpPrice - standardCost) * percent) + standardCost;
+                                    retailPrice = unitPrice * qty;
+                                    break;
+                                case 'Fixed Dollar Amount':
+                                    unitPrice = (standardCost + amount);
+                                    retailPrice = unitPrice * qty;
+                                    break;
+                                case 'Markup Standard Cost':
+                                    var markup = (standardCost * (amount / 100));
+                                    unitPrice = (standardCost + markup);
+                                    retailPrice = unitPrice * qty;
+                                    break;
+                                case 'Percent of Margin':
+                                    unitPrice = (standardCost / (1 - (amount / 100)));
+                                    retailPrice = unitPrice * qty;
                                     break;
                                 case 'None':
                                 default:
-                                    amountRate = 0;
+                                    retailPrice = 0;
                                     break;
                             }
-                            context.record.set('dblAmountRate', amountRate);
-                            context.record.set('dblUnitPrice', dblSalePrice - amountRate);
+                            context.record.set('dblUnitPrice', retailPrice);
                         }
                     }
                 }

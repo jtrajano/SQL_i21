@@ -3626,9 +3626,10 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelAmount',
+                                                                        minWidth: 110,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Amount/Rate',
+                                                                        text: 'Amount/Percent',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',
@@ -3662,10 +3663,10 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         itemId: 'colPricingLevelCommissionRate',
-                                                                        minWidth: 125,
+                                                                        minWidth: 145,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Comm Amount/Rate',
+                                                                        text: 'Comm Amount/Percent',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',

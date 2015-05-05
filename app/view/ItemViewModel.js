@@ -430,7 +430,7 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strDescription: 'Percent of Margin'
                 },
                 {
-                    strDescription: 'Discount Sales Price'
+                    strDescription: 'Discount Retail Price'
                 },
                 {
                     strDescription: 'MSRP Discount'
