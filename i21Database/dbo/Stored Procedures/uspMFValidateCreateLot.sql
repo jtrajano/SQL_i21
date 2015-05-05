@@ -508,10 +508,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND ri.intConsumptionMethodId IN (
-				2
-				,3
-				)
+			AND ri.intConsumptionMethodId <>4
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblMFWorkOrderConsumedLot WC
