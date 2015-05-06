@@ -49,6 +49,22 @@ Ext.define('Inventory.controller.Inventory', {
                 filterField = 'intInventoryReceiptId';
                 viewName = 'Inventory.view.InventoryReceipt';
                 break;
+            case 'Inventory Adjustment':
+                filterField = 'intInventoryAdjustmentId';
+                viewName = 'Inventory.view.InventoryAdjustment';
+                break;
+            case 'Build Assembly':
+                filterField = 'intBuildAssemblyId';
+                viewName = 'Inventory.view.BuildAssemblyBlend';
+                break;
+            case 'Inventory Transfer':
+                filterField = 'intInventoryTransferId';
+                viewName = 'Inventory.view.InventoryTransfer';
+                break;
+            case 'Inventory Shipment':
+                filterField = 'intInventoryShipmentId';
+                viewName = 'Inventory.view.InventoryShipment';
+                break;
         }
 
         Ext.each(params, function(param, index) {
