@@ -258,13 +258,17 @@ BEGIN
 	BEGIN
 		SET @dblItemCost = @dblAverageItemCost
 	END
-	IF (@strCostToUseLas = ''S'')
-	BEGIN
-		SET @dblItemCost = @dblStandardItemCost
-	END
+	
 	ELSE
 	BEGIN
-		SET @dblItemCost = @dblLastItemCost
+		IF (@strCostToUseLas = ''S'')
+		BEGIN
+			SET @dblItemCost = @dblStandardItemCost
+		END
+		ELSE
+		BEGIN
+			SET @dblItemCost = @dblLastItemCost
+		END
 	END
 	
 	------------From here special price
