@@ -1476,7 +1476,6 @@
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
-    <Build Include="dbo\Functions\uspICDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostBuildAssembly.sql" />
     <Build Include="dbo\Stored Procedures\uspAPVoidPayment.sql" />
@@ -1523,6 +1522,8 @@
     <Build Include="dbo\Tables\tblGRCustomerStorage.sql" />
     <Build Include="dbo\Tables\tblGRStorageDiscount.sql" />
     <Build Include="dbo\Tables\tblGRStorageHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessToBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDuplicateItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
