@@ -823,6 +823,7 @@ Ext.define('Inventory.view.ItemViewController', {
             createRecord : me.createRecord,
             validateRecord : me.validateRecord,
             onSaveClick: me.onSaveClick,
+            onSaveSuccess: me.onSaveSuccess,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
@@ -1008,6 +1009,7 @@ Ext.define('Inventory.view.ItemViewController', {
             ]
         });
 
+        win.context.data.on('savesuccess', me.onSaveSuccess);
         me.subscribeLocationEvents(grdLocationStore, me);
 
         var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
@@ -1106,6 +1108,7 @@ Ext.define('Inventory.view.ItemViewController', {
     onSaveClick: function(button, e, options) {
         var win = button.up('window');
         var me = this;
+
         if (win.viewModel.data.current.dirty && win.viewModel.data.current.phantom) {
             var buttonAction = function(button) {
                 if (button === 'yes') {
@@ -1128,6 +1131,13 @@ Ext.define('Inventory.view.ItemViewController', {
         else {
             me.onSaveClick(button, e, options);
         }
+    },
+
+    onSaveSuccess: function(batch, options) {
+        var win = this.configuration.window;
+        var pgeDetails = win.down('#pgeDetails');
+        var grdUnitOfMeasure = pgeDetails.down('#grdUnitOfMeasure');
+        grdUnitOfMeasure.store.load();
     },
 
     // <editor-fold desc="Details Tab Methods and Event Handlers">
