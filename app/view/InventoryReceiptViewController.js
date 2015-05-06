@@ -849,7 +849,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     filters: [
                                         {
                                             column: 'intBillId',
-                                            value: jsonData.BillId
+                                            value: jsonData.message.BillId
                                         }
                                     ],
                                     action: 'view'
