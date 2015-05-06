@@ -23,7 +23,7 @@ BEGIN
 			END
 			) AS strCustomerName
 		,RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) AS strSiteNumber
-		,A.strSiteAddress
+		,(A.strSiteAddress + CHAR(10) + A.strCity + '', '' + A.strState +  '' '' +  A.strZipCode) AS strSiteAddress
 		,A.strLocation
 		,E.vwsls_name AS strDriverName
 		,F.vwitm_no AS strItemNo
