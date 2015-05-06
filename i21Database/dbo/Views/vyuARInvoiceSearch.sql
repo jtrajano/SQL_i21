@@ -40,7 +40,7 @@ AS
 	INNER JOIN
 		dbo.tblARCustomer AS C 
 			ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
-	INNER JOIN
+	LEFT OUTER JOIN
 		dbo.tblEntity AS E 
 			ON C.intDefaultContactId = E.intEntityId
 	INNER JOIN
