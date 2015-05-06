@@ -77,7 +77,7 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		INSERT INTO #tmpPostBillData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@billIds)
+		INSERT INTO #tmpPostBillData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@param)
 	END
 END
 
