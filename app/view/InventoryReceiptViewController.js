@@ -628,8 +628,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intShipFromId', null);
             current.set('intShipViaId', null);
 
-            current.set('intShipFromId', records[0].get('intShipFromId'));
-            current.set('intShipViaId', records[0].getShipViaLocation().get('intShipViaId'));
+            current.set('intShipFromId', records[0].get('intDefaultLocationId'));
+
+            var vendorLocation = records[0].getDefaultLocation();
+            if (vendorLocation) {
+                current.set('intShipViaId', vendorLocation.get('intShipViaId'));
+            }
         }
     },
 
