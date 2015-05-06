@@ -38,6 +38,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryTransfer> FromInventoryTransfers { get; set; }
         public ICollection<tblICInventoryTransfer> ToInventoryTransfers { get; set; }
+
+        public ICollection<tblICInventoryAdjustmentDetail> InventoryAdjustmentNewLocations { get; set; }
     }
 
     public class tblGLAccount
@@ -239,6 +241,8 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryTransferDetail> FromTransferDetails { get; set; }
         public ICollection<tblICInventoryTransferDetail> ToTransferDetails { get; set; }
+
+        public ICollection<tblICInventoryAdjustmentDetail> InventoryAdjustmentNewSubLocations { get; set; }
     }
 
     public class tblSMTaxCode : BaseEntity

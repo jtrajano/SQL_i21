@@ -752,7 +752,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter11",
                                                     "designerId": "be0a06de-99ab-416d-ae5c-3a1068a87c05",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1093,6 +1093,22 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strItemUOM",
+                                                "itemId": "colUOM",
+                                                "text": "UOM",
+                                                "width": 70
+                                            },
+                                            "name": "MyColumn16",
+                                            "designerId": "61547e01-a543-425c-9bed-4b71d8fc6579"
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -1115,6 +1131,80 @@
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strNewItemUOM",
+                                                "itemId": "colNewUOM",
+                                                "tdCls": "blue-text-column",
+                                                "text": "New UOM",
+                                                "width": 70
+                                            },
+                                            "name": "MyColumn17",
+                                            "designerId": "f37f3130-2c51-4ef6-8339-882142f39bcf",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intItemUOMId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Unit Of Measure Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Unit Measure',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strUnitType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Unit Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\txtype: 'checkcolumn',",
+                                                            "\t\tdataIndex: 'ysnStockUnit',",
+                                                            "\t\tdataType: 'boolean',",
+                                                            "\t\ttext: 'Stock Unit',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strUnitMeasure",
+                                                        "itemId": "cboNewUOM",
+                                                        "valueField": "strUnitMeasure"
+                                                    },
+                                                    "name": "MyComboBox80",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "bd240312-d3b7-4e18-9615-1c7116a67baf",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         },
@@ -1210,87 +1300,13 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "dataIndex": "strItemUOM",
-                                                "itemId": "colUOM",
-                                                "text": "UOM",
+                                                "dataIndex": "strWeightUOM",
+                                                "itemId": "colWeightUOM",
+                                                "text": "Wgt UOM",
                                                 "width": 70
                                             },
-                                            "name": "MyColumn16",
-                                            "designerId": "61547e01-a543-425c-9bed-4b71d8fc6579"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strNewItemUOM",
-                                                "itemId": "colNewUOM",
-                                                "tdCls": "blue-text-column",
-                                                "text": "New UOM",
-                                                "width": 70
-                                            },
-                                            "name": "MyColumn17",
-                                            "designerId": "f37f3130-2c51-4ef6-8339-882142f39bcf",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.ComboBox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": [
-                                                            "[",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'intItemUOMId',",
-                                                            "\t\tdataType: 'numeric',",
-                                                            "\t\ttext: 'Unit Of Measure Id',",
-                                                            "\t\thidden: true",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit Measure',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\tdataIndex: 'strUnitType',",
-                                                            "\t\tdataType: 'string',",
-                                                            "\t\ttext: 'Unit Type',",
-                                                            "\t\tflex: 1",
-                                                            "\t},",
-                                                            "\t{",
-                                                            "\t\txtype: 'checkcolumn',",
-                                                            "\t\tdataIndex: 'ysnStockUnit',",
-                                                            "\t\tdataType: 'boolean',",
-                                                            "\t\ttext: 'Stock Unit',",
-                                                            "\t\tflex: 1",
-                                                            "\t}",
-                                                            "]"
-                                                        ],
-                                                        "designer|createAlias": "gridcombobox",
-                                                        "displayField": "strUnitMeasure",
-                                                        "itemId": "cboNewUOM",
-                                                        "valueField": "strUnitMeasure"
-                                                    },
-                                                    "name": "MyComboBox80",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "bd240312-d3b7-4e18-9615-1c7116a67baf",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                }
-                                            ]
+                                            "name": "MyColumn3",
+                                            "designerId": "7eb1cb5b-a960-4c3d-925b-bfc6e6f73d23"
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",
@@ -1327,55 +1343,22 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
-                                                "dataIndex": "dblNewWeight",
+                                                "dataIndex": "dblWeightPerQty",
                                                 "dataType": "numeric",
                                                 "format": null,
-                                                "itemId": "colNewNetWeight",
-                                                "tdCls": "blue-text-column",
-                                                "text": "New Net Weight",
+                                                "itemId": "colWeightPerQty",
+                                                "text": "Weight Per Qty",
                                                 "width": 110
                                             },
-                                            "name": "MyNumberColumn3",
-                                            "designerId": "3b04912f-a635-4a51-b279-f2d70dcdc462",
+                                            "name": "MyNumberColumn22",
+                                            "designerId": "57d3eb81-9909-42c5-ab90-2f5643cd74be",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
                                                 }
-                                            ],
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldStyle": null,
-                                                        "itemId": "numNewNetWeight"
-                                                    },
-                                                    "name": "MyNumberField2",
-                                                    "designerId": "5df18040-0248-457f-8718-8d0a98b19ee0"
-                                                }
                                             ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strWeightUOM",
-                                                "itemId": "colWeightUOM",
-                                                "text": "Wgt UOM",
-                                                "width": 70
-                                            },
-                                            "name": "MyColumn3",
-                                            "designerId": "7eb1cb5b-a960-4c3d-925b-bfc6e6f73d23"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -1454,20 +1437,37 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
-                                                "dataIndex": "dblWeightPerQty",
+                                                "dataIndex": "dblNewWeight",
                                                 "dataType": "numeric",
                                                 "format": null,
-                                                "itemId": "colWeightPerQty",
-                                                "text": "Weight Per Qty",
+                                                "itemId": "colNewNetWeight",
+                                                "tdCls": "blue-text-column",
+                                                "text": "New Net Weight",
                                                 "width": 110
                                             },
-                                            "name": "MyNumberColumn22",
-                                            "designerId": "57d3eb81-9909-42c5-ab90-2f5643cd74be",
+                                            "name": "MyNumberColumn3",
+                                            "designerId": "3b04912f-a635-4a51-b279-f2d70dcdc462",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
                                                     "name": "dataType",
                                                     "type": "string"
+                                                }
+                                            ],
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldStyle": null,
+                                                        "itemId": "numNewNetWeight"
+                                                    },
+                                                    "name": "MyNumberField2",
+                                                    "designerId": "5df18040-0248-457f-8718-8d0a98b19ee0"
                                                 }
                                             ]
                                         },
@@ -1799,6 +1799,213 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strNewLocation",
+                                                "itemId": "colNewLocation",
+                                                "tdCls": "blue-text-column",
+                                                "text": "New Location",
+                                                "width": 100
+                                            },
+                                            "name": "MyColumn5",
+                                            "designerId": "ab5b1605-a525-414c-bc14-2bf7c09aedec",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strLocationName",
+                                                        "itemId": "cboNewLocation",
+                                                        "valueField": "strLocationName"
+                                                    },
+                                                    "name": "MyComboBox76",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "3509ecf4-f491-422b-b460-d9f2465bbb75",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strNewSubLocation",
+                                                "itemId": "colNewSubLocation",
+                                                "tdCls": "blue-text-column",
+                                                "text": "New Sub Location",
+                                                "width": 100
+                                            },
+                                            "name": "MyColumn2",
+                                            "designerId": "ffb9aec5-f8ce-40dd-863b-bcaa03b91c46",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationSubLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Sub Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Sub Location Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubLocationDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strSubLocationName",
+                                                        "itemId": "cboNewSubLocation",
+                                                        "valueField": "strSubLocationName"
+                                                    },
+                                                    "name": "MyComboBox76",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "9643d8f0-a3d7-4713-be2b-9471781868ef",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strNewStorageLocation",
+                                                "itemId": "colNewStorageLocation",
+                                                "tdCls": "blue-text-column",
+                                                "text": "New Storage Location",
+                                                "width": 120
+                                            },
+                                            "name": "MyColumn4",
+                                            "designerId": "63374975-5618-4c4c-9aed-74f4fcc5ff66",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intStorageLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Country Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strName",
+                                                        "itemId": "cboNewStorageLocation",
+                                                        "valueField": "strName"
+                                                    },
+                                                    "name": "MyComboBox77",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "2f3be45d-5be9-4c3e-8ebb-c36fc857f57b",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -1965,7 +2172,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter12",
                                                     "designerId": "db7aee6c-0f65-4c31-92b0-c61bf09fe226",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2150,7 +2357,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "fc46f0de-7c8f-4d13-8dd6-f03119153f7d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

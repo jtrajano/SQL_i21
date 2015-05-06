@@ -36,7 +36,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                     strDescription: 'Lot Status Change'
                 },{
                     intAdjustmentTypeId : '5',
-                    strDescription: 'Lot Id Change'
+                    strDescription: 'Split Lot'
                 },{
                     intAdjustmentTypeId : '6',
                     strDescription: 'Expiry Date Change'
@@ -79,6 +79,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         },
         newLotStatus: {
             type: 'icbufferedlotstatus'
+        },
+        newLocation: {
+            type: 'companylocationbuffered'
+        },
+        newSubLocation: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
+        newStorageLocation: {
+            type: 'icbufferedstoragelocation'
         }
     },
 

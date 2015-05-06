@@ -71,6 +71,9 @@ namespace iRely.Inventory.BRL
                 .Include("tblICInventoryAdjustmentDetails.NewWeightUOM.tblICUnitMeasure")
                 .Include("tblICInventoryAdjustmentDetails.OldLotStatus")
                 .Include("tblICInventoryAdjustmentDetails.NewLotStatus")
+                .Include("tblICInventoryAdjustmentDetails.NewLocation")
+                .Include("tblICInventoryAdjustmentDetails.NewSubLocation")
+                .Include("tblICInventoryAdjustmentDetails.NewStorageLocation")
                 
                 .Include(p => p.tblICInventoryAdjustmentNotes)
                 .Where(w => query.Where(predicate).Any(a => a.intInventoryAdjustmentId == w.intInventoryAdjustmentId)) //Filter the Main DataSource Based on Search Query

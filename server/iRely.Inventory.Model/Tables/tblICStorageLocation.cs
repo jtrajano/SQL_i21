@@ -76,6 +76,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
         public ICollection<tblICInventoryTransferDetail> FromTransferDetails { get; set; }
         public ICollection<tblICInventoryTransferDetail> ToTransferDetails { get; set; }
+        public ICollection<tblICInventoryAdjustmentDetail> InventoryAdjustmentNewStorageLocations { get; set; }
     }
 
     public class tblICStorageLocationCategory : BaseEntity

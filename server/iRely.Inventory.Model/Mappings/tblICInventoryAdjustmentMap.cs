@@ -81,7 +81,11 @@ namespace iRely.Inventory.Model
 
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(38,20);
             
-            this.Property(t => t.intSort).HasColumnName("intSort");                       
+            this.Property(t => t.intSort).HasColumnName("intSort");
+
+            this.Property(t => t.intNewLocationId).HasColumnName("intNewLocationId");
+            this.Property(t => t.intNewSubLocationId).HasColumnName("intNewSubLocationId");
+            this.Property(t => t.intNewStorageLocationId).HasColumnName("intNewStorageLocationId");
             
             this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
                 .WithMany(p => p.tblICInventoryAdjustmentDetails)
@@ -126,6 +130,16 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.NewLotStatus)
                 .WithMany(p => p.NewLotStatusAdjustmentDetails)
                 .HasForeignKey(p => p.intNewLotStatusId);
+
+            this.HasOptional(p => p.NewLocation)
+                .WithMany(p => p.InventoryAdjustmentNewLocations)
+                .HasForeignKey(p => p.intNewLocationId);
+            this.HasOptional(p => p.NewSubLocation)
+                .WithMany(p => p.InventoryAdjustmentNewSubLocations)
+                .HasForeignKey(p => p.intNewSubLocationId);
+            this.HasOptional(p => p.NewStorageLocation)
+                .WithMany(p => p.InventoryAdjustmentNewStorageLocations)
+                .HasForeignKey(p => p.intNewStorageLocationId);
         }
     }
 

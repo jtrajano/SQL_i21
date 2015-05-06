@@ -109,6 +109,10 @@ namespace iRely.Inventory.Model
         public decimal? dblLineTotal { get; set; }
         public int? intSort { get; set; }
 
+        public int? intNewLocationId { get; set; }
+        public int? intNewSubLocationId { get; set; }
+        public int? intNewStorageLocationId { get; set; }
+
         // 1: Sub Location
         private string _subLocation;
         [NotMapped]
@@ -464,9 +468,74 @@ namespace iRely.Inventory.Model
             }
         }
 
+        private string _strNewLocation;
+        [NotMapped]
+        public string strNewLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strNewLocation))
+                    if (NewLocation != null)
+                        return NewLocation.strLocationName;
+                    else
+                        return null;
+                else
+                    return _strNewLocation;
+            }
+            set
+            {
+                _strNewLocation = value;
+            }
+        }
+
+        private string _strNewSubLocation;
+        [NotMapped]
+        public string strNewSubLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strNewSubLocation))
+                    if (NewSubLocation != null)
+                        return NewSubLocation.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _strNewSubLocation;
+            }
+            set
+            {
+                _strNewSubLocation = value;
+            }
+        }
+
+        private string _strNewStorageLocation;
+        [NotMapped]
+        public string strNewStorageLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_strNewStorageLocation))
+                    if (NewStorageLocation != null)
+                        return NewStorageLocation.strName;
+                    else
+                        return null;
+                else
+                    return _strNewStorageLocation;
+            }
+            set
+            {
+                _strNewStorageLocation = value;
+            }
+        }
+
         public tblICInventoryAdjustment tblICInventoryAdjustment { get; set; }
         public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         public tblICStorageLocation tblICStorageLocation { get; set; }
+
+        public tblSMCompanyLocation NewLocation { get; set; }
+        public tblSMCompanyLocationSubLocation NewSubLocation { get; set; }
+        public tblICStorageLocation NewStorageLocation { get; set; }
+        
         public tblICItem Item { get; set; }
         public tblICItem NewItem { get; set; }
         public tblICLot Lot { get; set; }

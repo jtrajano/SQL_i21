@@ -144,7 +144,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewLotNumber: {
                     dataIndex: 'strNewLotNumber',
                     editor: {
-                        store: '{newLot}',
                         readOnly: '{current.ysnPosted}'
                     }
                 },
@@ -201,6 +200,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         readOnly: '{current.ysnPosted}'
                     }
                 },
+
                 colNewWeightUOM: {
                     dataIndex: 'strNewWeightUOM',
                     editor: {
@@ -257,6 +257,63 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     dataIndex: 'strNewLotStatus',
                     editor: {
                         store: '{newLotStatus}',
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
+
+                colNewLocation: {
+                    dataIndex: 'strNewLocation',
+                    editor: {
+                        store: '{newLocation}',
+                        defaultFilters: [{
+                            column: 'intCompanyLocationId',
+                            value: '{current.intLocationId}',
+                            conjunction: 'and',
+                            condition: 'noteq'
+                        }],
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
+
+                colNewSubLocation: {
+                    dataIndex: 'strNewSubLocation',
+                    editor: {
+                        store: '{newSubLocation}',
+                        defaultFilters: [
+                            {
+                                column: 'intCompanyLocationId',
+                                value: '{grdInventoryAdjustment.selection.intNewLocationId}',
+                                conjunction: 'and',
+                                condition: 'blk'
+                            },
+                            {
+                                column: 'strClassification',
+                                value: 'Inventory',
+                                conjunction: 'and'
+                            }
+                        ],
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
+
+                colNewStorageLocation: {
+                    dataIndex: 'strNewStorageLocation',
+                    editor: {
+                        store: '{newStorageLocation}',
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{grdInventoryAdjustment.selection.intNewLocationId}',
+                                conjunction: 'and',
+                                condition: 'blk'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryAdjustment.selection.intNewSubLocationId}',
+                                conjunction: 'and',
+                                condition: 'blk'
+                            }
+                        ],
                         readOnly: '{current.ysnPosted}'
                     }
                 }
@@ -447,6 +504,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         {
             current.set('intNewLotStatusId', record.get('intLotStatusId'));
         }
+        else if (combo.itemId === 'cboNewLocation')
+        {
+            current.set('intNewLocationId', record.get('intCompanyLocationId'));
+        }
+        else if (combo.itemId === 'cboNewSubLocation')
+        {
+            current.set('intNewSubLocationId', record.get('intCompanyLocationSubLocationId'));
+        }
+        else if (combo.itemId === 'cboNewStorageLocation')
+        {
+            current.set('intNewStorageLocationId', record.get('intStorageLocationId'));
+        }
     },
 
     /**
@@ -505,11 +574,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         var colLineTotal = this.getGridColumnByDataIndex(grid, 'dblLineTotal');
 
+        var colNewLocation = this.getGridColumnByDataIndex(grid, 'strNewLocation');
+        var colNewSubLocation = this.getGridColumnByDataIndex(grid, 'strNewSubLocation');
+        var colNewStorageLocation = this.getGridColumnByDataIndex(grid, 'strNewStorageLocation');
+
         var QuantityChange = 1;
         var UOMChange = 2;
         var ItemChange = 3;
         var LotStatusChange = 4;
-        var LotIdChange = 5;
+        var SplitLot = 5;
         var ExpiryDateChange = 6;
 
         var hide = true;
@@ -538,6 +611,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colWeightPerQty.setHidden(hide);
                 colNewWeightPerQty.setHidden(hide);
+
+                colNewLocation.setHidden(hide);
+                colNewSubLocation.setHidden(hide);
+                colNewStorageLocation.setHidden(hide);
 
                 // Show columns:
                 colQuantity.setHidden(show);
@@ -575,13 +652,44 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colLineTotal.setHidden(hide);
                 colUnitCost.setHidden(hide);
                 colNewUnitCost.setHidden(hide);
+                colNewLocation.setHidden(hide);
+                colNewSubLocation.setHidden(hide);
+                colNewStorageLocation.setHidden(hide);
 
                 //  Show Columns:
                 colLotStatus.setHidden(show);
                 colNewLotStatus.setHidden(show);
                 break;
-            case LotIdChange:
-                // todo
+            case SplitLot:
+                // Hide Columns:
+                colNewItemNumber.setHidden(hide);
+                colNewItemDescription.setHidden(hide);
+                colAdjustByQuantity.setHidden(hide);
+                colWeightPerQty.setHidden(hide);
+                colNewWeightPerQty.setHidden(hide);
+                colLineTotal.setHidden(hide);
+                colLotStatus.setHidden(hide);
+                colNewLotStatus.setHidden(hide);
+                colExpiryDate.setHidden(hide);
+                colNewExpiryDate.setHidden(hide);
+                colNewUOM.setHidden(hide);
+
+                //  Show Columns:
+                colQuantity.setHidden(show);
+                colUOM.setHidden(show);
+                colNetWeight.setHidden(show);
+                colWeightUOM.setHidden(show);
+                colUnitCost.setHidden(show);
+
+                colNewLot.setHidden(show);
+                colNewQuantity.setHidden(show);
+                colNewNetWeight.setHidden(show);
+                colNewWeightUOM.setHidden(show);
+                colNewUnitCost.setHidden(show);
+                colNewLocation.setHidden(show);
+                colNewSubLocation.setHidden(show);
+                colNewStorageLocation.setHidden(show);
+
                 break;
             case ExpiryDateChange:
                 // Hide Columns:
@@ -604,12 +712,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewUnitCost.setHidden(hide);
                 colLotStatus.setHidden(hide);
                 colNewLotStatus.setHidden(hide);
+                colNewLocation.setHidden(hide);
+                colNewSubLocation.setHidden(hide);
+                colNewStorageLocation.setHidden(hide);
 
                 //  Show Columns:
                 colExpiryDate.setHidden(show);
                 colNewExpiryDate.setHidden(show);
-
-                break;
                 break;
         }
     },
@@ -629,7 +738,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var UOMChange = 2;
         var ItemChange = 3;
         var LotStatusChange = 4;
-        var LotIdChange = 5;
+        var SplitLot = 5;
         var ExpiryDateChange = 6;
 
         var data = record.getData();
@@ -641,6 +750,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 case QuantityChange:
                 case LotStatusChange:
                 case ExpiryDateChange:
+                case SplitLot:
                     break;
                 default:
                     var msgBox = iRely.Functions;
@@ -1014,6 +1124,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#btnRecap": {
                 click: this.onRecapClick
+            },
+            "#cboNewLocation": {
+                select: this.onAdjustmentDetailSelect
+            },
+            "#cboNewSubLocation": {
+                select: this.onAdjustmentDetailSelect
+            },
+            "#cboNewStorageLocation": {
+                select: this.onAdjustmentDetailSelect
             }
         });
     }
