@@ -52,6 +52,9 @@ BEGIN
 	DECLARE @dblItemPriceLevel1 DECIMAL(18,6)
 	DECLARE @dblItemPriceLevel2 DECIMAL(18,6)
 	DECLARE @dblItemPriceLevel3 DECIMAL(18,6)
+	DECLARE @dblItemPriceLevel1WithLocation DECIMAL(18,6)
+	DECLARE @dblItemPriceLevel2WithLocation DECIMAL(18,6)
+	DECLARE @dblItemPriceLevel3WithLocation DECIMAL(18,6)
 	DECLARE @strReturnString NVARCHAR(50)
 	DECLARE @strRackVendorNumber NVARCHAR(50)
 	DECLARE @strRackItemNumber NVARCHAR(50)
@@ -91,6 +94,9 @@ BEGIN
 			,@dblAverageItemCost = ISNULL(vwitm_avg_un_cost,0.0)
 			,@dblStandardItemCost = ISNULL(vwitm_std_un_cost,0.0)
 			,@dblLastItemCost = ISNULL(vwitm_last_un_cost,0.0)
+			,@dblItemPriceLevel1 = ISNULL(vwitm_un_prc1,0.0)
+			,@dblItemPriceLevel2 = ISNULL(vwitm_un_prc2,0.0)
+			,@dblItemPriceLevel3 = ISNULL(vwitm_un_prc3,0.0)
 		FROM vwitmmst
 		WHERE vwitm_no = @strItemNumber
 	
@@ -125,6 +131,9 @@ BEGIN
 			,@dblAverageItemCostWithLocation = ISNULL(vwitm_avg_un_cost,0.0)
 			,@dblStandardItemCostWithLocation = ISNULL(vwitm_std_un_cost,0.0)
 			,@dblLastItemCostWithLocation = ISNULL(vwitm_last_un_cost,0.0)
+			,@dblItemPriceLevel1WithLocation = ISNULL(vwitm_un_prc1,0.0)
+			,@dblItemPriceLevel2WithLocation = ISNULL(vwitm_un_prc2,0.0)
+			,@dblItemPriceLevel3WithLocation = ISNULL(vwitm_un_prc3,0.0)
 		FROM vwitmmst
 		WHERE vwitm_no = @strItemNumber
 			AND vwitm_loc_no = @strLocation
@@ -137,6 +146,9 @@ BEGIN
 		SET @dblAverageItemCost = @dblAverageItemCostWithLocation
 		SET @dblStandardItemCost = @dblStandardItemCostWithLocation
 		SET @dblLastItemCost = @dblLastItemCostWithLocation
+		SET @dblItemPriceLevel1 = @dblItemPriceLevel1WithLocation
+		SET @dblItemPriceLevel2 = @dblItemPriceLevel2WithLocation
+		SET	@dblItemPriceLevel3 = @dblItemPriceLevel3WithLocation
 	END
 	ELSE
 	BEGIN
