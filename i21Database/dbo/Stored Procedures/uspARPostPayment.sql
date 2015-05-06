@@ -1032,7 +1032,8 @@ BEGIN
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblAmountDue = A.dblInvoiceTotal - (A.dblPayment + A.dblDiscount)
+				dblAmountDue = A.dblInvoiceTotal
+				,dblPayment = 0.00
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1208,7 +1209,7 @@ BEGIN
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblAmountDue = A.dblAmountDue - (A.dblPayment + A.dblDiscount)
+				dblAmountDue = 0.00
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
