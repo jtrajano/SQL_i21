@@ -4,8 +4,15 @@
 AS
 BEGIN
 
+	DECLARE @intCount NVARCHAR
+
+	SELECT @intCount = COUNT(*) FROM [tblSMTaxGroup] WHERE [strTaxGroup] LIKE 'DUP: ' + (SELECT [strTaxGroup] FROM [dbo].[tblSMTaxGroup] WHERE [intTaxGroupId] = @taxGroupId) + '%' 
+
 	INSERT dbo.tblSMTaxGroup([strTaxGroup], [strDescription])
-	SELECT 'DUP: ' + [strTaxGroup], [strDescription]
+	SELECT CASE @intCount WHEN 0 
+		   THEN 'DUP: ' + [strTaxGroup] 
+		   ELSE 'DUP: ' + [strTaxGroup] + ' (' + @intCount + ')' END,
+	[strDescription]
 	FROM dbo.tblSMTaxGroup 
 	WHERE [intTaxGroupId] = @taxGroupId;
 	
