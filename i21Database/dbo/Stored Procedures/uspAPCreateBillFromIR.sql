@@ -43,6 +43,12 @@ IF @APAccount IS NULL
 IF @APAccount IS NULL
 	SET @APAccount = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountCategoryId = 1)
 
+IF @APAccount IS NULL
+BEGIN
+	RAISERROR('Please setup default AP Account', 16, 1);
+	RETURN;
+END
+
 --removed first the constraint
 ALTER TABLE tblAPBill
 	DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
