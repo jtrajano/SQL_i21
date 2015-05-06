@@ -143,18 +143,24 @@ namespace iRely.Inventory.BRL
             return saveResult;
         }
 
-        public SaveResult ProcessBill(int receiptId)
+        public SaveResult ProcessBill(int receiptId, out int? newBill)
         {
             SaveResult saveResult = new SaveResult();
+            int? newBillId = null;
 
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
                 var connection = _db.ContextManager.Database.Connection;
                 try
                 {
-                    var idParameter = new SqlParameter("receiptIds", receiptId.ToString());
-                    var userId = new SqlParameter("userId", iRely.Common.Security.GetUserId());
-                    _db.ContextManager.Database.ExecuteSqlCommand("uspAPCreateBillFromIR @receiptIds, @userId", idParameter, userId);
+                    var idParameter = new SqlParameter("intReceiptId", receiptId);
+                    var userId = new SqlParameter("@intUserId", iRely.Common.Security.GetUserId());
+                    var outParam = new SqlParameter("@intBillId", newBillId);
+                    outParam.Direction = System.Data.ParameterDirection.Output;
+                    outParam.DbType = System.Data.DbType.Int32;
+                    outParam.SqlDbType = System.Data.SqlDbType.Int;
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICProcessToBill @intReceiptId, @intUserId, @intBillId OUTPUT", idParameter, userId, outParam);
+                    newBillId = (int)outParam.Value;
                     saveResult = _db.Save(false);
                     transaction.Commit();
                 }
@@ -163,10 +169,10 @@ namespace iRely.Inventory.BRL
                     saveResult.BaseException = ex;
                     saveResult.Exception = new ServerException(ex);
                     saveResult.HasError = true;
-                    transaction.Rollback();
+                    //transaction.Rollback();
                 }
             }
-
+            newBill = newBillId;
             return saveResult;
         }
         

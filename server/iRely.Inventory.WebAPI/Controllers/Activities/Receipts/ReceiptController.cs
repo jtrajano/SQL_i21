@@ -113,7 +113,8 @@ namespace iRely.Invetory.WebAPI.Controllers
         [HttpPost]
         public HttpResponseMessage ProcessBill(int id)
         {
-            var result = _ReceiptBRL.ProcessBill(id);
+            int? newBill = null;
+            var result = _ReceiptBRL.ProcessBill(id, out newBill);
             _ReceiptBRL.Dispose();
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
@@ -121,6 +122,7 @@ namespace iRely.Invetory.WebAPI.Controllers
                 success = !result.HasError,
                 message = new
                 {
+                    BillId = newBill,
                     statusText = result.Exception.Message,
                     status = result.Exception.Error,
                     button = result.Exception.Button.ToString()
