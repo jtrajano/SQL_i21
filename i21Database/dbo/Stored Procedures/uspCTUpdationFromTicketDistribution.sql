@@ -10,10 +10,10 @@ BEGIN TRY
 			@dblNetUnits	NUMERIC(10,3),
 			@intContractId	INT,
 			@intSplitId		INT,
-			@dblBalance		NUMERIC(8,4),
+			@dblBalance		NUMERIC(12,4),
 			@intEntityId	INT,
 			@intItemId		INT,
-			@dblNewBalance	NUMERIC(8,4),
+			@dblNewBalance	NUMERIC(12,4),
 			@strInOutFlag	NVARCHAR(4)
 
 	DECLARE @Processed TABLE
