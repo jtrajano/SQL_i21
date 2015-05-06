@@ -976,11 +976,76 @@ BEGIN
 			SELECT Z.intPaymentId, Z.strTransactionId FROM #tmpZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM #tmpARReceivablePostData WHERE intPaymentId = Z.intPaymentId)
 		
+<<<<<<< HEAD
 			--Unposting Process
 			UPDATE tblARPaymentDetail
 			SET tblARPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + (C.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)) + B.dblPayment ELSE ((C.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)) + B.dblPayment) END)
 			FROM tblARPayment A
 				LEFT JOIN tblARPaymentDetail B
+=======
+			UPDATE 
+				tblARInvoice
+			SET 
+				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) - P.dblPayment 
+				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount 
+			FROM
+				(
+					SELECT 
+						SUM(A.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) dblPayment
+						,SUM(A.dblDiscount) dblDiscount
+						,A.intInvoiceId 
+					FROM
+						tblARPaymentDetail A
+					INNER JOIN tblARPayment B
+							ON A.intPaymentId = B.intPaymentId						
+					INNER JOIN tblARInvoice C
+						ON A.intInvoiceId = C.intInvoiceId
+					WHERE
+						A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+					GROUP BY
+						A.intInvoiceId
+				) P
+			WHERE
+				tblARInvoice.intInvoiceId = P.intInvoiceId
+				
+			UPDATE 
+				tblARInvoice
+			SET 
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
+			FROM 
+				tblARPayment A
+			INNER JOIN tblARPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblARInvoice C
+				ON B.intInvoiceId = C.intInvoiceId
+			WHERE
+				A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+				
+			UPDATE 
+				tblARInvoice
+			SET 
+				tblARInvoice.ysnPaid = 0,
+				tblARInvoice.dtmPostDate = (CASE WHEN (C.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE C.dtmPostDate END)
+			FROM 
+				tblARPayment A
+			INNER JOIN tblARPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblARInvoice C
+				ON B.intInvoiceId = C.intInvoiceId
+			WHERE
+				A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)							
+								
+
+			UPDATE 
+				tblARPaymentDetail
+			SET 
+				dblAmountDue = A.dblInvoiceTotal
+				,dblPayment = 0.00
+			FROM
+				tblARPaymentDetail A
+			INNER JOIN
+				tblARPayment B
+>>>>>>> f24e90e... AR-1057 Customer Balance Due not calculating correctly
 					ON A.intPaymentId = B.intPaymentId
 				LEFT JOIN tblARInvoice C
 					ON B.intInvoiceId = C.intInvoiceId
@@ -1105,6 +1170,7 @@ BEGIN
 			SET		ysnPosted = 1
 					--,intConcurrencyId += 1 
 			WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+<<<<<<< HEAD
 
 			UPDATE tblARPaymentDetail
 				   SET tblARPaymentDetail.dblAmountDue = (B.dblInvoiceTotal) - (B.dblPayment + B.dblDiscount + (SELECT SUM(ISNULL(dblPayment,0) * (CASE WHEN tblARInvoice.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)) FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId))
@@ -1150,6 +1216,72 @@ BEGIN
 			SET dblAmountDue = C.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)
 			FROM tblARPaymentDetail A
 				INNER JOIN tblARPayment B
+=======
+												
+			UPDATE 
+				tblARInvoice
+			SET 
+				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
+				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount 
+			FROM
+				(
+					SELECT 
+						SUM(A.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) dblPayment
+						,SUM(A.dblDiscount) dblDiscount
+						,A.intInvoiceId 
+					FROM
+						tblARPaymentDetail A
+					INNER JOIN tblARPayment B
+							ON A.intPaymentId = B.intPaymentId						
+					INNER JOIN tblARInvoice C
+						ON A.intInvoiceId = C.intInvoiceId
+					WHERE
+						A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+					GROUP BY
+						A.intInvoiceId
+				) P
+			WHERE
+				tblARInvoice.intInvoiceId = P.intInvoiceId
+				
+				
+			UPDATE 
+				tblARInvoice
+			SET 
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
+			FROM 
+				tblARPayment A
+			INNER JOIN tblARPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblARInvoice C
+				ON B.intInvoiceId = C.intInvoiceId
+			WHERE
+				A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)	
+					
+				
+			UPDATE 
+				tblARInvoice
+			SET 
+				tblARInvoice.ysnPaid = (CASE WHEN (C.dblAmountDue) = 0 THEN 1 ELSE 0 END),
+				tblARInvoice.dtmPostDate = (CASE WHEN (C.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE C.dtmPostDate END)
+			FROM 
+				tblARPayment A
+			INNER JOIN tblARPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblARInvoice C
+				ON B.intInvoiceId = C.intInvoiceId
+			WHERE
+				A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)							
+								
+
+			UPDATE 
+				tblARPaymentDetail
+			SET 
+				dblAmountDue = 0.00
+			FROM
+				tblARPaymentDetail A
+			INNER JOIN
+				tblARPayment B
+>>>>>>> f24e90e... AR-1057 Customer Balance Due not calculating correctly
 					ON A.intPaymentId = B.intPaymentId
 					AND A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
 					AND B.ysnPosted = 0
