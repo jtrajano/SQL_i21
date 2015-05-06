@@ -1,4 +1,5 @@
-﻿GO
+﻿PRINT 'Import Customer Scripts'
+GO
 
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspARImportCustomer')
 	DROP PROCEDURE uspARImportCustomer
