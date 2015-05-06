@@ -10,6 +10,7 @@ AS
 			CD.dblQuantity												AS dblDetailQuantity,
 			CD.intUnitMeasureId, 			
 			UM.strUnitMeasure,
+			UM.strUnitType,
 			CD.intPricingType,
 			CD.dblBasis,
 			CU.strCurrency												AS strBasisCurrency,
