@@ -261,7 +261,10 @@ EXEC dbo.uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @intUs
 IF (@isSuccessful <> 0)
 	BEGIN
 		/* If Posting succeeds, mark transaction as posted */
-		UPDATE tblPRPaycheck SET ysnPosted = 1 WHERE strPaycheckId = @strTransactionId
+		UPDATE tblPRPaycheck SET 
+			ysnPosted = 1
+			,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
+		WHERE strPaycheckId = @strTransactionId
 		SET @isSuccessful = 1
 	END
 ELSE
