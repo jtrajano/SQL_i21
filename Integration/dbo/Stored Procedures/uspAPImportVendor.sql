@@ -1,4 +1,5 @@
-﻿GO
+﻿PRINT 'Import Vendor Scripts'
+GO
 
 IF EXISTS(select top 1 1 from sys.procedures where name = 'uspAPImportVendor')
 	DROP PROCEDURE uspAPImportVendor

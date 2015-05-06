@@ -43,6 +43,9 @@
     [strWillCallComments] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [dtmWillCallCallInDate] DATETIME NULL, 
     [intWillCallUserId] INT NULL, 
+    [ysnWillCallPrinted] BIT NULL, 
+    [dtmWillCallDispatch] DATETIME NULL, 
+    [strWillCallOrderNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -444,3 +447,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
     @level2name = 'intWillCallUserId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call Printed Indicator',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnWillCallPrinted'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call dispatch date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmWillCallDispatch'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call order number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'strWillCallOrderNumber'
