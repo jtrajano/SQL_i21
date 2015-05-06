@@ -121,6 +121,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.strNotes}',
                 readOnly: '{current.ysnPosted}'
             },
+            btnInsertInventoryReceipt: {
+                hidden: '{current.ysnPosted}'
+            },
+            btnRemoveInventoryReceipt: {
+                hidden: '{current.ysnPosted}'
+            },
 
             grdInventoryReceipt: {
                 colSourceNumber : {
@@ -623,7 +629,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intShipViaId', null);
 
             current.set('intShipFromId', records[0].get('intShipFromId'));
-            current.set('intShipViaId', records[0].getDefaultLocation().get('intShipViaId'));
+            current.set('intShipViaId', records[0].getShipViaLocation().get('intShipViaId'));
         }
     },
 
@@ -853,10 +859,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = win.viewModel.data.current;
 
         if (current.get('intEntityVendorId') !== null) {
-            iRely.Functions.openScreen('AccountsPayable.view.Vendor', {
+            iRely.Functions.openScreen('EntityManagement.view.Entity', {
                 filters: [
                     {
-                        column: 'intEntityVendorId',
+                        column: 'intEntityId',
                         value: current.get('intEntityVendorId')
                     }
                 ]
@@ -1871,7 +1877,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#btnBill": {
                 click: this.onBillClick
             },
-            "#btnInventory": {
+            "#btnViewItem": {
                 click: this.onInventoryClick
             },
             "#btnVendor": {
@@ -1891,9 +1897,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#colItemNo": {
                 beforerender: this.onItemGridColumnBeforeRender
             },
-//            "#colUOM": {
-//                beforerender: this.onItemGridColumnBeforeRender
-//            },
             "#colLotUOM": {
                 beforerender: this.onLotGridColumnBeforeRender
             },
