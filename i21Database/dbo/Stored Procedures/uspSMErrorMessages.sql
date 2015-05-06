@@ -300,7 +300,7 @@ SET @strmessage =  'LotID ''%s'' has been configured with item ''%s'' in storage
 EXEC sp_addmessage 51074,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51075) EXEC sp_dropmessage 51075, 'us_english'	
-SET @strmessage =   'Create date should not be in future date.'
+SET @strmessage =   'Lot cannot be produced in a future date or future shift.'
 EXEC sp_addmessage 51075,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51076) EXEC sp_dropmessage 51076, 'us_english'	

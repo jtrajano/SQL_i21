@@ -1530,6 +1530,15 @@
     <Build Include="dbo\Tables\tblCTPosition.sql" />
     <Build Include="dbo\Tables\tblCTApprovalBasis.sql" />
     <Build Include="dbo\Tables\tblCTContractBasis.sql" />
+    <Build Include="dbo\Tables\tblQMConditionalProperty.sql" />
+    <Build Include="dbo\Tables\tblQMPropertyValidityPeriod.sql" />
+    <Build Include="dbo\Tables\tblQMComputationType.sql" />
+    <Build Include="dbo\Tables\tblQMSampleStatus.sql" />
+    <Build Include="dbo\Tables\tblQMTestProperty.sql" />
+    <Build Include="dbo\Tables\tblQMTest.sql" />
+    <Build Include="dbo\Tables\tblQMProperty.sql" />
+    <Build Include="dbo\Tables\tblQMDataType.sql" />
+    <Build Include="dbo\Tables\tblQMAnalysisType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
