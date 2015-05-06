@@ -102,17 +102,16 @@ BEGIN
 	ON t.intAccountSegmentId = g.intAccountSegmentId
 	AND t.intAccountCategoryId IS NULL
  
-
-	SELECT @i = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'General' 
-	--updating segments
-	UPDATE s SET intAccountCategoryId = @i  FROM tblGLAccountSegment s 
-		JOIN tblGLAccountStructure  t ON t.intAccountStructureId = s.intAccountStructureId
-		WHERE intAccountCategoryId  IS NULL AND t.strType = 'Primary'
-
 	DELETE FROM @tmpTbl
 	DELETE FROM @tmpTbl1
 END
---updating accounts
-UPDATE tblGLAccount SET intAccountCategoryId = @i WHERE intAccountCategoryId  IS NULL
+--updating accounts/primary segments to general category if null
+DECLARE @generalCategoryId INT
+SELECT @generalCategoryId = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'General' 
+	
+UPDATE s SET intAccountCategoryId = @generalCategoryId  FROM tblGLAccountSegment s 
+	JOIN tblGLAccountStructure  t ON t.intAccountStructureId = s.intAccountStructureId
+	WHERE intAccountCategoryId  IS NULL AND t.strType = 'Primary'
+UPDATE tblGLAccount SET intAccountCategoryId = @generalCategoryId WHERE intAccountCategoryId  IS NULL
 	
 
