@@ -23,6 +23,14 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intAssociationId] INT NULL, 
     [intTermId] INT NOT NULL, 
     [intPricingType] INT NOT NULL, 
+
+	[intApprovalBasisId] [INT] NULL,
+	[intContractBasisId] [INT] NULL,
+	[intPositionId] [INT] NULL,
+	[intInsuranceById] [INT] NULL,
+	[intInvoiceTypeId] [INT] NULL,
+	[dblTolerancePct] NUMERIC(18, 4) NULL,
+	[dblProvisionalInvoicePct] NUMERIC(18, 2) NULL,
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intPurchaseSale_intContractNumber] UNIQUE ([intPurchaseSale], [intContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
@@ -35,7 +43,14 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblCTWeightGrade_intWeightGradeId_intWeightId] FOREIGN KEY([intWeightId])REFERENCES [tblCTWeightGrade] ([intWeightGradeId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodity_intCommodityId] FOREIGN KEY([intCommodityId])REFERENCES [tblICCommodity] ([intCommodityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intCommodityUnitMeasureId] FOREIGN KEY([intCommodityUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblCTPricingType_intPricingType] FOREIGN KEY ([intPricingType]) REFERENCES [tblCTPricingType]([Value])
+	CONSTRAINT [FK_tblCTContractHeader_tblCTPricingType_intPricingType] FOREIGN KEY ([intPricingType]) REFERENCES [tblCTPricingType]([Value]),
+
+	CONSTRAINT [FK_tblCTContractHeader_tblCTApprovalBasis_intApprovalBasisId] FOREIGN KEY ([intApprovalBasisId]) REFERENCES [tblCTApprovalBasis]([intApprovalBasisId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblCTContractBasis_intContractBasisId] FOREIGN KEY ([intContractBasisId]) REFERENCES [tblCTContractBasis]([intContractBasisId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblCTPosition_intPositionId] FOREIGN KEY ([intPositionId]) REFERENCES [tblCTPosition]([intPositionId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblCTInsuranceBy_] FOREIGN KEY ([intInsuranceById]) REFERENCES [tblCTInsuranceBy]([intInsuranceById]),
+	CONSTRAINT [FK_tblCTContractHeader_tblCTInvoiceType_] FOREIGN KEY ([intInvoiceTypeId]) REFERENCES [tblCTInvoiceType]([intInvoiceTypeId])
+	
 )
 
 

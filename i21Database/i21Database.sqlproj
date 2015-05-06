@@ -1525,6 +1525,11 @@
     <Build Include="dbo\Views\vyuAREmailTemplate.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessToBill.sql" />
     <Build Include="dbo\Stored Procedures\uspICDuplicateItem.sql" />
+    <Build Include="dbo\Tables\tblCTInvoiceType.sql" />
+    <Build Include="dbo\Tables\tblCTInsuranceBy.sql" />
+    <Build Include="dbo\Tables\tblCTPosition.sql" />
+    <Build Include="dbo\Tables\tblCTApprovalBasis.sql" />
+    <Build Include="dbo\Tables\tblCTContractBasis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
