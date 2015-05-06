@@ -89,6 +89,8 @@ END
 
 DROP TABLE #TempGLAccount
 
+UPDATE tblFRRow SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1 WHERE intRowId = @intRowId
+
 
 END
 
