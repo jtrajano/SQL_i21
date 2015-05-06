@@ -108,12 +108,11 @@ BEGIN
 	UPDATE s SET intAccountCategoryId = @i  FROM tblGLAccountSegment s 
 		JOIN tblGLAccountStructure  t ON t.intAccountStructureId = s.intAccountStructureId
 		WHERE intAccountCategoryId  IS NULL AND t.strType = 'Primary'
-	
-	--updating accounts
-	UPDATE tblGLAccount SET intAccountCategoryId = @i WHERE intAccountCategoryId  IS NULL
-		
 
 	DELETE FROM @tmpTbl
 	DELETE FROM @tmpTbl1
 END
+--updating accounts
+UPDATE tblGLAccount SET intAccountCategoryId = @i WHERE intAccountCategoryId  IS NULL
+	
 
