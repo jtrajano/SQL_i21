@@ -37,4 +37,6 @@ AS
 	JOIN	tblCTContractHeader		CHS	ON	CHS.intContractHeaderId		=	CDS.intContractHeaderId
 	JOIN	tblEntity				ENP	ON	ENP.intEntityId				=	CHP.intEntityId
 	JOIN	tblEntity				ENS	ON	ENS.intEntityId				=	CHS.intEntityId
-	WHERE	AD.intAllocationDetailId NOT IN (SELECT intAllocationDetailId FROM tblLGGenerateLoad WHERE intAllocationDetailId IS NOT NULL)
+	WHERE	AD.intAllocationDetailId NOT IN (SELECT intAllocationDetailId FROM tblLGGenerateLoad WHERE intAllocationDetailId IS NOT NULL) 
+	AND 
+	AD.intPUnitMeasureId = AD.intSUnitMeasureId
