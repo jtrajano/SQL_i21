@@ -1560,6 +1560,7 @@
     <Build Include="dbo\Functions\fnAPCreatePaymentGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderShipmentStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCStorageUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

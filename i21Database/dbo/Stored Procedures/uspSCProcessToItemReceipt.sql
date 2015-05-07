@@ -2,8 +2,8 @@ CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	 @intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT
-	,@dblNetUnits AS DECIMAL
-	,@dblCost AS DECIMAL
+	,@dblNetUnits AS DECIMAL (13,3)
+	,@dblCost AS DECIMAL (9,5)
 	,@intLineNo AS INT
 	,@intEntityId AS INT 
 	,@InventoryReceiptId AS INT OUTPUT 
@@ -71,7 +71,8 @@ BEGIN TRY
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 	END
 
-	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId; 
+	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
+	EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 
 END TRY
 BEGIN CATCH

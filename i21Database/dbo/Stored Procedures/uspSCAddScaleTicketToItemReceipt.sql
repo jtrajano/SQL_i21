@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCAddScaleTicketToItemReceipt]
 	 @intTicketId AS INT
 	,@intUserId AS INT
-	,@dblNetUnits AS DECIMAL
-	,@dblCost AS DECIMAL
+	,@dblNetUnits AS DECIMAL (13,3)
+	,@dblCost AS DECIMAL (9,5)
 	,@intLineNo AS INT
 	,@intEntityId AS INT
 	,@InventoryReceiptId AS INT OUTPUT 
