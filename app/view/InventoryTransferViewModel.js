@@ -88,7 +88,22 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
     },
 
     formulas: {
-
+        hideOnLocationToLocation: function(get) {
+            if (get('current.strTransferType') === 'Location to Location') {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+        hideOnStorageToStorage: function(get) {
+            if (get('current.strTransferType') === 'Storage to Storage') {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
     }
 
 });

@@ -702,6 +702,278 @@ Ext.define('Inventory.view.ItemViewModel', {
                 return true;
             else
                 return false;
+        },
+        pgeStockHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Commodity':
+                case 'Raw Material':
+                    return false;
+                    break;
+
+                case 'Bundle':
+                case 'Kit':
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                    return true;
+                    break;
+            }
+        },
+        pgeCommodityHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Raw Material':
+                    return true;
+                    break;
+
+                case 'Commodity':
+                    return false
+                    break;
+            }
+        },
+        pgeAssemblyHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                    return false;
+                    break;
+
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Commodity':
+                case 'Raw Material':
+                    return true;
+                    break;
+            }
+        },
+        pgeBundleHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Bundle':
+                    return false;
+                    break;
+
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Commodity':
+                case 'Raw Material':
+                    return true;
+                    break;
+            }
+        },
+        pgeKitHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Kit':
+                    return false;
+                    break;
+
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Commodity':
+                case 'Raw Material':
+                    return true;
+                    break;
+            }
+        },
+        pgeFactoryHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Raw Material':
+                    return false;
+                    break;
+
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Commodity':
+                    return true;
+                    break;
+            }
+        },
+        pgeSalesHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Software':
+                case 'Raw Material':
+                    return false;
+                    break;
+
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Commodity':
+                    return true;
+                    break;
+            }
+        },
+        pgePOSHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                    return false;
+                    break;
+
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Commodity':
+                case 'Raw Material':
+                    return true;
+                    break;
+            }
+        },
+        pgeManufacturingHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Raw Material':
+                    return false;
+                    break;
+
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Commodity':
+                    return true;
+                    break;
+            }
+        },
+        pgeContractHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Commodity':
+                case 'Raw Material':
+                    return true;
+                    break;
+            }
+        },
+        pgeXrefHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Commodity':
+                case 'Raw Material':
+                    return false;
+                    break;
+
+                case 'Software':
+                    return true
+                    break;
+            }
         }
     }
 

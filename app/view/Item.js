@@ -194,6 +194,10 @@ Ext.define('Inventory.view.Item', {
                                             type: 'vbox',
                                             align: 'stretch'
                                         },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgDetails'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'container',
@@ -826,6 +830,10 @@ Ext.define('Inventory.view.Item', {
                                             type: 'vbox',
                                             align: 'stretch'
                                         },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgSetup'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'tabpanel',
@@ -839,6 +847,10 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'pgeLocation',
                                                         layout: 'fit',
                                                         title: 'Location',
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgLocation'
+                                                        },
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
@@ -928,6 +940,10 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'pgeGLAccounts',
                                                         layout: 'fit',
                                                         title: 'GL Accounts',
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgGLAccounts'
+                                                        },
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
@@ -1078,6 +1094,10 @@ Ext.define('Inventory.view.Item', {
                                                             type: 'hbox',
                                                             align: 'stretch',
                                                             padding: 7
+                                                        },
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgSales'
                                                         },
                                                         items: [
                                                             {
@@ -1538,6 +1558,10 @@ Ext.define('Inventory.view.Item', {
                                                             align: 'stretch',
                                                             padding: 7
                                                         },
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgPOS'
+                                                        },
                                                         items: [
                                                             {
                                                                 xtype: 'container',
@@ -1899,6 +1923,10 @@ Ext.define('Inventory.view.Item', {
                                                             type: 'hbox',
                                                             align: 'stretch',
                                                             padding: 5
+                                                        },
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgManufacturing'
                                                         },
                                                         items: [
                                                             {
@@ -2364,7 +2392,8 @@ Ext.define('Inventory.view.Item', {
                                                         title: 'UPC',
                                                         tabConfig: {
                                                             xtype: 'tab',
-                                                            hidden: true
+                                                            hidden: true,
+                                                            itemId: 'cfgUPC'
                                                         },
                                                         items: [
                                                             {
@@ -2485,6 +2514,10 @@ Ext.define('Inventory.view.Item', {
                                                         layout: {
                                                             type: 'vbox',
                                                             align: 'stretch'
+                                                        },
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgContract'
                                                         },
                                                         items: [
                                                             {
@@ -2877,6 +2910,10 @@ Ext.define('Inventory.view.Item', {
                                                             type: 'vbox',
                                                             align: 'stretch'
                                                         },
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgXref'
+                                                        },
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
@@ -3239,6 +3276,10 @@ Ext.define('Inventory.view.Item', {
                                         layout: {
                                             type: 'vbox',
                                             align: 'stretch'
+                                        },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgPricing'
                                         },
                                         items: [
                                             {
@@ -3978,6 +4019,10 @@ Ext.define('Inventory.view.Item', {
                                         itemId: 'pgeStock',
                                         layout: 'fit',
                                         title: 'Stock',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgStock'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -4072,6 +4117,10 @@ Ext.define('Inventory.view.Item', {
                                         layout: {
                                             type: 'hbox',
                                             align: 'stretch'
+                                        },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgCommodity'
                                         },
                                         items: [
                                             {
@@ -4469,6 +4518,10 @@ Ext.define('Inventory.view.Item', {
                                         itemId: 'pgeAssembly',
                                         layout: 'fit',
                                         title: 'Assembly',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgAssembly'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -4669,6 +4722,10 @@ Ext.define('Inventory.view.Item', {
                                         itemId: 'pgeBundle',
                                         layout: 'fit',
                                         title: 'Bundle Details',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgBundle'
+                                        },
                                         items: [
                                             {
                                                 xtype: 'advancefiltergrid',
@@ -4870,6 +4927,10 @@ Ext.define('Inventory.view.Item', {
                                         layout: {
                                             type: 'vbox',
                                             align: 'stretch'
+                                        },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgKit'
                                         },
                                         items: [
                                             {
@@ -5136,6 +5197,10 @@ Ext.define('Inventory.view.Item', {
                                         layout: {
                                             type: 'vbox',
                                             align: 'stretch'
+                                        },
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgFactory'
                                         },
                                         items: [
                                             {
