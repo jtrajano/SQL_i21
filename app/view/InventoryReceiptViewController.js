@@ -233,6 +233,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             column: 'intLocationId',
                             value: '{current.intLocationId}',
                             conjunction: 'and'
+                        },{
+                            column: 'intSubLocationId',
+                            value: '{currentReceiptItem.intSubLocationId}',
+                            conjunction: 'and'
                         }]
                     }
                 },
