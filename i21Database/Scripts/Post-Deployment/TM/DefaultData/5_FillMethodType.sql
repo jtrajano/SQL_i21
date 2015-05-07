@@ -6,6 +6,7 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[
 BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMFillMethod WHERE strFillMethod = 'Julian Calendar' AND ysnDefault = 1) INSERT INTO tblTMFillMethod (strFillMethod,ysnDefault) VALUES ('Julian Calendar',1)
 	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMFillMethod WHERE strFillMethod = 'Will Call' AND ysnDefault = 1) INSERT INTO tblTMFillMethod (strFillMethod,ysnDefault) VALUES ('Will Call',1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].tblTMFillMethod WHERE strFillMethod = 'Keep Full' AND ysnDefault = 1) INSERT INTO tblTMFillMethod (strFillMethod,ysnDefault) VALUES ('Keep Full',1)
 END
 
 GO
