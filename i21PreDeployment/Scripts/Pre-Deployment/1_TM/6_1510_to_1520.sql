@@ -27,6 +27,20 @@ GO
 print N'END Update tblTMDevice remove dblTankSize column'
 GO
 
+GO	
+print N'BEGIN Check for Keep Full fill method type'
+GO
+	IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE name = 'tblTMFillMethod')
+	BEGIN
+		EXEC('
+			IF EXISTS(SELECT TOP 1 1 FROM tblTMFillMethod WHERE strFillMethod = ''Keep Full'')
+			BEGIN
+				UPDATE tblTMFillMethod
+				SET ysnDefault = 1 WHERE strFillMethod = ''Keep Full''
+			END
+		')
+	END
+
 GO
 PRINT N'END 15.10.x.x to 15.20.x.x'
 GO

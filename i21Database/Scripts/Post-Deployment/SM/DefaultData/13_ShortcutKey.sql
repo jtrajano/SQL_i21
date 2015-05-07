@@ -4,7 +4,7 @@ GO
 SET IDENTITY_INSERT [dbo].[tblSMShortcutKeys] ON 
 
 INSERT [dbo].[tblSMShortcutKeys] ([intShortcutKeyId], [strModule], [strItemId], [strShortcutKey], [ctrl], [shift], [alt], [isEnabled], [intConcurrencyId]) VALUES (1, NULL, N'btnRefresh', N'r', 1, 0, 0, 1, 1)
-INSERT [dbo].[tblSMShortcutKeys] ([intShortcutKeyId], [strModule], [strItemId], [strShortcutKey], [ctrl], [shift], [alt], [isEnabled], [intConcurrencyId]) VALUES (2, NULL, N'btnClose', N'x', 1, 0, 0, 1, 1)
+INSERT [dbo].[tblSMShortcutKeys] ([intShortcutKeyId], [strModule], [strItemId], [strShortcutKey], [ctrl], [shift], [alt], [isEnabled], [intConcurrencyId]) VALUES (2, NULL, N'btnClose', N'x', 0, 0, 1, 1, 1)
 INSERT [dbo].[tblSMShortcutKeys] ([intShortcutKeyId], [strModule], [strItemId], [strShortcutKey], [ctrl], [shift], [alt], [isEnabled], [intConcurrencyId]) VALUES (3, NULL, N'btnNew', N'n', 0, 0, 1, 1, 1)
 INSERT [dbo].[tblSMShortcutKeys] ([intShortcutKeyId], [strModule], [strItemId], [strShortcutKey], [ctrl], [shift], [alt], [isEnabled], [intConcurrencyId]) VALUES (4, NULL, N'btnSave', N's', 1, 0, 0, 1, 1)
 INSERT [dbo].[tblSMShortcutKeys] ([intShortcutKeyId], [strModule], [strItemId], [strShortcutKey], [ctrl], [shift], [alt], [isEnabled], [intConcurrencyId]) VALUES (6, NULL, N'btnDelete', N'd', 1, 0, 0, 1, 1)

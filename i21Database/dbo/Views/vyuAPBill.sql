@@ -1,4 +1,5 @@
 ﻿CREATE VIEW vyuAPBill
+WITH SCHEMABINDING
 AS
 SELECT
 	A.intBillId,
@@ -11,17 +12,18 @@ SELECT
 	A.strVendorOrderNumber,
 	A.dtmDateCreated,
 	A.intTransactionType,
+	A.intEntityVendorId,
 	B1.strName,
 	C.strAccountId,
 	Payment.strPaymentInfo,
 	Payment.strBankAccountNo,
 	F.strUserName AS strUserId
 FROM
-	tblAPBill A
+	dbo.tblAPBill A
 	INNER JOIN 
-		(tblAPVendor B INNER JOIN tblEntity B1 ON B.[intEntityVendorId] = B1.intEntityId)
+		(dbo.tblAPVendor B INNER JOIN dbo.tblEntity B1 ON B.[intEntityVendorId] = B1.intEntityId)
 	ON A.[intEntityVendorId] = B.[intEntityVendorId]
-	INNER JOIN tblGLAccount C
+	INNER JOIN dbo.tblGLAccount C
 		ON A.intAccountId = C.intAccountId
 	OUTER APPLY
 	(
@@ -29,9 +31,9 @@ FROM
 			D.intBillId
 			,E.strPaymentInfo
 			,G.strBankAccountNo
-		FROM tblAPPaymentDetail D
-			INNER JOIN tblAPPayment E ON D.intPaymentId = E.intPaymentId
-			INNER JOIN tblCMBankAccount G ON E.intAccountId = G.intGLAccountId
+		FROM dbo.tblAPPaymentDetail D
+			INNER JOIN dbo.tblAPPayment E ON D.intPaymentId = E.intPaymentId
+			INNER JOIN dbo.tblCMBankAccount G ON E.intAccountId = G.intGLAccountId
 		WHERE E.ysnPosted = 1 AND A.intBillId = D.intBillId
 		ORDER BY intBillId, E.dtmDatePaid DESC --get only the latest payment
 	) Payment

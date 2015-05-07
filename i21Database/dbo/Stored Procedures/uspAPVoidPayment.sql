@@ -195,6 +195,29 @@ BEGIN
 		ON A.strPaymentRecordNum = C.strTransactionId
 	WHERE B.intNewPaymentId IS NULL
 
+	--Unposting Process
+	UPDATE tblAPPaymentDetail
+	SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + C.dblAmountDue + B.dblPayment ELSE (B.dblAmountDue + B.dblPayment) END)
+	FROM tblAPPayment A
+		LEFT JOIN tblAPPaymentDetail B
+			ON A.intPaymentId = B.intPaymentId
+		LEFT JOIN tblAPBill C
+			ON B.intBillId = C.intBillId
+	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+
+	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
+	UPDATE tblAPBill
+		SET tblAPBill.dblAmountDue = B.dblAmountDue,
+			tblAPBill.ysnPaid = 0,
+			tblAPBill.dtmDatePaid = NULL,
+			tblAPBill.dblWithheld = 0
+	FROM tblAPPayment A
+				INNER JOIN tblAPPaymentDetail B 
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPBill C
+						ON B.intBillId = C.intBillId
+				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+
 	IF @@ERROR != 0
 	BEGIN
 		ROLLBACK TRANSACTION

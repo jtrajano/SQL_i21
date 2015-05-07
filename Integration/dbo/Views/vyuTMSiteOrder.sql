@@ -23,7 +23,7 @@ BEGIN
 			END
 			) AS strCustomerName
 		,RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) AS strSiteNumber
-		,A.strSiteAddress
+		,(A.strSiteAddress + CHAR(10) + A.strCity + '', '' + A.strState +  '' '' +  A.strZipCode) AS strSiteAddress
 		,A.strLocation
 		,E.vwsls_name AS strDriverName
 		,F.vwitm_no AS strItemNo
@@ -47,6 +47,8 @@ BEGIN
 		,ISNULL(G.ysnDispatched,0) AS ysnDispatched
 		,A.intTaxStateID
 		,ISNULL(G.strWillCallStatus,'''') AS strWillCallStatus
+		,ISNULL(A.ysnTaxable,0) AS ysnTaxable
+		,RTRIM(ISNULL(F.vwitm_desc,'''')) AS strProductDescription
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID

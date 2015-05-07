@@ -64,7 +64,7 @@ CROSS APPLY
 		tblICInventoryShipment ISH
 			ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
 	WHERE
-		ISH.[ysnPosted] = 0
+		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]	
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]

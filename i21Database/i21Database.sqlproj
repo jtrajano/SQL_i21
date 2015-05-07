@@ -1522,8 +1522,44 @@
     <Build Include="dbo\Tables\tblGRCustomerStorage.sql" />
     <Build Include="dbo\Tables\tblGRStorageDiscount.sql" />
     <Build Include="dbo\Tables\tblGRStorageHistory.sql" />
+    <Build Include="dbo\Views\vyuAREmailTemplate.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessToBill.sql" />
     <Build Include="dbo\Stored Procedures\uspICDuplicateItem.sql" />
+    <Build Include="dbo\Tables\tblCTInvoiceType.sql" />
+    <Build Include="dbo\Tables\tblCTInsuranceBy.sql" />
+    <Build Include="dbo\Tables\tblCTPosition.sql" />
+    <Build Include="dbo\Tables\tblCTApprovalBasis.sql" />
+    <Build Include="dbo\Tables\tblCTContractBasis.sql" />
+    <Build Include="dbo\Tables\tblQMConditionalProperty.sql" />
+    <Build Include="dbo\Tables\tblQMPropertyValidityPeriod.sql" />
+    <Build Include="dbo\Tables\tblQMComputationType.sql" />
+    <Build Include="dbo\Tables\tblQMSampleStatus.sql" />
+    <Build Include="dbo\Tables\tblQMTestProperty.sql" />
+    <Build Include="dbo\Tables\tblQMTest.sql" />
+    <Build Include="dbo\Tables\tblQMProperty.sql" />
+    <Build Include="dbo\Tables\tblQMDataType.sql" />
+    <Build Include="dbo\Tables\tblQMAnalysisType.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPVoidPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDuplicateRecord.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntriesFromTransaction.sql" />
+    <Build Include="dbo\Functions\fnAPReverseGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreateBillGLEntries.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_intAccountId_ysnIsUnposted.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_ysnIsUnposted.sql" />
+    <Build Include="dbo\Index\IX_tblGLJournalDetail_intJournalId.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPVoidPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDuplicateRecord.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseGLEntriesFromTransaction.sql" />
+    <Build Include="dbo\Functions\fnAPReverseGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreateBillGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPValidatePostPayment.sql" />
+    <Build Include="dbo\Functions\fnAPCreatePaymentGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateOrderShipmentStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1558,6 +1594,7 @@
     <None Include="Scripts\Post-Deployment\IC\7_Status.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\InsertWriteOffPaymentMethod.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePOAddressInfo.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\2_SalesOrderDetailDefault.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

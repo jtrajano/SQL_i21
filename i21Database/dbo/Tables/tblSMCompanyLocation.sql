@@ -101,7 +101,8 @@
 	[strOverShortCustomer] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strOverShortAccount] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnAutomaticCashDepositEntries] BIT NULL DEFAULT (1), 
-    [intConcurrencyId] INT NOT NULL DEFAULT (1)
+    [intConcurrencyId] INT NOT NULL DEFAULT (1), 
+    CONSTRAINT [AK_tblSMCompanyLocation_strLocationName] UNIQUE ([strLocationName])
 )
 
 GO

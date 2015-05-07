@@ -21,10 +21,15 @@ BEGIN
 		AND R.ysnActive = 1
 		AND RI.intRecipeItemTypeId = 1
 		AND RI.intConsumptionMethodId = 1
-	JOIN dbo.tblICLot L ON L.intItemId = RI.intItemId
+	LEFT JOIN dbo.tblMFRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
+		AND SI.intRecipeId = R.intRecipeId
+	JOIN dbo.tblICLot L ON (
+		L.intItemId = RI.intItemId
+		OR L.intItemId = SI.intSubstituteItemId
+		)
 		AND L.intStorageLocationId = @intStorageLocationId
 	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-	JOIN dbo.tblICItem I ON I.intItemId = RI.intItemId
+	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intWeightUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	WHERE LS.strSecondaryStatus = 'Active'

@@ -43,6 +43,12 @@ IF @APAccount IS NULL
 IF @APAccount IS NULL
 	SET @APAccount = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountCategoryId = 1)
 
+IF @APAccount IS NULL
+BEGIN
+	RAISERROR('Please setup default AP Account', 16, 1);
+	RETURN;
+END
+
 --removed first the constraint
 ALTER TABLE tblAPBill
 	DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
@@ -82,7 +88,7 @@ BEGIn
 	SELECT
 		[intEntityVendorId]		=	A.intEntityVendorId,
 		[strVendorOrderNumber] 	=	A.strVendorRefNo,
-		[intTermsId] 			=	(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt'),
+		[intTermsId] 			=	ISNULL(Terms.intTermsId,(SELECT TOP 1 intTermID FROM tblSMTerm WHERE LOWER(strTerm) = 'due on receipt')),
 		[intShipViaId]			=	A.intShipViaId,
 		[intShipFromId]			=	A.intShipFromId,
 		[intShipToId]			=	A.intLocationId,
@@ -103,6 +109,13 @@ BEGIn
 		[dblDiscount]			=	0,
 		[dblWithheld]			=	0
 	FROM tblICInventoryReceipt A
+	OUTER APPLY 
+	(
+		SELECT 
+			C.intTermsId
+		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId AND B.intDefaultLocationId = C.intEntityLocationId
+		WHERE B.intEntityVendorId = A.intEntityVendorId
+	) Terms
 	WHERE A.intInventoryReceiptId = @receiptId
 
 	SET @generatedBillId = SCOPE_IDENTITY()
