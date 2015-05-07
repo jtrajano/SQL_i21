@@ -257,6 +257,7 @@ BEGIN
 		)  	
 		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
 				@intTransactionId
+				,@intUserId
 	END 
 
 	-----------------------------------
