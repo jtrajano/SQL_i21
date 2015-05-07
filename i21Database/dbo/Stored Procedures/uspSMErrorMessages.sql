@@ -406,3 +406,35 @@ EXEC sp_addmessage 51100,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51101) EXEC sp_dropmessage 51101, 'us_english'	
 SET @strmessage = 'The lot expiry dates are outdated for %s. Please review your quantity adjustments after the system reloads the latest expiry dates.'
 EXEC sp_addmessage 51101,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51102) EXEC sp_dropmessage 51102, 'us_english'	
+SET @strmessage = 'Cannot do the cycle count for future production date.'
+EXEC sp_addmessage 51102,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51103) EXEC sp_dropmessage 51103, 'us_english'	
+SET @strmessage = 'No machines are configured for cyclecount this process.'
+EXEC sp_addmessage 51103,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51104) EXEC sp_dropmessage 51104, 'us_english'	
+SET @strmessage = 'No valid input item is configured against the selected run, in Recipe configuration.'
+EXEC sp_addmessage 51104,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51105) EXEC sp_dropmessage 51105, 'us_english'	
+SET @strmessage = 'The run prior to the current run has no cycle count entries. Please do cycle count and close the previous run before starting the cycle count for the current run.'
+EXEC sp_addmessage 51105,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51106) EXEC sp_dropmessage 51106, 'us_english'	
+SET @strmessage = 'A cycle count for the item ''%s'' is already started on %s for the target item ''%s''. Please complete the prior cycle count to continue.'
+EXEC sp_addmessage 51106,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51107) EXEC sp_dropmessage 51107, 'us_english'	
+SET @strmessage = 'A run for ''%s'' already exists for %s which is using the same ingredient item ''%s''. Please complete the prior run to continue.'
+EXEC sp_addmessage 51107,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51108) EXEC sp_dropmessage 51108, 'us_english'	
+SET @strmessage = 'The run is already trued up. you cannot continue.'
+EXEC sp_addmessage 51108,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51109) EXEC sp_dropmessage 51109, 'us_english'	
+SET @strmessage = 'The cycle count for this run is already started by ''%s'' on ''%s''. you cannot continue. The current run already cyclecounted by another user. you cannot continue.'
+EXEC sp_addmessage 51109,11,@strmessage,'us_english','False' 

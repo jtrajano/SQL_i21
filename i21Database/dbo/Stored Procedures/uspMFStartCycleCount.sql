@@ -47,7 +47,7 @@ BEGIN TRY
 			)
 	BEGIN
 		RAISERROR (
-				51100
+				51108
 				,11
 				,1
 				)
@@ -69,7 +69,7 @@ BEGIN TRY
 		WHERE intUserSecurityID = @intUserSecurityID
 
 		RAISERROR (
-				51101
+				51109
 				,11
 				,1
 				,@strSessionStartDateTime
