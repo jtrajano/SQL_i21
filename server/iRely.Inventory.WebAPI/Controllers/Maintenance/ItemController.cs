@@ -202,6 +202,10 @@ namespace iRely.Invetory.WebAPI.Controllers
                 {
                     errMessage = "Item Pricing must be unique per location.";
                 }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemUOM'"))
+                {
+                    errMessage = "UOM must be unique per Item.";
+                }
             }
 
             return Request.CreateResponse(HttpStatusCode.Accepted, new
@@ -240,6 +244,10 @@ namespace iRely.Invetory.WebAPI.Controllers
                 else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemPricing'"))
                 {
                     errMessage = "Item Pricing must be unique per location.";
+                }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemUOM'"))
+                {
+                    errMessage = "UOM must be unique per Item.";
                 }
             }
 
