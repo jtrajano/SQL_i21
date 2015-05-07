@@ -127,6 +127,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnRemoveInventoryReceipt: {
                 hidden: '{current.ysnPosted}'
             },
+            btnBill: {
+                hidden: '{!current.ysnPosted}'
+            },
 
             grdInventoryReceipt: {
                 colSourceNumber : {
@@ -839,20 +842,29 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 method: 'post',
                 success: function(response){
                     var jsonData = Ext.decode(response.responseText);
-                    var buttonAction = function(button) {
-                        if (button === 'yes') {
-                            iRely.Functions.openScreen('AccountsPayable.view.Bill', {
-                                filters: [
-                                    {
-                                        column: 'intBillId',
-                                        value: jsonData.intBillId
-                                    }
-                                ],
-                                action: 'view'
-                            });
-                        }
-                    };
-                    iRely.Functions.showQuestionDialog('Bill succesfully processed. Do you want to view this bill?', buttonAction);
+                    if (jsonData.success) {
+                        var buttonAction = function(button) {
+                            if (button === 'yes') {
+                                iRely.Functions.openScreen('AccountsPayable.view.Bill', {
+                                    filters: [
+                                        {
+                                            column: 'intBillId',
+                                            value: jsonData.message.BillId
+                                        }
+                                    ],
+                                    action: 'view'
+                                });
+                            }
+                        };
+                        iRely.Functions.showCustomDialog('question', 'yesno', 'Bill succesfully processed. Do you want to view this bill?', buttonAction);
+                    }
+                    else {
+                        iRely.Functions.showErrorDialog(jsonData.statusText);
+                    }
+                },
+                failure: function(response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
                 }
             });
         }

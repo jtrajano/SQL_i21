@@ -60,6 +60,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             txtTaxAmount: '{current.dblTaxAmount}',
 
+            pnlFreight: {
+                hidden: '{hideOnStorageToStorage}'
+            },
+
             grdInventoryTransfer: {
                 colItemNumber: {
                     dataIndex: 'strItemNo',
@@ -176,8 +180,14 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     }
                 },
                 colTaxAmount: 'dblTaxAmount',
-                colFreightRate: 'dblFreightRate',
-                colFreightAmount: 'dblFreightAmount'
+                colFreightRate: {
+                    dataIndex: 'dblFreightRate',
+                    hidden: '{hideOnStorageToStorage}'
+                },
+                colFreightAmount: {
+                    dataIndex: 'dblFreightAmount',
+                    hidden: '{hideOnStorageToStorage}'
+                }
             },
 
             grdNotes: {
@@ -381,46 +391,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         }
     },
 
-    onTransferTypeChange: function(obj, newValue, oldValue, eOpts) {
-        var win = obj.up('window');
-        var pnlFreight = win.down('#pnlFreight');
-        var grdInventoryTransfer = win.down('#grdInventoryTransfer');
-        var colCost = grdInventoryTransfer.columns[16];
-        var colTaxCode = grdInventoryTransfer.columns[17];
-        var colTaxAmount = grdInventoryTransfer.columns[18];
-
-        var colFreightRate = grdInventoryTransfer.columns[19];
-        var colFreightAmount = grdInventoryTransfer.columns[20];
-
-        switch (newValue) {
-            case 'Location to Location':
-                pnlFreight.setHidden(false);
-
-                colCost.setHidden(true);
-                colTaxCode.setHidden(true);
-                colTaxAmount.setHidden(true);
-
-                colFreightRate.setHidden(false);
-                colFreightAmount.setHidden(false);
-                break
-            case 'Storage to Storage':
-                pnlFreight.setHidden(true);
-
-                colCost.setHidden(true);
-                colTaxCode.setHidden(true);
-                colTaxAmount.setHidden(true);
-
-                colFreightRate.setHidden(true);
-                colFreightAmount.setHidden(true);
-                break
-        }
-    },
-
     onEditDetails: function(editor, context, eOpts) {
-//        if (context.field === 'dblTaxAmount')
-//        {
-//
-//        }
+
     },
 
     onDetailGridColumnBeforeRender: function(column) {
@@ -582,9 +554,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             "#cboTaxCode": {
                 select: this.onTransferDetailSelect
-            },
-            "#cboTransferType": {
-                change: this.onTransferTypeChange
             },
             "#colAvailableQty": {
                 beforerender: this.onDetailGridColumnBeforeRender

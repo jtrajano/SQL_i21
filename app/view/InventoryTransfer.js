@@ -1001,6 +1001,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
+                                                        hideMode: 'visibility',
                                                         itemId: 'colFreightRate',
                                                         width: 85,
                                                         align: 'right',
@@ -1014,6 +1015,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
+                                                        hideMode: 'visibility',
                                                         itemId: 'colFreightAmount',
                                                         width: 100,
                                                         align: 'right',

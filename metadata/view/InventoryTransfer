@@ -1151,7 +1151,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter16",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2122,6 +2122,7 @@
                                                 "dataIndex": "dblFreightRate",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
+                                                "hideMode": "visibility",
                                                 "itemId": "colFreightRate",
                                                 "text": "Freight Rate",
                                                 "width": 85
@@ -2160,6 +2161,7 @@
                                                 "dataIndex": "dblFreightAmount",
                                                 "dataType": "numeric",
                                                 "format": "0,000.##",
+                                                "hideMode": "visibility",
                                                 "itemId": "colFreightAmount",
                                                 "text": "Freight Amount",
                                                 "width": 100
@@ -2335,7 +2337,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter17",
                                                     "designerId": "dc8288c0-74ca-4def-b42c-feb73cdf1f4d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2512,7 +2514,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging11",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
