@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspAPPostBill
+﻿﻿CREATE PROCEDURE uspAPPostBill
 	@batchId			AS NVARCHAR(20)		= NULL,
 	@billBatchId		AS NVARCHAR(20)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,

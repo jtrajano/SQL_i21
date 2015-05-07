@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPReverseGLEntriesFromTransaction]
+﻿﻿CREATE PROCEDURE [dbo].[uspAPReverseGLEntriesFromTransaction]
 		@transactionIds		NVARCHAR(MAX)
 		,@dtmDateReverse	DATETIME = NULL 
 		,@intUserId			INT

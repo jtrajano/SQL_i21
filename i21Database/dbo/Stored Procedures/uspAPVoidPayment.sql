@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPVoidPayment]
+﻿﻿CREATE PROCEDURE [dbo].[uspAPVoidPayment]
 	@paymentIds NVARCHAR(MAX),
 	@voidDate DATETIME,
 	@intUserId INT

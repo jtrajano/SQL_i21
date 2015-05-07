@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspAPPostPayment
+﻿﻿CREATE PROCEDURE uspAPPostPayment
 	@batchId			AS NVARCHAR(20)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
