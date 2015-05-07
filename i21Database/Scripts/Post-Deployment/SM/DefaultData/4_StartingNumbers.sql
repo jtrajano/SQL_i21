@@ -337,13 +337,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Build Assembly')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 36
-			,[strTransactionType]	= N'Batch Posting'
-			,[strPrefix]			= N'BATCH-'
-			,[intNumber]			= 1
-			,[strModule]			= 'System Manager'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch Posting')
+			 ,[strTransactionType]	= N'ContractAdjNo'
+           ,[strPrefix]				= N'Adj - '
+           ,[intNumber]				= 1
+           ,[strModule]				= 'Contract Management'
+           ,[ysnEnable]				= 1
+           ,[intConcurrencyId]		= 1
+    WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'ContractAdjNo')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 37
 			,[strTransactionType]	= N'Shipping Instructions'
