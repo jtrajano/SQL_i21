@@ -11,6 +11,7 @@
 	[strNewLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[dblQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblNewQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblNewSplitLotQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblAdjustByQuantity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intItemUOMId] INT NULL, 
 	[intNewItemUOMId] INT NULL, 
