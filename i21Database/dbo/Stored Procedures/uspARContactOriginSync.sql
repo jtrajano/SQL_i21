@@ -28,7 +28,7 @@
 				INNER JOIN tblEntityToContact EntToCon
 					on EntToCon.intEntityContactId = Contact.intEntityId
 				INNER JOIN tblEntity E ON E.intEntityId = EntToCon.intEntityId
-				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND UPPER(sscon_contact_id) = UPPER(@ContactNumber)
+				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND UPPER(sscon_contact_id) = SUBSTRING(UPPER(@ContactNumber),1,20)
 
 		END
 		--INSERT IF NOT EXIST IN THE ORIGIN
@@ -54,8 +54,8 @@
 				sscon_vnd_no
 			)
 			SELECT
-				UPPER(Contact.strContactNumber),
-				E.strEntityNo,
+				SUBSTRING(UPPER(Contact.strContactNumber),1,20),
+				SUBSTRING(C.strCustomerNumber,1,10),--E.strEntityNo,
 				--Substring names to avoid SQL truncation error
 				SUBSTRING((CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30), 0, CHARINDEX(', ',E.strName)) ELSE SUBSTRING(E.strName,1,30)END), 1, 20) AS LastName,
 				SUBSTRING((CASE WHEN CHARINDEX(', ', E.strName) > 0 THEN SUBSTRING(SUBSTRING(E.strName,1,30),CHARINDEX(', ',E.strName) + 2, LEN(E.strName))END), 1, 20) AS FirstName,
@@ -74,7 +74,8 @@
 				INNER JOIN tblEntityToContact EntToCon
 					on EntToCon.intEntityContactId = Contact.intEntityId
 				INNER JOIN tblEntity E ON E.intEntityId = EntToCon.intEntityId
-				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber)
+				INNER JOIN tblARCustomer C on C.intEntityCustomerId = EntToCon.intEntityId
+				WHERE UPPER(Contact.strContactNumber) = UPPER(@ContactNumber) AND C.strCustomerNumber <> ''
 			--FROM tblEntityContact Contact
 			--	INNER JOIN tblEntity E ON E.intEntityId = Contact.intEntityContactId
 			--	INNER JOIN tblARCustomerToContact  CusToCon ON Contact.intEntityContactId = CusToCon.intEntityContactId
