@@ -81,6 +81,7 @@ print 'BEGIN POST DEPLOYMENT'
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
+:R .\AR\DefaultData\2_SalesOrderDetailDefault.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
