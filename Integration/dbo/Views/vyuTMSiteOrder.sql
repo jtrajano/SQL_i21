@@ -48,6 +48,7 @@ BEGIN
 		,A.intTaxStateID
 		,ISNULL(G.strWillCallStatus,'''') AS strWillCallStatus
 		,ISNULL(A.ysnTaxable,0) AS ysnTaxable
+		,RTRIM(ISNULL(F.vwitm_desc,'''')) AS strProductDescription
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
