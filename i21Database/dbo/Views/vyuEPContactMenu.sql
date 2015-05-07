@@ -28,9 +28,12 @@ ysnVisible = (CASE WHEN ISNULL(Permission.intEntityPortalMenuId, 0) = 0 THEN CAS
 ysnIsLegacy = CAST(0 AS BIT),    
 intSort = Menu.intEntityPortalMenuId    
 FROM tblEntityPortalMenu Menu    
-	LEFT JOIN tblEntityPortalPermission Permission 
+	JOIN tblEntityPortalPermission Permission 
 		ON Menu.intEntityPortalMenuId = Permission.intEntityPortalMenuId  
-	LEFT JOIN tblEntityToContact EntityToContact 
+	JOIN tblEntityToContact EntityToContact 
 		ON Permission.intEntityToContactId = EntityToContact.intEntityToContactId  
-	LEFT JOIN tblEntity Contact 
+	JOIN tblEntity Contact 
 		ON EntityToContact.[intEntityContactId] = Contact.[intEntityId]
+	JOIN tblEntityType EntType
+		ON EntType.intEntityId =  EntityToContact.intEntityId 
+			and EntType.strType = Menu.strEntityType
