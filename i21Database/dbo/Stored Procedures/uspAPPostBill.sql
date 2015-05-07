@@ -63,7 +63,7 @@ DECLARE @GLEntries AS RecapTableType
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 DECLARE @validBillIds NVARCHAR(MAX)
-DECLARE @billIds NVARCHAR(MAX) = @param
+DECLARE @billIds NVARCHAR(MAX)
 
 SET @recapId = '1'
 --=====================================================================================================================================
