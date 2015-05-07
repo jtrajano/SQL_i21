@@ -316,5 +316,4 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
         public bool? ysnPosted { get; set; }
     }
-
 }

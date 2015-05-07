@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets8d61b8e4d0013ca7d766ccf3048a815249335cac5140878207b3ca46c5617066))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets4677d9aa543fc6ffbbe126cfbef8bc96e637bc8f579720c1e999c6c60ee66908))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets8d61b8e4d0013ca7d766ccf3048a815249335cac5140878207b3ca46c5617066 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets4677d9aa543fc6ffbbe126cfbef8bc96e637bc8f579720c1e999c6c60ee66908 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "8d61b8e4d0013ca7d766ccf3048a815249335cac5140878207b3ca46c5617066"; }
+            get { return "4677d9aa543fc6ffbbe126cfbef8bc96e637bc8f579720c1e999c6c60ee66908"; }
         }
 
         /// <summary>
@@ -1828,7 +1828,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryAdjustmentDetail
-        [CodeFirstDatabaseSchema.tblICInventoryAdjustmentDetail](T1.tblICInventoryAdjustmentDetail_intInventoryAdjustmentDetailId, T1.tblICInventoryAdjustmentDetail_intInventoryAdjustmentId, T1.tblICInventoryAdjustmentDetail_intSubLocationId, T1.tblICInventoryAdjustmentDetail_intStorageLocationId, T1.tblICInventoryAdjustmentDetail_intItemId, T1.tblICInventoryAdjustmentDetail_intNewItemId, T1.tblICInventoryAdjustmentDetail_intLotId, T1.tblICInventoryAdjustmentDetail_intNewLotId, T1.tblICInventoryAdjustmentDetail_strNewLotNumber, T1.tblICInventoryAdjustmentDetail_dblQuantity, T1.tblICInventoryAdjustmentDetail_dblNewQuantity, T1.tblICInventoryAdjustmentDetail_dblAdjustByQuantity, T1.tblICInventoryAdjustmentDetail_intItemUOMId, T1.tblICInventoryAdjustmentDetail_intNewItemUOMId, T1.tblICInventoryAdjustmentDetail_intWeightUOMId, T1.tblICInventoryAdjustmentDetail_intNewWeightUOMId, T1.tblICInventoryAdjustmentDetail_dblWeight, T1.tblICInventoryAdjustmentDetail_dblNewWeight, T1.tblICInventoryAdjustmentDetail_dblWeightPerQty, T1.tblICInventoryAdjustmentDetail_dblNewWeightPerQty, T1.tblICInventoryAdjustmentDetail_dtmExpiryDate, T1.tblICInventoryAdjustmentDetail_dtmNewExpiryDate, T1.tblICInventoryAdjustmentDetail_intLotStatusId, T1.tblICInventoryAdjustmentDetail_intNewLotStatusId, T1.tblICInventoryAdjustmentDetail_dblCost, T1.tblICInventoryAdjustmentDetail_dblNewCost, T1.tblICInventoryAdjustmentDetail_dblLineTotal, T1.tblICInventoryAdjustmentDetail_intSort, T1.tblICInventoryAdjustmentDetail_intNewLocationId, T1.tblICInventoryAdjustmentDetail_intNewSubLocationId, T1.tblICInventoryAdjustmentDetail_intNewStorageLocationId, T1.tblICInventoryAdjustmentDetail_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryAdjustmentDetail](T1.tblICInventoryAdjustmentDetail_intInventoryAdjustmentDetailId, T1.tblICInventoryAdjustmentDetail_intInventoryAdjustmentId, T1.tblICInventoryAdjustmentDetail_intSubLocationId, T1.tblICInventoryAdjustmentDetail_intStorageLocationId, T1.tblICInventoryAdjustmentDetail_intItemId, T1.tblICInventoryAdjustmentDetail_intNewItemId, T1.tblICInventoryAdjustmentDetail_intLotId, T1.tblICInventoryAdjustmentDetail_intNewLotId, T1.tblICInventoryAdjustmentDetail_strNewLotNumber, T1.tblICInventoryAdjustmentDetail_dblQuantity, T1.tblICInventoryAdjustmentDetail_dblNewQuantity, T1.tblICInventoryAdjustmentDetail_dblAdjustByQuantity, T1.tblICInventoryAdjustmentDetail_dblNewSplitLotQuantity, T1.tblICInventoryAdjustmentDetail_intItemUOMId, T1.tblICInventoryAdjustmentDetail_intNewItemUOMId, T1.tblICInventoryAdjustmentDetail_intWeightUOMId, T1.tblICInventoryAdjustmentDetail_intNewWeightUOMId, T1.tblICInventoryAdjustmentDetail_dblWeight, T1.tblICInventoryAdjustmentDetail_dblNewWeight, T1.tblICInventoryAdjustmentDetail_dblWeightPerQty, T1.tblICInventoryAdjustmentDetail_dblNewWeightPerQty, T1.tblICInventoryAdjustmentDetail_dtmExpiryDate, T1.tblICInventoryAdjustmentDetail_dtmNewExpiryDate, T1.tblICInventoryAdjustmentDetail_intLotStatusId, T1.tblICInventoryAdjustmentDetail_intNewLotStatusId, T1.tblICInventoryAdjustmentDetail_dblCost, T1.tblICInventoryAdjustmentDetail_dblNewCost, T1.tblICInventoryAdjustmentDetail_dblLineTotal, T1.tblICInventoryAdjustmentDetail_intSort, T1.tblICInventoryAdjustmentDetail_intNewLocationId, T1.tblICInventoryAdjustmentDetail_intNewSubLocationId, T1.tblICInventoryAdjustmentDetail_intNewStorageLocationId, T1.tblICInventoryAdjustmentDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryAdjustmentDetailId AS tblICInventoryAdjustmentDetail_intInventoryAdjustmentDetailId, 
@@ -1843,6 +1843,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblQuantity AS tblICInventoryAdjustmentDetail_dblQuantity, 
             T.dblNewQuantity AS tblICInventoryAdjustmentDetail_dblNewQuantity, 
             T.dblAdjustByQuantity AS tblICInventoryAdjustmentDetail_dblAdjustByQuantity, 
+            T.dblNewSplitLotQuantity AS tblICInventoryAdjustmentDetail_dblNewSplitLotQuantity, 
             T.intItemUOMId AS tblICInventoryAdjustmentDetail_intItemUOMId, 
             T.intNewItemUOMId AS tblICInventoryAdjustmentDetail_intNewItemUOMId, 
             T.intWeightUOMId AS tblICInventoryAdjustmentDetail_intWeightUOMId, 
@@ -4736,7 +4737,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryAdjustmentDetails
-        [iRely.Inventory.Model.tblICInventoryAdjustmentDetail](T1.tblICInventoryAdjustmentDetail_intInventoryAdjustmentDetailId, T1.tblICInventoryAdjustmentDetail_intInventoryAdjustmentId, T1.tblICInventoryAdjustmentDetail_intSubLocationId, T1.tblICInventoryAdjustmentDetail_intStorageLocationId, T1.tblICInventoryAdjustmentDetail_intItemId, T1.tblICInventoryAdjustmentDetail_intNewItemId, T1.tblICInventoryAdjustmentDetail_intLotId, T1.tblICInventoryAdjustmentDetail_intNewLotId, T1.tblICInventoryAdjustmentDetail_strNewLotNumber, T1.tblICInventoryAdjustmentDetail_dblQuantity, T1.tblICInventoryAdjustmentDetail_dblNewQuantity, T1.tblICInventoryAdjustmentDetail_dblAdjustByQuantity, T1.tblICInventoryAdjustmentDetail_intItemUOMId, T1.tblICInventoryAdjustmentDetail_intNewItemUOMId, T1.tblICInventoryAdjustmentDetail_intWeightUOMId, T1.tblICInventoryAdjustmentDetail_intNewWeightUOMId, T1.tblICInventoryAdjustmentDetail_dblWeight, T1.tblICInventoryAdjustmentDetail_dblNewWeight, T1.tblICInventoryAdjustmentDetail_dblWeightPerQty, T1.tblICInventoryAdjustmentDetail_dblNewWeightPerQty, T1.tblICInventoryAdjustmentDetail_dtmExpiryDate, T1.tblICInventoryAdjustmentDetail_dtmNewExpiryDate, T1.tblICInventoryAdjustmentDetail_intLotStatusId, T1.tblICInventoryAdjustmentDetail_intNewLotStatusId, T1.tblICInventoryAdjustmentDetail_dblCost, T1.tblICInventoryAdjustmentDetail_dblNewCost, T1.tblICInventoryAdjustmentDetail_dblLineTotal, T1.tblICInventoryAdjustmentDetail_intSort, T1.tblICInventoryAdjustmentDetail_intNewLocationId, T1.tblICInventoryAdjustmentDetail_intNewSubLocationId, T1.tblICInventoryAdjustmentDetail_intNewStorageLocationId, T1.tblICInventoryAdjustmentDetail_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryAdjustmentDetail](T1.tblICInventoryAdjustmentDetail_intInventoryAdjustmentDetailId, T1.tblICInventoryAdjustmentDetail_intInventoryAdjustmentId, T1.tblICInventoryAdjustmentDetail_intSubLocationId, T1.tblICInventoryAdjustmentDetail_intStorageLocationId, T1.tblICInventoryAdjustmentDetail_intItemId, T1.tblICInventoryAdjustmentDetail_intNewItemId, T1.tblICInventoryAdjustmentDetail_intLotId, T1.tblICInventoryAdjustmentDetail_intNewLotId, T1.tblICInventoryAdjustmentDetail_strNewLotNumber, T1.tblICInventoryAdjustmentDetail_dblQuantity, T1.tblICInventoryAdjustmentDetail_dblNewQuantity, T1.tblICInventoryAdjustmentDetail_dblAdjustByQuantity, T1.tblICInventoryAdjustmentDetail_dblNewSplitLotQuantity, T1.tblICInventoryAdjustmentDetail_intItemUOMId, T1.tblICInventoryAdjustmentDetail_intNewItemUOMId, T1.tblICInventoryAdjustmentDetail_intWeightUOMId, T1.tblICInventoryAdjustmentDetail_intNewWeightUOMId, T1.tblICInventoryAdjustmentDetail_dblWeight, T1.tblICInventoryAdjustmentDetail_dblNewWeight, T1.tblICInventoryAdjustmentDetail_dblWeightPerQty, T1.tblICInventoryAdjustmentDetail_dblNewWeightPerQty, T1.tblICInventoryAdjustmentDetail_dtmExpiryDate, T1.tblICInventoryAdjustmentDetail_dtmNewExpiryDate, T1.tblICInventoryAdjustmentDetail_intLotStatusId, T1.tblICInventoryAdjustmentDetail_intNewLotStatusId, T1.tblICInventoryAdjustmentDetail_dblCost, T1.tblICInventoryAdjustmentDetail_dblNewCost, T1.tblICInventoryAdjustmentDetail_dblLineTotal, T1.tblICInventoryAdjustmentDetail_intSort, T1.tblICInventoryAdjustmentDetail_intNewLocationId, T1.tblICInventoryAdjustmentDetail_intNewSubLocationId, T1.tblICInventoryAdjustmentDetail_intNewStorageLocationId, T1.tblICInventoryAdjustmentDetail_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryAdjustmentDetailId AS tblICInventoryAdjustmentDetail_intInventoryAdjustmentDetailId, 
@@ -4751,6 +4752,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.dblQuantity AS tblICInventoryAdjustmentDetail_dblQuantity, 
             T.dblNewQuantity AS tblICInventoryAdjustmentDetail_dblNewQuantity, 
             T.dblAdjustByQuantity AS tblICInventoryAdjustmentDetail_dblAdjustByQuantity, 
+            T.dblNewSplitLotQuantity AS tblICInventoryAdjustmentDetail_dblNewSplitLotQuantity, 
             T.intItemUOMId AS tblICInventoryAdjustmentDetail_intItemUOMId, 
             T.intNewItemUOMId AS tblICInventoryAdjustmentDetail_intNewItemUOMId, 
             T.intWeightUOMId AS tblICInventoryAdjustmentDetail_intWeightUOMId, 

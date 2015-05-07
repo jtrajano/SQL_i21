@@ -58,6 +58,32 @@ namespace iRely.Inventory.BRL
             return finalquery;
         }
 
+        public object GetWeightUOMs(int page, int start, int limit, CompositeSortSelector sortSelector, Expression<Func<WeightUOMVm, bool>> predicate)
+        {
+            var query = (
+                    from ItemUOM in _db.GetQuery<tblICItemUOM>()
+                    join UOM in _db.GetQuery<tblICUnitMeasure>()
+                        on ItemUOM.intUnitMeasureId equals UOM.intUnitMeasureId
+                    where UOM.strUnitType == "Weight"                        
+                    select new WeightUOMVm 
+                    {
+                        intItemUOMId = ItemUOM.intItemUOMId,
+                        strUnitMeasure = UOM.strUnitMeasure,
+                        strUnitType = UOM.strUnitType,
+                        intItemId = ItemUOM.intItemId
+                    }
+                )
+                .Where(predicate)
+                .OrderBySelector(sortSelector);
+
+            var data = new Dictionary<string, object>();
+            data["total"] = query.Count();
+            data["data"] = query.Skip(start).Take(limit).AsNoTracking();
+
+            return data;
+        }
+        
+
         public void AddItemUnitMeasure(tblICItemUOM uom)
         {
             _db.AddNew<tblICItemUOM>(uom);

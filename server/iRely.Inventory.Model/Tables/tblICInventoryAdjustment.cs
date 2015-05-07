@@ -84,6 +84,7 @@ namespace iRely.Inventory.Model
         public decimal? dblQuantity { get; set; }
         public decimal? dblNewQuantity { get; set; }
         public decimal? dblAdjustByQuantity { get; set; }
+        public decimal? dblNewSplitLotQuantity { get; set; }
 
         public int? intItemUOMId { get; set; }
         public int? intNewItemUOMId { get; set; }
@@ -395,7 +396,7 @@ namespace iRely.Inventory.Model
             {
                 if (string.IsNullOrEmpty(_newWeightUOM))
                     if (NewWeightUOM != null)
-                        return NewWeightUOM.strWeightUOM;
+                        return NewWeightUOM.strUnitMeasure;
                     else
                         return null;
                 else

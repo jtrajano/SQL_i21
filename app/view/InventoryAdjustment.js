@@ -530,19 +530,47 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        dataIndex: 'dblQuantity',
                                                         itemId: 'colQuantity',
                                                         width: 65,
                                                         align: 'right',
+                                                        dataIndex: 'dblQuantity',
                                                         text: 'Quantity'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colAdjustByQuantity',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        dataIndex: 'dblAdjustByQuantity',
+                                                        tdCls: 'blue-text-column',
+                                                        text: 'Adjust Qty By',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            itemId: 'numAdjustByQuantity'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        dataType: 'numeric',
+                                                        itemId: 'colNewQuantity',
+                                                        width: 90,
+                                                        align: 'right',
+                                                        dataIndex: 'dblNewQuantity',
+                                                        tdCls: 'blue-text-column',
+                                                        text: 'New Quantity',
+                                                        editor: {
+                                                            xtype: 'numberfield',
+                                                            itemId: 'numNewQuantity'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewUOM',
-                                                        width: 70,
+                                                        width: 110,
                                                         dataIndex: 'strNewItemUOM',
                                                         tdCls: 'blue-text-column',
-                                                        text: 'New UOM',
+                                                        text: 'New Split Lot UOM',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -580,29 +608,15 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
-                                                        itemId: 'colAdjustByQuantity',
-                                                        width: 100,
+                                                        itemId: 'colNewSplitLotQuantity',
+                                                        width: 115,
                                                         align: 'right',
-                                                        dataIndex: 'dblAdjustByQuantity',
+                                                        dataIndex: 'dblNewSplitLotQuantity',
                                                         tdCls: 'blue-text-column',
-                                                        text: 'Adjust Qty By',
+                                                        text: 'New Split Lot Qty',
                                                         editor: {
                                                             xtype: 'numberfield',
-                                                            itemId: 'numAdjustByQuantity'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        dataType: 'numeric',
-                                                        itemId: 'colNewQuantity',
-                                                        width: 90,
-                                                        align: 'right',
-                                                        dataIndex: 'dblNewQuantity',
-                                                        tdCls: 'blue-text-column',
-                                                        text: 'New Quantity',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            itemId: 'numNewQuantity'
+                                                            itemId: 'numNewSplitLotQuantity'
                                                         }
                                                     },
                                                     {
@@ -660,7 +674,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 }
                                                             ],
                                                             itemId: 'cboNewWeightUOM',
-                                                            width: 100,
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'strUnitMeasure'
                                                         }

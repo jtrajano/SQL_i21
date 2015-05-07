@@ -74,6 +74,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         weightUOM: {
             type: 'icbuffereditemweightuom'
         },
+        newWeightUOM: {
+            type: 'icbuffereditemweightuom'
+        },
         newItem: {
             type: 'icbuffereditemstockview'
         },

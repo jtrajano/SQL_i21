@@ -164,6 +164,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     }
                 },
 
+                colNewSplitLotQuantity: {
+                    dataIndex: 'dblNewSplitLotQuantity',
+                    editor: {
+                        readOnly: '{current.ysnPosted}'
+                    }
+                },
+
                 colUOM: 'strItemUOM',
 
                 colNewUOM: {
@@ -204,13 +211,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewWeightUOM: {
                     dataIndex: 'strNewWeightUOM',
                     editor: {
-                        store: '{weightUOM}',
+                        store: '{newWeightUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{grdInventoryAdjustment.selection.intItemId}',
                             conjunction: 'and'
-                        }],
-                        readOnly: '{current.ysnPosted}'
+                        }]
+                        ,readOnly: '{current.ysnPosted}'
                     }
                 },
 
@@ -310,8 +317,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             {
                                 column: 'intSubLocationId',
                                 value: '{grdInventoryAdjustment.selection.intNewSubLocationId}',
-                                conjunction: 'and',
-                                condition: 'blk'
+                                conjunction: 'and'
                             }
                         ],
                         readOnly: '{current.ysnPosted}'
@@ -547,6 +553,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var colQuantity = this.getGridColumnByDataIndex(grid, 'dblQuantity');
         var colNewQuantity = this.getGridColumnByDataIndex(grid, 'dblNewQuantity');
         var colAdjustByQuantity = this.getGridColumnByDataIndex(grid, 'dblAdjustByQuantity');
+        var colNewSplitLotQuantity = this.getGridColumnByDataIndex(grid, 'dblNewSplitLotQuantity');
 
         var colUOM = this.getGridColumnByDataIndex(grid, 'strItemUOM');
         var colNewUOM = this.getGridColumnByDataIndex(grid, 'strNewItemUOM');
@@ -620,6 +627,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colQuantity.setHidden(show);
                 colNewQuantity.setHidden(show);
                 colAdjustByQuantity.setHidden(show);
+                colNewSplitLotQuantity.setHidden(show);
                 colUOM.setHidden(show);
 
                 colUnitCost.setHidden(show);
@@ -641,6 +649,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colQuantity.setHidden(hide);
                 colNewQuantity.setHidden(hide);
                 colAdjustByQuantity.setHidden(hide);
+                colNewSplitLotQuantity.setHidden(hide);
                 colUOM.setHidden(hide);
                 colNewUOM.setHidden(hide);
                 colNetWeight.setHidden(hide);
@@ -664,7 +673,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 // Hide Columns:
                 colNewItemNumber.setHidden(hide);
                 colNewItemDescription.setHidden(hide);
-                colAdjustByQuantity.setHidden(hide);
                 colWeightPerQty.setHidden(hide);
                 colNewWeightPerQty.setHidden(hide);
                 colLineTotal.setHidden(hide);
@@ -672,7 +680,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colNewLotStatus.setHidden(hide);
                 colExpiryDate.setHidden(hide);
                 colNewExpiryDate.setHidden(hide);
-                colNewUOM.setHidden(hide);
 
                 //  Show Columns:
                 colQuantity.setHidden(show);
@@ -682,7 +689,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colUnitCost.setHidden(show);
 
                 colNewLot.setHidden(show);
+                colAdjustByQuantity.setHidden(show);
                 colNewQuantity.setHidden(show);
+                colNewUOM.setHidden(show);
+                colNewSplitLotQuantity.setHidden(show);
                 colNewNetWeight.setHidden(show);
                 colNewWeightUOM.setHidden(show);
                 colNewUnitCost.setHidden(show);
@@ -699,6 +709,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 colQuantity.setHidden(hide);
                 colNewQuantity.setHidden(hide);
                 colAdjustByQuantity.setHidden(hide);
+                colNewSplitLotQuantity.setHidden(hide);
                 colUOM.setHidden(hide);
                 colNewUOM.setHidden(hide);
                 colNetWeight.setHidden(hide);
@@ -1038,16 +1049,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var current = plugin.getActiveRecord();
         if (current && (newUOM === null || newUOM === '')){
             current.set('intNewItemUOMId', null);
-        }
-    },
-
-    onNewWeightUOMChange: function(control, newWeightUOM, oldValue, eOpts ){
-        var me = this;
-        var grid = control.up('grid');
-        var plugin = grid.getPlugin('cepItem');
-        var current = plugin.getActiveRecord();
-        if (current && (newWeightUOM === null || newWeightUOM === '')){
-            current.set('intNewWeightUOMId', null);
         }
     },
 

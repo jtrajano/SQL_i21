@@ -76,22 +76,15 @@ namespace iRely.Invetory.WebAPI.Controllers
 
             var searchFilters = JsonConvert.DeserializeObject<IEnumerable<SearchFilter>>(filter);
             var searchSorts = JsonConvert.DeserializeObject<IEnumerable<SearchSort>>(sort);
-            var predicate = ExpressionBuilder.True<tblICItemUOM>();
+            var predicate = ExpressionBuilder.True<WeightUOMVm>();
             var sortSelector = ExpressionBuilder.GetSortSelector(searchSorts, "intItemUOMId", "DESC");
 
             if (searchFilters != null)
-                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<tblICItemUOM>(searchFilters, true);
-            
-            var total = _ItemUnitMeasureBRL.GetCount(predicate);
-            var data = _ItemUnitMeasureBRL.GetItemUnitMeasures(page, start, page == 0 ? total : limit, sortSelector, predicate);
+                predicate = ExpressionBuilder.GetPredicateBasedOnSearch<WeightUOMVm>(searchFilters, true);
 
-            var finalData = data.ToList().Where(p=> p.strUnitType == "Weight").ToList();
+            var result = _ItemUnitMeasureBRL.GetWeightUOMs(page, start, limit, sortSelector, predicate);
 
-            return Request.CreateResponse(HttpStatusCode.OK, new
-            {
-                data = finalData,
-                total = finalData.Count
-            });
+            return Request.CreateResponse(HttpStatusCode.OK, result);
         }
 
         [HttpPost]
