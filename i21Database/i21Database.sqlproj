@@ -1562,6 +1562,7 @@
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderShipmentStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSCStorageUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStartCycleCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRPostPaycheck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
