@@ -738,7 +738,8 @@ Ext.define('Inventory.view.Commodity', {
                                                         xtype: 'checkcolumn',
                                                         itemId: 'colUOMDefaultUOM',
                                                         text: 'Default UOM',
-                                                        flex: 1
+                                                        flex: 1,
+                                                        stopSelection: false
                                                     }
                                                 ],
                                                 viewConfig: {

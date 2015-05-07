@@ -325,13 +325,12 @@ Ext.define('Inventory.view.CommodityViewController', {
     },
 
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
+        var grid = obj.up('grid');
+        var current = grid.view.getRecord(rowIndex);
+        var uoms = grid.store.data.items;
+
         if (obj.dataIndex === 'ysnStockUnit'){
-            var grid = obj.up('grid');
-
-            var current = grid.view.getRecord(rowIndex);
-
             if (checked === true){
-                var uoms = grid.store.data.items;
                 var currUOM = current.get('tblICUnitMeasure');
                 if (currUOM) {
                     var conversions = currUOM.vyuICGetUOMConversions;
@@ -364,6 +363,15 @@ Ext.define('Inventory.view.CommodityViewController', {
                 }
             }
         }
+        else if (obj.dataIndex === 'ysnDefault'){
+            if (checked === true) {
+                uoms.forEach(function (uom) {
+                    if (uom !== current) {
+                        uom.set('ysnDefault', false);
+                    }
+                });
+            }
+        }
     },
 
     init: function(application) {
@@ -381,6 +389,9 @@ Ext.define('Inventory.view.CommodityViewController', {
                 select: this.onAccountSelect
             },
             "#colUOMStockUnit": {
+                beforecheckchange: this.onUOMStockUnitCheckChange
+            },
+            "#colUOMDefaultUOM": {
                 beforecheckchange: this.onUOMStockUnitCheckChange
             }
         });
