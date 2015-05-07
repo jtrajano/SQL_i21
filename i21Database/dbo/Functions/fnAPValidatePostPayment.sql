@@ -1,4 +1,4 @@
-﻿﻿CREATE FUNCTION [dbo].[fnAPValidatePostPayment]
+﻿CREATE FUNCTION [dbo].[fnAPValidatePostPayment]
 (
 	@paymentIds NVARCHAR(MAX),
 	@post BIT
