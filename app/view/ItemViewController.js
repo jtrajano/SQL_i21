@@ -855,7 +855,6 @@ Ext.define('Inventory.view.ItemViewController', {
             createRecord : me.createRecord,
             validateRecord : me.validateRecord,
             onSaveClick: me.onSaveClick,
-            onSaveSuccess: me.onSaveSuccess,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
@@ -1041,7 +1040,6 @@ Ext.define('Inventory.view.ItemViewController', {
             ]
         });
 
-        win.context.data.on('savesuccess', me.onSaveSuccess);
         me.subscribeLocationEvents(grdLocationStore, me);
 
         var cepPricingLevel = grdPricingLevel.getPlugin('cepPricingLevel');
@@ -1130,7 +1128,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 }
                 else {
-                    tabItem.setActiveTab('pgePricing');
+//                    tabItem.setActiveTab('pgePricing');
                     action(false);
                 }
             }
@@ -1163,13 +1161,6 @@ Ext.define('Inventory.view.ItemViewController', {
         else {
             me.onSaveClick(button, e, options);
         }
-    },
-
-    onSaveSuccess: function(batch, options) {
-        var win = this.configuration.window;
-        var pgeDetails = win.down('#pgeDetails');
-        var grdUnitOfMeasure = pgeDetails.down('#grdUnitOfMeasure');
-        grdUnitOfMeasure.store.load();
     },
 
     // <editor-fold desc="Details Tab Methods and Event Handlers">
@@ -1395,8 +1386,10 @@ Ext.define('Inventory.view.ItemViewController', {
             return;
 
         var grid = combo.up('grid');
+        var win = grid.up('window');
         var plugin = grid.getPlugin('cepDetailUOM');
         var current = plugin.getActiveRecord();
+        var uomConversion = win.viewModel.storeInfo.uomConversion;
 
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
@@ -1411,19 +1404,25 @@ Ext.define('Inventory.view.ItemViewController', {
                 }
             });
             if (exists) {
-                var currUOM = exists.get('tblICUnitMeasure');
-                if (currUOM) {
-                    var conversions = currUOM.vyuICGetUOMConversions;
-                    if (!conversions) {
-                        conversions = currUOM.data.vyuICGetUOMConversions;
-                    }
-                    var selectedUOM = Ext.Array.findBy(conversions, function (row) {
-                        if (row.intUnitMeasureId === records[0].get('intUnitMeasureId')) {
+                if (uomConversion) {
+                    var index = uomConversion.data.findIndexBy(function (row) {
+                        if (row.get('intUnitMeasureId') === exists.get('intUnitMeasureId')) {
                             return true;
                         }
                     });
-                    if (selectedUOM) {
-                        current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                    if (index >= 0) {
+                        var stockUOM = uomConversion.getAt(index);
+                        var conversions = stockUOM.data.vyuICGetUOMConversions;
+                        if (conversions) {
+                            var selectedUOM = Ext.Array.findBy(conversions, function (row) {
+                                if (row.intUnitMeasureId === current.get('intUnitMeasureId')) {
+                                    return true;
+                                }
+                            });
+                            if (selectedUOM) {
+                                current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                            }
+                        }
                     }
                 }
             }
@@ -1445,7 +1444,6 @@ Ext.define('Inventory.view.ItemViewController', {
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
-
             var current = grid.view.getRecord(rowIndex);
 
             if (checked === true){

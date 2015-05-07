@@ -147,6 +147,10 @@ Ext.define('Inventory.view.ItemViewModel', {
         uomUnitMeasure: {
             type: 'icbuffereduom'
         },
+        uomConversion: {
+            autoLoad: true,
+            type: 'icbuffereduom'
+        },
         weightUOM: {
             type: 'icbuffereduom'
         },
