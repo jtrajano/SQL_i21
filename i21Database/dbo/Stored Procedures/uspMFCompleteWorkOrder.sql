@@ -106,7 +106,7 @@ BEGIN TRY
 
 	Select @dtmCurrentDate=GetDate()
 
-	If @intSubLocationId is null
+	If @intSubLocationId is null or @intSubLocationId=0
 	Select @intSubLocationId=intSubLocationId From dbo.tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
 
 	SELECT @strLotTracking = strLotTracking
