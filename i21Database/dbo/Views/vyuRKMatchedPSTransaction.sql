@@ -25,5 +25,5 @@ SELECT psh.intMatchFuturesPSHeaderId,
  JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId
  JOIN tblRKFutOptTransaction ot1 on psd.intSFutOptTransactionId= ot1.intFutOptTransactionId
  JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=psh.intFutureMarketId AND psh.intBrokerageAccountId=bc.intBrokerageAccountId 
- JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ba.intInstrumentTypeId=1
+ JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ba.intInstrumentTypeId in(1,3) and( ot.dblStrike is null or ot.dblStrike=0)
   )t)t1
