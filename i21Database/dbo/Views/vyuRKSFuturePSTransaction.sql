@@ -22,7 +22,7 @@ SELECT
       ,ISNULL(ot.intSubBookId,0) as intSubBookId
       ,intFutOptTransactionId
       ,fm.dblContractSize
-      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0)* isnull(fm.dblContractSize,0) end as dblFutCommission
+      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId 
