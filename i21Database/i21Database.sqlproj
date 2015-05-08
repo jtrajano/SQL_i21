@@ -1570,6 +1570,7 @@
     <Build Include="dbo\Views\vyuRKDPRHedgeDailyPositionDetail.sql" />
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodityLocation.sql" />
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodity.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptPayablesAging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
