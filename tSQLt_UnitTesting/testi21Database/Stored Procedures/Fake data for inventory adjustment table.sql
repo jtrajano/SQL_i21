@@ -6,7 +6,7 @@ BEGIN
 		
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustment';	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustmentDetail', @Identity = 1;	
-	EXEC tSQLt.FakeTable 'dbo.tblICLot';	
+	EXEC tSQLt.FakeTable 'dbo.tblICLot', @Identity = 1;	
 
 	-- Item Ids
 	DECLARE @WetGrains AS INT = 1
@@ -153,6 +153,7 @@ BEGIN
 			,@LOT_STATUS_On_Hold AS INT = 2
 			,@LOT_STATUS_Quarantine AS INT = 3
 
+	SET IDENTITY_INSERT tblICLot ON
 	INSERT INTO dbo.tblICLot (
 		intLotId
 		,intItemId
@@ -206,7 +207,7 @@ BEGIN
 		,dblWeight				= NULL 
 		,intWeightUOMId			= NULL 
 		,dblWeightPerQty		= NULL 
-
+	SET IDENTITY_INSERT tblICLot OFF
 		
 	-- TODO: 
 	-- The following are the scenarios you can do within Inventory adjustment:
@@ -223,7 +224,7 @@ BEGIN
 			,@ADJUSTMENT_TYPE_UOM_CHANGE AS INT = 2
 			,@ADJUSTMENT_TYPE_ITEM_CHANGE AS INT = 3
 			,@ADJUSTMENT_TYPE_LOT_STATUS_CHANGE AS INT = 4
-			,@ADJUSTMENT_TYPE_LOT_ID_CHANGE AS INT = 5
+			,@ADJUSTMENT_TYPE_SPLIT_LOT AS INT = 5
 			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
 
 	DECLARE @intInventoryAdjustmentId AS INT 
@@ -601,6 +602,85 @@ BEGIN
 				,intLotId					= @ManualLotGrains_Lot_100001
 				,dtmExpiryDate				= '01/10/2018'
 				,dtmNewExpiryDate			= '05/12/2018'
+	END
+
+	-- ADJ-7
+	BEGIN 
+		SET @intInventoryAdjustmentId = 7
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/17/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,strAdjustmentNo    = 'ADJ-7'                              
+				,strDescription     = 'Split Lot. Split to the same Item UOM, Weight, and Cost.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId	
+				,intSubLocationId			
+				,intStorageLocationId		
+				,intItemId					
+				,intLotId					
+				,strNewLotNumber
+				,intItemUOMId
+				,dblQuantity
+				,dblAdjustByQuantity
+				,dblNewQuantity
+				,intNewItemUOMId
+				,dblNewSplitLotQuantity
+				,intWeightUOMId
+				,dblWeight
+				,intNewWeightUOMId
+				,dblNewWeight
+				,dblWeightPerQty
+				,dblNewWeightPerQty
+				,dblCost
+				,dblNewCost
+				,intNewLocationId
+				,intNewSubLocationId
+				,intNewStorageLocationId
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId		= @StorageSilo_RM_DL
+				,intItemId					= @ManualLotGrains
+				,intLotId					= @ManualLotGrains_Lot_100001
+				,strNewLotNumber			= 'ABC-123'
+				,intItemUOMId				= @ManualGrains_25KgBagUOM
+				,dblQuantity				= 1000
+				,dblAdjustByQuantity		= -500
+				,dblNewQuantity				= 500
+				,intNewItemUOMId			= NULL 
+				,dblNewSplitLotQuantity		= NULL 
+				,intWeightUOMId				= @ManualGrains_PoundUOM 
+				,dblWeight					= 55115.60
+				,intNewWeightUOMId			= NULL 
+				,dblNewWeight				= NULL 
+				,dblWeightPerQty			= 55.1156
+				,dblNewWeightPerQty			= NULL 
+				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblNewCost					= NULL 
+				,intNewLocationId			= NULL 
+				,intNewSubLocationId		= NULL 
+				,intNewStorageLocationId	= NULL 
+
+
 	END
 
 END 

@@ -154,6 +154,7 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblValue 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
@@ -181,6 +182,7 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblValue 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
@@ -208,6 +210,7 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblValue 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
@@ -244,7 +247,8 @@ BEGIN
 				,dtmDate  
 				,dblQty  
 				,dblUOMQty  
-				,dblCost  
+				,dblCost
+				,dblValue
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  

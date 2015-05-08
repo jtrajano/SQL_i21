@@ -98,9 +98,11 @@ BEGIN
 			,strLotAlias			= SourceLot.strLotAlias
 			,intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intSubLocationId		= Detail.intNewSubLocationId
-			,intStorageLocationId	= Detail.intNewStorageLocationId
-			,dblQty					= Detail.dblNewSplitLotQuantity
+			,intSubLocationId		= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
+			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
+			,dblQty					=	CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) = 0 THEN ISNULL(Detail.dblAdjustByQuantity, 0) * -1
+												ELSE Detail.dblNewSplitLotQuantity
+										END
 			,intItemUOMId			= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
 			,dblWeight				=	
 										CASE	WHEN ISNULL(Detail.dblNewWeight, 0) = 0 THEN 

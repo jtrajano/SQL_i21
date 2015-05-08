@@ -164,7 +164,8 @@ BEGIN
 			,dtmDate			
 			,dblQty				
 			,dblUOMQty			
-			,dblCost  
+			,dblCost 
+			,dblValue  
 			,dblSalesPrice  
 			,intCurrencyId  
 			,dblExchangeRate  

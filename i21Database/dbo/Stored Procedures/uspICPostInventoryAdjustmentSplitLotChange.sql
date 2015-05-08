@@ -97,6 +97,7 @@ BEGIN
 			,dblQty				
 			,dblUOMQty			
 			,dblCost  
+			,dblValue
 			,dblSalesPrice  
 			,intCurrencyId  
 			,dblExchangeRate  
@@ -130,6 +131,7 @@ BEGIN
 																Detail.dblNewCost
 													END 													
 										END 
+			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -158,7 +160,8 @@ SELECT	intItemId
 		,dtmDate			
 		,dblQty				
 		,dblUOMQty			
-		,dblCost  
+		,dblCost 
+		,dblValue
 		,dblSalesPrice  
 		,intCurrencyId  
 		,dblExchangeRate  

@@ -986,6 +986,18 @@
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedExpiryDate for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedExpiryDate for error 51101.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedExpiryDate for updating items in the adjustment detail.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for calling uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for the basics.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for creating a new lot number.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

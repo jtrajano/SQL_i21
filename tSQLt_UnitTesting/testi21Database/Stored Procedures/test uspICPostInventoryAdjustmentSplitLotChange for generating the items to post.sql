@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentQtyChange on adjusting the Qty of a Lot item]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post]
 AS
 BEGIN
 	-- Item Ids
@@ -17,7 +17,7 @@ BEGIN
 			,@BetterHaven AS INT = 3
 			,@InvalidLocation AS INT = -1
 
-	-- Sub-locations Ids
+	-- Declare the variables for sub-locations
 	DECLARE @Raw_Materials_SubLocation_DefaultLocation AS INT = 1
 			,@FinishedGoods_SubLocation_DefaultLocation AS INT = 2
 			,@Raw_Materials_SubLocation_NewHaven AS INT = 3
@@ -25,7 +25,7 @@ BEGIN
 			,@Raw_Materials_SubLocation_BetterHaven AS INT = 5
 			,@FinishedGoods_SubLocation_BetterHaven AS INT = 6
 
-	-- Storage locations Ids
+	-- Declare the variables for storage locations
 	DECLARE @StorageSilo_RM_DL AS INT = 1
 			,@StorageSilo_FG_DL AS INT = 2
 			,@StorageSilo_RM_NH AS INT = 3
@@ -33,7 +33,24 @@ BEGIN
 			,@StorageSilo_RM_BH AS INT = 5
 			,@StorageSilo_FG_BH AS INT = 6
 
-	-- Item-Location Ids
+	-- Declare the variables for the Item UOM Ids
+	DECLARE @WetGrains_BushelUOMId AS INT = 1
+			,@StickyGrains_BushelUOMId AS INT = 2
+			,@PremiumGrains_BushelUOMId AS INT = 3
+			,@ColdGrains_BushelUOMId AS INT = 4
+			,@HotGrains_BushelUOMId AS INT = 5
+			,@ManualLotGrains_BushelUOMId AS INT = 6
+			,@SerializedLotGrains_BushelUOMId AS INT = 7
+
+			,@WetGrains_PoundUOMId AS INT = 8
+			,@StickyGrains_PoundUOMId AS INT = 9
+			,@PremiumGrains_PoundUOMId AS INT = 10
+			,@ColdGrains_PoundUOMId AS INT = 11
+			,@HotGrains_PoundUOMId AS INT = 12
+			,@ManualLotGrains_PoundUOMId AS INT = 13
+			,@SerializedLotGrains_PoundUOMId AS INT = 14
+
+	-- Declare Item-Locations
 	DECLARE @WetGrains_DefaultLocation AS INT = 1
 			,@StickyGrains_DefaultLocation AS INT = 2
 			,@PremiumGrains_DefaultLocation AS INT = 3
@@ -55,7 +72,6 @@ BEGIN
 			,@ManualLotGrains_DefaultLocation AS INT = 16
 			,@SerializedLotGrains_DefaultLocation AS INT = 17
 
-	-- UOM Ids
 	DECLARE	@UOM_Bushel AS INT = 1
 			,@UOM_Pound AS INT = 2
 			,@UOM_Kg AS INT = 3
@@ -63,15 +79,13 @@ BEGIN
 			,@UOM_10LbBag AS INT = 5
 			,@UOM_Ton AS INT = 6
 
-	-- Unit Qty's
 	DECLARE @BushelUnitQty AS NUMERIC(18,6) = 1
 			,@PoundUnitQty AS NUMERIC(18,6) = 1
 			,@KgUnitQty AS NUMERIC(18,6) = 2.20462
 			,@25KgBagUnitQty AS NUMERIC(18,6) = 55.1155
 			,@10LbBagUnitQty AS NUMERIC(18,6) = 10
 			,@TonUnitQty AS NUMERIC(18,6) = 2204.62
-
-	-- Item UOM Ids
+	
 	DECLARE @WetGrains_BushelUOM AS INT = 1,		@StickyGrains_BushelUOM AS INT = 2,		@PremiumGrains_BushelUOM AS INT = 3,
 			@ColdGrains_BushelUOM AS INT = 4,		@HotGrains_BushelUOM AS INT = 5,		@ManualGrains_BushelUOM AS INT = 6,
 			@SerializedGrains_BushelUOM AS INT = 7	
@@ -96,23 +110,49 @@ BEGIN
 			@ColdGrains_TonUOM AS INT = 39,			@HotGrains_TonUOM AS INT = 40,			@ManualGrains_TonUOM AS INT = 41,
 			@SerializedGrains_TonUOM AS INT = 42
 
-	-- Lot Ids
+	-- Create mock data for Lot Numbers
 	DECLARE @ManualLotGrains_Lot_100001 AS INT = 1
+			,@ManualLotGrains_Lot_100002 AS INT = 2
 
-	-- Transaction Type
-	DECLARE @INVENTORY_ADJUSTMENT_TYPE AS INT = 10
+	-- Lot Status
+	DECLARE @LOT_STATUS_Active AS INT = 1
+			,@LOT_STATUS_On_Hold AS INT = 2
+			,@LOT_STATUS_Quarantine AS INT = 3
+
+	-- Constant for Adjustment Types
+	DECLARE @ADJUSTMENT_TYPE_QTY_CHANGE AS INT = 1
+			,@ADJUSTMENT_TYPE_UOM_CHANGE AS INT = 2
+			,@ADJUSTMENT_TYPE_ITEM_CHANGE AS INT = 3
+			,@ADJUSTMENT_TYPE_LOT_STATUS_CHANGE AS INT = 4
+			,@ADJUSTMENT_TYPE_SPLIT_LOT AS INT = 5
+			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
+
+	DECLARE @INVENTORY_ADJUSTMENT AS INT = 10
 
 	-- Arrange 
 	BEGIN 
-		EXEC testi21Database.[Fake data for inventory adjustment table]
-			
-		DECLARE @intTransactionId AS INT = 2 -- For ADJ-2				
-		DECLARE @ItemsForQtyChangeResult AS dbo.ItemCostingTableType
+		EXEC testi21Database.[Fake open fiscal year and accounting periods];
+		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		-- Create the expected table
+		DECLARE @intTransactionId AS INT = 7
+		DECLARE @intUserId AS INT = 1
+
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
+
+		DECLARE @TestItemToPost AS ItemCostingTableType
+
+		SELECT * 
+		INTO actual 
+		FROM @TestItemToPost
+
 		SELECT * 
 		INTO expected
-		FROM @ItemsForQtyChangeResult;
+		FROM @TestItemToPost
 
 		INSERT INTO expected (
 				intItemId			
@@ -131,39 +171,56 @@ BEGIN
 				,intTransactionTypeId  
 				,intLotId 
 				,intSubLocationId
-				,intStorageLocationId		
+				,intStorageLocationId
 		)
-		SELECT 
-				intItemId				= @ManualLotGrains
+		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_PoundUOM
-				,dtmDate				= '05/14/2015'
-				,dblQty					= -13778.875 -- <-- This value is -250.00 kg converted to pounds. 
-				,dblUOMQty				= @PoundUnitQty
-				,dblCost				= 2.50
-				,dblValue				= 0.00
-				,dblSalesPrice			= 0.00
+				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,dtmDate				= '05/17/2015'
+				,dblQty					= -500.000000
+				,dblUOMQty				= 55.115500
+				,dblCost				= 2.500000
+				,dblValue				= 0
+				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
 				,dblExchangeRate		= 1
-				,intTransactionId		= 2
-				,strTransactionId		= 'ADJ-2'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_TYPE
+				,intTransactionId		= 7
+				,strTransactionId		= 'ADJ-7'
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
 				,intLotId				= @ManualLotGrains_Lot_100001
+				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId	= @StorageSilo_RM_DL
+		UNION ALL 
+		SELECT	
+				intItemId				= @ManualLotGrains
+				,intItemLocationId		= @ManualLotGrains_DefaultLocation
+				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,dtmDate				= '05/17/2015'
+				,dblQty					= 500.00
+				,dblUOMQty				= 55.115500
+				,dblCost				= 2.50
+				,dblValue				= 0
+				,dblSalesPrice			= 0
+				,intCurrencyId			= NULL 
+				,dblExchangeRate		= 1
+				,intTransactionId		= 7
+				,strTransactionId		= 'ADJ-7'
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
+				,intLotId				= 3
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
 	END 
 
 	-- Act
 	BEGIN 
-		-- Get the list of items for posting. 
-		INSERT INTO @ItemsForQtyChangeResult (
+		INSERT INTO actual (
 			intItemId			
 			,intItemLocationId	
 			,intItemUOMId		
 			,dtmDate			
 			,dblQty				
 			,dblUOMQty			
-			,dblCost 
+			,dblCost  
 			,dblValue 
 			,dblSalesPrice  
 			,intCurrencyId  
@@ -173,25 +230,22 @@ BEGIN
 			,intTransactionTypeId  
 			,intLotId 
 			,intSubLocationId
-			,intStorageLocationId		
-		)
-		EXEC dbo.uspICPostInventoryAdjustmentQtyChange 
+			,intStorageLocationId
+		) 
+		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
 			@intTransactionId
+	 		,@intUserId
 	END 
 
-	-- Assert
+	-- Assert 
 	BEGIN 
-		SELECT	* 
-		INTO	actual 
-		FROM	@ItemsForQtyChangeResult
-
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
-	END
+	END 	
 
 	-- Clean-up: remove the tables used in the unit test
-	IF OBJECT_ID('expected') IS NOT NULL 
-		DROP TABLE expected
-
 	IF OBJECT_ID('actual') IS NOT NULL 
-		DROP TABLE dbo.actual
+		DROP TABLE actual
+
+	IF OBJECT_ID('expected') IS NOT NULL 
+		DROP TABLE dbo.expected
 END 
