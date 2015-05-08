@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentSplitLotChange for creating a new lot number]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new item UOM]
 AS
 BEGIN
 	-- Item Ids
@@ -119,12 +119,22 @@ BEGIN
 			,@LOT_STATUS_On_Hold AS INT = 2
 			,@LOT_STATUS_Quarantine AS INT = 3
 
+	-- Constant for Adjustment Types
+	DECLARE @ADJUSTMENT_TYPE_QTY_CHANGE AS INT = 1
+			,@ADJUSTMENT_TYPE_UOM_CHANGE AS INT = 2
+			,@ADJUSTMENT_TYPE_ITEM_CHANGE AS INT = 3
+			,@ADJUSTMENT_TYPE_LOT_STATUS_CHANGE AS INT = 4
+			,@ADJUSTMENT_TYPE_SPLIT_LOT AS INT = 5
+			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
+
+	DECLARE @INVENTORY_ADJUSTMENT AS INT = 10
+
 	-- Arrange 
 	BEGIN 
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		DECLARE @intTransactionId AS INT = 7
+		DECLARE @intTransactionId AS INT = 11
 		DECLARE @intUserId AS INT = 1
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
@@ -134,83 +144,94 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
-		CREATE TABLE actual (
-			intLotId INT NULL 
-			,intItemId INT  NULL 
-			,intLocationId INT NULL 
-			,intItemLocationId INT NULL 
-			,intItemUOMId INT NULL 
-			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-			,intSubLocationId INT NULL 
-			,intStorageLocationId INT NULL 
-			,dblQty NUMERIC(18,6) NULL 
-			,dblLastCost NUMERIC(18,6) NULL 
-			,dtmExpiryDate DATETIME NULL
-			,strLotAlias NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-			,intLotStatusId INT NULL 
-			,dblWeight NUMERIC(18,6) NULL 
-			,intWeightUOMId INT NULL 
-			,dblWeightPerQty NUMERIC(18,6) NULL 
-		)
-		
-		CREATE TABLE expected (
-			intLotId INT NULL 
-			,intItemId INT  NULL 
-			,intLocationId INT NULL 
-			,intItemLocationId INT NULL 
-			,intItemUOMId INT NULL 
-			,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-			,intSubLocationId INT NULL 
-			,intStorageLocationId INT NULL 
-			,dblQty NUMERIC(18,6) NULL 
-			,dblLastCost NUMERIC(18,6) NULL 
-			,dtmExpiryDate DATETIME NULL
-			,strLotAlias NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-			,intLotStatusId INT NULL 
-			,dblWeight NUMERIC(18,6) NULL 
-			,intWeightUOMId INT NULL 
-			,dblWeightPerQty NUMERIC(18,6) NULL 
-		)
+		DECLARE @TestItemToPost AS ItemCostingTableType
+
+		SELECT * 
+		INTO actual 
+		FROM @TestItemToPost
+
+		SELECT * 
+		INTO expected
+		FROM @TestItemToPost
 
 		INSERT INTO expected (
-			intLotId
-			,intItemId
-			,intLocationId
-			,intItemLocationId
-			,intItemUOMId
-			,strLotNumber
-			,intSubLocationId
-			,intStorageLocationId
-			,dblQty
-			,dblLastCost
-			,dtmExpiryDate
-			,strLotAlias
-			,intLotStatusId
-			,dblWeight
-			,intWeightUOMId
-			,dblWeightPerQty		
+				intItemId			
+				,intItemLocationId	
+				,intItemUOMId		
+				,dtmDate			
+				,dblQty				
+				,dblUOMQty			
+				,dblCost  
+				,dblValue
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
 		)
-		SELECT 
-			intLotId				= (SELECT COUNT(1) + 1 FROM dbo.tblICLot)
-			,intItemId				= @ManualLotGrains
-			,intLocationId			= @Default_Location
-			,intItemLocationId		= @ManualLotGrains_DefaultLocation
-			,intItemUOMId			= @ManualGrains_25KgBagUOM
-			,strLotNumber			= 'ABC-123'
-			,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
-			,intStorageLocationId	= @StorageSilo_RM_DL
-			,dblQty					= 0 -- This is populated by uspICPostCosting
-			,dblLastCost			= NULL -- This is populated by uspICPostCosting
-			,dtmExpiryDate			= '01/10/2018'
-			,strLotAlias			= 'Fine grade raw material'
-			,intLotStatusId			= @LOT_STATUS_Active
-			,dblWeight				= 0 -- This is populated by uspICPostCosting
-			,intWeightUOMId			= @ManualGrains_PoundUOM
-			,dblWeightPerQty		= 55.1156
+		SELECT 	intItemId				= @ManualLotGrains
+				,intItemLocationId		= @ManualLotGrains_DefaultLocation
+				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,dtmDate				= '05/21/2015'
+				,dblQty					= -500.000000
+				,dblUOMQty				= 55.115500
+				,dblCost				= 2.500000
+				,dblValue				= 0
+				,dblSalesPrice			= 0
+				,intCurrencyId			= NULL 
+				,dblExchangeRate		= 1
+				,intTransactionId		= 11
+				,strTransactionId		= 'ADJ-11'
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
+				,intLotId				= @ManualLotGrains_Lot_100001
+				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId	= @StorageSilo_RM_DL
+		UNION ALL 
+		SELECT	
+				intItemId				= @ManualLotGrains
+				,intItemLocationId		= @ManualLotGrains_DefaultLocation
+				,intItemUOMId			= @ManualGrains_10LbBagUOM -- This part changed to the new item uom. 
+				,dtmDate				= '05/21/2015'
+				,dblQty					= 500.00
+				,dblUOMQty				= 10.00 -- UOM Qty also changed. It is for 10 Lbs per 10LbBag. 
+				,dblCost				= 2.50
+				,dblValue				= 0
+				,dblSalesPrice			= 0
+				,intCurrencyId			= NULL 
+				,dblExchangeRate		= 1
+				,intTransactionId		= 11
+				,strTransactionId		= 'ADJ-11'
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
+				,intLotId				= 3
+				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId	= @StorageSilo_RM_DL
 	END 
 
 	-- Act
 	BEGIN 
+		INSERT INTO actual (
+			intItemId			
+			,intItemLocationId	
+			,intItemUOMId		
+			,dtmDate			
+			,dblQty				
+			,dblUOMQty			
+			,dblCost  
+			,dblValue 
+			,dblSalesPrice  
+			,intCurrencyId  
+			,dblExchangeRate  
+			,intTransactionId  
+			,strTransactionId  
+			,intTransactionTypeId  
+			,intLotId 
+			,intSubLocationId
+			,intStorageLocationId
+		) 
 		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
 			@intTransactionId
 	 		,@intUserId
@@ -218,44 +239,6 @@ BEGIN
 
 	-- Assert 
 	BEGIN 
-		-- Get the actual 
-		INSERT INTO actual (
-				intLotId
-				,intItemId
-				,intLocationId
-				,intItemLocationId
-				,intItemUOMId
-				,strLotNumber
-				,intSubLocationId
-				,intStorageLocationId
-				,dblQty
-				,dblLastCost
-				,dtmExpiryDate
-				,strLotAlias
-				,intLotStatusId
-				,dblWeight
-				,intWeightUOMId
-				,dblWeightPerQty	
-		) 
-		SELECT	intLotId
-				,intItemId
-				,intLocationId
-				,intItemLocationId
-				,intItemUOMId
-				,strLotNumber
-				,intSubLocationId
-				,intStorageLocationId
-				,dblQty
-				,dblLastCost
-				,dtmExpiryDate
-				,strLotAlias
-				,intLotStatusId
-				,dblWeight
-				,intWeightUOMId
-				,dblWeightPerQty	
-		FROM	dbo.tblICLot 
-		WHERE	intLotId = (SELECT MAX(intLotId) FROM dbo.tblICLot) 
-
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END 	
 

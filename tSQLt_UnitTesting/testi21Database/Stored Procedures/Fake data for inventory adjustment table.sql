@@ -679,8 +679,390 @@ BEGIN
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL 
 				,intNewStorageLocationId	= NULL 
-
-
 	END
 
+	-- ADJ-8
+	BEGIN 
+		SET @intInventoryAdjustmentId = 8
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/18/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,strAdjustmentNo    = 'ADJ-8'
+				,strDescription     = 'Split Lot. Same Item UOM, Split Qty, and Weight. Different Cost.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId	
+				,intSubLocationId			
+				,intStorageLocationId		
+				,intItemId					
+				,intLotId					
+				,strNewLotNumber
+				,intItemUOMId
+				,dblQuantity
+				,dblAdjustByQuantity
+				,dblNewQuantity
+				,intNewItemUOMId
+				,dblNewSplitLotQuantity
+				,intWeightUOMId
+				,dblWeight
+				,intNewWeightUOMId
+				,dblNewWeight
+				,dblWeightPerQty
+				,dblNewWeightPerQty
+				,dblCost
+				,dblNewCost
+				,intNewLocationId
+				,intNewSubLocationId
+				,intNewStorageLocationId
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId		= @StorageSilo_RM_DL
+				,intItemId					= @ManualLotGrains
+				,intLotId					= @ManualLotGrains_Lot_100001
+				,strNewLotNumber			= 'ABC-123'
+				,intItemUOMId				= @ManualGrains_25KgBagUOM
+				,dblQuantity				= 1000
+				,dblAdjustByQuantity		= -500
+				,dblNewQuantity				= 500
+				,intNewItemUOMId			= NULL 
+				,dblNewSplitLotQuantity		= NULL 
+				,intWeightUOMId				= @ManualGrains_PoundUOM 
+				,dblWeight					= 55115.60
+				,intNewWeightUOMId			= NULL 
+				,dblNewWeight				= NULL 
+				,dblWeightPerQty			= 55.1156
+				,dblNewWeightPerQty			= NULL 
+				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblNewCost					= 3.50
+				,intNewLocationId			= NULL 
+				,intNewSubLocationId		= NULL 
+				,intNewStorageLocationId	= NULL 
+	END
+
+	-- ADJ-9
+	BEGIN 
+		SET @intInventoryAdjustmentId = 9
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/19/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,strAdjustmentNo    = 'ADJ-9'
+				,strDescription     = 'Split Lot. Same Item UOM, Split Qty, and Cost. Different Weight.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId	
+				,intSubLocationId			
+				,intStorageLocationId		
+				,intItemId					
+				,intLotId					
+				,strNewLotNumber
+				,intItemUOMId
+				,dblQuantity
+				,dblAdjustByQuantity
+				,dblNewQuantity
+				,intNewItemUOMId
+				,dblNewSplitLotQuantity
+				,intWeightUOMId
+				,dblWeight
+				,intNewWeightUOMId
+				,dblNewWeight
+				,dblWeightPerQty
+				,dblNewWeightPerQty
+				,dblCost
+				,dblNewCost
+				,intNewLocationId
+				,intNewSubLocationId
+				,intNewStorageLocationId
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId		= @StorageSilo_RM_DL
+				,intItemId					= @ManualLotGrains
+				,intLotId					= @ManualLotGrains_Lot_100001
+				,strNewLotNumber			= 'ABC-123'
+				,intItemUOMId				= @ManualGrains_25KgBagUOM
+				,dblQuantity				= 1000
+				,dblAdjustByQuantity		= -500
+				,dblNewQuantity				= 500
+				,intNewItemUOMId			= NULL 
+				,dblNewSplitLotQuantity		= NULL 
+				,intWeightUOMId				= @ManualGrains_PoundUOM 
+				,dblWeight					= 55115.60
+				,intNewWeightUOMId			= NULL 
+				,dblNewWeight				= 27500.00
+				,dblWeightPerQty			= 55.1156
+				,dblNewWeightPerQty			= NULL 
+				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblNewCost					= NULL 
+				,intNewLocationId			= NULL 
+				,intNewSubLocationId		= NULL 
+				,intNewStorageLocationId	= NULL 
+	END
+
+	-- ADJ-10
+	BEGIN 
+		SET @intInventoryAdjustmentId = 10
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/20/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,strAdjustmentNo    = 'ADJ-10'
+				,strDescription     = 'Split Lot. Same Item UOM, Weight, and Cost. Different Split Qty.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId	
+				,intSubLocationId			
+				,intStorageLocationId		
+				,intItemId					
+				,intLotId					
+				,strNewLotNumber
+				,intItemUOMId
+				,dblQuantity
+				,dblAdjustByQuantity
+				,dblNewQuantity
+				,intNewItemUOMId
+				,dblNewSplitLotQuantity
+				,intWeightUOMId
+				,dblWeight
+				,intNewWeightUOMId
+				,dblNewWeight
+				,dblWeightPerQty
+				,dblNewWeightPerQty
+				,dblCost
+				,dblNewCost
+				,intNewLocationId
+				,intNewSubLocationId
+				,intNewStorageLocationId
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId		= @StorageSilo_RM_DL
+				,intItemId					= @ManualLotGrains
+				,intLotId					= @ManualLotGrains_Lot_100001
+				,strNewLotNumber			= 'ABC-123'
+				,intItemUOMId				= @ManualGrains_25KgBagUOM
+				,dblQuantity				= 1000
+				,dblAdjustByQuantity		= -500
+				,dblNewQuantity				= 500
+				,intNewItemUOMId			= NULL 
+				,dblNewSplitLotQuantity		= 400
+				,intWeightUOMId				= @ManualGrains_PoundUOM 
+				,dblWeight					= 55115.60
+				,intNewWeightUOMId			= NULL 
+				,dblNewWeight				= NULL
+				,dblWeightPerQty			= 55.1156
+				,dblNewWeightPerQty			= NULL 
+				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblNewCost					= NULL 
+				,intNewLocationId			= NULL 
+				,intNewSubLocationId		= NULL  
+				,intNewStorageLocationId	= NULL 
+	END
+
+	-- ADJ-11
+	BEGIN 
+		SET @intInventoryAdjustmentId = 11
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/21/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,strAdjustmentNo    = 'ADJ-11'
+				,strDescription     = 'Split Lot. Same Weight, Split Qty, and Cost. Different Item UOM.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId	
+				,intSubLocationId			
+				,intStorageLocationId		
+				,intItemId					
+				,intLotId					
+				,strNewLotNumber
+				,intItemUOMId
+				,dblQuantity
+				,dblAdjustByQuantity
+				,dblNewQuantity
+				,intNewItemUOMId
+				,dblNewSplitLotQuantity
+				,intWeightUOMId
+				,dblWeight
+				,intNewWeightUOMId
+				,dblNewWeight
+				,dblWeightPerQty
+				,dblNewWeightPerQty
+				,dblCost
+				,dblNewCost
+				,intNewLocationId
+				,intNewSubLocationId
+				,intNewStorageLocationId
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId		= @StorageSilo_RM_DL
+				,intItemId					= @ManualLotGrains
+				,intLotId					= @ManualLotGrains_Lot_100001
+				,strNewLotNumber			= 'ABC-123'
+				,intItemUOMId				= @ManualGrains_25KgBagUOM
+				,dblQuantity				= 1000
+				,dblAdjustByQuantity		= -500
+				,dblNewQuantity				= 500
+				,intNewItemUOMId			= @ManualGrains_10LbBagUOM
+				,dblNewSplitLotQuantity		= NULL 
+				,intWeightUOMId				= @ManualGrains_PoundUOM 
+				,dblWeight					= 55115.60
+				,intNewWeightUOMId			= NULL 
+				,dblNewWeight				= NULL
+				,dblWeightPerQty			= 55.1156
+				,dblNewWeightPerQty			= NULL 
+				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblNewCost					= NULL 
+				,intNewLocationId			= NULL 
+				,intNewSubLocationId		= NULL  
+				,intNewStorageLocationId	= NULL 
+	END
+
+	-- ADJ-12
+	BEGIN 
+		SET @intInventoryAdjustmentId = 12
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/22/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,strAdjustmentNo    = 'ADJ-12'
+				,strDescription     = 'Split Lot. Same Item UOM, Weight, Split Qty, and Cost. Different Weight UOM.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId	
+				,intSubLocationId			
+				,intStorageLocationId		
+				,intItemId					
+				,intLotId					
+				,strNewLotNumber
+				,intItemUOMId
+				,dblQuantity
+				,dblAdjustByQuantity
+				,dblNewQuantity
+				,intNewItemUOMId
+				,dblNewSplitLotQuantity
+				,intWeightUOMId
+				,dblWeight
+				,intNewWeightUOMId
+				,dblNewWeight
+				,dblWeightPerQty
+				,dblNewWeightPerQty
+				,dblCost
+				,dblNewCost
+				,intNewLocationId
+				,intNewSubLocationId
+				,intNewStorageLocationId
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId		= @StorageSilo_RM_DL
+				,intItemId					= @ManualLotGrains
+				,intLotId					= @ManualLotGrains_Lot_100001
+				,strNewLotNumber			= 'ABC-123'
+				,intItemUOMId				= @ManualGrains_25KgBagUOM
+				,dblQuantity				= 1000
+				,dblAdjustByQuantity		= -500
+				,dblNewQuantity				= 500
+				,intNewItemUOMId			= NULL 
+				,dblNewSplitLotQuantity		= NULL 
+				,intWeightUOMId				= @ManualGrains_PoundUOM 
+				,dblWeight					= 55115.60
+				,intNewWeightUOMId			= @ManualGrains_KgUOM
+				,dblNewWeight				= NULL
+				,dblWeightPerQty			= 55.1156
+				,dblNewWeightPerQty			= NULL 
+				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblNewCost					= NULL 
+				,intNewLocationId			= NULL 
+				,intNewSubLocationId		= NULL  
+				,intNewStorageLocationId	= NULL 
+	END
 END 
