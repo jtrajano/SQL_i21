@@ -1563,6 +1563,7 @@
     <Build Include="dbo\Stored Procedures\uspSCStorageUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStartCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPostPaycheck.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
