@@ -94,7 +94,7 @@ BEGIN
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1			
 
-				SET @strRowDescription = '          Total ' + @strAccountType + ' :'
+				SET @strRowDescription = '          Total ' + REPLACE(REPLACE(@strAccountType,'Expense','Expenses'),'Revenue','Revenues') + ' :'
 
 				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Row Calculation', '', '', @strRelatedRows, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort	
 				
@@ -130,11 +130,6 @@ BEGIN
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
-				
-				SET @intRefNo = @intRefNo + 1
-				SET @intSort = @intSort + 1
-
 				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
 								
 				SET @intRefNo = @intRefNo + 1
@@ -151,7 +146,7 @@ BEGIN
 
 	IF (SELECT TOP 1 1 FROM #TempAccountType) IS NULL
 		BEGIN
-			SET @strRowFilter = 'R' + CAST(@intRefNo_Expense as NVARCHAR(25)) + ' - R' + CAST(@intRefNo_Revenue as NVARCHAR(25))
+			SET @strRowFilter = 'R' + CAST(@intRefNo_Revenue as NVARCHAR(25)) + ' - R' + CAST(@intRefNo_Expense as NVARCHAR(25))
 			EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '          NET PROFIT(LOSS) :', 'Row Calculation', '', '', @strRowFilter, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort
 			
 			SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
