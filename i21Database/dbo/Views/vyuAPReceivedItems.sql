@@ -99,7 +99,7 @@ A.intEntityVendorId
 ,B.intItemId
 ,C.strItemNo
 ,C.strDescription
-,B.dblOrderQty
+,B.dblOpenReceive
 ,B.dblReceived
 ,B.dblOpenReceive
 ,B.intInventoryReceiptItemId
