@@ -42,7 +42,7 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
 		,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
 		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
-		,@ADJUSTMENT_TYPE_LotIdChange AS INT = 5
+		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
 
 -- Read the transaction info   
@@ -235,7 +235,7 @@ BEGIN
 	-----------------------------------
 	--  Call Split Lot Change
 	-----------------------------------
-	IF @adjustmentType = @ADJUSTMENT_TYPE_LotIdChange
+	IF @adjustmentType = @ADJUSTMENT_TYPE_SplitLot
 	BEGIN 
 		INSERT INTO @ItemsForAdjust (  
 				intItemId  
@@ -273,7 +273,7 @@ BEGIN
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
+	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
 	BEGIN 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -316,7 +316,7 @@ END
 IF @ysnPost = 0   
 BEGIN   
 	-- Call the unpost routine 
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
+	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
 	BEGIN 
 		-- Call the post routine 
 		INSERT INTO @GLEntries (
@@ -379,7 +379,7 @@ END
 --------------------------------------------------------------------------------------------  
 IF	@ysnRecap = 1	
 BEGIN 
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
+	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
 		EXEC dbo.uspCMPostRecap @GLEntries

@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateLotNumberOnInventoryAdjustmentSplitLot]
 	@intTransactionId INT 
 	,@intUserId INT = NULL 
-	,@ysnPost BIT = 1
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -47,7 +46,7 @@ BEGIN
 		FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 					ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 				INNER JOIN dbo.tblICItem Item
-					ON Detail.intItemId = Item.intItemId
+					ON Item.intItemId = Detail.intItemId
 				INNER JOIN dbo.tblICItemUOM ItemUOM
 					ON ItemUOM.intItemId = Detail.intItemId
 				INNER JOIN dbo.tblICUnitMeasure UOM
@@ -103,7 +102,16 @@ BEGIN
 			,intStorageLocationId	= Detail.intNewStorageLocationId
 			,dblQty					= Detail.dblNewSplitLotQuantity
 			,intItemUOMId			= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
-			,dblWeight				= ISNULL(Detail.dblNewWeight, ABS(SourceLot.dblWeightPerQty * Detail.dblNewSplitLotQuantity))
+			,dblWeight				=	
+										CASE	WHEN ISNULL(Detail.dblNewWeight, 0) = 0 THEN 
+													ABS(
+														ISNULL(SourceLot.dblWeightPerQty, 0) * 
+														CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) = 0 THEN ISNULL(Detail.dblAdjustByQuantity, 0)
+																ELSE Detail.dblNewSplitLotQuantity
+														END 
+													)
+												ELSE Detail.dblNewWeight
+										END 
 			,intWeightUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId)
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate
 			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate

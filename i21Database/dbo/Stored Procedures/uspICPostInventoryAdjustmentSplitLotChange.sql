@@ -11,12 +11,6 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @INVENTORY_ADJUSTMENT_TYPE AS INT = 10
 DECLARE @ItemsForQtyChange AS ItemCostingTableType
-DECLARE @strTransactionId AS NVARCHAR(50)
-
-SELECT TOP 1 
-		@strTransactionId = strAdjustmentNo
-FROM	dbo.tblICInventoryAdjustment
-WHERE	intInventoryAdjustmentId = @intTransactionId
 
 --------------------------------------------------------------------------------
 -- VALIDATIONS
@@ -48,7 +42,7 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= Detail.intItemUOMId 
+			,intItemUOMId			= ItemUOM.intItemUOMId 
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
 			,dblUOMQty				= ItemUOM.dblUnitQty
@@ -68,7 +62,8 @@ BEGIN
 				ON ItemLocation.intLocationId = Header.intLocationId 
 				AND ItemLocation.intItemId = Detail.intItemId
 			LEFT JOIN dbo.tblICItemUOM ItemUOM
-				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
+				ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+				AND ItemUOM.intItemId = Detail.intItemId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) <> 0 
@@ -81,9 +76,8 @@ BEGIN
 	DECLARE @intCreateUpdateLotError AS INT 
 
 	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryAdjustmentSplitLot 
-			@strTransactionId
+			@intTransactionId
 			,@intUserId
-			,@ysnPost = 1
 
 	IF @intCreateUpdateLotError <> 0
 	BEGIN 
@@ -117,18 +111,32 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= ItemUOM.intItemUOMId 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= ISNULL(Detail.dblNewSplitLotQuantity, Detail.dblAdjustByQuantity * -1)
+			,dblQty					= 
+										CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) = 0 THEN Detail.dblAdjustByQuantity * -1
+												ELSE Detail.dblNewSplitLotQuantity
+										END			
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= ISNULL(Detail.dblNewCost, Detail.dblCost)
-										-- TODO. Need to recompute the cost if split is for a different item uom. 
-										-- Ex. 50lb bag to 25 kg bag. 
+			,dblCost				= 
+										CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) = 0 THEN 
+													CASE	WHEN ISNULL(Detail.dblNewCost, 0) = 0 THEN Detail.dblCost
+															ELSE Detail.dblNewCost
+													END 
+												ELSE 
+													CASE	WHEN ISNULL(Detail.dblNewCost, 0) = 0 THEN	
+																-- Redistribute the cost from the qty to adjust to the Qty of the Split lot. 
+																ABS(Detail.dblCost * Detail.dblAdjustByQuantity / Detail.dblNewSplitLotQuantity)		
+															ELSE
+																-- The user manually computed the new cost for the split lot.  
+																Detail.dblNewCost
+													END 													
+										END 
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,strTransactionId		= Header.strAdjustmentNo
 			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_TYPE
-			,intLotId				= Detail.intLotId
+			,intLotId				= Detail.intNewLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
