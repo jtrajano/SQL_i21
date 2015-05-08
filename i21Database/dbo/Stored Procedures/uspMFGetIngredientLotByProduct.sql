@@ -5,7 +5,7 @@
 	)
 AS
 BEGIN
-	SELECT L.intLotId
+	SELECT DISTINCT L.intLotId
 		,L.intItemId
 		,L.strLotNumber
 		,I.strItemNo
@@ -14,6 +14,7 @@ BEGIN
 		,L.intWeightUOMId
 		,U.strUnitMeasure
 		,IU.intUnitMeasureId
+		,L.dtmDateCreated 
 	FROM dbo.tblMFRecipe R
 	JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 		AND R.intItemId = @intItemId
