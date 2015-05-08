@@ -1,6 +1,6 @@
 CREATE VIEW vyuLGGenerateLoadOpenAllocationDetails
 AS
-	SELECT	AH.intRefernceNumber,
+	SELECT	AH.intReferenceNumber,
 			AH.intAllocationHeaderId,
 
 			AD.intAllocationDetailId,
