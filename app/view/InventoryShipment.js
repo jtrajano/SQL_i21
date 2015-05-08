@@ -157,6 +157,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         xtype: 'button',
                                         tabIndex: -1,
                                         height: 57,
+                                        hidden: true,
                                         itemId: 'btnDuplicate',
                                         width: 59,
                                         iconAlign: 'top',
@@ -174,17 +175,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                         iconCls: 'large-customer',
                                         scale: 'large',
                                         text: 'Customer'
-                                    },
-                                    {
-                                        xtype: 'button',
-                                        tabIndex: -1,
-                                        height: 57,
-                                        itemId: 'btnNotes',
-                                        width: 50,
-                                        iconAlign: 'top',
-                                        iconCls: 'large-notes',
-                                        scale: 'large',
-                                        text: 'Notes'
                                     },
                                     {
                                         xtype: 'tbseparator',

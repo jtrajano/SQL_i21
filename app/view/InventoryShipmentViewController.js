@@ -370,6 +370,22 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onCustomerClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current.get('intEntityCustomerId') !== null) {
+            iRely.Functions.openScreen('EntityManagement.view.Entity', {
+                filters: [
+                    {
+                        column: 'intEntityId',
+                        value: current.get('intEntityCustomerId')
+                    }
+                ]
+            });
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -395,7 +411,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboLotWeightUOM": {
                 select: this.onLotSelect
+            },
+            "#btnCustomer": {
+                click: this.onCustomerClick
             }
+
         })
     }
 
