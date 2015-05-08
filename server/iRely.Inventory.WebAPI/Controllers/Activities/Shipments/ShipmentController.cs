@@ -132,5 +132,24 @@ namespace iRely.Invetory.WebAPI.Controllers
                 }
             });
         }
+
+        [HttpPost]
+        public HttpResponseMessage Ship(Inventory.BRL.Common.Posting_RequestModel shipment)
+        {
+            var result = _ShipmentBRL.PostTransaction(shipment, shipment.isRecap);
+            _ShipmentBRL.Dispose();
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                data = shipment,
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
     }
 }
