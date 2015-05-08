@@ -1564,7 +1564,11 @@
     <Build Include="dbo\Stored Procedures\uspMFStartCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPostPaycheck.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipment.sql" />
+<<<<<<< HEAD
     <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonthList.sql" />
+=======
+    <Build Include="dbo\Tables\tblMFProductionSummary.sql" />
+>>>>>>> a0dd092b3ad8d5097589ae7fbb398df68588b408
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -60,10 +60,10 @@ BEGIN TRY
 			dblAdjAmount			NUMERIC(12, 4)'dblAdjAmount[not(@xsi:nil = "true")]',
 			dblContractPrice		NUMERIC(8, 4) 'dblContractPrice[not(@xsi:nil = "true")]',
 			dblCancellationPrice	NUMERIC(8, 4) 'dblCancellationPrice[not(@xsi:nil = "true")]',
-			dblGainLossPerUnit		NUMERIC(8, 4) 'dblGainLossPerUnit[not(@xsi:nil = "true")]',
+			dblGainLossPerUnit		NUMERIC(10, 4) 'dblGainLossPerUnit[not(@xsi:nil = "true")]',
 			dblCancelFeePerUnit		NUMERIC(8, 4) 'dblCancelFeePerUnit[not(@xsi:nil = "true")]',
-			dblCancelFeeFlatAmount	NUMERIC(8, 4) 'dblCancelFeeFlatAmount[not(@xsi:nil = "true")]',
-			dblTotalGainLoss		NUMERIC(8, 4) 'dblTotalGainLoss[not(@xsi:nil = "true")]',
+			dblCancelFeeFlatAmount	NUMERIC(10, 4) 'dblCancelFeeFlatAmount[not(@xsi:nil = "true")]',
+			dblTotalGainLoss		NUMERIC(18, 4) 'dblTotalGainLoss[not(@xsi:nil = "true")]',
 			intUserId				INT ,
 			dtmCreatedDate			DATETIME
 	)  

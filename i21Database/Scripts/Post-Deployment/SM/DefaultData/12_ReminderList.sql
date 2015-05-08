@@ -1,7 +1,7 @@
 ﻿GO
     TRUNCATE TABLE [dbo].[tblSMReminderList]
 GO
-    INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strDescription], [strQuery], [strNamespace], [intSort])
+    INSERT INTO [dbo].[tblSMReminderList] ([strReminder], [strType], [strDescription], [strQuery], [strNamespace], [strParameter], [intSort])
     SELECT [strReminder]        =        N'Process',
 		   [strType]        	=        N'Invoice',
            [strDescription]     =        N'{0} {1} {2} {3}',
@@ -10,6 +10,7 @@ GO
 										  'AND dtmNextProcess >= dtmStartDate ' + 
 										  'AND dtmNextProcess <= dtmEndDate',
            [strNamespace]       =        N'i21.view.RecurringTransaction', 
+		   [strParameter]		=		 NULL,
            [intSort]            =        1
 	UNION ALL
 	SELECT [strReminder]        =        N'Process',
@@ -20,5 +21,14 @@ GO
 										  'AND dtmNextProcess >= dtmStartDate ' + 
 										  'AND dtmNextProcess <= dtmEndDate',
            [strNamespace]       =        N'i21.view.RecurringTransaction', 
+		   [strParameter]		=		 NULL,
            [intSort]            =        2
+	UNION ALL
+	SELECT [strReminder]        =        N'Approve',
+		   [strType]        	=        N'Bill',
+           [strDescription]     =        N'{0} {1} {2} {3}',
+           [strQuery]  			=        N'SELECT * FROM vyuAPBillForApproval WHERE intEntityApproverId = {0} AND ysnApproved = 0',
+           [strNamespace]       =        N'AccountsPayable.view.VendorExpenseApproval', 
+		   [strParameter]		=		 N'intEntityId', 
+           [intSort]            =        3
 GO

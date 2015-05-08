@@ -11,6 +11,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[ysnAccrue] [bit] NOT NULL CONSTRAINT [DF_tblCTContractCost_ysnAccrue]  DEFAULT ((1)),
 	[ysnMTM] [bit] NULL,
 	[ysnPrice] [bit] NULL,
+	[ysnFreight] [bit] NULL,
  CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED 
 (
 	[intContractCostId] ASC
