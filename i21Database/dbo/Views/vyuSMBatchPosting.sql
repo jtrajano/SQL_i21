@@ -12,7 +12,8 @@ FROM
 (
 	SELECT strJournalType as strTransactionType, intJournalId, strJournalId, intEntityId, dtmDate, strDescription
 	FROM tblGLJournal 
-	WHERE strJournalType IN ('Adjusted Origin Journal', 'General Journal', 'Audit Adjustment', 'Imported Journal', 'Origin Journal', 'Recurring Journal' ) 
+	WHERE strJournalType IN ('Adjusted Origin Journal', 'General Journal', 'Audit Adjustment', 'Imported Journal', 'Origin Journal', 'Recurring Journal') 
+	AND strTransactionType <> 'Template'
 	AND ysnPosted = 0
 	--UNION ALL
 	--SELECT 'Bill', intBillId, strBillId, intEntityId, dtmDate, NULL as strReference FROM tblAPBill WHERE ysnPosted = 0
