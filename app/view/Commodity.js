@@ -746,8 +746,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     itemId: 'grvUom'
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel',
-                                                    mode: 'SINGLE'
+                                                    selType: 'checkboxmodel'
                                                 }),
                                                 plugins: [
                                                     {
