@@ -99,7 +99,7 @@ BEGIN
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1			
 
-				SET @strRowDescription = '          Total ' + @strAccountType + ' :'
+				SET @strRowDescription = '          Total ' + REPLACE(REPLACE(@strAccountType,'Asset','Assets'),'Liability','Liabilities') + ' :'
 
 				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Row Calculation', '', '', @strRelatedRows, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort	
 				
@@ -135,10 +135,14 @@ BEGIN
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
+
+				IF(@strAccountType != 'Liability' and @strAccountType != 'Equity')
+				BEGIN
+					EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
 				
-				SET @intRefNo = @intRefNo + 1
-				SET @intSort = @intSort + 1
+					SET @intRefNo = @intRefNo + 1
+					SET @intSort = @intSort + 1
+				END			
 
 				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
 								
