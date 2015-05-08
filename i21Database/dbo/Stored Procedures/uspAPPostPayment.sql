@@ -400,10 +400,10 @@ ELSE
 		--RECAP
 		--TODO:
 		--DELETE TABLE PER Session
-		DELETE FROM tblGLDetailRecap
+		DELETE FROM tblGLPostRecap
 			WHERE intTransactionId IN (SELECT intPaymentId FROM #tmpPayablePostData);
 
-		INSERT INTO tblGLDetailRecap (
+		INSERT INTO tblGLPostRecap(
 			 [strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
@@ -426,31 +426,41 @@ ELSE
 			,[strModuleName]
 			,[strTransactionForm]
 			,[strTransactionType]
+			,[strAccountId]
+			,[strAccountGroup]
 		)
 		SELECT
 			[strTransactionId]
-			,[intTransactionId]
-			,[intAccountId]
-			,[strDescription]
-			,[strJournalLineDescription]
-			,[strReference]	
-			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[dtmDate]
-			,[ysnIsUnposted]
-			,[intConcurrencyId]	
-			,[dblExchangeRate]
-			,[intUserId]
-			,[dtmDateEntered]
-			,[strBatchId]
-			,[strCode]
-			,[strModuleName]
-			,[strTransactionForm]
-			,[strTransactionType]
-		FROM @GLEntries
+			,A.[intTransactionId]
+			,A.[intAccountId]
+			,A.[strDescription]
+			,A.[strJournalLineDescription]
+			,A.[strReference]	
+			,A.[dtmTransactionDate]
+			,Debit.Value--[dblDebit]
+			,Credit.Value--[dblCredit]
+			,A.[dblDebitUnit]
+			,A.[dblCreditUnit]
+			,A.[dtmDate]
+			,A.[ysnIsUnposted]
+			,A.[intConcurrencyId]	
+			,A.[dblExchangeRate]
+			,A.[intUserId]
+			,A.[dtmDateEntered]
+			,A.[strBatchId]
+			,A.[strCode]
+			,A.[strModuleName]
+			,A.[strTransactionForm]
+			,A.[strTransactionType]
+			,B.strAccountId
+			,C.strAccountGroup
+		FROM @GLEntries A
+		INNER JOIN dbo.tblGLAccount B 
+			ON A.intAccountId = B.intAccountId
+		INNER JOIN dbo.tblGLAccountGroup C
+			ON B.intAccountGroupId = C.intAccountGroupId
+		CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
+		CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0))  Credit;
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 
