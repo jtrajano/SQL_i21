@@ -4,25 +4,38 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     config: {
         searchConfig: {
-            title:  'Search Inventory Receipt',
+            title: 'Search Inventory Receipt',
             type: 'Inventory.InventoryReceipt',
             api: {
                 read: '../Inventory/api/Receipt/SearchReceipts'
             },
             columns: [
-                {dataIndex: 'intInventoryReceiptId',text: "Receipt Id", flex: 1, defaultSort:true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
-                {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1,  dataType: 'string'},
-                {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1,  dataType: 'date', xtype: 'datecolumn'},
-                {dataIndex: 'strReceiptType',text: 'Receipt Type', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strVendorName',text: 'Vendor Name', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strLocationName',text: 'Location Name', flex: 1,  dataType: 'string'},
-                {dataIndex: 'ysnPosted',text: 'Posted', flex: 1,  dataType: 'boolean', xtype: 'checkcolumn'}
+                {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},
+                {dataIndex: 'strReceiptNumber', text: 'Receipt No', flex: 1, dataType: 'string'},
+                {dataIndex: 'dtmReceiptDate', text: 'Receipt Date', flex: 1, dataType: 'date', xtype: 'datecolumn'},
+                {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
+                {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string'},
+                {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string'},
+                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
         binding: {
             bind: {
                 title: 'Inventory Receipt - {current.strReceiptNumber}'
             },
+            btnSave: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnDelete: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnUndo: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnReceive: {
+                text: '{getReceiveButtonText}'
+            },
+
             cboReceiptType: {
                 value: '{current.strReceiptType}',
                 store: '{receiptTypes}',
@@ -80,10 +93,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboShipFrom: {
                 value: '{current.intShipFromId}',
                 store: '{shipFrom}',
-                defaultFilters: [{
-                    column: 'intEntityId',
-                    value: '{current.intVendorEntityId}'
-                }],
+                defaultFilters: [
+                    {
+                        column: 'intEntityId',
+                        value: '{current.intVendorEntityId}'
+                    }
+                ],
                 readOnly: '{current.ysnPosted}'
             },
             cboReceiver: {
@@ -98,10 +113,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboFreightTerms: {
                 value: '{current.intFreightTermId}',
                 store: '{freightTerm}',
-                defaultFilters: [{
-                    column: 'ysnActive',
-                    value: 'true'
-                }],
+                defaultFilters: [
+                    {
+                        column: 'ysnActive',
+                        value: 'true'
+                    }
+                ],
                 readOnly: '{current.ysnPosted}'
             },
             txtFobPoint: {
@@ -132,19 +149,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
 
             grdInventoryReceipt: {
-                colSourceNumber : {
+                colSourceNumber: {
                     dataIndex: 'strSourceId',
                     editor: {
                         store: '{poSource}',
-                        defaultFilters: [{
-                            column: 'ysnCompleted',
-                            value: false,
-                            conjunction: 'and'
-                        },{
-                            column: 'intEntityVendorId',
-                            value: '{current.intEntityVendorId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'ysnCompleted',
+                                value: false,
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intEntityVendorId',
+                                value: '{current.intEntityVendorId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colItemNo: {
@@ -158,15 +178,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strSubLocationName',
                     editor: {
                         store: '{subLocation}',
-                        defaultFilters: [{
-                            column: 'intCompanyLocationId',
-                            value: '{current.intLocationId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'strClassification',
-                            value: 'Inventory',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intCompanyLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'strClassification',
+                                value: 'Inventory',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colLotTracking: 'strLotTracking',
@@ -178,26 +201,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{itemUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryReceipt.selection.intItemId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'intLocationId',
-                            value: '{current.intLocationId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryReceipt.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
                         store: '{weightUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryReceipt.selection.intItemId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryReceipt.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colUnitCost: 'dblUnitCost',
@@ -214,11 +242,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{lotUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{currentReceiptItem.intItemId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{currentReceiptItem.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colLotQuantity: 'dblQuantity',
@@ -229,15 +259,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strStorageLocation',
                     editor: {
                         store: '{storageLocation}',
-                        defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{current.intLocationId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'intSubLocationId',
-                            value: '{currentReceiptItem.intSubLocationId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{currentReceiptItem.intSubLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colLotUnitsPallet: 'intUnitPallet',
@@ -250,11 +283,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strParentLotId',
                     editor: {
                         store: '{parentLots}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{currentReceiptItem.intItemId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{currentReceiptItem.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colLotContainerNo: 'strContainerNo',
@@ -589,28 +624,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var grdLotTracking = win.down('#grdLotTracking');
             var itemPlugin = grdInventoryReceipt.plugins[0];
             var lotPlugin = grdLotTracking.plugins[0];
-            var btnReceive = win.down('#btnReceive');
-            var btnSave = win.down('#btnSave');
-            var btnDelete = win.down('#btnDelete');
-            var btnUndo = win.down('#btnUndo');
 
             var current = records[0];
             if (current){
                 if (current.get('ysnPosted') !== false){
                     itemPlugin.disable();
                     lotPlugin.disable();
-                    btnReceive.setText('UnReceive');
-                    btnSave.disable();
-                    btnDelete.disable();
-                    btnUndo.disable();
                 }
                 else {
                     itemPlugin.enable();
                     lotPlugin.enable();
-                    btnReceive.setText('Receive');
-                    btnSave.enable();
-                    btnDelete.enable();
-                    btnUndo.enable();
                 }
             }
 

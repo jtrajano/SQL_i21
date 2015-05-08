@@ -239,8 +239,15 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 }
                 else { return false; }
             }
+        },
+        getReceiveButtonText: function(get) {
+            if (get('current.ysnPosted')) {
+                return 'UnReceive';
+            }
+            else {
+                return 'Receive';
+            }
         }
-
     }
 
 });
