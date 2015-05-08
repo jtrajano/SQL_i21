@@ -40,6 +40,11 @@ BEGIN TRY
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId		=	@intContractDetailId 
 	
+	IF @dblAdjAmount < 0 AND @dblAdjAmount + @dblQuantity < 0
+	BEGIN
+		RAISERROR('Negative adjustment quantity should not be more than available quantity.',16,1)
+	END
+
 	INSERT INTO tblCTContractAdjustment
 	(
 			intContractDetailId,	strAdjustmentNo,		dtmAdjustmentDate,			strComment,						ysnAdjustment,		dblOldQuantity,
