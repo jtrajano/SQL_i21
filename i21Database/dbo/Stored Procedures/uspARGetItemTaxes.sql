@@ -295,36 +295,13 @@ AS
 					ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId] 
 			INNER JOIN
 				@TaxGroups FG
-					ON TG.[intTaxGroupId] = FG.[intTaxGroupId] 
+					ON TG.[intTaxGroupId] = FG.[intTaxGroupId]
+			WHERE
+				TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
+				AND (TC.[intSalesTaxAccountId] IS NOT NULL
+					AND TC.[intSalesTaxAccountId] <> 0)
 				
 			RETURN 1											
-		END	
-					
-
-	SELECT
-		 0
-		,0		[intInvoiceDetailId]
-		,0		[intTaxGroupMasterId] 
-		,0		[intTaxGroupId] 
-		,0		[intTaxCodeId]
-		,0		[intTaxClassId]				
-		,NULL	[strTaxableByOtherTaxes]
-		,NULL	[strCalculationMethod] 
-		,NULL	[numRate]
-		,NULL	[dblTax]
-		,NULL	[dblAdjustedTax]
-		,0		[intSalesTaxAccountId]								
-		,0		[ysnSeparateOnInvoice] 
-		,0		[ysnCheckoffTax]
-		,NULL	[strTaxCode] 
-				
-		--,NULL	[strTaxAgency] 
-		--,NULL	[strState] 
-		--,NULL	[strCity]
-		--,NULL	[strCountry] 
-		--,NULL	[strCounty] 
-		
-		--,NULL	[strTaxGroup] 				
-		--,NULL	[strTaxGroupMaster] 	
+		END						
 	
 	RETURN 0
