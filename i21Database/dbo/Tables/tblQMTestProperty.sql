@@ -4,8 +4,7 @@
 	[intTestId] INT NOT NULL, 
 	[intPropertyId] INT NOT NULL, 
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMTestProperty_intConcurrencyId] DEFAULT 0, 
-	[intSequenceNo] INT NOT NULL CONSTRAINT [DF_tblQMTestProperty_intSequenceNo] DEFAULT 1, 
-	[intFormulaID] INT NULL CONSTRAINT [DF_tblQMTestProperty_intFormulaID] DEFAULT 0, 
+	[intFormulaID] INT NOT NULL CONSTRAINT [DF_tblQMTestProperty_intFormulaID] DEFAULT 0, 
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMTestProperty_dtmCreated] DEFAULT GetDate(),
