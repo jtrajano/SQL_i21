@@ -27,6 +27,8 @@ CREATE TABLE #tmpReceiptBillIds (
 	UNIQUE ([intBillId])
 );
 
+BEGIN TRANSACTION
+
 INSERT INTO #tmpReceiptIds(intInventoryReceiptId) SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@receiptIds)
 
 SET @totalReceipts = (SELECT COUNT(*) FROM #tmpReceiptIds)
@@ -72,6 +74,7 @@ BEGIn
 		[dtmDateCreated], 
 		[dtmBillDate],
 		[dtmDueDate], 
+		[intCurrencyId],
 		[intAccountId], 
 		[strBillId],
 		[strReference], 
@@ -97,8 +100,9 @@ BEGIn
 		[dtmDateCreated] 		=	GETDATE(),
 		[dtmBillDate] 			=	GETDATE(),
 		[dtmDueDate] 			=	GETDATE(),
+		[intCurrencyId]			=	ISNULL(A.intCurrencyId,CAST((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency') AS INT)),
 		[intAccountId] 			=	@APAccount,
-		[strBillId]				=	@generatedBillId,
+		[strBillId]				=	@generatedBillRecordId,
 		[strReference] 			=	NULL,
 		[dblTotal] 				=	A.dblInvoiceAmount,
 		[dblAmountDue]			=	A.dblInvoiceAmount,
@@ -116,7 +120,7 @@ BEGIn
 		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId AND B.intDefaultLocationId = C.intEntityLocationId
 		WHERE B.intEntityVendorId = A.intEntityVendorId
 	) Terms
-	WHERE A.intInventoryReceiptId = @receiptId
+	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
 	SET @generatedBillId = SCOPE_IDENTITY()
 
@@ -137,10 +141,10 @@ BEGIn
 		[intItemId]				=	B.intItemId,
 		[intItemReceiptId]		=	B.intInventoryReceiptItemId,
 		[intPODetailId]			=	B.intLineNo,
-		[dblQtyOrdered]			=	B.dblOrderQty,
-		[dblQtyReceived]		=	B.dblOpenReceive,
+		[dblQtyOrdered]			=	B.dblOpenReceive - B.dblBillQty,
+		[dblQtyReceived]		=	B.dblOpenReceive - B.dblBillQty,
 		[intAccountId]			=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
-		[dblTotal]				=	B.dblLineTotal,
+		[dblTotal]				=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
 		[dblCost]				=	B.dblUnitCost,
 		[intLineNo]				=	B.intSort
 	FROM tblICInventoryReceipt A
@@ -150,7 +154,12 @@ BEGIn
 		ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation D
 		ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
-	WHERE A.intInventoryReceiptId = @receiptId
+	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
+
+	UPDATE A
+		SET A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
+	FROM tblAPBill A
+	WHERE intBillId = @generatedBillId
 
 	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId
 END
@@ -158,4 +167,14 @@ END
 ALTER TABLE tblAPBill
 	ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
+IF @@ERROR != 0
+BEGIN
+	ROLLBACK TRANSACTION
+END
+ELSE
+BEGIN
+	COMMIT TRANSACTION
+END
+
 SELECT * FROM #tmpReceiptBillIds
+
