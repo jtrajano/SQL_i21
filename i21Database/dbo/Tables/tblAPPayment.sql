@@ -33,6 +33,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPPayment_intVendorId_intPaymentId] ON [dbo].[t
 (
 	[intEntityVendorId] ASC,
 	[intPaymentId] ASC,
+	[intAccountId] ASC,
 	[dtmDatePaid] ASC
 )
 WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
