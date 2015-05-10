@@ -240,11 +240,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				IF @glije_units < 0
     				BEGIN
     					SELECT @glije_units *= -1
-    					SELECT @debitUnit +=@glije_units,@debitUnitInLBS += @glije_units,@creditUnit = 0,@creditUnitInLBS = 0
+    					SELECT @creditUnit +=@glije_units,@creditUnitInLBS += @glije_units,@debitUnit = 0,@debitUnitInLBS = 0
     				END
     				ELSE
     				BEGIN
-    					SELECT @creditUnit +=@glije_units,@creditUnitInLBS += @glije_units,@debitUnit = 0,@debitUnitInLBS = 0
+    					SELECT @debitUnit +=@glije_units,@debitUnitInLBS += @glije_units,@creditUnit = 0,@creditUnitInLBS = 0
     				END
 
     				SELECT @totalCredit += @credit, @totalDebit +=@debit
