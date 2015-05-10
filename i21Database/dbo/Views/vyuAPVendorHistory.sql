@@ -42,4 +42,6 @@ GROUP BY A.intBillId,
     strVendorOrderNumber,
 	A.strBillId,
 	A.ysnPaid,
-	A.dblAmountDue
+	A.dblAmountDue,
+    A.ysnPosted
+
