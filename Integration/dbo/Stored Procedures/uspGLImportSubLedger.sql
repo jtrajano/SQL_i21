@@ -234,18 +234,20 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     					SELECT @glije_amt *= -1
     					SELECT @glije_dr_cr_ind = CASE WHEN @glije_dr_cr_ind = ''D'' THEN ''C'' ELSE ''D'' END
     				END
-    				IF @glije_amt >= 0
-    					IF @glije_dr_cr_ind = ''D'' SELECT @debit += @glije_amt ELSE SELECT @credit += @glije_amt
+    				--IF @glije_amt >= 0
+    				IF @glije_dr_cr_ind = ''D'' SELECT @debit += @glije_amt ELSE SELECT @credit += @glije_amt
+
 
     				IF @glije_units < 0
     				BEGIN
     					SELECT @glije_units *= -1
-    					SELECT @creditUnit +=@glije_units,@creditUnitInLBS += @glije_units,@debitUnit = 0,@debitUnitInLBS = 0
+    					SELECT @glije_dr_cr_ind = CASE WHEN @glije_dr_cr_ind = ''D'' THEN ''C'' ELSE ''D'' END
     				END
-    				ELSE
-    				BEGIN
+
+    				IF @glije_dr_cr_ind = ''D''
     					SELECT @debitUnit +=@glije_units,@debitUnitInLBS += @glije_units,@creditUnit = 0,@creditUnitInLBS = 0
-    				END
+    				ELSE
+    				    SELECT @creditUnit +=@glije_units,@creditUnitInLBS += @glije_units,@debitUnit = 0,@debitUnitInLBS = 0
 
     				SELECT @totalCredit += @credit, @totalDebit +=@debit
 
