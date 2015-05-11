@@ -39,7 +39,6 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                     column: 'intCompanyLocationId',
                     value: '{current.intLocationId}',
                     conjunction: 'and'
-
                 },{
                     column: 'strClassification',
                     value: 'Inventory',
@@ -67,7 +66,12 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 store: '{receiveUOM}',
                 defaultFilters: [{
                     column: 'intItemId',
-                    value: '{current.intItemId}'
+                    value: '{current.intItemId}',
+                    conjunction: 'and'
+                },{
+                    column: 'ysnAllowPurchase',
+                    value: true,
+                    conjunction: 'and'
                 }]
             },
             cboFamily: {
