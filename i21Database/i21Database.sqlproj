@@ -1571,6 +1571,10 @@
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodityLocation.sql" />
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesAging.sql" />
+    <Build Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeviceLeaseDetail.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\FieldSelection\DeviceLeaseDetail.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\DeviceLeaseDetail.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceLeaseDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
