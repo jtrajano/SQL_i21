@@ -206,7 +206,7 @@ BEGIN
 				,intTransactionId		= 11
 				,strTransactionId		= 'ADJ-11'
 				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
-				,intLotId				= 3
+				,intLotId				= 4
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
 	END 

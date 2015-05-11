@@ -162,4 +162,4 @@ END
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
 	DROP TABLE #GeneratedLotItems
 
-RETURN 0; 
+RETURN 0;

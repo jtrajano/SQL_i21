@@ -1016,6 +1016,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new weight UOM.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryAdjustmentSplitLot  for updating the intNewLotId in the AdjustmentDetail.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryAdjustmentSplitLot for using an existing lot id for the split.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

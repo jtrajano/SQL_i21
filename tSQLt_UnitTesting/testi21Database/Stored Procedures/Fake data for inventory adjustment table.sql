@@ -147,6 +147,7 @@ BEGIN
 	-- Create mock data for Lot Numbers
 	DECLARE @ManualLotGrains_Lot_100001 AS INT = 1
 			,@ManualLotGrains_Lot_100002 AS INT = 2
+			,@ManualLotGrains_Lot_100003 AS INT = 3
 
 	-- Lot Status
 	DECLARE @LOT_STATUS_Active AS INT = 1
@@ -207,6 +208,24 @@ BEGIN
 		,dblWeight				= NULL 
 		,intWeightUOMId			= NULL 
 		,dblWeightPerQty		= NULL 
+	UNION ALL 
+	SELECT 
+		intLotId				= @ManualLotGrains_Lot_100003
+		,intItemId				= @ManualLotGrains
+		,intLocationId			= @Default_Location
+		,intItemLocationId		= @ManualLotGrains_DefaultLocation
+		,intItemUOMId			= @ManualGrains_25KgBagUOM
+		,strLotNumber			= 'MG-LOT-100003'
+		,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
+		,intStorageLocationId	= @StorageSilo_RM_DL
+		,dblQty					= 600 
+		,dblLastCost			= 3.50
+		,dtmExpiryDate			= '01/25/2018'
+		,strLotAlias			= 'Like MG-LOT-100001 except the expiry date.'
+		,intLotStatusId			= @LOT_STATUS_Active
+		,dblWeight				= 33069.36
+		,intWeightUOMId			= @ManualGrains_PoundUOM
+		,dblWeightPerQty		= 55.1156
 	SET IDENTITY_INSERT tblICLot OFF
 		
 	-- TODO: 
@@ -1056,6 +1075,83 @@ BEGIN
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
 				,dblWeight					= 55115.60
 				,intNewWeightUOMId			= @ManualGrains_KgUOM
+				,dblNewWeight				= NULL
+				,dblWeightPerQty			= 55.1156
+				,dblNewWeightPerQty			= NULL 
+				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblNewCost					= NULL 
+				,intNewLocationId			= NULL 
+				,intNewSubLocationId		= NULL  
+				,intNewStorageLocationId	= NULL 
+	END
+
+	-- ADJ-13
+	BEGIN 
+		SET @intInventoryAdjustmentId = 13
+		INSERT INTO dbo.tblICInventoryAdjustment (
+				intInventoryAdjustmentId
+				,intLocationId 
+				,dtmAdjustmentDate       
+				,intAdjustmentType 
+				,strAdjustmentNo                                    
+				,strDescription                                                                                       
+				,intSort     
+				,ysnPosted 
+				,intEntityId 
+				,intConcurrencyId	
+		)
+		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
+				,intLocationId		= @Default_Location
+				,dtmAdjustmentDate  = '05/22/2015'
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,strAdjustmentNo    = 'ADJ-13'
+				,strDescription     = 'Split Lot. Reusing an existing lot for the split.'
+				,intSort			= 1
+				,ysnPosted			= 0
+				,intEntityId		= 1
+				,intConcurrencyId	= 1
+
+		INSERT INTO dbo.tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentId	
+				,intSubLocationId			
+				,intStorageLocationId		
+				,intItemId					
+				,intLotId					
+				,strNewLotNumber
+				,intItemUOMId
+				,dblQuantity
+				,dblAdjustByQuantity
+				,dblNewQuantity
+				,intNewItemUOMId
+				,dblNewSplitLotQuantity
+				,intWeightUOMId
+				,dblWeight
+				,intNewWeightUOMId
+				,dblNewWeight
+				,dblWeightPerQty
+				,dblNewWeightPerQty
+				,dblCost
+				,dblNewCost
+				,intNewLocationId
+				,intNewSubLocationId
+				,intNewStorageLocationId
+		)
+		SELECT 
+				intInventoryAdjustmentId	= @intInventoryAdjustmentId
+				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId		= @StorageSilo_RM_DL
+				,intItemId					= @ManualLotGrains
+				,intLotId					= @ManualLotGrains_Lot_100001
+				,strNewLotNumber			= 'MG-LOT-100003'
+				,intItemUOMId				= @ManualGrains_25KgBagUOM
+				,dblQuantity				= 1000
+				,dblAdjustByQuantity		= -500
+				,dblNewQuantity				= 500
+				,intNewItemUOMId			= NULL 
+				,dblNewSplitLotQuantity		= NULL 
+				,intWeightUOMId				= @ManualGrains_PoundUOM 
+				,dblWeight					= 55115.60
+				,intNewWeightUOMId			= NULL
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.1156
 				,dblNewWeightPerQty			= NULL 

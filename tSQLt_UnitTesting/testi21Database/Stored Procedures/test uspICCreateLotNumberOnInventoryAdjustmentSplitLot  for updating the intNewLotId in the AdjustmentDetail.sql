@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateLotNumberOnInventoryAdjustmentSplitLot for updating the intNewLotId in the AdjustmentDetail]
 AS
 BEGIN
 	-- Item Ids
@@ -110,7 +110,6 @@ BEGIN
 			@ColdGrains_TonUOM AS INT = 39,			@HotGrains_TonUOM AS INT = 40,			@ManualGrains_TonUOM AS INT = 41,
 			@SerializedGrains_TonUOM AS INT = 42
 
-	-- Create mock data for Lot Numbers
 	DECLARE @ManualLotGrains_Lot_100001 AS INT = 1
 			,@ManualLotGrains_Lot_100002 AS INT = 2
 
@@ -119,22 +118,12 @@ BEGIN
 			,@LOT_STATUS_On_Hold AS INT = 2
 			,@LOT_STATUS_Quarantine AS INT = 3
 
-	-- Constant for Adjustment Types
-	DECLARE @ADJUSTMENT_TYPE_QTY_CHANGE AS INT = 1
-			,@ADJUSTMENT_TYPE_UOM_CHANGE AS INT = 2
-			,@ADJUSTMENT_TYPE_ITEM_CHANGE AS INT = 3
-			,@ADJUSTMENT_TYPE_LOT_STATUS_CHANGE AS INT = 4
-			,@ADJUSTMENT_TYPE_SPLIT_LOT AS INT = 5
-			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
-
-	DECLARE @INVENTORY_ADJUSTMENT AS INT = 10
-
 	-- Arrange 
 	BEGIN 
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		DECLARE @intTransactionId AS INT = 7
+		DECLARE @intTransactionId AS INT = 7 -- ADJ-7
 		DECLARE @intUserId AS INT = 1
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
@@ -144,101 +133,67 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
-		DECLARE @TestItemToPost AS ItemCostingTableType
-
-		SELECT * 
-		INTO actual 
-		FROM @TestItemToPost
-
-		SELECT * 
-		INTO expected
-		FROM @TestItemToPost
+		CREATE TABLE actual (
+			intInventoryAdjustmentId INT NULL
+			,intInventoryAdjustmentDetailId INT NULL
+			,intItemId INT NULL
+			,intLotId INT NULL
+			,intNewLotId INT NULL 
+			,strNewLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		)
+		
+		CREATE TABLE expected (
+			intInventoryAdjustmentId INT NULL
+			,intInventoryAdjustmentDetailId INT NULL
+			,intItemId INT NULL
+			,intLotId INT NULL
+			,intNewLotId INT NULL 
+			,strNewLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		)
 
 		INSERT INTO expected (
-				intItemId			
-				,intItemLocationId	
-				,intItemUOMId		
-				,dtmDate			
-				,dblQty				
-				,dblUOMQty			
-				,dblCost  
-				,dblValue
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)
-		SELECT 	intItemId				= @ManualLotGrains
-				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
-				,dtmDate				= '05/17/2015'
-				,dblQty					= -500.000000
-				,dblUOMQty				= 55.115500
-				,dblCost				= 2.500000
-				,dblValue				= 0
-				,dblSalesPrice			= 0
-				,intCurrencyId			= NULL 
-				,dblExchangeRate		= 1
-				,intTransactionId		= 7
-				,strTransactionId		= 'ADJ-7'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
-				,intLotId				= @ManualLotGrains_Lot_100001
-				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
-				,intStorageLocationId	= @StorageSilo_RM_DL
-		UNION ALL 
-		SELECT	
-				intItemId				= @ManualLotGrains
-				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
-				,dtmDate				= '05/17/2015'
-				,dblQty					= 500.00
-				,dblUOMQty				= 55.115500
-				,dblCost				= 2.50
-				,dblValue				= 0
-				,dblSalesPrice			= 0
-				,intCurrencyId			= NULL 
-				,dblExchangeRate		= 1
-				,intTransactionId		= 7
-				,strTransactionId		= 'ADJ-7'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
-				,intLotId				= 4
-				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
-				,intStorageLocationId	= @StorageSilo_RM_DL
+				intInventoryAdjustmentId
+				,intInventoryAdjustmentDetailId
+				,intItemId
+				,intLotId
+				,intNewLotId
+				,strNewLotNumber
+		) 
+		SELECT	intInventoryAdjustmentId = @intTransactionId
+				,intInventoryAdjustmentDetailId = 6
+				,intItemId = @ManualLotGrains
+				,intLotId = @ManualLotGrains_Lot_100001
+				,intNewLotId = 4
+				,strNewLotNumber = 'ABC-123'		
 	END 
-
+		
 	-- Act
 	BEGIN 
-		INSERT INTO actual (
-			intItemId			
-			,intItemLocationId	
-			,intItemUOMId		
-			,dtmDate			
-			,dblQty				
-			,dblUOMQty			
-			,dblCost  
-			,dblValue 
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
-		) 
-		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
+		EXEC dbo.uspICCreateLotNumberOnInventoryAdjustmentSplitLot
 			@intTransactionId
 	 		,@intUserId
-	END 
+	END
 
 	-- Assert 
 	BEGIN 
+		-- Get the actual 
+		INSERT INTO actual (
+				intInventoryAdjustmentId
+				,intInventoryAdjustmentDetailId
+				,intItemId
+				,intLotId
+				,intNewLotId
+				,strNewLotNumber
+		) 
+		SELECT	intInventoryAdjustmentId
+				,intInventoryAdjustmentDetailId
+				,intItemId
+				,intLotId
+				,intNewLotId
+				,strNewLotNumber
+		FROM	dbo.tblICInventoryAdjustmentDetail Detail 
+		WHERE	Detail.intInventoryAdjustmentId = @intTransactionId		
+
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END 	
 
@@ -248,4 +203,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-END 
+END
