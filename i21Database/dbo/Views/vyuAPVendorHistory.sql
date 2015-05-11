@@ -16,6 +16,7 @@ SELECT
 	,dblAmountPaid = CASE WHEN A.ysnPaid = 1 THEN A.dblTotal ELSE ISNULL(SUM(B.dblPayment),0) END
 	,A.ysnPaid
 	,A.dblAmountDue
+	,A.ysnPosted
 FROM dbo.tblAPBill A
 		LEFT JOIN (dbo.tblAPPayment B1 
 						INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
@@ -41,4 +42,6 @@ GROUP BY A.intBillId,
     strVendorOrderNumber,
 	A.strBillId,
 	A.ysnPaid,
-	A.dblAmountDue
+	A.dblAmountDue,
+    A.ysnPosted
+

@@ -197,7 +197,7 @@ BEGIN
 		
 		--Unposting Process
 		UPDATE tblAPPaymentDetail
-		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + C.dblAmountDue + B.dblPayment ELSE (B.dblAmountDue + B.dblPayment) END)
+		SET tblAPPaymentDetail.dblAmountDue = C.dblAmountDue
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
@@ -278,8 +278,12 @@ BEGIN
 		WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
 		UPDATE B
-			SET B.dblAmountDue = CASE WHEN (B.dblPayment + B.dblDiscount) = B.dblAmountDue THEN 0 ELSE (B.dblAmountDue) - (B.dblPayment) END,
-			B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount) = B.dblAmountDue THEN B.dblDiscount ELSE 0 END
+			SET B.dblAmountDue = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+									THEN 0 ELSE (B.dblAmountDue) - (B.dblPayment) END,
+			B.dblDiscount = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+								THEN B.dblDiscount ELSE 0 END,
+			B.dblInterest = CASE WHEN (B.dblPayment + B.dblDiscount - B.dblInterest) = B.dblAmountDue 
+								THEN B.dblInterest ELSE 0 END
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId

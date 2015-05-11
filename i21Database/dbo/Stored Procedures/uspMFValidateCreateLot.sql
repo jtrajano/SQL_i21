@@ -494,6 +494,8 @@ BEGIN TRY
 		SELECT *
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			LEFT JOIN dbo.tblMFRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId
+		AND SI.intRecipeId = r.intRecipeId
 		WHERE r.intItemId = @intProductId
 			AND ri.intRecipeItemTypeId = 1
 			AND (
@@ -513,7 +515,7 @@ BEGIN TRY
 				SELECT *
 				FROM tblMFWorkOrderConsumedLot WC
 				JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
-				WHERE L.intItemId = ri.intItemId and WC.intWorkOrderId =@intWorkOrderId 
+				WHERE (L.intItemId = ri.intItemId OR L.intItemId = SI.intSubstituteItemId)and WC.intWorkOrderId =@intWorkOrderId 
 				)
 		)
 		BEGIN

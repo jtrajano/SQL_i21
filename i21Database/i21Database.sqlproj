@@ -1376,8 +1376,6 @@
     <Build Include="dbo\Views\vyuSMBatchPostingResult.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateConsumeLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateLot.sql" />
-    <Build Include="dbo\Views\vyuRKLFuturePSTransaction.sql" />
-    <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />
     <Build Include="dbo\Tables\tblMFManufacturingProcessMachine.sql" />
     <Build Include="dbo\Stored Procedures\uspCMMiscCheckReversal.sql" />
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
@@ -1443,12 +1441,6 @@
     <Build Include="dbo\Tables\tblCFItem.sql" />
     <Build Include="dbo\Views\vyuICGetShipmentItemSource.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateFuturePrice.sql" />
-    <Build Include="dbo\Views\vyuRKMatchedPSTransaction.sql" />
-    <Build Include="dbo\Views\vyuRKGetBrokerInstrumentType.sql" />
-    <Build Include="dbo\Views\vyuRKGetMarketCurrency.sql" />
-    <Build Include="dbo\Views\vyuRKGetBrokerTrader.sql" />
-    <Build Include="dbo\Views\vyuRKGetMarketCommodity.sql" />
-    <Build Include="dbo\Views\vyuRKGetFutureMarketName.sql" />
     <Build Include="dbo\Tables\tblPRWorkersCompensation.sql" />
     <Build Include="dbo\Index\IX_tblGLJournalDetail_intJournalId.sql" />
     <Build Include="dbo\Functions\fnGetBusinessDate.sql" />
@@ -1560,12 +1552,26 @@
     <Build Include="dbo\Functions\fnAPCreatePaymentGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderShipmentStatus.sql" />
-	<Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql" />
+	  <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql" />
     <Build Include="dbo\Stored Procedures\uspSCStorageUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStartCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPostPaycheck.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipment.sql" />
-
+    <Build Include="dbo\Stored Procedures\uspRKGenerateOptionsMonthList.sql" />
+    <Build Include="dbo\Tables\tblMFProductionSummary.sql" />
+    <Build Include="dbo\Views\vyuRKSFuturePSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKMatchedPSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKLFuturePSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKGetMarketCurrency.sql" />
+    <Build Include="dbo\Views\vyuRKGetMarketCommodity.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureMarketName.sql" />
+    <Build Include="dbo\Views\vyuRKGetBrokerTrader.sql" />
+    <Build Include="dbo\Views\vyuRKGetBrokerInstrumentType.sql" />
+    <Build Include="dbo\Views\vyuRKDPRInvDailyPositionDetail.sql" />
+    <Build Include="dbo\Views\vyuRKDPRHedgeDailyPositionDetail.sql" />
+    <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodityLocation.sql" />
+    <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodity.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptPayablesAging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

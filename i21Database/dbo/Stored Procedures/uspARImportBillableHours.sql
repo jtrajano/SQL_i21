@@ -85,12 +85,12 @@ INSERT INTO
 SELECT
 	NULL						--[strInvoiceOriginId]
 	,V.[intEntityCustomerId]	--[intEntityCustomerId]
-	,V.[dtmDate]				--[dtmDate]
-	,dbo.fnGetDueDateBasedOnTerm(V.[dtmDate], ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
+	,V.[dtmBilled]				--[dtmDate]
+	,dbo.fnGetDueDateBasedOnTerm(V.[dtmBilled], ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
 	,ISNULL(C.[intCurrencyId], @Currency)									--[intCurrencyId]
 	,V.[intCompanyLocationId]	--[intCompanyLocationId]
-	,V.[intAgentEntityId]		--[intEntitySalespersonId]
-	,V.[dtmDate]				--[dtmShipDate]
+	,ISNULL(C.[intSalespersonId],V.[intAgentEntityId])		--[intEntitySalespersonId]
+	,V.[dtmBilled]				--[dtmShipDate]
 	,ISNULL(EL.[intShipViaId], 0)											--[intShipViaId]
 	,''							--[strPONumber]
 	,EL.[intTermsId]			--[intTermId]
@@ -105,7 +105,7 @@ SELECT
 	,0							--[intPaymentMethodId]
 	,V.[intTicketHoursWorkedId]	--[strComments] 
 	,CL.[intARAccount]			--[intAccountId]
-	,NULL						--[dtmPostDate]
+	,[dtmBilled]						--[dtmPostDate]
 	,0							--[ysnPosted]
 	,0							--[ysnPaid]
 	,SL.[strLocationName]		--[strShipToLocationName]
@@ -185,6 +185,7 @@ INNER JOIN
 LEFT OUTER JOIN
 	vyuARGetItemAccount Acct
 		ON V.[intItemId] = Acct.[intItemId]
+			AND V.[intCompanyLocationId] = Acct.[intLocationId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON V.[intCompanyLocationId] = CL.[intCompanyLocationId]

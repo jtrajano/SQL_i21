@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuRKLFuturePSTransaction
 AS
 SELECT * FROM (
-SELECT strTotalLot-dblSelectedLot1 AS dblBalanceLot, Case WHEN dblSelectedLot1=0 THEN strTotalLot else dblSelectedLot1 end dblSelectedLot ,* from  (
+SELECT strTotalLot-dblSelectedLot1 AS dblBalanceLot, 0.0 as dblSelectedLot ,* from  (
 SELECT 
       strInternalTradeNo AS strTransactionNo
       ,dtmTransactionDate as dtmTransactionDate
@@ -22,11 +22,11 @@ SELECT
       ,ISNULL(ot.intSubBookId,0) as intSubBookId
       ,intFutOptTransactionId
       ,fm.dblContractSize
-      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0)* isnull(fm.dblContractSize,0) end as dblFutCommission
+      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId 
-JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId and ba.intInstrumentTypeId=1
+JOIN tblRKBrokerageAccount ba on bc.intBrokerageAccountId=ba.intBrokerageAccountId AND ba.intInstrumentTypeId IN(1,3) and( ot.dblStrike is null or ot.dblStrike=0)
 AND ba.intBrokerageAccountId=bc.intBrokerageAccountId 
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId )t)t1  where dblBalanceLot > 0

@@ -143,7 +143,9 @@ BEGIN TRY
 				intFutureMonthId		=	@intFutureMonthId	,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
-				intPricingType			=	@intPricingType	
+				intPricingType			=	@intPricingType	,
+				dtmStartDate			=	@StartDate,
+				dtmEndDate				=	@EndDate
 		WHERE	intContractDetailId		=	@ContractDetailId
 		
 	END
@@ -157,7 +159,9 @@ BEGIN TRY
 				intFutureMonthId		=	@intFutureMonthId,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
-				intPricingType			=	@intPricingType	
+				intPricingType			=	@intPricingType		,
+				dtmStartDate			=	@StartDate,
+				dtmEndDate				=	@EndDate
 		WHERE	intContractDetailId		=	@ContractDetailId
 	END
 	
