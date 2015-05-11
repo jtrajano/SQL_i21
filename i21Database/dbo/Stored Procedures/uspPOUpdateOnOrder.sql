@@ -20,15 +20,11 @@ BEGIN
 		,[dtmDate]				=	A.dtmDate
 		,[dblQty]				=	CASE WHEN @negate = 1 
 										THEN 
-											CASE WHEN A.intOrderStatusId IN (4, 6)
-												THEN (B.dblQtyOrdered - B.dblQtyReceived) * -1
-												ELSE B.dblQtyOrdered * -1 
-												END
+											(B.dblQtyOrdered - B.dblQtyReceived) * -1
 										ELSE 
 											CASE WHEN A.intOrderStatusId IN (4, 6) --Short Closed, Cancellled
-												THEN
-													B.dblQtyOrdered - B.dblQtyReceived
-												ELSE B.dblQtyOrdered 
+												THEN 0
+												ELSE B.dblQtyOrdered - B.dblQtyReceived
 												END
 										END
 		,[dblUOMQty]			=	ItemUOM.dblUnitQty
@@ -50,7 +46,7 @@ BEGIN
 			AND B.intItemId = ItemLocation.intItemId 
 		INNER JOIN tblICItemUOM ItemUOM
 			ON B.intUnitOfMeasureId = ItemUOM.intItemUOMId
-	WHERE A.intPurchaseId = @poId			
+	WHERE A.intPurchaseId = @poId	
 
 	EXEC uspICIncreaseOnOrderQty @items
 

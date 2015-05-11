@@ -35,7 +35,7 @@ SET ANSI_WARNINGS OFF
 IF(@Update = 1 AND @VendorId IS NOT NULL)
 BEGIN
 
-	IF(EXISTS(SELECT 1 FROM ssvndmst WHERE ssvnd_vnd_no = @VendorId))
+	IF(EXISTS(SELECT 1 FROM ssvndmst WHERE ssvnd_vnd_no = SUBSTRING(@VendorId, 1, 10)))
 	BEGIN	
 
 		UPDATE ssvndmst
@@ -71,10 +71,10 @@ BEGIN
 		ssvnd_1099_name					=	CAST(A.str1099Name AS VARCHAR(50)),
 		ssvnd_gl_pur					=	CAST(F.strExternalId AS DECIMAL(16,8)),
 		ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2))
-		FROM ssvndmst 
-		INNER JOIN tblEntity A
-			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = A.strEntityNo COLLATE Latin1_General_CI_AS
+		FROM ssvndmst 		
 		INNER JOIN tblAPVendor B
+			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = SUBSTRING(B.strVendorId, 1, 10) COLLATE Latin1_General_CI_AS
+		INNER JOIN tblEntity A
 			ON A.intEntityId = B.intEntityVendorId
 		INNER JOIN tblEntityLocation C
 			ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
@@ -86,7 +86,7 @@ BEGIN
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
-		WHERE ssvndmst.ssvnd_vnd_no = @VendorId
+		WHERE ssvndmst.ssvnd_vnd_no =  SUBSTRING(@VendorId, 1, 10)
 	END
 	ELSE
 	BEGIN		
@@ -114,7 +114,7 @@ BEGIN
 		ssvnd_tax_st
 		)
 		SELECT 
-			ssvnd_vnd_no					=	A.strEntityNo,
+			ssvnd_vnd_no					=	CASE WHEN CHARINDEX(CHAR(10), B.strVendorId) > 0 THEN SUBSTRING(B.strVendorId, 0, CHARINDEX(CHAR(10),B.strVendorId)) ELSE B.strVendorId END,
 			ssvnd_co_per_ind				=	CASE WHEN B.intVendorType = 0 THEN ''C'' ELSE ''P'' END,
 			ssvnd_name						=	A.strName,
 			ssvnd_addr_1					=	CASE WHEN CHARINDEX(CHAR(10), C.strAddress) > 0 THEN SUBSTRING(C.strAddress, 0, CHARINDEX(CHAR(10),C.strAddress)) ELSE C.strAddress END,
@@ -152,7 +152,7 @@ BEGIN
 			ON B.intCurrencyId = E.intCurrencyID
 		LEFT JOIN tblGLCOACrossReference F
 			ON B.intGLAccountExpenseId = F.inti21Id
-		WHERE A.strEntityNo = @VendorId
+		WHERE B.strVendorId = @VendorId
 
 		--Insert new record to tblAPImportedVendors
 		INSERT INTO tblAPImportedVendors

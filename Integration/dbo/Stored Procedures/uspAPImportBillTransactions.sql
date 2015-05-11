@@ -129,9 +129,9 @@ BEGIN
 				--[strVendorId]			=	A.aptrx_vnd_no,
 				--[strBillId] 			=	A.aptrx_ivc_no,
 				[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-				[intTermsId] 			=	NULL, --ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
-													--WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
-														--WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+				[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
+													WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
+														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 				[intTaxId] 			=	NULL,
 				[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -167,9 +167,9 @@ BEGIN
 				--[strVendorId]			=	A.apivc_vnd_no,
 				--[strBillId] 			=	A.apivc_ivc_no,
 				[strVendorOrderNumber] 	=	A.apivc_ivc_no,
-				[intTermsId] 			=	NULL, --ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
-													--WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
-														--WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+				[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation 
+												WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor 
+													WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 				[intTaxId] 			=	NULL,
 				[dtmDate] 				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -520,9 +520,9 @@ BEGIN
 				--[strVendorId]			=	A.aptrx_vnd_no,
 				--[strBillId] 			=	A.aptrx_ivc_no,
 				[strVendorOrderNumber] 	=	A.aptrx_ivc_no,
-				[intTermsId] 			=	NULL,--ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
-													--WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor
-														--WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+				[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
+													WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
+														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
 				[intTaxId] 			=	NULL,
 				[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,

@@ -41,8 +41,9 @@ AS
 		dbo.tblARCustomer AS C 
 			ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
 	LEFT OUTER JOIN
-		dbo.tblEntity AS E 
-			ON C.intDefaultContactId = E.intEntityId
+		dbo.tblEntityToContact AS EC ON C.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
+	LEFT OUTER JOIN
+		dbo.tblEntity AS E ON EC.intEntityContactId = E.intEntityId
 	INNER JOIN
 		dbo.tblEntity AS CE 
 			ON C.[intEntityCustomerId] = CE.intEntityId 

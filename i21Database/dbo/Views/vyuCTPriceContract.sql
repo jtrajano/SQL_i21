@@ -27,8 +27,9 @@ AS
 				WHEN 4 THEN 'TBD'
 				ELSE 'CanadianBasis'
 			END	AS strPricingType,
-			M.strFutureMonth
-			
+			M.strFutureMonth,
+			D.dblBalance
+
 	FROM	tblCTContractDetail		D
 	JOIN	tblSMCompanyLocation	L	ON	L.intCompanyLocationId	=	D.intCompanyLocationId
 	JOIN	tblCTContractHeader		H	ON	H.intContractHeaderId	=	D.intContractHeaderId

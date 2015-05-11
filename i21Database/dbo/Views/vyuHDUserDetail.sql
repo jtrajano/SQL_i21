@@ -61,9 +61,11 @@
 		from
 			--tblEntityContact ec
 			tblEntity ec
-			left outer join tblARCustomer cus on cus.[intEntityCustomerId] = (select top 1 et.[intEntityCustomerId] from tblARCustomerToContact et where et.[intEntityContactId] = ec.[intEntityId])
+			--left outer join tblARCustomer cus on cus.[intEntityCustomerId] = (select top 1 et.[intEntityCustomerId] from tblARCustomerToContact et where et.[intEntityContactId] = ec.[intEntityId])
+			left outer join tblARCustomer cus on cus.[intEntityCustomerId] = (select top 1 et.[intEntityId] from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId])
 			--left outer join tblEntity en on en.intEntityId = ec.[intEntityContactId]
-			left outer join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblARCustomerToContact et where et.[intEntityContactId] = ec.[intEntityId])
+			--left outer join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblARCustomerToContact et where et.[intEntityContactId] = ec.[intEntityId])
+			left outer join tblEntityLocation el on el.intEntityLocationId = (select top 1 et.intEntityLocationId from tblEntityToContact et where et.[intEntityContactId] = ec.[intEntityId])
 	--select
 	--		strCustomer = 'i21 User'
 	--		,strCompanyName = 'iRely'

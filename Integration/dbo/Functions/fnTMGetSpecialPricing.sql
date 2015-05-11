@@ -365,6 +365,7 @@ BEGIN
 		WHERE strVendorNumber = @strRackVendorNumber 
 			AND strRackItemNumber = @strRackItemNumber 
 			AND dtmDate <= GETDATE()
+		ORDER BY dtmDate DESC
 		
 		SET @dblCurrentItemPrice = ISNULL(@dblCurrentItemPrice,0.0) + ISNULL(@dblFactor,0.0)
 	END
@@ -376,6 +377,7 @@ BEGIN
 		WHERE strVendorNumber = @strRackVendorNumber 
 			AND strRackItemNumber = @strRackItemNumber 
 			AND dtmDate <= GETDATE()
+		ORDER BY dtmDate DESC
 		
 		SET @dblCurrentItemPrice = ISNULL(@dblCurrentItemPrice,0.0) + ISNULL(@dblFactor,0.0)
 	END

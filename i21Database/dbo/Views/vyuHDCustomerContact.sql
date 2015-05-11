@@ -20,6 +20,12 @@
 		,ec.imgPhoto
 		,ysnBillable = c.ysnHDBillableSupport
 	  from
+	  	tblARCustomer c
+		inner join tblEntityToContact etc on etc.intEntityId = c.intEntityCustomerId
+		inner join tblEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
+		inner join tblEntity e on e.intEntityId = c.[intEntityCustomerId]
+		left outer join tblEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
+		/*
 		--tblEntityContact ec
 		tblARCustomerToContact etc 		
 		inner join tblEntity ec on ec.[intEntityId] = etc.[intEntityContactId]
@@ -28,6 +34,7 @@
 		inner join tblEntity e on e.intEntityId = c.[intEntityCustomerId]
 		--inner join tblEntity eec on eec.intEntityId = ec.[intEntityContactId]
 		left outer join tblEntityLocation el on el.intEntityLocationId = etc.intEntityLocationId
+		*/
 	--select
 	--	intContactId = ec.intEntityId
 	--	,c.strCustomerNumber

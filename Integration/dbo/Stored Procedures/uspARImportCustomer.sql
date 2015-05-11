@@ -11,7 +11,7 @@ BEGIN
 
 EXEC(
 '
- CREATE PROCEDURE [dbo].[uspARImportCustomer]
+CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		@CustomerId NVARCHAR(50) = NULL,
 		@Update BIT = 0,
 		@Total INT = 0 OUTPUT
@@ -24,7 +24,7 @@ EXEC(
 		IF(@Update = 1 AND @CustomerId IS NOT NULL) 
 		BEGIN
 			--UPDATE IF EXIST IN THE ORIGIN
-			IF(EXISTS(SELECT 1 FROM agcusmst WHERE agcus_key = @CustomerId))
+			IF(EXISTS(SELECT 1 FROM agcusmst WHERE agcus_key = SUBSTRING(@CustomerId,1,10)))
 			BEGIN
 							
 				UPDATE agcusmst
@@ -49,7 +49,7 @@ EXEC(
 				agcus_phone2 = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END),
 				agcus_phone2_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,30),CHARINDEX(''x'',Con.strPhone2) + 1, LEN(Con.strPhone2))END),
 				--Customer
-				agcus_key = SUBSTRING(Ent.strEntityNo,1,10),
+				agcus_key = SUBSTRING(Cus.strCustomerNumber,1,10),
 				agcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END,
 				agcus_cred_limit = Cus.dblCreditLimit,
 				agcus_tax_exempt = SUBSTRING(Cus.strTaxNumber,1,15),
@@ -94,7 +94,7 @@ EXEC(
 				INNER JOIN tblEntityLocation Loc 
 					ON Ent.intEntityId = Loc.intEntityId 
 						and Loc.ysnDefaultLocation = 1
-				WHERE Ent.strEntityNo = @CustomerId AND agcus_key = @CustomerId
+				WHERE Cus.strCustomerNumber = @CustomerId AND agcus_key = SUBSTRING(@CustomerId,1,10)
 			END
 			--INSERT IF NOT EXIST IN THE ORIGIN	
 			ELSE
@@ -175,7 +175,7 @@ EXEC(
 				(CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)as strCountry,
 				Loc.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
 				--Customer
-				SUBSTRING(Ent.strEntityNo,1,10) as strCustomerNumber,
+				SUBSTRING(Cus.strCustomerNumber,1,10) as strCustomerNumber,
 				(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
 				Cus.dblCreditLimit,
 				SUBSTRING(Cus.strTaxNumber,1,15) as strTaxNumber,
@@ -216,9 +216,11 @@ EXEC(
 				INNER JOIN tblEntityLocation Loc 
 					ON Ent.intEntityId = Loc.intEntityId 
 						and Loc.ysnDefaultLocation = 1
-				WHERE Ent.strEntityNo = @CustomerId
+				WHERE Cus.strCustomerNumber = @CustomerId
 			END
 
+
+				
 				-- INSERT Contact to ssonmst
 				DECLARE @ContactNumber nvarchar(20)
 			
@@ -231,7 +233,7 @@ EXEC(
 						and CusToCon.ysnDefaultContact = 1
 				INNER JOIN tblEntity Con 
 					ON CusToCon.intEntityContactId = Con.intEntityId									
-				WHERE Ent.strEntityNo = @CustomerId
+				WHERE Cus.strCustomerNumber = @CustomerId
 								
 				EXEC uspARContactOriginSync @ContactNumber
 				
@@ -637,7 +639,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		IF(@Update = 1 AND @CustomerId IS NOT NULL)
 		BEGIN
 			--UPDATE IF EXIST IN THE ORIGIN
-			IF(EXISTS(SELECT 1 FROM ptcusmst WHERE ptcus_cus_no = @CustomerId))
+			IF(EXISTS(SELECT 1 FROM ptcusmst WHERE ptcus_cus_no = SUBSTRING(@CustomerId,1,10)))
 			BEGIN
 				UPDATE ptcusmst
 				SET
@@ -700,7 +702,8 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				INNER JOIN tblEntityLocation Loc 
 					ON Ent.intEntityId = Loc.intEntityId 
 						and Loc.ysnDefaultLocation = 1
-				WHERE Ent.strEntityNo = @CustomerId AND ptcus_cus_no = @CustomerId
+				--WHERE Ent.strEntityNo = @CustomerId AND ptcus_cus_no = SUBSTRING(@CustomerId,1,10)
+				WHERE Cus.strCustomerNumber = @CustomerId AND ptcus_cus_no = SUBSTRING(@CustomerId,1,10)
 			END
 			--INSERT IF NOT EXIST IN THE ORIGIN
 			ELSE
@@ -1198,6 +1201,6 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			WHERE tblARCustomer.strCustomerNumber IS NULL
 		END
 	END
-'
+	'
 )
 END

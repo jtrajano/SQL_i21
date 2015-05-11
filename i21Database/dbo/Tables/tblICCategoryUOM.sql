@@ -38,7 +38,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICCategoryUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICCategoryUOM_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICCategoryUOM_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblICCategoryUOM_VolumeUOM] FOREIGN KEY ([intVolumeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+		CONSTRAINT [FK_tblICCategoryUOM_VolumeUOM] FOREIGN KEY ([intVolumeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+		CONSTRAINT [AK_tblICCategoryUOM] UNIQUE ([intCategoryId], [intUnitMeasureId])
 	)
 
 GO

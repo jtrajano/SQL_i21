@@ -7,6 +7,7 @@ BEGIN TRY
 			@idoc					INT,
 			@intContractDetailId	INT,
 			@intConcurrencyId		INT,
+			@intContractHeaderId	INT,
 			@dblQuantity			DECIMAL(12,4),
 			@dblBalance				DECIMAL(12,4),
 			@dblAdjAmount			DECIMAL(12,4)
@@ -33,10 +34,11 @@ BEGIN TRY
 		RAISERROR('This sequence has been modified by other user.',16,1)
 	END
 	
-	SELECT	@dblQuantity	=	dblQuantity,
-			@dblBalance		=	dblBalance
+	SELECT	@dblQuantity			=	dblQuantity,
+			@dblBalance				=	dblBalance,
+			@intContractHeaderId	=	intContractHeaderId
 	FROM	tblCTContractDetail 
-	WHERE	intContractDetailId = @intContractDetailId 
+	WHERE	intContractDetailId		=	@intContractDetailId 
 	
 	INSERT INTO tblCTContractAdjustment
 	(
@@ -71,6 +73,11 @@ BEGIN TRY
 			dblBalance			=	dblBalance + @dblAdjAmount,
 			intConcurrencyId	=	intConcurrencyId + 1
 	WHERE	intContractDetailId	=	@intContractDetailId
+
+	UPDATE	tblCTContractHeader
+	SET		dblQuantity			=	dblQuantity + @dblAdjAmount,
+			intConcurrencyId	=	intConcurrencyId + 1
+	WHERE	intContractHeaderId	=	@intContractHeaderId
 	
 END TRY      
 BEGIN CATCH       
