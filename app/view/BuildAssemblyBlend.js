@@ -154,6 +154,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                             xtype: 'button',
                             tabIndex: -1,
                             height: 57,
+                            hidden: true,
                             itemId: 'btnDuplicate',
                             width: 60,
                             iconAlign: 'top',

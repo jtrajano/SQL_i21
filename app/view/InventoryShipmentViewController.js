@@ -21,57 +21,126 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             bind: {
                 title: 'Inventory Shipment - {current.strBOLNumber}'
             },
+            btnSave: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnDelete: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnUndo: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnShip: {
+                text: '{getShipButtonText}',
+                iconCls: '{getShipButtonIcon}'
+            },
+
             txtShipmentNo: '{current.strShipmentNumber}',
-            dtmShipDate: '{current.dtmShipDate}',
+            dtmShipDate: {
+                value: '{current.dtmShipDate}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboOrderType: {
                 value: '{current.intOrderType}',
-                store: '{orderTypes}'
+                store: '{orderTypes}',
+                readOnly: '{current.ysnPosted}'
             },
-            txtReferenceNumber: '{current.strReferenceNumber}',
-            dtmRequestedArrival: '{current.dtmRequestedArrivalDate}',
+            txtReferenceNumber: {
+                value: '{current.strReferenceNumber}',
+                readOnly: '{current.ysnPosted}'
+            },
+            dtmRequestedArrival: {
+                value: '{current.dtmRequestedArrivalDate}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboFreightTerms: {
                 value: '{current.intFreightTermId}',
-                store: '{freightTerm}'
+                store: '{freightTerm}',
+                readOnly: '{current.ysnPosted}'
             },
             cboCustomer: {
                 value: '{current.intEntityCustomerId}',
-                store: '{customer}'
+                store: '{customer}',
+                readOnly: '{current.ysnPosted}'
             },
             txtCustomerName: '{current.strCustomerName}',
             cboShipFromAddress: {
                 value: '{current.intShipFromLocationId}',
-                store: '{shipFromLocation}'
+                store: '{shipFromLocation}',
+                readOnly: '{current.ysnPosted}'
             },
             txtShipFromAddress: '{current.strShipFromAddress}',
             cboShipToAddress: {
                 value: '{current.intShipToLocationId}',
                 store: '{shipToLocation}',
+                readOnly: '{current.ysnPosted}',
                 defaultFilters: [{
                     column: 'intEntityId',
                     value: '{current.intEntityCustomerId}'
                 }]
             },
             txtShipToAddress: '{current.strShipToAddress}',
-            txtDeliveryInstructions: '{current.strDeliveryInstruction}',
-            txtComments: '{current.strComment}',
-            chkDirectShipment: '{current.ysnDirectShipment}',
-            txtBOLNo: '{current.strBOLNumber}',
+            txtDeliveryInstructions: {
+                value: '{current.strDeliveryInstruction}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtComments: {
+                value: '{current.strComment}',
+                readOnly: '{current.ysnPosted}'
+            },
+            chkDirectShipment: {
+                value: '{current.ysnDirectShipment}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtBOLNo: {
+                value: '{current.strBOLNumber}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboShipVia: {
                 value: '{current.intShipViaId}',
-                store: '{shipVia}'
+                store: '{shipVia}',
+                readOnly: '{current.ysnPosted}'
             },
-            txtVesselVehicle: '{current.strVessel}',
-            txtProNumber: '{current.strProNumber}',
-            txtDriverID: '{current.strDriverId}',
-            txtSealNumber: '{current.strSealNumber}',
-            txtAppointmentTime: '{current.dtmAppointmentTime}',
-            txtDepartureTime: '{current.dtmDepartureTime}',
-            txtArrivalTime: '{current.dtmArrivalTime}',
-            dtmDelivered: '{current.dtmDeliveredDate}',
-            dtmFreeTime: '{current.dtmFreeTime}',
+            txtVesselVehicle: {
+                value: '{current.strVessel}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtProNumber: {
+                value: '{current.strProNumber}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtDriverID: {
+                value: '{current.strDriverId}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtSealNumber: {
+                value: '{current.strSealNumber}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtAppointmentTime: {
+                value: '{current.dtmAppointmentTime}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtDepartureTime: {
+                value: '{current.dtmDepartureTime}',
+                readOnly: '{current.ysnPosted}'
+            },
+            txtArrivalTime: {
+                value: '{current.dtmArrivalTime}',
+                readOnly: '{current.ysnPosted}'
+            },
+            dtmDelivered: {
+                value: '{current.dtmDeliveredDate}',
+                readOnly: '{current.ysnPosted}'
+            },
+            dtmFreeTime: {
+                value: '{current.dtmFreeTime}',
+                readOnly: '{current.ysnPosted}'
+            },
             txtReceivedBy: '{current.strReceivedBy}',
 
             grdInventoryShipment: {
+                readOnly: '{current.ysnPosted}',
                 colOrderNumber: {
                     dataIndex: 'strSourceId',
                     editor: {
@@ -123,6 +192,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
 
             grdLotTracking: {
+                readOnly: '{current.ysnPosted}',
                 colLotID: {
                     dataIndex: 'strLotId',
                     editor: {

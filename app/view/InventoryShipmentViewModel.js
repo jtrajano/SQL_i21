@@ -72,7 +72,25 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         lotWeightUOM: {
             type: 'icbuffereditemweightuom'
         }
+    },
 
+    formulas: {
+        getShipButtonText: function(get) {
+            if (get('current.ysnPosted')) {
+                return 'UnShip';
+            }
+            else {
+                return 'Ship';
+            }
+        },
+        getShipButtonIcon: function(get) {
+            if (get('current.ysnPosted')) {
+                return 'large-unpost';
+            }
+            else {
+                return 'large-ship-via';
+            }
+        }
     }
 
 });

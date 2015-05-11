@@ -36,7 +36,22 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewModel', {
     },
 
     formulas: {
-
+        getPostButtonText: function(get) {
+            if (get('current.ysnPosted')) {
+                return 'UnPost';
+            }
+            else {
+                return 'Post';
+            }
+        },
+        getPostButtonIcon: function(get) {
+            if (get('current.ysnPosted')) {
+                return 'large-unpost';
+            }
+            else {
+                return 'large-post';
+            }
+        }
     }
 
 });

@@ -24,10 +24,28 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
             bind: {
                 title: 'Build Assembly - {current.strBuildNo}'
             },
-            dtmBuildDate: '{current.dtmBuildDate}',
+            btnSave: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnDelete: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnUndo: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnPost: {
+                text: '{getPostButtonText}',
+                iconCls: '{getPostButtonIcon}'
+            },
+
+            dtmBuildDate: {
+                value: '{current.dtmBuildDate}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboLocation: {
                 value: '{current.intLocationId}',
-                store: '{location}'
+                store: '{location}',
+                readOnly: '{current.ysnPosted}'
             },
             cboSubLocation: {
                 value: '{current.intSubLocationId}',
@@ -36,7 +54,8 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                     column: 'intCompanyLocationId',
                     value: '{current.intLocationId}',
                     conjunction: 'and'
-                }]
+                }],
+                readOnly: '{current.ysnPosted}'
             },
             cboItemNumber: {
                 value: '{current.intItemId}',
@@ -45,9 +64,13 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                     column: 'intLocationId',
                     value: '{current.intLocationId}',
                     conjunction: 'and'
-                }]
+                }],
+                readOnly: '{current.ysnPosted}'
             },
-            txtBuildQuantity: '{current.dblBuildQuantity}',
+            txtBuildQuantity: {
+                value: '{current.dblBuildQuantity}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboUOM: {
                 value: '{current.intItemUOMId}',
                 store: '{itemUOM}',
@@ -55,13 +78,18 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                     column: 'intItemId',
                     value: '{current.intItemId}',
                     conjunction: 'and'
-                }]
+                }],
+                readOnly: '{current.ysnPosted}'
             },
             txtBuildNumber: '{current.strBuildNo}',
             txtCost: '{current.dblCost}',
-            txtDescription: '{current.strDescription}',
+            txtDescription: {
+                value: '{current.strDescription}',
+                readOnly: '{current.ysnPosted}'
+            },
 
             grdBuildAssemblyBlend: {
+                readOnly: '{current.ysnPosted}',
                 colItemNo: 'strItemNo',
                 colDescription: 'strItemDescription',
                 colSubLocation: {
@@ -323,6 +351,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
     },
 
     AvailableStockRenderer: function (value, metadata, record) {
+        if (!metadata) return;
         var grid = metadata.column.up('grid');
         var win = grid.up('window');
         var items = win.viewModel.storeInfo.stockUOMList;
