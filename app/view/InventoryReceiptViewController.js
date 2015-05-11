@@ -149,6 +149,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
 
             grdInventoryReceipt: {
+                readOnly: '{current.ysnPosted}',
                 colSourceNumber: {
                     dataIndex: 'strSourceId',
                     editor: {
@@ -235,6 +236,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
 
             grdLotTracking: {
+                readOnly: '{current.ysnPosted}',
                 colLotId: {
                     dataIndex: 'strLotNumber'
                 },
@@ -446,8 +448,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             ]
         });
 
-        win.context.data.store.on('load', me.onStoreLoad);
-
         var cepItemLots = grdLotTracking.getPlugin('cepItemLots');
         if (cepItemLots){
             cepItemLots.on({
@@ -614,33 +614,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 else { action(true) }
             }
         });
-    },
-
-    onStoreLoad: function(store, records, success, eOpts) {
-        if (success === true){
-            var win = store.window;
-            if (!win) return;
-            var grdInventoryReceipt = win.down('#grdInventoryReceipt');
-            var grdLotTracking = win.down('#grdLotTracking');
-            var itemPlugin = grdInventoryReceipt.plugins[0];
-            var lotPlugin = grdLotTracking.plugins[0];
-
-            var current = records[0];
-            if (current){
-                if (current.get('ysnPosted') !== false){
-                    itemPlugin.disable();
-                    lotPlugin.disable();
-                }
-                else {
-                    itemPlugin.enable();
-                    lotPlugin.enable();
-                }
-            }
-
-            var selModel = grdInventoryReceipt.getSelectionModel();
-            selModel.clearSelections();
-            win.controller.onItemSelectionChange(selModel, selModel.getSelection());
-        }
     },
 
     onVendorSelect: function(combo, records, eOpts) {
