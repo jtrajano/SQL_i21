@@ -21,6 +21,7 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Transfer Transaction' + CA
 -- Constants  
 DECLARE @INVENTORY_TRANSFER_TYPE AS INT = 12
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3 
+DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
 
 -- Get the Inventory Receipt batch number
 DECLARE @strBatchId AS NVARCHAR(40) 
@@ -185,7 +186,7 @@ BEGIN
 			,Detail.intItemUOMId  
 			,Header.dtmTransferDate
 			,Detail.dblQuantity * -1
-			,Detail.dblQuantity * -1
+			,ItemUOM.dblUnitQty
 			,Detail.dblCost  
 			,0
 			,NULL
@@ -198,6 +199,7 @@ BEGIN
 			,Detail.intFromStorageLocationId
 	FROM tblICInventoryTransferDetail Detail
 	LEFT JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
 
 	-- Call the post routine 
 	BEGIN 
@@ -232,7 +234,7 @@ BEGIN
 		EXEC	dbo.uspICPostCosting  
 				@ItemsForRemovalPost  
 				,@strBatchId  
-				,NULL
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
 	END
 
@@ -261,7 +263,7 @@ BEGIN
 			,Detail.intItemUOMId  
 			,Header.dtmTransferDate
 			,Detail.dblQuantity
-			,Detail.dblQuantity
+			,ItemUOM.dblUnitQty
 			,Detail.dblCost  
 			,0
 			,NULL
@@ -274,6 +276,7 @@ BEGIN
 			,Detail.intToStorageLocationId
 	FROM tblICInventoryTransferDetail Detail
 	LEFT JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
 
 	-- Call the post routine 
 	BEGIN 
@@ -308,11 +311,15 @@ BEGIN
 		EXEC	dbo.uspICPostCosting  
 				@ItemsForTransferPost  
 				,@strBatchId  
-				,NULL
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
 	END
 
-END   
+END   	
+
+select * from @ItemsForTransferPost
+
+
 
 --------------------------------------------------------------------------------------------  
 -- If UNPOST, call the Unpost routines  
@@ -366,6 +373,7 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 1
 BEGIN 
+	select * from @GLEntries
 	ROLLBACK TRAN @TransactionName
 	EXEC dbo.uspCMPostRecap @GLEntries
 	COMMIT TRAN @TransactionName
