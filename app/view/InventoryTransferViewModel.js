@@ -105,6 +105,22 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             else {
                 return false;
             }
+        },
+        getPostButtonText: function(get) {
+            if (get('current.ysnPosted')) {
+                return 'UnPost';
+            }
+            else {
+                return 'Post';
+            }
+        },
+        getPostButtonIcon: function(get) {
+            if (get('current.ysnPosted')) {
+                return 'large-unpost';
+            }
+            else {
+                return 'large-post';
+            }
         }
     }
 

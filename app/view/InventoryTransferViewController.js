@@ -25,6 +25,20 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             bind: {
                 title: 'Inventory Transfer - {current.strTransferNo}'
             },
+            btnSave: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnDelete: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnUndo: {
+                disabled: '{current.ysnPosted}'
+            },
+            btnPost: {
+                text: '{getPostButtonText}',
+                iconCls: '{getPostButtonIcon}'
+            },
+
             txtTransferNumber: '{current.strTransferNo}',
             dtmTransferDate: {
                 value: '{current.dtmTransferDate}',
