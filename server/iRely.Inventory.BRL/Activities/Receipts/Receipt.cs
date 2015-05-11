@@ -117,6 +117,16 @@ namespace iRely.Inventory.BRL
                             _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus", idParameter, openStatus);
                         }
                     }
+                    var changedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryReceipt>().Where(p => p.State == EntityState.Deleted).ToList();
+                    foreach (var receipt in changedReceipts)
+                    {
+                        if (receipt.Entity.strReceiptType == "Purchase Order")
+                        {
+                            var idParameter = new SqlParameter("intReceiptNo", receipt.Entity.intInventoryReceiptId);
+                            var openStatus = new SqlParameter("ysnOpenStatus", true);
+                            _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo, @ysnOpenStatus", idParameter, openStatus);
+                        }
+                    }
 
                     saveResult = _db.Save(false);
 
