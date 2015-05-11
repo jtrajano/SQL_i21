@@ -26,37 +26,52 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 title: 'Inventory Transfer - {current.strTransferNo}'
             },
             txtTransferNumber: '{current.strTransferNo}',
-            dtmTransferDate: '{current.dtmTransferDate}',
+            dtmTransferDate: {
+                value: '{current.dtmTransferDate}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboTransferType: {
                 value: '{current.strTransferType}',
-                store: '{transferTypes}'
+                store: '{transferTypes}',
+                readOnly: '{current.ysnPosted}'
             },
             cboTransferredBy: {
                 value: '{current.intTransferredById}',
                 store: '{userList}'
             },
-            txtDescription: '{current.strDescription}',
+            txtDescription: {
+                value: '{current.strDescription}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboFromLocation: {
                 value: '{current.intFromLocationId}',
-                store: '{fromLocation}'
+                store: '{fromLocation}',
+                readOnly: '{current.ysnPosted}'
             },
             cboToLocation: {
                 value: '{current.intToLocationId}',
-                store: '{toLocation}'
+                store: '{toLocation}',
+                readOnly: '{current.ysnPosted}'
             },
-            chkShipmentRequired: '{current.ysnShipmentRequired}',
+            chkShipmentRequired: {
+                value: '{current.ysnShipmentRequired}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboStatus: {
                 value: '{current.intStatusId}',
-                store: '{status}'
+                store: '{status}',
+                readOnly: '{current.ysnPosted}'
             },
 
             cboShipVia: {
                 value: '{current.intShipViaId}',
-                store: '{shipVia}'
+                store: '{shipVia}',
+                readOnly: '{current.ysnPosted}'
             },
             cboFreightUOM: {
                 value: '{current.intFreightUOMId}',
-                store: '{uom}'
+                store: '{uom}',
+                readOnly: '{current.ysnPosted}'
             },
             txtTaxAmount: '{current.dblTaxAmount}',
 
@@ -65,6 +80,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
 
             grdInventoryTransfer: {
+                readOnly: '{current.ysnPosted}',
                 colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -191,6 +207,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
 
             grdNotes: {
+                readOnly: '{current.ysnPosted}',
                 colNoteType: 'strNoteType',
                 colNote: 'strNotes'
             }
@@ -285,14 +302,15 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         if (app.EntityId > 0)
             record.set('intTransferredById', app.EntityId);
         record.set('dtmTransferDate', today);
-
+        record.set('intStatusId', 1);
         action(record);
     },
 
     AvailableQtyRenderer: function (value, metadata, record) {
+        if (!metadata) return;
         var grid = metadata.column.up('grid');
         var win = grid.up('window');
-        var items = win.viewModel.storeInfo.item;
+        var items = win.viewModel.storeInfo.itemStock;
         var currentMaster = win.viewModel.data.current;
 
         if (currentMaster) {
@@ -317,9 +335,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
     },
 
     AvailableUOMRenderer: function (value, metadata, record) {
+        if (!metadata) return;
         var grid = metadata.column.up('grid');
         var win = grid.up('window');
-        var items = win.viewModel.storeInfo.item;
+        var items = win.viewModel.storeInfo.itemStock;
         var currentMaster = win.viewModel.data.current;
 
         if (currentMaster) {

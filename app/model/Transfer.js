@@ -21,10 +21,13 @@ Ext.define('Inventory.model.Transfer', {
         { name: 'strDescription', type: 'string' },
         { name: 'intFromLocationId', type: 'int', allowNull: true },
         { name: 'intToLocationId', type: 'int', allowNull: true },
-        { name: 'intStatusId', type: 'int', allowNull: true },
         { name: 'ysnShipmentRequired', type: 'boolean' },
+        { name: 'intStatusId', type: 'int', allowNull: true },
         { name: 'intShipViaId', type: 'int', allowNull: true },
         { name: 'intFreightUOMId', type: 'int', allowNull: true },
+        { name: 'ysnPosted', type: 'boolean' },
+        { name: 'intCreatedUserId', type: 'int', allowNull: true },
+        { name: 'intEntityId', type: 'int', allowNull: true },
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'dblTaxAmount', type: 'float' }

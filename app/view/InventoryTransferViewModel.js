@@ -53,9 +53,11 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             type: 'icbufferedstatus'
         },
 
-
-        item: {
+        itemStock: {
             autoLoad: true,
+            type: 'icbuffereditemstockuomview'
+        },
+        item: {
             type: 'icbuffereditemstockuomview'
         },
         lot: {
