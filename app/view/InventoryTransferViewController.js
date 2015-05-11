@@ -440,6 +440,27 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         };
     },
 
+    onViewItemClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var grd = win.down('#grdInventoryTransfer');
+
+        var selected = grd.getSelectionModel().getSelection();
+
+        if (selected) {
+            if (selected.length > 0){
+                var current = selected[0];
+                if (!current.dummy)
+                    iRely.Functions.openScreen('Inventory.view.Item', current.get('intItemId'));
+            }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Item to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
+        }
+    },
+
     onPostClick: function(button, e, eOpts) {
         var me = this;
         var win = button.up('window');
@@ -585,6 +606,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             "#btnRecap": {
                 click: this.onRecapClick
+            },
+            "#btnViewItem": {
+                click: this.onViewItemClick
             }
         });
     }
