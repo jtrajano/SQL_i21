@@ -5,6 +5,7 @@ SELECT
 A.[intEntityVendorId]
 ,A.dtmDate
 ,A.strReference
+,tblReceived.strReceiptNumber AS strSourceNumber
 ,A.strPurchaseOrderNumber
 ,B.intPurchaseDetailId
 ,B.intItemId
@@ -27,7 +28,8 @@ FROM tblPOPurchase A
 	CROSS APPLY 
 	(
 		SELECT
-			B1.intInventoryReceiptItemId
+			A1.strReceiptNumber
+			,B1.intInventoryReceiptItemId
 			,B1.intItemId
 			,B1.intLineNo
 			,B1.dblOrderQty
@@ -42,7 +44,8 @@ FROM tblPOPurchase A
 		WHERE A1.ysnPosted = 1 AND B1.dblOpenReceive != B1.dblBillQty
 		AND B.intPurchaseDetailId = B1.intLineNo
 		GROUP BY
-			B1.intInventoryReceiptItemId
+			A1.strReceiptNumber
+			,B1.intInventoryReceiptItemId
 			,B1.intItemId 
 			,B1.dblUnitCost
 			,intLineNo
@@ -62,6 +65,7 @@ SELECT
 A.[intEntityVendorId]
 ,A.dtmDate
 ,A.strReference
+,A.strPurchaseOrderNumber
 ,A.strPurchaseOrderNumber
 ,B.intPurchaseDetailId
 ,B.intItemId
@@ -94,6 +98,7 @@ SELECT
 A.intEntityVendorId
 ,A.dtmReceiptDate
 ,A.strVendorRefNo
+,A.strReceiptNumber
 ,A.strReceiptNumber
 ,B.intInventoryReceiptItemId
 ,B.intItemId
