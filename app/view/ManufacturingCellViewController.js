@@ -81,6 +81,7 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             binding: me.config.binding,
+            createRecord : me.createRecord,
             window : win,
             store  : store,
             details: [
@@ -131,6 +132,12 @@ Ext.define('Inventory.view.ManufacturingCellViewController', {
                 });
             }
         }
+    },
+
+    createRecord: function(config, action) {
+        var record = Ext.create('Inventory.model.ManufacturingCell');
+        record.set('ysnActive', true);
+        action(record);
     },
 
     onPackTypeSelect: function(combo, records, eOpts) {
