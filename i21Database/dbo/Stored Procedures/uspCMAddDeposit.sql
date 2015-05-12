@@ -46,7 +46,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@msg_id INT
 		
 -- Check for invalid bank account id. 
-IF NOT EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankAccount] WHERE intBankAccountId = @intBankAccountId AND ysnActive =  1)
+IF NOT EXISTS (SELECT TOP 1 1 FROM [dbo].[tblCMBankAccount] WHERE intBankAccountId = @intBankAccountId AND (ysnActive = 0 OR intGLAccountId IN (SELECT intAccountId FROM tblGLAccount WHERE ysnActive = 0)))
 BEGIN
 	RAISERROR(50010, 11, 1, @strTransactionId)
 	GOTO uspCMAddDeposit_Rollback

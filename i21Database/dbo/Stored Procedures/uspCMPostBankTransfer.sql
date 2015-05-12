@@ -167,7 +167,7 @@ BEGIN
 	SELECT TOP 1 @ysnBankAccountIdInactive = 1
 	FROM	tblCMBankAccount
 	WHERE	intBankAccountId IN (@intBankAccountIdFrom, @intBankAccountIdTo) 
-			AND ysnActive = 0
+			AND (ysnActive = 0 OR intGLAccountId IN (SELECT intAccountId FROM tblGLAccount WHERE ysnActive = 0))
 	
 	IF @ysnBankAccountIdInactive = 1
 	BEGIN

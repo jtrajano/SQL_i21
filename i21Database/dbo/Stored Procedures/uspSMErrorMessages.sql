@@ -40,7 +40,7 @@ SET @strmessage = 'The transaction is already cleared.'
 EXEC sp_addmessage 50009,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50010) EXEC sp_dropmessage 50010, 'us_english'	
-SET @strmessage = 'The bank account is inactive.'
+SET @strmessage = 'The bank account or its associated GL account is inactive.'
 EXEC sp_addmessage 50010,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50011) EXEC sp_dropmessage 50011, 'us_english'	
