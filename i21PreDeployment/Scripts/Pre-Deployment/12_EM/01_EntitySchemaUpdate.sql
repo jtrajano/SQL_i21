@@ -130,7 +130,13 @@ BEGIN
 	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARCustomerProductVersion' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer' 
 	if(@constraint <> '')
-		print('ALTER TABLE tblARCustomerProductVersion DROP CONSTRAINT [' + @constraint +']' )
+		exec('ALTER TABLE tblARCustomerProductVersion DROP CONSTRAINT [' + @constraint +']' )
+	
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblCTContractHeader' and OBJECT_NAME(referenced_object_id) = 'tblARSalesperson'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblCTContractHeader DROP CONSTRAINT [' + @constraint +']' )
+
 
 	print 'Adding tblEntityContact columns to tblEntity'
 	exec(N'	
@@ -796,6 +802,16 @@ END
 				from tblARCustomerProductVersion a
 					join tblARCustomer b
 						on a.intCustomerId =  b.intCustomerId ')
+	END			
+
+
+	print 'Update Linking of tblCTContractHeader from salesperson id to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblCTContractHeader' AND [COLUMN_NAME] = 'intSalespersonId') 
+	BEGIN
+		exec(N' update a set a.intSalespersonId = b.intEntityId
+				from tblCTContractHeader a
+					join tblARSalesperson b
+						on a.intSalespersonId =  b.intSalespersonId ')
 	END			
 
 END
