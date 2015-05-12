@@ -10,6 +10,9 @@ SET ANSI_WARNINGS OFF
 
 BEGIN
 
+	/* Fix user security data that shares one entity */
+	UPDATE tblSMUserSecurity SET intEntityId = NULL WHERE strUserName NOT IN (SELECT strUserName FROM tblEntityCredential)
+
 	DECLARE @UserName NVARCHAR(100)
 	DECLARE @FullName NVARCHAR(100)
 	DECLARE @Email NVARCHAR(100)
@@ -20,29 +23,30 @@ BEGIN
 	SELECT strUserName, strFullName, strEmail, strPassword, strPhone
 	INTO #tmpUsers
 	FROM tblSMUserSecurity
-	WHERE ysnDisabled = 0
-	AND ISNULL(intEntityId, 0) <= 0
+	WHERE ISNULL(intEntityId, 0) <= 0
+	--WHERE ysnDisabled = 0
+	--AND ISNULL(intEntityId, 0) <= 0
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpUsers)
 	BEGIN
 		
-		SELECT TOP 1 @UserName = strUserName, 
+		SELECT TOP 1 @UserName = strUserName,
 			@FullName = strFullName,
 			@Email = strEmail,
 			@Password = strPassword,
 			@ContactNumber = strPhone
 		FROM #tmpUsers
 		
-		IF NOT EXISTS(SELECT * FROM tblEntity WHERE strName = @FullName AND strEmail = @Email)
-		BEGIN
+		--IF NOT EXISTS(SELECT * FROM tblEntity WHERE strName = @FullName AND strEmail = @Email)
+		--BEGIN
 			INSERT INTO tblEntity(strName, strEmail, strContactNumber)
 			VALUES (@FullName, @Email, @ContactNumber)
 			SELECT @NewId = SCOPE_IDENTITY()
-		END
-		ELSE
-		BEGIN
-			SELECT @NewId = intEntityId FROM tblEntity WHERE strName = @FullName AND strEmail = @Email
-		END
+		--END
+		--ELSE
+		--BEGIN
+		--	SELECT @NewId = intEntityId FROM tblEntity WHERE strName = @FullName AND strEmail = @Email
+		--END
 		
 		UPDATE tblSMUserSecurity
 		SET intEntityId = @NewId
