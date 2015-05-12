@@ -19,6 +19,7 @@ BEGIN
 			@Invalid_UserId_Found AS BIT OUTPUT
 			,@Invalid_GL_Account_Id_Found AS BIT OUTPUT
 			,@Invalid_Currency_Id_Found AS BIT OUTPUT
+			,@Invalid_Bank_Account_Found AS BIT OUTPUT
 			,@Missing_Default_Currency AS BIT OUTPUT
 			,@Missing_Cash_Account_Group AS BIT OUTPUT
 		AS
@@ -55,6 +56,11 @@ BEGIN
 		WHERE	grp.strAccountGroup <> @CASH_ACCOUNT
 				OR grp.strAccountType <> @ASSET
 
+		-- Check for bank accounts assigned to multiple GL accounts. 
+		-- They must be moved to different Cash Accounts before import can be done. (ERR)
+		SELECT @Invalid_Bank_Account_Found = 1
+		WHERE EXISTS (SELECT TOP 1 apcbk_gl_cash, count(*) FROM apcbkmst GROUP BY apcbk_gl_cash HAVING count(*) > 1)
+
 		-- Check for missing default currency. 
 		SELECT	TOP 1
 				@Missing_Default_Currency = 0
@@ -71,6 +77,7 @@ BEGIN
 		SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)
 				,@Invalid_GL_Account_Id_Found = ISNULL(@Invalid_GL_Account_Id_Found, 0)
 				,@Invalid_Currency_Id_Found = ISNULL(@Invalid_Currency_Id_Found,0)
+				,@Invalid_Bank_Account_Found = ISNULL(@Invalid_Bank_Account_Found, 0)
 				,@Missing_Default_Currency = ISNULL(@Missing_Default_Currency, 1)
 				,@Missing_Cash_Account_Group = ISNULL(@Missing_Cash_Account_Group, 0)	
 	')
