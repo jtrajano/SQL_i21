@@ -175,10 +175,10 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/22/2015'
-				,dblQty					= -500.000000
-				,dblUOMQty				= 55.115500
+				,dblQty					= -500.000000 * @25KgBagUnitQty -- Convert @ManualGrains_25KgBagUOM to @ManualGrains_Pound
+				,dblUOMQty				= 1 -- Unit qty of @ManualGrains_PoundUOM
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
@@ -194,11 +194,11 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_KgUOM
 				,dtmDate				= '05/22/2015'
-				,dblQty					= 500.00
-				,dblUOMQty				= 55.115500
-				,dblCost				= 2.50
+				,dblQty					= 500.00 * @25KgBagUnitQty / @KgUnitQty  -- @ManualGrains_Pound to @ManualGrains_KgUOM
+				,dblUOMQty				= @KgUnitQty
+				,dblCost				= (2.50 * 500.00 * 55.1155) / (500.00 * 55.1155 / @KgUnitQty) -- calculate a new cost to realign the stock value from LB to KG. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 

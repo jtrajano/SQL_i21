@@ -100,9 +100,12 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
 			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
-			,dblQty					=	CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) = 0 THEN ISNULL(Detail.dblAdjustByQuantity, 0) * -1
-												ELSE Detail.dblNewSplitLotQuantity
-										END
+			,dblQty					= ABS(
+											ISNULL(
+												Detail.dblNewSplitLotQuantity, 
+												(ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+											)
+										)
 			,intItemUOMId			= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
 			,dblWeight				=	
 										CASE	WHEN ISNULL(Detail.dblNewWeight, 0) = 0 THEN 

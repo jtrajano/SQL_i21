@@ -134,7 +134,7 @@ BEGIN
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		DECLARE @intTransactionId AS INT = 9
+		DECLARE @intTransactionId AS INT = 10
 		DECLARE @intUserId AS INT = 1
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
@@ -175,17 +175,17 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
-				,dtmDate				= '05/19/2015'
-				,dblQty					= -500.000000
-				,dblUOMQty				= 55.115500
+				,intItemUOMId			= @ManualGrains_PoundUOM
+				,dtmDate				= '05/20/2015'
+				,dblQty					= -500.000000 * 55.115500	-- Convert 500 25KgBagUOM to Pound
+				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
 				,dblExchangeRate		= 1
-				,intTransactionId		= 9
-				,strTransactionId		= 'ADJ-9'
+				,intTransactionId		= 10
+				,strTransactionId		= 'ADJ-10'
 				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
 				,intLotId				= @ManualLotGrains_Lot_100001
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
@@ -194,17 +194,17 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
-				,dtmDate				= '05/19/2015'
-				,dblQty					= 500.00
-				,dblUOMQty				= 55.115500
-				,dblCost				= 2.50
+				,intItemUOMId			= @ManualGrains_PoundUOM
+				,dtmDate				= '05/20/2015'
+				,dblQty					= 400.00 * 55.115500	-- Convert 400 25KgBagUOM to Pound
+				,dblUOMQty				= 1						-- Unit qty of @ManualGrains_PoundUOM
+				,dblCost				= (2.50 * 55.115500 * 500) / (400 * 55.115500)	-- New cost is calculated to realign it with the new split lot Qty. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
 				,dblExchangeRate		= 1
-				,intTransactionId		= 9
-				,strTransactionId		= 'ADJ-9'
+				,intTransactionId		= 10
+				,strTransactionId		= 'ADJ-10'
 				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
 				,intLotId				= 4
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation

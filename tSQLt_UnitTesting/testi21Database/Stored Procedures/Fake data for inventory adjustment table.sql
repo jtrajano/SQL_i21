@@ -189,7 +189,7 @@ BEGIN
 		,intLotStatusId			= @LOT_STATUS_Active
 		,dblWeight				= 55115.60
 		,intWeightUOMId			= @ManualGrains_PoundUOM
-		,dblWeightPerQty		= 55.1156
+		,dblWeightPerQty		= 55.115500
 	UNION ALL 
 	SELECT 
 		intLotId				= @ManualLotGrains_Lot_100002
@@ -225,7 +225,7 @@ BEGIN
 		,intLotStatusId			= @LOT_STATUS_Active
 		,dblWeight				= 33069.36
 		,intWeightUOMId			= @ManualGrains_PoundUOM
-		,dblWeightPerQty		= 55.1156
+		,dblWeightPerQty		= 55.115500
 	SET IDENTITY_INSERT tblICLot OFF
 		
 	-- TODO: 
@@ -346,9 +346,9 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM
 				,intNewWeightUOMId			= NULL 
-				,dblWeight					= 55115.60
+				,dblWeight					= @25KgBagUnitQty
 				,dblNewWeight				= NULL 
-				,dblWeightPerQty			= 55.1156
+				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
 				,dtmExpiryDate				= '01/10/2018'
 				,dtmNewExpiryDate			= NULL 
@@ -688,10 +688,10 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= 55115.60
+				,dblWeight					= @25KgBagUnitQty
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= NULL 
-				,dblWeightPerQty			= 55.1156
+				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
 				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
@@ -765,10 +765,10 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= 55115.60
+				,dblWeight					= @25KgBagUnitQty
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= NULL 
-				,dblWeightPerQty			= 55.1156
+				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
 				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= 3.50
@@ -842,10 +842,10 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= 55115.60
+				,dblWeight					= @25KgBagUnitQty
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= 27500.00
-				,dblWeightPerQty			= 55.1156
+				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
 				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
@@ -919,10 +919,10 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= 400
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= 55115.60
+				,dblWeight					= @25KgBagUnitQty
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= NULL
-				,dblWeightPerQty			= 55.1156
+				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
 				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
@@ -996,10 +996,10 @@ BEGIN
 				,intNewItemUOMId			= @ManualGrains_10LbBagUOM
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= 55115.60
+				,dblWeight					= @25KgBagUnitQty
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= NULL
-				,dblWeightPerQty			= 55.1156
+				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
 				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
@@ -1073,10 +1073,10 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= 55115.60
+				,dblWeight					= @25KgBagUnitQty
 				,intNewWeightUOMId			= @ManualGrains_KgUOM
 				,dblNewWeight				= NULL
-				,dblWeightPerQty			= 55.1156
+				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
 				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
@@ -1150,10 +1150,10 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= 55115.60
+				,dblWeight					= @25KgBagUnitQty
 				,intNewWeightUOMId			= NULL
 				,dblNewWeight				= NULL
-				,dblWeightPerQty			= 55.1156
+				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
 				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 

@@ -175,10 +175,10 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/17/2015'
-				,dblQty					= -500.000000
-				,dblUOMQty				= 55.115500
+				,dblQty					= -500.000000 * @25KgBagUnitQty
+				,dblUOMQty				= @PoundUnitQty
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
@@ -194,10 +194,10 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/17/2015'
-				,dblQty					= 500.00
-				,dblUOMQty				= 55.115500
+				,dblQty					= 500.00 * @25KgBagUnitQty
+				,dblUOMQty				= @PoundUnitQty
 				,dblCost				= 2.50
 				,dblValue				= 0
 				,dblSalesPrice			= 0

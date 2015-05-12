@@ -147,11 +147,17 @@ BEGIN
 										END
 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= CASE	WHEN Detail.intWeightUOMId IS NOT NULL THEN 
+			,dblQty					= CASE		WHEN Detail.intWeightUOMId IS NOT NULL THEN 
 													CASE	
 															WHEN Detail.dblNewWeight IS NOT NULL THEN 
 																-- Use the new net weight. 
 																ISNULL(Detail.dblNewWeight, 0) 
+															WHEN Detail.dblNewSplitLotQuantity IS NOT NULL THEN 
+																dbo.fnCalculateQtyBetweenUOM(
+																	ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId),
+																	ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId), 
+																	Detail.dblNewSplitLotQuantity
+																)
 															ELSE 
 																-- If there is no new weight, calculate as: {Weight per Qty} x {Adjust by Qty}. 
 																-- And then the result is converted into the new weight UOM. 
@@ -176,43 +182,42 @@ BEGIN
 										END
 
 			,dblCost				=	
-										CASE	
-												WHEN Detail.intWeightUOMId IS NOT NULL THEN 
+										CASE	WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblNewWeight IS NOT NULL THEN 
 													-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
 													dbo.fnCalculateCostPerWeight (
 														-- 1 of 2. Calculate the overall item value according to the (new or original) cost and original net weight. 
 														ISNULL(Detail.dblNewCost, Detail.dblCost) 
 														* ABS(ISNULL(Detail.dblWeightPerQty, 0) * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)))
 
-														-- 2 of 2. Determine the weight to use (either new or original). 
-														,ISNULL(
-															Detail.dblNewWeight, 
-															dbo.fnCalculateQtyBetweenUOM(
-																Detail.intWeightUOMId,
-																ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId), 
-																ABS(ISNULL(Detail.dblWeightPerQty, 0) * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)))
-															)													
-														) 
+														-- 2 of 2. Use the new weight qty. 
+														,Detail.dblNewWeight
 													) 
-										
+
 												WHEN Detail.dblNewSplitLotQuantity IS NOT NULL THEN 
 													-- Distribute the value over the new split lot qty. 
 													CASE	WHEN Detail.dblNewSplitLotQuantity = 0 THEN 
-																ISNULL(Detail.dblNewCost, Detail.dblCost)
-															WHEN Detail.intWeightUOMId IS NOT NULL THEN 
-																-- If there is weight uom, 
-																ABS (
-																	ISNULL(Detail.dblNewCost, Detail.dblCost) 
-																	* ABS(ISNULL(Detail.dblWeightPerQty, 0) 
-																	* (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)))
-																	/ Detail.dblNewSplitLotQuantity																
-																)
-																
+																ISNULL(Detail.dblNewCost, Detail.dblCost)														
 															ELSE 
 																ISNULL(Detail.dblNewCost, Detail.dblCost)
-																* (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+																* ABS(ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
 																/ Detail.dblNewSplitLotQuantity
 													END
+
+												WHEN Detail.intWeightUOMId IS NOT NULL AND Detail.dblNewWeight IS NULL THEN 
+													-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
+													dbo.fnCalculateCostPerWeight (
+														-- 1 of 2. Calculate the overall item value according to the (new or original) cost and original net weight. 
+														ISNULL(Detail.dblNewCost, Detail.dblCost) 
+														* ABS(ISNULL(Detail.dblWeightPerQty, 0) * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)))
+
+														-- 2 of 2. User the original weight
+														,dbo.fnCalculateQtyBetweenUOM(
+																Detail.intWeightUOMId,
+																ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId), 
+																ABS(ISNULL(Detail.dblWeightPerQty, 0) * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)))
+														)													
+													) 
+
 												ELSE 
 													-- Otherwise, recalculate the (new or original) cost to the (new or original) Item UOM unit qty. 
 													ISNULL(Detail.dblNewCost, Detail.dblCost)

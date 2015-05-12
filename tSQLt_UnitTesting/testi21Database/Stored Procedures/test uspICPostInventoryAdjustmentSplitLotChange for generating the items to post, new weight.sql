@@ -175,10 +175,10 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/19/2015'
-				,dblQty					= -500.000000
-				,dblUOMQty				= 55.115500
+				,dblQty					= -500.000000 * @25KgBagUnitQty
+				,dblUOMQty				= @PoundUnitQty
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
@@ -194,11 +194,11 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/19/2015'
-				,dblQty					= 500.00
-				,dblUOMQty				= 55.115500
-				,dblCost				= 2.50
+				,dblQty					= 27500.00 -- New Weight entered by the user 
+				,dblUOMQty				= @PoundUnitQty
+				,dblCost				= (2.50 * 500.00 * 55.1155) / (27500.00) -- Calculate a new cost to realign the stock value to the new weight. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 

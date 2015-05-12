@@ -206,7 +206,7 @@ BEGIN
 			,intLotStatusId			= @LOT_STATUS_Active
 			,dblWeight				= 0 -- This is populated by uspICPostCosting
 			,intWeightUOMId			= @ManualGrains_PoundUOM
-			,dblWeightPerQty		= 55.1156
+			,dblWeightPerQty		= 55.1155
 	END 
 
 	-- Act

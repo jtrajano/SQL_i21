@@ -175,10 +175,10 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM -- Since there is weight, convert the bags into weights. 
 				,dtmDate				= '05/18/2015'
-				,dblQty					= -500.000000
-				,dblUOMQty				= 55.115500
+				,dblQty					= -500.00 * 55.115500  -- bags x unit qty. 
+				,dblUOMQty				= 1 -- Unit Qty of @ManualGrains_PoundUOM
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
@@ -194,10 +194,10 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/18/2015'
-				,dblQty					= 500.00
-				,dblUOMQty				= 55.115500
+				,dblQty					= 500 * 55.115500 -- bags x unit qty. 
+				,dblUOMQty				= 1 -- Unit Qty of @ManualGrains_PoundUOM
 				,dblCost				= 3.50
 				,dblValue				= 0
 				,dblSalesPrice			= 0

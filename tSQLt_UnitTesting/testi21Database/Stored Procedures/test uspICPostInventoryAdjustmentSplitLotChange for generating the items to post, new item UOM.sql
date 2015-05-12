@@ -175,10 +175,10 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/21/2015'
-				,dblQty					= -500.000000
-				,dblUOMQty				= 55.115500
+				,dblQty					= -500.000000 * 55.1155	-- Convert 500 25KgBag to Pound
+				,dblUOMQty				= 1						-- Unit qty of @ManualGrains_PoundUOM
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
@@ -194,10 +194,10 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_10LbBagUOM -- This part changed to the new item uom. 
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/21/2015'
-				,dblQty					= 500.00
-				,dblUOMQty				= 10.00 -- UOM Qty also changed. It is for 10 Lbs per 10LbBag. 
+				,dblQty					= 500 * 55.1155			-- Since we are receiving it by weight (POUND), then use the same values from 25KgBag
+				,dblUOMQty				= 1						-- Use unit qty of @ManualGrains_PoundUOM
 				,dblCost				= 2.50
 				,dblValue				= 0
 				,dblSalesPrice			= 0
