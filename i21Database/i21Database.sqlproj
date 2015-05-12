@@ -1552,7 +1552,7 @@
     <Build Include="dbo\Functions\fnAPCreatePaymentGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderShipmentStatus.sql" />
-	  <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql" />
     <Build Include="dbo\Stored Procedures\uspSCStorageUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStartCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPostPaycheck.sql" />
@@ -1572,6 +1572,7 @@
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodityLocation.sql" />
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesAging.sql" />
+    <Build Include="dbo\Functions\fnCalculateAdjustByQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

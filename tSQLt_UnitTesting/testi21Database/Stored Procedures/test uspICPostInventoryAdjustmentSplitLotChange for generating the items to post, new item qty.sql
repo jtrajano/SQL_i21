@@ -196,9 +196,9 @@ BEGIN
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= 400.00 * 55.115500	-- Convert 400 25KgBagUOM to Pound
-				,dblUOMQty				= 1						-- Unit qty of @ManualGrains_PoundUOM
-				,dblCost				= (2.50 * 55.115500 * 500) / (400 * 55.115500)	-- New cost is calculated to realign it with the new split lot Qty. 
+				,dblQty					= 500.000000 * 55.115500	-- Since weight does not change, use the same weight as the Qty. 
+				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
+				,dblCost				= 2.50						-- Since weight remains the same, the cost will remain the same. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 

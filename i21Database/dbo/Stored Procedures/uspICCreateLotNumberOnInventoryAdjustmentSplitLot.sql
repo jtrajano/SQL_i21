@@ -100,22 +100,17 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
 			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
-			,dblQty					= ABS(
-											ISNULL(
-												Detail.dblNewSplitLotQuantity, 
-												(ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
-											)
-										)
+			,dblQty					=	CASE	WHEN Detail.dblNewSplitLotQuantity IS NOT NULL THEN 
+													Detail.dblNewSplitLotQuantity
+												ELSE 
+													-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+										END 
 			,intItemUOMId			= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
 			,dblWeight				=	
-										CASE	WHEN ISNULL(Detail.dblNewWeight, 0) = 0 THEN 
-													ABS(
-														ISNULL(SourceLot.dblWeightPerQty, 0) * 
-														CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) = 0 THEN ISNULL(Detail.dblAdjustByQuantity, 0)
-																ELSE Detail.dblNewSplitLotQuantity
-														END 
-													)
-												ELSE Detail.dblNewWeight
+										CASE	WHEN Detail.dblNewWeight IS NOT NULL  THEN 
+													Detail.dblNewWeight 
+												ELSE 
+													ISNULL(Detail.dblWeightPerQty, 0) * (-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))) 
 										END 
 			,intWeightUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId)
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate

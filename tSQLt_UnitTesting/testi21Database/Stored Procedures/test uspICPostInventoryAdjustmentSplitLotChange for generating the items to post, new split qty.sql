@@ -177,8 +177,8 @@ BEGIN
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= -500.000000 * 55.115500 -- Convert 25KgBagUOM to Pound
-				,dblUOMQty				= 1 -- Unit qty of @ManualGrains_PoundUOM
+				,dblQty					= -500.000000 * 55.115500		-- Convert 25KgBagUOM to Pound
+				,dblUOMQty				= 1								-- Unit qty of @ManualGrains_PoundUOM
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
@@ -196,9 +196,9 @@ BEGIN
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= 400.00 * 55.1155 -- Convert 25KgBagUOM to Pound
-				,dblUOMQty				= 1 -- Unit qty of @ManualGrains_PoundUOM
-				,dblCost				= 3.125 -- Cost is recomputed. It is computed as : (500 from source lot) x ($2.50) = $3.125 as new cost of the new split qty. 
+				,dblQty					= 500.000000 * 55.115500		-- Since weight remains the same, use the same weight as the qty. 
+				,dblUOMQty				= 1								-- Unit qty of @ManualGrains_PoundUOM
+				,dblCost				= 2.50							-- Since weight remains the same, use the same cost. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
