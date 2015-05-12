@@ -501,6 +501,12 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'string',
                                                                     text: 'Lot Number',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblCost',
+                                                                    dataType: 'float',
+                                                                    text: 'Cost',
+                                                                    flex: 1
                                                                 }
                                                             ],
                                                             itemId: 'cboLotNumber',
