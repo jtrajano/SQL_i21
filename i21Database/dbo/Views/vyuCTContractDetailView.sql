@@ -68,7 +68,6 @@ AS
 	JOIN	tblARMarketZone			MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId
 	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
 	JOIN	tblICUnitMeasure		U1	ON	U1.intUnitMeasureId			=	CD.intUnitMeasureId
-	JOIN	tblSMCurrency			CU	ON	CU.intCurrencyID			=	CD.intCurrencyId
 	JOIN	tblSMFreightTerms		FT	ON	FT.intFreightTermId			=	CD.intFreightTermId
 	JOIN	tblCTPricingType		PT	ON	PT.Value					=	CD.intPricingType
 	JOIN	tblSMShipVia			SV	ON	SV.intShipViaID				=	CD.intShipViaId				LEFT
@@ -77,8 +76,9 @@ AS
 	JOIN	tblCTRailGrade			RG	ON	RG.Value					=	CD.intGrade					LEFT
 	JOIN	tblRKFutureMarket		FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
 	JOIN	tblAPVendor				VR	ON	VR.[intEntityVendorId]		=	CD.intBillTo				LEFT
-	JOIN	tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId
-	
+	JOIN	tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
+	JOIN	tblSMCurrency			CU	ON	CU.intCurrencyID			=	CD.intCurrencyId
+
 	JOIN	tblEntity				EY	ON	EY.intEntityId				=	CH.intEntityId
 	JOIN	tblICCommodity			CY	ON	CY.intCommodityId			=	CH.intCommodityId
 	JOIN	tblCTContractType		TP	ON	TP.Value					=	CH.intPurchaseSale
@@ -87,5 +87,5 @@ AS
 	JOIN	tblARSalesperson		SP	ON	SP.intEntitySalespersonId   =	CH.intSalespersonId
 	JOIN	tblCTWeightGrade		W1	ON	W1.intWeightGradeId			=	CH.intGradeId
 	JOIN	tblCTWeightGrade		W2	ON	W2.intWeightGradeId			=	CH.intWeightId
+	JOIN	tblSMTerm				TM	ON	TM.intTermID				=	CH.intTermId				LEFT
 	JOIN	tblCTAssociation		AN	ON	AN.intAssociationId			=	CH.intAssociationId
-	JOIN	tblSMTerm				TM	ON	TM.intTermID				=	CH.intTermId
