@@ -77,6 +77,14 @@ BEGIN
 			SET @success = 0;
 			SET @errorMsg = 'You cannot change the status of this PO to "Cancelled" because it has received item(s).';
 		END
+		IF @currentStatus != 4 AND @success = 1
+		BEGIN
+			IF (dbo.fnPOHasItemReceipt(@poId, 0) = 0 AND dbo.fnPOHasBill(@poId, 1) = 0)
+			BEGIN
+				SET @success = 0;
+				SET @errorMsg = 'You cannot cancel this PO. Please delete the open receipt before cancelling.';
+			END
+		END
 	END
 	ELSE IF @statusId = 6 --SHORT CLOSED
 	BEGIN
