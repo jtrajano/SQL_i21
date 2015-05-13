@@ -64,6 +64,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             grdInventoryAdjustment: {
+                readOnly: '{current.ysnPosted}',
                 colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -72,8 +73,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             column: 'intLocationId',
                             value: '{current.intLocationId}',
                             conjunction: 'and'
-                        }],
-                        readOnly: '{current.ysnPosted}'
+                        }]
                     }
                 },
 
@@ -83,16 +83,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     dataIndex: 'strSubLocation',
                     editor: {
                         store: '{subLocation}',
-                        defaultFilters: [{
-                            column: 'intCompanyLocationId',
-                            value: '{current.intLocationId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'strClassification',
-                            value: 'Inventory',
-                            conjunction: 'and'
-                        }],
-                        readOnly: '{current.ysnPosted}'
+                        defaultFilters: [
+                            {
+                                column: 'intCompanyLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'strClassification',
+                                value: 'Inventory',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
 
@@ -100,12 +102,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     dataIndex: 'strStorageLocation',
                     editor: {
                         store: '{storageLocation}',
-                        defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{current.intLocationId}',
-                            conjunction: 'and'
-                        }],
-                        readOnly: '{current.ysnPosted}'
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
 
@@ -143,73 +146,73 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colNewLotNumber: {
                     dataIndex: 'strNewLotNumber',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
+                    hidden: '{formulaHideColumn_colNewLotNumber}'
                 },
 
-                colQuantity: 'dblQuantity',
+                colQuantity: {
+                    dataIndex: 'dblQuantity',
+                    hidden: '{formulaHideColumn_colQuantity}'
+                },
 
                 colNewQuantity: {
                     dataIndex: 'dblNewQuantity',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
+                    hidden: '{formulaHideColumn_colNewQuantity}'
                 },
 
                 colAdjustByQuantity: {
                     dataIndex: 'dblAdjustByQuantity',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
+                    hidden: '{formulaHideColumn_colAdjustByQuantity}'
                 },
 
                 colNewSplitLotQuantity: {
                     dataIndex: 'dblNewSplitLotQuantity',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
+                    hidden: '{formulaHideColumn_colNewSplitLotQuantity}'
                 },
 
-                colUOM: 'strItemUOM',
+                colUOM: {
+                    dataIndex: 'strItemUOM',
+                    hidden: '{formulaHideColumn_colUOM}'
+                },
 
                 colNewUOM: {
                     dataIndex: 'strNewItemUOM',
+                    hidden: '{formulaHideColumn_colNewUOM}',
                     editor: {
                         store: '{newItemUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{grdInventoryAdjustment.selection.intItemId}',
                             conjunction: 'and'
-                        }],
-                        readOnly: '{current.ysnPosted}'
+                        }]
                     }
                 },
 
-                colNetWeight: 'dblWeight',
+                colNetWeight: {
+                    dataIndex: 'dblWeight',
+                    hidden: '{formulaHideColumn_colNetWeight}'
+                },
 
                 colNewNetWeight: {
                     dataIndex: 'dblNewWeight',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
+                    hidden: '{formulaHideColumn_colNewNetWeight}'
                 },
 
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
+                    hidden: '{formulaHideColumn_colWeightUOM}',
                     editor: {
                         store: '{weightUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{grdInventoryAdjustment.selection.intItemId}',
                             conjunction: 'and'
-                        }],
-                        readOnly: '{current.ysnPosted}'
+                        }]
                     }
                 },
 
                 colNewWeightUOM: {
                     dataIndex: 'strNewWeightUOM',
+                    hidden: '{formulaHideColumn_colNewWeightUOM}',
                     editor: {
                         store: '{newWeightUOM}',
                         defaultFilters: [{
@@ -217,73 +220,94 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                             value: '{grdInventoryAdjustment.selection.intItemId}',
                             conjunction: 'and'
                         }]
-                        ,readOnly: '{current.ysnPosted}'
                     }
                 },
 
-                colWeightPerQty: 'dblWeightPerQty',
+                colWeightPerQty: {
+                    dataIndex: 'dblWeightPerQty',
+                    hidden: '{formulaHideColumn_colWeightPerQty}'
+                },
 
-                colNewWeightPerQty: 'dblNewWeightPerQty',
+                colNewWeightPerQty: {
+                    dataIndex: 'dblNewWeightPerQty',
+                    hidden: '{formulaHideColumn_colNewWeightPerQty}'
+                },
 
-                colUnitCost: 'dblCost',
+                colUnitCost: {
+                    dataIndex: 'dblCost',
+                    hidden: '{formulaHideColumn_colUnitCost}'
+                },
 
                 colNewUnitCost: {
                     dataIndex: 'dblNewCost',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
+                    hidden: '{formulaHideColumn_colNewUnitCost}'
                 },
 
                 colNewItemNumber: {
                     dataIndex: 'strNewItemNo',
+                    hidden: '{formulaHideColumn_colNewItemNumber}',
                     editor: {
                         store: '{newItem}',
                         defaultFilters: [{
                             column: 'intLocationId',
                             value: '{current.intLocationId}',
                             conjunction: 'and'
-                        }],
-                        readOnly: '{current.ysnPosted}'
+                        }]
                     }
                 },
 
-                colNewItemDescription: 'strNewItemDescription',
+                colNewItemDescription: {
+                    dataIndex: 'strNewItemDescription',
+                    hidden: '{formulaHideColumn_colNewItemDescription}'
+                },
 
-                colExpiryDate: 'dtmExpiryDate',
+                colExpiryDate: {
+                    dataIndex: 'dtmExpiryDate',
+                    hidden: '{formulaHideColumn_colExpiryDate}'
+                },
 
                 colNewExpiryDate: {
                     dataIndex: 'dtmNewExpiryDate',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
+                    hidden: '{formulaHideColumn_colNewExpiryDate}'
                 },
 
-                colLotStatus: 'strLotStatus',
+                colLotStatus: {
+                    dataIndex: 'strLotStatus',
+                    hidden: '{formulaHideColumn_colLotStatus}'
+                },
 
                 colNewLotStatus: {
                     dataIndex: 'strNewLotStatus',
+                    hidden: '{formulaHideColumn_colNewLotStatus}',
                     editor: {
-                        store: '{newLotStatus}',
-                        readOnly: '{current.ysnPosted}'
+                        store: '{newLotStatus}'
                     }
+                },
+
+                colLineTotal: {
+                    dataIndex: 'dblLineTotal',
+                    hidden: '{formulaHideColumn_colLineTotal}'
                 },
 
                 colNewLocation: {
                     dataIndex: 'strNewLocation',
+                    hidden: '{formulaHideColumn_colNewLocation}',
                     editor: {
                         store: '{newLocation}',
-                        defaultFilters: [{
-                            column: 'intCompanyLocationId',
-                            value: '{current.intLocationId}',
-                            conjunction: 'and',
-                            condition: 'noteq'
-                        }],
-                        readOnly: '{current.ysnPosted}'
+                        defaultFilters: [
+                            {
+                                column: 'intCompanyLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and',
+                                condition: 'noteq'
+                            }
+                        ]
                     }
                 },
 
                 colNewSubLocation: {
                     dataIndex: 'strNewSubLocation',
+                    hidden: '{formulaHideColumn_colNewSubLocation}',
                     editor: {
                         store: '{newSubLocation}',
                         defaultFilters: [
@@ -298,13 +322,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 value: 'Inventory',
                                 conjunction: 'and'
                             }
-                        ],
-                        readOnly: '{current.ysnPosted}'
+                        ]
                     }
                 },
 
                 colNewStorageLocation: {
                     dataIndex: 'strNewStorageLocation',
+                    hidden: '{formulaHideColumn_colNewStorageLocation}',
                     editor: {
                         store: '{newStorageLocation}',
                         defaultFilters: [
@@ -319,25 +343,15 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 value: '{grdInventoryAdjustment.selection.intNewSubLocationId}',
                                 conjunction: 'and'
                             }
-                        ],
-                        readOnly: '{current.ysnPosted}'
+                        ]
                     }
                 }
             },
 
             grdNotes: {
-                colNoteDescription: {
-                    dataIndex: 'strDescription',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
-                },
-                colNotes: {
-                    dataIndex: 'strNotes',
-                    editor: {
-                        readOnly: '{current.ysnPosted}'
-                    }
-                }
+                readOnly: '{current.ysnPosted}',
+                colNoteDescription: 'strDescription',
+                colNotes: 'strNotes'
             }
         }
     },
@@ -455,6 +469,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('strLotNumber', null);
             current.set('intNewLotId', null);
             current.set('strNewLotNumber', null);
+            current.set('dblAdjustByQuantity', null);
             current.set('dblNewQuantity', null);
             current.set('dblNewCost', null);
             current.set('intNewItemUOMId', null);
@@ -497,6 +512,26 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('intLotStatusId', record.get('intLotStatusId'));
             current.set('dtmExpiryDate', record.get('dtmExpiryDate'));
             current.set('dblLineTotal', 0.00);
+
+            // Clear the values for the following fields:
+            current.set('dblAdjustByQuantity', null);
+            current.set('dblNewQuantity', null);
+            current.set('dblNewWeight', null);
+            current.set('dblNewCost', null);
+            current.set('dblNewWeightPerQty', null);
+            current.set('intNewItemUOMId', null);
+            current.set('strNewItemUOM', null);
+            current.set('intNewWeightUOMId', null);
+            current.set('strNewWeightUOM', null);
+            current.set('intNewLotStatusId', null);
+            current.set('strNewLotStatus', null);
+            current.set('dtmNewExpiryDate', null);
+            current.set('intNewLocationId', null);
+            current.set('strNewLocation', null);
+            current.set('intNewSubLocationId', null);
+            current.set('strNewSubLocation', null);
+            current.set('intNewStorageLocationId', null);
+            current.set('strNewStorageLocation', null);
         }
         else if (combo.itemId === 'cboNewUOM')
         {
@@ -541,196 +576,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             if (gridColumns[i].dataIndex == dataIndex) {
                 return gridColumns[i];
             }
-        }
-    },
-
-    onAdjustmentTypeChange: function(obj, newValue, oldValue, eOpts) {
-        var win = obj.up('window');
-        var grid = win.down('#grdInventoryAdjustment');
-
-        var colNewLot = this.getGridColumnByDataIndex(grid, 'strNewLotNumber');
-
-        var colQuantity = this.getGridColumnByDataIndex(grid, 'dblQuantity');
-        var colNewQuantity = this.getGridColumnByDataIndex(grid, 'dblNewQuantity');
-        var colAdjustByQuantity = this.getGridColumnByDataIndex(grid, 'dblAdjustByQuantity');
-        var colNewSplitLotQuantity = this.getGridColumnByDataIndex(grid, 'dblNewSplitLotQuantity');
-
-        var colUOM = this.getGridColumnByDataIndex(grid, 'strItemUOM');
-        var colNewUOM = this.getGridColumnByDataIndex(grid, 'strNewItemUOM');
-
-        var colNetWeight = this.getGridColumnByDataIndex(grid, 'dblWeight');
-        var colNewNetWeight = this.getGridColumnByDataIndex(grid, 'dblNewWeight');
-
-        var colWeightUOM = this.getGridColumnByDataIndex(grid, 'strWeightUOM');
-        var colNewWeightUOM = this.getGridColumnByDataIndex(grid, 'strNewWeightUOM');
-
-        var colWeightPerQty = this.getGridColumnByDataIndex(grid, 'dblWeightPerQty');
-        var colNewWeightPerQty = this.getGridColumnByDataIndex(grid, 'dblNewWeightPerQty');
-
-        var colUnitCost = this.getGridColumnByDataIndex(grid, 'dblCost');
-        var colNewUnitCost = this.getGridColumnByDataIndex(grid, 'dblNewCost');
-
-        var colNewItemNumber = this.getGridColumnByDataIndex(grid, 'strNewItemNo');
-        var colNewItemDescription = this.getGridColumnByDataIndex(grid, 'strNewItemDescription');
-
-        var colExpiryDate = this.getGridColumnByDataIndex(grid, 'dtmExpiryDate');
-        var colNewExpiryDate = this.getGridColumnByDataIndex(grid, 'dtmNewExpiryDate');
-
-        var colLotStatus = this.getGridColumnByDataIndex(grid, 'strLotStatus');
-        var colNewLotStatus = this.getGridColumnByDataIndex(grid, 'strNewLotStatus');
-
-        var colLineTotal = this.getGridColumnByDataIndex(grid, 'dblLineTotal');
-
-        var colNewLocation = this.getGridColumnByDataIndex(grid, 'strNewLocation');
-        var colNewSubLocation = this.getGridColumnByDataIndex(grid, 'strNewSubLocation');
-        var colNewStorageLocation = this.getGridColumnByDataIndex(grid, 'strNewStorageLocation');
-
-        var QuantityChange = 1;
-        var UOMChange = 2;
-        var ItemChange = 3;
-        var LotStatusChange = 4;
-        var SplitLot = 5;
-        var ExpiryDateChange = 6;
-
-        var hide = true;
-        var show = false;
-
-        // Todo: Hide the line total for now.
-        colLineTotal.setHidden(hide);
-
-        switch (newValue) {
-            case QuantityChange:
-                // Hide columns:
-                colNewLot.setHidden(hide);
-                colNewItemNumber.setHidden(hide);
-                colNewItemDescription.setHidden(hide);
-                colExpiryDate.setHidden(hide);
-                colNewExpiryDate.setHidden(hide);
-                colLotStatus.setHidden(hide);
-                colNewLotStatus.setHidden(hide);
-
-                colNewUOM.setHidden(hide);
-                colNetWeight.setHidden(hide);
-                colNewNetWeight.setHidden(hide);
-
-                colWeightUOM.setHidden(hide);
-                colNewWeightUOM.setHidden(hide);
-
-                colWeightPerQty.setHidden(hide);
-                colNewWeightPerQty.setHidden(hide);
-
-                colNewLocation.setHidden(hide);
-                colNewSubLocation.setHidden(hide);
-                colNewStorageLocation.setHidden(hide);
-
-                // Show columns:
-                colQuantity.setHidden(show);
-                colNewQuantity.setHidden(show);
-                colAdjustByQuantity.setHidden(show);
-                colNewSplitLotQuantity.setHidden(show);
-                colUOM.setHidden(show);
-
-                colUnitCost.setHidden(show);
-                colNewUnitCost.setHidden(show);
-                break;
-            case UOMChange:
-                // todo
-                break;
-            case ItemChange:
-                // todo
-                break;
-            case LotStatusChange:
-                // Hide Columns:
-                colNewLot.setHidden(hide);
-                colNewItemNumber.setHidden(hide);
-                colNewItemDescription.setHidden(hide);
-                colExpiryDate.setHidden(hide);
-                colNewExpiryDate.setHidden(hide);
-                colQuantity.setHidden(hide);
-                colNewQuantity.setHidden(hide);
-                colAdjustByQuantity.setHidden(hide);
-                colNewSplitLotQuantity.setHidden(hide);
-                colUOM.setHidden(hide);
-                colNewUOM.setHidden(hide);
-                colNetWeight.setHidden(hide);
-                colNewNetWeight.setHidden(hide);
-                colWeightUOM.setHidden(hide);
-                colNewWeightUOM.setHidden(hide);
-                colWeightPerQty.setHidden(hide);
-                colNewWeightPerQty.setHidden(hide);
-                colLineTotal.setHidden(hide);
-                colUnitCost.setHidden(hide);
-                colNewUnitCost.setHidden(hide);
-                colNewLocation.setHidden(hide);
-                colNewSubLocation.setHidden(hide);
-                colNewStorageLocation.setHidden(hide);
-
-                //  Show Columns:
-                colLotStatus.setHidden(show);
-                colNewLotStatus.setHidden(show);
-                break;
-            case SplitLot:
-                // Hide Columns:
-                colNewItemNumber.setHidden(hide);
-                colNewItemDescription.setHidden(hide);
-                colWeightPerQty.setHidden(hide);
-                colNewWeightPerQty.setHidden(hide);
-                colLineTotal.setHidden(hide);
-                colLotStatus.setHidden(hide);
-                colNewLotStatus.setHidden(hide);
-                colExpiryDate.setHidden(hide);
-                colNewExpiryDate.setHidden(hide);
-
-                //  Show Columns:
-                colQuantity.setHidden(show);
-                colUOM.setHidden(show);
-                colNetWeight.setHidden(show);
-                colWeightUOM.setHidden(show);
-                colUnitCost.setHidden(show);
-
-                colNewLot.setHidden(show);
-                colAdjustByQuantity.setHidden(show);
-                colNewQuantity.setHidden(show);
-                colNewUOM.setHidden(show);
-                colNewSplitLotQuantity.setHidden(show);
-                colNewNetWeight.setHidden(show);
-                colNewWeightUOM.setHidden(show);
-                colNewUnitCost.setHidden(show);
-                colNewLocation.setHidden(show);
-                colNewSubLocation.setHidden(show);
-                colNewStorageLocation.setHidden(show);
-
-                break;
-            case ExpiryDateChange:
-                // Hide Columns:
-                colNewLot.setHidden(hide);
-                colNewItemNumber.setHidden(hide);
-                colNewItemDescription.setHidden(hide);
-                colQuantity.setHidden(hide);
-                colNewQuantity.setHidden(hide);
-                colAdjustByQuantity.setHidden(hide);
-                colNewSplitLotQuantity.setHidden(hide);
-                colUOM.setHidden(hide);
-                colNewUOM.setHidden(hide);
-                colNetWeight.setHidden(hide);
-                colNewNetWeight.setHidden(hide);
-                colWeightUOM.setHidden(hide);
-                colNewWeightUOM.setHidden(hide);
-                colWeightPerQty.setHidden(hide);
-                colNewWeightPerQty.setHidden(hide);
-                colLineTotal.setHidden(hide);
-                colUnitCost.setHidden(hide);
-                colNewUnitCost.setHidden(hide);
-                colLotStatus.setHidden(hide);
-                colNewLotStatus.setHidden(hide);
-                colNewLocation.setHidden(hide);
-                colNewSubLocation.setHidden(hide);
-                colNewStorageLocation.setHidden(hide);
-
-                //  Show Columns:
-                colExpiryDate.setHidden(show);
-                colNewExpiryDate.setHidden(show);
-                break;
         }
     },
 
@@ -1102,7 +947,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 change: this.onNewLotStatusChange
             },
             "#cboAdjustmentType": {
-                change: this.onAdjustmentTypeChange,
                 beforeselect: this.onAdjustmentTypeBeforeSelect
             },
             "#numNewQuantity": {

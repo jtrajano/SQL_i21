@@ -94,6 +94,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         }
     },
 
+    adjustmentTypes: {
+        QuantityChange: 1,
+        UOMChange: 2,
+        ItemChange: 3,
+        LotStatusChange: 4,
+        SplitLot: 5,
+        ExpiryDateChange: 6
+    },
+
+    hide: true,
+    show: false,
+
     formulas: {
         formulaShowLotNumberEditor: function(get){
             var hide = true
@@ -116,7 +128,466 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                     return show;
                 }
             }
+        },
+
+        formulaHideColumn_colNewLotNumber: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colQuantity: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ItemChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewQuantity: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                    return me.hide;
+                    break;
+
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ItemChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colAdjustByQuantity: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ItemChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewSplitLotQuantity: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ItemChange:
+                    return me.hide;
+                    break;
+
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colUOM: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                    return me.hide;
+                    break;
+
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.UOMChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewUOM: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.UOMChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNetWeight: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewNetWeight: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colWeightUOM: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewWeightUOM: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colWeightPerQty: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.SplitLot:
+                    return me.hide;
+                    break;
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewWeightPerQty: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.SplitLot:
+                    return me.hide;
+                    break;
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colUnitCost: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewUnitCost: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewItemNumber: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewItemDescription: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colExpiryDate: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.ExpiryDateChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewExpiryDate: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.LotStatusChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.ExpiryDateChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colLotStatus: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.LotStatusChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewLotStatus: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.LotStatusChange:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colLineTotal: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.SplitLot:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotStatusChange:
+                    // Todo: Hide Line total for now.
+                    return me.hide;
+                    break;
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewLocation: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotStatusChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewSubLocation: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotStatusChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
+        },
+
+        formulaHideColumn_colNewStorageLocation: function(get){
+            var me = this;
+            var intAdjustmentTypeId = get('current.intAdjustmentType');
+
+            switch (intAdjustmentTypeId) {
+                case me.adjustmentTypes.QuantityChange:
+                case me.adjustmentTypes.ItemChange:
+                case me.adjustmentTypes.UOMChange:
+                case me.adjustmentTypes.ExpiryDateChange:
+                case me.adjustmentTypes.LotStatusChange:
+                    return me.hide;
+                    break;
+                case me.adjustmentTypes.SplitLot:
+                default:
+                    return me.show;
+            }
         }
+
+
     }
 
 });
