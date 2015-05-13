@@ -676,7 +676,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colAssemblyQuantity: 'dblQuantity',
-                colAssemblyDescription: 'strDescription',
+                colAssemblyDescription: 'strItemDescription',
                 colAssemblyUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
@@ -2094,6 +2094,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colAssemblyComponent'){
             current.set('intAssemblyItemId', records[0].get('intItemId'));
+            current.set('strItemDescription', records[0].get('strDescription'));
         }
         else if (combo.column.itemId === 'colAssemblyUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));

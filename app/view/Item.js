@@ -4567,7 +4567,7 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colAssemblyComponent',
                                                         dataIndex: 'string',
                                                         text: 'Component',
-                                                        flex: 1,
+                                                        flex: 2,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -4607,6 +4607,7 @@ Ext.define('Inventory.view.Item', {
                                                         width: 65,
                                                         align: 'right',
                                                         text: 'Quantity',
+                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'numberfield',
                                                             fieldStyle: 'text-align:right',
@@ -4618,24 +4619,23 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colAssemblyStock',
                                                         width: 60,
                                                         align: 'right',
-                                                        text: 'Stock'
+                                                        text: 'Stock',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colAssemblyDescription',
                                                         dataIndex: 'string',
+                                                        itemId: 'colAssemblyDescription',
                                                         text: 'Description',
-                                                        flex: 2,
-                                                        editor: {
-                                                            xtype: 'textfield'
-                                                        }
+                                                        flex: 2
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colAssemblyUOM',
                                                         width: 82,
                                                         dataIndex: 'string',
-                                                        text: 'Unit Measure',
+                                                        text: 'UOM',
+                                                        flex: 1,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -4674,12 +4674,8 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colAssemblyUnit',
                                                         width: 37,
                                                         align: 'right',
-                                                        text: 'Unit',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
+                                                        text: 'Unit Qty',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -4687,18 +4683,15 @@ Ext.define('Inventory.view.Item', {
                                                         width: 70,
                                                         align: 'right',
                                                         text: 'Cost',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colAssemblyTotal',
                                                         width: 70,
                                                         align: 'right',
-                                                        text: 'Total'
+                                                        text: 'Total',
+                                                        flex: 1
                                                     }
                                                 ],
                                                 viewConfig: {
