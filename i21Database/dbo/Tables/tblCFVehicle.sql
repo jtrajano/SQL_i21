@@ -13,7 +13,7 @@
     [strNoticeMessageLine1]   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strNoticeMessageLine2]   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strVehicleForOwnUse]     NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
-    [strExpenseItemId]        NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
+    [intExpenseItemId]        INT            NULL,
     [strLicencePlateNumber]   NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [strDepartment]           NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [intCreatedUserId]        INT            NULL,
