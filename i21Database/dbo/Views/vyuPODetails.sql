@@ -29,7 +29,7 @@ SELECT
  ,D.strItemNo
  ,D.strLotTracking
  ,H.strUnitMeasure AS strUOM
- ,E.dblUnitQty AS dblItemUOMCF
+ ,ISNULL(E.dblUnitQty,0) AS dblItemUOMCF
  ,intStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId),0)
  ,strStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId)
  ,strStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId)

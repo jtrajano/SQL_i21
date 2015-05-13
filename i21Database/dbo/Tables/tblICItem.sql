@@ -119,7 +119,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
 		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
 		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
-		CONSTRAINT [FK_tblICItem_tblSMTaxGroupMaster] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId])  
+		CONSTRAINT [FK_tblICItem_tblSMTaxGroupMaster] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
+		CONSTRAINT [FK_tblICItem_tblSMCountry] FOREIGN KEY ([intOriginId]) REFERENCES [tblSMCountry]([intCountryID])  
 	);
 	GO
 

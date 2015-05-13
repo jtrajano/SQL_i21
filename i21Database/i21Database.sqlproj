@@ -1324,7 +1324,7 @@
     <Build Include="dbo\Tables\tblCFNetwork.sql" />
     <Build Include="dbo\Tables\tblCFMiscellaneous.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceCycle.sql" />
-    <Build Include="dbo\Tables\tblCFindexPricingBySiteGroup.sql" />
+    <Build Include="dbo\Tables\tblCFIndexPricingBySiteGroup.sql" />
     <Build Include="dbo\Tables\tblCFHost.sql" />
     <Build Include="dbo\Tables\tblCFFeeProfileDetail.sql" />
     <Build Include="dbo\Tables\tblCFFeeProfile.sql" />
@@ -1573,6 +1573,7 @@
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesAging.sql" />
     <Build Include="dbo\Functions\fnCalculateAdjustByQuantity.sql" />
+    <Build Include="dbo\Tables\tblCFIndexPricingBySiteGroupHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
