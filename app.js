@@ -20,6 +20,9 @@ Ext.Loader.setConfig({
 
 
 Ext.application({
+    views: [
+        'PhysicalCount'
+    ],
     name: 'Inventory',
 
     launch: function() {
