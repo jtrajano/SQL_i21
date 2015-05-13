@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intShipViaId] [int] NOT NULL,
 	[dblQuantity] [numeric](12, 4) NOT NULL,
 	[intUnitMeasureId] [int] NOT NULL,
+	[intItemUOMId] [int] NULL,
 	[intPricingType] [int] NOT NULL,
 	[dblFutures] [numeric](8, 4) NULL,
 	[dblBasis] [numeric](8, 4) NULL,
@@ -36,6 +37,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblIntransitQty] NUMERIC(12, 4) NULL, 
     [dblScheduleQty] NUMERIC(12, 4) NULL, 
     [intPriceUOMId] INT NULL, 
+	[intPriceItemUOMId]  INT NULL, 
     [intLoadingPortId] INT NULL, 
     [intDestinationPortId] INT NULL, 
     [strShippingTerm] NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
@@ -51,8 +53,10 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intPackingDescriptionId] INT NULL,
 	[dblWeightPerUnit] [numeric](18,4) NULL,
 	[intWeightPerUnitUOMId] INT NULL,
+	[intWeightPerUnitItemUOMId] INT NULL,
 	[dblNoOfPacks] [numeric](18,4) NULL,
 	[intPackingTypeUOMId] INT NULL,
+	[intPackingTypeItemUOMId]  INT NULL,
 	[intUnitsPerLayer] INT NULL,
 	[intLayersPerPallet] INT NULL,
 	[dtmEventStartDate] [datetime] NULL,
@@ -90,4 +94,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intPackingTypeUOMId_intUnitMeasureId] FOREIGN KEY ([intPackingTypeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]),
+
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId] FOREIGN KEY ([intPriceItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intWeightPerUnitItemUOMId_intItemUOMId] FOREIGN KEY ([intWeightPerUnitItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intPackingTypeItemUOMId_intItemUOMId] FOREIGN KEY ([intPackingTypeItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 ) 
