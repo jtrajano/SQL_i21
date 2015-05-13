@@ -1,21 +1,16 @@
 ﻿CREATE VIEW dbo.vyuCFCustomerEntity
 AS
-SELECT     entity.intEntityId, entity.strName, entity.strEmail, entity.strWebsite, entity.strInternalNotes, entity.ysnPrint1099, entity.str1099Name, entity.str1099Form, 
-                      entity.str1099Type, entity.strFederalTaxId, entity.dtmW9Signed, entity.imgPhoto, entity.strContactNumber, entity.strTitle, entity.strDepartment, entity.strMobile, 
-                      entity.strPhone, entity.strPhone2, entity.strEmail2, entity.strFax, entity.strNotes, entity.strContactMethod, entity.strTimezone, entity.intDefaultLocationId, 
-                      entity.ysnActive, entity.intConcurrencyId, customer.intEntityCustomerId, customer.strCustomerNumber, customer.strType, customer.dblCreditLimit, 
-                      customer.dblARBalance, customer.strAccountNumber, customer.strTaxNumber, customer.strCurrency, customer.intCurrencyId, customer.intAccountStatusId, 
-                      customer.intSalespersonId, customer.strPricing, customer.strLevel, customer.dblPercent, customer.strTimeZone AS EXPR1, customer.ysnActive AS EXPR2, 
-                      customer.intDefaultContactId, customer.intDefaultLocationId AS EXPR3, customer.intBillToId, customer.intShipToId, customer.strTaxState, customer.ysnPORequired, 
-                      customer.ysnCreditHold, customer.ysnStatementDetail, customer.strStatementFormat, customer.intCreditStopDays, customer.strTaxAuthority1, 
-                      customer.strTaxAuthority2, customer.ysnPrintPriceOnPrintTicket, customer.intServiceChargeId, customer.ysnApplySalesTax, customer.ysnApplyPrepaidTax, 
-                      customer.dblBudgetAmountForBudgetBilling, customer.strBudgetBillingBeginMonth, customer.strBudgetBillingEndMonth, customer.ysnCalcAutoFreight, 
-                      customer.strUpdateQuote, customer.strCreditCode, customer.strDiscSchedule, customer.strPrintInvoice, customer.ysnSpecialPriceGroup, 
-                      customer.ysnExcludeDunningLetter, customer.strLinkCustomerNumber, customer.intReferredByCustomer, customer.ysnReceivedSignedLiscense, 
-                      customer.strDPAContract, customer.dtmDPADate, customer.strGBReceiptNumber, customer.ysnCheckoffExempt, customer.ysnVoluntaryCheckoff, 
-                      customer.strCheckoffState, customer.ysnMarketAgreementSigned, customer.intMarketZoneId, customer.ysnHoldBatchGrainPayment, 
-                      customer.ysnFederalWithholding, customer.strAEBNumber, customer.strAgrimineId, customer.strHarvestPartnerCustomerId, customer.strComments, 
-                      customer.ysnTransmittedCustomer, customer.dtmMembershipDate, customer.dtmBirthDate, customer.strStockStatus, customer.strPatronClass, 
-                      customer.dtmDeceasedDate, customer.ysnSubjectToFWT, customer.intConcurrencyId AS EXPR4
-FROM         dbo.tblEntity AS entity INNER JOIN
-                      dbo.tblARCustomer AS customer ON entity.intEntityId = customer.intEntityCustomerId
+SELECT     Entity.intEntityId, Cus.intEntityCustomerId, Entity.strName, 
+                      CASE WHEN Cus.strCustomerNumber = '' THEN Entity.strEntityNo ELSE Cus.strCustomerNumber END AS strCustomerNumber, Cus.strType, Con.strPhone, 
+                      Loc.strAddress, Loc.strCity, Loc.strState, Loc.strZipCode, Cus.ysnActive, Cus.intSalespersonId, Cus.intCurrencyId, Loc.intTermsId, Loc.intShipViaId, 
+                      ShipToLoc.strLocationName AS strShipToLocationName, ShipToLoc.strAddress AS strShipToAddress, ShipToLoc.strCity AS strShipToCity, 
+                      ShipToLoc.strState AS strShipToState, ShipToLoc.strZipCode AS strShipToZipCode, ShipToLoc.strCountry AS strShipToCountry, 
+                      BillToLoc.strLocationName AS strBillToLocationName, BillToLoc.strAddress AS strBillToAddress, BillToLoc.strCity AS strBillToCity, 
+                      BillToLoc.strState AS strBillToState, BillToLoc.strZipCode AS strBillToZipCode, BillToLoc.strCountry AS strBillToCountry
+FROM         dbo.tblEntity AS Entity INNER JOIN
+                      dbo.tblARCustomer AS Cus ON Entity.intEntityId = Cus.intEntityCustomerId INNER JOIN
+                      dbo.tblEntityToContact AS CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId AND CusToCon.ysnDefaultContact = 1 LEFT OUTER JOIN
+                      dbo.tblEntity AS Con ON CusToCon.intEntityContactId = Con.intEntityId LEFT OUTER JOIN
+                      dbo.tblEntityLocation AS Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId LEFT OUTER JOIN
+                      dbo.tblEntityLocation AS ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId LEFT OUTER JOIN
+                      dbo.tblEntityLocation AS BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
