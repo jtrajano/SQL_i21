@@ -257,6 +257,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotGrossWeight: 'dblGrossWeight',
                 colLotTareWeight: 'dblTareWeight',
                 colLotNetWeight: 'dblNetWeight',
+                colLotExpiryDate: 'dtmExpiryDate',
                 colLotStorageLocation: {
                     dataIndex: 'strStorageLocation',
                     editor: {

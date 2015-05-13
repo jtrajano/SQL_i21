@@ -164,7 +164,7 @@ namespace iRely.Inventory.BRL
                 try
                 {
                     var idParameter = new SqlParameter("intReceiptId", receiptId);
-                    var userId = new SqlParameter("@intUserId", iRely.Common.Security.GetUserId());
+                    var userId = new SqlParameter("@intUserId", iRely.Common.Security.GetEntityId());
                     var outParam = new SqlParameter("@intBillId", newBillId);
                     outParam.Direction = System.Data.ParameterDirection.Output;
                     outParam.DbType = System.Data.DbType.Int32;

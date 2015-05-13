@@ -137,8 +137,8 @@ Ext.define('Inventory.view.Catalog', {
                                     xtype: 'button',
                                     tabIndex: -1,
                                     itemId: 'btnEditCatalog',
-                                    iconCls: 'small-edit',
-                                    text: 'Edit'
+                                    iconCls: 'small-view',
+                                    text: 'View'
                                 },
                                 {
                                     xtype: 'button',
