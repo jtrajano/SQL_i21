@@ -85,7 +85,7 @@ Ext.define('Inventory.view.ItemViewController', {
             cfgBundle: {
                 hidden: '{pgeBundleHide}'
             },
-            cfgKitHide: {
+            cfgKit: {
                 hidden: '{pgeKitHide}'
             },
             cfgFactory: {
