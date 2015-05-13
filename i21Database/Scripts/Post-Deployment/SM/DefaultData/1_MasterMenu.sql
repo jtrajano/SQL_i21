@@ -1475,11 +1475,14 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scale Sta
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.ScaleStationSettings', intSort = 5 WHERE strMenuName = 'Scale Station Settings' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Storage Types', N'Grain', @ScaleInterfaceParentMenuId, N'Storage Type', N'Maintenance', N'Screen', N'Grain.view.StorageType', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.StorageType', intSort = 0 WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Storage Types', N'Grain', @ScaleInterfaceParentMenuId, N'Storage Type', N'Maintenance', N'Screen', N'Grain.view.StorageType', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+--ELSE
+--	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.StorageType', intSort = 0 WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Storage Types' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket Formats' AND strModuleName = 'Grain' AND intParentMenuID = @ScaleInterfaceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -1532,6 +1535,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount 
 	VALUES (N'Discount Schedule', N'Grain', @GrainParentMenuId, N'Discount Schedule', N'Maintenance', N'Screen', N'Grain.view.DiscountSchedule', N'small-menu-maintenance', 0, 0, 0, 1, 2, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.DiscountSchedule' WHERE strMenuName = 'Discount Schedule' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Type' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Storage Type', N'Grain', @GrainParentMenuId, N'Storage Type', N'Maintenance', N'Screen', N'Grain.view.GrainStorageType', N'small-menu-maintenance', 0, 0, 0, 1, 3, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.GrainStorageType' WHERE strMenuName = 'Storage Type' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
 
 /* MANUFACTURING */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing' AND strModuleName = 'Manufacturing' AND intParentMenuID = 0)
