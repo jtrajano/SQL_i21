@@ -99,7 +99,7 @@ BEGIN
 		,[intEntityId] = @intUserId
 	FROM	tblGLDetail 
 	WHERE	intTransactionId IN (SELECT intTransactionId FROM @tmpTransacions)
-	AND strTransactionType = @transactionType
+	AND strTransactionForm = @transactionType
 	AND ysnIsUnposted = 0
 	ORDER BY intGLDetailId
 

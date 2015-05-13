@@ -355,7 +355,7 @@ Post_Cleanup:
 		BEGIN
 			--clean gl detail recap after posting
 			DELETE FROM tblGLPostRecap
-			FROM tblGLDetailRecap A
+			FROM tblGLPostRecap A
 			INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 		END
 
