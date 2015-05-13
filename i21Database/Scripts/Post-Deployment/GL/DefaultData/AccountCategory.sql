@@ -117,6 +117,8 @@ IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCate
 	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'AR Adjustments', 'Expense',1)
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Inventory Adjustment')
 	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Inventory Adjustment', 'Expense',1)
+IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Work In Progress')
+	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Work In Progress', 1)
 END
 BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Begin Inventory')
