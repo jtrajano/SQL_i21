@@ -197,7 +197,7 @@ BEGIN
 		
 		--Unposting Process
 		UPDATE tblAPPaymentDetail
-		SET tblAPPaymentDetail.dblAmountDue = C.dblAmountDue
+		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN (B.dblDiscount + B.dblPayment - B.dblInterest) ELSE (B.dblAmountDue + B.dblPayment) END)
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId

@@ -113,6 +113,7 @@ BEGIN
 		,A.strPaymentRecordNum = OldPayments.strPaymentRecordNum + 'V'
 		,A.strPaymentInfo = 'Voided-' + A.strPaymentInfo
 		,A.dblAmountPaid = A.dblAmountPaid * -1
+		,A.dblWithheld = A.dblWithheld * -1
 	FROM tblAPPayment A
 	INNER JOIN #tmpPayables B
 		ON A.intPaymentId = B.intNewPaymentId
@@ -197,7 +198,7 @@ BEGIN
 
 	--Unposting Process
 	UPDATE tblAPPaymentDetail
-	SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + C.dblAmountDue + B.dblPayment ELSE (B.dblAmountDue + B.dblPayment) END)
+	SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + B.dblPayment - B.dblInterest ELSE (B.dblAmountDue + B.dblPayment) END)
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
