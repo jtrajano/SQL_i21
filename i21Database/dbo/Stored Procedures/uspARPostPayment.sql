@@ -976,13 +976,6 @@ BEGIN
 			SELECT Z.intPaymentId, Z.strTransactionId FROM #tmpZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM #tmpARReceivablePostData WHERE intPaymentId = Z.intPaymentId)
 		
-<<<<<<< HEAD
-			--Unposting Process
-			UPDATE tblARPaymentDetail
-			SET tblARPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount + (C.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)) + B.dblPayment ELSE ((C.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)) + B.dblPayment) END)
-			FROM tblARPayment A
-				LEFT JOIN tblARPaymentDetail B
-=======
 			UPDATE 
 				tblARInvoice
 			SET 
@@ -1045,26 +1038,12 @@ BEGIN
 				tblARPaymentDetail A
 			INNER JOIN
 				tblARPayment B
->>>>>>> f24e90e... AR-1057 Customer Balance Due not calculating correctly
 					ON A.intPaymentId = B.intPaymentId
-				LEFT JOIN tblARInvoice C
-					ON B.intInvoiceId = C.intInvoiceId
-			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
-
-			--Update dblAmountDue, dtmDatePaid and ysnPaid on tblARInvoice
-			UPDATE tblARInvoice
-				SET tblARInvoice.dblAmountDue = B.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END),
-					tblARInvoice.ysnPaid = 0,
-					tblARInvoice.dtmPostDate = NULL,	
-					tblARInvoice.dblDiscount = 0,
-					tblARInvoice.dblPayment = 0
-					
-			FROM tblARPayment A
-						INNER JOIN tblARPaymentDetail B 
-								ON A.intPaymentId = B.intPaymentId
-						INNER JOIN tblARInvoice C
-								ON B.intInvoiceId = C.intInvoiceId
-						WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+					AND A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
+			INNER JOIN 
+				tblARInvoice C
+					ON A.intInvoiceId = C.intInvoiceId				
+										
 						
 			-- Delete zero payment temporarily
 			DELETE FROM A
@@ -1090,7 +1069,9 @@ BEGIN
 			 INNER JOIN #tmpARReceivablePostData B ON A.intPaymentId = B.intPaymentId
 
 			-- Calling the stored procedure
-			EXEC uspCMBankTransactionReversal @userId, @isSuccessful OUTPUT
+			DECLARE @ReverseDate AS DATETIME
+			SET @ReverseDate = GETDATE()
+			EXEC uspCMBankTransactionReversal @userId, @ReverseDate, @isSuccessful OUTPUT
 
 			--update payment record based on record from tblCMBankTransaction
 			UPDATE tblARPayment
@@ -1168,55 +1149,7 @@ BEGIN
 			-- Update the posted flag in the transaction table
 			UPDATE tblARPayment
 			SET		ysnPosted = 1
-					--,intConcurrencyId += 1 
 			WHERE	intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
-<<<<<<< HEAD
-
-			UPDATE tblARPaymentDetail
-				   SET tblARPaymentDetail.dblAmountDue = (B.dblInvoiceTotal) - (B.dblPayment + B.dblDiscount + (SELECT SUM(ISNULL(dblPayment,0) * (CASE WHEN tblARInvoice.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)) FROM tblARInvoice WHERE intInvoiceId = B.intInvoiceId))
-			FROM tblARPayment A
-				LEFT JOIN tblARPaymentDetail B
-					ON A.intPaymentId = B.intPaymentId
-			WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
-
-
-			--Update dblAmountDue, dtmDatePaid and ysnPaid on tblARInvoice
-			UPDATE tblARInvoice
-				SET tblARInvoice.dblAmountDue = B.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END),
-					tblARInvoice.ysnPaid = (CASE WHEN (B.dblAmountDue) = 0 THEN 1 ELSE 0 END),
-					tblARInvoice.dtmPostDate = (CASE WHEN (B.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE NULL END)
-			FROM tblARPayment A
-						INNER JOIN tblARPaymentDetail B 
-								ON A.intPaymentId = B.intPaymentId
-						INNER JOIN tblARInvoice C
-								ON B.intInvoiceId = C.intInvoiceId
-						WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
-						
-			UPDATE tblARInvoice
-				SET tblARInvoice.dblDiscount = (
-													SELECT
-														SUM(dblDiscount)
-													FROM tblARPaymentDetail 															
-													WHERE
-														intInvoiceId = B.intInvoiceId
-														AND intPaymentId = A.intPaymentId																											
-												)
-					,tblARInvoice.dblPayment = C.dblPayment  + (ISNULL(B.dblPayment,0) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END) )
-			FROM tblARPayment A
-						INNER JOIN tblARPaymentDetail B 
-								ON A.intPaymentId = B.intPaymentId
-								 
-						INNER JOIN tblARInvoice C
-								ON B.intInvoiceId = C.intInvoiceId
-						WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)	
-								AND C.intInvoiceId = B.intInvoiceId				
-
-			--Update Bill Amount Due associated on the other payment record
-			UPDATE tblARPaymentDetail
-			SET dblAmountDue = C.dblAmountDue * (CASE WHEN C.strTransactionType = 'Invoice'  THEN 1 ELSE -1 END)
-			FROM tblARPaymentDetail A
-				INNER JOIN tblARPayment B
-=======
 												
 			UPDATE 
 				tblARInvoice
@@ -1281,11 +1214,10 @@ BEGIN
 				tblARPaymentDetail A
 			INNER JOIN
 				tblARPayment B
->>>>>>> f24e90e... AR-1057 Customer Balance Due not calculating correctly
 					ON A.intPaymentId = B.intPaymentId
 					AND A.intPaymentId IN (SELECT intPaymentId FROM #tmpARReceivablePostData)
-					AND B.ysnPosted = 0
-				INNER JOIN tblARInvoice C
+			INNER JOIN 
+				tblARInvoice C
 					ON A.intInvoiceId = C.intInvoiceId
 					
 			-- Delete zero payment temporarily
