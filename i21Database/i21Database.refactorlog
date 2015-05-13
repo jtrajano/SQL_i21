@@ -3003,4 +3003,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intContractDetailId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a5d51b16-4fa5-4d0c-96d5-99eb6367c70b" ChangeDateTime="05/13/2015 05:16:05">
+    <Property Name="ElementName" Value="[dbo].[FK_tblSMXMLTagAttribute_ToTable]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMXMLTagAttribute]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblSMXMLTagAttribute_tblSMImportFileColumnDetail]" />
+  </Operation>
 </Operations>
