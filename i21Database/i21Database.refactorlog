@@ -3010,4 +3010,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[FK_tblSMXMLTagAttribute_tblSMImportFileColumnDetail]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0634e867-cbad-4bc2-87a2-36000b83afd4" ChangeDateTime="05/13/2015 14:48:45">
+    <Property Name="ElementName" Value="[dbo].[tblCTPosition].[strDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPosition]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPositionType" />
+  </Operation>
 </Operations>
