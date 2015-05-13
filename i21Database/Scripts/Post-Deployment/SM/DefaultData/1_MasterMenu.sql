@@ -1899,4 +1899,17 @@ UPDATE tblSMMasterMenu
 SET strCommand = 'EntityManagement.view.Entity:searchEntitySalesperson'
 WHERE strMenuName = 'Salesperson' AND strModuleName = 'Accounts Receivable' AND strCommand = 'AccountsReceivable.view.Salesperson'
 
+/* PATCH UPDATE */
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Patch Update' AND strModuleName = 'Patch Update' AND intParentMenuID = 0)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Patch Update', N'Patch Update', 0, N'Patch Update', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 23, 0)
+
+DECLARE @PatchUpdateParentMenuId INT
+SELECT @PatchUpdateParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Patch Update' AND strModuleName = 'Patch Update' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Patch' AND strModuleName = 'Patch Update' AND intParentMenuID = @PatchUpdateParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Patch', N'Patch Update', @PatchUpdateParentMenuId, N'Patch', N'Maintenance', N'Screen', N'PatchUpdate.view.Patch', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+
 GO
