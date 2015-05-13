@@ -36,12 +36,18 @@ BEGIN
            ,[intCriteriaFieldSelectionId] = (SELECT TOP 1 intCriteriaFieldSelectionId FROM [tblRMCriteriaFieldSelection] WHERE strName = 'True/False')
            ,[strFieldName] = 'ysnPending'
            ,[strDataType] = 'Bool'
-           ,[strDescription] = 'Pending'
+           ,[strDescription] = 'Pending Orders'
            ,[strConditions] = NULL
            ,[ysnIsRequired] = 0
            ,[ysnShow] = 1
            ,[ysnAllowSort] = 0
            ,[ysnEditCondition] = 1
+END
+ELSE
+BEGIN
+	UPDATE [tblRMCriteriaField]
+	SET [strDescription] = 'Pending Orders'
+	WHERE intReportId = @intReportId AND strFieldName = 'ysnPending'
 END
 
 GO
