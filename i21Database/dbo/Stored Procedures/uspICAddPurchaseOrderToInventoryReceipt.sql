@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICAddPurchaseOrderToItemReceipt]
+﻿CREATE PROCEDURE [dbo].[uspICAddPurchaseOrderToInventoryReceipt]
 	@PurchaseOrderId AS INT
 	,@intUserId AS INT
 	,@InventoryReceiptId AS INT OUTPUT 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICAddPurchaseOrderToItemReceipt for errors thrown by a null transaction id]
+﻿CREATE PROCEDURE [testi21Database].[test uspICAddPurchaseOrderToInventoryReceipt for errors thrown by a null transaction id]
 AS
 BEGIN
 	-- Arrange 
@@ -8,7 +8,7 @@ BEGIN
 	
 	-- Act
 	BEGIN 
-		EXEC dbo.uspICAddPurchaseOrderToItemReceipt
+		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt
 			@PurchaseOrderId = NULL
 			,@intUserId = NULL
 			,@InventoryReceiptId = NULL 

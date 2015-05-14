@@ -469,10 +469,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from negative to zero.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from positive to positive.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from zero to positive.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for valid item and invalid location.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for the basics.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for invalid item and valid location.sql" />
-    <Build Include="testi21Database\Functions\test the fnGetProcessToItemReceiptErrors function for invalid item and invalid location.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryReceiptErrors function for valid item and invalid location.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryReceiptErrors function for the basics.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryReceiptErrors function for invalid item and valid location.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryReceiptErrors function for invalid item and invalid location.sql" />
     <Build Include="testi21Database\Scripts\test the account id constraints of AP tables.sql" />
     <Build Include="testi21Database\Scripts\test the item id constraints on AP tables.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICProcessToItemReceipt for errors thrown by uspICAddPurchaseOrderToItemReceipt.sql">
@@ -1022,6 +1022,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryAdjustmentSplitLot for using an existing lot id for the split.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryShipmentErrors function for the basics.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryShipmentErrors function for invalid item and invalid location.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryShipmentErrors function for invalid item and valid location.sql" />
+    <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryShipmentErrors function for valid item and invalid location.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />

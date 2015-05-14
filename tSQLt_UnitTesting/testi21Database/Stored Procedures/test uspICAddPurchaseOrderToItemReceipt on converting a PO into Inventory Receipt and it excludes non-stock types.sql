@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICAddPurchaseOrderToItemReceipt on converting a PO into Inventory Receipt and it excludes non-stock types]
+﻿CREATE PROCEDURE [testi21Database].[test uspICAddPurchaseOrderToInventoryReceipt on converting a PO into Inventory Receipt and it excludes non-stock types]
 AS
 BEGIN
 	-- Arrange 
@@ -212,7 +212,7 @@ BEGIN
 	BEGIN 
 		DECLARE @InventoryReceiptIdResult AS INT 
 
-		EXEC dbo.uspICAddPurchaseOrderToItemReceipt
+		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt
 			@PurchaseOrderId = 1
 			,@intUserId = @intUserId
 			,@InventoryReceiptId = @InventoryReceiptIdResult OUTPUT

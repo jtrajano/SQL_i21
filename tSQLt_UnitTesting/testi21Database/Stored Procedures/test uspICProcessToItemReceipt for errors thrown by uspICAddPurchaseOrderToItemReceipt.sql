@@ -1,18 +1,18 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICProcessToItemReceipt for errors thrown by uspICAddPurchaseOrderToItemReceipt]
+﻿CREATE PROCEDURE [testi21Database].[test uspICProcessToItemReceipt for errors thrown by uspICAddPurchaseOrderToInventoryReceipt]
 AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		DECLARE @isCalledUspICAddPurchaseOrderToItemReceipt AS BIT
+		DECLARE @isCalleduspICAddPurchaseOrderToInventoryReceipt AS BIT
 
 		DECLARE @errorCommand AS NVARCHAR(MAX)
 		DECLARE @command AS NVARCHAR(MAX)
-		SET @errorCommand = 'RAISERROR(''Error raised inside uspICAddPurchaseOrderToItemReceipt'', 16, 1);';
+		SET @errorCommand = 'RAISERROR(''Error raised inside uspICAddPurchaseOrderToInventoryReceipt'', 16, 1);';
 
-		EXEC tSQLt.SpyProcedure 'dbo.uspICAddPurchaseOrderToItemReceipt', @errorCommand;
+		EXEC tSQLt.SpyProcedure 'dbo.uspICAddPurchaseOrderToInventoryReceipt', @errorCommand;
 	END 
 	
-	-- Test if error/s raised by uspICAddPurchaseOrderToItemReceipt is handled properly. 
+	-- Test if error/s raised by uspICAddPurchaseOrderToInventoryReceipt is handled properly. 
 	BEGIN 
 		-- Act
 		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50000 
@@ -25,12 +25,12 @@ BEGIN
 
 		-- Assert
 		BEGIN 
-			-- Check if uspICAddPurchaseOrderToItemReceipt was called. 
-			SELECT	@isCalledUspICAddPurchaseOrderToItemReceipt = 1 
-			FROM	uspICAddPurchaseOrderToItemReceipt_SpyProcedureLog 
+			-- Check if uspICAddPurchaseOrderToInventoryReceipt was called. 
+			SELECT	@isCalleduspICAddPurchaseOrderToInventoryReceipt = 1 
+			FROM	uspICAddPurchaseOrderToInventoryReceipt_SpyProcedureLog 
 			WHERE	_id_ = 1 
 
-			EXEC tSQLt.AssertEquals 1 ,@isCalledUspICAddPurchaseOrderToItemReceipt;			
+			EXEC tSQLt.AssertEquals 1 ,@isCalleduspICAddPurchaseOrderToInventoryReceipt;			
 		END		
 	END 
 END

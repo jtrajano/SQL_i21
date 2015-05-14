@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test the fnGetProcessToItemReceiptErrors function for invalid item and valid location]
+﻿CREATE PROCEDURE testi21Database.[test the fnGetProcessToInventoryReceiptErrors function for valid item and invalid location]
 AS 
 BEGIN
 	-- Arrange
@@ -38,14 +38,9 @@ BEGIN
 				,strText
 				,intErrorCode
 		)
-		-- Invalid item and valid location
-		SELECT	intItemId = @InvalidItem
-				,intItemLocationId = @Default_Location
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
-		--UNION ALL
-		--SELECT	intItemId = @InvalidItem
-		--		,intItemLocationId = @Default_Location
+		---- Valid item and invalid location
+		--SELECT	intItemId = @StickyGrains
+		--		,intItemLocationId = @InvalidLocation
 		--		,strText = FORMATMESSAGE(50028)
 		--		,intErrorCode = 50028
 
@@ -56,8 +51,8 @@ BEGIN
 	-- Act
 	BEGIN 
 		INSERT INTO actual	
-		-- Invalid item and valid location
-		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@InvalidItem, @Default_Location, NULL, NULL)
+		-- valid item and invalid location
+		SELECT * FROM dbo.fnGetProcessToInventoryReceiptErrors(@StickyGrains, @InvalidLocation, NULL, NULL)		
 	END
 
 	-- Assert

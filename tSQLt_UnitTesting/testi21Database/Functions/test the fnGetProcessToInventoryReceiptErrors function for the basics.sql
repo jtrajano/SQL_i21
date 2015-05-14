@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test the fnGetProcessToItemReceiptErrors function for invalid item and invalid location]
+﻿CREATE PROCEDURE testi21Database.[test the fnGetProcessToInventoryReceiptErrors function for the basics]
 AS 
 BEGIN
 	-- Arrange
@@ -31,33 +31,14 @@ BEGIN
 				,@BetterHaven AS INT = 3
 				,@InvalidLocation AS INT = -1
 
-		-- Setup the expected data
-		INSERT INTO expected (
-				intItemId
-				,intItemLocationId
-				,strText
-				,intErrorCode
-		)
-		-- Invalid item and invalid location
-		SELECT	intItemId = @InvalidItem
-				,intItemLocationId = @InvalidLocation
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
-		--UNION ALL
-		--SELECT	intItemId = @InvalidItem
-		--		,intItemLocationId = @InvalidLocation
-		--		,strText = FORMATMESSAGE(50028)
-		--		,intErrorCode = 50028
-
 		-- Create the mock data 
 		EXEC testi21Database.[Fake inventory items];
 	END
 
 	-- Act
 	BEGIN 
-		INSERT INTO actual	
-		-- Invalid item and invalid location
-		SELECT * FROM dbo.fnGetProcessToItemReceiptErrors(@InvalidItem, @InvalidLocation, NULL, NULL)		
+		INSERT INTO actual
+		SELECT * FROM dbo.fnGetProcessToInventoryReceiptErrors(@WetGrains, @Default_Location, 0, 1)
 	END
 
 	-- Assert
@@ -70,4 +51,4 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE expected
 	
-END
+END 

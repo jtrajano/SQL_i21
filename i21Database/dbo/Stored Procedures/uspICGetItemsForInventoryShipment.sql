@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICGetItemsForItemShipment]
+﻿CREATE PROCEDURE [dbo].[uspICGetItemsForInventoryShipment]
 	@intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
 AS
@@ -15,16 +15,16 @@ DECLARE @ShipmentType_SalesContract AS NVARCHAR(100) = 'Sales Contract'
 DECLARE @ShipmentType_SalesOrder AS NVARCHAR(100) = 'Sales Order'
 DECLARE @ShipmentType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 
-DECLARE @intSalesContractType AS INT = 1
-DECLARE @intSalesOrderType AS INT = 2
-DECLARE @intTransferOrderType AS INT = 3
+DECLARE @SALES_CONTRACT AS INT = 1
+		,@SALES_ORDER AS INT = 2
+		,@TRANSFER_ORDER AS INT = 3
 
 IF @strSourceType = @ShipmentType_SalesOrder
 BEGIN 
 	SELECT	intItemId				= SODetail.intItemId
 			,intLocationId			= ItemLocation.intLocationId
 			,intItemUOMId			= ItemUOM.intItemUOMId
-			,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
+			,dtmDate				= dbo.fnRemoveTimeOnDate(SO.dtmDate)
 			,dblQty					= SODetail.dblQtyOrdered
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= ISNULL(ItemPricing.dblLastCost, 0) -- Default to the last cost. 
@@ -33,9 +33,9 @@ BEGIN
 			,dblExchangeRate		= 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 			,intTransactionId		= SO.intSalesOrderId
 			,strTransactionId		= SO.strSalesOrderNumber
-			,intTransactionTypeId	= @intSalesOrderType
+			,intTransactionTypeId	= @SALES_ORDER
 			,intLotId				= NULL 
-			,intSubLocationId		= NULL -- Unable to find a sub location from SO and SODetail
+			,intSubLocationId		= NULL -- There is no sub location in Sales Order
 			,intStorageLocationId	= SODetail.intStorageLocationId
 	FROM	dbo.tblSOSalesOrder SO INNER JOIN dbo.tblSOSalesOrderDetail SODetail
 				ON SO.intSalesOrderId = SODetail.intSalesOrderId
@@ -51,6 +51,3 @@ BEGIN
 	WHERE	SODetail.intSalesOrderId = @intSourceTransactionId
 			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1			
 END
-
--- TODO IF @strSourceType = @ShipmentType_SalesContract
--- TODO IF @strSourceType = @ShipmentType_TransferOrder

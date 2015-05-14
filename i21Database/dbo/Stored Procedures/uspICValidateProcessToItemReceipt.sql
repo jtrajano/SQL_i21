@@ -2,7 +2,7 @@
 	Used to validate the items before converting it to item receipt. When an error is found, it will execute a RAISERROR. 
 	This stored procedure is internally used for validation and it will always be called. 
 	
-	If you wish to retrieve the errors prior to posting and show it to the user, I suggest you use fnGetProcessToItemReceiptErrors
+	If you wish to retrieve the errors prior to posting and show it to the user, I suggest you use fnGetProcessToInventoryReceiptErrors
 	and return the result back to the user-interface. 
 
 	These are the validations performed by this stored procedure
@@ -34,7 +34,7 @@ SELECT	Errors.intItemId
 		,Errors.intItemLocationId
 		,Errors.strText
 		,Errors.intErrorCode
-FROM	@Items Item CROSS APPLY dbo.fnGetProcessToItemReceiptErrors(Item.intItemId, Item.intItemLocationId, Item.dblQty, Item.dblUOMQty) Errors
+FROM	@Items Item CROSS APPLY dbo.fnGetProcessToInventoryReceiptErrors(Item.intItemId, Item.intItemLocationId, Item.dblQty, Item.dblUOMQty) Errors
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 

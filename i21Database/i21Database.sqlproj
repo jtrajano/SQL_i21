@@ -909,7 +909,7 @@
     <Build Include="dbo\Tables\tblICStorageLocationSku.sql" />
     <Build Include="dbo\Views\vyuARItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessToItemReceipt.sql" />
-    <Build Include="dbo\Functions\fnGetProcessToItemReceiptErrors.sql" />
+    <Build Include="dbo\Functions\fnGetProcessToInventoryReceiptErrors.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\POOrderStatus.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFOOut.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemReceipt.sql" />
@@ -943,7 +943,7 @@
     <Build Include="dbo\Functions\fnGetCostingMethodAsTable.sql" />
     <Build Include="dbo\Functions\fnGetItemAverageCostAsTable.sql" />
     <Build Include="dbo\Stored Procedures\uspPOProcessItemReceipt.sql" />
-    <Build Include="dbo\Stored Procedures\uspICAddPurchaseOrderToItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddPurchaseOrderToInventoryReceipt.sql" />
     <Build Include="dbo\Functions\fnGetDiscountBasedOnTerm.sql" />
     <Build Include="dbo\Functions\fnRemoveTimeOnDate.sql" />
     <None Include="Scripts\Post-Deployment\AP\ClearPostResult.sql" />
@@ -1244,7 +1244,7 @@
     <Build Include="dbo\Tables\tblICInventoryAdjustment.sql" />
     <Build Include="dbo\Tables\tblICInventoryAdjustmentDetail.sql" />
     <Build Include="dbo\Tables\tblICInventoryAdjustmentNote.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessToItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessToInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspPOValidateStatus.sql" />
     <Build Include="dbo\Views\vyuPOStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateFuturesMonthList.sql" />
@@ -1275,10 +1275,10 @@
     <Build Include="dbo\Tables\tblLGAllocationDetail.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenSContracts.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenPContracts.sql" />
-    <Build Include="dbo\Stored Procedures\uspICGetItemsForItemShipment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICValidateProcessToItemShipment.sql" />
-    <Build Include="dbo\Functions\fnGetProcessToItemShipmentErrors.sql" />
-    <Build Include="dbo\Stored Procedures\uspICAddSalesOrderToItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemsForInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\fnGetProcessToItemShipmentErrors.sql" />
+    <Build Include="dbo\Functions\fnGetProcessToInventoryShipmentErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddSalesOrderToInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnSplitString.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemLot.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateReceivedQty.sql" />

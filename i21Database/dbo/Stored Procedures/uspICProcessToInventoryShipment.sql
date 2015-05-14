@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspICProcessToItemReceipt]
+﻿CREATE PROCEDURE [dbo].[uspICProcessToInventoryShipment]
 	@intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT 
-	,@InventoryReceiptId AS INT OUTPUT 
+	,@InventoryShipmentId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -15,16 +15,15 @@ DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
--- Constant variables for the source type
-DECLARE @SourceType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
-DECLARE @SourceType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
-DECLARE @SourceType_Direct AS NVARCHAR(100) = 'Direct'
+DECLARE @ItemsForItemShipment AS ItemCostingTableType 
 
-DECLARE @ItemsForItemReceipt AS ItemCostingTableType 
+DECLARE @SALES_CONTRACT AS INT = 1
+		,@SALES_ORDER AS INT = 2
+		,@TRANSFER_ORDER AS INT = 3
 
 BEGIN TRY
 	-- Get the items to process
-	INSERT INTO @ItemsForItemReceipt (
+	INSERT INTO @ItemsForItemShipment (
 		intItemId
 		,intItemLocationId
 		,intItemUOMId
@@ -40,19 +39,22 @@ BEGIN TRY
 		,intTransactionTypeId
 		,intLotId
 		,intSubLocationId
-		,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion. 
+		,intStorageLocationId 
 	)
-	EXEC dbo.uspICGetItemsForItemReceipt 
+	EXEC dbo.uspICGetItemsForInventoryShipment
 		@intSourceTransactionId
 		,@strSourceType
 
-	-- Validate the items to receive 
-	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
+	-- Validate the items to shipment 
+	EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
 
-	-- Add the items to the item receipt 
-	IF @strSourceType = @SourceType_PurchaseOrder
+	-- Add the items into inventory shipment
+	IF @strSourceType = @SALES_CONTRACT
 	BEGIN 
-		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+		EXEC dbo.uspICAddSalesOrderToInventoryShipment 
+			@intSourceTransactionId, 
+			@intUserId, 
+			@InventoryShipmentId OUTPUT; 
 	END
 
 END TRY

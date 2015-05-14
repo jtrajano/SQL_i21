@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICAddSalesOrderToItemShipment]
+﻿CREATE PROCEDURE [dbo].[uspICAddSalesOrderToInventoryShipment]
 	@SalesOrderId AS INT
 	,@intUserId AS INT
 	,@InventoryShipmentId AS INT OUTPUT 
