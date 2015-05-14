@@ -438,3 +438,31 @@ EXEC sp_addmessage 51108,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51109) EXEC sp_dropmessage 51109, 'us_english'	
 SET @strmessage = 'The cycle count for this run is already started by ''%s'' on ''%s''. you cannot continue. The current run already cyclecounted by another user. you cannot continue.'
 EXEC sp_addmessage 51109,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51110) EXEC sp_dropmessage 51110, 'us_english'	
+SET @strmessage = 'Lot quantity should be greater than zero.'
+EXEC sp_addmessage 51110,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51111) EXEC sp_dropmessage 51111, 'us_english'	
+SET @strmessage = 'No open runs for the target item ''%s''. Cannot consume.'
+EXEC sp_addmessage 51111,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51112) EXEC sp_dropmessage 51112, 'us_english'	
+SET @strmessage = 'Lot can not be blank.'
+EXEC sp_addmessage 51112,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51113) EXEC sp_dropmessage 51113, 'us_english'	
+SET @strmessage = 'Please select a valid lot'
+EXEC sp_addmessage 51113,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51114) EXEC sp_dropmessage 51114, 'us_english'	
+SET @strmessage = 'Input item ''%s'' does not belong to recipe of ''%s'' , Cannot proceed.'
+EXEC sp_addmessage 51114,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51115) EXEC sp_dropmessage 51115, 'us_english'	
+SET @strmessage = 'No mapped staging location found, cannot stage.'
+EXEC sp_addmessage 51115,11,@strmessage,'us_english','False'   
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51116) EXEC sp_dropmessage 51116, 'us_english'	
+SET @strmessage = 'The quantity must not exceed the lot quantity.'
+EXEC sp_addmessage 51116,11,@strmessage,'us_english','False'   
