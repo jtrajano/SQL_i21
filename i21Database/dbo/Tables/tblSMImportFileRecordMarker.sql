@@ -5,7 +5,7 @@
 	[strRecordMarker] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intRowsToSkip] INT NULL DEFAULT ((0)), 
 	[intPosition] INT NULL, 
-	[strCondition] nvarchar(50) NULL,
+	[strCondition] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[intSequence] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	CONSTRAINT [PK_tblSMImportFileRecordMarker] PRIMARY KEY ([intImportFileRecordMarkerId]),

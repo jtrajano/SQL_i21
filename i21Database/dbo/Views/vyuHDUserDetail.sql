@@ -20,7 +20,7 @@
 			,us.strLastName
 			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from tblEntity where intEntityId = us.intEntityId)
 			,ysni21User = 1
-			,imgPhoto = null
+			,imgPhoto = (select top 1 imgPhoto from tblEntity where intEntityId = us.intEntityId)
 			,intConcurrencyId = 1
 			,strFullName2 = (select top 1 strName from tblEntity where intEntityId = us.intEntityId)
 		from

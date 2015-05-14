@@ -39,5 +39,5 @@ FROM (
 			LEFT JOIN dbo.tblSMUserSecurity F ON E.intUserSecurityId = F.intUserSecurityID
 			WHERE D.intApprovalListId = B.intApprovalListId
 		) Approver
-		WHERE A.intTransactionType = 7 AND B.intApprovalListId IS NOT NULL
+		WHERE A.intTransactionType = 7 AND B.intApprovalListId IS NOT NULL AND A.dtmApprovalDate IS NULL
 ) tblBillApproval

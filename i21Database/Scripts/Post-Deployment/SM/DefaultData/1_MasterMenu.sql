@@ -1834,6 +1834,10 @@ ELSE
 DECLARE @CardFuelingParentMenuId INT
 SELECT @CardFuelingParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Card Fueling' AND strModuleName = 'Card Fueling' AND intParentMenuID = 0
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Index Pricing By Site Group' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Index Pricing By Site Group', N'Card Fueling', @CardFuelingParentMenuId, N'Index Pricing By Site Group', N'Activity', N'Screen', N'CardFueling.view.IndexPricingBySiteGroup', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Accounts' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Accounts', N'Card Fueling', @CardFuelingParentMenuId, N'Accounts', N'Maintenance', N'Screen', N'CardFueling.view.Account', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
@@ -1869,6 +1873,34 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sites' AN
 	VALUES (N'Sites', N'Card Fueling', @CardFuelingParentMenuId, N'Sites', N'Maintenance', N'Screen', N'CardFueling.view.Site', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'CardFueling.view.Site' WHERE strMenuName = 'Sites' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Card Type' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Card Type', N'Card Fueling', @CardFuelingParentMenuId, N'Card Type', N'Maintenance', N'Screen', N'CardFueling.view.CardType', N'small-menu-maintenance', 0, 0, 0, 1, 6, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fee' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Fee', N'Card Fueling', @CardFuelingParentMenuId, N'Fee', N'Maintenance', N'Screen', N'CardFueling.view.Fee', N'small-menu-maintenance', 0, 0, 0, 1, 7, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoice Cycle​' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Invoice Cycle​', N'Card Fueling', @CardFuelingParentMenuId, N'Invoice Cycle​', N'Maintenance', N'Screen', N'CardFueling.view.InvoiceCycle', N'small-menu-maintenance', 0, 0, 0, 1, 8, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Price Index​' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Price Index​', N'Card Fueling', @CardFuelingParentMenuId, N'Price Index​', N'Maintenance', N'Screen', N'CardFueling.view.PriceIndex', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Price Rule Group​' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Price Rule Group​', N'Card Fueling', @CardFuelingParentMenuId, N'Price Rule Group​', N'Maintenance', N'Screen', N'CardFueling.view.PriceRuleGroup', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Site Group​' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Site Group​', N'Card Fueling', @CardFuelingParentMenuId, N'Site Group​', N'Maintenance', N'Screen', N'CardFueling.view.SiteGroup', N'small-menu-maintenance', 0, 0, 0, 1, 11, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Site Group Price Adjustment​' AND strModuleName = 'Card Fueling' AND intParentMenuID = @CardFuelingParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Site Group Price Adjustment​', N'Card Fueling', @CardFuelingParentMenuId, N'Site Group Price Adjustment', N'Maintenance', N'Screen', N'CardFueling.view.SiteGroupPriceAdjustment', N'small-menu-maintenance', 0, 0, 0, 1, 12, 1)
 
 /* CREDIT CARD RECONCILIATION */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Credit Card Reconciliation' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0)

@@ -1579,6 +1579,11 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\DeviceLeaseDetail.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceLeaseDetail.sql" />
     <Build Include="dbo\Tables\tblSMXMLTagAttribute.sql" />
+    <Build Include="dbo\Functions\fnAPIsBillApprover.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeviceActions.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceActions.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConvertAccountTemplateGroupToCategory.sql" />
+    <Build Include="dbo\Tables\cstEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
