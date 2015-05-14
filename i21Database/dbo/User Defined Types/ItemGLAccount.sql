@@ -11,5 +11,6 @@ CREATE TYPE [dbo].[ItemGLAccount] AS TABLE
 	,intWriteOffSoldId INT
 	,intRevalueSoldId INT
 	,intAutoNegativeId INT
-	,PRIMARY KEY CLUSTERED (intItemId, intItemLocationId) 
+	,intTransactionTypeId INT 
+	,PRIMARY KEY CLUSTERED (intItemId, intItemLocationId, intTransactionTypeId) 
 )

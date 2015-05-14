@@ -38,13 +38,15 @@ BEGIN
 		,intItemLocationId 
 		,intInventoryId 
 		,intAutoNegativeId 
+		,intTransactionTypeId
 	)
 	SELECT	Query.intItemId
 			,Query.intItemLocationId
 			,intInventoryId = Inventory.intAccountId
 			,intAutoNegativeId = AutoNegative.intAccountId
+			,Query.intTransactionTypeId
 	FROM	(
-				SELECT DISTINCT intItemId, intItemLocationId 
+				SELECT DISTINCT intItemId, intItemLocationId, intTransactionTypeId 
 				FROM	dbo.tblICInventoryTransaction ItemTransactions 
 				WHERE	ItemTransactions.strBatchId = @strBatchId
 			) Query
@@ -131,6 +133,7 @@ BEGIN
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
+				AND ItemTransactions.intTransactionTypeId = GLAccounts.intTransactionTypeId
 			INNER JOIN dbo.tblGLAccount	
 				ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
@@ -168,6 +171,7 @@ BEGIN
 	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
+				AND ItemTransactions.intTransactionTypeId = GLAccounts.intTransactionTypeId
 			INNER JOIN dbo.tblGLAccount	
 				ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
