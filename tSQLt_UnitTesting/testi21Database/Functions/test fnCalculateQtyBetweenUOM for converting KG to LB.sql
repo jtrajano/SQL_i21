@@ -10,15 +10,13 @@ BEGIN
 		,@20KG_BAG AS INT = 4	
 
 	-- Arrange
-	DECLARE @intItemUOMIdFrom AS INT = @KGS
-	DECLARE @intItemUOMIdTo AS INT = @LBS
 	DECLARE @dblQty AS NUMERIC(18,6) = 100
 
 	DECLARE @result AS NUMERIC(18,6) 
 	DECLARE @expected AS NUMERIC(18,6) = 220.462442
 
 	-- Act
-	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@intItemUOMIdFrom, @intItemUOMIdTo, @dblQty)
+	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@KGS, @LBS, @dblQty)
 
 	-- Assert 
 	EXEC tSQLt.AssertEquals @expected, @result;
