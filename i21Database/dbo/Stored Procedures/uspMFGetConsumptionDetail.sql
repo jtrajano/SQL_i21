@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE uspMFGetConsumptionDetail (@intWorkOrderId INT)
 AS
 BEGIN
-	SELECT L.strLotNumber
+	SELECT W.intWorkOrderConsumedLotId,
+		L.strLotNumber
 		,I.strItemNo
 		,I.strDescription
 		,W.dblQuantity
