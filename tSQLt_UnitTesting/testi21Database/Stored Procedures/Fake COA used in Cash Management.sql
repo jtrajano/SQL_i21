@@ -78,14 +78,14 @@ BEGIN
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Add fake data for GL Account
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@BankOfAmerica_Default, 'BANK OF AMERICA-DEFAULT', '100100-1000', @Group_CashAccounts);
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@MiscExpenses_Default, 'MISC EXPENSES-DEFAULT', '400100-1000', @Group_Expenses);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId, ysnActive) VALUES (@BankOfAmerica_Default, 'BANK OF AMERICA-DEFAULT', '100100-1000', @Group_CashAccounts, 1);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId, ysnActive) VALUES (@MiscExpenses_Default, 'MISC EXPENSES-DEFAULT', '400100-1000', @Group_Expenses, 1);
 
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@BankOfAmerica_NewHaven, 'BANK OF AMERICA-NEW HAVEN', '100100-1001', @Group_CashAccounts);
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@MiscExpenses_NewHaven, 'MISC EXPENSES-NEW HAVEN', '400100-1001', @Group_Expenses);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId, ysnActive) VALUES (@BankOfAmerica_NewHaven, 'BANK OF AMERICA-NEW HAVEN', '100100-1001', @Group_CashAccounts, 1);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId, ysnActive) VALUES (@MiscExpenses_NewHaven, 'MISC EXPENSES-NEW HAVEN', '400100-1001', @Group_Expenses, 1);
 
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@BankOfAmerica_BetterHaven, 'BANK OF AMERICA-BETTER HAVEN', '100100-1002', @Group_CashAccounts);
-		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId) VALUES (@MiscExpenses_BetterHaven, 'MISC EXPENSES-BETTER HAVEN', '400100-1002', @Group_Expenses);		
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId, ysnActive) VALUES (@BankOfAmerica_BetterHaven, 'BANK OF AMERICA-BETTER HAVEN', '100100-1002', @Group_CashAccounts, 1);
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId, intAccountGroupId, ysnActive) VALUES (@MiscExpenses_BetterHaven, 'MISC EXPENSES-BETTER HAVEN', '400100-1002', @Group_Expenses, 1);		
 
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Add fake data for Segment Mapping
