@@ -14,6 +14,20 @@ SET ANSI_WARNINGS OFF
 DECLARE @intCustomerStorageId AS INT
 DECLARE @ysnAddDiscount BIT
 DECLARE @intHoldCustomerStorageId AS INT
+DECLARE @intGRStorageId AS INT
+DECLARE @strGRStorage AS nvarchar(3)
+
+BEGIN 
+	SELECT	@strGRStorage = SC.strDistributionOption
+	FROM	dbo.tblSCTicket SC	        
+	WHERE	SC.intTicketId = @intTicketId		
+END
+
+BEGIN 
+	SELECT	@intGRStorageId = ST.intStorageScheduleTypeId
+	FROM	dbo.tblGRStorageType ST	        
+	WHERE	ST.strStorageTypeCode = @strGRStorage		
+END
 
 -- Insert the Customer Storage Record 
 INSERT INTO [dbo].[tblGRCustomerStorage]
@@ -47,7 +61,7 @@ SELECT 	[intConcurrencyId]		= 1
 		,[intEntityId]			= @intEntityId
 		,[intCommodityId]		= SC.intCommodityId
 		,[intStorageScheduleId]	= NULL -- TODO Storage Schedule
-		,[intStorageTypeId]		= SC.intDistributionOption
+		,[intStorageTypeId]		= @intGRStorageId
 		,[intCompanyLocationId]= SC.intProcessingLocationId
 		,[intTicketId]= SC.intTicketId
 		,[intDiscountScheduleId]= SC.intDiscountSchedule

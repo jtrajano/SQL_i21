@@ -58,7 +58,6 @@
 	intManufacturingProcessId INT, 
 	intSupervisorId INT,
 	intSubLocationId INT,
-	ysnTrueUp BIT CONSTRAINT DF_tblMFWorkOrder_strVendorLotNumber DEFAULT((0)),
 	ysnIngredientAvailable bit CONSTRAINT [DF_tblMFWorkOrder_ysnIngredientAvailable] DEFAULT 1,
 	intCountStatusId INT NULL, 
 	CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),

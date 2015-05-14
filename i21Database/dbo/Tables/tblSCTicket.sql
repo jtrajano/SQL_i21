@@ -38,7 +38,7 @@
     [strItemNumber] NVARCHAR(13) COLLATE Latin1_General_CI_AS NULL, 
     [intCustomerId] INT NULL, 
     [intSplitId] INT NULL, 
-    [intDistributionOption] INT NULL, 
+    [strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [intDiscountSchedule] INT NULL, 
     [strDiscountLocation] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [dtmDeferDate] DATETIME NULL, 
@@ -438,7 +438,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
-    @level2name = 'intDistributionOption'
+    @level2name = 'strDistributionOption'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Discount Schedule',
