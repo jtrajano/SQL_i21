@@ -43,7 +43,7 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
-				AND ysnTrueUp = 1
+				--AND ysnTrueUp = 1
 			)
 	BEGIN
 		RAISERROR (
@@ -201,7 +201,7 @@ BEGIN TRY
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)
-				AND W.ysnTrueUp = 0
+				--AND W.ysnTrueUp = 0
 			)
 	BEGIN
 		SELECT TOP 1 @strProductItem = Product.strItemNo + ' - ' + Product.strDescription
@@ -237,7 +237,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND W.ysnTrueUp = 0
+			--AND W.ysnTrueUp = 0
 		ORDER BY W.dtmPlannedDate DESC
 			,W.intPlannedShiftId DESC
 
@@ -275,7 +275,7 @@ BEGIN TRY
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)
-				AND W.ysnTrueUp = 0
+				--AND W.ysnTrueUp = 0
 				AND (
 					CASE 
 						WHEN intPlannedShiftId IS NOT NULL
@@ -319,7 +319,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND W.ysnTrueUp = 0
+			--AND W.ysnTrueUp = 0
 			AND (
 				CASE 
 					WHEN intPlannedShiftId IS NOT NULL
