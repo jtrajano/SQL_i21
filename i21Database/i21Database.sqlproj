@@ -1584,6 +1584,8 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceActions.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConvertAccountTemplateGroupToCategory.sql" />
     <Build Include="dbo\Tables\cstEntity.sql" />
+    <Build Include="dbo\Functions\fnAPCreateFilter.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptPayablesAgingSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

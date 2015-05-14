@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPRptPayablesAging]
+﻿CREATE PROCEDURE [dbo].[uspAPRptPayablesAgingSummary]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
@@ -169,7 +169,7 @@ SET @query = '
 			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl90
 	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN ''Current''
 			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 THEN ''01 - 30 Days''
-			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60 THEN ''31 - 60 Days'' 
+			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60 THEN ''31 - 60 Days''
 			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 THEN ''61 - 90 Days''
 			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90 THEN ''Over 90'' 
 			ELSE ''Current'' END AS strAge
@@ -182,9 +182,9 @@ SET @query = '
 		,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
 		,SUM(tmpAPPayables.dblInterest) AS dblInterest
 		,(SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS dblAmountDue
-		FROM ('
+		FROM (' 
 				+ @innerQuery +
-			') tmpAPPayables 
+			') tmpAPPayables WHERE dblAmount <> 0
 		GROUP BY intBillId
 	) AS tmpAgingSummaryTotal
 	LEFT JOIN dbo.tblAPBill A

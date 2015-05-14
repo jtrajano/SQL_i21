@@ -18,7 +18,7 @@ SELECT
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEntity C2 ON C1.[intEntityVendorId] = C2.intEntityId)
 	ON C1.[intEntityVendorId] = A.[intEntityVendorId]
-WHERE A.ysnPosted = 1
+WHERE A.ysnPosted = 1 AND intTransactionType != 7
 UNION ALL   
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   
