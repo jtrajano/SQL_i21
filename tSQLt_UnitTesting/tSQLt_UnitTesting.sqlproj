@@ -1026,6 +1026,8 @@
     <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryShipmentErrors function for invalid item and invalid location.sql" />
     <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryShipmentErrors function for invalid item and valid location.sql" />
     <Build Include="testi21Database\Functions\test the fnGetProcessToInventoryShipmentErrors function for valid item and invalid location.sql" />
+    <Build Include="testi21Database\Stored Procedures\Fake data for item uom table, metric ton scenario.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 69 KG BAG to KG.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
