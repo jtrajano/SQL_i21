@@ -3017,4 +3017,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strPositionType" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="aba14032-ca04-441d-b86e-7de961e64c8e" ChangeDateTime="05/13/2015 10:17:26">
+    <Property Name="ElementName" Value="[dbo].[tblSCDistributionOption].[intDistributionMethod]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCDistributionOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDistributionOption" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="319c64c0-67fe-4e90-ae0a-34582017c987" ChangeDateTime="05/13/2015 10:18:30">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicket].[intDistributionOption]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicket]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDistributionOption" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ee506c24-237d-40ae-a71c-f0a024cd5a1f" ChangeDateTime="05/13/2015 10:19:35">
+    <Property Name="ElementName" Value="[dbo].[tblSCTicketSplit].[intSplitOption]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSCTicketSplit]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDistributionOption" />
+  </Operation>
 </Operations>
