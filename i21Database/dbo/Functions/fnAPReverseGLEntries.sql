@@ -62,6 +62,7 @@ BEGIN
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
 		,[strJournalLineDescription]
+		,[intJournalLineNo]
 		,[ysnIsUnposted]
 		,[intConcurrencyId]
 		,[intUserId]
@@ -88,6 +89,7 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,[dtmTransactionDate]
 		,[strJournalLineDescription]
+		,[intJournalLineNo]
 		,ysnIsUnposted = 1
 		,[intConcurrencyId]
 		,intUserId = @intUserId
