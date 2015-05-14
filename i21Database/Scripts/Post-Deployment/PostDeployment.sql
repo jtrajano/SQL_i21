@@ -58,6 +58,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\DataSource\DeviceLeaseDetail.sql
 :r .\TM\Reports\DefaultCriteria\DeviceLeaseDetail.sql
 
+:r .\TM\Reports\Layout\DeviceActions.sql
+:r .\TM\Reports\DataSource\DeviceActions.sql
+
 
 -- Canned Panels
 :r .\DB\1_CannedPanels_Panel.sql

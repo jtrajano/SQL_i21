@@ -1580,6 +1580,8 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceLeaseDetail.sql" />
     <Build Include="dbo\Tables\tblSMXMLTagAttribute.sql" />
     <Build Include="dbo\Functions\fnAPIsBillApprover.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeviceActions.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceActions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
