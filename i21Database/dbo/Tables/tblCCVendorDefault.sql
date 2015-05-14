@@ -2,8 +2,8 @@
 (
 	[intVendorDefaultId] INT NOT NULL IDENTITY,
 	[intVendorId] INT NULL,
-	[intBankAccountId]  INT NOT NULL DEFAULT 0,
-	[intCompanyLocationId] INT NOT NULL DEFAULT 0,
+	[intBankAccountId]  INT NULL ,
+	[intCompanyLocationId] INT NULL,
 	[strApType] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strEnterTotalsAsGrossOrNet] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strFileType] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
