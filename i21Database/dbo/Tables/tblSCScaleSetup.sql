@@ -69,8 +69,8 @@
     CONSTRAINT [FK_tblSCScaleSetup_tblSCScaleDevice_intGraderDeviceId] FOREIGN KEY ([intGraderDeviceId]) REFERENCES [tblSCScaleDevice]([intScaleDeviceId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSCScaleDevice_intAlternateGraderDeviceId] FOREIGN KEY ([intAlternateGraderDeviceId]) REFERENCES [tblSCScaleDevice]([intScaleDeviceId]),
     CONSTRAINT [FK_tblSCScaleSetup_tblSCScaleDevice_intLEDDeviceId] FOREIGN KEY ([intLEDDeviceId]) REFERENCES [tblSCScaleDevice]([intScaleDeviceId]), 
-    CONSTRAINT [FK_tblSCScaleSetup_tblSCTicketStorageType_intDefaultStorageTypeId] FOREIGN KEY ([intDefaultStorageTypeId]) REFERENCES [tblSCTicketStorageType]([intTicketStorageTypeId]),
-    CONSTRAINT [FK_tblSCScaleSetup_tblSCTicketStorageType_intGrainBankStorageTypeId] FOREIGN KEY ([intGrainBankStorageTypeId]) REFERENCES [tblSCTicketStorageType]([intTicketStorageTypeId]), 
+    CONSTRAINT [FK_tblSCScaleSetup_tblGRStorageType_intDefaultStorageTypeId] FOREIGN KEY ([intDefaultStorageTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]),
+    CONSTRAINT [FK_tblSCScaleSetup_tblGRStorageType_intGrainBankStorageTypeId] FOREIGN KEY ([intGrainBankStorageTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]), 
     CONSTRAINT [UK_tblSCScaleSetup_strStationShortDescription] UNIQUE ([strStationShortDescription]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMUserSecurity_intLastPurgeUserId] FOREIGN KEY ([intLastPurgeUserId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID])
