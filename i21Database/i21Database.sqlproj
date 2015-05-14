@@ -603,9 +603,6 @@
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Stored Procedures\uspARFixStartingNumbers.sql" />
-    <Build Include="dbo\Tables\cstGLJournal.sql" />
-    <Build Include="dbo\Tables\cstARCustomer.sql" />
-    <Build Include="dbo\Tables\cstAPVendor.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\10_Screen.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPOverflow.sql" />
     <Build Include="dbo\Tables\tblRMSubreportCondition.sql" />
@@ -1426,7 +1423,6 @@
     <Build Include="dbo\Stored Procedures\uspMFPickWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspPRCreatePaycheckEntry.sql" />
     <Build Include="dbo\Views\vyuCTContractAdjustment.sql" />
-    <Build Include="dbo\Tables\cstGLAccount.sql" />
     <Build Include="dbo\Tables\tblQMSampleTypeDetail.sql" />
     <Build Include="dbo\Tables\tblQMSampleType.sql" />
     <Build Include="dbo\Tables\tblQMControlPoint.sql" />
@@ -1583,7 +1579,7 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeviceActions.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceActions.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConvertAccountTemplateGroupToCategory.sql" />
-    <Build Include="dbo\Tables\cstEntity.sql" />
+    <None Include="Scripts\Post-Deployment\SM\CustomField.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
