@@ -273,5 +273,7 @@ GO
 	END
 
 GO
+	EXEC dbo.uspGLConvertAccountTemplateGroupToCategory
+GO
 	PRINT N'END INSERT ACCOUNT TEMPLATE: Petrolac'
 GO

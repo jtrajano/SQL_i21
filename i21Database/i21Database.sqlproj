@@ -1582,6 +1582,7 @@
     <Build Include="dbo\Functions\fnAPIsBillApprover.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeviceActions.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\DeviceActions.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLConvertAccountTemplateGroupToCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
