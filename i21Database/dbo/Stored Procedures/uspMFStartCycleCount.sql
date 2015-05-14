@@ -430,7 +430,7 @@ BEGIN TRY
 	WHERE MP.intManufacturingProcessId = @intManufacturingProcessId
 
 	UPDATE dbo.tblMFWorkOrder
-	SET ysnCountStarted = 1
+	SET intCountStatusId  = 10
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId

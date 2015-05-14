@@ -329,3 +329,51 @@ IF NOT EXISTS (
 	SELECT 6
 		,'String'
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFManufacturingProcessRunDuration
+		WHERE intManufacturingProcessRunDurationId = 1
+		)
+	INSERT INTO tblMFManufacturingProcessRunDuration (
+		intManufacturingProcessRunDurationId
+		,strManufacturingProcessRunDurationName
+		)
+	SELECT 1
+		,'Open'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFManufacturingProcessRunDuration
+		WHERE intManufacturingProcessRunDurationId = 2
+		)
+	INSERT INTO tblMFManufacturingProcessRunDuration (
+		intManufacturingProcessRunDurationId
+		,strManufacturingProcessRunDurationName
+		)
+	SELECT 2
+		,'By Shift'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFManufacturingProcessRunDuration
+		WHERE intManufacturingProcessRunDurationId = 3
+		)
+	INSERT INTO tblMFManufacturingProcessRunDuration (
+		intManufacturingProcessRunDurationId
+		,strManufacturingProcessRunDurationName
+		)
+	SELECT 3
+		,'By Day'
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFManufacturingProcessRunDuration
+		WHERE intManufacturingProcessRunDurationId = 4
+		)
+	INSERT INTO tblMFManufacturingProcessRunDuration (
+		intManufacturingProcessRunDurationId
+		,strManufacturingProcessRunDurationName
+		)
+	SELECT 4
+		,'By Week'
+GO

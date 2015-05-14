@@ -20,7 +20,7 @@ BEGIN
 		,W.ysnConsumptionReversed
 		,W.strReferenceNo
 		,W.ysnFeedSent
-		,W.intTransactionId
+		--,W.intTransactionId
 		,W.dtmActualInputDateTime
 		,C.intContainerId
 		,C.strContainerId
