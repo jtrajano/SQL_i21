@@ -363,7 +363,7 @@ BEGIN
 			[strCountry] = '',
 			[dblAmount] = A.dblAmountPaid,
 			[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
-			[strMemo] = '',
+			[strMemo] = A.strNotes,
 			[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE A.strPaymentInfo END,
 			[ysnCheckToBePrinted] = 1,
 			[ysnCheckVoid] = 0,
