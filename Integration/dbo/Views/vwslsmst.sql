@@ -12,7 +12,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 		AS  
 		SELECT   	  
 		vwsls_slsmn_id   = agsls_slsmn_id  
-		,vwsls_name    =  ISNULL(agsls_name, '''')
+		,vwsls_name    =  RTRIM(ISNULL(agsls_name, ''''))
 		,vwsls_addr1   = agsls_addr1  
 		,vwsls_addr2   = agsls_addr2  
 		,vwsls_city    = agsls_city  
@@ -86,7 +86,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBNa
 		SELECT  
 	  
 		vwsls_slsmn_id   = ptsls_slsmn_id  
-		,vwsls_name    =  ISNULL(ptsls_name, '''')
+		,vwsls_name    =  RTRIM(ISNULL(ptsls_name, ''''))
 		,vwsls_addr1   = ptsls_addr1  
 		,vwsls_addr2   = ptsls_addr2  
 		,vwsls_city    = ptsls_city  

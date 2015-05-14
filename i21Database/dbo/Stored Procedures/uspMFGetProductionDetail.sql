@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE uspMFGetProductionDetail (@intWorkOrderId INT)
 AS
 BEGIN
-	SELECT L.strLotNumber
+	SELECT W.intWorkOrderProducedLotId,
+		L.strLotNumber
 		,I.strItemNo
 		,I.strDescription
 		,W.dblQuantity
