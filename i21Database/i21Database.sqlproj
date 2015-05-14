@@ -1584,6 +1584,9 @@
     <Build Include="dbo\Functions\fnAPCreateFilter.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesAgingSummary.sql" />
     <None Include="Scripts\Post-Deployment\SM\CustomField.sql" />
+    <Build Include="dbo\Views\vyuARReceivables.sql" />
+    <Build Include="dbo\Views\vyuARCustomerHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetCustomerStatement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
