@@ -3,7 +3,7 @@
 	[intTagAttributeId] INT NOT NULL ,
 	[intImportFileColumnDetailId] INT NOT NULL, 
 	[intSequence] INT NULL,
-	[strTagAttribute] nvarchar(200) NOT NULL,
+	[strTagAttribute] nvarchar(200) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTable] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strColumnName] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDefaultValue]   nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
