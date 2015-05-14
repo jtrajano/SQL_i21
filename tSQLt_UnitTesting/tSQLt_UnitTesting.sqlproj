@@ -1022,6 +1022,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryAdjustmentSplitLot for using an existing lot id for the split.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="testi21Database\Stored Procedures\Fake data for item uom table, metric ton scenario.sql" />
+    <Build Include="testi21Database\Functions\test fnCalculateQtyBetweenUOM for converting 69 KG BAG to KG.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
