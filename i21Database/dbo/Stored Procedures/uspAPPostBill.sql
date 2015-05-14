@@ -63,7 +63,7 @@ DECLARE @GLEntries AS RecapTableType
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Bill'
 DECLARE @validBillIds NVARCHAR(MAX)
-DECLARE @billIds NVARCHAR(MAX) = @param
+DECLARE @billIds NVARCHAR(MAX)
 
 SET @recapId = '1'
 --=====================================================================================================================================
@@ -345,7 +345,7 @@ Post_Cleanup:
 		BEGIN
 			--clean gl detail recap after posting
 			DELETE FROM tblGLDetailRecap
-			FROM tblGLDetailRecap A
+			FROM tblGLPostRecap A
 			INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId 
 		END
 
