@@ -1585,6 +1585,9 @@
     <Build Include="dbo\Views\vyuARReceivables.sql" />
     <Build Include="dbo\Views\vyuARCustomerHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetCustomerStatement.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingProcessRunDuration.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStageWorkOrder.sql" />
+    <Build Include="dbo\Tables\tblCTPackingDescription.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

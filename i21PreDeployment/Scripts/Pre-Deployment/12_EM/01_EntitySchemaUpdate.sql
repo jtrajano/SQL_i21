@@ -377,7 +377,17 @@ END
 	END
 	
 
-	
+	print 'Fix Vendor BadData '
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact') 
+	BEGIN
+		exec(N'UPDATE A SET A.intDefaultContactId = B.intContactId
+				FROM tblAPVendor A
+					JOIN tblAPVendorToContact B
+						on A.intVendorId = B.intVendorId 
+					where A.intDefaultContactId <> B.intContactId
+				')
+	END
+
 		
 	print 'Update vendor to contact default contact column'
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact' AND [COLUMN_NAME] = 'ysnDefaultContact') 

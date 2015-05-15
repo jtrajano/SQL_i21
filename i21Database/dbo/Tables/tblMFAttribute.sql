@@ -1,5 +1,5 @@
 ﻿CREATE TABLE dbo.tblMFAttribute (
-	intAttributeId INT identity(1, 1)
+	intAttributeId INT Not NULL
 	,strAttributeName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,intAttributeDataTypeId INT
 	,strSQL NVARCHAR(MAX) COLLATE Latin1_General_CI_AS

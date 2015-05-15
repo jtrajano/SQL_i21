@@ -4,7 +4,7 @@
     [intTicketId] INT NOT NULL, 
     [intCustomerId] INT NOT NULL, 
     [dblSplitPercent] DECIMAL(6, 3) NOT NULL, 
-    [intSplitOption] INT NULL, 
+    [strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicketSplit_intTicketSplitId] PRIMARY KEY ([intTicketSplitId]) ,
 	CONSTRAINT [FK_tblSCTicketSplit_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId])
@@ -54,7 +54,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSCTicketSplit',
     @level2type = N'COLUMN',
-    @level2name = 'intSplitOption'
+    @level2name = 'strDistributionOption'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Field',
