@@ -250,7 +250,7 @@ BEGIN
 				ON A.intInvoiceId = B.intInvoiceId
 		WHERE  
 			A.intAccountId IS NULL 
-			AND A.intAccountId = 0
+			OR A.intAccountId = 0
 			
 		--Company Location
 		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -316,9 +316,27 @@ BEGIN
 		--	G.intAccountId IS NULL
 		--	AND A.dblTax <> 0.0					
 
+		--INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		--SELECT
+		--	'The account id on one of the details is not specified.',
+		--	A.strTransactionType,
+		--	A.strInvoiceNumber,
+		--	@batchId,
+		--	A.intInvoiceId
+		--FROM 
+		--	tblARInvoice A 
+		--INNER JOIN 
+		--	#tmpPostInvoiceData B
+		--		ON A.intInvoiceId = B.intInvoiceId
+		--WHERE  
+		--	EXISTS(	SELECT null FROM tblARInvoiceDetail  
+		--			WHERE 
+		--				intInvoiceId = B.intInvoiceId
+		--				AND (intAccountId IS NULL OR intAccountId = 0))
+		
 		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
-			'The account id on one of the details is not specified.',
+			'The Service Charge account of Company Location - ' + L.strLocationName + ' was not set.',
 			A.strTransactionType,
 			A.strInvoiceNumber,
 			@batchId,
@@ -328,11 +346,40 @@ BEGIN
 		INNER JOIN 
 			#tmpPostInvoiceData B
 				ON A.intInvoiceId = B.intInvoiceId
-		WHERE  
-			EXISTS(	SELECT null FROM tblARInvoiceDetail  
-					WHERE 
-						intInvoiceId = B.intInvoiceId
-						AND (intAccountId IS NULL OR intAccountId = 0))
+		INNER JOIN
+			tblARInvoiceDetail D
+				ON A.intInvoiceId = D.intInvoiceId
+		INNER JOIN
+			tblSMCompanyLocation L
+				ON D.intCompanyLocationId = L.intCompanyLocationId				 				
+		WHERE
+			(D.intAccountId IS NULL OR D.intAccountId = 0)
+			AND (D.intItemId IS NULL OR D.intItemId = 0)
+			AND (L.intServiceCharges  IS NULL OR L.intServiceCharges  = 0)
+						
+						
+		INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT
+			'The Service Charge Account of item - ' + I.strItemNo + ' was not specified.',
+			A.strTransactionType,
+			A.strInvoiceNumber,
+			@batchId,
+			A.intInvoiceId
+		FROM 
+			tblARInvoice A 
+		INNER JOIN 
+			#tmpPostInvoiceData B
+				ON A.intInvoiceId = B.intInvoiceId
+		INNER JOIN
+			tblARInvoiceDetail D
+				ON A.intInvoiceId = D.intInvoiceId
+		INNER JOIN
+			tblICItem I
+				ON D.intItemId = I.intItemId			 				
+		WHERE
+			(D.intAccountId IS NULL OR D.intAccountId = 0)
+			AND I.strType IN ('Non-Inventory','Service','Other Charge')
+
 
 	END 
 
