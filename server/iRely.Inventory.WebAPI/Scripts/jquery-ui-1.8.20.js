@@ -3855,7 +3855,7 @@ $.widget("ui.sortable", $.ui.mouse, {
 		var delayedTriggers = [], self = this;
 
 		// We first have to update the dom position of the actual currentItem
-		// Note: don't do it if the current item is already removed (by a user), or it gets reappended (see #4088)
+		 don't do it if the current item is already removed (by a user), or it gets reappended (see #4088)
 		if(!this._noFinalSort && this.currentItem.parent().length) this.placeholder.before(this.currentItem);
 		this._noFinalSort = null;
 
@@ -10129,7 +10129,7 @@ $.widget( "ui.slider", $.ui.mouse, {
 			this.range = $( "<div></div>" )
 				.appendTo( this.element )
 				.addClass( "ui-slider-range" +
-				// note: this isn't the most fittingly semantic framework class for this element,
+				 this isn't the most fittingly semantic framework class for this element,
 				// but worked best visually with a variety of themes
 				" ui-widget-header" + 
 				( ( o.range === "min" || o.range === "max" ) ? " ui-slider-range-" + o.range : "" ) );

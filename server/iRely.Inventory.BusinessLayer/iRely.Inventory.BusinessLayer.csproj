@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{896DA55E-1218-4146-ADD0-81C3EAED882D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>iRely.Inventory.BusinessLayer</RootNamespace>
+    <AssemblyName>iRely.Inventory.BusinessLayer</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Label="TemplateBuilder">
+    <TemplateBuilderTargets Condition=" '$(TemplateBuilderTargets)'=='' ">$([System.IO.Path]::GetFullPath( $(MSBuildProjectDirectory)\..\..\i21\packages\TemplateBuilder.1.1.3\tools\ligershark.templates.targets ))</TemplateBuilderTargets>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="IdeaBlade.Core">
+      <HintPath>..\..\..\Resources\references\IdeaBlade.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="IdeaBlade.Linq">
+      <HintPath>..\..\..\Resources\references\IdeaBlade.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="iRely.Common">
+      <HintPath>..\..\..\Resources\references\iRely.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="iRely.GlobalComponentEngine.BusinessLayer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\i21\i21_resources\references\iRely.GlobalComponentEngine.BusinessLayer.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\Resources\references\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\Common.cs" />
+    <Compile Include="Implementation\BrandBl.cs" />
+    <Compile Include="Implementation\BuildAssemblyBl.cs" />
+    <Compile Include="Implementation\CategoryAccountBl.cs" />
+    <Compile Include="Implementation\CategoryBl.cs" />
+    <Compile Include="Implementation\CategoryLocationBl.cs" />
+    <Compile Include="Implementation\CategoryUOMBl.cs" />
+    <Compile Include="Implementation\CategoryVendorBl.cs" />
+    <Compile Include="Implementation\CertificationBl.cs" />
+    <Compile Include="Implementation\CommodityAttributeBl.cs" />
+    <Compile Include="Implementation\CommodityBl.cs" />
+    <Compile Include="Implementation\CommodityUOMBl.cs" />
+    <Compile Include="Implementation\CountGroupBl.cs" />
+    <Compile Include="Implementation\DocumentBl.cs" />
+    <Compile Include="Implementation\FuelTaxClassBl.cs" />
+    <Compile Include="Implementation\FuelTypeBl.cs" />
+    <Compile Include="Implementation\InventoryAdjustmentBl.cs" />
+    <Compile Include="Implementation\InventoryReceiptBl.cs" />
+    <Compile Include="Implementation\InventoryReceiptItemTaxBl.cs" />
+    <Compile Include="Implementation\InventoryShipmentBl.cs" />
+    <Compile Include="Implementation\InventoryTransferBl.cs" />
+    <Compile Include="Implementation\LotBl.cs" />
+    <Compile Include="Implementation\LotStatusBl.cs" />
+    <Compile Include="Implementation\ManufacturerBl.cs" />
+    <Compile Include="Implementation\PatronageCategoryBl.cs" />
+    <Compile Include="Implementation\StatusBl.cs" />
+    <Compile Include="Implementation\StockReservationBl.cs" />
+    <Compile Include="Implementation\StorageLocationBl.cs" />
+    <Compile Include="Implementation\StorageUnitTypeBl.cs" />
+    <Compile Include="Implementation\TagBl.cs" />
+    <Compile Include="Implementation\UnitMeasureBl.cs" />
+    <Compile Include="Interface\IBuildAssemblyBl.cs" />
+    <Compile Include="Interface\IInventoryAdjustmentBl.cs" />
+    <Compile Include="Interface\IInventoryReceiptBl.cs" />
+    <Compile Include="Interface\IInventoryReceiptItemTaxBl.cs" />
+    <Compile Include="Interface\IInventoryShipmentBl.cs" />
+    <Compile Include="Interface\IInventoryTransferBl.cs" />
+    <Compile Include="Interface\ILotBl.cs" />
+    <Compile Include="Interface\ILotStatusBl.cs" />
+    <Compile Include="Implementation\ItemXrefBl.cs" />
+    <Compile Include="Implementation\LineOfBusinessBl.cs" />
+    <Compile Include="Interface\IItemXrefBl.cs" />
+    <Compile Include="Implementation\ItemUOMBl.cs" />
+    <Compile Include="Interface\IItemUOMBl.cs" />
+    <Compile Include="Implementation\ItemStockBl.cs" />
+    <Compile Include="Interface\IItemStockBl.cs" />
+    <Compile Include="Implementation\ItemPricingBl.cs" />
+    <Compile Include="Interface\IItemPricingBl.cs" />
+    <Compile Include="Implementation\ItemAccountBl.cs" />
+    <Compile Include="Implementation\ItemAssemblyBl.cs" />
+    <Compile Include="Implementation\ItemBundleBl.cs" />
+    <Compile Include="Implementation\ItemCertificationBl.cs" />
+    <Compile Include="Implementation\ItemCommodityCostBl.cs" />
+    <Compile Include="Implementation\ItemContractBl.cs" />
+    <Compile Include="Implementation\ItemFactoryBl.cs" />
+    <Compile Include="Implementation\ItemKitBl.cs" />
+    <Compile Include="Implementation\ItemLocationBl.cs" />
+    <Compile Include="Implementation\ItemNoteBl.cs" />
+    <Compile Include="Implementation\ItemPOSBl.cs" />
+    <Compile Include="Interface\IBrandBl.cs" />
+    <Compile Include="Interface\ICategoryAccountBl.cs" />
+    <Compile Include="Interface\ICategoryBl.cs" />
+    <Compile Include="Interface\ICategoryLocationBl.cs" />
+    <Compile Include="Interface\ICategoryUOMBl.cs" />
+    <Compile Include="Interface\ICategoryVendorBl.cs" />
+    <Compile Include="Interface\ICertificationBl.cs" />
+    <Compile Include="Interface\ICommodityAttributeBl.cs" />
+    <Compile Include="Interface\ICommodityBl.cs" />
+    <Compile Include="Interface\ICommodityUOMBl.cs" />
+    <Compile Include="Interface\ICountGroupBl.cs" />
+    <Compile Include="Interface\IDocumentBl.cs" />
+    <Compile Include="Interface\IFuelTaxClassBl.cs" />
+    <Compile Include="Interface\IFuelTypeBl.cs" />
+    <Compile Include="Interface\IItemAccountBl.cs" />
+    <Compile Include="Interface\IItemAssemblyBl.cs" />
+    <Compile Include="Interface\IItemBundleBl.cs" />
+    <Compile Include="Interface\IItemCertificationBl.cs" />
+    <Compile Include="Interface\IItemCommodityCostBl.cs" />
+    <Compile Include="Interface\IItemContractBl.cs" />
+    <Compile Include="Interface\IItemFactoryBl.cs" />
+    <Compile Include="Interface\IItemKitBl.cs" />
+    <Compile Include="Interface\IItemLocationBl.cs" />
+    <Compile Include="Interface\IItemNoteBl.cs" />
+    <Compile Include="Interface\IItemPOSBl.cs" />
+    <Compile Include="Interface\ILineOfBusinessBl.cs" />
+    <Compile Include="Interface\IManufacturerBl.cs" />
+    <Compile Include="Interface\IPatronageCategoryBl.cs" />
+    <Compile Include="Interface\IStatusBl.cs" />
+    <Compile Include="Interface\IStockReservationBl.cs" />
+    <Compile Include="Interface\IStorageLocationBl.cs" />
+    <Compile Include="Interface\IStorageUnitTypeBl.cs" />
+    <Compile Include="Interface\ITagBl.cs" />
+    <Compile Include="Interface\IUnitMeasureBl.cs" />
+    <Compile Include="InventoryRepository.cs" />
+    <Compile Include="Implementation\ItemBl.cs" />
+    <Compile Include="Interface\IItemBl.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\iRely.Inventory.Model\iRely.Inventory.Model.csproj">
+      <Project>{24827e37-d24e-4c49-858b-9127dd775958}</Project>
+      <Name>iRely.Inventory.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\template-builder.props" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(TemplateBuilderTargets)" Condition="Exists('$(TemplateBuilderTargets)')" Label="TemplateBuilder" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
