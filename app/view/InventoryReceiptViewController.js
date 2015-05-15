@@ -853,8 +853,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                             value: jsonData.message.BillId
                                         }
                                     ],
-                                    action: 'view'
+                                    action: 'view',
+                                    showAddReceipt: false
                                 });
+                                win.close();
                             }
                         };
                         iRely.Functions.showCustomDialog('question', 'yesno', 'Bill succesfully processed. Do you want to view this bill?', buttonAction);
