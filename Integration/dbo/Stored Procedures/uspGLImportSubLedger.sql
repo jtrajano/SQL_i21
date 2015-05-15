@@ -183,7 +183,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     			strSourceId, strSourceType)
     			SELECT @strJournalId,@postdate, ''Imported from SubLedger'' ,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0,
     				@glije_src_no,@glije_src_sys
-
+                SET @journalCount = @journalCount +1
 
     			SELECT @intJournalId = @@IDENTITY
     			select @totalCredit =0, @totalDebit = 0,@isValid =1
@@ -301,7 +301,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 
     				EXECUTE [dbo].[uspGLPostJournal] @Param,1,0,@strBatchId,''Origin Journal'',@intUserId,@successfulCount OUTPUT
 					
-    				IF @successfulCount > 0
+    				IF @successfulCount = @journalCount
     				BEGIN
     					UPDATE tblGLJournal SET strJournalType = ''Origin Journal'',strRecurringStatus = ''Locked'' , ysnPosted = 1 WHERE intJournalId = @intJournalId
     					IF @importLogId = 0
