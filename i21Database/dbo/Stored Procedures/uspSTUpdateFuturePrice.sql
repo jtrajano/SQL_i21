@@ -59,9 +59,9 @@ BEGIN
 		Location,Vendor,Category,
 		Family,Class,Region,Destrict,PriceType,DetailID
 		)
-		select adj1.strUpcCode, adj1.dblPrice, adj1.dtmSalesStartDate,adj1.dtmSalesEndDate,
-		adj1.intCompanyLocationId,adj1.intVendorId,adj1.intCategoryId,adj1.strFamily,
-		adj1.strClass,adj1.strRegion,adj1.strDestrict,adj1.strPriceType,adj1.intRetailPriceAdjustmentDetailId
+		select adj1.intItemUOMId, adj1.dblPrice, adj1.dtmSalesStartDate,adj1.dtmSalesEndDate,
+		adj1.intCompanyLocationId,adj1.intVendorId,adj1.intCategoryId,adj1.intFamilyId,
+		adj1.intClassId,adj1.strRegion,adj1.strDestrict,adj1.strPriceType,adj1.intRetailPriceAdjustmentDetailId
 		from tblSTRetailPriceAdjustmentDetail adj1 inner join tblSTRetailPriceAdjustment adj2
 	    on adj1.intRetailPriceAdjustmentId = adj2.intRetailPriceAdjustmentId where 
 	    adj2.dtmEffectiveDate = @TodaysDate 
