@@ -242,7 +242,7 @@ GO
 GO
 IF NOT EXISTS(SELECT * FROM tblCTInvoiceType WHERE intInvoiceTypeId = 1)
 BEGIN
-	INSERT INTO tblCTInsuranceBy(intInsuranceById,strInsuranceBy,strDescription,ysnDefault,intConcurrencyId)
+	INSERT INTO tblCTInvoiceType(intInvoiceTypeId,strInvoiceType,strDescription,ysnDefault,intConcurrencyId)
 	SELECT 1,'Received/Delivered Quantity','Received/Delivered Quantity',0,1
 END
 GO
@@ -250,7 +250,7 @@ GO
 GO
 IF NOT EXISTS(SELECT * FROM tblCTInvoiceType WHERE intInvoiceTypeId = 2)
 BEGIN
-	INSERT INTO tblCTInsuranceBy(intInsuranceById,strInsuranceBy,strDescription,ysnDefault,intConcurrencyId)
+	INSERT INTO tblCTInvoiceType(intInvoiceTypeId,strInvoiceType,strDescription,ysnDefault,intConcurrencyId)
 	SELECT 2,'Shipped Quantity','Shipped Quantity',0,1
 END
 GO
@@ -258,7 +258,7 @@ GO
 GO
 IF NOT EXISTS(SELECT * FROM tblCTInvoiceType WHERE intInvoiceTypeId = 3)
 BEGIN
-	INSERT INTO tblCTInsuranceBy(intInsuranceById,strInsuranceBy,strDescription,ysnDefault,intConcurrencyId)
+	INSERT INTO tblCTInvoiceType(intInvoiceTypeId,strInvoiceType,strDescription,ysnDefault,intConcurrencyId)
 	SELECT 3,'Standard Quantity','Standard Quantity',1,1
 END
 GO
