@@ -24,12 +24,14 @@
     [dtmProcessDate]        DATETIME        NULL,
     [ysnProcessed]          BIT             CONSTRAINT [DF_tblSOSalesOrder_ysnPosted] DEFAULT ((0)) NOT NULL,
     [strComments]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+	[intShipToLocationId]   INT             NULL,
     [strShipToLocationName] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strShipToAddress]      NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strShipToCity]         NVARCHAR (30)   COLLATE Latin1_General_CI_AS NULL,
     [strShipToState]        NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strShipToZipCode]      NVARCHAR (12)   COLLATE Latin1_General_CI_AS NULL,
     [strShipToCountry]      NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
+	[intBillToLocationId]   INT             NULL,
     [strBillToLocationName] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strBillToAddress]      NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strBillToCity]         NVARCHAR (30)   COLLATE Latin1_General_CI_AS NULL,
@@ -41,7 +43,9 @@
     CONSTRAINT [PK_tblSOSalesOrder] PRIMARY KEY CLUSTERED ([intSalesOrderId] ASC),
     CONSTRAINT [FK_tblSOSalesOrder_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
     CONSTRAINT [FK_tblSOSalesOrder_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-	CONSTRAINT [FK_tblSOSalesOrder_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+	CONSTRAINT [FK_tblSOSalesOrder_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblSOSalesOrder_tblEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
+	CONSTRAINT [FK_tblSOSalesOrder_tblEntityLocation_intBillToLocationId] FOREIGN KEY ([intBillToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId])
 );
 GO
 

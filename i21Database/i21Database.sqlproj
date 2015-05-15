@@ -1628,6 +1628,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdatePOAddressInfo.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\2_SalesOrderDetailDefault.sql" />
     <None Include="Scripts\Post-Deployment\EM\002_UpdateMenuuEntityType.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
