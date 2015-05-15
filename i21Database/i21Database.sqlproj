@@ -153,6 +153,7 @@
     <Folder Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria" />
     <Folder Include="Scripts\Post-Deployment\QM" />
     <Folder Include="dbo\Triggers\" />
+    <Folder Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1587,6 +1588,9 @@
     <Build Include="dbo\Views\vyuARReceivables.sql" />
     <Build Include="dbo\Views\vyuARCustomerHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetCustomerStatement.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\ProductTotals.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\ProductTotals.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings\DeliveryFill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
