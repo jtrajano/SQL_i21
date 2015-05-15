@@ -119,7 +119,7 @@ namespace iRely.Inventory.BusinessLayer
             return postResult;
         }
 
-        public SaveResult ValidateOutdatedStockOnHand(string transactionId)
+        private SaveResult ValidateOutdatedStockOnHand(string transactionId)
         {
             // Post the Adjustment transaction 
             var validateResult = new SaveResult();
@@ -137,7 +137,7 @@ namespace iRely.Inventory.BusinessLayer
             return validateResult;
         }
 
-        public SaveResult UpdateOutdatedStockOnHand(string transactionId)
+        private SaveResult UpdateOutdatedStockOnHand(string transactionId)
         {
             var updateResult = new SaveResult();
             try
@@ -154,7 +154,7 @@ namespace iRely.Inventory.BusinessLayer
             return updateResult;
         }
 
-        public SaveResult ValidateOutdatedExpiryDate(string transactionId)
+        private SaveResult ValidateOutdatedExpiryDate(string transactionId)
         {
             // Post the Adjustment transaction 
             var validateResult = new SaveResult();
@@ -172,7 +172,7 @@ namespace iRely.Inventory.BusinessLayer
             return validateResult;
         }
 
-        public SaveResult UpdateOutdatedExpiryDate(string transactionId)
+        private SaveResult UpdateOutdatedExpiryDate(string transactionId)
         {
             var updateResult = new SaveResult();
             try

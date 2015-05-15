@@ -7,7 +7,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             title:  'Search Inventory Shipment',
             type: 'Inventory.InventoryShipment',
             api: {
-                read: '../Inventory/api/Shipment/SearchShipments'
+                read: '../Inventory/api/InventoryShipment/Search'
             },
             columns: [
                 {dataIndex: 'intInventoryShipmentId',text: "Shipment Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

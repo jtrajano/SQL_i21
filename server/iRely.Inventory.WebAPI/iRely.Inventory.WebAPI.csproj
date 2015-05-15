@@ -144,6 +144,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\BrandController.cs" />
+    <Compile Include="Controllers\BuildAssemblyController.cs" />
     <Compile Include="Controllers\CategoryAccountController.cs" />
     <Compile Include="Controllers\CategoryController.cs" />
     <Compile Include="Controllers\CategoryLocationController.cs" />
@@ -153,6 +154,11 @@
     <Compile Include="Controllers\CommodityAttributeController.cs" />
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CommodityUOMController.cs" />
+    <Compile Include="Controllers\InventoryReceiptItemTaxController.cs" />
+    <Compile Include="Controllers\InventoryShipmentController.cs" />
+    <Compile Include="Controllers\InventoryTransferController.cs" />
+    <Compile Include="Controllers\InventoryReceiptController.cs" />
+    <Compile Include="Controllers\InventoryAdjustmentController.cs" />
     <Compile Include="Controllers\CountGroupController.cs" />
     <Compile Include="Controllers\DocumentController.cs" />
     <Compile Include="Controllers\FuelTaxClass.cs" />
@@ -174,6 +180,7 @@
     <Compile Include="Controllers\ItemUOMController.cs" />
     <Compile Include="Controllers\ItemXrefController.cs" />
     <Compile Include="Controllers\LineOfBusinessController.cs" />
+    <Compile Include="Controllers\LotController.cs" />
     <Compile Include="Controllers\LotStatusController.cs" />
     <Compile Include="Controllers\ManufacturerController.cs" />
     <Compile Include="Controllers\PatronageCategoryController.cs" />

@@ -22,6 +22,35 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
+        public override async Task<SearchResult> Search(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICItem>()
+               .Include(p => p.tblICBrand)
+               .Include(p => p.tblICManufacturer)
+               .Select(p => new ItemVM
+               {
+                   intItemId = p.intItemId,
+                   strItemNo = p.strItemNo,
+                   strType = p.strType,
+                   strDescription = p.strDescription,
+                   strStatus = p.strStatus,
+                   strModelNo = p.strModelNo,
+                   strLotTracking = p.strLotTracking,
+                   strBrand = p.tblICBrand.strBrandCode,
+                   strManufacturer = p.tblICManufacturer.strManufacturer,
+                   strTracking = p.strInventoryTracking
+               })
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param).ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+            
+        }
+
         /// <summary>
         /// Return compact version of Item and some of its details
         /// </summary>

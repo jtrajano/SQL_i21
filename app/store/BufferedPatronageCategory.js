@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedPatronageCategory', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/PatronageCategory/GetPatronageCategories'
+                    read: '../Inventory/api/PatronageCategory/Search'
                 },
                 reader: {
                     type: 'json',

@@ -7,7 +7,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             title: 'Search Category',
             type: 'Inventory.Category',
             api: {
-                read: '../Inventory/api/Category/SearchCategories'
+                read: '../Inventory/api/Category/Search'
             },
             columns: [
                 {dataIndex: 'intCategoryId', text: "Category Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},

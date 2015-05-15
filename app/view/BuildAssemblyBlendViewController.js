@@ -7,7 +7,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
             title: 'Search Build Assemblies',
             type: 'Inventory.BuildAssembly',
             api: {
-                read: '../Inventory/api/BuildAssembly/SearchBuildAssemblies'
+                read: '../Inventory/api/BuildAssembly/Search'
             },
             columns: [
                 {dataIndex: 'intBuildAssemblyId', text: "Build Assembly Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},

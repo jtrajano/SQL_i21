@@ -20,10 +20,10 @@ Ext.define('Inventory.store.ItemPricing', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/ItemPricing/GetItemPricings',
-                    update: '../Inventory/api/ItemPricing/PutItemPricings',
-                    create: '../Inventory/api/ItemPricing/PostItemPricings',
-                    destroy: '../Inventory/api/ItemPricing/DeleteItemPricings'
+                    read: '../Inventory/api/ItemPricing/Get',
+                    update: '../Inventory/api/ItemPricing/Put',
+                    create: '../Inventory/api/ItemPricing/Post',
+                    destroy: '../Inventory/api/ItemPricing/Delete'
                 },
                 reader: {
                     type: 'json',

@@ -21,10 +21,10 @@ Ext.define('Inventory.store.PatronageCategory', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/PatronageCategory/GetPatronageCategories',
-                    update: '../Inventory/api/PatronageCategory/PutPatronageCategories',
-                    create: '../Inventory/api/PatronageCategory/PostPatronageCategories',
-                    destroy: '../Inventory/api/PatronageCategory/DeletePatronageCategories'
+                    read: '../Inventory/api/PatronageCategory/Get',
+                    update: '../Inventory/api/PatronageCategory/Put',
+                    create: '../Inventory/api/PatronageCategory/Post',
+                    destroy: '../Inventory/api/PatronageCategory/Delete'
                 },
                 reader: {
                     type: 'json',

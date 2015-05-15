@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedCommodityUnitMeasure', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/CommodityUnitMeasure/GetCommodityUnitMeasures'
+                    read: '../Inventory/api/CommodityUOM/Search'
                 },
                 reader: {
                     type: 'json',

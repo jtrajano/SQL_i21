@@ -7,7 +7,7 @@ Ext.define('Inventory.view.ItemViewController', {
             title: 'Search Item',
             type: 'Inventory.Item',
             api: {
-                read: '../Inventory/api/Item/SearchItems'
+                read: '../Inventory/api/Item/Search'
             },
             columns: [
                 {dataIndex: 'intItemId', text: "Item Id", flex: 1, dataType: 'numeric', key: true, hidden: true},

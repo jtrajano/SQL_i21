@@ -20,10 +20,10 @@ Ext.define('Inventory.store.CountGroup', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/CountGroup/GetCountGroups',
-                    update: '../Inventory/api/CountGroup/PutCountGroups',
-                    create: '../Inventory/api/CountGroup/PostCountGroups',
-                    destroy: '../Inventory/api/CountGroup/DeleteCountGroups'
+                    read: '../Inventory/api/CountGroup/Get',
+                    update: '../Inventory/api/CountGroup/Put',
+                    create: '../Inventory/api/CountGroup/Post',
+                    destroy: '../Inventory/api/CountGroup/Delete'
                 },
                 reader: {
                     type: 'json',

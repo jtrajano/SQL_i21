@@ -22,7 +22,7 @@ Ext.define('Inventory.view.CommodityViewController', {
             title:  'Search Commodity',
             type: 'Inventory.Commodity',
             api: {
-                read: '../Inventory/api/Commodity/SearchCommodities'
+                read: '../Inventory/api/Commodity/Search'
             },
             columns: [
                 {dataIndex: 'intCommodityId',text: "Commodity Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

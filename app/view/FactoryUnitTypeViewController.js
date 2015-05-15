@@ -22,7 +22,7 @@ Ext.define('Inventory.view.FactoryUnitTypeViewController', {
             title:  'Search Storage Unit Type',
             type: 'Inventory.FactoryUnitType',
             api: {
-                read: '../Inventory/api/StorageUnitType/SearchStorageUnitTypes'
+                read: '../Inventory/api/StorageUnitType/Search'
             },
             columns: [
                 {dataIndex: 'intStorageUnitTypeId',text: "Storage Unit Type Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

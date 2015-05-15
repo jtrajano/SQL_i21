@@ -20,10 +20,10 @@ Ext.define('Inventory.store.Document', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Document/GetDocuments',
-                    update: '../Inventory/api/Document/PutDocuments',
-                    create: '../Inventory/api/Document/PostDocuments',
-                    destroy: '../Inventory/api/Document/DeleteDocuments'
+                    read: '../Inventory/api/Document/Get',
+                    update: '../Inventory/api/Document/Put',
+                    create: '../Inventory/api/Document/Post',
+                    destroy: '../Inventory/api/Document/Delete'
                 },
                 reader: {
                     type: 'json',

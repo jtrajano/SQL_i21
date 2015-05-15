@@ -7,7 +7,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             title: 'Search Inventory Receipt',
             type: 'Inventory.InventoryReceipt',
             api: {
-                read: '../Inventory/api/Receipt/SearchReceipts'
+                read: '../Inventory/api/InventoryReceipt/Search'
             },
             columns: [
                 {dataIndex: 'intInventoryReceiptId', text: "Receipt Id", flex: 1, defaultSort: true, sortOrder: 'DESC', dataType: 'numeric', key: true, hidden: true},

@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedContainerType', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/ContainerType/GetContainerTypes'
+                    read: '../Inventory/api/ContainerType/Get'
                 },
                 reader: {
                     type: 'json',

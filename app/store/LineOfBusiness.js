@@ -20,10 +20,10 @@ Ext.define('Inventory.store.LineOfBusiness', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/LineOfBusiness/GetLineOfBusinesses',
-                    update: '../Inventory/api/LineOfBusiness/PutLineOfBusinesses',
-                    create: '../Inventory/api/LineOfBusiness/PostLineOfBusinesses',
-                    destroy: '../Inventory/api/LineOfBusiness/DeleteLineOfBusinesses'
+                    read: '../Inventory/api/LineOfBusiness/Get',
+                    update: '../Inventory/api/LineOfBusiness/Put',
+                    create: '../Inventory/api/LineOfBusiness/Post',
+                    destroy: '../Inventory/api/LineOfBusiness/Delete'
                 },
                 reader: {
                     type: 'json',

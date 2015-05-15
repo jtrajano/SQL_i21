@@ -7,7 +7,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             title: 'Search Inventory Transfer',
             type: 'Inventory.InventoryTransfer',
             api: {
-                read: '../Inventory/api/Transfer/SearchTransfers'
+                read: '../Inventory/api/InventoryTransfer/Search'
             },
             columns: [
                 {dataIndex: 'intInventoryTransferId', text: "Inventory Transfer Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},

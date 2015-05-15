@@ -12,10 +12,6 @@ namespace iRely.Inventory.BusinessLayer
     public interface IInventoryAdjustmentBl : IBusinessLayer<tblICInventoryAdjustment>
     {
         SaveResult PostTransaction(Common.Posting_RequestModel Adjustment, bool isRecap);
-        SaveResult ValidateOutdatedStockOnHand(string transactionId);
-        SaveResult UpdateOutdatedStockOnHand(string transactionId);
-        SaveResult ValidateOutdatedExpiryDate(string transactionId);
-        SaveResult UpdateOutdatedExpiryDate(string transactionId);
         Task<SearchResult> GetPostedLots(GetParameter param);
     }
 }
