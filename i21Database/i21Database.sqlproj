@@ -1593,6 +1593,7 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\ProductTotals.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings\DeliveryFill.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateCycleCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
