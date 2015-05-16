@@ -28,6 +28,7 @@ AS
 			CH.intContractNumber,
 			CH.dtmContractDate,
 			CH.intCommodityId,
+			CD.intItemUOMId,
 			CD.intCompanyLocationId
 	FROM 	tblCTContractDetail 		CD
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
