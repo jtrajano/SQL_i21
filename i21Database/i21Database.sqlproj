@@ -1594,6 +1594,10 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings\DeliveryFill.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateCycleCount.sql" />
+    <Build Include="dbo\Tables\tblLGPickLotDetail.sql" />
+    <Build Include="dbo\Tables\tblLGPickLotHeader.sql" />
+    <Build Include="dbo\Functions\fnLGGetItemUnitConversion.sql" />
+    <Build Include="dbo\Views\vyuLGPickOpenInventoryLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
