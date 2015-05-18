@@ -71,7 +71,7 @@ BEGIN
 				,strBOLNumber				= NULL -- TODO
 				,intShipViaId				= SO.intShipViaId
 				,strVessel					= NULL -- TODO
-				,strProNumber				= SO.strPONumber
+				,strProNumber				= NULL 
 				,strDriverId				= NULL
 				,strSealNumber				= NULL 
 				,strDeliveryInstruction		= NULL 
@@ -96,8 +96,8 @@ SELECT @InventoryShipmentId = SCOPE_IDENTITY()
 IF @InventoryShipmentId IS NULL 
 BEGIN 
 	-- Raise the error:
-	-- Unable to generate the Inventory Shipment. An error stopped the process from Purchase Order to Inventory Shipment.
-	RAISERROR(50031, 11, 1);
+	-- Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.
+	RAISERROR(51117, 11, 1);
 	RETURN;
 END
 

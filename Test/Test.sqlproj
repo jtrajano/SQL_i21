@@ -570,6 +570,14 @@
     <Build Include="testi21Database\Fake Data\Fake posted transactions using LIFO, scenario 4.sql" />
     <Build Include="testi21Database\Fake Data\Fake transactions for item costing.sql" />
     <Build Include="testi21Database\Fake Data\Fake transactions for lot items and costing.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddSalesOrderToInventoryShipment for errors thrown by a null transaction id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddSalesOrderToInventoryShipment for errors thrown by uspSMGetStartingNumber.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddSalesOrderToInventoryShipment in generating the correct starting number.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddSalesOrderToInventoryShipment on converting an SO into Inventory Shipment and it excludes non-stock types.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddSalesOrderToInventoryShipment on converting an SO into Inventory Shipment.sql" />
+    <Build Include="testi21Database\Fake Data\Fake sales orders.sql" />
+    <Build Include="testi21Database\Fake Data\Inventory Shipment expected tables.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for ship via.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">

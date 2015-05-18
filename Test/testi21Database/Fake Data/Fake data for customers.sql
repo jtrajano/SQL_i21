@@ -2,8 +2,12 @@
 AS
 BEGIN	
 	EXEC tSQLt.FakeTable 'dbo.tblSMTerm', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblARCustomer', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblARCustomer';
 	EXEC tSQLt.FakeTable 'dbo.tblEntityLocation', @Identity = 1;
+
+	DECLARE @Customer_Paul_Unlimited AS NVARCHAR(50) = 'Paul Unlimited'
+	DECLARE @Customer_Paul_Unlimited_Id AS INT = 1
+
 
 	INSERT INTO dbo.tblSMTerm (
 		strTerm
@@ -76,7 +80,8 @@ BEGIN
 		,intConcurrencyId		= 1
 
 	INSERT INTO dbo.tblARCustomer (
-			strCustomerNumber
+			intEntityCustomerId 
+			,strCustomerNumber
 			,strType
 			,dblCreditLimit
 			,dblARBalance
@@ -149,7 +154,8 @@ BEGIN
 			,ysnTaxExempt
 			,intConcurrencyId	
 	)
-	SELECT	strCustomerNumber					= 'Paul Unlimited'
+	SELECT	intEntityCustomerId					= @Customer_Paul_Unlimited_Id
+			,strCustomerNumber					= @Customer_Paul_Unlimited
 			,strType							= 'Company'
 			,dblCreditLimit						= 0.00
 			,dblARBalance						= 0.00

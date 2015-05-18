@@ -2,18 +2,19 @@
 AS
 BEGIN
 	-- Arrange 
+	-- n/a 
+
+	-- Assert 
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50031
+		-- Expect No errors
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51117
 	END
 	
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICAddSalesOrderToInventoryShipment
-			@SalesOrder = NULL
+			@SalesOrderId = NULL
 			,@intUserId = NULL
 			,@InventoryShipmentId = NULL 
 	END 
-
-	-- Assert
-	-- Nothing to assert
 END

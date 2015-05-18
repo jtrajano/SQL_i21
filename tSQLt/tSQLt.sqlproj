@@ -159,8 +159,12 @@
     <Build Include="tSQLt\Stored Procedures\CaptureOutput.sql" />
     <Build Include="tSQLt\Stored Procedures\DefaultResultFormatter.sql" />
     <Build Include="tSQLt\Stored Procedures\DropClass.sql" />
-    <Build Include="tSQLt\Stored Procedures\ExpectException.sql" />
-    <Build Include="tSQLt\Stored Procedures\ExpectNoException.sql" />
+    <Build Include="tSQLt\Stored Procedures\ExpectException.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="tSQLt\Stored Procedures\ExpectNoException.sql">
+      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
+    </Build>
     <Build Include="tSQLt\Stored Procedures\Fail.sql" />
     <Build Include="tSQLt\Stored Procedures\FakeFunction.sql" />
     <Build Include="tSQLt\Stored Procedures\FakeTable.sql" />
