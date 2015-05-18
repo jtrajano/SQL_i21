@@ -1601,6 +1601,7 @@
     <Build Include="dbo\Tables\tblFRBudget.sql" />
     <Build Include="dbo\Tables\tblFRBudgetCode.sql" />
     <Build Include="dbo\Tables\tblFRBudgetDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPostConsumptionProduction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
