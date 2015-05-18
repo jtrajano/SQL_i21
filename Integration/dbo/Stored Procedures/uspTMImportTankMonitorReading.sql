@@ -46,25 +46,25 @@ EXEC('
 		SET @rpt_date_ti = @str_rpt_date_ti
  
 		SET @resultLog = ''''
-		IF(ISNULL(@customerid,'''') = '''')BEGIN
-			SET @resultLog = @resultLog +  ''Failed customerid validation'' + char(10)
-			RETURN 
-		END
+		--IF(ISNULL(@customerid,'''') = '''')BEGIN
+		--	SET @resultLog = @resultLog +  ''Failed customerid validation'' + char(10)
+		--	RETURN 
+		--END
 	
 		SET @resultLog = @resultLog +  ''passed customerid validation'' + char(10)
 	
-		IF(ISNULL(@ts_cat_1,'''') = '''')BEGIN
-			SET @resultLog = @resultLog +  ''Failed Tank Monitor Serial validation'' + char(10)
-			RETURN
-		END
+		--IF(ISNULL(@ts_cat_1,'''') = '''')BEGIN
+		--	SET @resultLog = @resultLog +  ''Failed Tank Monitor Serial validation'' + char(10)
+		--	RETURN
+		--END
 	
 		SET @resultLog = @resultLog + ''passed Tank Monitor Serial validation'' + char(10)
 	
-		IF(ISNULL(@ts_tankserialnum,'''') = '''')
-		BEGIN 
-			SET @resultLog = @resultLog + ''Failed Tank Serial validation'' + char(10)
-			RETURN 
-		END
+		--IF(ISNULL(@ts_tankserialnum,'''') = '''')
+		--BEGIN 
+		--	SET @resultLog = @resultLog + ''Failed Tank Serial validation'' + char(10)
+		--	RETURN 
+		--END
 		SET @resultLog = @resultLog +  ''passed Tank Serial validation'' + char(10)
 	
 		IF(@tx_nosensor <> 0) RETURN 10

@@ -53,6 +53,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\DeliveryFill.sql
 :r .\TM\Reports\DataSource\DeliveryFill.sql
 :r .\TM\Reports\DefaultCriteria\DeliveryFill.sql
+:r .\TM\Reports\SubReportSettings\DeliveryFill.sql
 
 :r .\TM\Reports\FieldSelection\DeviceLeaseDetail.sql
 :r .\TM\Reports\Layout\DeviceLeaseDetail.sql
@@ -61,6 +62,9 @@ print 'BEGIN POST DEPLOYMENT'
 
 :r .\TM\Reports\Layout\DeviceActions.sql
 :r .\TM\Reports\DataSource\DeviceActions.sql
+
+:r .\TM\Reports\Layout\ProductTotals.sql
+:r .\TM\Reports\DataSource\ProductTotals.sql
 
 
 -- Canned Panels
@@ -91,6 +95,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\EntityTableDataFix.sql
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
 :R .\AR\DefaultData\2_SalesOrderDetailDefault.sql
+:R .\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql

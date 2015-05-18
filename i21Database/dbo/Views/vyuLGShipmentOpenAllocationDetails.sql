@@ -2,9 +2,7 @@ CREATE VIEW vyuLGShipmentOpenAllocationDetails
 AS
 	SELECT	AH.intReferenceNumber,
 			AH.intAllocationHeaderId,
-
 			AD.intAllocationDetailId,
-
 			AD.intPContractDetailId,
 			CHP.intContractNumber as intPContractNumber,
 			CDP.intContractSeq as intPContractSeq,
@@ -13,10 +11,20 @@ AS
 			CDP.intItemId AS intPItemId,
 			CAST (CHP.intContractNumber AS VARCHAR(100)) +  '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber, 
 			AD.dblPAllocatedQty,
-			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblPAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) AS dblPUnAllocatedQty,
+			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblPAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+								- IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) AS dblPUnAllocatedQty,
 			AD.intPUnitMeasureId,
 			UP.strUnitMeasure as strPUnitMeasure,
 			ENP.strName AS strVendor,
+			ITP.strDescription as strPItemDescription,
+			CDP.dtmStartDate as dtmPStartDate,
+			CDP.dtmEndDate as dtmPEndDate,
+			PP.strPosition as strPPosition,	
+			CP.strCountry as strPOrigin,
+			CHP.intCommodityId AS intPCommodityId,
+			CDP.intItemUOMId AS intPItemUOMId,
+			ITP.intOriginId as intPOriginId,
+			UP.strUnitType as strPUnitType,
 
 			AD.intSContractDetailId,
 			CHS.intContractNumber as intSContractNumber,
@@ -26,10 +34,20 @@ AS
 			CDS.intItemId AS intSItemId,
 			CAST (CHS.intContractNumber AS VARCHAR(100)) +  '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber, 
 			AD.dblSAllocatedQty,
-			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblSAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) AS dblSUnAllocatedQty,
+			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblSAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+								- IsNull((SELECT SUM (PL.dblSalePickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0)  AS dblSUnAllocatedQty,
 			AD.intSUnitMeasureId,
 			US.strUnitMeasure as strSUnitMeasure,
-			ENS.strName AS strCustomer
+			ENS.strName AS strCustomer,
+			ITS.strDescription as strSItemDescription,
+			CDS.dtmStartDate as dtmSStartDate,
+			CDS.dtmEndDate as dtmSEndDate,
+			PS.strPosition as strSPosition,
+			CS.strCountry as strSOrigin,
+			CHS.intCommodityId AS intSCommodityId,
+			CDS.intItemUOMId AS intSItemUOMId,
+			ITS.intOriginId as intSOriginId,
+			US.strUnitType as strSUnitType
 
 	FROM 	tblLGAllocationDetail AD
 	JOIN	tblLGAllocationHeader	AH	ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -41,7 +59,15 @@ AS
 	JOIN	tblEntity				ENS	ON	ENS.intEntityId				=	CHS.intEntityId
 	JOIN	tblICUnitMeasure		UP	ON	UP.intUnitMeasureId				=	AD.intPUnitMeasureId
 	JOIN	tblICUnitMeasure		US	ON	US.intUnitMeasureId				=	AD.intSUnitMeasureId
-	WHERE	(AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblPAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) > 0 AND
-			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblSAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) > 0
-			)
-			
+	JOIN	tblICItem				ITP	ON	ITP.intItemId				= CDP.intItemId
+	JOIN	tblICItem				ITS	ON	ITS.intItemId				= CDS.intItemId
+	LEFT JOIN	tblCTPosition			PP	ON	PP.intPositionId			= CHP.intPositionId
+	LEFT JOIN	tblCTPosition			PS	ON	PS.intPositionId			= CHS.intPositionId
+	LEFT JOIN	tblSMCountry			CP	ON	CP.intCountryID				= ITP.intOriginId
+	LEFT JOIN	tblSMCountry			CS	ON	CS.intCountryID				= ITS.intOriginId
+	WHERE	(
+			AD.dblPAllocatedQty - IsNull((SELECT SUM (SP.dblPAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+								- IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0 AND
+			AD.dblSAllocatedQty - IsNull((SELECT SUM (SP.dblSAllocatedQty) from tblLGShipmentPurchaseSalesContract SP Group By SP.intAllocationDetailId Having AD.intAllocationDetailId = SP.intAllocationDetailId), 0) 
+								- IsNull((SELECT SUM (PL.dblSalePickedQty) from tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having AD.intAllocationDetailId = PL.intAllocationDetailId), 0) > 0
+			)			

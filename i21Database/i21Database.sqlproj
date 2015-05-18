@@ -153,6 +153,7 @@
     <Folder Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria" />
     <Folder Include="Scripts\Post-Deployment\QM" />
     <Folder Include="dbo\Triggers\" />
+    <Folder Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1589,6 +1590,18 @@
     <Build Include="dbo\Tables\tblCTPackingDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateProcessToInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnGetUserEntityId.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\ProductTotals.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\ProductTotals.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings\DeliveryFill.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateCycleCount.sql" />
+    <Build Include="dbo\Tables\tblLGPickLotDetail.sql" />
+    <Build Include="dbo\Tables\tblLGPickLotHeader.sql" />
+    <Build Include="dbo\Functions\fnLGGetItemUnitConversion.sql" />
+    <Build Include="dbo\Views\vyuLGPickOpenInventoryLots.sql" />
+    <Build Include="dbo\Tables\tblFRBudget.sql" />
+    <Build Include="dbo\Tables\tblFRBudgetCode.sql" />
+    <Build Include="dbo\Tables\tblFRBudgetDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1625,6 +1638,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdatePOAddressInfo.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\2_SalesOrderDetailDefault.sql" />
     <None Include="Scripts\Post-Deployment\EM\002_UpdateMenuuEntityType.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -435,6 +435,30 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	SELECT CC.intCycleCountSessionId,CC.intCycleCountId
+		,CC.intMachineId
+		,M.strName AS MachineName
+		,CC.intLotId
+		,CC.intItemId
+		,I.strItemNo
+		,I.strDescription
+		,CC.dblQuantity
+		,CC.dblSystemQty
+		,CC.intCreatedUserId CreatedUser
+		,U.strUserName
+		,CC.dtmCreated
+		,CC.intLastModifiedUserId
+		,U1.strUserName LastModifiedUser
+		,CC.dtmLastModified
+		,CC.intConcurrencyId
+	FROM tblMFProcessCycleCount CC
+	JOIN tblMFMachine M ON M.intMachineId = CC.intMachineId
+	JOIN tblICItem I ON I.intItemId = CC.intItemId
+	JOIN dbo.tblSMUserSecurity U ON U.intUserSecurityID = CC.intCreatedUserId
+	JOIN dbo.tblSMUserSecurity U1 ON U1.intUserSecurityID = CC.intCreatedUserId
+	WHERE intCycleCountSessionId = @intCycleCountSessionId
+
+
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc

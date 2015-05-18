@@ -40,7 +40,7 @@
     [strCustomerOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strERPOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intSalesOrderLineItemId] INT NULL, 
-    [strLotId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strVendorLotNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intOrderHeaderId] INT NULL, 
     [strBOLNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

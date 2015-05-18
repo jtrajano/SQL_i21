@@ -28,13 +28,14 @@ AS
 			CH.intContractNumber,
 			CH.dtmContractDate,
 			CH.intCommodityId,
+			CD.intItemUOMId,
 			CD.intCompanyLocationId
 	FROM 	tblCTContractDetail 		CD
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
 	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
 	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
 	JOIN	tblSMFreightTerms		FT	ON	FT.intFreightTermId			=	CD.intFreightTermId
-	JOIN	tblSMCurrency			CU	ON	CU.intCurrencyID			=	CD.intCurrencyId
+	LEFT JOIN	tblSMCurrency			CU	ON	CU.intCurrencyID			=	CD.intCurrencyId
 	JOIN	tblEntity				EN	ON	EN.intEntityId				=	CH.intEntityId
 	WHERE CD.dblQuantity - IsNull((SELECT SUM (AD.dblSAllocatedQty) from tblLGAllocationDetail AD Group By AD.intSContractDetailId Having CD.intContractDetailId = AD.intSContractDetailId), 0) > 0
 	AND

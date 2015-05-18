@@ -62,4 +62,8 @@ BEGIN TRANSACTION
 	-- DELETE Stage
 	DELETE FROM tblSMScreenStage
 
+	-- UPDATE Company Setup
+	UPDATE tblSMCompanySetup 
+	SET ysnScreenControlListingUpdated = 1
+
 COMMIT TRANSACTION

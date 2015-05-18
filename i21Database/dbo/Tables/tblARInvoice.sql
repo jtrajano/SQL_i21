@@ -26,12 +26,14 @@
 	[dtmPostDate]          DATETIME        NULL,
     [ysnPosted]            BIT             CONSTRAINT [DF_tblARInvoice_ysnPosted] DEFAULT ((0)) NOT NULL,
     [ysnPaid]              BIT             CONSTRAINT [DF_tblARInvoice_ysnPaid] DEFAULT ((0)) NOT NULL,
+	[intShipToLocationId]  INT             NULL,
 	[strShipToLocationName]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strShipToAddress]     NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,
     [strShipToCity]        NVARCHAR (30)    COLLATE Latin1_General_CI_AS NULL,
     [strShipToState]       NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [strShipToZipCode]     NVARCHAR (12)    COLLATE Latin1_General_CI_AS NULL,
     [strShipToCountry]     NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,
+	[intBillToLocationId]  INT             NULL,
 	[strBillToLocationName]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strBillToAddress]     NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,
     [strBillToCity]        NVARCHAR (30)    COLLATE Latin1_General_CI_AS NULL,
@@ -43,7 +45,9 @@
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
 	CONSTRAINT [FK_tblARInvoice_tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
-	CONSTRAINT [FK_tblARInvoice_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+	CONSTRAINT [FK_tblARInvoice_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblARInvoice_tblEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
+	CONSTRAINT [FK_tblARInvoice_tblEntityLocation_intBillToLocationId] FOREIGN KEY ([intBillToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId])
 );
 
 
