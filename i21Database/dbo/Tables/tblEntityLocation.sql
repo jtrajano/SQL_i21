@@ -16,10 +16,12 @@
     [intTermsId]          INT            NULL,
     [intWarehouseId]      INT            NULL,
 	[ysnDefaultLocation]  BIT			 NULL,
+	[intFreightTermId]	  INT            NULL,
     [intConcurrencyId]    INT            CONSTRAINT [DF_tblEntityLocation_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_dbo.tblEntityLocation] PRIMARY KEY CLUSTERED ([intEntityLocationId] ASC),
     CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
+	CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
+	CONSTRAINT [FK_dbo.tblEntityLocation_dbo.tblSMFreightTerms_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [dbo].[tblSMFreightTerms] ([intFreightTermId])
 );
 
 
