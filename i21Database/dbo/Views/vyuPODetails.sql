@@ -46,3 +46,4 @@ FROM tblPOPurchase A
  LEFT JOIN tblICUnitMeasure H ON E.intUnitMeasureId = H.intUnitMeasureId
  LEFT JOIN tblSMCompanyLocationSubLocation F ON B.intSubLocationId = F.intCompanyLocationSubLocationId
  LEFT JOIN tblICStorageLocation G ON B.intStorageLocationId = G.intStorageLocationId
+ WHERE D.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')
