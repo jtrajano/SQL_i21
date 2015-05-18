@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblFRDBudgetDetail] (
+﻿CREATE TABLE [dbo].[tblFRBudgetDetail] (
     [cntId]            INT             IDENTITY (1, 1) NOT NULL,
     [strAccountId]     NVARCHAR (40)   COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmYear]          DATETIME        NOT NULL,
@@ -51,6 +51,6 @@
     [curOperPlan11]    NUMERIC (18, 6) NULL,
     [curOperPlan12]    NUMERIC (18, 6) NULL,
     [intConcurrencyId] INT             DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblFRDBudgetDetail] PRIMARY KEY CLUSTERED ([strAccountId] ASC, [dtmYear] ASC)
+    CONSTRAINT [PK_tblFRBudgetDetail] PRIMARY KEY CLUSTERED ([strAccountId] ASC, [dtmYear] ASC)
 );
 

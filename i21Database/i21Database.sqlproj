@@ -1598,9 +1598,9 @@
     <Build Include="dbo\Tables\tblLGPickLotHeader.sql" />
     <Build Include="dbo\Functions\fnLGGetItemUnitConversion.sql" />
     <Build Include="dbo\Views\vyuLGPickOpenInventoryLots.sql" />
-    <Build Include="dbo\Tables\tblFRDBudget.sql" />
-    <Build Include="dbo\Tables\tblFRDBudgetCode.sql" />
-    <Build Include="dbo\Tables\tblFRDBudgetDetail.sql" />
+    <Build Include="dbo\Tables\tblFRBudget.sql" />
+    <Build Include="dbo\Tables\tblFRBudgetCode.sql" />
+    <Build Include="dbo\Tables\tblFRBudgetDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
