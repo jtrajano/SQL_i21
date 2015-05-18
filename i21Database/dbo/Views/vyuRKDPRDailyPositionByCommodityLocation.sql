@@ -1,108 +1,105 @@
 ﻿CREATE VIEW [dbo].[vyuRKDPRDailyPositionByCommodityLocation]
       
 AS    
-SELECT intCommodityId,strLocationName,strCommodityCode,strUnitMeasure,isnull(CompanyTitled,0) as dblCompanyTitled,
-isnull(CashExposure,0) as dblCaseExposure,        
+SELECT strLocationName,OpenPurchasesQty,OpenSalesQty,intCommodityId,strCommodityCode,strUnitMeasure,isnull(CompanyTitled,0) as dblCompanyTitled,
+isnull(CashExposure,0) as dblCaseExposure,            
 (isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) as dblBasisExposure ,           
 (isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) - isnull(ReceiptProductQty,0) as dblAvailForSale,
- isnull(CompanyTitled,0) as dblInHouse        
- FROM(        
-SELECT intCommodityId,strLocationName,strCommodityCode,strUnitMeasure,(invQty)-isnull(ReserveQty,0) AS CompanyTitled,        
-            (isnull(invQty,0)-isnull(ReserveQty,0)) +       
-            (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))        
-              +(((isnull(FutLBalTransQty,0)-isnull(FutMatchedQty,0))- (isnull(FutSBalTransQty,0)-isnull(FutMatchedQty,0)) )*dblContractSize) 
-            AS CashExposure,        
-   ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty        
-           
-FROM(        
-SELECT c.intCommodityId    
- ,strCommodityCode    
- ,u.intUnitMeasureId    
- ,u.strUnitMeasure    
- ,sum(isnull(it.dblUnitOnHand,0)) invQty    
- ,SUM(isnull(sr.dblQty,0)) ReserveQty    
- ,cl1.intCompanyLocationId    
- ,cl1.strLocationName    
- ,(    
-  SELECT isnull(Sum(CD.dblBalance), 0) AS Qty    
-  FROM tblCTContractDetail CD    
-  INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId    
-  INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId AND CH.intPurchaseSale = 1    
-  INNER JOIN tblCTPricingType PT ON PT.Value = CD.intPricingType AND PT.Value IN (1,3)    
-  INNER JOIN tblCTContractType TP ON TP.Value = CH.intPurchaseSale    
-  WHERE CH.intCommodityId = c.intCommodityId AND CD.intCompanyLocationId=cl1.intCompanyLocationId    
-  ) AS OpenPurQty    
- ,(    
-  SELECT isnull(Sum(CD.dblBalance), 0) AS Qty    
-  FROM tblCTContractDetail CD    
-  INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId    
-  INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId AND CH.intPurchaseSale = 2    
-  INNER JOIN tblCTPricingType PT ON PT.Value = CD.intPricingType AND PT.Value IN (1,3)    
-  INNER JOIN tblCTContractType TP ON TP.Value = CH.intPurchaseSale    
-  WHERE CH.intCommodityId = c.intCommodityId AND CD.intCompanyLocationId=cl1.intCompanyLocationId    
-  ) AS OpenSalQty    
- ,(    
-  SELECT isnull(Sum(CD.dblBalance), 0) AS Qty    
-  FROM tblCTContractDetail CD    
-  INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId    
-  INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId AND CH.intPurchaseSale = 1    
-  INNER JOIN tblCTPricingType PT ON PT.Value = CD.intPricingType AND PT.Value IN (1,2)    
-  INNER JOIN tblCTContractType TP ON TP.Value = CH.intPurchaseSale    
-  WHERE CH.intCommodityId = c.intCommodityId AND CD.intCompanyLocationId=cl1.intCompanyLocationId    
-  ) AS ReceiptProductQty    
- ,(    
-  SELECT isnull(Sum(CD.dblBalance), 0) AS Qty    
-  FROM tblCTContractDetail CD    
-  INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId    
-  INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId   AND CH.intPurchaseSale = 2    
-  INNER JOIN tblCTPricingType PT ON PT.Value = CD.intPricingType AND PT.Value IN (1,2)    
-  INNER JOIN tblCTContractType TP ON TP.Value = CH.intPurchaseSale    
-  WHERE CH.intCommodityId = c.intCommodityId AND CD.intCompanyLocationId=cl1.intCompanyLocationId    
-  ) AS OpenPurchasesQty    
- ,(    
-  SELECT isnull(Sum(CD.dblBalance), 0) AS Qty    
-  FROM tblCTContractDetail CD    
-  INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId    
-  INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId    
-  INNER JOIN tblCTPricingType PT ON PT.Value = CD.intPricingType AND PT.Value IN (1,2)    
-  INNER JOIN tblCTContractType TP ON TP.Value = CH.intPurchaseSale    
-  WHERE CH.intCommodityId = c.intCommodityId and CD.intCompanyLocationId=cl1.intCompanyLocationId    
-  ) AS OpenSalesQty 
-   ,(  
-  SELECT top 1 rfm.dblContractSize  
-  FROM tblRKFutOptTransaction otr  
-   JOIN tblRKFutureMarket rfm on rfm.intFutureMarketId=otr.intFutureMarketId
-  WHERE otr.intCommodityId = c.intCommodityId AND otr.intLocationId=cl1.intCompanyLocationId GROUP BY rfm.intFutureMarketId,rfm.dblContractSize 
-  ) AS dblContractSize    
- ,(    
-  SELECT sum(intNoOfContract)    
-  FROM tblRKFutOptTransaction otr    
-  WHERE otr.strBuySell = 'Sell'    
-   AND otr.intCommodityId = c.intCommodityId AND otr.intLocationId=cl1.intCompanyLocationId    
-  ) AS FutSBalTransQty    
- ,(    
-  SELECT sum(intNoOfContract)    
-  FROM tblRKFutOptTransaction otr    
-  WHERE otr.strBuySell = 'Buy'    
-   AND otr.intCommodityId = c.intCommodityId AND otr.intLocationId=cl1.intCompanyLocationId    
-  ) AS FutLBalTransQty    
- ,(    
-  SELECT SUM(psd.dblMatchQty)    
-  FROM tblRKMatchFuturesPSHeader psh    
-  INNER JOIN tblRKMatchFuturesPSDetail psd ON psd.intMatchFuturesPSHeaderId = psh.intMatchFuturesPSHeaderId    
-  WHERE intCommodityId = c.intCommodityId and psh.intCompanyLocationId=cl1.intCompanyLocationId    
-  ) FutMatchedQty    
-FROM tblICCommodity c    
-LEFT JOIN tblICCommodityUnitMeasure um ON c.intCommodityId = um.intCommodityId    
-LEFT JOIN tblICUnitMeasure u ON um.intUnitMeasureId = u.intUnitMeasureId    
-LEFT JOIN tblICItem i ON i.intCommodityId = c.intCommodityId    
-LEFT JOIN tblICItemStock it ON it.intItemId = i.intItemId    
-LEFT JOIN tblICItemLocation lo ON lo.intItemLocationId = it.intItemLocationId    
-LEFT JOIN tblSMCompanyLocation cl1 ON cl1.intCompanyLocationId = lo.intLocationId    
-LEFT JOIN tblICStockReservation sr ON it.intItemId = sr.intItemId    
-GROUP BY c.intCommodityId    
- ,strCommodityCode    
- ,u.intUnitMeasureId    
- ,u.strUnitMeasure    
- ,cl1.strLocationName    
- ,cl1.intCompanyLocationId) t)t1 
+
+isnull(CompanyTitled,0) as dblInHouse            
+ FROM(            
+SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,(invQty)-isnull(ReserveQty,0) AS CompanyTitled, 
+            (isnull(invQty,0)-isnull(ReserveQty,0)) +           
+            (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))            
+            +(((isnull(FutLBalTransQty,0)-isnull(FutMatchedQty,0))- (isnull(FutSBalTransQty,0)-isnull(FutMatchedQty,0)) )*isnull(dblContractSize,1))       
+            AS CashExposure,            
+   ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty            
+               
+FROM(
+SELECT distinct c.intCommodityId, strLocationName,   
+  strCommodityCode,            
+  u.intUnitMeasureId,            
+  u.strUnitMeasure            
+     ,(SELECT             
+   isnull(Sum(CD.dblBalance),0) as Qty                 
+   FROM tblCTContractDetail  CD                 
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
+   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId    and CH.intPurchaseSale=1            
+   JOIN tblCTPricingType  PT ON PT.Value     = CD.intPricingType and PT.Value in(1,3)             
+   JOIN tblCTContractType  TP ON TP.Value     = CH.intPurchaseSale where CH.intCommodityId=c.intCommodityId
+    and CD.intCompanyLocationId=cl.intCompanyLocationId) as OpenPurQty            
+   ,(SELECT             
+   isnull(Sum(CD.dblBalance),0) as Qty                 
+   FROM tblCTContractDetail  CD                 
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
+   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId    and CH.intPurchaseSale=2            
+   JOIN tblCTPricingType  PT ON PT.Value     = CD.intPricingType and PT.Value  in(1,3)             
+   JOIN tblCTContractType  TP ON TP.Value     = CH.intPurchaseSale where CH.intCommodityId=c.intCommodityId
+    and CD.intCompanyLocationId=cl.intCompanyLocationId) as OpenSalQty            
+    ,(SELECT             
+   isnull(Sum(CD.dblBalance),0) as Qty                 
+   FROM tblCTContractDetail  CD                 
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
+   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId   and CH.intPurchaseSale=1            
+   JOIN tblCTPricingType  PT ON PT.Value     = CD.intPricingType and PT.Value in(1,2)             
+   JOIN tblCTContractType  TP ON TP.Value     = CH.intPurchaseSale where CH.intCommodityId=c.intCommodityId
+    and CD.intCompanyLocationId=cl.intCompanyLocationId) as ReceiptProductQty            
+    ,(SELECT             
+   isnull(Sum(CD.dblBalance),0) as Qty                 
+   FROM tblCTContractDetail  CD                 
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
+   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId  and CH.intPurchaseSale=1               
+   JOIN tblCTPricingType  PT ON PT.Value     = CD.intPricingType and PT.Value in(1,2)             
+   JOIN tblCTContractType  TP ON TP.Value     = CH.intPurchaseSale where CH.intCommodityId=c.intCommodityId
+    and CD.intCompanyLocationId=cl.intCompanyLocationId) as OpenPurchasesQty  --req          
+    ,(SELECT             
+   isnull(Sum(CD.dblBalance),0) as Qty                 
+   FROM tblCTContractDetail  CD                 
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
+   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId   and  CH.intPurchaseSale= 2             
+   JOIN tblCTPricingType  PT ON PT.Value     = CD.intPricingType and PT.Value in(1,2)             
+   JOIN tblCTContractType  TP ON TP.Value     = CH.intPurchaseSale where CH.intCommodityId=c.intCommodityId 
+   and CD.intCompanyLocationId=cl.intCompanyLocationId) as OpenSalesQty    --req        
+    
+     ,(SELECT top 1 rfm.dblContractSize as dblContractSize from tblRKFutOptTransaction otr
+	  JOIN tblRKFutureMarket rfm on rfm.intFutureMarketId=otr.intFutureMarketId
+	  WHERE otr.intCommodityId=c.intCommodityId and otr.intLocationId=cl.intCompanyLocationId) dblContractSize   
+            
+	,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr
+    	WHERE otr.strBuySell='Sell' AND otr.intCommodityId=c.intCommodityId
+    	and otr.intLocationId=cl.intCompanyLocationId ) FutSBalTransQty   
+
+	,(SELECT isnull(SUM(intNoOfContract),0) from tblRKFutOptTransaction otr
+		WHERE otr.strBuySell='Buy' AND otr.intCommodityId=c.intCommodityId and otr.intLocationId=cl.intCompanyLocationId) as FutLBalTransQty,        
+	        
+	(SELECT SUM(psd.dblMatchQty) from tblRKMatchFuturesPSHeader psh          
+	JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId          
+	and intCommodityId=c.intCommodityId and psh.intCompanyLocationId=cl.intCompanyLocationId   ) FutMatchedQty 
+,(	select sum(isnull(s.dblUnitOnHand,0)) from tblICItemStock s
+	join tblICItemLocation it on it.intItemLocationId=s.intItemLocationId
+	join tblICItem i on i.intItemId=it.intItemId
+	and i.intCommodityId= c.intCommodityId where it.intLocationId=cl.intCompanyLocationId ) as invQty
+,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+	FROM tblICItem i1 
+	JOIN tblICItemLocation lo ON lo.intItemId = i1.intItemId and   lo.intLocationId = cl.intCompanyLocationId  
+	JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+	JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+	WHERE 
+	i1.intCommodityId=c.intCommodityId ) as ReserveQty
+         
+  FROM tblSMCompanyLocation cl
+JOIN tblICItemLocation lo ON lo.intLocationId = cl.intCompanyLocationId   
+JOIN tblICItem i ON lo.intItemId = i.intItemId  
+JOIN tblICCommodity c on c.intCommodityId=i.intCommodityId 
+JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId 
+JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId 
+WHERE  ysnDefault=1 
+ GROUP BY 
+ 	c.intCommodityId 
+	,strCommodityCode  
+	,cl.intCompanyLocationId    
+	,cl.strLocationName, 
+	 u.intUnitMeasureId    
+	,u.strUnitMeasure  
+  )t
+)t1 

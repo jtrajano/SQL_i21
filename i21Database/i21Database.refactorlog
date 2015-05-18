@@ -3038,4 +3038,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strDistributionOption" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2c3ef55c-7ec6-4f6d-8d50-44f5753b0101" ChangeDateTime="05/18/2015 06:21:26">
+    <Property Name="ElementName" Value="[dbo].[tblAPBillDetail].[intPODetailId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBillDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intPurchaseOrderDetailId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="11008c3f-b6df-4294-8d88-93cb7582d7aa" ChangeDateTime="05/18/2015 06:24:40">
+    <Property Name="ElementName" Value="[dbo].[tblAPBillDetail].[intPurchaseOrderDetailId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBillDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intPurchaseDetailId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6f689bbe-1ddb-40eb-9307-87e9c7182df1" ChangeDateTime="05/18/2015 06:46:28">
+    <Property Name="ElementName" Value="[dbo].[tblAPBillDetail].[intItemReceiptId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblAPBillDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intInventoryReceiptItemId]" />
+  </Operation>
 </Operations>

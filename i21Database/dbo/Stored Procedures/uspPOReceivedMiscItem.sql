@@ -15,7 +15,7 @@ BEGIN
 	SELECT @posted = ysnPosted FROM tblAPBill WHERE intBillId = @billId;
 
 	SELECT	B.intBillId
-			,B.intPODetailId
+			,B.[intPurchaseDetailId]
 			,B.dblQtyReceived
 			,B.intItemId
 			,A.ysnPosted
@@ -35,7 +35,7 @@ BEGIN
 							END
 	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOMiscItems B 
 				ON A.intItemId = B.intItemId 
-				AND A.intPurchaseDetailId = B.intPODetailId
+				AND A.intPurchaseDetailId = B.[intPurchaseDetailId]
 
 	--Validate
 	IF(@@ROWCOUNT != (SELECT COUNT(*) FROM #tmpReceivedPOMiscItems))
@@ -50,9 +50,9 @@ BEGIN
 	WHILE @counter != @countReceivedMisc
 	BEGIN
 		SET @counter = @counter + 1;
-		SELECT TOP(1) @purchaseId = intPurchaseId, @purchaseDetailId = intPODetailId FROM #tmpReceivedPOMiscItems A INNER JOIN tblPOPurchaseDetail B ON A.intPODetailId = B.intPurchaseDetailId
+		SELECT TOP(1) @purchaseId = intPurchaseId, @purchaseDetailId = [intPurchaseDetailId] FROM #tmpReceivedPOMiscItems A INNER JOIN tblPOPurchaseDetail B ON A.[intPurchaseDetailId] = B.intPurchaseDetailId
 		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
-		DELETE FROM #tmpReceivedPOMiscItems WHERE intPODetailId = @purchaseDetailId
+		DELETE FROM #tmpReceivedPOMiscItems WHERE [intPurchaseDetailId] = @purchaseDetailId
 	END
 
 END

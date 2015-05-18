@@ -140,21 +140,20 @@ SELECT c.intCommodityId,
   sum(it.dblUnitOnHand) invQty,            
   SUM(sr.dblQty) ReserveQty      
        
-    ,(SELECT             
-   isnull(Sum(CD.dblBalance),0) as Qty                 
-   FROM tblCTContractDetail  CD                 
-   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
-   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId  and CH.intPurchaseSale=2               
-   JOIN tblCTPricingType  PT ON PT.Value     = CD.intPricingType and PT.Value in(1,2)             
-   JOIN tblCTContractType  TP ON TP.Value     = CH.intPurchaseSale where CH.intCommodityId=c.intCommodityId) as OpenPurchasesQty            
-    ,(SELECT             
-   isnull(Sum(CD.dblBalance),0) as Qty                 
-   FROM tblCTContractDetail  CD                 
-   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
-   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId                
-   JOIN tblCTPricingType  PT ON PT.Value     = CD.intPricingType and PT.Value in(1,2)             
-   JOIN tblCTContractType  TP ON TP.Value     = CH.intPurchaseSale where CH.intCommodityId=c.intCommodityId) as OpenSalesQty            
-         
+    ,(SELECT               
+   isnull(Sum(CD.dblBalance),0) as Qty                   
+   FROM tblCTContractDetail  CD                   
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId                
+   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId  and CH.intPurchaseSale=1                 
+   JOIN tblCTPricingType  PT ON PT.Value     = CD.intPricingType and PT.Value in(1,2)               
+   JOIN tblCTContractType  TP ON TP.Value     = CH.intPurchaseSale where CH.intCommodityId=c.intCommodityId) as OpenPurchasesQty              
+    ,(SELECT               
+   isnull(Sum(CD.dblBalance),0) as Qty                   
+   FROM tblCTContractDetail  CD                   
+   JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId                
+   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId  and CH.intPurchaseSale=2                 
+   JOIN tblCTPricingType  PT ON PT.Value     = CD.intPricingType and PT.Value in(1,2)               
+   JOIN tblCTContractType  TP ON TP.Value     = CH.intPurchaseSale where CH.intCommodityId=c.intCommodityId) as OpenSalesQty             
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            

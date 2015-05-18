@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreatePayment]
 	@userId NVARCHAR(50),
-	@bankAccount INT,
-	@paymentMethod INT,
-	@paymentInfo NVARCHAR(10),
-	@notes NVARCHAR(500),
+	@bankAccount INT = NULL,
+	@paymentMethod INT = NULL,
+	@paymentInfo NVARCHAR(10) = NULL,
+	@notes NVARCHAR(500) = NULL,
 	@payment DECIMAL(18, 6) = NULL,
 	@datePaid DATETIME = NULL,
 	@isPost BIT = 0,
@@ -22,14 +22,12 @@ BEGIN
 	DECLARE @queryPaymentDetail NVARCHAR(MAX)
 	DECLARE @paymentId INT
 	DECLARE @vendorId INT
-
+	DECLARE @amountPaid NUMERIC(18,6) = @payment;
+	DECLARE @paymentMethodId INT = @paymentMethod
+	DECLARE @intBankAccountId INT = @bankAccount;
+	DECLARE @intGLBankAccountId INT;
+	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
-
-	--Compute Discount Here
-
-	--Compute Interest Here
-
-	--TODO Validations
 
 	--TODO Allow Multi Vendor
 	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
@@ -41,13 +39,60 @@ BEGIN
 		INNER JOIN tblAPVendor C
 			ON A.[intEntityVendorId] = C.[intEntityVendorId]
 
+	--VALIDATION
+	--Make sure there is user to use
+	IF @userId IS NULL
+	BEGIN
+		RAISERROR('User is required.', 16, 1);
+		RETURN;
+	END
+
+	--Make sure there is bank account to use
+	IF @intBankAccountId IS NULL
+	BEGIN
+		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
+		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
+
+		IF @intBankAccountId IS NULL
+		BEGIN
+			RAISERROR('There was not set up for cash account.', 16, 1);
+			RETURN;
+		END
+	END
+
+	IF @intGLBankAccountId IS NULL
+	BEGIN
+		SET @intGLBankAccountId = (SELECT TOP 1 intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId);
+	END
+		
+	--Make sure there is payment method to user
+	IF @paymentMethodId IS NULL
+	BEGIN
+		SELECT TOP 1 @paymentMethodId = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'check'
+		IF @paymentMethodId IS NULL
+		BEGIN
+			RAISERROR('There is no check payment method setup.', 16, 1);
+			RETURN;
+		END
+	END
+
+	IF @amountPaid IS NULL
+	BEGIN
+		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+	END
+
+	--Compute Discount Here
+
+	--Compute Interest Here
+
+
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
 		[intAccountId],
 		[intBankAccountId],
 		[intPaymentMethodId],
 		[intCurrencyId],
-		[intVendorId],
+		[intEntityVendorId],
 		[strPaymentInfo],
 		[strNotes],
 		[dtmDatePaid],
@@ -58,11 +103,11 @@ BEGIN
 		[intEntityId],
 		[intConcurrencyId])
 	SELECT
-		[intAccountId]			= (SELECT TOP 1 intGLAccountId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccount ),
+		[intAccountId]			= @bankGLAccountId,
 		[intBankAccountId]		= @bankAccount,
 		[intPaymentMethodId]	= @paymentMethod,
 		[intCurrencyId]			= ISNULL((SELECT TOP 1 intCurrencyId FROM tblCMBankAccount WHERE intBankAccountId = @bankAccount), (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'')),
-		[intVendorId]			= @vendorId,
+		[intEntityVendorId]		= @vendorId,
 		[strPaymentInfo]		= @paymentInfo,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
@@ -103,6 +148,7 @@ BEGIN
 	EXEC sp_executesql @queryPayment,
 	 N'@billId NVARCHAR(MAX),
 	 @userId NVARCHAR(50),
+	 @bankGLAccountId INT,
 	 @bankAccount INT,
 	 @paymentMethod INT,
 	 @vendorId INT,
@@ -114,12 +160,13 @@ BEGIN
 	 @paymentId INT OUTPUT',
 	 @userId = @userId,
 	 @billId = @billId,
-	 @bankAccount = @bankAccount,
-	 @paymentMethod = @paymentMethod,
+	 @bankGLAccountId = @intGLBankAccountId,
+	 @bankAccount = @intBankAccountId,
+	 @paymentMethod = @paymentMethodId,
 	 @paymentInfo = @paymentInfo,
 	 @vendorId = @vendorId,
 	 @notes = @notes,
-	 @payment = @payment,
+	 @payment = @amountPaid,
 	 @datePaid = @datePaid,
 	 @isPost = @isPost,
 	 @paymentId = @paymentId OUTPUT;

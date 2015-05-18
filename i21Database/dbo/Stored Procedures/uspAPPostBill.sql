@@ -210,7 +210,7 @@ BEGIN
 		UPDATE A
 			SET A.dblBillQty = A.dblBillQty - B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
-			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intInventoryReceiptItemId
+			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully unposted transactions.
@@ -236,7 +236,7 @@ BEGIN
 		UPDATE A
 			SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
-			INNER JOIN tblAPBillDetail B ON B.intItemReceiptId = A.intInventoryReceiptItemId
+			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully posted transactions.
@@ -259,7 +259,7 @@ BEGIN
 				ON A.intItemId = B.intItemId 
 				WHERE B.strType IN ('Service','Software','Non-Inventory','Other Charge')
 				AND A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-				AND A.intPODetailId > 0)
+				AND A.[intPurchaseDetailId] > 0)
 	BEGIN
 		DECLARE @countReceivedMisc INT = 0, @billIdReceived INT;
 		WHILE @countReceivedMisc != @totalRecords

@@ -127,8 +127,8 @@ BEGIn
 	INSERT INTO tblAPBillDetail(
 		[intBillId],
 		[intItemId],
-		[intItemReceiptId],
-		[intPODetailId],
+		[intInventoryReceiptItemId],
+		[intPurchaseDetailId],
 		[dblQtyOrdered],
 		[dblQtyReceived],
 		[intAccountId],
