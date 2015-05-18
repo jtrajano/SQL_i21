@@ -11,7 +11,7 @@ BEGIN
 							INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 							INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 							INNER JOIN (tblAPBill D1 INNER JOIN tblAPBillDetail D2 ON D1.intBillId = D2.intBillId)
-								 ON B.intPurchaseDetailId = D2.intPODetailId
+								 ON B.intPurchaseDetailId = D2.[intPurchaseDetailId]
 							WHERE strType IN ('Service','Software','Non-Inventory','Other Charge')
 								AND A.intPurchaseId = @poId)
 					THEN 1
@@ -20,7 +20,7 @@ BEGIN
 							INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 							INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 							INNER JOIN (tblAPBill D1 INNER JOIN tblAPBillDetail D2 ON D1.intBillId = D2.intBillId)
-								 ON B.intPurchaseDetailId = D2.intPODetailId
+								 ON B.intPurchaseDetailId = D2.[intPurchaseDetailId]
 							WHERE strType IN ('Service','Software','Non-Inventory','Other Charge')
 								AND A.intPurchaseId = @poId
 								AND D1.ysnPosted = @posted)
