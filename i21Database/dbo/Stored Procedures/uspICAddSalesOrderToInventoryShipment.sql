@@ -10,16 +10,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @StartingNumberId_InventoryShipment AS INT = 30;
+DECLARE @StartingNumberId_InventoryShipment AS INT = 31;
 DECLARE @ShipmentNumber AS NVARCHAR(20)
 
-DECLARE @ShipmentType_SalesContract AS NVARCHAR(100) = 'Sales Contract'
-DECLARE @ShipmentType_SalesOrder AS NVARCHAR(100) = 'Sales Order'
-DECLARE @ShipmentType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
-
-DECLARE @intSalesContractType AS INT = 1
-DECLARE @intSalesOrderType AS INT = 2
-DECLARE @intTransferOrderType AS INT = 3
+DECLARE @SALES_CONTRACT AS INT = 1
+		,@SALES_ORDER AS INT = 2
+		,@TRANSFER_ORDER AS INT = 3
 
 -- Get the transaction id 
 EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryShipment, @ShipmentNumber OUTPUT 
@@ -33,13 +29,66 @@ BEGIN
 END 
 
 -- Insert the Inventory Shipment header 
-		--INSERT INTO dbo.tblICInventoryShipment (
-
-		--)
-		--SELECT 	
-
-		--FROM	dbo.tblSalesOrder SO
-		--WHERE	SO.intSalesOrderId = @SalesOrderId
+BEGIN 
+		INSERT INTO dbo.tblICInventoryShipment (
+				strShipmentNumber
+				,dtmShipDate
+				,intOrderType
+				,strReferenceNumber
+				,dtmRequestedArrivalDate
+				,intShipFromLocationId
+				,intEntityCustomerId
+				,intShipToLocationId
+				,intFreightTermId
+				,strBOLNumber
+				,intShipViaId
+				,strVessel
+				,strProNumber
+				,strDriverId
+				,strSealNumber
+				,strDeliveryInstruction
+				,dtmAppointmentTime
+				,dtmDepartureTime
+				,dtmArrivalTime
+				,dtmDeliveredDate
+				,dtmFreeTime
+				,strReceivedBy
+				,strComment
+				,ysnPosted
+				,intEntityId
+				,intCreatedUserId
+				,intConcurrencyId
+		)
+		SELECT	strShipmentNumber			= @ShipmentNumber
+				,dtmShipDate				= SO.dtmDate
+				,intOrderType				= @SALES_ORDER
+				,strReferenceNumber			= SO.strSalesOrderNumber
+				,dtmRequestedArrivalDate	= NULL -- TODO
+				,intShipFromLocationId		= SO.intCompanyLocationId
+				,intEntityCustomerId		= SO.intEntityCustomerId
+				,intShipToLocationId		= NULL -- TODO
+				,intFreightTermId			= NULL -- TODO
+				,strBOLNumber				= NULL -- TODO
+				,intShipViaId				= SO.intShipViaId
+				,strVessel					= NULL -- TODO
+				,strProNumber				= SO.strPONumber
+				,strDriverId				= NULL
+				,strSealNumber				= NULL 
+				,strDeliveryInstruction		= NULL 
+				,dtmAppointmentTime			= NULL 
+				,dtmDepartureTime			= NULL 
+				,dtmArrivalTime				= NULL 
+				,dtmDeliveredDate			= NULL 
+				,dtmFreeTime				= NULL 
+				,strReceivedBy				= NULL 
+				,strComment					= SO.strComments
+				,ysnPosted					= 0 
+				,intEntityId				= dbo.fnGetUserEntityId(@intUserId) 
+				,intCreatedUserId			= @intUserId
+				,intConcurrencyId			= 1
+		FROM	dbo.tblSOSalesOrder SO
+		WHERE	SO.intSalesOrderId = @SalesOrderId
+END 
 
 -- Get the identity value from tblICInventoryShipment
 SELECT @InventoryShipmentId = SCOPE_IDENTITY()

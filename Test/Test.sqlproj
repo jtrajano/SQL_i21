@@ -1,0 +1,603 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>Test</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{624ab520-1c65-428f-923f-e77c9ff27b39}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql100DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>Test</RootNamespace>
+    <AssemblyName>Test</AssemblyName>
+    <ModelCollation>1033,CS</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CS_AS</DefaultCollation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Schema" />
+    <Folder Include="testi21Database\" />
+    <Folder Include="testi21Database\Stored Procedures\" />
+    <Folder Include="Scripts" />
+    <Folder Include="testi21Database\Fake Data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Schema\testi21Database.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateAverageCost for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateAverageCost, compute a new average cost when increasing stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateAverageCost, use new cost when increasing stock but aggregate result is zero.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateAverageCost, use new cost when increasing stock but aggregate result is still negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateAverageCost, use new cost when increasing stock but stock was from negative or zero.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateAverageCost, use the current average cost when reducing stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateAverageCost, use the current average cost when reducing stock and on hand qty is negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerLot for 25KgBag-LB-25KgBag.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerLot for 25KgBag-LB-NULL.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerLot for Kg-LB-10LbBag.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerLot for Kg-Ton-10LbBag.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerLot for Lb-Kg-10LbBag.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerLot for LB-LB-25KgBag.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerLot for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerWeight against divide by zero.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerWeight for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateCostPerWeight with valid values.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotQty for adding a Qty value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotQty for adding a Weight value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotQty for reducing a Qty value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotQty for reducing a Weight value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotWeight for adding a Qty value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotWeight for adding a Weight value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotWeight for reducing a Qty value in steps.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotWeight for reducing a Qty value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotWeight for reducing a Weight value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateLotWeight for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to 20 KG BAG.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to 50 LB BAG.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to KG.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting 50 LB BAG to LB.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting 69 KG BAG to KG.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting 69 KG BAG to MT.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting KG to KG.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting KG to LB.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting LB to 50 LB BAG.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting LB to KG.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting LB to LB.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting MT to LB.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateStockUnitQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateStockUnitQty for the non-zero unit qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateStockUnitQty for the zero unit qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateUnitCost for returning 20 decimal values.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateUnitCost for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateUnitCost for the non-zero unit qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateUnitCost for the zero unit qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateWeightUnitQty for correct arguments.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateWeightUnitQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateWeightUnitQty for whole numbers.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateWeightUnitQty for zero Qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateWeightUnitQty for zero weight.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateEquals date 1 higher than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateEquals date 1 is invalid and date 1 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateEquals date 1 is less than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateEquals date 1 is valid and date 2 is invalid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateEquals date 1 is valid and date 2 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateEquals for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThan date 1 higher than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThan date 1 is invalid and date 2 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThan date 1 is less than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThan date 1 is valid and date 2 is invalid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThan date 1 is valid and date 2 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThan for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThanEquals date 1 higher than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThanEquals date 1 is invalid and date 2 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThanEquals date 1 is less than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThanEquals date 1 is valid and date 2 is invalid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThanEquals date 1 is valid and date 1 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateGreaterThanEquals for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThan date 1 higher than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThan date 1 is invalid and date 1 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThan date 1 is less than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThan date 1 is valid and date 2 is invalid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThan date 1 is valid and date 2 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThan for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThanEquals date 1 higher than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThanEquals date 1 is invalid and date 1 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThanEquals date 1 is less than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThanEquals date 1 is valid and date 2 is invalid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThanEquals date 1 is valid and date 2 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateLessThanEquals for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateNotEquals date 1 higher than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateNotEquals date 1 is invalid and date 1 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateNotEquals date 1 is less than date 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateNotEquals date 1 is valid and date 2 is invalid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateNotEquals date 1 is valid and date 2 is valid.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnDateNotEquals for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetCostingMethodAsTable for retrieving the costing method at category level.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetCostingMethodAsTable for retrieving the costing method at item level.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetCostingMethodAsTable for retrieving the costing method for manual lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetCostingMethodAsTable for retrieving the costing method for serial lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetCostingMethodAsTable for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetCostingMethodAsTable when costing method was not specified.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetCredit for negative value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetCredit for positive value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetCredit for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetDebit for negative value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetDebit for positive value.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetDebit for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetGLAccountFromCompanyLocation for retrieving the gl accounts.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetGLAccountFromCompanyLocation for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetGLEntriesErrors for error 50001 _non-null and invalid account id_.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetGLEntriesErrors for error 50001.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetGLEntriesErrors for error 50003.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetGLEntriesErrors for error 50005.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetGLEntriesErrors for error 50032.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetInventoryTransactionId for invalid args.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetInventoryTransactionId for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetInventoryTransactionId for valid args.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemBaseGLAccount function for another location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemBaseGLAccount function for bad inputs.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemBaseGLAccount function for category level.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemBaseGLAccount function for item-level.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemBaseGLAccount function for location level.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it allows negative stock on lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it allows negative stock on lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it allows negative stock on lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it allows negative stock on non-lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it allows negative stock on non-lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it allows negative stock on non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks discontinued items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks items with missing costing method setup.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and phased out items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on phased out lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors on multiple scenarios.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it allows negative stock on lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it allows negative stock on lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it allows negative stock on lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it allows negative stock on non-lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it allows negative stock on non-lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it allows negative stock on non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on non-lot items from an empty stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on non-lot items from stock uom table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors if it blocks negative stock on non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnUnpostErrors on multiple scenarios.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemGLAccount function for bad inputs.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemGLAccount function for cost of goods.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemGLAccount function for purchase account.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemLotType for No Lot Items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemLotType for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemLotType for Yes Manual.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemLotType for Yes Serial.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetTotalStockValueFromTransactionBatch for getting the actual total from the table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetTotalStockValueFromTransactionBatch for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnIsStockTrackingItem for Assembly or Blend type.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnIsStockTrackingItem for Commodity type.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnIsStockTrackingItem for Inventory type.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnIsStockTrackingItem for Manufacturing type.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnIsStockTrackingItem for non-stock keeping type.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnIsStockTrackingItem for Raw Material type.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnIsStockTrackingItem for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnRecalculateAverageCost for average cost from FIFO.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnRecalculateAverageCost for average cost from LIFO.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnRecalculateAverageCost for average cost from Lot.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnRecalculateAverageCost for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnRemoveTimeOnDate for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnRemoveTimeOnDate on a date with time.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnRemoveTimeOnDate on a date without time.sql" />
+    <Build Include="testi21Database\Stored Procedures\test isOpenAccountingDate for closed periods.sql" />
+    <Build Include="testi21Database\Stored Procedures\test isOpenAccountingDate for empty periods.sql" />
+    <Build Include="testi21Database\Stored Procedures\test isOpenAccountingDate for multiple periods.sql" />
+    <Build Include="testi21Database\Stored Procedures\test isOpenAccountingDate for open periods.sql" />
+    <Build Include="testi21Database\Stored Procedures\test isOpenAccountingDate for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnAddZeroPrefixes function.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetCostingMethod function.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetGLAccountIdFromProfitCenter function on 8x8 account structure.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetGLAccountIdFromProfitCenter function on multiple account segments.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetItemCostingOnUnpostErrors function.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetItemsToUnpost function.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetNegativeInventoryOptions function.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetProcessToInventoryReceiptErrors function for invalid item and invalid location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetProcessToInventoryReceiptErrors function for invalid item and valid location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetProcessToInventoryReceiptErrors function for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetProcessToInventoryReceiptErrors function for valid item and invalid location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetProcessToInventoryShipmentErrors function for invalid item and invalid location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetProcessToInventoryShipmentErrors function for invalid item and valid location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetProcessToInventoryShipmentErrors function for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the fnGetProcessToInventoryShipmentErrors function for valid item and invalid location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the account id constraints of AP tables.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the constraints of tblAPBill.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the constraints of tblAPBillBatch.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the constraints of tblAPPayment.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the constraints of tblAPVendor.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the standard collation _Latin1_General_CI_AS_ on all i21 columns.sql" />
+    <Build Include="testi21Database\Stored Procedures\test insert on tblICItemStock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspCMAddDeposit stored procedure.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert lot items into tblICStockReservation.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert lot items reservations and replace existing data.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert non-lot items and replace existing data.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the uspICCreateStockReservation to insert non-lot items into tblICStockReservation.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspCMCheckPrint_QueuePrintJobs for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for empty GL entries.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for invalid GL Entries.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspGLBookEntries for the valid GL Entries.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToInventoryReceipt for errors thrown by a null transaction id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToInventoryReceipt for errors thrown by uspSMGetStartingNumber.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToInventoryReceipt on converting a PO into Inventory Receipt and it excludes non-stock types.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddPurchaseOrderToInventoryReceipt on converting a PO into Inventory Receipt.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for Auto Negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Auto Negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Contra Account.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Revalue Sold.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Write-Off Sold.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for one item purchase.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for one item sold.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for one transaction.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for Revalue Sold.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for Write-Off Sold.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries on posting 6 decimal places to the GLDetail debits and credits.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryAdjustmentSplitLot for updating the intNewLotId in the AdjustmentDetail.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryAdjustmentSplitLot for using an existing lot id for the split.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for manual lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for mix of lot and non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for serial lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateLotNumberOnInventoryReceipt to raise error 51038.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreatePOInventoryTransaction for creating the PO transaction to tblICInventoryTransaction.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries for reversing GL entries.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateReversalGLEntries from inventory transaction.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVRCPT-0001.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVRCPT-0002.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVSHIP-0001.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVSHIP-0002.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for INVSHIP-0003.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for PO-0001.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for SO-0002-1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for SO-0002-2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathNode for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathRoot for invalid arg 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathRoot for invalid arg 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathRoot for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateStockPathRoot for valid arguments.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for scenario 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for scenario 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateUpdateLotNumber for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsForItemReceipt for getting the items from PO.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsForItemReceipt for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for decrease in on-order qty on multiple items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for decrease in on-order qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for increase in on-order qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to positive _with partial in_.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from negative to zero.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from positive to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFO from zero to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from negative to negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from negative to positive _with partial in_.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from negative to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from negative to zero.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from positive to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFO from zero to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot from negative to negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot from negative to positive _with partial in_.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot from negative to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot from negative to zero.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot from positive to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLot from zero to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedExpiryDate for error 51101.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedExpiryDate for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 51100 on lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 51100 on non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 51100 on lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 51100 on non-lot items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentGetOutdatedStockOnHand for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedExpiryDate for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedExpiryDate for updating items in the adjustment detail.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedStockOnHand for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedStockOnHand for updating a lot item in the adjustment detail.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustmentUpdateOutdatedStockOnHand for updating non-lot item in the adjustment detail.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Apr 12_1. Purchase 75 stocks at 19 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Apr 7_1. Sold 60 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Feb 10_1. Purchase 20 stocks at 21 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Feb 15_1. Purchase 20 stocks at 21.75 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Jan 1_1. Purchase 20 stocks %40 20 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Mar 1_1. Sold 40 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, Mar 15_1. Sold 50 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostAverageCosting, May 15_1. Purchase 15 stocks at 27 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and fifo is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and GL entries are correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and the inventory-transaction is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for multiple incoming and outgoing stock and the item stock is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one incoming stock and fifo is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one incoming stock and GL entries are correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one incoming stock and lot is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one incoming stock and the inventory-transaction is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one incoming stock and the item stock is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one outgoing stock and fifo is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one outgoing stock and GL entries are correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one outgoing stock and the inventory-transaction is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for one outgoing stock and the item stock is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for two incoming stock and fifo is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for two incoming stock and GL entries are correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for two incoming stock and the inventory-transaction is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for two incoming stock and the item stock is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for two outgoing stock and fifo is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for two outgoing stock and GL entries are correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for two outgoing stock and the inventory-transaction is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCosting for two outgoing stock and the item stock is correct.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Apr 12_1. Purchase 75 stocks at 19 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Apr 7_1. Sold 60 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Feb 10_1. Purchase 20 stocks at 21 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Feb 15_1. Purchase 20 stocks at 21.75 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Jan 1_1. Purchase 20 stocks %40 20 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Mar 1_1. Sold 40 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, Mar 15_1. Sold 50 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostFIFO, May 15_1. Purchase 15 stocks at 27 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Expiry Lot Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Item Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Lot Status Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Qty Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Split Lot Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling UOM Change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment on getting the batch id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentExpiryLotChange on adjusting the expiry date.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentLotStatusChange on adjusting the lot status.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentQtyChange on adjusting the Qty of a bagged Lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentQtyChange on adjusting the Qty of a Lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for calling uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for creating a new lot number.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new cost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new item qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new item UOM.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new split qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new weight UOM.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new weight.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentSplitLotChange for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt and expect no exceptions.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspICCreateLotNumberOnInventoryReceipt.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspPOReceived.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple items and non-recap.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple items and recap.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple lot items and non-recap.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for multiple lot items and recap.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one item and non-recap.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one item and recap.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one lot items and non-recap.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for one lot items and recap.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransaction for inserting the supplied arguments.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransaction for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Apr 12_1. Purchase 75 stocks at 19 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Apr 7_1. Sold 60 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Feb 10_1. Purchase 20 stocks at 21 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Feb 15_1. Purchase 20 stocks at 21.75 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Jan 1_1. Purchase 20 stocks %40 20 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Mar 1_1. Sold 40 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, Mar 15_1. Sold 50 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLIFO, May 15_1. Purchase 15 stocks at 27 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Apr 12_1. Purchase 75 stocks at 19 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Apr 7_1. Sold 60 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Feb 10_1. Purchase 20 stocks at 21 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Feb 15_1. Purchase 20 stocks at 21.75 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Jan 1_1. Purchase 20 stocks %40 20 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Mar 1_1. Sold 40 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, Mar 15_1. Sold 50 stocks.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLot, May 15_1. Purchase 15 stocks at 27 dollars each.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessToInventoryShipment for errors thrown by uspICValidateProcessToInventoryShipment.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessToItemReceipt for errors thrown by uspICAddPurchaseOrderToInventoryReceipt.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessToItemReceipt for errors thrown by uspICGetItemsForItemReceipt.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICProcessToItemReceipt for errors thrown by uspICValidateProcessToItemReceipt.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from negative to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from positive stock to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from positive stock to positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from positive stock to zero stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFO from zero to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from negative to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from positive stock to zero stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFO from zero to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from negative to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from positive stock to zero stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLot from zero to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReserveStockForInventoryShipment for calling the sub procedures.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for posted Inventory Receipt.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for posted Inventory Shipment.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for scenario 3, unpost add stock, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for scenario 3, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for scenario 3, unpost sell stock, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for scenario 3, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for scenario 4, unpost add stock, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for scenario 4, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for scenario 4, unpost sell stock, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on AVG for scenario 4, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on FIFO for scenario 3, unpost add stock, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on FIFO for scenario 3, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on FIFO for scenario 3, unpost sell stock, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on FIFO for scenario 3, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on FIFO for scenario 4, unpost add stock, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on FIFO for scenario 4, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on FIFO for scenario 4, unpost sell stock, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on FIFO for scenario 4, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on LIFO for scenario 3, unpost add stock, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on LIFO for scenario 3, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on LIFO for scenario 3, unpost sell stock, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on LIFO for scenario 3, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add 1-add 2-unpost add 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for add-sell-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for sell 1-sell 2-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOut for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for add 1-add 2-unpost add 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for add-sell-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for sell 1-sell 2-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOut for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for add 1-add 2-unpost add 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOut for add-sell-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOut for sell 1-sell 2-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOut for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost as it checks for a valid item and location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost as it checks for an invalid item location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost as it checks for an invalid item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost if negative stock qty is allowed.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnPost if negative stock qty is not allowed.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnUnpost if negative stock qty is allowed.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateCostingOnUnpost if negative stock qty is not allowed.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToInventoryShipment as it checks for a valid item and location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToInventoryShipment as it checks for an invalid item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for a valid item and location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateProcessToItemReceipt as it checks for an invalid item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the high stocks and lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the high stocks and non-lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the low stocks and lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICValidateStockReserves for the low stocks and non-lot item.sql" />
+    <Build Include="testi21Database\Stored Procedures\test the item id constraints on AP tables.sql" />
+    <Build Include="testi21Database\Fake Data\Fake COA used for fake inventory items.sql" />
+    <Build Include="testi21Database\Fake Data\Fake COA used in Cash Management.sql" />
+    <Build Include="testi21Database\Fake Data\Fake COA with multiple account segments.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data company location.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for customers.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for inventory adjustment table.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for inventory receipt table.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for inventory transaction table.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for Item Stock Path.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for item stock table.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for item uom table, metric ton scenario.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for item uom table.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for the Costing Method.sql" />
+    <Build Include="testi21Database\Fake Data\Fake inventory items.sql" />
+    <Build Include="testi21Database\Fake Data\Fake Item Stock Path.sql" />
+    <Build Include="testi21Database\Fake Data\Fake open fiscal year and accounting periods.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions for testing the unposting.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions using AVG, scenario 1.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions using AVG, scenario 2.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions using AVG, scenario 3.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions using AVG, scenario 4.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions using FIFO, scenario 3.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions using FIFO, scenario 4.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions using LIFO, scenario 3.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions using LIFO, scenario 4.sql" />
+    <Build Include="testi21Database\Fake Data\Fake transactions for item costing.sql" />
+    <Build Include="testi21Database\Fake Data\Fake transactions for lot items and costing.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">
+      <Name>tSQLt</Name>
+      <Project>{ec6666e5-b9e5-4a93-a016-5d8d65d2ee28}</Project>
+      <Private>True</Private>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ProjectReference>
+    <ProjectReference Include="..\i21Database\i21Database.sqlproj">
+      <Name>i21Database</Name>
+      <Project>{2e49b212-114b-4cfd-a343-2a2061e987bc}</Project>
+      <Private>True</Private>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Scripts\PostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\100\SqlSchemas\msdb.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>msdb</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+  </ItemGroup>
+</Project>

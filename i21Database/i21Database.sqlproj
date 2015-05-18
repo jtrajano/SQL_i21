@@ -1273,7 +1273,6 @@
     <Build Include="dbo\Views\vyuLGAllocationOpenSContracts.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenPContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemsForInventoryShipment.sql" />
-    <Build Include="dbo\Stored Procedures\fnGetProcessToItemShipmentErrors.sql" />
     <Build Include="dbo\Functions\fnGetProcessToInventoryShipmentErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddSalesOrderToInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnSplitString.sql" />
@@ -1588,6 +1587,8 @@
     <Build Include="dbo\Tables\tblMFManufacturingProcessRunDuration.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStageWorkOrder.sql" />
     <Build Include="dbo\Tables\tblCTPackingDescription.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateProcessToInventoryShipment.sql" />
+    <Build Include="dbo\Functions\fnGetUserEntityId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

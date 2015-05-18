@@ -17,9 +17,9 @@ DECLARE @ErrorState INT;
 
 DECLARE @ItemsForItemShipment AS ItemCostingTableType 
 
-DECLARE @SALES_CONTRACT AS INT = 1
-		,@SALES_ORDER AS INT = 2
-		,@TRANSFER_ORDER AS INT = 3
+DECLARE @SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
+		,@SALES_ORDER AS NVARCHAR(50) = 'Sales Order'
+		,@TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
 
 BEGIN TRY
 	-- Get the items to process
@@ -48,8 +48,8 @@ BEGIN TRY
 	-- Validate the items to shipment 
 	EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
 
-	-- Add the items into inventory shipment
-	IF @strSourceType = @SALES_CONTRACT
+	-- Add the items into inventory shipment > sales order type. 
+	IF @strSourceType = @SALES_ORDER
 	BEGIN 
 		EXEC dbo.uspICAddSalesOrderToInventoryShipment 
 			@intSourceTransactionId, 
