@@ -2,7 +2,7 @@
  * Created by rnkumashi on 19-09-2014.
  */
 
-Ext.define('Inventory.model.FactoryUnitType', {
+Ext.define('Inventory.model.StorageUnitType', {
     extend: 'iRely.BaseEntity',
 
     requires: [

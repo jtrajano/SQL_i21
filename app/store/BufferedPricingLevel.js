@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedPricingLevel', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/ItemPricing/GetPricingLevels'
+                    read: '../Inventory/api/ItemPricingLevel/GetPricingLevels'
                 },
                 reader: {
                     type: 'json',

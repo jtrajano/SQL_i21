@@ -40,4 +40,12 @@ namespace iRely.Inventory.Model
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
         public ICollection<tblICFuelType> RinFeedStockUOMs { get; set; }
     }
+
+    public class FeedStockUOMVM
+    {
+        public int intRinFeedStockUOMId { get; set; }
+        public int? intUnitMeasureId { get; set; }
+        public string strRinFeedStockUOMCode { get; set; }
+        public string strUnitMeasure { get; set; }
+    }
 }

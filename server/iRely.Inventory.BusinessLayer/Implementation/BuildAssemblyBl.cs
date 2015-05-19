@@ -45,7 +45,7 @@ namespace iRely.Inventory.BusinessLayer
                     strDescription = p.strDescription
                 })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intBuildAssemblyId").ToListAsync();
 
             return new SearchResult()
             {

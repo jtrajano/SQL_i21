@@ -26,7 +26,7 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetPackedUOM>()
                 .Where(p => p.strUnitType == "Packed")
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intUnitMeasureId").ToListAsync();
 
             return new SearchResult()
             {

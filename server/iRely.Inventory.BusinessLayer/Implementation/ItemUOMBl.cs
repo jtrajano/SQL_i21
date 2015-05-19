@@ -69,7 +69,7 @@ namespace iRely.Inventory.BusinessLayer
                     }
                 )
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemUOMId").ToListAsync();
 
             return new SearchResult()
             {

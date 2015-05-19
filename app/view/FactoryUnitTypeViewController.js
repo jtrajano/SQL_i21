@@ -63,7 +63,7 @@ Ext.define('Inventory.view.FactoryUnitTypeViewController', {
     setupContext : function(options){
         var me = this,
             win = options.window,
-            store = Ext.create('Inventory.store.FactoryUnitType', { pageSize: 1 });
+            store = Ext.create('Inventory.store.StorageUnitType', { pageSize: 1 });
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,

@@ -31,7 +31,7 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<tblICCommodity>()
                 .Include("tblICCommodityUnitMeasures.tblICUnitMeasure")                
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
 
             return new SearchResult()
             {

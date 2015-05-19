@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedFeedStockCode', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/RinFeedStock/Search'
+                    read: '../Inventory/api/FeedStock/Search'
                 },
                 reader: {
                     type: 'json',

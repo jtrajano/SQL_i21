@@ -46,7 +46,7 @@ namespace iRely.Inventory.BusinessLayer
                     ysnPosted = p.ysnPosted,
                 })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryTransferId").ToListAsync();
 
             return new SearchResult()
             {

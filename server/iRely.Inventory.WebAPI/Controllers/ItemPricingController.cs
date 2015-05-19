@@ -40,7 +40,14 @@ namespace iRely.Inventory.WebApi
         {
             _bl = bl;
         }
-        
+
+        [HttpGet]
+        [ActionName("GetPricingLevels")]
+        public async Task<HttpResponseMessage> GetPricingLevels(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetPricingLevels(param));
+        }
+
     }
 
     public class ItemSpecialPricingController : BaseApiController<tblICItemSpecialPricing>

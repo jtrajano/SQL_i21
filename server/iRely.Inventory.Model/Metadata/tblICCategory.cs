@@ -214,10 +214,50 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
+        private string _locationType;
+        [NotMapped]
+        public string strLocationType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_locationType))
+                    if (tblSMCompanyLocation != null)
+                        return tblSMCompanyLocation.strLocationType;
+                    else
+                        return null;
+                else
+                    return _locationType;
+            }
+            set
+            {
+                _locationType = value;
+            }
+        }
+        [NotMapped]
+        public int? intCompanyLocationId
+        {
+            get
+            {
+                if (tblSMCompanyLocation != null)
+                    return tblSMCompanyLocation.intCompanyLocationId;
+                else
+                    return null;
+            }
+        }
 
         public tblICCategory tblICCategory { get; set; }
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
+    }
+
+    public class CategoryLocationVM
+    {
+        public int intCategoryLocationId { get; set; }
+        public int intCategoryId { get; set; }
+        public int? intLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public string strLocationType { get; set; }
+        public int? intCompanyLocationId { get; set; }
     }
 
     public class tblICCategoryUOM : BaseEntity

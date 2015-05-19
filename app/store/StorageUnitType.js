@@ -1,19 +1,19 @@
 /**
  * Created by rnkumashi on 19-09-2014.
  */
-Ext.define('Inventory.store.FactoryUnitType', {
+Ext.define('Inventory.store.StorageUnitType', {
     extend: 'Ext.data.Store',
 
     requires: [
-        'Inventory.model.FactoryUnitType'
+        'Inventory.model.StorageUnitType'
     ],
 
     constructor: function(cfg) {
         var me = this;
         cfg = cfg || {};
         me.callParent([Ext.apply({
-            model: 'Inventory.model.FactoryUnitType',
-            storeId: 'FactoryUnitType',
+            model: 'Inventory.model.StorageUnitType',
+            storeId: 'StorageUnitType',
             pageSize: 50,
             batchActions: true,
             proxy: {

@@ -50,5 +50,16 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetAssemblyItems(param));
         }
 
+        [HttpGet]
+        [ActionName("DuplicateItem")]
+        public HttpResponseMessage DuplicateItem(int ItemId)
+        {
+            var NewItemId = _bl.DuplicateItem(ItemId);
+            return Request.CreateResponse(HttpStatusCode.OK, new
+            {
+                id = NewItemId
+            });
+        }
+
     }
 }

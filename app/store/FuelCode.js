@@ -20,10 +20,10 @@ Ext.define('Inventory.store.FuelCode', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/RinFuel/GetRinFuels',
-                    update: '../Inventory/api/RinFuel/PutRinFuels',
-                    create: '../Inventory/api/RinFuel/PostRinFuels',
-                    destroy: '../Inventory/api/RinFuel/DeleteRinFuels'
+                    read: '../Inventory/api/FuelCode/Get',
+                    update: '../Inventory/api/FuelCode/Put',
+                    create: '../Inventory/api/FuelCode/Post',
+                    destroy: '../Inventory/api/FuelCode/Delete'
                 },
                 reader: {
                     type: 'json',

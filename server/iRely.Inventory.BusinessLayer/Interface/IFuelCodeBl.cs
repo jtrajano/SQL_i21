@@ -9,8 +9,8 @@ using iRely.Inventory.Model;
 
 namespace iRely.Inventory.BusinessLayer
 {
-    public interface ICategoryLocationBl : IBusinessLayer<tblICCategoryLocation>
+    public interface IFuelCodeBl : IBusinessLayer<tblICRinFuel>
     {
-        
+
     }
 }

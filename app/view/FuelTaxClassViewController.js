@@ -22,7 +22,7 @@ Ext.define('Inventory.view.FuelTaxClassViewController', {
             title:  'Search Fuel Tax Class',
             type: 'Inventory.FuelTaxClass',
             api: {
-                read: '../Inventory/api/FuelTaxClass/SearchFuelTaxClasses'
+                read: '../Inventory/api/FuelTaxClass/Search'
             },
             columns: [
                 {dataIndex: 'intFuelTaxClassId',text: "Fuel Tax Class Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

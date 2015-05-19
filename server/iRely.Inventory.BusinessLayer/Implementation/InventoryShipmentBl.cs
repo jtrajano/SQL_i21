@@ -35,7 +35,7 @@ namespace iRely.Inventory.BusinessLayer
                     dtmShipDate = p.dtmShipDate
                 })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
 
             return new SearchResult()
             {

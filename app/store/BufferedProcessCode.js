@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedProcessCode', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/RinProcess/GetRinProcesses'
+                    read: '../Inventory/api/ProcessCode/Search'
                 },
                 reader: {
                     type: 'json',

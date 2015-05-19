@@ -1,20 +1,20 @@
 /**
  * Created by LZabala on 11/12/2014.
  */
-Ext.define('Inventory.store.BufferedFactoryUnitType', {
+Ext.define('Inventory.store.BufferedStorageUnitType', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.icbufferedfactoryunittype',
+    alias: 'store.icbufferedstorageunittype',
 
     requires: [
-        'Inventory.model.FactoryUnitType'
+        'Inventory.model.StorageUnitType'
     ],
 
     constructor: function(cfg) {
         var me = this;
         cfg = cfg || {};
         me.callParent([Ext.apply({
-            model: 'Inventory.model.FactoryUnitType',
-            storeId: 'BufferedFactoryUnitType',
+            model: 'Inventory.model.StorageUnitType',
+            storeId: 'BufferedStorageUnitType',
             pageSize: 50,
             batchActions: true,
             remoteFilter: true,

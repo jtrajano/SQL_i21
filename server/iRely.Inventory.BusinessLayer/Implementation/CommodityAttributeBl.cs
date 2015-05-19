@@ -31,7 +31,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICCommodityOrigin>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
 
             return new SearchResult()
             {
@@ -49,7 +49,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICCommodityProductType>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
 
             return new SearchResult()
             {
@@ -67,7 +67,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICCommodityRegion>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
 
             return new SearchResult()
             {
@@ -85,7 +85,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICCommoditySeason>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
 
             return new SearchResult()
             {
@@ -103,7 +103,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICCommodityClassVariant>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
 
             return new SearchResult()
             {
@@ -121,7 +121,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICCommodityProductLine>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
 
             return new SearchResult()
             {
@@ -139,7 +139,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICCommodityGrade>()
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intCommodityId").ToListAsync();
 
             return new SearchResult()
             {

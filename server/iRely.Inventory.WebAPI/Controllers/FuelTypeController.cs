@@ -11,11 +11,11 @@ using iRely.Inventory.BusinessLayer;
 
 namespace iRely.Inventory.WebApi
 {
-    public class FuelTaxClass : BaseApiController<tblICFuelTaxClass>
+    public class FuelTypeController : BaseApiController<tblICFuelType>
     {
-        private IFuelTaxClassBl _bl;
+        private IFuelTypeBl _bl;
 
-        public FuelTaxClass(IFuelTaxClassBl bl)
+        public FuelTypeController(IFuelTypeBl bl)
             : base(bl)
         {
             _bl = bl;

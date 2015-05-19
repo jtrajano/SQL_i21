@@ -65,4 +65,22 @@ namespace iRely.Inventory.Model
         public tblICItemLocation tblICItemLocation { get; set; }
         public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
     }
+
+    public class ItemStockVM
+    {
+        public int intItemStockId { get; set; }
+        public int intItemId { get; set; }
+        public int? intItemLocationId { get; set; }
+        public int? intSubLocationId { get; set; }
+        public decimal? dblUnitOnHand { get; set; }
+        public decimal? dblOrderCommitted { get; set; }
+        public decimal? dblOnOrder { get; set; }
+        public decimal? dblBackOrder { get; set; }
+        public decimal? dblLastCountRetail { get; set; }
+        
+        public string strItemNo { get; set; }
+        public string strLocationName { get; set; }
+        public string strSubLocationName { get; set; }
+
+    }
 }

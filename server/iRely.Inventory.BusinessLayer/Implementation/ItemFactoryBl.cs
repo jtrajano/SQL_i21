@@ -26,7 +26,7 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<tblICItemFactoryManufacturingCell>()
                            .Include(p => p.tblICManufacturingCell)
                            .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
             return new SearchResult()
             {

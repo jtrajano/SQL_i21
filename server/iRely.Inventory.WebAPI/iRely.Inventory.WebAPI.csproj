@@ -154,6 +154,10 @@
     <Compile Include="Controllers\CommodityAttributeController.cs" />
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CommodityUOMController.cs" />
+    <Compile Include="Controllers\FeedStockController.cs" />
+    <Compile Include="Controllers\FeedStockUOMController.cs" />
+    <Compile Include="Controllers\FuelCategoryController.cs" />
+    <Compile Include="Controllers\FuelCodeController.cs" />
     <Compile Include="Controllers\InventoryReceiptItemTaxController.cs" />
     <Compile Include="Controllers\InventoryShipmentController.cs" />
     <Compile Include="Controllers\InventoryTransferController.cs" />
@@ -161,8 +165,8 @@
     <Compile Include="Controllers\InventoryAdjustmentController.cs" />
     <Compile Include="Controllers\CountGroupController.cs" />
     <Compile Include="Controllers\DocumentController.cs" />
-    <Compile Include="Controllers\FuelTaxClass.cs" />
-    <Compile Include="Controllers\FuelType.cs" />
+    <Compile Include="Controllers\FuelTaxClassController.cs" />
+    <Compile Include="Controllers\FuelTypeController.cs" />
     <Compile Include="Controllers\ItemAccountController.cs" />
     <Compile Include="Controllers\ItemAssemblyController.cs" />
     <Compile Include="Controllers\ItemBundleController.cs" />
@@ -184,6 +188,7 @@
     <Compile Include="Controllers\LotStatusController.cs" />
     <Compile Include="Controllers\ManufacturerController.cs" />
     <Compile Include="Controllers\PatronageCategoryController.cs" />
+    <Compile Include="Controllers\ProcessCodeController.cs" />
     <Compile Include="Controllers\StatusController.cs" />
     <Compile Include="Controllers\StockReservationController.cs" />
     <Compile Include="Controllers\StorageLocationController.cs" />

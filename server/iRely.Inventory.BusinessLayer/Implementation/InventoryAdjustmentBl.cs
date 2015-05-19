@@ -39,7 +39,7 @@ namespace iRely.Inventory.BusinessLayer
                     ysnPosted = p.ysnPosted
                 })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intInventoryAdjustmentId").ToListAsync();
 
             return new SearchResult()
             {
@@ -193,7 +193,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetPostedLot>()
                            .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intLotId").ToListAsync();
 
             return new SearchResult()
             {

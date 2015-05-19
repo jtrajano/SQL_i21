@@ -79,6 +79,10 @@
     <Compile Include="Implementation\CommodityUOMBl.cs" />
     <Compile Include="Implementation\CountGroupBl.cs" />
     <Compile Include="Implementation\DocumentBl.cs" />
+    <Compile Include="Implementation\FeedStockCodeBl.cs" />
+    <Compile Include="Implementation\FeedStockUOMBl.cs" />
+    <Compile Include="Implementation\FuelCategoryBl.cs" />
+    <Compile Include="Implementation\FuelCodeBl.cs" />
     <Compile Include="Implementation\FuelTaxClassBl.cs" />
     <Compile Include="Implementation\FuelTypeBl.cs" />
     <Compile Include="Implementation\InventoryAdjustmentBl.cs" />
@@ -90,6 +94,7 @@
     <Compile Include="Implementation\LotStatusBl.cs" />
     <Compile Include="Implementation\ManufacturerBl.cs" />
     <Compile Include="Implementation\PatronageCategoryBl.cs" />
+    <Compile Include="Implementation\ProcessCodeBl.cs" />
     <Compile Include="Implementation\StatusBl.cs" />
     <Compile Include="Implementation\StockReservationBl.cs" />
     <Compile Include="Implementation\StorageLocationBl.cs" />
@@ -97,6 +102,10 @@
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
     <Compile Include="Interface\IBuildAssemblyBl.cs" />
+    <Compile Include="Interface\IFeedStockCodeBl.cs" />
+    <Compile Include="Interface\IFeedStockUOMBl.cs" />
+    <Compile Include="Interface\IFuelCategoryBl.cs" />
+    <Compile Include="Interface\IFuelCodeBl.cs" />
     <Compile Include="Interface\IInventoryAdjustmentBl.cs" />
     <Compile Include="Interface\IInventoryReceiptBl.cs" />
     <Compile Include="Interface\IInventoryReceiptItemTaxBl.cs" />
@@ -152,6 +161,7 @@
     <Compile Include="Interface\ILineOfBusinessBl.cs" />
     <Compile Include="Interface\IManufacturerBl.cs" />
     <Compile Include="Interface\IPatronageCategoryBl.cs" />
+    <Compile Include="Interface\IProcessCodeBl.cs" />
     <Compile Include="Interface\IStatusBl.cs" />
     <Compile Include="Interface\IStockReservationBl.cs" />
     <Compile Include="Interface\IStorageLocationBl.cs" />
