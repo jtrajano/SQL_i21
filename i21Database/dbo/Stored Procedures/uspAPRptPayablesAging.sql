@@ -192,10 +192,11 @@ SET @query = '
 	LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.[intEntityVendorId] = C.intEntityId)
 	ON B.[intEntityVendorId] = A.[intEntityVendorId]
 	LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) MainQuery'
 
 
-IF @filter IS NOT NULL
+IF ISNULL(@filter,'') != ''
 BEGIN
 	SET @query = @query + ' WHERE ' + @filter
 END

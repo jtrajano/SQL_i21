@@ -86,7 +86,7 @@ WITH (
 	, [datatype] nvarchar(50)
 )
 
-select * from @temp_xml_table
+--select * from @temp_xml_table
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to] FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SET @innerQuery = 'SELECT 
@@ -138,64 +138,87 @@ END
 
 SET @query = '
 	SELECT * FROM (
-	SELECT
-	A.dtmDate
-	,A.dtmDueDate
-	,B.strVendorId
-	,B.[intEntityVendorId]
-	,A.intBillId
-	,A.strBillId
-	,A.intAccountId
-	,D.strAccountId
-	,tmpAgingSummaryTotal.dblTotal
-	,tmpAgingSummaryTotal.dblAmountPaid
-	,tmpAgingSummaryTotal.dblDiscount
-	,tmpAgingSummaryTotal.dblInterest
-	,tmpAgingSummaryTotal.dblAmountDue
-	,ISNULL(B.strVendorId,'''') + '' - '' + isnull(C.strName,'''') as strVendorIdName 
-	,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 THEN 0 
-			ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
-	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN 0
-			ELSE DATEDIFF(dayofyear,A.dtmDueDate,GETDATE()) END AS intAging
-	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 
-			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dblCurrent,
-		CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 
-			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl1, 
-		CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60
-			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl30, 
-		CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 
-			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl60,
-		CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90  
-			THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl90
-	,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN ''Current''
-			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 THEN ''01 - 30 Days''
-			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60 THEN ''31 - 60 Days''
-			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 THEN ''61 - 90 Days''
-			WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90 THEN ''Over 90'' 
-			ELSE ''Current'' END AS strAge
-	FROM  
-	(
-		SELECT 
-		intBillId
-		,SUM(tmpAPPayables.dblTotal) AS dblTotal
-		,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
-		,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
-		,SUM(tmpAPPayables.dblInterest) AS dblInterest
-		,(SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS dblAmountDue
-		FROM (' 
-				+ @innerQuery +
-			') tmpAPPayables WHERE dblAmount <> 0
-		GROUP BY intBillId
-	) AS tmpAgingSummaryTotal
-	LEFT JOIN dbo.tblAPBill A
-	ON A.intBillId = tmpAgingSummaryTotal.intBillId
-	LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.[intEntityVendorId] = C.intEntityId)
-	ON B.[intEntityVendorId] = A.[intEntityVendorId]
-	LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
-) MainQuery'
+	SELECT 
+		intEntityVendorId
+		,strVendorId
+		,strVendorIdName
+		,SUM(dblCurrent) dblCurrent
+		,SUM(dbl1) dbl1
+		,SUM(dbl30) dbl30
+		,SUM(dbl60) dbl60
+		,SUM(dbl90) dbl90
+		,SUM(dblTotal) dblTotal
+		,SUM(dblAmountPaid) dblAmountPaid
+		,SUM(dblDiscount) dblDiscount
+		,SUM(dblInterest) dblInterest
+		,SUM(dblAmountDue) dblAmountDue
+		,SUM(dblUnappliedAmount) dblUnappliedAmount
+	FROM (
+		SELECT
+		A.dtmDate
+		,A.dtmDueDate
+		,B.strVendorId
+		,B.[intEntityVendorId]
+		,A.intBillId
+		,A.strBillId
+		,A.intAccountId
+		,D.strAccountId
+		,tmpAgingSummaryTotal.dblTotal
+		,tmpAgingSummaryTotal.dblAmountPaid
+		,tmpAgingSummaryTotal.dblDiscount
+		,tmpAgingSummaryTotal.dblInterest
+		,tmpAgingSummaryTotal.dblAmountDue
+		,ISNULL(B.strVendorId,'''') + '' - '' + isnull(C.strName,'''') as strVendorIdName 
+		,CASE WHEN tmpAgingSummaryTotal.dblAmountDue>=0 THEN 0 
+				ELSE tmpAgingSummaryTotal.dblAmountDue END AS dblUnappliedAmount
+		,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN 0
+				ELSE DATEDIFF(dayofyear,A.dtmDueDate,GETDATE()) END AS intAging
+		,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 
+				THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dblCurrent,
+			CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 
+				THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl1, 
+			CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60
+				THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl30, 
+			CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 
+				THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl60,
+			CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90  
+				THEN tmpAgingSummaryTotal.dblAmountDue ELSE 0 END AS dbl90
+		,CASE WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=0 THEN ''Current''
+				WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>0 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=30 THEN ''01 - 30 Days''
+				WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>30 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=60 THEN ''31 - 60 Days''
+				WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>60 AND DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())<=90 THEN ''61 - 90 Days''
+				WHEN DATEDIFF(dayofyear,A.dtmDueDate,GETDATE())>90 THEN ''Over 90'' 
+				ELSE ''Current'' END AS strAge
+		FROM  
+		(
+			SELECT 
+			intBillId
+			,SUM(tmpAPPayables.dblTotal) AS dblTotal
+			,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
+			,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
+			,SUM(tmpAPPayables.dblInterest) AS dblInterest
+			,(SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS dblAmountDue
+			FROM (' 
+					+ @innerQuery +
+				') tmpAPPayables
+			GROUP BY intBillId
+		) AS tmpAgingSummaryTotal
+		LEFT JOIN dbo.tblAPBill A
+		ON A.intBillId = tmpAgingSummaryTotal.intBillId
+		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.[intEntityVendorId] = C.intEntityId)
+		ON B.[intEntityVendorId] = A.[intEntityVendorId]
+		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
+		WHERE dblAmountDue <> 0
+) SubQuery
+	GROUP BY 
+		intEntityVendorId
+		,strVendorId
+		,strVendorIdName
+	) MainQuery
+'
 
 
-IF @filter IS NOT NULL
+IF ISNULL(@filter,'') != ''
 BEGIN
 	SET @query = @query + ' WHERE ' + @filter
 END
