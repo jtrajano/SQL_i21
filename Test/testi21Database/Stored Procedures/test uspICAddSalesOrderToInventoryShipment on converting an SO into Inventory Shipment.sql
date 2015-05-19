@@ -67,8 +67,9 @@ BEGIN
 	-- Fake Sales Order variables 
 	BEGIN 
 		DECLARE @STR_SO_10001 AS NVARCHAR(50) = 'SO-10001'
-		DECLARE @INT_SO_10001 AS INT = 1
-			END
+				,@INT_SO_10001 AS INT = 1
+				,@INT_SO_10001_DETAIL_1  AS INT = 1
+	END
 
 	-- Fake customer variables 
 	BEGIN 
@@ -95,6 +96,8 @@ BEGIN
 
 		-- Create the expected tables 
 		EXEC testi21Database.[Inventory Shipment expected tables]
+
+		DECLARE @Expected_Shipment_Id AS INT = 1
 
 		INSERT INTO expected_tblICInventoryShipment (
 			intInventoryShipmentId
@@ -127,7 +130,7 @@ BEGIN
 			,intConcurrencyId
 		)
 		SELECT 
-			intInventoryShipmentId		= 1
+			intInventoryShipmentId		= @Expected_Shipment_Id
 			,strShipmentNumber			= 'INVSHIP-1'
 			,dtmShipDate				= '01/03/2015'
 			,intOrderType				= @SALES_ORDER_TYPE_ID
@@ -155,6 +158,36 @@ BEGIN
 			,intEntityId				= @intEntityId
 			,intCreatedUserId			= @intUserId
 			,intConcurrencyId			= 1
+
+		INSERT INTO expected_tblICInventoryShipmentItem (
+			intInventoryShipmentId
+			,intSourceId
+			,intLineNo
+			,intItemId
+			,intSubLocationId
+			,dblQuantity
+			,intItemUOMId
+			,dblUnitPrice
+			,intTaxCodeId
+			,intDockDoorId
+			,strNotes
+			,intSort
+			,intConcurrencyId		
+		)
+		SELECT 
+			intInventoryShipmentId	= @Expected_Shipment_Id
+			,intSourceId			= @INT_SO_10001
+			,intLineNo				= @INT_SO_10001_DETAIL_1
+			,intItemId				= @WetGrains
+			,intSubLocationId		= NULL 
+			,dblQuantity			= 10
+			,intItemUOMId			= @WetGrains_BushelUOMId
+			,dblUnitPrice			= 25.10
+			,intTaxCodeId			= NULL
+			,intDockDoorId			= NULL
+			,strNotes				= 'Line detail comments'
+			,intSort				= @INT_SO_10001_DETAIL_1
+			,intConcurrencyId		= 1
 	END
 
 	-- Act
@@ -170,7 +203,103 @@ BEGIN
 	-- Assert
 	BEGIN 
 		-- Check if the output parameter value returned is correct. 
-		EXEC tSQLt.AssertEquals @InventoryShipmentIdResult, 1
+		EXEC tSQLt.AssertEquals @InventoryShipmentIdResult, @Expected_Shipment_Id
+
+		-- Get the actual shipment header record 
+		INSERT INTO actual_tblICInventoryShipment (
+				intInventoryShipmentId
+				,strShipmentNumber
+				,dtmShipDate
+				,intOrderType
+				,strReferenceNumber
+				,dtmRequestedArrivalDate
+				,intShipFromLocationId
+				,intEntityCustomerId
+				,intShipToLocationId
+				,intFreightTermId
+				,strBOLNumber
+				,intShipViaId
+				,strVessel
+				,strProNumber
+				,strDriverId
+				,strSealNumber
+				,strDeliveryInstruction
+				,dtmAppointmentTime
+				,dtmDepartureTime
+				,dtmArrivalTime
+				,dtmDeliveredDate
+				,dtmFreeTime
+				,strReceivedBy
+				,strComment
+				,ysnPosted
+				,intEntityId
+				,intCreatedUserId
+				,intConcurrencyId
+		)
+		SELECT 
+				intInventoryShipmentId
+				,strShipmentNumber
+				,dtmShipDate
+				,intOrderType
+				,strReferenceNumber
+				,dtmRequestedArrivalDate
+				,intShipFromLocationId
+				,intEntityCustomerId
+				,intShipToLocationId
+				,intFreightTermId
+				,strBOLNumber
+				,intShipViaId
+				,strVessel
+				,strProNumber
+				,strDriverId
+				,strSealNumber
+				,strDeliveryInstruction
+				,dtmAppointmentTime
+				,dtmDepartureTime
+				,dtmArrivalTime
+				,dtmDeliveredDate
+				,dtmFreeTime
+				,strReceivedBy
+				,strComment
+				,ysnPosted
+				,intEntityId
+				,intCreatedUserId
+				,intConcurrencyId
+		FROM	dbo.tblICInventoryShipment
+		WHERE	intInventoryShipmentId = @Expected_Shipment_Id
+
+		-- Get the actual shipment detail record(s)
+		INSERT INTO actual_tblICInventoryShipmentItem (
+				intInventoryShipmentId
+				,intSourceId
+				,intLineNo
+				,intItemId
+				,intSubLocationId
+				,dblQuantity
+				,intItemUOMId
+				,dblUnitPrice
+				,intTaxCodeId
+				,intDockDoorId
+				,strNotes
+				,intSort
+				,intConcurrencyId		
+		)
+		SELECT 
+				intInventoryShipmentId	
+				,intSourceId			
+				,intLineNo				
+				,intItemId				
+				,intSubLocationId		
+				,dblQuantity			
+				,intItemUOMId			
+				,dblUnitPrice			
+				,intTaxCodeId			
+				,intDockDoorId			
+				,strNotes				
+				,intSort				
+				,intConcurrencyId		
+		FROM	dbo.tblICInventoryShipmentItem
+		WHERE	intInventoryShipmentId = @Expected_Shipment_Id
 
 		-- Check if the expected data in the tables are created
 		EXEC tSQLt.AssertEqualsTable 'expected_tblICInventoryShipment', 'actual_tblICInventoryShipment'

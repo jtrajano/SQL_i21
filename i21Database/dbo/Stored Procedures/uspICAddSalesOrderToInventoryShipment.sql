@@ -102,25 +102,41 @@ BEGIN
 END
 
 -- Insert the Inventory Shipment detail items 
-	--INSERT INTO dbo.tblICInventoryShipmentItem (
-
-	--)
-	--SELECT	
-
-	--FROM	dbo.tblSalesOrderDetail SODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
-	--			ON ItemUOM.intItemId = SODetail.intItemId
-	--			AND ItemUOM.intItemUOMId = SODetail.intUnitOfMeasureId
-	--		INNER JOIN dbo.tblICUnitMeasure UOM
-	--			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-	--WHERE	SODetail.intPurchaseId = @SalesOrderId
-	--		AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
-
--- Re-update the total cost 
-	--UPDATE	Shipment
-	--SET		dblInvoiceAmount = (
-	--			SELECT	ISNULL(SUM(ISNULL(ShipmentItem.dblOpenReceive, 0) * ISNULL(ShipmentItem.dblUnitCost, 0)) , 0)
-	--			FROM	dbo.tblICInventoryShipmentItem ShipmentItem
-	--			WHERE	ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
-	--		)
-	--FROM	dbo.tblICInventoryShipment Shipment 
-	--WHERE	Shipment.intInventoryShipmentId = @InventoryShipmentId
+BEGIN 
+	INSERT INTO dbo.tblICInventoryShipmentItem (
+			intInventoryShipmentId
+			,intSourceId
+			,intLineNo
+			,intItemId
+			,intSubLocationId
+			,dblQuantity
+			,intItemUOMId
+			,dblUnitPrice
+			,intTaxCodeId
+			,intDockDoorId
+			,strNotes
+			,intSort
+			,intConcurrencyId
+	)
+	SELECT			
+			intInventoryShipmentId	= @InventoryShipmentId
+			,intSourceId			= SODetail.intSalesOrderId
+			,intLineNo				= SODetail.intSalesOrderDetailId
+			,intItemId				= SODetail.intItemId
+			,intSubLocationId		= NULL
+			,dblQuantity			= SODetail.dblQtyOrdered
+			,intItemUOMId			= SODetail.intItemUOMId
+			,dblUnitPrice			= SODetail.dblPrice
+			,intTaxCodeId			= SODetail.intTaxId
+			,intDockDoorId			= NULL
+			,strNotes				= SODetail.strComments
+			,intSort				= SODetail.intSalesOrderDetailId
+			,intConcurrencyId		= 1
+	FROM	dbo.tblSOSalesOrderDetail SODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
+				ON ItemUOM.intItemId = SODetail.intItemId
+				AND ItemUOM.intItemUOMId = SODetail.intItemUOMId
+			INNER JOIN dbo.tblICUnitMeasure UOM
+				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+	WHERE	SODetail.intSalesOrderId = @SalesOrderId
+			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
+END 
