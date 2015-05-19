@@ -1609,6 +1609,7 @@
     <Build Include="dbo\Tables\tblLGDeliveryHeader.sql" />
     <Build Include="dbo\Views\vyuLGDeliveryOpenPickLots.sql" />
     <Build Include="dbo\Views\vyuLGDeliveryOpenPickLotDetails.sql" />
+    <Build Include="dbo\User Defined Types\ScaleTransactionTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
