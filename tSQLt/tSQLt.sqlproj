@@ -61,7 +61,6 @@
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
-    <Folder Include="Assemblies\" />
     <Folder Include="Scripts" />
     <Folder Include="Schema" />
     <Folder Include="tSQLt\" />
@@ -70,23 +69,12 @@
     <Folder Include="tSQLt\Functions\" />
     <Folder Include="tSQLt\Stored Procedures\" />
     <Folder Include="tSQLt\User Defined Types\" />
+    <Folder Include="Assemblies" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\ChangeDbOwner.sql" />
     <None Include="Scripts\SetClrEnabled.sql" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Assemblies\tSQLtCLR.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="tSQLtCLR">
-      <HintPath>Assemblies\tSQLtCLR.dll</HintPath>
-      <SqlAssemblyName>tSQLtCLR</SqlAssemblyName>
-      <IsModelAware>True</IsModelAware>
-      <GenerateSqlClrDdl>False</GenerateSqlClrDdl>
-      <SqlOwnerName>dbo</SqlOwnerName>
-      <SqlPermissionSet>EXTERNAL_ACCESS</SqlPermissionSet>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -225,5 +213,15 @@
     <Build Include="tSQLt\Stored Procedures\Uninstall.sql" />
     <Build Include="tSQLt\Stored Procedures\XmlResultFormatter.sql" />
     <Build Include="tSQLt\User Defined Types\Private.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="tSQLtCLR">
+      <HintPath>Assemblies\tSQLtCLR.dll</HintPath>
+      <SqlAssemblyName>tSQLtCLR</SqlAssemblyName>
+      <IsModelAware>True</IsModelAware>
+      <GenerateSqlClrDdl>False</GenerateSqlClrDdl>
+      <SqlOwnerName>dbo</SqlOwnerName>
+      <SqlPermissionSet>EXTERNAL_ACCESS</SqlPermissionSet>
+    </Reference>
   </ItemGroup>
 </Project>
