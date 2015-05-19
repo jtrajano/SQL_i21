@@ -74,11 +74,10 @@ END
 -- Find the Lot Id
 BEGIN 
 	SELECT	@intLotId = Lot.intLotId
-	FROM	dbo.tblICLot Lot INNER JOIN dbo.tblSMCompanyLocation CompanyLocation
-				ON Lot.intItemId = CompanyLocation.intCompanyLocationId
+	FROM	dbo.tblICLot Lot 
 	WHERE	Lot.strLotNumber = @strLotNumber
 			AND Lot.intItemId = @intItemId
-			AND CompanyLocation.intCompanyLocationId = @intLocationId
+			AND Lot.intLocationId = @intLocationId
 			AND Lot.intSubLocationId = @intSubLocationId
 			AND Lot.intStorageLocationId = @intStorageLocationId
 END 

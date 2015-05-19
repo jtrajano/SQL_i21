@@ -4,7 +4,7 @@ BEGIN
 	EXEC [testi21Database].[Fake inventory items];
 	EXEC testi21Database.[Fake open fiscal year and accounting periods]
 		
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustment';	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustment', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustmentDetail', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICLot', @Identity = 1;	
 
@@ -142,7 +142,15 @@ BEGIN
 			,[intNumber]			= 1
 			,[strModule]			= N'Posting'
 			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
+			,[intConcurrencyId]		= 1	
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 30
+			,[strTransactionType]	= N'Inventory Adjustment'
+			,[strPrefix]			= N'ADJ-'
+			,[intNumber]			= 1001
+			,[strModule]			= N'Inventory'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1	
 
 	-- Create mock data for Lot Numbers
 	DECLARE @ManualLotGrains_Lot_100001 AS INT = 1
@@ -247,6 +255,8 @@ BEGIN
 			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
 
 	DECLARE @intInventoryAdjustmentId AS INT 
+
+	SET IDENTITY_INSERT tblICInventoryAdjustment ON 
 
 	-- ADJ-1
 	BEGIN 
@@ -1161,4 +1171,6 @@ BEGIN
 				,intNewSubLocationId		= NULL  
 				,intNewStorageLocationId	= NULL 
 	END
+
+	SET IDENTITY_INSERT tblICInventoryAdjustment OFF
 END

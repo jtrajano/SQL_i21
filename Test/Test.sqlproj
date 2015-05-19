@@ -581,6 +581,13 @@
     <Build Include="testi21Database\Stored Procedures\test uspICProcessToInventoryShipment for errors thrown by uspICGetItemsForInventoryShipment.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICProcessToInventoryShipment for errors thrown by uspICAddSalesOrderToInventoryShipment.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for a successful post.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid company location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid lot id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid lot status.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid storage location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid sub location id.sql" />
+    <Build Include="testi21Database\Fake Data\Inventory Adjustment expected tables.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

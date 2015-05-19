@@ -116,10 +116,23 @@ BEGIN
 		DECLARE @LOT_STATUS_Active AS INT = 1
 				,@LOT_STATUS_On_Hold AS INT = 2
 				,@LOT_STATUS_Quarantine AS INT = 3
+
+		DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
+				,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
+				,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
+				,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
+				,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
+				,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+
+		DECLARE @ManualLotGrains_Lot_100001 AS INT = 1
+				,@ManualLotGrains_Lot_100002 AS INT = 2
+				,@ManualLotGrains_Lot_100003 AS INT = 3
 	END
 
 	-- Arrange 
 	BEGIN 
+		DECLARE @intInventoryAdjustmentId AS INT 
+
 		-- Call the fake data stored procedures
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
@@ -132,11 +145,6 @@ BEGIN
 				,@Invalid_Lot AS NVARCHAR(50) = 'INVALID LOT'
 	END 	
 
-	-- Assert 
-	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51053			
-	END 
-
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICInventoryAdjustment_CreatePostLotStatusChange	
@@ -148,8 +156,125 @@ BEGIN
 			,@strLotNumber				= @MG_LOT_100001 
 			,@intNewLotStatusId			= @LOT_STATUS_Quarantine 
 			,@intUserId					= 1
-			,@intInventoryAdjustmentId	= NULL
-	END 	
+			,@intInventoryAdjustmentId	= @intInventoryAdjustmentId OUTPUT 
+	END 
+
+	-- Assert 
+	BEGIN 
+		DECLARE @expected_InventoryAdjustment_Id AS INT = 14
+				,@expected_InventoryAdjustment AS NVARCHAR(50) = 'ADJ-1001'
+
+		-- Setup the expected data (HEADER)
+		INSERT INTO expected_tblICInventoryAdjustment (
+				intInventoryAdjustmentId		
+				,intLocationId					
+				,dtmAdjustmentDate				
+				,intAdjustmentType				
+				,strAdjustmentNo				
+				,strDescription					
+				,intSort						
+				,ysnPosted						
+				,intEntityId					
+				,intConcurrencyId				
+				,dtmPostedDate					
+				,dtmUnpostedDate				
+		)
+		SELECT
+				intInventoryAdjustmentId	= @expected_InventoryAdjustment_Id	
+				,intLocationId				= @Default_Location
+				,dtmAdjustmentDate			= '01/30/2014' 		
+				,intAdjustmentType			= @ADJUSTMENT_TYPE_LotStatusChange
+				,strAdjustmentNo			= @expected_InventoryAdjustment
+				,strDescription				= ''
+				,intSort					= 1
+				,ysnPosted					= 1
+				,intEntityId				= 1
+				,intConcurrencyId			= 2
+				,dtmPostedDate				= dbo.fnRemoveTimeOnDate(GETDATE())
+				,dtmUnpostedDate			= NULL 
+
+		-- Setup the expected data (DETAIL)
+		INSERT INTO expected_tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentDetailId	
+				,intInventoryAdjustmentId		
+				,intSubLocationId				
+				,intStorageLocationId			
+				,intItemId						
+				,intLotId						
+				,intLotStatusId					
+				,intNewLotStatusId				
+				,intConcurrencyId						
+		)
+		SELECT 
+				intInventoryAdjustmentDetailId	= 13
+				,intInventoryAdjustmentId		= @expected_InventoryAdjustment_Id
+				,intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId			= @StorageSilo_RM_DL
+				,intItemId						= @ManualLotGrains
+				,intLotId						= @ManualLotGrains_Lot_100001
+				,intLotStatusId					= @LOT_STATUS_Active
+				,intNewLotStatusId				= @LOT_STATUS_Quarantine
+				,intConcurrencyId				= 1
+
+		-- Get the actual data (Detail)
+		INSERT INTO actual_tblICInventoryAdjustment (
+				intInventoryAdjustmentId		
+				,intLocationId					
+				,dtmAdjustmentDate				
+				,intAdjustmentType				
+				,strAdjustmentNo				
+				,strDescription					
+				,intSort						
+				,ysnPosted						
+				,intEntityId					
+				,intConcurrencyId				
+				,dtmPostedDate					
+				,dtmUnpostedDate				
+		)
+		SELECT
+				intInventoryAdjustmentId		
+				,intLocationId					
+				,dtmAdjustmentDate				
+				,intAdjustmentType				
+				,strAdjustmentNo				
+				,strDescription					
+				,intSort						
+				,ysnPosted						
+				,intEntityId					
+				,intConcurrencyId				
+				,dbo.fnRemoveTimeOnDate(dtmPostedDate)	-- Remove the time so that we can test it. 
+				,dtmUnpostedDate	
+		FROM	dbo.tblICInventoryAdjustment 
+		WHERE	intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+		-- Setup the expected data (DETAIL)
+		INSERT INTO actual_tblICInventoryAdjustmentDetail (
+				intInventoryAdjustmentDetailId	
+				,intInventoryAdjustmentId		
+				,intSubLocationId				
+				,intStorageLocationId			
+				,intItemId						
+				,intLotId						
+				,intLotStatusId					
+				,intNewLotStatusId				
+				,intConcurrencyId						
+		)
+		SELECT 
+				intInventoryAdjustmentDetailId	
+				,intInventoryAdjustmentId		
+				,intSubLocationId				
+				,intStorageLocationId			
+				,intItemId						
+				,intLotId						
+				,intLotStatusId					
+				,intNewLotStatusId				
+				,intConcurrencyId				
+		FROM	dbo.tblICInventoryAdjustmentDetail 
+		WHERE	intInventoryAdjustmentId = @intInventoryAdjustmentId
+	END 
+
+	EXEC tSQLt.AssertEqualsTable 'expected_tblICInventoryAdjustment', 'actual_tblICInventoryAdjustment'
+	EXEC tSQLt.AssertEqualsTable 'expected_tblICInventoryAdjustmentDetail', 'actual_tblICInventoryAdjustmentDetail'
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('expected_tblICInventoryAdjustment') IS NOT NULL 
