@@ -3,7 +3,7 @@ AS
 SELECT     
 	D.[intInvoiceDetailId]
 	,D.[intInvoiceId]
-	,D.[intCompanyLocationId]
+	,I.[intCompanyLocationId]
 	,D.[intItemId]
 	,D.[strItemDescription]
 	,D.[intItemUOMId]
@@ -27,7 +27,7 @@ INNER JOIN
 		ON D.[intInvoiceId] = I.[intInvoiceId]
 LEFT OUTER JOIN
 	[tblSMCompanyLocation] L
-		ON D.[intCompanyLocationId] = L.[intCompanyLocationId]
+		ON I.[intCompanyLocationId] = L.[intCompanyLocationId]
 LEFT OUTER JOIN
 	[tblICUnitMeasure] U
 		ON D.[intItemUOMId] = U.[intUnitMeasureId]

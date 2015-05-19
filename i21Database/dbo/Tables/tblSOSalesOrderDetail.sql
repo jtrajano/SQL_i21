@@ -1,7 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSOSalesOrderDetail] (
     [intSalesOrderDetailId] INT             IDENTITY (1, 1) NOT NULL,
     [intSalesOrderId]       INT             NOT NULL,
-    [intCompanyLocationId]  INT             CONSTRAINT [DF_tblSOSalesOrderDetail_intCompanyLocationId] DEFAULT ((0)) NOT NULL,
     [intItemId]             INT             NULL,
     [strItemDescription]    NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intItemUOMId]          INT             NULL,

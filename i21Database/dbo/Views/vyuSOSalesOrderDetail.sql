@@ -4,7 +4,7 @@ SELECT
 	 D.[intSalesOrderDetailId]
     ,D.[intSalesOrderId]
     ,H.[strSalesOrderNumber]  
-    ,D.[intCompanyLocationId]
+    ,H.[intCompanyLocationId]
     ,L.[strLocationName] 
     ,D.[intItemId]
     ,IC.[strItemNo]
@@ -32,7 +32,7 @@ LEFT JOIN
         ON H.[intSalesOrderId] = D.[intSalesOrderId] 
 LEFT JOIN
     [tblSMCompanyLocation] L
-        ON D.[intCompanyLocationId] = L.[intCompanyLocationId]
+        ON H.[intCompanyLocationId] = L.[intCompanyLocationId]
 LEFT JOIN
     [tblICItemUOM] IU
         ON D.[intItemUOMId] = IU.[intItemUOMId]

@@ -576,7 +576,7 @@ BEGIN
 				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
-			AND B.intCompanyLocationId = IP.intLocationId
+			AND A.intCompanyLocationId = IP.intLocationId
 			AND B.intItemUOMId = IP.intItemUnitMeasureId 	
 	INNER JOIN 
 		#tmpPostInvoiceData	P
@@ -647,7 +647,7 @@ BEGIN
 				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
-			AND B.intCompanyLocationId = IP.intLocationId
+			AND A.intCompanyLocationId = IP.intLocationId
 			AND B.intItemUOMId = IP.intItemUnitMeasureId 						
 	INNER JOIN 
 		#tmpPostInvoiceData	P
@@ -1244,7 +1244,7 @@ ELSE
 				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
-			AND B.intCompanyLocationId = IP.intLocationId
+			AND A.intCompanyLocationId = IP.intLocationId
 			AND B.intItemUOMId = IP.intItemUnitMeasureId 					
 		INNER JOIN 
 			#tmpPostInvoiceData	P
@@ -1316,7 +1316,7 @@ ELSE
 				AND ST.intItemLocationId = IP.intItemLocationId
 		) IP
 			ON B.intItemId = IP.intItemId  
-			AND B.intCompanyLocationId = IP.intLocationId
+			AND A.intCompanyLocationId = IP.intLocationId
 			AND B.intItemUOMId = IP.intItemUnitMeasureId 								
 		INNER JOIN 
 			#tmpPostInvoiceData	P
