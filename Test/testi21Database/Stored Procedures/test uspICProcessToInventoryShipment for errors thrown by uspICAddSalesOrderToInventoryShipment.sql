@@ -17,7 +17,6 @@ BEGIN
 		-- Act
 		EXEC tSQLt.ExpectException 
 			@ExpectedMessage = 'Error raised inside uspICAddSalesOrderToInventoryShipment'
-			,@ExpectedErrorNumber = 50000 
 
 		EXEC dbo.uspICProcessToInventoryShipment
 			 @intSourceTransactionId = NULL
