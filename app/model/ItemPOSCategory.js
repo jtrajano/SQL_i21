@@ -20,9 +20,10 @@ Ext.define('Inventory.model.ItemPOSCategory', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
+                            extraParams: { include: 'tblICCategory' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemPOS/GetItemPOSCategories'
+                                read: '../Inventory/api/ItemPOSCategory/Get'
                             },
                             reader: {
                                 type: 'json',

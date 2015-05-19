@@ -19,6 +19,7 @@ Ext.define('Inventory.store.BufferedUnitMeasure', {
             batchActions: true,
             remoteFilter: true,
             proxy: {
+                extraParams: { include: 'tblICUnitMeasureConversions.StockUnitMeasure, vyuICGetUOMConversions' },
                 type: 'rest',
                 api: {
                     read: '../Inventory/api/UnitMeasure/Search'

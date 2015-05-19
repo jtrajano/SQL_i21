@@ -22,19 +22,12 @@ Ext.define('Inventory.store.BufferedStorageType', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/StorageType/GetStorageTypes',
-                    update: '../Inventory/api/StorageType/PutStorageTypes',
-                    create: '../Inventory/api/StorageType/PostStorageTypes',
-                    destroy: '../Inventory/api/StorageType/DeleteStorageTypes'
+                    read: '../Inventory/api/StorageType/Search'
                 },
                 reader: {
                     type: 'json',
                     rootProperty: 'data',
                     messageProperty: 'message'
-                },
-                writer: {
-                    type: 'json',
-                    allowSingle: false
                 }
             }
         }, cfg)]);

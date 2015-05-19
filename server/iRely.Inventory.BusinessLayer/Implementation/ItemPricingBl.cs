@@ -33,35 +33,29 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+    }
 
-        public async Task<SearchResult> GetItemPricingLevels(GetParameter param)
+    public class ItemPricingLevelBl : BusinessLayer<tblICItemPricingLevel>, IItemPricingLevelBl
+    {
+        #region Constructor
+        public ItemPricingLevelBl(IRepository db)
+            : base(db)
         {
-            var query = _db.GetQuery<tblICItemPricingLevel>()
-                .Include("tblICItemUOM.tblICUnitMeasure")
-                .Include("tblICItemLocation.tblSMCompanyLocation")
-                .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
-
-            return new SearchResult()
-            {
-                data = data.AsQueryable(),
-                total = await query.CountAsync()
-            };
+            _db = db;
         }
+        #endregion
 
-        public async Task<SearchResult> GetItemSpecialPricings(GetParameter param)
+    }
+
+    public class ItemSpecialPricingBl : BusinessLayer<tblICItemSpecialPricing>, IItemSpecialPricingBl
+    {
+        #region Constructor
+        public ItemSpecialPricingBl(IRepository db)
+            : base(db)
         {
-            var query = _db.GetQuery<tblICItemSpecialPricing>()
-                .Include("tblICItemUOM.tblICUnitMeasure")
-                .Include("tblICItemLocation.tblSMCompanyLocation")
-                .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
-
-            return new SearchResult()
-            {
-                data = data.AsQueryable(),
-                total = await query.CountAsync()
-            };
+            _db = db;
         }
+        #endregion
+
     }
 }

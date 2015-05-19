@@ -20,9 +20,10 @@ Ext.define('Inventory.model.ItemBundle', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
+                            extraParams: { include: 'BundleItem, tblICItemUOM.tblICUnitMeasure' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemBundle/GetItemBundles'
+                                read: '../Inventory/api/ItemBundle/Get'
                             },
                             reader: {
                                 type: 'json',

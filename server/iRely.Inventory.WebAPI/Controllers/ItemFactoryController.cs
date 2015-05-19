@@ -23,9 +23,23 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        [ActionName("GetItemFactoryManufacturingCells")]
         public async Task<HttpResponseMessage> GetItemFactoryManufacturingCells(GetParameter param)
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemFactoryManufacturingCells(param));
         }
+
+    }
+
+    public class ItemOwnerController : BaseApiController<tblICItemOwner>
+    {
+        private IItemOwnerBl _bl;
+
+        public ItemOwnerController(IItemOwnerBl bl)
+            : base(bl)
+        {
+            _bl = bl;
+        }
+        
     }
 }

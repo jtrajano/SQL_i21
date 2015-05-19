@@ -74,7 +74,7 @@ namespace iRely.Inventory.BusinessLayer
                     strTracking = p.strInventoryTracking
                 })
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
             return new SearchResult()
             {
@@ -91,7 +91,7 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<SearchResult> GetItemStocks(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStock>().Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
             return new SearchResult()
             {
@@ -110,7 +110,7 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<vyuICGetItemStock>()
                 .Include(p => p.tblICItemAccounts)
                 .Include(p => p.tblICItemPricings).Filter(param, true);
-            var data = await query.ExecuteProjection(param).ToListAsync();
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
             return new SearchResult()
             {

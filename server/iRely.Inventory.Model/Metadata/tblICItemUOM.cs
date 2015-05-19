@@ -158,6 +158,23 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryShipmentItemLot> WeightShipmentItemLot { get; set; }
     }
 
+    public class ItemUOMVM
+    {
+        public int intItemUOMId { get; set; }
+        public int intItemId { get; set; }
+        public int? intUnitMeasureId { get; set; }
+        public decimal? dblUnitQty { get; set; }
+        public decimal? dblWeight { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public string strUpcCode { get; set; }
+        public bool ysnStockUnit { get; set; }
+        public bool ysnAllowPurchase { get; set; }
+        public bool ysnAllowSale { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUnitType { get; set; }
+        public string strWeightUOM { get; set; }
+    }
+
     public class WeightUOMVm
     {
         public int intItemUOMId { get; set; }

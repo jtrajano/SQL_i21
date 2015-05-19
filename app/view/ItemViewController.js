@@ -359,20 +359,6 @@ Ext.define('Inventory.view.ItemViewController', {
             txtMask2: '{current.strMask2}',
             txtMask3: '{current.strMask3}',
 
-            //-------//
-            //UPC Tab//
-            //-------//
-            grdUPC: {
-                colUPCUnitMeasure: {
-                    dataIndex: 'strUnitMeasure',
-                    editor: {
-                        store: '{upcUom}'
-                    }
-                },
-                colUPCUnitQty: 'dblUnitQty',
-                colUPCCode: 'strUPCCode'
-            },
-
             //-------------------//
             //Cross Reference Tab//
             //-------------------//
@@ -825,7 +811,6 @@ Ext.define('Inventory.view.ItemViewController', {
             grdLocationStore = win.down('#grdLocationStore'),
             grdCategory = win.down('#grdCategory'),
             grdGlAccounts = win.down('#grdGlAccounts'),
-            grdUPC = win.down('#grdUPC'),
             grdVendorXref = win.down('#grdVendorXref'),
             grdCustomerXref = win.down('#grdCustomerXref'),
             grdContractItem = win.down('#grdContractItem'),
@@ -875,13 +860,6 @@ Ext.define('Inventory.view.ItemViewController', {
                         grid: grdLocationStore,
                         deleteButton : grdLocationStore.down('#btnDeleteLocation'),
                         position: 'none'
-                    })
-                },
-                {
-                    key: 'tblICItemUPCs',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: grdUPC,
-                        deleteButton : win.down('#btnDeleteUPC')
                     })
                 },
                 {
@@ -1211,15 +1189,6 @@ Ext.define('Inventory.view.ItemViewController', {
                     grdServiceLevelAgreement.getView().refresh();
                 else
                     grdServiceLevelAgreement.store.load();
-                break;
-
-            case 'pgeUPC':
-                var pgeUPC = tabPanel.down('#pgeUPC');
-                var grdUPC = pgeUPC.down('#grdUPC');
-                if (grdUPC.store.complete === true)
-                    grdUPC.getView().refresh();
-                else
-                    grdUPC.store.load();
                 break;
 
             case 'pgeXref':
@@ -1663,24 +1632,6 @@ Ext.define('Inventory.view.ItemViewController', {
         current.set('intCategoryId', records[0].get('intCategoryId'));
     }
 },
-
-    // </editor-fold>
-
-    // <editor-fold desc="UPC Tab Methods and Event Handlers">
-
-    onUpcUOMSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepUPC');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colUPCUnitMeasure')
-        {
-            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
-        }
-    },
 
     // </editor-fold>
 
@@ -2409,9 +2360,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboPOSCategoryId": {
                 select: this.onPOSCategorySelect
-            },
-            "#cboUpcUOM": {
-                select: this.onUpcUOMSelect
             },
             "#cboCustXrefLocation": {
                 select: this.onCustomerXrefSelect

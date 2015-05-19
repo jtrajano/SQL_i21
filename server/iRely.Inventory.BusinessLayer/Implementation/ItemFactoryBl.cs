@@ -34,5 +34,18 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+    }
+
+    public class ItemOwnerBl : BusinessLayer<tblICItemOwner>, IItemOwnerBl
+    {
+        #region Constructor
+        public ItemOwnerBl(IRepository db)
+            : base(db)
+        {
+            _db = db;
+        }
+        #endregion
+
     }
 }

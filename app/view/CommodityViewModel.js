@@ -102,6 +102,10 @@ Ext.define('Inventory.view.CommodityViewModel', {
         unitMeasure: {
             type: 'icbuffereduom'
         },
+        uomConversion: {
+            autoLoad: true,
+            type: 'icbuffereduom'
+        },
         glAccount: {
             type: 'glbufaccountid'
         },

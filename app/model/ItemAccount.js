@@ -21,9 +21,10 @@ Ext.define('Inventory.model.ItemAccount', {
                         complete: false,
                         remoteFilter: true,
                         proxy: {
+                            extraParams: { include: 'tblGLAccount, tblGLAccountCategory' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemAccount/GetItemAccounts'
+                                read: '../Inventory/api/ItemAccount/Get'
                             },
                             reader: {
                                 type: 'json',

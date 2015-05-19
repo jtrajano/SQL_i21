@@ -20,9 +20,10 @@ Ext.define('Inventory.model.ItemCommodityCost', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
+                            extraParams: { include: 'tblICItemLocation.tblSMCompanyLocation' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemCommodityCost/GetItemCommodityCosts'
+                                read: '../Inventory/api/ItemCommodityCost/Get'
                             },
                             reader: {
                                 type: 'json',

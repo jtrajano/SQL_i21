@@ -218,4 +218,28 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemCommodityCost> tblICItemCommodityCosts { get; set; }
         
     }
+
+    public class ItemLocationVM
+    {
+        public int intItemLocationId { get; set; }
+        public int intItemId { get; set; }
+        public int? intLocationId { get; set; }
+        public int? intCompanyLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public string strLocationType { get; set; }
+        public int? intVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public string strDescription { get; set; }
+        public int? intCostingMethod { get; set; }
+        public string strCostingMethod { get; set; }
+        public int? intAllowNegativeInventory { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocation { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocation { get; set; }
+        public int? intIssueUOMId { get; set; }
+        public string strIssueUOM { get; set; }
+        public int? intReceiveUOMId { get; set; }
+        public string strReceiveUOM { get; set; }
+    }
 }

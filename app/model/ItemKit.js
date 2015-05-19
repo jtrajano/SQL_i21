@@ -21,9 +21,10 @@ Ext.define('Inventory.model.ItemKit', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
+                            extraParams: { include: 'tblICItemKitDetails.tblICItem, tblICItemKitDetails.tblICItemUOM' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemKit/GetItemKits'
+                                read: '../Inventory/api/ItemKit/Get'
                             },
                             reader: {
                                 type: 'json',

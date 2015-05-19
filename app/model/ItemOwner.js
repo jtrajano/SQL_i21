@@ -20,9 +20,10 @@ Ext.define('Inventory.model.ItemOwner', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
+                            extraParams: { include: 'tblARCustomer' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemFactory/GetItemOwners'
+                                read: '../Inventory/api/ItemOwner/Get'
                             },
                             reader: {
                                 type: 'json',

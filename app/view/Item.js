@@ -3237,9 +3237,9 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'ysnDefault',
+                                                                                    dataIndex: 'ysnStockUnit',
                                                                                     dataType: 'boolean',
-                                                                                    text: 'Default',
+                                                                                    text: 'Stock Unit',
                                                                                     flex: 1
                                                                                 }
                                                                             ],
@@ -4624,8 +4624,8 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colAssemblyDescription',
+                                                        dataIndex: 'string',
                                                         text: 'Description',
                                                         flex: 2
                                                     },

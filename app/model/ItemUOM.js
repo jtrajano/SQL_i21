@@ -22,9 +22,10 @@ Ext.define('Inventory.model.ItemUOM', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
+                            extraParams: { include: 'tblICUnitMeasure, WeightUOM, DimensionUOM, VolumeUOM, tblICUnitMeasure.vyuICGetUOMConversions' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemUnitMeasure/GetItemUnitMeasures'
+                                read: '../Inventory/api/ItemUOM/Get'
                             },
                             reader: {
                                 type: 'json',

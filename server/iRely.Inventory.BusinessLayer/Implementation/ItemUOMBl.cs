@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,37 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+
+        public override async Task<SearchResult> Search(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICItemUOM>()
+                .Include(p => p.tblICUnitMeasure)
+                .Include(p => p.WeightUOM)
+                .Select(p => new ItemUOMVM
+                {
+                    intItemUOMId = p.intItemUOMId,
+                    intItemId = p.intItemId,
+                    intUnitMeasureId = p.intUnitMeasureId,
+                    dblUnitQty = p.dblUnitQty,
+                    dblWeight = p.dblWeight,
+                    intWeightUOMId = p.intWeightUOMId,
+                    strUpcCode = p.strUpcCode,
+                    ysnStockUnit = p.ysnStockUnit,
+                    ysnAllowPurchase = p.ysnAllowPurchase,
+                    ysnAllowSale = p.ysnAllowSale,
+                    strUnitMeasure = p.tblICUnitMeasure.strUnitMeasure,
+                    strUnitType = p.tblICUnitMeasure.strUnitType,
+                    strWeightUOM = p.WeightUOM.strUnitMeasure
+                })
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
 
         public async Task<SearchResult> GetWeightUOMs(GetParameter param)
         {
