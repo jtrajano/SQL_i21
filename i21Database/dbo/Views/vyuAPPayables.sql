@@ -8,6 +8,7 @@ SELECT
 	, 0 AS dblAmountPaid 
 	, dblTotal = ISNULL(A.dblTotal,0) 
 	, dblAmountDue = A.dblAmountDue 
+	, dblWithheld = 0
 	, dblDiscount = 0 
 	, dblInterest = 0 
 	, C1.strVendorId 
@@ -26,6 +27,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	 B.dblPayment AS dblAmountPaid,     
 	 dblTotal = 0 
 	, dblAmountDue = 0 
+	, dblWithheld = B.dblWithheld
 	, B.dblDiscount 
 	, B.dblInterest 
 	, D.strVendorId 

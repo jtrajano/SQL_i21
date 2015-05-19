@@ -443,6 +443,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inbound Shipments')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 48
+			,[strTransactionType]	= N'Site Number'
+			,[strPrefix]			= N''
+			,[intNumber]			= 99
+			,[strModule]			= 'Entity Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Site Number')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

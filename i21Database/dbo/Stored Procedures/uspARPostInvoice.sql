@@ -351,7 +351,7 @@ BEGIN
 				ON A.intInvoiceId = D.intInvoiceId
 		INNER JOIN
 			tblSMCompanyLocation L
-				ON D.intCompanyLocationId = L.intCompanyLocationId				 				
+				ON A.intCompanyLocationId = L.intCompanyLocationId				 				
 		WHERE
 			(D.intAccountId IS NULL OR D.intAccountId = 0)
 			AND (D.intItemId IS NULL OR D.intItemId = 0)

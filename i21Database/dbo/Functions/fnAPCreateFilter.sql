@@ -42,7 +42,7 @@ BEGIN
 							WHEN 'Greater Than Or Eqal' THEN ' >= ' + @from
 							WHEN 'Less Than' THEN ' < ' + @from
 							WHEN 'Less Than Or Equal' THEN ' <= ' + @from END
-				WHEN 'Int'
+				WHEN 'Integer'
 						THEN 
 							CASE @condition
 							WHEN 'BETWEEN' THEN ' BETWEEN ' + @from + ' AND ' + @to

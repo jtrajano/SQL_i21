@@ -42,8 +42,8 @@ IF NOT EXISTS(	SELECT 1
 
 DECLARE @icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @UserId);
 
-EXEC dbo.uspICProcessToItemShipment
-		@intSourceTransactionId = @SalesOrderId
+EXEC dbo.uspICProcessToInventoryShipment
+		 @intSourceTransactionId = @SalesOrderId
 		,@strSourceType = 'Sales Order'
 		,@intUserId = @icUserId
 		,@InventoryShipmentId = @ShipmentId OUTPUT
