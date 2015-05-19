@@ -5,7 +5,7 @@
 	@recap				AS BIT				= 0,
 	@isBatch			AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
-	@userId				AS INT				= 1,
+	@userId				AS INT,
 	@beginDate			AS DATE				= NULL,
 	@endDate			AS DATE				= NULL,
 	@beginTransaction	AS NVARCHAR(50)		= NULL,
