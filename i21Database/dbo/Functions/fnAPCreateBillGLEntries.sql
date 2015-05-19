@@ -61,7 +61,10 @@ BEGIN
 		[dblExchangeRate]				=	1,
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
-		[strJournalLineDescription]		=	'Posted Bill',
+		[strJournalLineDescription]		=	CASE WHEN intTransactionType = 1 THEN 'Posted Bill'
+												WHEN intTransactionType = 2 THEN 'Posted Vendor Prepayment'
+												WHEN intTransactionType = 3 THEN 'Posted Debit Memo'
+											ELSE 'NONE' END,
 		[intJournalLineNo]				=	1,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,

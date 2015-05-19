@@ -107,7 +107,6 @@ BEGIN
 			
 			INSERT INTO [tblSOSalesOrderDetail]
 			   (	[intSalesOrderId]
-				   ,[intCompanyLocationId]
 				   ,[intItemId]
 				   ,[strItemDescription]
 				   ,[intItemUOMId]
@@ -126,7 +125,6 @@ BEGIN
 				)
 			SELECT 
 					@NewSalesOrderId
-				   ,[intCompanyLocationId]
 				   ,[intItemId]
 				   ,[strItemDescription]
 				   ,[intItemUOMId]

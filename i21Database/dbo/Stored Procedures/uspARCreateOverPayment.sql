@@ -129,7 +129,6 @@ SET @NewInvoiceId = @NewId
 
 INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
-	,[intCompanyLocationId]
 	,[intItemId]
 	,[strItemDescription]
 	,[intItemUOMId]
@@ -144,7 +143,6 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intConcurrencyId])
 SELECT
 	intInvoiceId			= @NewId 
-	,intCompanyLocationId	= ISNULL(A.[intLocationId], 0)
 	,intItemId				= NULL
 	,strItemDescription		= 'Overpayment for '+ A.strRecordNumber 
 	,intItemUOMId			= NULL
