@@ -17,3 +17,11 @@ AS
 	FROM	tblEntity		E
 	JOIN	tblAPVendor		V	ON	V.[intEntityVendorId] = E.intEntityId
 	
+	UNION ALL
+	
+	SELECT	E.intEntityId,
+			E.strName,
+			'ShippingLine' AS strEntity,
+			NULL 
+	FROM	tblEntity			E
+	JOIN	tblLGShippingLine	S	ON	S.[intEntityId] = E.intEntityId
