@@ -906,7 +906,6 @@
     <Build Include="dbo\Tables\tblICStorageLocationContainer.sql" />
     <Build Include="dbo\Tables\tblICStorageLocationSku.sql" />
     <Build Include="dbo\Views\vyuARItemUOM.sql" />
-    <Build Include="dbo\Stored Procedures\uspICProcessToItemReceipt.sql" />
     <Build Include="dbo\Functions\fnGetProcessToInventoryReceiptErrors.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\POOrderStatus.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFOOut.sql" />
@@ -1603,6 +1602,8 @@
     <Build Include="dbo\Tables\tblFRBudgetCode.sql" />
     <Build Include="dbo\Tables\tblFRBudgetDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPostConsumptionProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICProcessToItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotStatusChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

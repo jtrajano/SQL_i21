@@ -470,3 +470,7 @@ EXEC sp_addmessage 51116,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51117) EXEC sp_dropmessage 51117, 'us_english'	
 SET @strmessage = 'Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.'
 EXEC sp_addmessage 51117,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51118) EXEC sp_dropmessage 51118, 'us_english'	
+SET @strmessage = 'The lot status is invalid.'
+EXEC sp_addmessage 51118,11,@strmessage,'us_english','False'   

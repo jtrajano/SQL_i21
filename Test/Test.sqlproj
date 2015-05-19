@@ -580,6 +580,7 @@
     <Build Include="testi21Database\Fake Data\Fake data for ship via.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICProcessToInventoryShipment for errors thrown by uspICGetItemsForInventoryShipment.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICProcessToInventoryShipment for errors thrown by uspICAddSalesOrderToInventoryShipment.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tSQLt\tSQLt.sqlproj">
