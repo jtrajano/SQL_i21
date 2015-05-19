@@ -208,7 +208,7 @@ SET @query = '
 		LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.[intEntityVendorId] = C.intEntityId)
 		ON B.[intEntityVendorId] = A.[intEntityVendorId]
 		LEFT JOIN dbo.tblGLAccount D ON  A.intAccountId = D.intAccountId
-		WHERE dblAmountDue <> 0
+		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 ) SubQuery
 	GROUP BY 
 		intEntityVendorId
