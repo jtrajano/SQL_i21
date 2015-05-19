@@ -4560,6 +4560,12 @@ Ext.define('Inventory.view.Item', {
                                                                     hidden: true
                                                                 },
                                                                 {
+                                                                    dataIndex: 'strLotTracking',
+                                                                    dataType: 'string',
+                                                                    text: 'Lot Tracking',
+                                                                    hidden: true
+                                                                },
+                                                                {
                                                                     dataIndex: 'strItemNo',
                                                                     dataType: 'string',
                                                                     text: 'Item Number',
@@ -4629,6 +4635,19 @@ Ext.define('Inventory.view.Item', {
                                                                     dataIndex: 'strUnitType',
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblUnitQty',
+                                                                    dataType: 'float',
+                                                                    text: 'Unit Qty',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnStockUnit',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Stock Unit',
                                                                     flex: 1
                                                                 }
                                                             ],

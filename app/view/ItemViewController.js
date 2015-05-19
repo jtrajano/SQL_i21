@@ -658,7 +658,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 colAssemblyComponent: {
                     dataIndex: 'strItemNo',
                     editor: {
-                        store: '{assemblyItem}'
+                        store: '{assemblyItem}',
+                        defaultFilters: [{
+                            column: 'strLotTracking',
+                            value: 'No'
+                        }]
                     }
                 },
                 colAssemblyQuantity: 'dblQuantity',
@@ -673,8 +677,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colAssemblyUnit: 'dblUnit',
-                colAssemblyCost: 'dblCost'
+                colAssemblyUnit: 'dblUnit'
             },
 
             //------------------//
@@ -2049,6 +2052,7 @@ Ext.define('Inventory.view.ItemViewController', {
         }
         else if (combo.column.itemId === 'colAssemblyUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
+            current.set('dblUnit', records[0].get('dblUnitQty'));
         }
     },
 
