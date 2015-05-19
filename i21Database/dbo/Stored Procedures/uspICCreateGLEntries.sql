@@ -86,7 +86,7 @@ BEGIN
 			INNER JOIN dbo.tblICInventoryTransactionType TransactionTypes
 				ON ItemGLAccount.intTransactionTypeId = TransactionTypes.intTransactionTypeId
 	WHERE	ItemGLAccount.intContraInventoryId IS NULL 			
-			AND TransactionTypes.strName NOT IN ('Build Assembly') -- and it is not in the exempted list. 
+			AND TransactionTypes.strName NOT IN ('Build Assembly','Consume','Produce') -- and it is not in the exempted list. 
 			
 	IF @intItemId IS NOT NULL 
 	BEGIN 

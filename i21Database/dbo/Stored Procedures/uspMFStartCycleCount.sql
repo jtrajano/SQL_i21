@@ -437,18 +437,18 @@ BEGIN TRY
 
 	SELECT CC.intCycleCountSessionId,CC.intCycleCountId
 		,CC.intMachineId
-		,M.strName AS MachineName
+		,M.strName AS strMachineName
 		,CC.intLotId
 		,CC.intItemId
 		,I.strItemNo
 		,I.strDescription
 		,CC.dblQuantity
 		,CC.dblSystemQty
-		,CC.intCreatedUserId CreatedUser
-		,U.strUserName
+		,CC.intCreatedUserId 
+		,U.strUserName strCreatedUser
 		,CC.dtmCreated
 		,CC.intLastModifiedUserId
-		,U1.strUserName LastModifiedUser
+		,U1.strUserName strLastModifiedUser
 		,CC.dtmLastModified
 		,CC.intConcurrencyId
 	FROM tblMFProcessCycleCount CC

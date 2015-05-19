@@ -50,7 +50,7 @@ BEGIN
 	WHILE @counter != @countReceivedMisc
 	BEGIN
 		SET @counter = @counter + 1;
-		SELECT TOP(1) @purchaseId = intPurchaseId, @purchaseDetailId = [intPurchaseDetailId] FROM #tmpReceivedPOMiscItems A INNER JOIN tblPOPurchaseDetail B ON A.[intPurchaseDetailId] = B.intPurchaseDetailId
+		SELECT TOP(1) @purchaseId = intPurchaseId, @purchaseDetailId = B.[intPurchaseDetailId] FROM #tmpReceivedPOMiscItems A INNER JOIN tblPOPurchaseDetail B ON A.[intPurchaseDetailId] = B.intPurchaseDetailId
 		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
 		DELETE FROM #tmpReceivedPOMiscItems WHERE [intPurchaseDetailId] = @purchaseDetailId
 	END
