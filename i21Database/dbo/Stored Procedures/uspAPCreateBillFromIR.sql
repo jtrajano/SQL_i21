@@ -85,7 +85,8 @@ BEGIn
 		[ysnPaid],
 		[intTransactionType],
 		[dblDiscount],
-		[dblWithheld]
+		[dblWithheld],
+		[intStoreLocationId]
 	)
 	OUTPUT inserted.intBillId, @receiptId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId)
 	SELECT
@@ -111,7 +112,8 @@ BEGIn
 		[ysnPaid]				=	0,
 		[intTransactionType]	=	1,
 		[dblDiscount]			=	0,
-		[dblWithheld]			=	0
+		[dblWithheld]			=	0,
+		[intStoreLocationId]	=	A.intLocationId
 	FROM tblICInventoryReceipt A
 	OUTER APPLY 
 	(
