@@ -10091,23 +10091,6 @@
                                             ]
                                         },
                                         {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "flex": 1,
-                                                "itemId": "colAssemblyStock",
-                                                "text": "Stock",
-                                                "width": 60
-                                            },
-                                            "name": "MyNumberColumn17",
-                                            "designerId": "d1adda6d-b146-475a-bb4b-bcb25a292f65"
-                                        },
-                                        {
                                             "type": "Ext.grid.column.Column",
                                             "reference": {
                                                 "name": "columns",
@@ -10206,40 +10189,6 @@
                                             },
                                             "name": "MyNumberColumn21",
                                             "designerId": "9844940a-ad10-4d77-b682-f13ca33a2627"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "flex": 1,
-                                                "itemId": "colAssemblyCost",
-                                                "text": "Cost",
-                                                "width": 70
-                                            },
-                                            "name": "MyNumberColumn22",
-                                            "designerId": "b0610b63-89b2-4859-a842-bdd73cb01f80"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "flex": 1,
-                                                "itemId": "colAssemblyTotal",
-                                                "text": "Total",
-                                                "width": 70
-                                            },
-                                            "name": "MyNumberColumn23",
-                                            "designerId": "922aed58-132b-4d5f-9526-baa7e50413d3"
                                         },
                                         {
                                             "type": "Ext.grid.View",

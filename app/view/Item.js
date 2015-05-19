@@ -4597,14 +4597,6 @@ Ext.define('Inventory.view.Item', {
                                                         }
                                                     },
                                                     {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colAssemblyStock',
-                                                        width: 60,
-                                                        align: 'right',
-                                                        text: 'Stock',
-                                                        flex: 1
-                                                    },
-                                                    {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colAssemblyDescription',
                                                         dataIndex: 'string',
@@ -4651,22 +4643,6 @@ Ext.define('Inventory.view.Item', {
                                                         width: 37,
                                                         align: 'right',
                                                         text: 'Unit Qty',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colAssemblyCost',
-                                                        width: 70,
-                                                        align: 'right',
-                                                        text: 'Cost',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colAssemblyTotal',
-                                                        width: 70,
-                                                        align: 'right',
-                                                        text: 'Total',
                                                         flex: 1
                                                     }
                                                 ],
