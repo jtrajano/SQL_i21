@@ -120,7 +120,7 @@ SET @strmessage = 'Negative stock quantity is not allowed.'
 EXEC sp_addmessage 50029,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50030) EXEC sp_dropmessage 50030, 'us_english'	
-SET @strmessage = 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
+SET @strmessage = 'Unable to generate the Transaction Id. Please ask your local administrator to check the starting numbers setup.'
 EXEC sp_addmessage 50030,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50031) EXEC sp_dropmessage 50031, 'us_english'	
@@ -474,3 +474,12 @@ EXEC sp_addmessage 51117,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51118) EXEC sp_dropmessage 51118, 'us_english'	
 SET @strmessage = 'The lot status is invalid.'
 EXEC sp_addmessage 51118,11,@strmessage,'us_english','False'   
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51119) EXEC sp_dropmessage 51119, 'us_english'	
+SET @strmessage = 'Unable to generate Lot Number. Please ask your local administrator to check the starting numbers setup.'
+EXEC sp_addmessage 51119,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51120) EXEC sp_dropmessage 51120, 'us_english'	
+SET @strmessage = 'Unable to generate the Batch Id. Please ask your local administrator to check the starting numbers setup.'
+EXEC sp_addmessage 51120,11,@strmessage,'us_english','False'
+
