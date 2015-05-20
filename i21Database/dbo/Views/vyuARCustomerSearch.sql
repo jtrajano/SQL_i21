@@ -9,7 +9,8 @@ SELECT
 ,Loc.strAddress
 ,Loc.strCity
 ,Loc.strState
-,Loc.strZipCode 
+,Loc.strZipCode
+,Cus.ysnTaxExempt 
 ,Cus.ysnActive
 ,Cus.intSalespersonId
 ,Cus.intCurrencyId
