@@ -1121,6 +1121,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 2,
+                                                                hidden: true,
                                                                 itemId: 'pnlLotTracking',
                                                                 width: 100,
                                                                 layout: {

@@ -2286,6 +2286,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "container|align": "stretch",
+                                                        "hidden": true,
                                                         "itemId": "pnlLotTracking",
                                                         "layout": "hbox",
                                                         "layout|flex": 2,
