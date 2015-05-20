@@ -11,7 +11,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[strCustomerContract] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDeferPayDate] [datetime] NULL,
 	[dblDeferPayRate] [numeric](5, 2) NULL,
-	[intContractTextId] [int] NOT NULL,
+	[intContractTextId] [int] NULL,
 	[strInternalComments] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[ysnSigned] [bit] NOT NULL CONSTRAINT [DF_tblCTContractHeader_ysnSigned]  DEFAULT ((0)),
 	[ysnPrinted] [bit] NOT NULL CONSTRAINT [DF_tblCTContractHeader_ysnPrinted]  DEFAULT ((0)),

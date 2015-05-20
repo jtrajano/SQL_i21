@@ -83,9 +83,9 @@ AS
 	JOIN	tblICCommodity			CY	ON	CY.intCommodityId			=	CH.intCommodityId
 	JOIN	tblCTContractType		TP	ON	TP.Value					=	CH.intPurchaseSale
 	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	CH.intCommodityUnitMeasureId
-	JOIN	tblCTContractText		TX	ON	TX.intContractTextId		=	CH.intContractTextId
 	JOIN	tblARSalesperson		SP	ON	SP.intEntitySalespersonId   =	CH.intSalespersonId
 	JOIN	tblCTWeightGrade		W1	ON	W1.intWeightGradeId			=	CH.intGradeId
 	JOIN	tblCTWeightGrade		W2	ON	W2.intWeightGradeId			=	CH.intWeightId
 	JOIN	tblSMTerm				TM	ON	TM.intTermID				=	CH.intTermId				LEFT
-	JOIN	tblCTAssociation		AN	ON	AN.intAssociationId			=	CH.intAssociationId
+	JOIN	tblCTAssociation		AN	ON	AN.intAssociationId			=	CH.intAssociationId			LEFT
+	JOIN	tblCTContractText		TX	ON	TX.intContractTextId		=	CH.intContractTextId
