@@ -216,6 +216,18 @@ BEGIN
 				,intNewLotStatusId				= @LOT_STATUS_Quarantine
 				,intConcurrencyId				= 1
 
+		-- Setup the expected data (Lot)
+		INSERT INTO expected_tblICLot (
+			intLotId
+			,strLotNumber
+			,intLotStatusId
+		)
+		SELECT 
+			intLotId			= @ManualLotGrains_Lot_100001
+			,strLotNumber		= @MG_LOT_100001
+			,intLotStatusId		= @LOT_STATUS_Quarantine
+
+
 		-- Get the actual data (Detail)
 		INSERT INTO actual_tblICInventoryAdjustment (
 				intInventoryAdjustmentId		
@@ -247,7 +259,7 @@ BEGIN
 		FROM	dbo.tblICInventoryAdjustment 
 		WHERE	intInventoryAdjustmentId = @intInventoryAdjustmentId
 
-		-- Setup the expected data (DETAIL)
+		-- Get the actual data (DETAIL)
 		INSERT INTO actual_tblICInventoryAdjustmentDetail (
 				intInventoryAdjustmentDetailId	
 				,intInventoryAdjustmentId		
@@ -271,10 +283,25 @@ BEGIN
 				,intConcurrencyId				
 		FROM	dbo.tblICInventoryAdjustmentDetail 
 		WHERE	intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+		-- Get the actual data (Lot)
+		INSERT INTO actual_tblICLot (
+			intLotId
+			,strLotNumber
+			,intLotStatusId
+		)
+		SELECT 
+			intLotId
+			,strLotNumber
+			,intLotStatusId
+		FROM dbo.tblICLot 
+		WHERE intLotId = @ManualLotGrains_Lot_100001
+
 	END 
 
 	EXEC tSQLt.AssertEqualsTable 'expected_tblICInventoryAdjustment', 'actual_tblICInventoryAdjustment'
 	EXEC tSQLt.AssertEqualsTable 'expected_tblICInventoryAdjustmentDetail', 'actual_tblICInventoryAdjustmentDetail'
+	EXEC tSQLt.AssertEqualsTable 'expected_tblICLot', 'actual_tblICLot'
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('expected_tblICInventoryAdjustment') IS NOT NULL 
@@ -283,9 +310,15 @@ BEGIN
 	IF OBJECT_ID('expected_tblICInventoryAdjustmentDetail') IS NOT NULL 
 		DROP TABLE dbo.expected_tblICInventoryAdjustmentDetail
 
+	IF OBJECT_ID('expected_tblICLot') IS NOT NULL 
+		DROP TABLE dbo.expected_tblICLot
+
 	IF OBJECT_ID('actual_tblICInventoryAdjustment') IS NOT NULL 
 		DROP TABLE actual_tblICInventoryAdjustment
 
 	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL 
 		DROP TABLE dbo.actual_tblICInventoryAdjustmentDetail
+
+	IF OBJECT_ID('actual_tblICLot') IS NOT NULL 
+		DROP TABLE dbo.actual_tblICLot
 END 

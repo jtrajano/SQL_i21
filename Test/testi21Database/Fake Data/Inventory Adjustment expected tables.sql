@@ -104,4 +104,80 @@ BEGIN
 		,intSort						INT NULL
 		,intConcurrencyId				INT NULL 
 	)
+
+	CREATE TABLE expected_tblICLot (
+		intLotId					INT NULL 
+		,intItemId					INT NULL
+		,intLocationId				INT NULL
+		,intItemLocationId			INT NULL
+		,intItemUOMId				INT NULL			
+		,strLotNumber				NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL
+		,intSubLocationId			INT NULL
+		,intStorageLocationId		INT NULL
+		,dblQty						NUMERIC(18,6) NULL		
+		,dblLastCost				NUMERIC(18,6) NULL		
+		,dtmExpiryDate				DATETIME NULL
+		,strLotAlias				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+		,intLotStatusId				INT NULL 
+		,intParentLotId				INT NULL
+		,intSplitFromLotId			INT NULL
+		,dblWeight					NUMERIC(18,6) NULL
+		,intWeightUOMId				INT NULL
+		,dblWeightPerQty			NUMERIC(38,20) NULL
+		,intOriginId				INT NULL
+		,strBOLNo					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
+		,strVessel					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 		
+		,strReceiptNumber			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,strMarkings				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+		,stres						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+		,intEntityVendorId			INT NULL		
+		,strVendorLotNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+		,intVendorLocationId		INT NULL
+		,strVendorLocation			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
+		,strContractNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+		,dtmManufacturedDate		DATETIME NULL
+		,ysnReleasedToWarehouse		BIT 
+		,ysnProduced				BIT 
+		,dtmDateCreated				DATETIME NULL
+		,intCreatedUserId			INT NULL
+		,intConcurrencyId			INT NULL 
+	)
+
+	CREATE TABLE actual_tblICLot (
+		intLotId					INT NULL 
+		,intItemId					INT NULL
+		,intLocationId				INT NULL
+		,intItemLocationId			INT NULL
+		,intItemUOMId				INT NULL			
+		,strLotNumber				NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL
+		,intSubLocationId			INT NULL
+		,intStorageLocationId		INT NULL
+		,dblQty						NUMERIC(18,6) NULL		
+		,dblLastCost				NUMERIC(18,6) NULL		
+		,dtmExpiryDate				DATETIME NULL
+		,strLotAlias				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+		,intLotStatusId				INT NULL 
+		,intParentLotId				INT NULL
+		,intSplitFromLotId			INT NULL
+		,dblWeight					NUMERIC(18,6) NULL
+		,intWeightUOMId				INT NULL
+		,dblWeightPerQty			NUMERIC(38,20) NULL
+		,intOriginId				INT NULL
+		,strBOLNo					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
+		,strVessel					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 		
+		,strReceiptNumber			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,strMarkings				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+		,stres						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL 
+		,intEntityVendorId			INT NULL		
+		,strVendorLotNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+		,intVendorLocationId		INT NULL
+		,strVendorLocation			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL 
+		,strContractNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+		,dtmManufacturedDate		DATETIME NULL
+		,ysnReleasedToWarehouse		BIT 
+		,ysnProduced				BIT 
+		,dtmDateCreated				DATETIME NULL
+		,intCreatedUserId			INT NULL
+		,intConcurrencyId			INT NULL 
+	)
 END
