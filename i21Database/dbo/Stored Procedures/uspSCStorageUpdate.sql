@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	 @intTicketId AS INT
 	,@intUserId AS INT
-	,@dblNetUnits AS DECIMAL
+	,@dblNetUnits AS DECIMAL (13,3)
 	,@intEntityId AS INT 
 AS
 
@@ -15,10 +15,11 @@ DECLARE @intCustomerStorageId AS INT
 DECLARE @ysnAddDiscount BIT
 DECLARE @intHoldCustomerStorageId AS INT
 DECLARE @intGRStorageId AS INT
+DECLARE @intScaleStationId AS INT
 DECLARE @strGRStorage AS nvarchar(3)
 
 BEGIN 
-	SELECT	@strGRStorage = SC.strDistributionOption
+	SELECT	@strGRStorage = SC.strDistributionOption, @intScaleStationId = SC.intScaleSetupId
 	FROM	dbo.tblSCTicket SC	        
 	WHERE	SC.intTicketId = @intTicketId		
 END
@@ -27,6 +28,20 @@ BEGIN
 	SELECT	@intGRStorageId = ST.intStorageScheduleTypeId
 	FROM	dbo.tblGRStorageType ST	        
 	WHERE	ST.strStorageTypeCode = @strGRStorage		
+END
+
+IF @intGRStorageId is NULL
+BEGIN
+   	SELECT	@intGRStorageId = ST.intDefaultStorageTypeId
+	FROM	dbo.tblSCScaleSetup ST	        
+	WHERE	ST.intScaleSetupId = @intScaleStationId
+END
+
+IF @intGRStorageId IS NULL 
+BEGIN 
+	-- Raise the error:
+	RAISERROR('Invalid Default Storage Setup - uspSCStorageUpdate', 16, 1);
+	RETURN;
 END
 
 -- Insert the Customer Storage Record 

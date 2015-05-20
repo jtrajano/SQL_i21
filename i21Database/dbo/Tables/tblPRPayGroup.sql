@@ -4,6 +4,7 @@
     [strPayGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strPayPeriod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Bi-Weekly'), 
+	[intBankAccountId] INT NULL, 
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRPayGroup] PRIMARY KEY ([intPayGroupId]), 
@@ -66,3 +67,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPayGroup',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Bank Account',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPayGroup',
+    @level2type = N'COLUMN',
+    @level2name = N'intBankAccountId'
