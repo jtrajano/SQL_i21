@@ -482,4 +482,3 @@ EXEC sp_addmessage 51119,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51120) EXEC sp_dropmessage 51120, 'us_english'	
 SET @strmessage = 'Unable to generate the Batch Id. Please ask your local administrator to check the starting numbers setup.'
 EXEC sp_addmessage 51120,11,@strmessage,'us_english','False'
-
