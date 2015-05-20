@@ -135,15 +135,15 @@ EXEC('
 		SET @TankMonitorEventID = (SELECT TOP 1 intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-021'')
 	
 		--Check for previous tank monitor reading or duplicate reading
-		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading = @rpt_date_ti))	
+		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading = @rpt_date_ti AND intSiteID = @siteId ))	
 		BEGIN
 			SET @resultLog = @resultLog + ''Duplicate Reading'' + char(10)
 			SET @resultLog = @resultLog + ''Exception: Duplicate Reading'' + char(10)
 			RETURN
 		END
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent 
-					WHERE (intEventTypeID = @TankMonitorEventID AND strDescription LIKE ''%'' + CAST(@rpt_date_ti AS NVARCHAR(25)) + ''%'')
-						OR (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading > @rpt_date_ti))	
+					WHERE ((intEventTypeID = @TankMonitorEventID AND strDescription LIKE ''%'' + CAST(@rpt_date_ti AS NVARCHAR(25)) + ''%'')
+						OR (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading > @rpt_date_ti)) AND intSiteID = @siteId)	
 		BEGIN
 			SET @resultLog = @resultLog + ''Reading date is less than the current reading'' + char(10)
 			RETURN 
