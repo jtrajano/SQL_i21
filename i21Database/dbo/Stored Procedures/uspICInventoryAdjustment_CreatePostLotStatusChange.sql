@@ -41,7 +41,7 @@ IF NOT EXISTS (
 )
 BEGIN
 	-- 'Internal Error. The source transaction type provided is invalid or not supported.' 
-	RAISERROR(51121, 11, 1)  
+	RAISERROR(51124, 11, 1)  
 	GOTO _Exit;
 END 
 
@@ -49,7 +49,7 @@ END
 IF @intSourceId IS NULL 
 BEGIN
 	-- 'Internal Error. The source transaction id is invalid.'
-	RAISERROR(51122, 11, 1)  
+	RAISERROR(51125, 11, 1)  
 	GOTO _Exit;
 END 
 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCompleteWorkOrder] (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE [dbo].[uspMFCompleteWorkOrder] (@strXML NVARCHAR(MAX),@strOutputLotNumber nvarchar(50) Output)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -9,7 +9,6 @@ BEGIN TRY
 		,@strVesselNo NVARCHAR(50)
 		,@intUserId INT
 		,@intItemId INT
-		,@strOutputLotNumber NVARCHAR(50)
 		,@strVendorLotNo NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
 		,@intItemUOMId INT
@@ -29,14 +28,20 @@ BEGIN TRY
 		,@intExecutionOrder INT
 		,@dblInputWeight NUMERIC(18, 6)
 		,@intBatchId INT
-		,@dtmCurrentDate datetime
-		,@intSubLocationId int
+		,@dtmCurrentDate DATETIME
+		,@intSubLocationId INT
 		,@ysnNegativeQtyAllowed BIT
-		,@ysnSubLotAllowed Bit
-		,@strRetBatchId nvarchar(40)
+		,@ysnSubLotAllowed BIT
+		,@strRetBatchId NVARCHAR(40)
 		,@intLotId INT
 		,@strLotTracking NVARCHAR(50)
-
+		,@ysnProductionOnly BIT
+		,@ysnAllowMultipleItem BIT
+		,@ysnAllowMultipleLot BIT
+		,@ysnMergeOnMove BIT
+		,@intMachineId int
+		,@ysnLotAlias bit
+		,@strLotAlias nvarchar(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -49,9 +54,15 @@ BEGIN TRY
 		,@dblProduceQty = dblProduceQty
 		,@intProduceUnitMeasureId = intProduceUnitMeasureId
 		,@dblTareWeight = dblTareWeight
-		,@dblUnitQty=dblUnitQty
+		,@dblUnitQty = dblUnitQty
 		,@dblPhysicalCount = dblPhysicalCount
-		,@intPhysicalItemUOMId = (case When intPhysicalItemUOMId=0 Then NULL else intPhysicalItemUOMId End)
+		,@intPhysicalItemUOMId = (
+			CASE 
+				WHEN intPhysicalItemUOMId = 0
+					THEN NULL
+				ELSE intPhysicalItemUOMId
+				END
+			)
 		,@strVesselNo = strVesselNo
 		,@intUserId = intUserId
 		,@strOutputLotNumber = strOutputLotNumber
@@ -59,12 +70,16 @@ BEGIN TRY
 		,@intInputLotId = intInputLotId
 		,@dblInputWeight = dblInputWeight
 		,@intLocationId = intLocationId
-		,@intSubLocationId=intSubLocationId
+		,@intSubLocationId = intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
 		,@intContainerId = intContainerId
 		,@ysnEmptyOutSource = ysnEmptyOutSource
-		,@ysnNegativeQtyAllowed=ysnNegativeQtyAllowed
-		,@ysnSubLotAllowed=ysnSubLotAllowed
+		,@ysnNegativeQtyAllowed = ysnNegativeQtyAllowed
+		,@ysnSubLotAllowed = ysnSubLotAllowed
+		,@ysnProductionOnly = Isnull(ysnProductionOnly,0)
+		,@intMachineId =intMachineId
+		,@ysnLotAlias =ysnLotAlias
+		,@strLotAlias =strLotAlias
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -84,43 +99,118 @@ BEGIN TRY
 			,intInputLotId INT
 			,dblInputWeight NUMERIC(18, 6)
 			,intLocationId INT
-			,intSubLocationId Int
+			,intSubLocationId INT
 			,intStorageLocationId INT
 			,intContainerId INT
 			,ysnEmptyOutSource BIT
 			,ysnNegativeQtyAllowed BIT
 			,ysnSubLotAllowed BIT
+			,ysnProductionOnly BIT
+			,intMachineId int
+			,ysnLotAlias bit
+			,strLotAlias nvarchar(50)
 			)
 
 	BEGIN TRANSACTION
 
-	if @intPhysicalItemUOMId is null
-	Begin
+	IF @intPhysicalItemUOMId IS NULL
+	BEGIN
 		SELECT @intPhysicalItemUOMId = intItemUOMId
 		FROM dbo.tblICItemUOM
 		WHERE intItemId = @intItemId
-		AND intUnitMeasureId in (Select intUnitMeasureId from dbo.tblICUnitMeasure Where strUnitMeasure like '%bag%')
-	End
+			AND intUnitMeasureId IN (
+				SELECT intUnitMeasureId
+				FROM dbo.tblICUnitMeasure
+				WHERE strUnitMeasure LIKE '%bag%'
+				)
+	END
 
-	Update tblMFWorkOrder Set intStatusId =10  Where intWorkOrderId=@intWorkOrderId
+	UPDATE tblMFWorkOrder
+	SET intStatusId = 10
+	WHERE intWorkOrderId = @intWorkOrderId
 
-	Select @dtmCurrentDate=GetDate()
+	SELECT @dtmCurrentDate = GetDate()
 
-	If @intSubLocationId is null or @intSubLocationId=0
-	Select @intSubLocationId=intSubLocationId From dbo.tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+	IF @intSubLocationId IS NULL
+		OR @intSubLocationId = 0
+		SELECT @intSubLocationId = intSubLocationId
+		FROM dbo.tblICStorageLocation
+		WHERE intStorageLocationId = @intStorageLocationId
 
 	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
-	IF (
-			@strOutputLotNumber = ''
-			OR @strOutputLotNumber IS NULL
-			)
-		AND @strLotTracking <> 'Yes - Serial Number'
+	SELECT @ysnAllowMultipleItem = ysnAllowMultipleItem
+		,@ysnAllowMultipleLot = ysnAllowMultipleLot
+		,@ysnMergeOnMove = ysnMergeOnMove
+	FROM dbo.tblICStorageLocation
+	WHERE intStorageLocationId = @intStorageLocationId
+
+	IF @ysnAllowMultipleLot = 1
 	BEGIN
-		EXEC dbo.uspSMGetStartingNumber 24
-			,@strOutputLotNumber OUTPUT
+		IF (
+				@strOutputLotNumber = ''
+				OR @strOutputLotNumber IS NULL
+				)
+			AND @strLotTracking <> 'Yes - Serial Number'
+		BEGIN
+			EXEC dbo.uspSMGetStartingNumber 24
+				,@strOutputLotNumber OUTPUT
+		END
+	END
+	ELSE IF @ysnAllowMultipleLot = 0
+		AND @ysnMergeOnMove = 1
+	BEGIN
+		SELECT @strOutputLotNumber = strLotNumber
+		FROM tblICLot
+		WHERE intStorageLocationId = @intStorageLocationId
+			AND intItemId = @intItemId
+			AND dblWeight > 0
+			AND intLotStatusId = 1
+			AND dtmExpiryDate > Getdate()
+
+		IF @strOutputLotNumber IS NULL or @strOutputLotNumber =''
+		BEGIN
+			EXEC dbo.uspSMGetStartingNumber 24
+				,@strOutputLotNumber OUTPUT
+		END
+	END
+	ELSE IF EXISTS (
+			SELECT *
+			FROM tblICLot
+			WHERE intStorageLocationId = @intStorageLocationId
+				AND dblWeight > 0
+			)
+		AND EXISTS (
+			SELECT *
+			FROM dbo.tblICStorageLocation
+			WHERE intStorageLocationId = @intStorageLocationId
+				AND ysnAllowMultipleItem = 0
+				AND ysnAllowMultipleLot = 0
+				AND ysnMergeOnMove = 0
+			)
+	BEGIN
+		PRINT 'Call Lot Move'
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblICContainer C
+			JOIN dbo.tblICContainerType CT ON C.intContainerTypeId = CT.intContainerTypeId
+				AND CT.ysnAllowMultipleLots = 0
+				AND CT.ysnAllowMultipleItems = 0
+				AND CT.ysnMergeOnMove = 0
+				AND C.intContainerId = @intContainerId
+				AND EXISTS (
+					SELECT 1
+					FROM dbo.tblICLot L
+					WHERE intContainerId = @intContainerId
+						AND L.dblQty > 0
+					)
+			)
+	BEGIN
+		PRINT 'Move the selected lot''s container to Audit container'
 	END
 
 	EXEC dbo.uspSMGetStartingNumber 33
@@ -141,13 +231,13 @@ BEGIN TRY
 		SELECT @intItemUOMId = @intProduceUnitMeasureId
 
 		IF NOT EXISTS (
-		SELECT *
-		FROM dbo.tblICItemUOM
-		WHERE intItemId = @intItemId
-			AND intItemUOMId = @intItemUOMId and ysnStockUnit=1
-		)
+				SELECT *
+				FROM dbo.tblICItemUOM
+				WHERE intItemId = @intItemId
+					AND intItemUOMId = @intItemUOMId
+					AND ysnStockUnit = 1
+				)
 		BEGIN
-
 			RAISERROR (
 					51094
 					,11
@@ -244,22 +334,25 @@ BEGIN TRY
 		WHERE intLotId = @intInputLotId
 	END
 
-	EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-		,@dblProduceQty = @dblProduceQty
-		,@intProduceUOMKey = @intProduceUnitMeasureId
-		,@intBatchId = @intBatchId
-		,@intUserId = @intUserId
+	IF @ysnProductionOnly = 0
+	BEGIN
+		EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+			,@dblProduceQty = @dblProduceQty
+			,@intProduceUOMKey = @intProduceUnitMeasureId
+			,@intBatchId = @intBatchId
+			,@intUserId = @intUserId
 
-	EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
-		,@dblProduceQty = @dblProduceQty
-		,@intProduceUOMKey = @intProduceUnitMeasureId
-		,@intUserId = @intUserId
-		,@ysnNegativeQtyAllowed=@ysnNegativeQtyAllowed
-		,@strRetBatchId=@strRetBatchId Output
+		EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
+			,@dblProduceQty = @dblProduceQty
+			,@intProduceUOMKey = @intProduceUnitMeasureId
+			,@intUserId = @intUserId
+			,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+			,@strRetBatchId = @strRetBatchId OUTPUT
+	END
 
 	EXEC dbo.uspMFValidateCreateLot @strLotNumber = @strOutputLotNumber
 		,@dtmCreated = @dtmPlannedDate
-		,@intShiftId =@intPlannedShiftId
+		,@intShiftId = @intPlannedShiftId
 		,@intItemId = @intItemId
 		,@intStorageLocationId = @intStorageLocationId
 		,@intSubLocationId = @intSubLocationId
@@ -275,7 +368,10 @@ BEGIN TRY
 		,@ysnCreateNewLot = 1
 		,@ysnFGProduction = 0
 		,@ysnIgnoreTolerance = 1
-		
+		,@intMachineId =@intMachineId
+		,@ysnLotAlias =@ysnLotAlias
+		,@strLotAlias =@strLotAlias
+
 	EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
 		,@dblProduceQty = @dblProduceQty
 		,@intProduceUOMKey = @intProduceUnitMeasureId
@@ -285,11 +381,11 @@ BEGIN TRY
 		,@strLotNumber = @strOutputLotNumber
 		,@intContainerId = @intContainerId
 		,@dblTareWeight = @dblTareWeight
-		,@dblUnitQty=@dblUnitQty
+		,@dblUnitQty = @dblUnitQty
 		,@dblPhysicalCount = @dblPhysicalCount
 		,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 		,@intBatchId = @intBatchId
-		,@strBatchId=@strRetBatchId
+		,@strBatchId = @strRetBatchId
 		,@intLotId = @intLotId OUTPUT
 
 	UPDATE dbo.tblICLot
@@ -299,8 +395,8 @@ BEGIN TRY
 	SELECT @strOutputLotNumber = strLotNumber
 	FROM dbo.tblICLot
 	WHERE intLotId = @intLotId
-		
-	Select @strOutputLotNumber as strOutputLotNumber
+
+	SELECT @strOutputLotNumber AS strOutputLotNumber
 
 	COMMIT TRANSACTION
 

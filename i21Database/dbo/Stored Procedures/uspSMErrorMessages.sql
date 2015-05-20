@@ -484,9 +484,21 @@ SET @strmessage = 'Unable to generate the Batch Id. Please ask your local admini
 EXEC sp_addmessage 51120,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51121) EXEC sp_dropmessage 51121, 'us_english'	
-SET @strmessage = 'Internal Error. The source transaction type provided is invalid or not supported.'
-EXEC sp_addmessage 51121,11,@strmessage,'us_english','False'
+SET @strmessage = 'Entered quantity is greater than the configured batch size for the machine'
+EXEC sp_addmessage 51121,11,@strmessage,'us_english','False'  
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51122) EXEC sp_dropmessage 51122, 'us_english'	
+SET @strmessage = 'Lot Alias for Item ID ''%s'' Cannot be blank.'
+EXEC sp_addmessage 51122,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51123) EXEC sp_dropmessage 51123, 'us_english'	
+SET @strmessage = 'No open runs for the target item ''%s''. Cannot produce.'
+EXEC sp_addmessage 51123,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51124) EXEC sp_dropmessage 51124, 'us_english'	
+SET @strmessage = 'Internal Error. The source transaction type provided is invalid or not supported.'
+EXEC sp_addmessage 51124,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51125) EXEC sp_dropmessage 51125, 'us_english'	
 SET @strmessage = 'Internal Error. The source transaction id is invalid.'
-EXEC sp_addmessage 51122,11,@strmessage,'us_english','False'
+EXEC sp_addmessage 51125,11,@strmessage,'us_english','False'
