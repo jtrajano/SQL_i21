@@ -482,3 +482,15 @@ EXEC sp_addmessage 51119,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51120) EXEC sp_dropmessage 51120, 'us_english'	
 SET @strmessage = 'Unable to generate the Batch Id. Please ask your local administrator to check the starting numbers setup.'
 EXEC sp_addmessage 51120,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51121) EXEC sp_dropmessage 51121, 'us_english'	
+SET @strmessage = 'Entered quantity is greater than the configured batch size for the machine'
+EXEC sp_addmessage 51121,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51122) EXEC sp_dropmessage 51122, 'us_english'	
+SET @strmessage = 'Lot Alias for Item ID ''%s'' Cannot be blank.'
+EXEC sp_addmessage 51122,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51123) EXEC sp_dropmessage 51123, 'us_english'	
+SET @strmessage = 'No open runs for the target item ''%s''. Cannot produce.'
+EXEC sp_addmessage 51123,11,@strmessage,'us_english','False'  
