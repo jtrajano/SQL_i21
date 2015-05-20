@@ -704,7 +704,7 @@
     <Build Include="dbo\Tables\tblICItemLocation.sql" />
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
-    <None Include="Scripts\Post-Deployment\IC\1_InventoryTransactionTypes.sql" />
+    <None Include="Scripts\Post-Deployment\IC\01_InventoryTransactionTypes.sql" />
     <Build Include="dbo\Tables\tblPREmployeeDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPREmployeeEarningTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPost.sql" />
@@ -1060,7 +1060,7 @@
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Tables\tblICCostingMethod.sql" />
-    <None Include="Scripts\Post-Deployment\IC\4_CostingMethods.sql" />
+    <None Include="Scripts\Post-Deployment\IC\04_CostingMethods.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLotOut.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
@@ -1172,7 +1172,7 @@
     <Build Include="dbo\Stored Procedures\uspPOUpdateStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateUpdateLotNumber.sql" />
     <Build Include="dbo\Functions\fnCalculateWeightUnitQty.sql" />
-    <None Include="Scripts\Post-Deployment\IC\5_LotStatus.sql" />
+    <None Include="Scripts\Post-Deployment\IC\05_LotStatus.sql" />
     <Build Include="dbo\Functions\fnCalculateCostPerWeight.sql" />
     <Build Include="dbo\Functions\fnGetTotalStockValueFromTransactionBatch.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotTransaction.sql" />
@@ -1211,7 +1211,7 @@
     <Build Include="dbo\Tables\tblSMReminderList.sql" />
     <Build Include="dbo\Views\vyuSMControlPermission.sql" />
     <Build Include="dbo\Views\vyuSMScreenPermission.sql" />
-    <None Include="Scripts\Post-Deployment\IC\6_FixBlankLotNumber.sql" />
+    <None Include="Scripts\Post-Deployment\IC\06_FixBlankLotNumber.sql" />
     <Build Include="dbo\Tables\tblICInventoryGLAccountUsedOnPostLog.sql" />
     <Build Include="dbo\Tables\tblCTBook.sql" />
     <Build Include="dbo\Tables\tblCTSubBook.sql" />
@@ -1611,6 +1611,10 @@
     <Build Include="dbo\Views\vyuLGDeliveryOpenPickLots.sql" />
     <Build Include="dbo\Views\vyuLGDeliveryOpenPickLotDetails.sql" />
     <Build Include="dbo\User Defined Types\ScaleTransactionTableType.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransactionPostingIntegration.sql" />
+    <None Include="Scripts\Post-Deployment\IC\08_InventoryTransactionPostingIntegration.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransactionWithNoCounterAccountCategory.sql" />
+    <None Include="Scripts\Post-Deployment\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1628,12 +1632,12 @@
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\11_FreightTerms.sql" />
     <Build Include="dbo\Views\vyuPREmployee.sql" />
-    <None Include="Scripts\Post-Deployment\IC\2_MaterialNMFC.sql" />
+    <None Include="Scripts\Post-Deployment\IC\02_MaterialNMFC.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillBatch.sql" />
     <Build Include="dbo\Tables\tblFRAccountMonitor.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixPaymentRecordStatus.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixstrBillId.sql" />
-    <None Include="Scripts\Post-Deployment\IC\3_DefaultData.sql" />
+    <None Include="Scripts\Post-Deployment\IC\03_DefaultData.sql" />
     <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\NR\1_NoteTransType.sql" />
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
@@ -1642,7 +1646,7 @@
     <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\QM\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\13_ShortcutKey.sql" />
-    <None Include="Scripts\Post-Deployment\IC\7_Status.sql" />
+    <None Include="Scripts\Post-Deployment\IC\07_Status.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\InsertWriteOffPaymentMethod.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePOAddressInfo.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\2_SalesOrderDetailDefault.sql" />

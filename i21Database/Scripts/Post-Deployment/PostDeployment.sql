@@ -111,13 +111,15 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePOAddressInfo.sql
 
 -- Inventory 
-:r .\IC\1_InventoryTransactionTypes.sql 
-:r .\IC\2_MaterialNMFC.sql 
-:r .\IC\3_DefaultData.sql 
-:r .\IC\4_CostingMethods.sql 
-:r .\IC\5_LotStatus.sql
-:r .\IC\6_FixBlankLotNumber.sql
-:r .\IC\7_Status.sql
+:r .\IC\01_InventoryTransactionTypes.sql 
+:r .\IC\02_MaterialNMFC.sql 
+:r .\IC\03_DefaultData.sql 
+:r .\IC\04_CostingMethods.sql 
+:r .\IC\05_LotStatus.sql
+:r .\IC\06_FixBlankLotNumber.sql
+:r .\IC\07_Status.sql
+:r .\IC\08_InventoryTransactionPostingIntegration.sql
+:r .\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql
 :r .\IC\PatchFor_1510_to_1520.sql
 
 --Help Desk
