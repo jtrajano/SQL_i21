@@ -131,6 +131,10 @@ BEGIN
 
 	-- Arrange 
 	BEGIN 
+		DECLARE @TRANSACTION_TYPE_CONSUME AS INT = 8
+				,@TRANSACTION_TYPE_PRODUCE AS INT = 9
+				,@TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
+
 		DECLARE @intInventoryAdjustmentId AS INT 
 
 		-- Call the fake data stored procedures
@@ -148,15 +152,17 @@ BEGIN
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICInventoryAdjustment_CreatePostLotStatusChange	
-			@intItemId					= @ManualLotGrains 
-			,@dtmDate					= '01/30/2014' 
-			,@intLocationId				= @Default_Location
-			,@intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation 
-			,@intStorageLocationId		= @StorageSilo_RM_DL 
-			,@strLotNumber				= @MG_LOT_100001 
-			,@intNewLotStatusId			= @LOT_STATUS_Quarantine 
-			,@intUserId					= 1
-			,@intInventoryAdjustmentId	= @intInventoryAdjustmentId OUTPUT 
+			@intItemId						= @ManualLotGrains 
+			,@dtmDate						= '01/30/2014' 
+			,@intLocationId					= @Default_Location
+			,@intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation 
+			,@intStorageLocationId			= @StorageSilo_RM_DL 
+			,@strLotNumber					= @MG_LOT_100001 
+			,@intNewLotStatusId				= @LOT_STATUS_Quarantine 
+			,@intSourceId					= 1 
+			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
+			,@intUserId						= 1
+			,@intInventoryAdjustmentId		= @intInventoryAdjustmentId OUTPUT 
 	END 
 
 	-- Assert 

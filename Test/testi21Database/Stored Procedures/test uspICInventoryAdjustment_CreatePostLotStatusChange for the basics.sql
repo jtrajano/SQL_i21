@@ -115,6 +115,10 @@ BEGIN
 
 	-- Arrange 
 	BEGIN 
+		DECLARE @TRANSACTION_TYPE_CONSUME AS INT = 8
+				,@TRANSACTION_TYPE_PRODUCE AS INT = 9
+				,@TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
+
 		-- Call the fake data stored procedures
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
@@ -125,21 +129,25 @@ BEGIN
 
 	-- Assert 
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51053			
+		EXEC tSQLt.ExpectException 
+			@ExpectedMessage = 'Internal Error. The source transaction type provided is invalid or not supported.'
+			,@ExpectedErrorNumber = 51121
 	END 
 
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICInventoryAdjustment_CreatePostLotStatusChange	
-			@intItemId					= NULL 
-			,@dtmDate					= NULL 
-			,@intLocationId				= NULL 
-			,@intSubLocationId			= NULL 
-			,@intStorageLocationId		= NULL 
-			,@strLotNumber				= NULL 
-			,@intNewLotStatusId			= NULL 
-			,@intUserId					= NULL
-			,@intInventoryAdjustmentId	= NULL
+			@intItemId						= NULL 
+			,@dtmDate						= NULL 
+			,@intLocationId					= NULL 
+			,@intSubLocationId				= NULL 
+			,@intStorageLocationId			= NULL 
+			,@strLotNumber					= NULL 
+			,@intNewLotStatusId				= NULL 
+			,@intSourceId					= NULL 
+			,@intSourceTransactionTypeId	= NULL 
+			,@intUserId						= NULL
+			,@intInventoryAdjustmentId		= NULL
 	END 	
 
 	-- Clean-up: remove the tables used in the unit test

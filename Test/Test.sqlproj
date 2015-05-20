@@ -588,6 +588,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid storage location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid sub location id.sql" />
     <Build Include="testi21Database\Fake Data\Inventory Adjustment expected tables.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for allowing a missing Contra Account on Build Assembly.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for allowing a missing Contra Account on Consume.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for allowing a missing Contra Account on Produce.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid source transaction type id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid source transaction id.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

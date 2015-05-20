@@ -120,6 +120,10 @@ BEGIN
 
 	-- Arrange 
 	BEGIN 
+		DECLARE @TRANSACTION_TYPE_CONSUME AS INT = 8
+				,@TRANSACTION_TYPE_PRODUCE AS INT = 9
+				,@TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
+
 		-- Call the fake data stored procedures
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
@@ -127,6 +131,8 @@ BEGIN
 		DECLARE @MG_LOT_100001 AS NVARCHAR(50) = 'MG-LOT-100001'
 				,@MG_LOT_100002 AS NVARCHAR(50) = 'MG-LOT-100002'
 				,@Invalid_Lot AS NVARCHAR(50) = 'INVALID LOT'
+				,@SourceTransactionId AS INT = 1
+				,@intSourceTransactionTypeId AS INT = 1
 	END 	
 
 	-- Assert 
@@ -137,15 +143,17 @@ BEGIN
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICInventoryAdjustment_CreatePostLotStatusChange	
-			@intItemId					= @ManualLotGrains 
-			,@dtmDate					= '01/30/2014' 
-			,@intLocationId				= @NewHaven 
-			,@intSubLocationId			= @FinishedGoods_SubLocation_DefaultLocation  -- Invalid sub location
-			,@intStorageLocationId		= @StorageSilo_RM_DL 
-			,@strLotNumber				= @MG_LOT_100001 
-			,@intNewLotStatusId			= @LOT_STATUS_Quarantine 
-			,@intUserId					= 1
-			,@intInventoryAdjustmentId	= NULL
+			@intItemId						= @ManualLotGrains 
+			,@dtmDate						= '01/30/2014' 
+			,@intLocationId					= @NewHaven 
+			,@intSubLocationId				= @FinishedGoods_SubLocation_DefaultLocation  -- Invalid sub location
+			,@intStorageLocationId			= @StorageSilo_RM_DL 
+			,@strLotNumber					= @MG_LOT_100001 
+			,@intNewLotStatusId				= @LOT_STATUS_Quarantine 
+			,@intSourceId					= 1 
+			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
+			,@intUserId						= 1
+			,@intInventoryAdjustmentId		= NULL
 	END 	
 
 	-- Clean-up: remove the tables used in the unit test
@@ -155,9 +163,9 @@ BEGIN
 	IF OBJECT_ID('expected_tblICInventoryAdjustmentDetail') IS NOT NULL 
 		DROP TABLE dbo.expected_tblICInventoryAdjustmentDetail
 
-	IF OBJECT_ID('actual_tblICInventoryAdjustment') IS NOT NULL 
+	IF OBJECT_ID('actual_tblICInventoryAdjustment') IS NOT NULL
 		DROP TABLE actual_tblICInventoryAdjustment
 
-	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL 
+	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL
 		DROP TABLE dbo.actual_tblICInventoryAdjustmentDetail
 END 

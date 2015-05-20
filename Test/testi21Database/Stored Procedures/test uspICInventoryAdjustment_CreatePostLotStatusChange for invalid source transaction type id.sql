@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid storage location id]
+﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid source transaction type id]
 AS
 BEGIN 
 	-- Variables from Fake items
@@ -123,6 +123,7 @@ BEGIN
 		DECLARE @TRANSACTION_TYPE_CONSUME AS INT = 8
 				,@TRANSACTION_TYPE_PRODUCE AS INT = 9
 				,@TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
+				,@TRANSACTION_TYPE_INVALID AS INT = -1
 
 		-- Call the fake data stored procedures
 		EXEC testi21Database.[Fake data for inventory adjustment table];
@@ -131,11 +132,15 @@ BEGIN
 		DECLARE @MG_LOT_100001 AS NVARCHAR(50) = 'MG-LOT-100001'
 				,@MG_LOT_100002 AS NVARCHAR(50) = 'MG-LOT-100002'
 				,@Invalid_Lot AS NVARCHAR(50) = 'INVALID LOT'
+				,@SourceTransactionId AS INT = 1
+				,@intSourceTransactionTypeId AS INT = 1
 	END 	
 
 	-- Assert 
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51053			
+		EXEC tSQLt.ExpectException 
+			@ExpectedMessage = 'Internal Error. The source transaction type provided is invalid or not supported.'
+			,@ExpectedErrorNumber = 51121			
 	END 
 
 	-- Act
@@ -144,12 +149,12 @@ BEGIN
 			@intItemId						= @ManualLotGrains 
 			,@dtmDate						= '01/30/2014' 
 			,@intLocationId					= @NewHaven 
-			,@intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation 
-			,@intStorageLocationId			= @StorageSilo_FG_DL -- Invalid storage location 
+			,@intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation  
+			,@intStorageLocationId			= @StorageSilo_RM_DL 
 			,@strLotNumber					= @MG_LOT_100001 
 			,@intNewLotStatusId				= @LOT_STATUS_Quarantine 
-			,@intSourceId					= 1
-			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
+			,@intSourceId					= 1 
+			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_INVALID -- Invalid source transaction type id
 			,@intUserId						= 1
 			,@intInventoryAdjustmentId		= NULL
 	END 	
@@ -161,9 +166,9 @@ BEGIN
 	IF OBJECT_ID('expected_tblICInventoryAdjustmentDetail') IS NOT NULL 
 		DROP TABLE dbo.expected_tblICInventoryAdjustmentDetail
 
-	IF OBJECT_ID('actual_tblICInventoryAdjustment') IS NOT NULL 
+	IF OBJECT_ID('actual_tblICInventoryAdjustment') IS NOT NULL
 		DROP TABLE actual_tblICInventoryAdjustment
 
-	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL 
+	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL
 		DROP TABLE dbo.actual_tblICInventoryAdjustmentDetail
 END 

@@ -482,3 +482,11 @@ EXEC sp_addmessage 51119,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51120) EXEC sp_dropmessage 51120, 'us_english'	
 SET @strmessage = 'Unable to generate the Batch Id. Please ask your local administrator to check the starting numbers setup.'
 EXEC sp_addmessage 51120,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51121) EXEC sp_dropmessage 51121, 'us_english'	
+SET @strmessage = 'Internal Error. The source transaction type provided is invalid or not supported.'
+EXEC sp_addmessage 51121,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51122) EXEC sp_dropmessage 51122, 'us_english'	
+SET @strmessage = 'Internal Error. The source transaction id is invalid.'
+EXEC sp_addmessage 51122,11,@strmessage,'us_english','False'

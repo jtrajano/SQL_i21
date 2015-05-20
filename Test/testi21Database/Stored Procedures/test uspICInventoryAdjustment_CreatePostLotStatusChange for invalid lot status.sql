@@ -120,6 +120,10 @@ BEGIN
 
 	-- Arrange 
 	BEGIN 
+		DECLARE @TRANSACTION_TYPE_CONSUME AS INT = 8
+				,@TRANSACTION_TYPE_PRODUCE AS INT = 9
+				,@TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
+
 		-- Call the fake data stored procedures
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
@@ -137,15 +141,17 @@ BEGIN
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICInventoryAdjustment_CreatePostLotStatusChange	
-			@intItemId					= @ManualLotGrains 
-			,@dtmDate					= '01/30/2014' 
-			,@intLocationId				= @Default_Location 
-			,@intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation 
-			,@intStorageLocationId		= @StorageSilo_RM_DL 
-			,@strLotNumber				= @MG_LOT_100001 
-			,@intNewLotStatusId			= @LOT_STATUS_Active -- Invalid status. Item is already active. 
-			,@intUserId					= 1
-			,@intInventoryAdjustmentId	= NULL
+			@intItemId						= @ManualLotGrains 
+			,@dtmDate						= '01/30/2014' 
+			,@intLocationId					= @Default_Location 
+			,@intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation 
+			,@intStorageLocationId			= @StorageSilo_RM_DL 
+			,@strLotNumber					= @MG_LOT_100001 
+			,@intNewLotStatusId				= @LOT_STATUS_Active -- Invalid status. Item is already active. 
+			,@intSourceId					= 1 
+			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
+			,@intUserId						= 1
+			,@intInventoryAdjustmentId		= NULL
 	END 	
 
 	-- Clean-up: remove the tables used in the unit test

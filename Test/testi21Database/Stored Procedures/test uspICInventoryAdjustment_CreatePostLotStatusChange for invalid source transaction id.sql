@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid storage location id]
+﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustment_CreatePostLotStatusChange for invalid source transaction id]
 AS
 BEGIN 
 	-- Variables from Fake items
@@ -135,7 +135,9 @@ BEGIN
 
 	-- Assert 
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51053			
+		EXEC tSQLt.ExpectException 
+			@ExpectedMessage = 'Internal Error. The source transaction id is invalid.'
+			,@ExpectedErrorNumber = 51122			
 	END 
 
 	-- Act
@@ -145,10 +147,10 @@ BEGIN
 			,@dtmDate						= '01/30/2014' 
 			,@intLocationId					= @NewHaven 
 			,@intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation 
-			,@intStorageLocationId			= @StorageSilo_FG_DL -- Invalid storage location 
+			,@intStorageLocationId			= @StorageSilo_RM_DL 
 			,@strLotNumber					= @MG_LOT_100001 
 			,@intNewLotStatusId				= @LOT_STATUS_Quarantine 
-			,@intSourceId					= 1
+			,@intSourceId					= NULL  -- Invalid source transaction id
 			,@intSourceTransactionTypeId	= @TRANSACTION_TYPE_PRODUCE 
 			,@intUserId						= 1
 			,@intInventoryAdjustmentId		= NULL

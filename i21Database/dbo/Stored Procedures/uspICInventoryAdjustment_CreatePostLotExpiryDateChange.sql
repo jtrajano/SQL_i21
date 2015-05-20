@@ -1,14 +1,14 @@
-﻿CREATE PROCEDURE [dbo].[uspICInventoryAdjustment_CreatePostLotStatusChange]
+﻿CREATE PROCEDURE [dbo].[uspICInventoryAdjustment_CreatePostLotExpiryDateChange]
 	@intItemId AS INT
 	,@dtmDate AS DATETIME 
 	,@intLocationId AS INT
 	,@intSubLocationId AS INT
 	,@intStorageLocationId AS INT
 	,@strLotNumber AS NVARCHAR(50)
-	,@intNewLotStatusId AS INT
-	,@intSourceId AS INT
-	,@intSourceTransactionTypeId AS INT
+	,@dtmNewExpiryDate AS DATETIME
 	,@intUserId AS INT 
+	,@intSourceTransactionId AS INT
+	,@intSourceTransactionTypeId AS INT
 	,@intInventoryAdjustmentId AS INT OUTPUT
 AS
 
@@ -18,6 +18,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+
 DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
 		,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
@@ -25,37 +26,15 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
 
-DECLARE @TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
-
 DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
 		,@strAdjustmentNo AS NVARCHAR(40)
 		,@intEntityId AS INT 
 		,@intLotId AS INT 
 
--- Validate the source transaction type id. 
-IF NOT EXISTS (
-	SELECT	TOP 1 1 
-	FROM	dbo.tblICInventoryTransactionPostingIntegration
-	WHERE	intTransactionTypeId = @TRANSACTION_TYPE_INVENTORY_ADJUSTMENT
-			AND intLinkAllowedTransactionTypeId = @intSourceTransactionTypeId
-)
-BEGIN
-	-- 'Internal Error. The source transaction type provided is invalid or not supported.' 
-	RAISERROR(51121, 11, 1)  
-	GOTO _Exit;
-END 
-
--- Validate the source id. 
-IF @intSourceId IS NULL 
-BEGIN
-	-- 'Internal Error. The source transaction id is invalid.'
-	RAISERROR(51122, 11, 1)  
-	GOTO _Exit;
-END 
-
 -- Create the starting number for the inventory adjustment. 
-EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo OUTPUT 
-IF @@ERROR <> 0 GOTO _Exit
+BEGIN
+	EXEC dbo.uspSMGetStartingNumber @InventoryAdjustment_Batch_Id, @strAdjustmentNo OUTPUT 
+END
 
 -- Set the transaction date. 
 SET @dtmDate = ISNULL(@dtmDate, GETDATE());
@@ -78,8 +57,6 @@ BEGIN
 			,intConcurrencyId
 			,dtmPostedDate
 			,dtmUnpostedDate
-			,intSourceId
-			,intSourceTransactionTypeId
 	)
 	SELECT	intLocationId				= @intLocationId
 			,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmDate) 
@@ -91,9 +68,7 @@ BEGIN
 			,intEntityId				= @intEntityId
 			,intConcurrencyId			= 1
 			,dtmPostedDate				= NULL 
-			,dtmUnpostedDate			= NULL	
-			,intSourceTransactionId		= @intSourceId
-			,intSourceTransactionTypeId = @intSourceTransactionTypeId
+			,dtmUnpostedDate			= NULL 
 
 	SELECT @intInventoryAdjustmentId = SCOPE_IDENTITY();
 END
@@ -114,7 +89,7 @@ IF @intLotId IS NULL
 BEGIN 
 	-- Invalid Lot
 	RAISERROR(51053, 11, 1)  
-	GOTO _Exit
+	GOTO _Exit_With_Errors
 END 
 
 -- Raise an error if new lot status is invalid.
@@ -133,7 +108,7 @@ BEGIN
 	BEGIN 
 		-- The lot status is invalid.
 		RAISERROR(51118, 11, 1)  
-		GOTO _Exit
+		GOTO _Exit_With_Errors
 	END
 END 
 
@@ -180,4 +155,4 @@ BEGIN
 		,@intEntityId = @intEntityId
 END 
 
-_Exit: 
+_Exit_With_Errors: 

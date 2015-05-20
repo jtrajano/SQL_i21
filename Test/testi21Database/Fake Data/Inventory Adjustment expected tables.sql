@@ -16,6 +16,8 @@ BEGIN
 		,intConcurrencyId				INT NULL
 		,dtmPostedDate					DATETIME NULL
 		,dtmUnpostedDate				DATETIME NULL 			
+		,intSourceId					INT NULL 
+		,intSourceTransactionTypeId		INT NULL 
 	)
 
 	CREATE TABLE actual_tblICInventoryAdjustment (
@@ -31,6 +33,8 @@ BEGIN
 		,intConcurrencyId				INT NULL
 		,dtmPostedDate					DATETIME NULL
 		,dtmUnpostedDate				DATETIME NULL 		
+		,intSourceId					INT NULL 
+		,intSourceTransactionTypeId		INT NULL 
 	)
 
 	CREATE TABLE expected_tblICInventoryAdjustmentDetail(
