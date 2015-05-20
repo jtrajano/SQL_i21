@@ -24,7 +24,6 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<SearchResult> GetItemStockUOMView(GetParameter param)
         {
             var query = _db.GetQuery<vyuICGetItemStockUOM>()
-                .Where(p => p.dblOnHand > 0)
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 

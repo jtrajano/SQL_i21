@@ -2554,7 +2554,13 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataIndex: 'intItemLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Item Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intLocationId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Location Id',
                                                                                     hidden: true
@@ -2948,7 +2954,13 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataIndex: 'intItemLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Item Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intLocationId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Location Id',
                                                                                     hidden: true
@@ -3101,7 +3113,13 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataIndex: 'intItemLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Item Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intLocationId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Location Id',
                                                                                     hidden: true
@@ -3201,9 +3219,9 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intUnitMeasureId',
+                                                                                    dataIndex: 'intItemUOMId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Unit Of Measure ID',
+                                                                                    text: 'Unit Of Measure Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -3219,6 +3237,7 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    xtype: 'checkcolumn',
                                                                                     dataIndex: 'ysnStockUnit',
                                                                                     dataType: 'boolean',
                                                                                     text: 'Stock Unit',
@@ -3313,7 +3332,13 @@ Ext.define('Inventory.view.Item', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataIndex: 'intItemLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLocationId',
                                                                     dataType: 'numeric',
                                                                     text: 'Location Id',
                                                                     hidden: true
@@ -3499,7 +3524,13 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataIndex: 'intItemLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Item Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intLocationId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Location Id',
                                                                                     hidden: true
@@ -3563,9 +3594,9 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intUnitMeasureId',
+                                                                                    dataIndex: 'intItemUOMId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Unit Of Measure ID',
+                                                                                    text: 'Unit Of Measure Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -3759,7 +3790,13 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataIndex: 'intItemLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Item Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intLocationId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Location Id',
                                                                                     hidden: true
@@ -3804,9 +3841,9 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intUnitMeasureId',
+                                                                                    dataIndex: 'intItemUOMId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Unit Of Measure ID',
+                                                                                    text: 'Unit Of Measure Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -4620,9 +4657,9 @@ Ext.define('Inventory.view.Item', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataIndex: 'intItemUOMId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Unit Of Measure ID',
+                                                                    text: 'Unit Of Measure Id',
                                                                     hidden: true
                                                                 },
                                                                 {
@@ -4635,12 +4672,6 @@ Ext.define('Inventory.view.Item', {
                                                                     dataIndex: 'strUnitType',
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'dblUnitQty',
-                                                                    dataType: 'float',
-                                                                    text: 'Unit Qty',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -4807,9 +4838,9 @@ Ext.define('Inventory.view.Item', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataIndex: 'intItemUOMId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Unit Of Measure ID',
+                                                                    text: 'Unit Of Measure Id',
                                                                     hidden: true
                                                                 },
                                                                 {
@@ -4822,6 +4853,13 @@ Ext.define('Inventory.view.Item', {
                                                                     dataIndex: 'strUnitType',
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnStockUnit',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Stock Unit',
                                                                     flex: 1
                                                                 }
                                                             ],
@@ -5079,9 +5117,9 @@ Ext.define('Inventory.view.Item', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intUnitMeasureId',
+                                                                    dataIndex: 'intItemUOMId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Unit Of Measure ID',
+                                                                    text: 'Unit Of Measure Id',
                                                                     hidden: true
                                                                 },
                                                                 {
@@ -5094,6 +5132,13 @@ Ext.define('Inventory.view.Item', {
                                                                     dataIndex: 'strUnitType',
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnStockUnit',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Stock Unit',
                                                                     flex: 1
                                                                 }
                                                             ],
@@ -5530,7 +5575,13 @@ Ext.define('Inventory.view.Item', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intCompanyLocationId',
+                                                                    dataIndex: 'intItemLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLocationId',
                                                                     dataType: 'numeric',
                                                                     text: 'Location Id',
                                                                     hidden: true
@@ -5550,7 +5601,7 @@ Ext.define('Inventory.view.Item', {
                                                             ],
                                                             itemId: 'cboNoteLocation',
                                                             displayField: 'strLocationName',
-                                                            valueField: 'intCompanyLocationId'
+                                                            valueField: 'strLocationName'
                                                         }
                                                     },
                                                     {
