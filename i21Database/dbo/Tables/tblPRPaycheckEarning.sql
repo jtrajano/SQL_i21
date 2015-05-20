@@ -1,7 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblPRPaycheckEarning](
 	[intPaycheckEarningId] [int] IdENTITY(1,1) NOT NULL,
 	[intPaycheckId] INT NOT NULL,
-	[intEmployeeEarningId] INT NOT NULL,
+	[intEmployeeEarningId] INT NULL,
+	[intTypeEarningId] INT NULL,
 	[strCalculationType] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[dblHours] [numeric](18, 6) NULL,
 	[dblAmount] [numeric](18, 6) NULL,
@@ -12,7 +13,8 @@
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRPaycheckEarning] PRIMARY KEY ([intPaycheckEarningId]),
-	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE, 
+	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPRPaycheckEarning_tblPRTypeEarning] FOREIGN KEY ([intTypeEarningId]) REFERENCES [dbo].[tblPRTypeEarning] ([intTypeEarningId]),
 ) ON [PRIMARY]
 GO
 /****** Object:  Default [DF__tblPRPayc__dblHo__244DAE7E]    Script Date: 08/14/2014 10:50:11 ******/
@@ -137,3 +139,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheckEarning',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Earning Type Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intTypeEarningId'
