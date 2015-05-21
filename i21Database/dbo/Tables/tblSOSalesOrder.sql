@@ -54,20 +54,28 @@ ON dbo.tblSOSalesOrder
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intSalesOrderId INT)
+DECLARE @inserted TABLE(intSalesOrderId INT, strTransactionType NVARCHAR(10))
 DECLARE @count INT = 0
 DECLARE @intSalesOrderId INT
 DECLARE @SalesOrderNumber NVARCHAR(50)
+DECLARE @strTransactionType NVARCHAR(10)
 
 INSERT INTO @inserted
-SELECT intSalesOrderId FROM INSERTED ORDER BY intSalesOrderId
+SELECT intSalesOrderId, strTransactionType FROM INSERTED ORDER BY intSalesOrderId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	
 	--EXEC uspARFixStartingNumbers 17
 	--IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
-	EXEC uspSMGetStartingNumber 29, @SalesOrderNumber OUT
+	IF(@strTransactionType IS NOT NULL AND @strTransactionType = 'Order')
+		BEGIN
+			EXEC uspSMGetStartingNumber 29, @SalesOrderNumber OUT
+		END
+	ELSE
+		BEGIN
+			EXEC uspSMGetStartingNumber 51, @SalesOrderNumber OUT
+		END
 
 	SELECT TOP 1 @intSalesOrderId = intSalesOrderId FROM @inserted
 	
