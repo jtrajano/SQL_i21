@@ -7,6 +7,10 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustment', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustmentDetail', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICLot', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
 
 	-- Item Ids
 	DECLARE @WetGrains AS INT = 1
@@ -195,7 +199,7 @@ BEGIN
 		,dtmExpiryDate			= '01/10/2018'
 		,strLotAlias			= 'Fine grade raw material'
 		,intLotStatusId			= @LOT_STATUS_Active
-		,dblWeight				= 55115.60
+		,dblWeight				= 55115.50
 		,intWeightUOMId			= @ManualGrains_PoundUOM
 		,dblWeightPerQty		= 55.115500
 	UNION ALL 
@@ -356,7 +360,7 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM
 				,intNewWeightUOMId			= NULL 
-				,dblWeight					= @25KgBagUnitQty
+				,dblWeight					= @25KgBagUnitQty * 1000.00
 				,dblNewWeight				= NULL 
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 

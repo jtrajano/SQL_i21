@@ -17,6 +17,7 @@ BEGIN
 		DECLARE @AutoNegative_Default AS INT = 6000
 		DECLARE @InventoryInTransit_Default AS INT = 7000
 		DECLARE @AccountReceivable_Default AS INT = 8000
+		DECLARE @InventoryAdjustment_Default AS INT = 9000
 
 		DECLARE @Inventory_NewHaven AS INT = 1001
 		DECLARE @CostOfGoods_NewHaven AS INT = 2001
@@ -26,6 +27,7 @@ BEGIN
 		DECLARE @AutoNegative_NewHaven AS INT = 6001
 		DECLARE @InventoryInTransit_NewHaven AS INT = 7001
 		DECLARE @AccountReceivable_NewHaven AS INT = 8001
+		DECLARE @InventoryAdjustment_NewHaven AS INT = 9001
 
 		DECLARE @Inventory_BetterHaven AS INT = 1002
 		DECLARE @CostOfGoods_BetterHaven AS INT = 2002
@@ -35,6 +37,7 @@ BEGIN
 		DECLARE @AutoNegative_BetterHaven AS INT = 6002
 		DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
 		DECLARE @AccountReceivable_BetterHaven AS INT = 8002
+		DECLARE @InventoryAdjustment_BetterHaven AS INT = 9002
 
 		-- Constant Variables
 		DECLARE @Group_Asset AS INT = 1
@@ -49,7 +52,7 @@ BEGIN
 		DECLARE @Group_Inventory AS INT = 10
 		DECLARE @Group_MiscExpenses AS INT = 11
 
-		-- Add fake data fro the Account Group
+		-- Add fake data for the Account Group
 		INSERT INTO tblGLAccountGroup (intAccountGroupId, strAccountGroup, strAccountType, intParentGroupId,intGroup,intSort)
 		SELECT				@Group_Asset, 'Asset', 'Asset', 0, 1, 10000
 		UNION ALL SELECT	@Group_Liability, 'Liability', 'Liability', 0, 1, 20000
@@ -104,6 +107,10 @@ BEGIN
 		DECLARE @SegmentId_ACCOUNT_RECEIVABLE AS INT = 8
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_ACCOUNT_RECEIVABLE, '10650', 'ACCOUNT RECEIVABLE', @AccountStructureId_Primary)
 
+		DECLARE @SegmentId_INVENTORY_ADJUSTMENT AS INT = 9
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_INVENTORY_ADJUSTMENT, '20500', 'INVENTORY ADJUSTMENT', @AccountStructureId_Primary)
+
+
 		DECLARE @SegmentId_DEFAULT_LOCATION AS INT = 100
 		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_DEFAULT_LOCATION, '1000', 'DEFAULT', @AccountStructureId_Location)
 
@@ -124,6 +131,7 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_Default, 'AUTO NEGATIVE WHEAT-DEFAULT', '60110-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_Default, 'INVENTORY IN TRANSIT-DEFAULT', '12050-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_Default, 'ACCOUNT RECEIVABLE-DEFAULT', '10650-1000');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_Default, 'INVENTORY ADJUSTMENT-DEFAULT', '20500-1000');
 
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@Inventory_NewHaven, 'INVENTORY WHEAT-NEW HAVEN', '12040-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostOfGoods_NewHaven, 'COST OF GOODS WHEAT-NEW HAVEN', '20100-1001');
@@ -133,6 +141,7 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_NewHaven, 'AUTO NEGATIVE WHEAT-NEW HAVEN', '60110-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_NewHaven, 'INVENTORY IN TRANSIT-NEW HAVEN', '12050-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_NewHaven, 'ACCOUNT RECEIVABLE-NEW HAVEN', '10650-1001');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_NewHaven, 'INVENTORY ADJUSTMENT-NEW HAVEN', '20500-1001');
 
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@Inventory_BetterHaven, 'INVENTORY WHEAT-BETTER HAVEN', '12040-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostOfGoods_BetterHaven, 'COST OF GOODS WHEAT-BETTER HAVEN', '20100-1002');
@@ -142,6 +151,7 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AutoNegative_BetterHaven, 'AUTO NEGATIVE WHEAT-BETTER HAVEN', '60110-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_BetterHaven, 'INVENTORY IN TRANSIT-BETTER HAVEN', '12050-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_BetterHaven, 'ACCOUNT RECEIVABLE-BETTER HAVEN', '10650-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_BetterHaven, 'INVENTORY ADJUSTMENT-BETTER HAVEN', '20500-1002');
 
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Add fake data for Segment Mapping
@@ -179,6 +189,10 @@ BEGIN
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_Default, @SegmentId_ACCOUNT_RECEIVABLE);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_Default, @SegmentId_DEFAULT_LOCATION);
 
+			-- INVENTORY ADJUSTMENT 
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_Default, @SegmentId_INVENTORY_ADJUSTMENT);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_Default, @SegmentId_DEFAULT_LOCATION);
+
 		END 
 
 		-- for NEW HAVEN location 
@@ -214,6 +228,11 @@ BEGIN
 			-- ACCOUNT RECEIVABLE
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_NewHaven, @SegmentId_ACCOUNT_RECEIVABLE);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);
+
+			-- INVENTORY ADJUSTMENT 
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_NewHaven, @SegmentId_INVENTORY_ADJUSTMENT);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_NewHaven, @SegmentId_DEFAULT_LOCATION);
+
 		END 
 
 		-- for BETTER HAVEN location 
@@ -249,5 +268,9 @@ BEGIN
 			-- ACCOUNT RECEIVABLE
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_BetterHaven, @SegmentId_ACCOUNT_RECEIVABLE);
 			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_BetterHaven, @SegmentId_NEW_HAVEN_LOCATION);
+
+			-- INVENTORY ADJUSTMENT 
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_BetterHaven, @SegmentId_INVENTORY_ADJUSTMENT);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_BetterHaven, @SegmentId_DEFAULT_LOCATION);
 		END
 END

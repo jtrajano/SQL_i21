@@ -85,6 +85,8 @@ BEGIN
 	DECLARE @RevalueSold_Default AS INT = 5000 
 	DECLARE @AutoNegative_Default AS INT = 6000
 	DECLARE @InventoryInTransit_Default AS INT = 7000
+	DECLARE @AccountReceivable_Default AS INT = 8000
+	DECLARE @InventoryAdjustment_Default AS INT = 9000
 
 	DECLARE @Inventory_NewHaven AS INT = 1001
 	DECLARE @CostOfGoods_NewHaven AS INT = 2001
@@ -93,6 +95,8 @@ BEGIN
 	DECLARE @RevalueSold_NewHaven AS INT = 5001
 	DECLARE @AutoNegative_NewHaven AS INT = 6001
 	DECLARE @InventoryInTransit_NewHaven AS INT = 7001
+	DECLARE @AccountReceivable_NewHaven AS INT = 8001
+	DECLARE @InventoryAdjustment_NewHaven AS INT = 9001
 
 	DECLARE @Inventory_BetterHaven AS INT = 1002
 	DECLARE @CostOfGoods_BetterHaven AS INT = 2002
@@ -101,6 +105,8 @@ BEGIN
 	DECLARE @RevalueSold_BetterHaven AS INT = 5002
 	DECLARE @AutoNegative_BetterHaven AS INT = 6002
 	DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
+	DECLARE @AccountReceivable_BetterHaven AS INT = 8002
+	DECLARE @InventoryAdjustment_BetterHaven AS INT = 9002
 
 	DECLARE @SegmentId_DEFAULT_LOCATION AS INT = 100
 	DECLARE @SegmentId_NEW_HAVEN_LOCATION AS INT = 101
@@ -127,6 +133,9 @@ BEGIN
 
 	DECLARE @AccountCategoryName_InventoryInTransit AS NVARCHAR(100) = 'Inventory In Transit'
 	DECLARE @AccountCategoryId_InventoryInTransit AS INT = 46
+
+	DECLARE @AccountCategoryName_InventoryAdjustment AS NVARCHAR(100) = 'Inventory Adjustment'
+	DECLARE @AccountCategoryId_InventoryAdjustment AS INT = 59
 
 	-- Declare the item categories
 	DECLARE @HotItems AS INT = 1
@@ -416,6 +425,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @AccountCategoryId_RevalueSold, @RevalueSold_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @AccountCategoryId_AutoNegative, @AutoNegative_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @AccountCategoryId_InventoryInTransit, @InventoryInTransit_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@WetGrains, @AccountCategoryId_InventoryAdjustment, @InventoryAdjustment_Default);
 
 		-- Add the G/L accounts for STICKY GRAINS
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @AccountCategoryId_Inventory, @Inventory_NewHaven);
@@ -425,6 +435,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @AccountCategoryId_RevalueSold, @RevalueSold_NewHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @AccountCategoryId_AutoNegative, @AutoNegative_NewHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @AccountCategoryId_InventoryInTransit, @InventoryInTransit_NewHaven);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@StickyGrains, @AccountCategoryId_InventoryAdjustment, @InventoryAdjustment_NewHaven);
 
 		-- Add the G/L accounts for PREMIUM GRAINS 
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @AccountCategoryId_Inventory, @Inventory_BetterHaven);
@@ -434,6 +445,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @AccountCategoryId_RevalueSold, @RevalueSold_BetterHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @AccountCategoryId_AutoNegative, @AutoNegative_BetterHaven);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @AccountCategoryId_InventoryInTransit, @InventoryInTransit_BetterHaven);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@PremiumGrains, @AccountCategoryId_InventoryAdjustment, @InventoryAdjustment_BetterHaven);
 
 		-- Add the G/L accounts for COLD GRAINS 
 		-- No item level g/l account overrides for cold grains. Use g/l from category
@@ -449,7 +461,7 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_RevalueSold, @RevalueSold_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_AutoNegative, @AutoNegative_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_InventoryInTransit, @InventoryInTransit_Default);
-
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_InventoryAdjustment, @InventoryAdjustment_Default);
 	END
 	
 	-- Create the fake table and data for the unit of measure

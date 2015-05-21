@@ -213,6 +213,7 @@ BEGIN
 			,intNewWeightUOMId
 			,dblWeight
 			,dblNewWeight
+			,dblWeightPerQty
 			,dblCost
 			,dblNewCost
 			,intNewLocationId
@@ -237,6 +238,7 @@ BEGIN
 			,intNewWeightUOMId			= @intNewWeightUOMId
 			,dblWeight					= Lot.dblWeight
 			,dblNewWeight				= @dblNewWeight
+			,dblWeightPerQty			= Lot.dblWeightPerQty
 			,dblCost					= Lot.dblLastCost
 			,dblNewCost					= @dblNewUnitCost
 			,intNewLocationId			= @intNewLocationId
