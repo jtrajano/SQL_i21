@@ -22,6 +22,40 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
+        public override async Task<BusinessResult<tblICItem>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            var msg = result.Exception.Message;
+
+            if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
+            {
+                msg = "Account Category must be unique.";
+            }
+            else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItem_strItemNo'"))
+            {
+                msg = "Item No must be unique.";
+            }
+            else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemPricing'"))
+            {
+                msg = "Item Pricing must be unique per location.";
+            }
+            else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemUOM'"))
+            {
+                msg = "UOM must be unique per Item.";
+            }
+
+            return new BusinessResult<tblICItem>()
+            {
+                success = !result.HasError,
+                message = new MessageResult()
+                {
+                    statusText = msg,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            };
+        }
+
         public override async Task<SearchResult> Search(GetParameter param)
         {
             var query = _db.GetQuery<tblICItem>()
