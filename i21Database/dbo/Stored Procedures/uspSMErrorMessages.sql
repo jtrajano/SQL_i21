@@ -502,3 +502,7 @@ EXEC sp_addmessage 51124,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51125) EXEC sp_dropmessage 51125, 'us_english'	
 SET @strmessage = 'Internal Error. The source transaction id is invalid.'
 EXEC sp_addmessage 51125,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51126) EXEC sp_dropmessage 51126, 'us_english'	
+SET @strmessage = 'Internal Error. The new expiry date is invalid.'
+EXEC sp_addmessage 51126,11,@strmessage,'us_english','False'
