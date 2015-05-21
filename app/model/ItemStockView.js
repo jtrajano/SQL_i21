@@ -8,6 +8,8 @@ Ext.define('Inventory.model.ItemStockView', {
         'Ext.data.Field'
     ],
 
+    idProperty: 'intKey',
+
     fields: [
         { name: 'intKey', type: 'int', allowNull: true },
         { name: 'intItemId', type: 'int', allowNull: true },

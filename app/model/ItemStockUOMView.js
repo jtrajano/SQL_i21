@@ -8,6 +8,8 @@ Ext.define('Inventory.model.ItemStockUOMView', {
         'Ext.data.Field'
     ],
 
+    idProperty: 'intItemStockUOMId',
+
     fields: [
         { name: 'intItemStockUOMId', type: 'int' },
         { name: 'intItemId', type: 'int' },
