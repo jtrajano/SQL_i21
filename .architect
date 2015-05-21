@@ -2184,29 +2184,13 @@
                                                                     "id": "34f0af06-4236-4a61-b532-dbe6d49190d5"
                                                                 },
                                                                 {
-                                                                    "id": "a8637949-68fc-45cd-9d4d-cc92e49d1022"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "id": "d968cec6-c419-43aa-9900-7900e900b7b6",
-                                                            "cn": [
-                                                                {
                                                                     "id": "b047e1a1-e9d3-4e6c-a2cb-65904a7aa1d9"
                                                                 },
-                                                                {
-                                                                    "id": "752a5c36-9e0a-45f3-b8e3-ca85fdd54ea6"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "id": "ef52289c-581c-48ee-b7a1-b7b49b4623d7",
-                                                            "cn": [
                                                                 {
                                                                     "id": "80d14e45-593b-4314-9c9d-36c51d6a7e9f"
                                                                 },
                                                                 {
-                                                                    "id": "0be85a42-0f81-4938-9bee-c8098f645684"
+                                                                    "id": "3a43a43f-e0cb-4c25-8d07-ede2f4b76de2"
                                                                 }
                                                             ]
                                                         },
@@ -2214,7 +2198,13 @@
                                                             "id": "6ec38db2-fc06-4d99-9c10-61ab511ae6ae",
                                                             "cn": [
                                                                 {
-                                                                    "id": "3a43a43f-e0cb-4c25-8d07-ede2f4b76de2"
+                                                                    "id": "a8637949-68fc-45cd-9d4d-cc92e49d1022"
+                                                                },
+                                                                {
+                                                                    "id": "752a5c36-9e0a-45f3-b8e3-ca85fdd54ea6"
+                                                                },
+                                                                {
+                                                                    "id": "0be85a42-0f81-4938-9bee-c8098f645684"
                                                                 },
                                                                 {
                                                                     "id": "8fbc06ee-4a99-4463-a83f-f3bdb93d70eb"
@@ -8951,11 +8941,11 @@
         "openTabs": []
     },
     "canvasState": {
-        "topInstance": "483bc983-652d-4090-bb1a-4d69f0ec289f"
+        "topInstance": "54062c27-ee12-42e6-8f66-e9a370fe94ab"
     },
     "inspectorState": {
-        "topInstance": null,
-        "selectedInstance": null
+        "topInstance": "54062c27-ee12-42e6-8f66-e9a370fe94ab",
+        "selectedInstance": "4fd3845a-5b90-4fb2-800c-3740d4f05efa"
     },
     "editMode": "design",
     "userSettings": {

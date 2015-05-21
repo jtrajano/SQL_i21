@@ -174,7 +174,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                     flex: 1
                                 }
                             ],
-                            tabIndex: 0,
                             itemId: 'cboLocation',
                             fieldLabel: 'Location',
                             labelWidth: 110,
@@ -195,7 +194,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 3,
                                     itemId: 'txtLastCost',
                                     fieldLabel: 'Last Cost',
                                     labelWidth: 110,
@@ -207,7 +205,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 4,
                                     itemId: 'txtStandardCost',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Standard Cost',
@@ -230,7 +227,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 5,
                                     itemId: 'txtAverageCost',
                                     margin: '',
                                     fieldLabel: 'Moving Avg Cost',
@@ -243,7 +239,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 6,
                                     itemId: 'txtEndofMonthCost',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'End of Month Cost',
@@ -266,7 +261,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'combobox',
                                     flex: 1,
-                                    tabIndex: 7,
                                     itemId: 'cboPricingMethod',
                                     fieldLabel: 'Pricing Method',
                                     labelWidth: 110,
@@ -279,7 +273,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 8,
                                     itemId: 'txtAmountPercent',
                                     margin: '0 0 0 5',
                                     width: 115,
@@ -300,7 +293,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 9,
                                     itemId: 'txtSalePrice',
                                     fieldLabel: 'Sale Price',
                                     labelWidth: 110,
@@ -312,7 +304,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 10,
                                     itemId: 'txtRetailPrice',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Retail Price',
@@ -335,7 +326,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 11,
                                     itemId: 'txtWholesalePrice',
                                     fieldLabel: 'Wholesale Price',
                                     labelWidth: 110,
@@ -347,7 +337,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 12,
                                     itemId: 'txtLargeVolumePrice',
                                     margin: '0 0 0 5',
                                     fieldLabel: 'Large Volume Price',
@@ -370,7 +359,6 @@ Ext.define('Inventory.view.ItemPricing', {
                                 {
                                     xtype: 'moneynumber',
                                     flex: 1,
-                                    tabIndex: 13,
                                     itemId: 'txtMsrp',
                                     fieldLabel: 'MSRP',
                                     labelWidth: 110,
