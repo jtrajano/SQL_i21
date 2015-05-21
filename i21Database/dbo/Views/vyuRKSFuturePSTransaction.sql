@@ -17,7 +17,7 @@ SELECT
       ,ot.intLocationId
       ,ot.intFutureMonthId
       ,ot.intCommodityId
-      ,ot.intBrokerId
+      ,ot.intEntityId
       ,ISNULL(ot.intBookId,0) as intBookId
       ,ISNULL(ot.intSubBookId,0) as intSubBookId
       ,intFutOptTransactionId

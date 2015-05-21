@@ -3059,4 +3059,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intInventoryReceiptItemId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="83f765df-ee41-4bef-9983-c5329d3e2d7d" ChangeDateTime="05/20/2015 09:52:10">
+    <Property Name="ElementName" Value="[dbo].[tblRKBrokerageAccount].[intBrokerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKBrokerageAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2135875f-b251-4296-bf40-a159e30948de" ChangeDateTime="05/21/2015 07:40:58">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutOptTransaction].[intBrokerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutOptTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="90b8b441-a69d-4661-bcb1-1afc91ebe0a2" ChangeDateTime="05/21/2015 08:26:22">
+    <Property Name="ElementName" Value="[dbo].[tblRKMatchFuturesPSHeader].[intBrokerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKMatchFuturesPSHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strName" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1244fb46-558f-464b-adb7-30542f320403" ChangeDateTime="05/21/2015 08:26:33">
+    <Property Name="ElementName" Value="[dbo].[tblRKMatchFuturesPSHeader].[strName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKMatchFuturesPSHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
+  </Operation>
 </Operations>
