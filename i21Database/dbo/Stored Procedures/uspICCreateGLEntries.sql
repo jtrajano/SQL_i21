@@ -268,7 +268,7 @@ SELECT
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription	= '' 
+		,strJournalLineDescription	= tblGLAccount.strDescription
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intUserId 
@@ -306,7 +306,7 @@ SELECT
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription	= '' 
+		,strJournalLineDescription	= tblGLAccount.strDescription 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intUserId 
@@ -347,7 +347,7 @@ SELECT
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription	= '' 
+		,strJournalLineDescription	= tblGLAccount.strDescription 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intUserId 
@@ -384,7 +384,7 @@ SELECT
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription	= '' 
+		,strJournalLineDescription	= tblGLAccount.strDescription 
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intUserId 
@@ -425,7 +425,7 @@ SELECT
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription	= '' -- TODO
+		,strJournalLineDescription	= tblGLAccount.strDescription
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intUserId -- TODO
@@ -463,7 +463,7 @@ SELECT
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription	= '' 
+		,strJournalLineDescription	= tblGLAccount.strDescription
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intUserId 
@@ -504,7 +504,7 @@ SELECT
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription	= '' 
+		,strJournalLineDescription	= tblGLAccount.strDescription
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intUserId 
@@ -541,7 +541,7 @@ SELECT
 		,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
-		,strJournalLineDescription	= '' 
+		,strJournalLineDescription	= tblGLAccount.strDescription
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intUserId 
