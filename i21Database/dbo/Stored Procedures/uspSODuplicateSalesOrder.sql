@@ -29,12 +29,14 @@ BEGIN
            ,[dtmProcessDate]
            ,[ysnProcessed]
            ,[strComments]
+		   ,[intShipToLocationId]
            ,[strShipToLocationName]
            ,[strShipToAddress]
            ,[strShipToCity]
            ,[strShipToState]
            ,[strShipToZipCode]
            ,[strShipToCountry]
+		   ,[intBillToLocationId]
            ,[strBillToLocationName]
            ,[strBillToAddress]
            ,[strBillToCity]
@@ -66,12 +68,14 @@ BEGIN
            ,NULL --Processed Date
            ,0 --Processed
            ,[strComments] + ' DUP: ' + [strSalesOrderNumber]
+		   ,[intShipToLocationId]
            ,[strShipToLocationName]
            ,[strShipToAddress]
            ,[strShipToCity]
            ,[strShipToState]
            ,[strShipToZipCode]
            ,[strShipToCountry]
+		   ,[intBillToLocationId]
            ,[strBillToLocationName]
            ,[strBillToAddress]
            ,[strBillToCity]
@@ -122,6 +126,7 @@ BEGIN
 				   ,[intCOGSAccountId]
 				   ,[intSalesAccountId]
 				   ,[intInventoryAccountId]
+				   ,[intStorageLocationId]
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -140,6 +145,7 @@ BEGIN
 				   ,[intCOGSAccountId]
 				   ,[intSalesAccountId]
 				   ,[intInventoryAccountId]
+				   ,[intStorageLocationId]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE
