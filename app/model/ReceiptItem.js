@@ -60,6 +60,17 @@ Ext.define('Inventory.model.ReceiptItem', {
         {type: 'presence', field: 'strItemNo'},
         {type: 'presence', field: 'strUnitMeasure'},
         {type: 'presence', field: 'dblOpenReceive'}
-    ]
+    ],
+
+    validate: function(options) {
+        var errors = this.callParent(arguments);
+        if (this.get('dblOpenReceive') <= 0) {
+            errors.add({
+                field: 'dblOpenReceive',
+                message: 'Qty to Receive must be greater than zero(0).'
+            })
+        }
+        return errors;
+    }
 
 });
