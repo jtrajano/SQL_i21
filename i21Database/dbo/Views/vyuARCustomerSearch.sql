@@ -28,7 +28,8 @@ SELECT
 ,BillToLoc.strZipCode as strBillToZipCode
 ,BillToLoc.strCountry as strBillToCountry
 ,Cus.intShipToId
-,Cus.intBillToId 
+,Cus.intBillToId
+,Loc.intFreightTermId
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 LEFT JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
