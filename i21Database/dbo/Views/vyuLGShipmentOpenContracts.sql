@@ -11,7 +11,10 @@ AS
 			CH.intPurchaseSale,
 			CH.intEntityId,
 			CH.intContractNumber,
-			CH.dtmContractDate
+			CH.dtmContractDate,
+			CD.intCompanyLocationId,
+			CH.intCommodityId,
+			CH.intPositionId
 	FROM 	tblCTContractDetail 		CD
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
 	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId

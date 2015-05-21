@@ -2,11 +2,12 @@
 (
 	[intPaycheckEarningTaxId] INT NOT NULL IDENTITY(1, 1), 
     [intPaycheckEarningId] INT NOT NULL,
-	[intPaycheckTaxId] INT NULL,
+	[intTypeTaxId] INT NULL,
     [intEmployeeTaxId] INT NOT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRPaycheckEarningTax] PRIMARY KEY ([intPaycheckEarningTaxId]), 
-    CONSTRAINT [FK_tblPRPaycheckEarningTax_tblPRPaycheckEarning] FOREIGN KEY ([intPaycheckEarningId]) REFERENCES [tblPRPaycheckEarning]([intPaycheckEarningId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblPRPaycheckEarningTax_tblPRPaycheckEarning] FOREIGN KEY ([intPaycheckEarningId]) REFERENCES [tblPRPaycheckEarning]([intPaycheckEarningId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPRPaycheckEarningTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId])
 )
 
 GO
@@ -49,10 +50,10 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intEmployeeTaxId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Paycheck Tax Id',
+    @value = N'Type Tax Id',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPRPaycheckEarningTax',
     @level2type = N'COLUMN',
-    @level2name = N'intPaycheckTaxId'
+    @level2name = 'intTypeTaxId'

@@ -1,7 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblPRPaycheckDeduction](
 	[intPaycheckDeductionId] [int] IDENTITY(1,1) NOT NULL,
 	[intPaycheckId] [int] NOT NULL,
-	[intEmployeeDeductionId] INT NOT NULL,
+	[intEmployeeDeductionId] INT NULL,
+	[intTypeDeductionId] INT NULL,
 	[strDeductFrom] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[strCalculationType] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[dblAmount] [numeric](18, 6) NULL,
@@ -15,7 +16,8 @@
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRPaycheckDeduction] PRIMARY KEY ([intPaycheckDeductionId]),
-	CONSTRAINT [FK_tblPRPaycheckDeduction_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE, 
+	CONSTRAINT [FK_tblPRPaycheckDeduction_tblPRPaycheck] FOREIGN KEY ([intPaycheckId]) REFERENCES [tblPRPaycheck]([intPaycheckId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPRPaycheckDeduction_tblPRTypeDeduction] FOREIGN KEY ([intTypeDeductionId]) REFERENCES [dbo].[tblPRTypeDeduction] ([intTypeDeductionId]),
 ) ON [PRIMARY]
 GO
 /****** Object:  Default [DF__tblPRPayc__dblAm__2FBF612A]    Script Date: 08/14/2014 10:50:11 ******/
@@ -173,3 +175,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheckDeduction',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Deduction Type Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckDeduction',
+    @level2type = N'COLUMN',
+    @level2name = N'intTypeDeductionId'
