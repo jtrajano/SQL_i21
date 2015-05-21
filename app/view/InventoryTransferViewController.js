@@ -99,11 +99,19 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'strItemNo',
                     editor: {
                         store: '{item}',
-                        defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{current.intFromLocationId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intFromLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'dblOnHand',
+                                value: '0',
+                                condition: 'gt',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colDescription: 'strItemDescription',
