@@ -1617,6 +1617,7 @@
     <Build Include="dbo\Tables\tblICInventoryTransactionWithNoCounterAccountCategory.sql" />
     <None Include="Scripts\Post-Deployment\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostExpiryDateChange.sql" />
+    <Build Include="dbo\Tables\tblRKBroker.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
