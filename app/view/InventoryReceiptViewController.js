@@ -144,6 +144,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnRemoveInventoryReceipt: {
                 hidden: '{current.ysnPosted}'
             },
+            btnInsertLot: {
+                hidden: '{current.ysnPosted}'
+            },
+            btnRemoveLot: {
+                hidden: '{current.ysnPosted}'
+            },
             btnBill: {
                 hidden: '{!current.ysnPosted}'
             },
