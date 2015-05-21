@@ -23,6 +23,7 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpPost]
+        [ActionName("Receive")]
         public HttpResponseMessage Receive(BusinessLayer.Common.Posting_RequestModel receipt)
         {
             var result = _bl.PostTransaction(receipt, receipt.isRecap);
@@ -41,6 +42,7 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpPost]
+        [ActionName("ProcessBill")]
         public HttpResponseMessage ProcessBill(int id)
         {
             int? newBill = null;

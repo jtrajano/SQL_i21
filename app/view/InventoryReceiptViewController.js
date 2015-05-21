@@ -417,6 +417,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             createRecord : me.createRecord,
             validateRecord: me.validateRecord,
             binding: me.config.binding,
+            include: 'tblICInventoryReceiptInspections,' +
+                'vyuAPVendor,' +
+                'tblSMFreightTerm,' +
+                'tblSMCompanyLocation,' +
+                'tblICInventoryReceiptItems.tblICItem,' +
+                'tblICInventoryReceiptItems.tblICItemUOM.tblICUnitMeasure,' +
+                'tblICInventoryReceiptItems.vyuICGetReceiptItemSource,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICLot,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICItemUOM.tblICUnitMeasure,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICStorageLocation,' +
+                'tblICInventoryReceiptItems.WeightUOM.tblICUnitMeasure,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
+                'tblICInventoryReceiptItems.tblSMCompanyLocationSubLocation',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
                 window: win
@@ -839,7 +852,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (current) {
             Ext.Ajax.request({
                 timeout: 120000,
-                url: '../Inventory/api/Receipt/ProcessBill?id=' + current.get('intInventoryReceiptId'),
+                url: '../Inventory/api/InventoryReceipt/ProcessBill?id=' + current.get('intInventoryReceiptId'),
                 method: 'post',
                 success: function(response){
                     var jsonData = Ext.decode(response.responseText);
@@ -897,7 +910,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
-                postURL             : '../Inventory/api/Receipt/Receive',
+                postURL             : '../Inventory/api/InventoryReceipt/Receive',
                 strTransactionId    : strReceiptNumber,
                 isPost              : !posted,
                 isRecap             : false,
@@ -932,7 +945,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../Inventory/api/Receipt/Receive',
+                postURL: '../Inventory/api/InventoryReceipt/Receive',
                 strTransactionId: currentRecord.get('strReceiptNumber'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,
@@ -1279,6 +1292,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                 dataIndex: 'dblQtyOrdered',
                                                 dataType: 'float',
                                                 text: 'Ordered Qty',
+                                                flex: 1
+                                            },
+                                            {
+                                                dataIndex: 'dblQtyReceived',
+                                                dataType: 'float',
+                                                text: 'Received Qty',
                                                 flex: 1
                                             },
                                             {

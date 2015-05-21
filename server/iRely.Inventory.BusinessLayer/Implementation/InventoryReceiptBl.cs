@@ -57,7 +57,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)
         {
-            SaveResult saveResult = new SaveResult();
+            SaveResult result = new SaveResult();
 
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
@@ -84,7 +84,7 @@ namespace iRely.Inventory.BusinessLayer
                         }
                     }
 
-                    saveResult = await _db.SaveAsync(false);
+                    result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
 
                     foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
                     {
@@ -96,18 +96,31 @@ namespace iRely.Inventory.BusinessLayer
                     }
 
                     transaction.Commit();
+
+                    if (result.HasError)
+                    {
+                        throw result.BaseException;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    saveResult.BaseException = ex;
-                    saveResult.Exception = new ServerException(ex);
-                    saveResult.HasError = true;
+                    result.BaseException = ex;
+                    result.Exception = new ServerException(ex);
+                    result.HasError = true;
                     transaction.Rollback();
                 }
             }
 
-            BusinessResult<tblICInventoryReceipt> bResult = new BusinessResult<tblICInventoryReceipt>();
-            return bResult;
+            return new BusinessResult<tblICInventoryReceipt>()
+            {
+                success = !result.HasError,
+                message = new MessageResult()
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            };
         }
 
         public SaveResult ProcessBill(int receiptId, out int? newBill)
