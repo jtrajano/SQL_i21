@@ -466,7 +466,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
-                postURL             : '../Inventory/api/Shipment/Ship',
+                postURL             : '../Inventory/api/InventoryShipment/Ship',
                 strTransactionId    : strShipmentNumber,
                 isPost              : !posted,
                 isRecap             : false,
