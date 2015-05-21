@@ -470,6 +470,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Orders')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 51
+			,[strTransactionType]	= N'Quote'
+			,[strPrefix]			= N'QU-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Receivable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Quote')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
