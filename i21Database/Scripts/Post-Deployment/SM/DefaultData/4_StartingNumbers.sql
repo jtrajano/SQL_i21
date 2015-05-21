@@ -214,7 +214,7 @@ GO
 			,[strTransactionType]	= N'Purchase Order'
 			,[strPrefix]			= N'PO-'
 			,[intNumber]			= 1
-			,[strModule]			= 'AccountsPayable'
+			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Purchase Order')
@@ -476,7 +476,8 @@ GO
 GO
 	-- Update the intNumber to update what really should be the current value
 	UPDATE tblSMStartingNumber
-	SET intNumber = x.intNumber
+	SET intNumber = x.intNumber,
+	strPrefix = x.strPrefix
 	FROM tmpSMStartingNumber x
 	WHERE tblSMStartingNumber.strTransactionType = x.strTransactionType
 GO
