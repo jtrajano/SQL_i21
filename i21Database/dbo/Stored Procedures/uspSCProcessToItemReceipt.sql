@@ -25,6 +25,7 @@ DECLARE @SourceType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 DECLARE @SourceType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 DECLARE @SourceType_Direct AS NVARCHAR(100) = 'Direct'
 DECLARE @strTransactionId NVARCHAR(40) = NULL
+DECLARE @strDummyDistributionOption AS NVARCHAR(3) = NULL
 
 DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 DECLARE @intTicketId AS INT = @intSourceTransactionId
@@ -60,7 +61,7 @@ BEGIN TRY
 		END
 		IF(@dblRemainingUnits > 0)
 		BEGIN
-			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId
+			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDummyDistributionOption
 			IF (@dblRemainingUnits = @dblNetUnits)
 			RETURN
 		END

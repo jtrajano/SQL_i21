@@ -2,7 +2,8 @@ CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	 @intTicketId AS INT
 	,@intUserId AS INT
 	,@dblNetUnits AS DECIMAL (13,3)
-	,@intEntityId AS INT 
+	,@intEntityId AS INT
+	,@strDistributionOption AS NVARCHAR(3)
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -19,7 +20,7 @@ DECLARE @intScaleStationId AS INT
 DECLARE @strGRStorage AS nvarchar(3)
 
 BEGIN 
-	SELECT	@strGRStorage = SC.strDistributionOption, @intScaleStationId = SC.intScaleSetupId
+	SELECT @intScaleStationId = SC.intScaleSetupId
 	FROM	dbo.tblSCTicket SC	        
 	WHERE	SC.intTicketId = @intTicketId		
 END
@@ -27,7 +28,7 @@ END
 BEGIN 
 	SELECT	@intGRStorageId = ST.intStorageScheduleTypeId
 	FROM	dbo.tblGRStorageType ST	        
-	WHERE	ST.strStorageTypeCode = @strGRStorage		
+	WHERE	ST.strStorageTypeCode = @strDistributionOption		
 END
 
 IF @intGRStorageId is NULL
