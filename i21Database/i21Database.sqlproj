@@ -865,7 +865,7 @@
     <Build Include="dbo\Tables\tblICRestriction.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSearch.sql" />
     <Build Include="dbo\Tables\tblCTBuySell.sql" />
-    <Build Include="dbo\Tables\tblCTCashOrFuture.sql" />
+    <Build Include="dbo\Tables\tblCTPriceCalculationType.sql" />
     <Build Include="dbo\Tables\tblCTContractCost.sql">
       <SuppressTSqlWarnings>70588</SuppressTSqlWarnings>
     </Build>
@@ -1003,7 +1003,7 @@
     <Build Include="dbo\Tables\tblSCTicketPrintOption.sql" />
     <Build Include="dbo\Tables\tblSCTicketDiscount.sql" />
     <Build Include="dbo\Tables\tblSCTicketSplit.sql" />
-    <Build Include="dbo\Tables\tblCTDiscount.sql" />
+    <Build Include="dbo\Tables\tblCTDiscountType.sql" />
     <Build Include="dbo\Views\vyuCTEntity.sql" />
     <Build Include="dbo\Functions\fnGetGLAccountFromCompanyLocation.sql" />
     <Build Include="dbo\Tables\tblCTContractType.sql" />

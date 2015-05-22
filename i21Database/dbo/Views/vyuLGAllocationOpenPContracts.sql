@@ -11,7 +11,7 @@ AS
 			CD.intUnitMeasureId, 			
 			UM.strUnitMeasure,
 			UM.strUnitType,
-			CD.intPricingType,
+			CD.intPricingTypeId intPricingType,
 			CD.dblBasis,
 			CU.strCurrency												AS strBasisCurrency,
 			CD.dtmStartDate,
@@ -22,7 +22,7 @@ AS
 			CD.dblQuantity - IsNull((SELECT SUM (AD.dblPAllocatedQty) from tblLGAllocationDetail AD Group By AD.intPContractDetailId Having CD.intContractDetailId = AD.intPContractDetailId), 0) AS dblUnAllocatedQuantity,
 			CD.dblQuantity - IsNull((SELECT SUM (R.dblReservedQuantity) from tblLGReservation R Group By R.intContractDetailId, R.intPurchaseSale Having CD.intContractDetailId = R.intContractDetailId AND R.intPurchaseSale = 1), 0) AS dblUnReservedQuantity,
 
-			CH.intPurchaseSale,
+			CH.intContractTypeId intPurchaseSale,
 			CH.intEntityId,
 			EN.strName,
 			CH.intContractNumber,
@@ -41,6 +41,6 @@ AS
 	AND
 	CD.dblQuantity - IsNull((SELECT SUM (R.dblReservedQuantity) from tblLGReservation R Group By R.intContractDetailId, R.intPurchaseSale Having CD.intContractDetailId = R.intContractDetailId AND R.intPurchaseSale = 1), 0) > 0
 	AND
-	CH.intPurchaseSale=1
+	CH.intContractTypeId=1
 
 	

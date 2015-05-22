@@ -49,10 +49,10 @@ BEGIN TRY
 		SELECT	TOP	1	@intContractId	=	intContractDetailId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE	CH.intPurchaseSale	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 		AND		CH.intEntityId		=	@intEntityId
 		AND		CD.intItemId		=	@intItemId
-		AND		CD.intPricingType	=	1
+		AND		CD.intPricingTypeId	=	1
 		AND		CD.dblBalance		>	0
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
@@ -62,10 +62,10 @@ BEGIN TRY
 		SELECT	TOP	1	@intContractId	=	intContractDetailId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE	CH.intPurchaseSale	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 		AND		CH.intEntityId		=	@intEntityId
 		AND		CD.intItemId		=	@intItemId
-		AND		CD.intPricingType	=	2
+		AND		CD.intPricingTypeId	=	2
 		AND		CD.dblBalance		>	0
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
@@ -121,10 +121,10 @@ BEGIN TRY
 		SELECT	TOP	1	@intContractId	=	intContractDetailId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE	CH.intPurchaseSale	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 		AND		CH.intEntityId		=	@intEntityId
 		AND		CD.intItemId		=	@intItemId
-		AND		CD.intPricingType	=	1
+		AND		CD.intPricingTypeId	=	1
 		AND		CD.dblBalance		>	0
 		AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
@@ -134,10 +134,10 @@ BEGIN TRY
 			SELECT	TOP	1	@intContractId	=	intContractDetailId
 			FROM	tblCTContractDetail CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-			WHERE	CH.intPurchaseSale	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+			WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 			AND		CH.intEntityId		=	@intEntityId
 			AND		CD.intItemId		=	@intItemId
-			AND		CD.intPricingType	=	2
+			AND		CD.intPricingTypeId	=	2
 			AND		CD.dblBalance		>	0
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 			ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC

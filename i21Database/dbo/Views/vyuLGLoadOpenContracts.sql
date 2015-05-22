@@ -9,7 +9,7 @@ AS
 			CD.intCompanyLocationId,
 			IsNull(CD.dblBalance, 0) - IsNull(CD.dblScheduleQty, 0)		AS dblUnLoadedQuantity,
 			
-			CH.intPurchaseSale,
+			CH.intContractTypeId intPurchaseSale,
 			CH.intEntityId,
 			CH.intContractNumber,
 			CH.dtmContractDate

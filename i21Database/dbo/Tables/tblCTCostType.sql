@@ -23,7 +23,7 @@ CREATE TABLE [dbo].[tblCTCostType](
 GO
 
 ALTER TABLE [dbo].[tblCTCostType]  WITH CHECK ADD  CONSTRAINT [FK_tblCTCostType_tblCTCostMethod_intCostMethod] FOREIGN KEY([intCostMethod])
-REFERENCES [dbo].[tblCTCostMethod] ([Value])
+REFERENCES [dbo].[tblCTCostMethod] ([intCostMethodId])
 GO
 
 ALTER TABLE [dbo].[tblCTCostType] CHECK CONSTRAINT [FK_tblCTCostType_tblCTCostMethod_intCostMethod]
