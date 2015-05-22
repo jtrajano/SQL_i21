@@ -161,7 +161,8 @@ IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
  )t  
  WHERE ISNULL(strMonth,'') <> ''  
  ORDER BY strMonth  
- 
+  DECLARE @strOptSymbol nvarchar(5)   
+ SELECT @strOptSymbol=strOptSymbol from tblRKFutureMarket where intFutureMarketId=@FutureMarketId
   
  INSERT INTO tblRKOptionsMonth(  
         intConcurrencyId,  
@@ -170,8 +171,8 @@ IF OBJECT_ID('tempdb..##AllowedMonths') IS NOT NULL
         intYear,  
         intFutureMonthId,  
         ysnMonthExpired,  
-        dtmExpirationDate)   
-
+        dtmExpirationDate,
+        strOptMonthSymbol)
 SELECT * FROM (          
 SELECT distinct t.intConcurrencyId,  
 	t.intFutureMarketId,  
@@ -179,8 +180,9 @@ SELECT distinct t.intConcurrencyId,
 	Right(StrYear,2) strYear,   
 	(SElECT TOP 1 intFutureMonthId FROM tblRKFuturesMonth WHERE intFutureMarketId = @FutureMarketId AND dtmFutureMonthsDate >= convert(datetime,Ltrim(Rtrim(StrYear))+'-'+REPLACE(strMonthId,' ','')+'-01') ORDER BY dtmFutureMonthsDate ASC) AS intFutureMonthId,
 	0 as ysnExpired,   
-	NULL as dtmExpirationDate      
-FROM #Temp t)t   
+	NULL as dtmExpirationDate,
+	@strOptSymbol+''+strSymbol+''+Right(StrYear,2) as symbol     
+FROM #Temp t)t    
 WHERE t.strOMonth not in(SELECT strOptionMonth collate Latin1_General_CI_AS from tblRKOptionsMonth where intFutureMarketId=@FutureMarketId)  
   order by convert(datetime,'01 '+strOMonth) asc
 END
