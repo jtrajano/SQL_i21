@@ -3262,4 +3262,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strContractType" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="91ab19a3-6d88-4467-89c2-f4703e1b9078" ChangeDateTime="05/24/2015 15:07:26">
+    <Property Name="ElementName" Value="[dbo].[tblCTCostType].[intCostMethod]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCostType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCostMethodId" />
+  </Operation>
 </Operations>
