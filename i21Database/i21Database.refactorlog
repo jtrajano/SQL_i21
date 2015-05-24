@@ -3087,4 +3087,186 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="bb2afa91-cd8e-421e-8a06-43701e822f54" ChangeDateTime="05/22/2015 11:00:52">
+    <Property Name="ElementName" Value="[dbo].[tblCTDiscount].[Value]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTDiscount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDiscountTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e6bb9058-e724-473b-a98c-d02755337327" ChangeDateTime="05/22/2015 11:01:03">
+    <Property Name="ElementName" Value="[dbo].[tblCTDiscount].[Name]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTDiscount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDiscountType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="182d942b-caee-4658-a111-d23d02be9696" ChangeDateTime="05/22/2015 11:05:08">
+    <Property Name="ElementName" Value="[dbo].[tblCTBuySell].[Value]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTBuySell]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBuySell" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c56788d9-552b-4ef1-a277-ff55a94cd85f" ChangeDateTime="05/22/2015 11:05:45">
+    <Property Name="ElementName" Value="[dbo].[tblCTBuySell].[intBuySell]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTBuySell]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBuySellId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="00b1fe96-f20b-4c44-9102-152390a86619" ChangeDateTime="05/22/2015 11:14:02">
+    <Property Name="ElementName" Value="[dbo].[tblCTCostMethod].[Value]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCostMethod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCostMethodId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="97f4a262-e623-45d3-a0b4-3e7f700d2be7" ChangeDateTime="05/22/2015 11:14:18">
+    <Property Name="ElementName" Value="[dbo].[tblCTCostMethod].[Name]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCostMethod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCostMethod" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cc73fe0c-7da5-4b7a-acf1-ef7da669b509" ChangeDateTime="05/22/2015 11:17:04">
+    <Property Name="ElementName" Value="[dbo].[tblCTPremFee].[Value]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPremFee]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPremFeeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3252d4cf-e339-4f51-b9fa-070c2a9ef6a1" ChangeDateTime="05/22/2015 11:17:11">
+    <Property Name="ElementName" Value="[dbo].[tblCTPremFee].[Name]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPremFee]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPremFee" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="996afd33-a9fd-4de0-8e1e-abd833af9cf2" ChangeDateTime="05/22/2015 11:19:22">
+    <Property Name="ElementName" Value="[dbo].[tblCTPricingType].[Value]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPricingType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPricingTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="88799c3c-5a13-48f4-9094-a39e4972dfad" ChangeDateTime="05/22/2015 11:19:32">
+    <Property Name="ElementName" Value="[dbo].[tblCTPricingType].[Name]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPricingType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPricingType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4923b44a-5009-40f0-8144-61417a13656a" ChangeDateTime="05/22/2015 11:21:55">
+    <Property Name="ElementName" Value="[dbo].[tblCTPutCall].[Value]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPutCall]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPutCallId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c5eac9ac-301b-4070-b028-f672ab38af9c" ChangeDateTime="05/22/2015 11:22:11">
+    <Property Name="ElementName" Value="[dbo].[tblCTPutCall].[Name]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPutCall]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPutCall" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e9d908e6-7670-46f8-b8b1-d2ba7a7683f3" ChangeDateTime="05/22/2015 11:25:14">
+    <Property Name="ElementName" Value="[dbo].[tblCTRailGrade].[Value]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTRailGrade]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRailGradeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="986776f9-3931-490d-91ae-78cb8f531c0d" ChangeDateTime="05/22/2015 11:25:20">
+    <Property Name="ElementName" Value="[dbo].[tblCTRailGrade].[Name]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTRailGrade]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strRailGrade" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d9e62ed6-293c-4041-b240-b7e566619058" ChangeDateTime="05/22/2015 12:10:48">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractCost].[intCostMethod]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractCost]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCostMethodId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="73842531-be42-41c0-8b00-1d4b2db1fce9" ChangeDateTime="05/22/2015 12:12:31">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[intPricingType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPricingTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="250ca499-5e72-4d8d-8b0c-3129107df1c1" ChangeDateTime="05/22/2015 12:12:42">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[intDiscountType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDiscountTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e1dd2a58-3a2e-47d4-a458-a3cd0c3a0e75" ChangeDateTime="05/22/2015 12:13:35">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[intGrade]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRailGradeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d82865d5-8fa1-4db8-ba77-a3ee122211f2" ChangeDateTime="05/22/2015 12:16:43">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractHeader].[intPricingType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPricingTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9a529f8b-1d2f-4f5b-bfaf-54d7b74cdc1a" ChangeDateTime="05/22/2015 12:20:04">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractOption].[intPremFee]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPremFeeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="6e3c1c51-b7f8-42ec-bb03-8a074c1596b8" ChangeDateTime="05/22/2015 12:20:14">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractOption].[intBuySell]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBuySellId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8072b135-e181-4d8f-b518-59e2c93bf227" ChangeDateTime="05/22/2015 12:20:19">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractOption].[intPutCall]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractOption]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPutCallId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c112235e-8bea-4a16-b10b-a188d0502232" ChangeDateTime="05/22/2015 12:30:25">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractHeader].[intPurchaseSale]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractHeader]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intContractTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="21ad5708-7bee-48e5-a083-8f117954882a" ChangeDateTime="05/22/2015 16:26:55">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractType].[Value]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intContractTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="58c2673f-9539-4833-8298-3965427d8126" ChangeDateTime="05/22/2015 16:27:00">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractType].[Name]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strContractType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="91ab19a3-6d88-4467-89c2-f4703e1b9078" ChangeDateTime="05/24/2015 15:07:26">
+    <Property Name="ElementName" Value="[dbo].[tblCTCostType].[intCostMethod]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCostType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCostMethodId" />
+  </Operation>
 </Operations>

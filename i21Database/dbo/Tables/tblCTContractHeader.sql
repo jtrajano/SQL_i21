@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblCTContractHeader](
 	[intContractHeaderId] [int] IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
-	[intPurchaseSale] [int] NOT NULL,
+	[intContractTypeId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
 	[intCommodityId] [int] NOT NULL,
 	[dblQuantity] [numeric](24, 4) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[strContractComments] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[intAssociationId] INT NULL, 
     [intTermId] INT NOT NULL, 
-    [intPricingType] INT NOT NULL DEFAULT 4, 
+    [intPricingTypeId] INT NOT NULL DEFAULT 4, 
 
 	[intApprovalBasisId] [INT] NULL,
 	[intContractBasisId] [INT] NULL,
@@ -32,7 +32,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[dblTolerancePct] NUMERIC(18, 4) NULL,
 	[dblProvisionalInvoicePct] NUMERIC(18, 2) NULL,
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
-	CONSTRAINT [UQ_tblCTContractHeader_intPurchaseSale_intContractNumber] UNIQUE ([intPurchaseSale], [intContractNumber]), 
+	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [intContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
 	CONSTRAINT [FK_tblCTContractHeader_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity] ([intEntityId]),
@@ -43,14 +43,14 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblCTWeightGrade_intWeightGradeId_intWeightId] FOREIGN KEY([intWeightId])REFERENCES [tblCTWeightGrade] ([intWeightGradeId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodity_intCommodityId] FOREIGN KEY([intCommodityId])REFERENCES [tblICCommodity] ([intCommodityId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intCommodityUnitMeasureId] FOREIGN KEY([intCommodityUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblCTPricingType_intPricingType] FOREIGN KEY ([intPricingType]) REFERENCES [tblCTPricingType]([Value]),
+	CONSTRAINT [FK_tblCTContractHeader_tblCTPricingType_intPricingTypeId] FOREIGN KEY ([intPricingTypeId]) REFERENCES [tblCTPricingType]([intPricingTypeId]),
 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTApprovalBasis_intApprovalBasisId] FOREIGN KEY ([intApprovalBasisId]) REFERENCES [tblCTApprovalBasis]([intApprovalBasisId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTContractBasis_intContractBasisId] FOREIGN KEY ([intContractBasisId]) REFERENCES [tblCTContractBasis]([intContractBasisId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTPosition_intPositionId] FOREIGN KEY ([intPositionId]) REFERENCES [tblCTPosition]([intPositionId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblCTInsuranceBy_] FOREIGN KEY ([intInsuranceById]) REFERENCES [tblCTInsuranceBy]([intInsuranceById]),
-	CONSTRAINT [FK_tblCTContractHeader_tblCTInvoiceType_] FOREIGN KEY ([intInvoiceTypeId]) REFERENCES [tblCTInvoiceType]([intInvoiceTypeId])
-	
+	CONSTRAINT [FK_tblCTContractHeader_tblCTInsuranceBy_intInsuranceById] FOREIGN KEY ([intInsuranceById]) REFERENCES [tblCTInsuranceBy]([intInsuranceById]),
+	CONSTRAINT [FK_tblCTContractHeader_tblCTInvoiceType_intInvoiceTypeId] FOREIGN KEY ([intInvoiceTypeId]) REFERENCES [tblCTInvoiceType]([intInvoiceTypeId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblCTContractType_intContractTypeId] FOREIGN KEY ([intContractTypeId]) REFERENCES [tblCTContractType]([intContractTypeId])
 )
 
 

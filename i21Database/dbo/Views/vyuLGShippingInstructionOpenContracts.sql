@@ -8,7 +8,7 @@ AS
 			CD.intUnitMeasureId, 			UM.strUnitMeasure,
 			CD.dblQuantity - IsNull((SELECT SUM (SI.dblQuantity) from tblLGShippingInstructionContractQty SI Group By SI.intContractDetailId Having CD.intContractDetailId = SI.intContractDetailId), 0) AS dblUnShippedQuantity,
 			
-			CH.intPurchaseSale,
+			CH.intContractTypeId intPurchaseSale,
 			CH.intEntityId,
 			CH.intContractNumber,
 			CH.dtmContractDate
