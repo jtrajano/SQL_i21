@@ -3106,13 +3106,6 @@
     <Property Name="ElementType" Value="SqlSimpleColumn" />
     <Property Name="ParentElementName" Value="[dbo].[tblCTBuySell]" />
     <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="intBuySell" />
-  </Operation>
-  <Operation Name="Rename Refactor" Key="c56788d9-552b-4ef1-a277-ff55a94cd85f" ChangeDateTime="05/22/2015 11:05:45">
-    <Property Name="ElementName" Value="[dbo].[tblCTBuySell].[intBuySell]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblCTBuySell]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intBuySellId" />
   </Operation>
   <Operation Name="Rename Refactor" Key="00b1fe96-f20b-4c44-9102-152390a86619" ChangeDateTime="05/22/2015 11:14:02">
@@ -3268,5 +3261,12 @@
     <Property Name="ParentElementName" Value="[dbo].[tblCTCostType]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCostMethodId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="af0fdf5b-8896-4c45-806d-a9e673643a39" ChangeDateTime="05/24/2015 16:47:01">
+    <Property Name="ElementName" Value="[dbo].[tblCTBuySell].[Name]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTBuySell]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strBuySell" />
   </Operation>
 </Operations>
