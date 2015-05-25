@@ -1,5 +1,4 @@
-﻿
-CREATE FUNCTION [dbo].[fnGetItemGLAccountAsTable] (
+﻿CREATE FUNCTION [dbo].[fnGetItemGLAccountAsTable] (
 	@intItemId INT
 	,@intItemLocationId INT
 	,@strAccountCategory NVARCHAR(255)
@@ -75,6 +74,7 @@ RETURN (
 																						ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
 																			WHERE	Item.intItemId = @intItemId
 																					AND AccntCategory.strAccountCategory = @strAccountCategory 
+																					AND Item.strType <> 'Commodity'
 																		) AS CategoryLevel
 																			ON CategoryLevel.intAccountId = CategoryLevel.intAccountId
 																		FULL JOIN (
