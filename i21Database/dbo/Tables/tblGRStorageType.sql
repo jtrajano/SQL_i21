@@ -5,7 +5,7 @@
     [strStorageTypeCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NOT NULL, 
     [ysnReceiptedStorage] BIT NOT NULL DEFAULT 0, 
     [intConcurrencyId] INT NOT NULL, 
-    [ysnOwnedPhysicalStock] BIT NOT NULL DEFAULT 0, 
+    [strOwnedPhysicalStock] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL , 
     [ysnDPOwnedType] BIT NOT NULL DEFAULT 0, 
     [ysnGrainBankType] BIT NOT NULL DEFAULT 0, 
     [ysnCustomerStorage] BIT NOT NULL DEFAULT 0, 

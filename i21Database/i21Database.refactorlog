@@ -3024,4 +3024,88 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strDistributionOption" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6e44e253-5f64-4004-8a43-05dc3763a50d" ChangeDateTime="05/14/2015 09:19:26">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageScheduleRule].[strStorageSchedule]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageScheduleRule]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strScheduleDescription" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4d51c006-fcdd-4b98-82a9-fbead8c1c912" ChangeDateTime="05/14/2015 16:02:29">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageScheduleRule].[intFeeType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageScheduleRule]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFeeType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d9ac70f0-b103-4e96-bbc5-d7da0703ad9e" ChangeDateTime="05/14/2015 16:03:52">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageSchedulePeriod].[intFeeType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageSchedulePeriod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFeeType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="88993a99-e9e8-41f7-8aeb-add16eddcae7" ChangeDateTime="05/15/2015 09:22:13">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageScheduleRule].[dblCurrencyRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageScheduleRule]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCurrencyID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="314d2dff-42d0-40d5-a1e1-83a327ec9d21" ChangeDateTime="05/15/2015 09:47:43">
+    <Property Name="ElementName" Value="[dbo].[FK_tblGRStorageScheduleRule_ToTable]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageScheduleRule]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblGRStorageScheduleRule_tblSMCurrency]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cf94de9b-fa3e-498d-8a74-ffbcc33a520f" ChangeDateTime="05/15/2015 11:32:06">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageSchedulePeriod].[intUseDateDays]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageSchedulePeriod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strPeriodType" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b8558828-ef18-4ac5-a1b5-6a6d8f69b4b8" ChangeDateTime="05/18/2015 15:42:16">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageType].[ysnOwnedPhysicalStock]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strOwnedPhysicalStock" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="72be92a9-1a72-4731-adde-0673b3894dbd" ChangeDateTime="05/20/2015 11:39:55">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageScheduleRule].[intFeeRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageScheduleRule]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblFeeRate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="113b4d18-f876-4b36-8d0b-592a5634ebee" ChangeDateTime="05/20/2015 11:40:45">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageSchedulePeriod].[intStorageRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageSchedulePeriod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblStorageRate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b5a41c70-a51b-42f6-aeb5-811e67036a9c" ChangeDateTime="05/20/2015 11:41:01">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageSchedulePeriod].[intFeeRate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageSchedulePeriod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblFeeRate" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="bb727f3d-cd4b-4e9b-80f3-7d5d293b2517" ChangeDateTime="05/21/2015 10:14:55">
+    <Property Name="ElementName" Value="[dbo].[tblGRStorageSchedulePeriod].[intSequence]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageSchedulePeriod]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSort" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9b471096-df45-4c11-92bc-1925fa0a92c0" ChangeDateTime="05/25/2015 13:43:34">
+    <Property Name="ElementName" Value="[dbo].[PK_tblRKMarketExchange]" />
+    <Property Name="ElementType" Value="SqlPrimaryKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKMarketExchange]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[PK_tblRKMarketExchange_intMarketExchangeId]" />
+  </Operation>
 </Operations>
