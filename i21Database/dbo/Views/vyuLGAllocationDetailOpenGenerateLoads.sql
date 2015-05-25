@@ -27,9 +27,11 @@ AS
 			AD.dblSAllocatedQty,
 			AD.intSUnitMeasureId,
 			ENS.strName AS strCustomer,
-			IsNull(CDS.dblBalance, 0) - IsNull(CDS.dblScheduleQty, 0)		AS dblSUnLoadedQuantity
+			IsNull(CDS.dblBalance, 0) - IsNull(CDS.dblScheduleQty, 0)		AS dblSUnLoadedQuantity,
+			IsNull(AD.dblPAllocatedQty, 0) - IsNull(GL.dblQuantity, 0)		AS dblGenerateLoadOpenQuantity
 
 	FROM 	tblLGAllocationDetail AD
+	LEFT JOIN	tblLGGenerateLoad		GL	ON GL.intAllocationDetailId = AD.intAllocationDetailId
 	JOIN	tblLGAllocationHeader	AH	ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 	JOIN	tblCTContractDetail 	CDP	ON CDP.intContractDetailId = AD.intPContractDetailId
 	JOIN	tblCTContractHeader		CHP	ON	CHP.intContractHeaderId		=	CDP.intContractHeaderId
@@ -37,6 +39,4 @@ AS
 	JOIN	tblCTContractHeader		CHS	ON	CHS.intContractHeaderId		=	CDS.intContractHeaderId
 	JOIN	tblEntity				ENP	ON	ENP.intEntityId				=	CHP.intEntityId
 	JOIN	tblEntity				ENS	ON	ENS.intEntityId				=	CHS.intEntityId
-	WHERE	AD.intAllocationDetailId NOT IN (SELECT intAllocationDetailId FROM tblLGGenerateLoad WHERE intAllocationDetailId IS NOT NULL) 
-	AND 
-	AD.intPUnitMeasureId = AD.intSUnitMeasureId
+	WHERE	AD.intPUnitMeasureId = AD.intSUnitMeasureId

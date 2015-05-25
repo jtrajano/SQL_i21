@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[intContractDetailId] [int] NOT NULL,
 	[intCostTypeId] [int] NOT NULL,
 	[intVendorId] [int] NULL,
-	[intCostMethod] [int] NOT NULL,
+	[intCostMethodId] [int] NOT NULL,
 	[dblRate] [numeric](10, 4) NOT NULL,
 	[intUnitMeasureId] [int] NULL,
 	[intCurrencyId] [int] NOT NULL,
@@ -12,53 +12,11 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[ysnMTM] [bit] NULL,
 	[ysnPrice] [bit] NULL,
 	[ysnFreight] [bit] NULL,
- CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED 
-(
-	[intContractCostId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
-
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblAPVendor_intVendorId] FOREIGN KEY([intVendorId])
-REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblAPVendor_intVendorId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY([intContractDetailId])
-REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]) ON DELETE CASCADE
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblCTCostMethod_intCostMethod] FOREIGN KEY([intCostMethod])
-REFERENCES [dbo].[tblCTCostMethod] ([Value])
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblCTCostMethod_intCostMethod]
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblCTCostType_intCostTypeId] FOREIGN KEY([intCostTypeId])
-REFERENCES [dbo].[tblCTCostType] ([intCostTypeId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblCTCostType_intCostTypeId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId])
-REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblICUnitMeasure_intUnitMeasureId]
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost]  WITH CHECK ADD  CONSTRAINT [FK_tblCTContractCost_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])
-REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
-GO
-
-ALTER TABLE [dbo].[tblCTContractCost] CHECK CONSTRAINT [FK_tblCTContractCost_tblSMCurrency_intCurrencyId]
-GO
-
+	CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED ([intContractCostId] ASC),
+	CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
+	CONSTRAINT [FK_tblCTContractCost_tblCTCostType_intCostTypeId] FOREIGN KEY ([intCostTypeId]) REFERENCES [tblCTCostType]([intCostTypeId]),
+	CONSTRAINT [FK_tblCTContractCost_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblCTContractCost_tblAPVendor_intVendorId] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+	CONSTRAINT [FK_tblCTContractCost_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblCTContractCost_tblCTCostMethod_intCostMethodId] FOREIGN KEY ([intCostMethodId]) REFERENCES [tblCTCostMethod]([intCostMethodId])
+)

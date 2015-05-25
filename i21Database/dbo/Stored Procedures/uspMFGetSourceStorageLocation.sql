@@ -19,6 +19,7 @@ BEGIN
 	--	AND PM.intLocationId = @intLocationId
 	SELECT SL.intStorageLocationId
 		,SL.strName
+		,SL.intSubLocationId 
 	FROM dbo.tblICStorageLocation SL
 	WHERE intLocationId = @intLocationId
 END

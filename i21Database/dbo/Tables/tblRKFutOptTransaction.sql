@@ -4,7 +4,7 @@
 	[intFutOptTransactionHeaderId] INT NOT NULL,
     [intConcurrencyId] INT NOT NULL, 
 	[dtmTransactionDate] DATETIME NOT NULL, 
-    [intBrokerId] INT NOT NULL, 
+    [intEntityId] INT NOT NULL, 
     [intBrokerageAccountId] INT NOT NULL, 
     [intFutureMarketId] INT NOT NULL, 
     [intInstrumentTypeId] INT NOT NULL, 
@@ -30,6 +30,7 @@
     [ysnOffset] BIT NULL, 
     CONSTRAINT [PK_tblRKFutOptTransaction_intFutOptTransactionId] PRIMARY KEY (intFutOptTransactionId),	
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] FOREIGN KEY ([intFutOptTransactionHeaderId]) REFERENCES [tblRKFutOptTransactionHeader]([intFutOptTransactionHeaderId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId]),
@@ -40,3 +41,4 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
 )
+

@@ -1,6 +1,6 @@
 ﻿--tblCTBuySell
 GO
-IF NOT EXISTS(SELECT * FROM tblCTBuySell WHERE Value = 1)
+IF NOT EXISTS(SELECT * FROM tblCTBuySell WHERE intBuySellId = 1)
 BEGIN
 	INSERT INTO tblCTBuySell
 	SELECT 1,'Buy',1
@@ -8,41 +8,41 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTBuySell WHERE Value = 2)
+IF NOT EXISTS(SELECT * FROM tblCTBuySell WHERE intBuySellId = 2)
 BEGIN
 	INSERT INTO tblCTBuySell
 	SELECT 2,'Sell',1	
 END
 GO
 
---tblCTCashOrFuture
+--tblCTPriceCalculationType
 GO
-IF NOT EXISTS(SELECT * FROM tblCTCashOrFuture WHERE Value = 1)
+IF NOT EXISTS(SELECT * FROM tblCTPriceCalculationType WHERE intPriceCalculationTypeId = 1)
 BEGIN
-	INSERT INTO tblCTCashOrFuture
+	INSERT INTO tblCTPriceCalculationType
 	SELECT 1,'Cash',1	
 END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTCashOrFuture WHERE Value = 2)
+IF NOT EXISTS(SELECT * FROM tblCTPriceCalculationType WHERE intPriceCalculationTypeId = 2)
 BEGIN
-	INSERT INTO tblCTCashOrFuture
+	INSERT INTO tblCTPriceCalculationType
 	SELECT 2,'Futures',1	
 END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTCashOrFuture WHERE Value = 3)
+IF NOT EXISTS(SELECT * FROM tblCTPriceCalculationType WHERE intPriceCalculationTypeId = 3)
 BEGIN
-	INSERT INTO tblCTCashOrFuture
+	INSERT INTO tblCTPriceCalculationType
 	SELECT 3,'Either',1	
 END
 GO
 
 --tblCTCostMethod
 GO
-IF NOT EXISTS(SELECT * FROM tblCTCostMethod WHERE Value = 1)
+IF NOT EXISTS(SELECT * FROM tblCTCostMethod WHERE intCostMethodId = 1)
 BEGIN
 	INSERT INTO tblCTCostMethod
 	SELECT 1,'Per Unit',1	
@@ -50,7 +50,7 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTCostMethod WHERE Value = 2)
+IF NOT EXISTS(SELECT * FROM tblCTCostMethod WHERE intCostMethodId = 2)
 BEGIN
 	INSERT INTO tblCTCostMethod
 	SELECT 2,'%',1	
@@ -58,7 +58,7 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTCostMethod WHERE Value = 3)
+IF NOT EXISTS(SELECT * FROM tblCTCostMethod WHERE intCostMethodId = 3)
 BEGIN
 	INSERT INTO tblCTCostMethod
 	SELECT 3,'Amount',1	
@@ -67,7 +67,7 @@ GO
 
 --tblCTPremFee
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPremFee WHERE Value = 1)
+IF NOT EXISTS(SELECT * FROM tblCTPremFee WHERE intPremFeeId = 1)
 BEGIN
 	INSERT INTO tblCTPremFee
 	SELECT 1,'Bill to Customer',1	
@@ -75,7 +75,7 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPremFee WHERE Value = 2)
+IF NOT EXISTS(SELECT * FROM tblCTPremFee WHERE intPremFeeId = 2)
 BEGIN
 	INSERT INTO tblCTPremFee
 	SELECT 2,'Deduct from settlement',1	
@@ -84,7 +84,7 @@ GO
 
 --tblCTPricingType
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE Value = 1)
+IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE intPricingTypeId = 1)
 BEGIN
 	INSERT INTO tblCTPricingType
 	SELECT 1,'Priced',1	
@@ -92,7 +92,7 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE Value = 2)
+IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE intPricingTypeId = 2)
 BEGIN
 	INSERT INTO tblCTPricingType
 	SELECT 2,'Basis',1	
@@ -100,7 +100,7 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE Value = 3)
+IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE intPricingTypeId = 3)
 BEGIN
 	INSERT INTO tblCTPricingType
 	SELECT 3,'HTA',1	
@@ -108,7 +108,7 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE Value = 4)
+IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE intPricingTypeId = 4)
 BEGIN
 	INSERT INTO tblCTPricingType
 	SELECT 4,'TBD',1	
@@ -116,20 +116,20 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE Value = 5)
+IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE intPricingTypeId = 5)
 BEGIN
 	INSERT INTO tblCTPricingType
 	SELECT 5,'DP (Priced Later)',1	
 END
 ELSE
 BEGIN
-	UPDATE tblCTPricingType SET Name = 'DP (Priced Later)' WHERE Value = 5
+	UPDATE tblCTPricingType SET strPricingType = 'DP (Priced Later)' WHERE intPricingTypeId = 5
 END
 GO
 
 --tblCTPutCall
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPutCall WHERE Value = 1)
+IF NOT EXISTS(SELECT * FROM tblCTPutCall WHERE intPutCallId = 1)
 BEGIN
 	INSERT INTO tblCTPutCall
 	SELECT 1,'Put',1	
@@ -137,7 +137,7 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTPutCall WHERE Value = 2)
+IF NOT EXISTS(SELECT * FROM tblCTPutCall WHERE intPutCallId = 2)
 BEGIN
 	INSERT INTO tblCTPutCall
 	SELECT 2,'Call',1	
@@ -146,7 +146,7 @@ GO
 
 --tblCTRailGrade
 GO
-IF NOT EXISTS(SELECT * FROM tblCTRailGrade WHERE Value = 1)
+IF NOT EXISTS(SELECT * FROM tblCTRailGrade WHERE intRailGradeId = 1)
 BEGIN
 	INSERT INTO tblCTRailGrade
 	SELECT 1,'Average',1	
@@ -154,41 +154,41 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTRailGrade WHERE Value = 2)
+IF NOT EXISTS(SELECT * FROM tblCTRailGrade WHERE intRailGradeId = 2)
 BEGIN
 	INSERT INTO tblCTRailGrade
 	SELECT 2,'Car',1	
 END
 GO
 
---tblCTDiscount
+--tblCTDiscountType
 GO
-IF NOT EXISTS(SELECT * FROM tblCTDiscount WHERE Value = 1)
+IF NOT EXISTS(SELECT * FROM tblCTDiscountType WHERE intDiscountTypeId = 1)
 BEGIN
-	INSERT INTO tblCTDiscount
+	INSERT INTO tblCTDiscountType
 	SELECT 1,'Deliver',1	
 END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTDiscount WHERE Value = 2)
+IF NOT EXISTS(SELECT * FROM tblCTDiscountType WHERE intDiscountTypeId = 2)
 BEGIN
-	INSERT INTO tblCTDiscount
+	INSERT INTO tblCTDiscountType
 	SELECT 2,'As-Is',1	
 END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTDiscount WHERE Value = 3)
+IF NOT EXISTS(SELECT * FROM tblCTDiscountType WHERE intDiscountTypeId = 3)
 BEGIN
-	INSERT INTO tblCTDiscount
+	INSERT INTO tblCTDiscountType
 	SELECT 3,'Contract',1	
 END
 GO
 
 --tblCTDiscount
 GO
-IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE Value = 1)
+IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE intContractTypeId = 1)
 BEGIN
 	INSERT INTO tblCTContractType
 	SELECT 1,'Purchase',1	
@@ -196,21 +196,21 @@ END
 GO
 
 GO
-IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE Value = 2)
+IF NOT EXISTS(SELECT * FROM tblCTContractType WHERE intContractTypeId = 2)
 BEGIN
 	INSERT INTO tblCTContractType
 	SELECT 2,'Sale',1	
 END
 ELSE
 BEGIN
-	UPDATE tblCTContractType SET Name = 'Sale' WHERE Value = 2
+	UPDATE tblCTContractType SET strContractType = 'Sale' WHERE intContractTypeId = 2
 END
 GO
 
 GO
-IF EXISTS(SELECT * FROM tblCTContractType WHERE Name = 'DP')
+IF EXISTS(SELECT * FROM tblCTContractType WHERE strContractType = 'DP')
 BEGIN
-	DELETE FROM tblCTContractType WHERE Name = 'DP'
+	DELETE FROM tblCTContractType WHERE strContractType = 'DP'
 END
 GO
 --GO

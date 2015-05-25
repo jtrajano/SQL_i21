@@ -50,9 +50,9 @@ BEGIN TRY
 	WHERE	[fieldname] = 'intContractHeaderId' 
 
 	SELECT	strItemNo,dblDetailQuantity,
-			CASE	WHEN intPricingType = 1 THEN dblCashPrice
-					WHEN intPricingType = 2 THEN dblBasis
-					WHEN intPricingType = 3 THEN dblFutures
+			CASE	WHEN intPricingTypeId = 1 THEN dblCashPrice
+					WHEN intPricingTypeId = 2 THEN dblBasis
+					WHEN intPricingTypeId = 3 THEN dblFutures
 			ELSE
 					0
 			END		AS	dblPrice,

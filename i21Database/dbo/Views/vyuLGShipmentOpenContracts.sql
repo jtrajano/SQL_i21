@@ -8,7 +8,7 @@ AS
 			CD.intUnitMeasureId, 			UM.strUnitMeasure,
 			CD.dblQuantity - IsNull((SELECT SUM (S.dblQuantity) from tblLGShipmentContractQty S Group By S.intContractDetailId Having CD.intContractDetailId = S.intContractDetailId), 0) AS dblUnShippedQuantity,
 			
-			CH.intPurchaseSale,
+			CH.intContractTypeId intPurchaseSale,
 			CH.intEntityId,
 			CH.intContractNumber,
 			CH.dtmContractDate,
@@ -21,4 +21,4 @@ AS
 	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
 
 	WHERE (CD.dblQuantity - IsNull((SELECT SUM (S.dblQuantity) from tblLGShipmentContractQty S Group By S.intContractDetailId Having CD.intContractDetailId = S.intContractDetailId), 0)) > 0 AND 
-			CH.intPurchaseSale = 1
+			CH.intContractTypeId = 1
