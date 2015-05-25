@@ -31,10 +31,9 @@ BEGIN
 		EXEC testi21Database.[Fake inventory items]
 	END 
 
-	-- Test case
-	-- 1. Will return empty table since item id and location id are NULL. 
+	-- Act
+	-- Will return empty table since item id and location id are NULL. 
 	BEGIN 
-		-- Act
 		INSERT actual (
 				[Inventory]
 				,[ContraInventory]
@@ -47,8 +46,10 @@ BEGIN
 				,[RevalueSold] = NULL 
 				,[WriteOffSold] = NULL 
 				,[AutoNegative] = NULL 	
+	END
 
-		-- expects a row with NULL values on all fields. 
+	-- Assert
+	BEGIN 
 		INSERT expected (
 			[Inventory]
 			,[ContraInventory]

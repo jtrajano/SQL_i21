@@ -52,7 +52,7 @@ BEGIN
 		*/
 	END 
 
-	-- Test case: Get the contra account for "Purchase Account"
+	-- Act
 	BEGIN 
 		DELETE FROM actual
 		DELETE FROM expected
@@ -72,8 +72,10 @@ BEGIN
 				,[RevalueSold] = NULL 
 				,[WriteOffSold] = NULL 
 				,[AutoNegative] = NULL 	
-		
-		-- expects a row with NULL values on all fields. 
+	END
+
+	-- Assert
+	BEGIN		
 		INSERT expected (
 			[Inventory]
 			,[ContraInventory]

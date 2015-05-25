@@ -10,6 +10,7 @@
     [intEntitySalespersonId]      INT             NOT NULL,
     [intShipViaId]          INT             NOT NULL,
     [strPONumber]           NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
+	[strBOLNumber]			NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL, 
     [intTermId]             INT             NOT NULL,
     [dblSalesOrderSubtotal] NUMERIC (18, 6) NULL,
     [dblShipping]           NUMERIC (18, 6) NULL,
@@ -24,6 +25,7 @@
     [dtmProcessDate]        DATETIME        NULL,
     [ysnProcessed]          BIT             CONSTRAINT [DF_tblSOSalesOrder_ysnPosted] DEFAULT ((0)) NOT NULL,
     [strComments]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+	[intFreightTermId]		INT				NULL, 
 	[intShipToLocationId]   INT             NULL,
     [strShipToLocationName] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strShipToAddress]      NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
@@ -48,7 +50,8 @@
 	CONSTRAINT [FK_tblSOSalesOrder_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblEntityLocation_intBillToLocationId] FOREIGN KEY ([intBillToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
-	CONSTRAINT [FK_tblSOSalesOrder_tblARQuoteTemplate_intQuoteTemplateId] FOREIGN KEY ([intQuoteTemplateId]) REFERENCES [dbo].[tblARQuoteTemplate] ([intQuoteTemplateId])
+	CONSTRAINT [FK_tblSOSalesOrder_tblARQuoteTemplate_intQuoteTemplateId] FOREIGN KEY ([intQuoteTemplateId]) REFERENCES [dbo].[tblARQuoteTemplate] ([intQuoteTemplateId]),
+	CONSTRAINT [FK_tblSOSalesOrder_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId])
 );
 GO
 

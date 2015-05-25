@@ -55,7 +55,7 @@ IF @@ERROR > 0
 UPDATE
 	tblSOSalesOrder
 SET
-	strOrderStatus = 'Pending'
+	strOrderStatus = 'In Process'
 WHERE
 	[intSalesOrderId] = @SalesOrderId
 	

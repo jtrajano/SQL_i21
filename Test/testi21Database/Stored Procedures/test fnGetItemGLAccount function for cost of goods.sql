@@ -53,6 +53,7 @@ BEGIN
 		*/
 	END 
 	
+	-- Act
 	-- Test case: Get the contra account for "Cost of Goods"
 	BEGIN 
 		DELETE FROM actual
@@ -73,7 +74,10 @@ BEGIN
 				,[RevalueSold] = NULL 
 				,[WriteOffSold] = NULL 
 				,[AutoNegative] = NULL 	
-		
+	END
+
+	-- Assert
+	BEGIN 
 		-- expects a row with NULL values on all fields. 
 		INSERT expected (
 			[Inventory]
