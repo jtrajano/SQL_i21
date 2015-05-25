@@ -22,6 +22,8 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotOut', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICStorageLocation';
+	EXEC tSQLt.FakeTable 'dbo.tblICCommodity';
+	EXEC tSQLt.FakeTable 'dbo.tblICCommodityAccount', @Identity = 1;		
 		
 	-- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1
@@ -31,6 +33,7 @@ BEGIN
 			,@HotGrains AS INT = 5
 			,@ManualLotGrains AS INT = 6
 			,@SerializedLotGrains AS INT = 7
+			,@CornCommodity AS INT = 8
 			,@InvalidItem AS INT = -1
 
 	-- Declare the variables for location
@@ -76,6 +79,10 @@ BEGIN
 
 			,@ManualLotGrains_DefaultLocation AS INT = 16
 			,@SerializedLotGrains_DefaultLocation AS INT = 17
+
+			,@CornCommodity_DefaultLocation AS INT = 18
+			,@CornCommodity_NewHaven AS INT = 19
+			,@CornCommodity_BetterHaven AS INT = 20
 
 	-- Declare the account ids
 	DECLARE @Inventory_Default AS INT = 1000
@@ -140,6 +147,9 @@ BEGIN
 	-- Declare the item categories
 	DECLARE @HotItems AS INT = 1
 	DECLARE @ColdItems AS INT = 2
+
+	-- Declare the commodities
+	DECLARE @Commodity_Corn AS INT = 999
 
 	-- Declare the costing methods
 	DECLARE @AverageCosting AS INT = 1
@@ -353,6 +363,15 @@ BEGIN
 		-- Add G/L setup for Cold items
 		-- No category-level g/l account overrides for Cold items. Use default g/l account from Location. 
 	END
+
+
+	-- Fake Commodity 
+	BEGIN 
+		INSERT INTO dbo.tblICCommodity (intCommodityId, strDescription) VALUES (@Commodity_Corn, 'Commodity record for corn.');
+		INSERT INTO dbo.tblICCommodityAccount (intCommodityId, intAccountId, intAccountCategoryId) VALUES (@Commodity_Corn, @Inventory_Default, @AccountCategoryId_Inventory)
+		INSERT INTO dbo.tblICCommodityAccount (intCommodityId, intAccountId, intAccountCategoryId) VALUES (@Commodity_Corn, @CostOfGoods_Default, @AccountCategoryId_CostOfGoods)
+		INSERT INTO dbo.tblICCommodityAccount (intCommodityId, intAccountId, intAccountCategoryId) VALUES (@Commodity_Corn, @APClearing_Default, @AccountCategoryId_APClearing)
+	END 
 		
 	-- Fake data for Items 
 	BEGIN 
@@ -363,6 +382,7 @@ BEGIN
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, intCategoryId) VALUES (@HotGrains, 'HOT GRAINS DESCRIPTION', 'HOT GRAINS', @HotItems)
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS DESCRIPTION', 'MANUAL LOT GRAINS', 'Yes - Manual')
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@SerializedLotGrains, 'SERIALIZED LOT GRAINS DESCRIPTION', 'SERIALIZED LOT GRAINS', 'Yes - Serial Number')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strType, intCommodityId) VALUES (@CornCommodity, 'CORN - A COMMODITY ITEM', 'CORN', 'Commodity', @Commodity_Corn)
 	END
 
 	-- Fake data for Item-Location
@@ -386,6 +406,9 @@ BEGIN
 		15						Hot Grains				Better Haven		LIFO
 		16						Manual Lot Grains		Default Location	LOT COST
 		17						Serialized Lot Grains	Default Location	LOT COST 
+		18						Corn					Default Location	Average Cost
+		19						Corn					New Haven			FIFO
+		20						Corn					Better Haven		LIFO
 	*/
 
 	BEGIN 
@@ -395,6 +418,7 @@ BEGIN
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains_DefaultLocation, @PremiumGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains_DefaultLocation, @ColdGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains_DefaultLocation, @HotGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@CornCommodity_DefaultLocation, @CornCommodity, @Default_Location, @AllowNegativeStock, @AverageCosting)
 
 		-- Add items for location 2 ('NEW HAVEN')
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains_NewHaven, @WetGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
@@ -402,6 +426,7 @@ BEGIN
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains_NewHaven, @PremiumGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains_NewHaven, @ColdGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains_NewHaven, @HotGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@CornCommodity_NewHaven, @CornCommodity, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
 
 		-- Add items for location 3 ('BETTER HAVEN')
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains_BetterHaven, @WetGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
@@ -409,6 +434,7 @@ BEGIN
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@PremiumGrains_BetterHaven, @PremiumGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains_BetterHaven, @ColdGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains_BetterHaven, @HotGrains, @BetterHaven, @DoNotAllowNegativeStock, @LIFO)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@CornCommodity_BetterHaven, @CornCommodity, @BetterHaven, @AllowNegativeStockWithWriteOff, @FIFO)
 
 		-- Add lot items for location 1 ('Default')
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ManualLotGrains_DefaultLocation, @ManualLotGrains , @Default_Location, @AllowNegativeStock, @AverageCosting) -- Since item is a lot, ignore average costing 
@@ -462,6 +488,18 @@ BEGIN
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_AutoNegative, @AutoNegative_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_InventoryInTransit, @InventoryInTransit_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@ManualLotGrains, @AccountCategoryId_InventoryAdjustment, @InventoryAdjustment_Default);
+
+		-- Add the G/L Account for Commodity items. 
+		-- Corn
+		--INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @AccountCategoryId_Inventory, @Inventory_Default); -- This account id is retrieved from the Commodity > GL Account setup. 
+		--INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @AccountCategoryId_CostOfGoods, @CostOfGoods_Default); -- This account id is retrieved from the Commodity > GL Account setup. 
+		--INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @AccountCategoryId_APClearing, @APClearing_Default); -- This account id is retrieved from the Commodity > GL Account setup. 
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @AccountCategoryId_WriteOffSold, @WriteOffSold_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @AccountCategoryId_RevalueSold, @RevalueSold_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @AccountCategoryId_AutoNegative, @AutoNegative_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @AccountCategoryId_InventoryInTransit, @InventoryInTransit_Default);
+		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@CornCommodity, @AccountCategoryId_InventoryAdjustment, @InventoryAdjustment_Default);
+
 	END
 	
 	-- Create the fake table and data for the unit of measure
@@ -503,6 +541,9 @@ BEGIN
 		DECLARE @WetGrains_TonUOM AS INT = 36,			@StickyGrains_TonUOM AS INT = 37,		@PremiumGrains_TonUOM AS INT = 38,
 				@ColdGrains_TonUOM AS INT = 39,			@HotGrains_TonUOM AS INT = 40,			@ManualGrains_TonUOM AS INT = 41,
 				@SerializedGrains_TonUOM AS INT = 42
+
+		DECLARE @Corn_BushelUOM AS INT = 43,			@Corn_PoundUOM AS INT = 44,				@Corn_KgUOM AS INT = 45, 
+				@Corn_25KgBagUOM AS INT = 46,			@Corn_10LbBagUOM AS INT = 47,			@Corn_TonUOM AS INT = 48
 
 		-- Unit of measure master table
 		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Bushel, 'Bushel')
@@ -560,5 +601,11 @@ BEGIN
 		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ManualGrains_TonUOM, @ManualLotGrains, @UOM_Ton, @TonUnitQty)
 		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SerializedGrains_TonUOM, @SerializedLotGrains, @UOM_Ton, @TonUnitQty)
 
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_BushelUOM, @CornCommodity, @UOM_Bushel, @BushelUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_PoundUOM, @CornCommodity, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_KgUOM, @CornCommodity, @UOM_Kg, @KgUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_25KgBagUOM, @CornCommodity, @UOM_25KgBag, @25KgBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_10LbBagUOM, @CornCommodity, @UOM_10LbBag, @10LbBagUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_TonUOM, @CornCommodity, @UOM_Ton, @TonUnitQty)
 	END 
 END
