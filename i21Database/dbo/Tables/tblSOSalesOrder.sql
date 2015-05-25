@@ -10,6 +10,7 @@
     [intEntitySalespersonId]      INT             NOT NULL,
     [intShipViaId]          INT             NOT NULL,
     [strPONumber]           NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
+	[strBOLNumber]			NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL, 
     [intTermId]             INT             NOT NULL,
     [dblSalesOrderSubtotal] NUMERIC (18, 6) NULL,
     [dblShipping]           NUMERIC (18, 6) NULL,

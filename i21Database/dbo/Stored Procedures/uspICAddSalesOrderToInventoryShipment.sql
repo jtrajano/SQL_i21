@@ -66,9 +66,9 @@ BEGIN
 				,dtmRequestedArrivalDate	= NULL -- TODO
 				,intShipFromLocationId		= SO.intCompanyLocationId
 				,intEntityCustomerId		= SO.intEntityCustomerId
-				,intShipToLocationId		= NULL -- TODO
-				,intFreightTermId			= NULL -- TODO
-				,strBOLNumber				= NULL -- TODO
+				,intShipToLocationId		= SO.intShipToLocationId
+				,intFreightTermId			= SO.intFreightTermId
+				,strBOLNumber				= SO.strBOLNumber
 				,intShipViaId				= SO.intShipViaId
 				,strVessel					= NULL -- TODO
 				,strProNumber				= NULL 
