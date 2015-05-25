@@ -13,9 +13,13 @@ CREATE TABLE [dbo].[tblCTCostType](
 	[intCurrencyId] [int] NOT NULL,
 	[ysnFreightRelated] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnFreightRelated]  DEFAULT ((0)),
 	[ysnActive] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnActive]  DEFAULT ((1)),
+	[intOnCostTypeId]  [int] NULL,
+	[intAccountCategoryId]  [int] NULL,
 	CONSTRAINT [PK_tblCTCostType_intCostTypeId] PRIMARY KEY CLUSTERED ([intCostTypeId] ASC),
 	CONSTRAINT [FK_tblCTCostType_tblCTCostMethod_intCostMethodId] FOREIGN KEY ([intCostMethodId]) REFERENCES [tblCTCostMethod]([intCostMethodId]),
 	CONSTRAINT [FK_tblCTCostType_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTCostType_tblSMFreightTerms_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
-	CONSTRAINT [FK_tblCTCostType_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+	CONSTRAINT [FK_tblCTCostType_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblCTCostType_tblCTCostType_intCostTypeId_intOnCostTypeId] FOREIGN KEY ([intOnCostTypeId]) REFERENCES [tblCTCostType]([intCostTypeId]),
+	CONSTRAINT [FK_tblCTCostType_tblGLAccountCategory_intAccountCategoryId] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId])
 )
