@@ -42,6 +42,7 @@ EXEC('
 		DECLARE @BurnRateChangePercent NUMERIC(18,6)
 		DECLARE @BurnRateAverage NUMERIC(18,6)
 		DECLARE @rpt_date_ti DATETIME
+		DECLARE @strOrderNumber NVARCHAR(50)
 	
 		SET @rpt_date_ti = @str_rpt_date_ti
  
@@ -250,7 +251,8 @@ EXEC('
 			END	
 		
 			PRINT ''Create Call entry''
-			INSERT INTO [i1520WG].[dbo].[tblTMDispatch]
+			EXEC uspTMGetNextWillCallStartingNumber @strOrderNumber OUTPUT
+			INSERT INTO [dbo].[tblTMDispatch]
 				   ([intSiteID]
 				   ,[dblPercentLeft]
 				   ,[dblQuantity]
@@ -265,6 +267,7 @@ EXEC('
 				   ,[dtmCallInDate]
 				   ,[intUserID]
 				   ,[intDeliveryTermID]
+				   ,[strOrderNumber] 
 			  )		   
 			 (SELECT TOP 1 
 				   @siteId
@@ -281,6 +284,7 @@ EXEC('
 				   ,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
 				   ,@userID
 				   ,intDeliveryTermID
+				   ,@strOrderNumber
 			FROM tblTMSite
 			WHERE intSiteID = 	@siteId  
 			)
