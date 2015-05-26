@@ -511,7 +511,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                 {
                                                                     dataIndex: 'dblCost',
                                                                     dataType: 'numeric',
-                                                                    text: 'Cost',
+                                                                    text: 'Last Cost',
                                                                     flex: 1
                                                                 }
                                                             ],

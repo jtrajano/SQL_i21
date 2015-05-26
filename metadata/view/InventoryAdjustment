@@ -1047,7 +1047,7 @@
                                                             "{",
                                                             "dataIndex: 'dblCost',",
                                                             "dataType: 'numeric',",
-                                                            "text: 'Cost',",
+                                                            "text: 'Last Cost',",
                                                             "flex: 1",
                                                             "}",
                                                             "]"
@@ -1055,7 +1055,8 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strLotNumber",
                                                         "itemId": "cboLotNumber",
-                                                        "valueField": "strLotNumber"
+                                                        "valueField": "strLotNumber",
+                                                        "width": null
                                                     },
                                                     "name": "MyComboBox78",
                                                     "configAlternates": {
