@@ -107,6 +107,11 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                                 column: 'intLocationId',
                                 value: '{current.intLocationId}',
                                 conjunction: 'and'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryAdjustment.selection.intSubLocationId}',
+                                conjunction: 'and'
                             }
                         ]
                     }
@@ -484,18 +489,65 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewWeightPerQty', null);
             current.set('dblLineTotal', 0.00);
         }
-        else if (combo.itemId === 'cboNewItemNo')
-        {
-            current.set('intNewItemId', record.get('intItemId'));
-            current.set('strNewItemDescription', record.get('strDescription'));
-        }
         else if (combo.itemId === 'cboSubLocation')
         {
             current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
+            current.set('dblQuantity', null);
+            current.set('dblCost', null);
+            current.set('intItemUOMId', null);
+            current.set('strItemUOM', null);
+            current.set('strStorageLocation', null);
+            current.set('intStorageLocationId', null);
+            current.set('intLotId', null);
+            current.set('strLotNumber', null);
+            current.set('intNewLotId', null);
+            current.set('strNewLotNumber', null);
+            current.set('dblAdjustByQuantity', null);
+            current.set('dblNewQuantity', null);
+            current.set('dblNewCost', null);
+            current.set('intNewItemUOMId', null);
+            current.set('strNewItemUOM', null);
+            current.set('dblWeight', null);
+            current.set('dblNewWeight', null);
+            current.set('intWeightUOMId', null);
+            current.set('strWeightUOM', null);
+            current.set('intNewWeightUOMId', null);
+            current.set('strNewWeightUOM', null);
+            current.set('dblWeightPerQty', null);
+            current.set('dblNewWeightPerQty', null);
+            current.set('dblLineTotal', 0.00);
         }
         else if (combo.itemId === 'cboStorageLocation')
         {
             current.set('intStorageLocationId', record.get('intStorageLocationId'));
+            current.set('dblQuantity', null);
+            current.set('dblCost', null);
+            current.set('intItemUOMId', null);
+            current.set('strItemUOM', null);
+            current.set('intLotId', null);
+            current.set('strLotNumber', null);
+            current.set('intNewLotId', null);
+            current.set('strNewLotNumber', null);
+            current.set('dblAdjustByQuantity', null);
+            current.set('dblNewQuantity', null);
+            current.set('dblNewCost', null);
+            current.set('intNewItemUOMId', null);
+            current.set('strNewItemUOM', null);
+            current.set('dblWeight', null);
+            current.set('dblNewWeight', null);
+            current.set('intWeightUOMId', null);
+            current.set('strWeightUOM', null);
+            current.set('intNewWeightUOMId', null);
+            current.set('strNewWeightUOM', null);
+            current.set('dblWeightPerQty', null);
+            current.set('dblNewWeightPerQty', null);
+            current.set('dblLineTotal', 0.00);
+        }
+
+        else if (combo.itemId === 'cboNewItemNo')
+        {
+            current.set('intNewItemId', record.get('intItemId'));
+            current.set('strNewItemDescription', record.get('strDescription'));
         }
         else if (combo.itemId === 'cboLotNumber')
         {
