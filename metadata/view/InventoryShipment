@@ -1644,7 +1644,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter145",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1720,42 +1720,36 @@
                                                                             "\t\tdataIndex: 'strSalesOrderNumber',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Sales Order',",
-                                                                            "\t\tflex: 1,",
                                                                             "        width: 100",
                                                                             "\t},",
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strItemNo',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Item No',",
-                                                                            "\t\tflex: 1,",
                                                                             "        width: 100",
                                                                             "\t},",
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strItemDescription',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Description',",
-                                                                            "\t\tflex: 1,",
                                                                             "        width: 120",
                                                                             "\t},",
                                                                             "    {",
                                                                             "\t\tdataIndex: 'strLotTracking',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Lot Tracking',",
-                                                                            "\t\tflex: 1,",
                                                                             "        width: 100",
                                                                             "\t},",
                                                                             "    {",
                                                                             "\t\tdataIndex: 'strUnitMeasure',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Item UOM Id',",
-                                                                            "\t\tflex: 1,",
                                                                             "        width: 100",
                                                                             "\t},",
                                                                             "    {",
                                                                             "\t\tdataIndex: 'dblQtyOrdered',",
                                                                             "\t\tdataType: 'float',",
                                                                             "\t\ttext: 'Qty Ordered',",
-                                                                            "\t\tflex: 1,",
                                                                             "        width: 100",
                                                                             "\t},",
                                                                             "    {",
@@ -1775,17 +1769,26 @@
                                                                         "designer|createAlias": "gridcombobox",
                                                                         "displayField": "strSalesOrderNumber",
                                                                         "itemId": "cboOrderNumber",
-                                                                        "valueField": "strSalesOrderNumber"
+                                                                        "matchFieldWidth": false,
+                                                                        "pickerWidth": 625,
+                                                                        "valueField": "strSalesOrderNumber",
+                                                                        "width": 500
                                                                     },
                                                                     "name": "MyComboBox",
                                                                     "configAlternates": {
-                                                                        "columns": "array"
+                                                                        "columns": "array",
+                                                                        "pickerWidth": "number"
                                                                     },
                                                                     "designerId": "34b1186d-b414-4217-a29f-3f0ca9db5572",
                                                                     "customConfigs": [
                                                                         {
                                                                             "group": "(Custom Properties)",
                                                                             "name": "columns",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "pickerWidth",
                                                                             "type": "string"
                                                                         }
                                                                     ]
@@ -2361,7 +2364,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter146",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2927,7 +2930,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter147",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3181,7 +3184,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter148",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3358,7 +3361,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging110",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

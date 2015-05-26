@@ -368,7 +368,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
             current.set('dblQuantity', records[0].get('dblQtyOrdered'));
             current.set('strOrderUOM', records[0].get('strUnitMeasure'));
-            current.set('dblOrderQty', records[0].get('dblQtyOrdered'));
+            current.set('dblQtyOrdered', records[0].get('dblQtyOrdered'));
             current.set('dblUnitPrice', records[0].get('dblPrice'));
 
             switch(records[0].get('strLotTracking')) {
