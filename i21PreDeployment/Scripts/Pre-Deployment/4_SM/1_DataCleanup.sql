@@ -130,7 +130,6 @@ GO
 GO
 
 	/* DELETE EXECESSIVE MENUS IN CARD FUELING */
-
 	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMMASTERMENU')
 	BEGIN
 		EXEC('DELETE FROM tblSMMasterMenu WHERE strMenuName LIKE ''Invoice Cycle%'' And strModuleName = ''Card Fueling'' AND intMenuID <> (Select TOP 1 intMenuID From tblSMMasterMenu Where strMenuName Like ''Invoice Cycle%'' And strModuleName = ''Card Fueling'' ORDER BY intMenuID ASC)
@@ -139,5 +138,11 @@ GO
 			  DELETE FROM tblSMMasterMenu WHERE strMenuName LIKE ''Site Group%'' AND strMenuName NOT LIKE ''Site Group Price Adjustment%'' AND strModuleName = ''Card Fueling'' AND intMenuID <> (Select TOP 1 intMenuID From tblSMMasterMenu Where strMenuName Like ''Site Group%'' AND strMenuName NOT LIKE ''Site Group Price Adjustment%'' AND strModuleName = ''Card Fueling'' ORDER BY intMenuID ASC)
 			  DELETE FROM tblSMMasterMenu WHERE strMenuName LIKE ''Site Group Price Adjustment%'' And strModuleName = ''Card Fueling'' AND intMenuID <> (Select TOP 1 intMenuID From tblSMMasterMenu Where strMenuName Like ''Site Group Price Adjustment%'' And strModuleName = ''Card Fueling'' ORDER BY intMenuID ASC)')
 	END
+
+GO
+	
+	/* RENAME NOTE RECEIVABLES TO NOTES RECEIVABLES MENU */
+	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMMASTERMENU')
+		EXEC('UPDATE tblSMMasterMenu SET strMenuName = ''Notes Receivables'' WHERE strMenuName = ''Note Receivables'' AND strModuleName = ''Notes Receivable''')
 
 GO
