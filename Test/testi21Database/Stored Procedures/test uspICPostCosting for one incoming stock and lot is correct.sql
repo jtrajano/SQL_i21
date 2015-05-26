@@ -52,7 +52,6 @@ BEGIN
 			,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,[strMarkings]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS 
 			,[strNotes]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS 
-			,[intVendorId]				INT 
 			,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS 
 			,[intVendorLocationId]		INT NULL 
 			,[strVendorLocation]		NVARCHAR(100) COLLATE Latin1_General_CI_AS 
@@ -78,22 +77,22 @@ BEGIN
 
 		-- Setup the items to post
 		INSERT INTO @ItemsForPost (  
-			intItemId  
-			,intItemLocationId 
-			,intItemUOMId  
-			,dtmDate  
-			,dblQty  
-			,dblUOMQty  
-			,dblCost  
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
+				intItemId				
+				,intItemLocationId		
+				,intItemUOMId			
+				,dtmDate				
+				,dblQty					
+				,dblUOMQty				
+				,dblCost				
+				,dblSalesPrice			
+				,intCurrencyId			
+				,dblExchangeRate		
+				,intTransactionId		
+				,strTransactionId		
+				,intTransactionTypeId	
+				,intLotId				
+				,intSubLocationId		
+				,intStorageLocationId	
 		)  
 		SELECT	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
@@ -113,8 +112,77 @@ BEGIN
 				,intStorageLocationId	= @StorageLocation
 
 			-- Setup the expected lot data
-			INSERT INTO expected 
-			SELECT	*
+			INSERT INTO expected (
+					[intLotId]					
+					,[intItemId]				
+					,[intLocationId]			
+					,[intItemLocationId]		
+					,[intItemUOMId]				
+					,[strLotNumber]				
+					,[intSubLocationId]			
+					,[intStorageLocationId]		
+					,[dblQty]					
+					,[dblLastCost]				
+					,[dtmExpiryDate]			
+					,[strLotAlias]				
+					,[intLotStatusId]			
+					,[intParentLotId]			
+					,[intSplitFromLotId]		
+					,[dblWeight]				
+					,[intWeightUOMId]			
+					,[dblWeightPerQty]			
+					,[intOriginId]				
+					,[strBOLNo]					
+					,[strVessel]				
+					,[strReceiptNumber]			
+					,[strMarkings]				
+					,[strNotes]					
+					,[strVendorLotNo]			
+					,[intVendorLocationId]		
+					,[strVendorLocation]		
+					,[strContractNo]			
+					,[dtmManufacturedDate]		
+					,[ysnReleasedToWarehouse]	
+					,[ysnProduced]				
+					,[dtmDateCreated]			
+					,[intCreatedUserId]			
+					,[intConcurrencyId]						
+			)
+			SELECT	
+					[intLotId]					
+					,[intItemId]				
+					,[intLocationId]			
+					,[intItemLocationId]		
+					,[intItemUOMId]				
+					,[strLotNumber]				
+					,[intSubLocationId]			
+					,[intStorageLocationId]		
+					,[dblQty]					
+					,[dblLastCost]				
+					,[dtmExpiryDate]			
+					,[strLotAlias]				
+					,[intLotStatusId]			
+					,[intParentLotId]			
+					,[intSplitFromLotId]		
+					,[dblWeight]				
+					,[intWeightUOMId]			
+					,[dblWeightPerQty]			
+					,[intOriginId]				
+					,[strBOLNo]					
+					,[strVessel]				
+					,[strReceiptNumber]			
+					,[strMarkings]				
+					,[strNotes]					
+					,[strVendorLotNo]			
+					,[intVendorLocationId]		
+					,[strVendorLocation]		
+					,[strContractNo]			
+					,[dtmManufacturedDate]		
+					,[ysnReleasedToWarehouse]	
+					,[ysnProduced]				
+					,[dtmDateCreated]			
+					,[intCreatedUserId]			
+					,[intConcurrencyId]			
 			FROM	dbo.tblICLot
 
 			UPDATE	expected
@@ -131,8 +199,77 @@ BEGIN
 			,@strAccountToCounterInventory
 			,@intUserId
 
-		INSERT INTO actual 
-		SELECT	*
+		INSERT INTO actual (
+					[intLotId]					
+					,[intItemId]				
+					,[intLocationId]			
+					,[intItemLocationId]		
+					,[intItemUOMId]				
+					,[strLotNumber]				
+					,[intSubLocationId]			
+					,[intStorageLocationId]		
+					,[dblQty]					
+					,[dblLastCost]				
+					,[dtmExpiryDate]			
+					,[strLotAlias]				
+					,[intLotStatusId]			
+					,[intParentLotId]			
+					,[intSplitFromLotId]		
+					,[dblWeight]				
+					,[intWeightUOMId]			
+					,[dblWeightPerQty]			
+					,[intOriginId]				
+					,[strBOLNo]					
+					,[strVessel]				
+					,[strReceiptNumber]			
+					,[strMarkings]				
+					,[strNotes]					
+					,[strVendorLotNo]			
+					,[intVendorLocationId]		
+					,[strVendorLocation]		
+					,[strContractNo]			
+					,[dtmManufacturedDate]		
+					,[ysnReleasedToWarehouse]	
+					,[ysnProduced]				
+					,[dtmDateCreated]			
+					,[intCreatedUserId]			
+					,[intConcurrencyId]						
+			)
+		SELECT	
+					[intLotId]					
+					,[intItemId]				
+					,[intLocationId]			
+					,[intItemLocationId]		
+					,[intItemUOMId]				
+					,[strLotNumber]				
+					,[intSubLocationId]			
+					,[intStorageLocationId]		
+					,[dblQty]					
+					,[dblLastCost]				
+					,[dtmExpiryDate]			
+					,[strLotAlias]				
+					,[intLotStatusId]			
+					,[intParentLotId]			
+					,[intSplitFromLotId]		
+					,[dblWeight]				
+					,[intWeightUOMId]			
+					,[dblWeightPerQty]			
+					,[intOriginId]				
+					,[strBOLNo]					
+					,[strVessel]				
+					,[strReceiptNumber]			
+					,[strMarkings]				
+					,[strNotes]					
+					,[strVendorLotNo]			
+					,[intVendorLocationId]		
+					,[strVendorLocation]		
+					,[strContractNo]			
+					,[dtmManufacturedDate]		
+					,[ysnReleasedToWarehouse]	
+					,[ysnProduced]				
+					,[dtmDateCreated]			
+					,[intCreatedUserId]			
+					,[intConcurrencyId]		
 		FROM	dbo.tblICLot
 	END 
 

@@ -12,7 +12,25 @@ BEGIN
 
 	DECLARE @items ItemCostingTableType
 
-	INSERT INTO @items
+	INSERT INTO @items (
+		[intItemId]				
+		,[intItemLocationId]	
+		,[intItemUOMId]			
+		,[dtmDate]				
+		,[dblQty]				
+		,[dblUOMQty]			
+		,[dblCost]				
+		,[dblValue]				
+		,[dblSalesPrice]		
+		,[intCurrencyId]		
+		,[dblExchangeRate]		
+		,[intTransactionId]		
+		,[strTransactionId]		
+		,[intTransactionTypeId]	
+		,[intLotId]				
+		,[intSubLocationId]		
+		,[intStorageLocationId]		
+	)
 	SELECT
 		[intItemId]				=	B.intItemId
 		,[intItemLocationId]	=	ItemLocation.intItemLocationId

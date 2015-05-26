@@ -203,7 +203,7 @@ BEGIN
 			,@intUserId;
 	END
 
-	-- LIFO 
+	-- LOT 
 	IF (@CostingMethod = @LOTCOST)
 	BEGIN 
 		EXEC dbo.uspICPostLot

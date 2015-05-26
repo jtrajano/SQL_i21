@@ -1621,6 +1621,12 @@
     <Build Include="dbo\Tables\tblRKBroker.sql" />
     <Build Include="dbo\Tables\tblARQuoteTemplate.sql" />
     <Build Include="dbo\Tables\tblARQuoteTemplateDetail.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotInCustody.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotInCustodyTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLotInCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLotCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotInCustodyTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

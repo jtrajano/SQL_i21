@@ -1,10 +1,10 @@
 ﻿/*
 ## Overview
-Tracks all stocks assigned to a Lot Number in a FIFO manner. Records are physically arranged in a FIFO manner using a CLUSTERED index. 
+Tracks the custody of customer-owned stocks in a FIFO manner. Records are physically arranged in a FIFO manner using a CLUSTERED index. 
 Records must be maintained in this table even if the costing method for an item is average costing. 
 
 ## Fields, description, and mapping. 
-*	[intInventoryLotId] INT NOT NULL IDENTITY
+*	[intInventoryLotInCustodyId] INT NOT NULL IDENTITY
 	Primay key. 
 	Maps: None 
 
@@ -58,9 +58,6 @@ Records must be maintained in this table even if the costing method for an item 
 	Flags if the cost bucket has been unposted. 
 	Maps: None
 
-*	[ysnInCustody] BIT NOT NULL DEFAULT 0
-	Flags if the Lot is owned by someone else like the customer. Lot is under the company's custody. 
-	Maps: None
 
 *	[intCreatedUserId] INT NULL
 	Internal field used to track the user id who created the cost bucket. 
@@ -74,9 +71,9 @@ Records must be maintained in this table even if the costing method for an item 
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblICInventoryLot]
+	CREATE TABLE [dbo].[tblICInventoryLotInCustody]
 	(
-		[intInventoryLotId] INT NOT NULL IDENTITY, 
+		[intInventoryLotInCustodyId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL,
 		[intItemUOMId] INT NOT NULL,
@@ -90,21 +87,20 @@ Records must be maintained in this table even if the costing method for an item 
 		[intTransactionId] INT NOT NULL,
 		[dtmCreated] DATETIME NULL, 
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
-		[ysnInCustody] BIT NOT NULL DEFAULT 0, 
 		[intCreatedUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
-		CONSTRAINT [PK_tblICInventoryLot] PRIMARY KEY NONCLUSTERED ([intInventoryLotId]),
-		CONSTRAINT [FK_tblICInventoryLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),
-		CONSTRAINT [FK_tblICInventoryLot_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
+		CONSTRAINT [PK_tblICInventoryLotInCustody] PRIMARY KEY NONCLUSTERED ([intInventoryLotInCustodyId]),
+		CONSTRAINT [FK_tblICInventoryLotInCustody_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),
+		CONSTRAINT [FK_tblICInventoryLotInCustody_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
 	)
 	GO
 
-	CREATE CLUSTERED INDEX [IDX_tblICInventoryLot]
-		ON [dbo].[tblICInventoryLot]([intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
+	CREATE CLUSTERED INDEX [IDX_tblICInventoryLotInCustody]
+		ON [dbo].[tblICInventoryLotInCustody]([intInventoryLotInCustodyId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLot_intItemId_intLocationId]
-		ON [dbo].[tblICInventoryLot]([intItemId] ASC, [intItemLocationId] ASC)
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotInCustody_intItemId_intLocationId]
+		ON [dbo].[tblICInventoryLotInCustody]([intItemId] ASC, [intItemLocationId] ASC)
 		INCLUDE (intLotId, intItemUOMId, dblStockIn, dblStockOut, dblCost);
 	GO
 
