@@ -42,6 +42,7 @@ BEGIN TRY
 		,@intMachineId int
 		,@ysnLotAlias bit
 		,@strLotAlias nvarchar(50)
+		,@strComment nvarchar(MAX)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -80,6 +81,7 @@ BEGIN TRY
 		,@intMachineId =intMachineId
 		,@ysnLotAlias =ysnLotAlias
 		,@strLotAlias =strLotAlias
+		,@strComment=strComment
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -109,6 +111,7 @@ BEGIN TRY
 			,intMachineId int
 			,ysnLotAlias bit
 			,strLotAlias nvarchar(50)
+			,strComment nvarchar(MAX)
 			)
 
 	BEGIN TRANSACTION
@@ -386,6 +389,7 @@ BEGIN TRY
 		,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 		,@intBatchId = @intBatchId
 		,@strBatchId = @strRetBatchId
+		,@strComment=@strComment
 		,@intLotId = @intLotId OUTPUT
 
 	UPDATE dbo.tblICLot
