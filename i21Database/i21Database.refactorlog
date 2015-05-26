@@ -3269,6 +3269,41 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strBuySell" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="49838c17-f49f-48e6-9905-1fca7afd7b6e" ChangeDateTime="05/25/2015 14:59:28">
+    <Property Name="ElementName" Value="[dbo].[tblSTStore].[intCustomerChargeMop]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTStore]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCustomerChargeMopId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="bc492efa-5beb-4532-8827-73449ba3d591" ChangeDateTime="05/25/2015 14:59:35">
+    <Property Name="ElementName" Value="[dbo].[tblSTStore].[intCashTransctionMop]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTStore]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCashTransctionMopId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7e1e5bc1-121f-4fea-a013-a14411ef445a" ChangeDateTime="05/25/2015 14:59:49">
+    <Property Name="ElementName" Value="[dbo].[tblSTStore].[intLoyaltyDiscountMop]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTStore]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLoyaltyDiscountMopId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dcc1e247-3cc6-4047-b9b1-c197e09b5d98" ChangeDateTime="05/25/2015 14:59:59">
+    <Property Name="ElementName" Value="[dbo].[tblSTStore].[intRemovePropCardMop]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTStore]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRemovePropCardMopId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="969192f5-b089-46c0-a7fa-748e24dabcfb" ChangeDateTime="05/25/2015 15:00:03">
+    <Property Name="ElementName" Value="[dbo].[tblSTStore].[intAddPropCardMop]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTStore]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intAddPropCardMopId" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="81a531b0-ffd8-4b1a-ac13-c6a7bb3b4eb9" ChangeDateTime="05/26/2015 06:52:19">
     <Property Name="ElementName" Value="[dbo].[tblRKMarketExchange].[strMarketSymbol]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
