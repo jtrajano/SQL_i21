@@ -1621,6 +1621,17 @@
     <Build Include="dbo\Tables\tblRKBroker.sql" />
     <Build Include="dbo\Tables\tblARQuoteTemplate.sql" />
     <Build Include="dbo\Tables\tblARQuoteTemplateDetail.sql" />
+    <Build Include="dbo\Tables\tblQMProduct.sql" />
+    <Build Include="dbo\Tables\tblQMProductTest.sql" />
+    <Build Include="dbo\Tables\tblQMProductControlPoint.sql" />
+    <Build Include="dbo\Tables\tblQMConditionalProductProperty.sql" />
+    <Build Include="dbo\Tables\tblQMProductPropertyValidityPeriod.sql" />
+    <Build Include="dbo\Tables\tblQMProductProperty.sql" />
+    <Build Include="dbo\Tables\tblQMProductType.sql" />
+    <Build Include="dbo\Views\vyuQMTemplateList.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMAddProductPropertyDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetProductValueDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetTestProperty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
