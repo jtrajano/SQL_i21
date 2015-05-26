@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARCustomerRackQuoteHeader]
 (	
-	[intCustomerRackQuoteHeaderId]			INT			NOT NULL,
+	[intCustomerRackQuoteHeaderId]			INT			IDENTITY (1, 1) NOT NULL,
 	[intEntityCustomerId]					INT			NOT NULL,
 	[ysnQuoteAllAvailabeRackPrice]			BIT         NULL,
 	[ysnShowTaxDetail]						BIT         NULL,
