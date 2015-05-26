@@ -59,13 +59,14 @@ namespace iRely.Inventory.BusinessLayer
                     from ItemUOM in _db.GetQuery<tblICItemUOM>()
                     join UOM in _db.GetQuery<tblICUnitMeasure>()
                         on ItemUOM.intUnitMeasureId equals UOM.intUnitMeasureId
-                    where UOM.strUnitType == "Weight"                        
-                    select new WeightUOMVm 
+                    where UOM.strUnitType == "Weight"
+                    select new WeightUOMVm
                     {
                         intItemUOMId = ItemUOM.intItemUOMId,
                         strUnitMeasure = UOM.strUnitMeasure,
                         strUnitType = UOM.strUnitType,
-                        intItemId = ItemUOM.intItemId
+                        intItemId = ItemUOM.intItemId,
+                        dblUnitQty = ItemUOM.dblUnitQty ?? 0
                     }
                 )
                 .Filter(param, true);

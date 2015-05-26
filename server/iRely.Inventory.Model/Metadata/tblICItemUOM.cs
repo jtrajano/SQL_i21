@@ -181,5 +181,6 @@ namespace iRely.Inventory.Model
         public string strUnitMeasure { get; set; }
         public string strUnitType { get; set; }
         public int intItemId { get; set; }
+        public decimal dblUnitQty { get; set; }
     }
 }
