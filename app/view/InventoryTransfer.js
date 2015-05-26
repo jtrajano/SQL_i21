@@ -596,7 +596,9 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     width: 100
                                                                 }
                                                             ],
+                                                            pickerWidth: 625,
                                                             itemId: 'cboItem',
+                                                            matchFieldWidth: false,
                                                             displayField: 'strItemNo',
                                                             valueField: 'strItemNo'
                                                         }

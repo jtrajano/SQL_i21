@@ -1246,17 +1246,25 @@
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strItemNo",
                                                         "itemId": "cboItem",
+                                                        "matchFieldWidth": false,
+                                                        "pickerWidth": 625,
                                                         "valueField": "strItemNo"
                                                     },
                                                     "name": "MyComboBox1",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "pickerWidth": "number"
                                                     },
                                                     "designerId": "18b37e3e-3c05-4b0a-a8db-eb6757ed3604",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "pickerWidth",
                                                             "type": "string"
                                                         }
                                                     ]
