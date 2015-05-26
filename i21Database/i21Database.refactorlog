@@ -3269,4 +3269,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strBuySell" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="81a531b0-ffd8-4b1a-ac13-c6a7bb3b4eb9" ChangeDateTime="05/26/2015 06:52:19">
+    <Property Name="ElementName" Value="[dbo].[tblRKMarketExchange].[strMarketSymbol]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKMarketExchange]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMarketExchange" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cb5adca5-43e4-470d-8d87-653be5f786d6" ChangeDateTime="05/26/2015 06:53:07">
+    <Property Name="ElementName" Value="[dbo].[tblRKMarketExchange].[strExchangeCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKMarketExchange]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strExchangeInterfaceCode" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="726bb221-3aea-4093-9e1b-79d47c1dff23" ChangeDateTime="05/26/2015 10:34:22">
+    <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricing].[strSybmolPrefix]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricing]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strSymbolPrefix" />
+  </Operation>
 </Operations>

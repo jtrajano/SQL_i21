@@ -37,9 +37,15 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
 	[ysnOptNov] [bit] NULL,
 	[ysnOptDec] [bit] NULL,
     [intNoOfDecimal] INT NULL , 
+    [intMarketExchangeId] INT NULL, 
+    [strSymbolPrefix] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
+    [dblConversionRate] NUMERIC(18, 6) NULL, 
+    [intReturnCurrency] INT NULL, 
+    [intDisplayCurrency] INT NULL, 
+    [strMarketSymbolCode] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblRKFutureMarket_intFutureMarketId] PRIMARY KEY CLUSTERED ([intFutureMarketId] ASC),
- CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
- CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
+	CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
+	CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
 )
 GO
 
