@@ -3290,4 +3290,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strSymbolPrefix" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="29705780-423d-44b8-8be9-f26171d02733" ChangeDateTime="05/26/2015 15:33:58">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractOptDetail].[intBuySell]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractOptDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBuySellId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4e9c9d2c-511b-40da-bb2d-54ddcc15d81f" ChangeDateTime="05/26/2015 15:34:03">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractOptDetail].[intPutCall]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractOptDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPutCallId" />
+  </Operation>
 </Operations>
