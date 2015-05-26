@@ -1621,6 +1621,10 @@
     <Build Include="dbo\Tables\tblRKBroker.sql" />
     <Build Include="dbo\Tables\tblARQuoteTemplate.sql" />
     <Build Include="dbo\Tables\tblARQuoteTemplateDetail.sql" />
+    <Build Include="dbo\Tables\tblARCustomerRackQuoteCategory.sql" />
+    <Build Include="dbo\Tables\tblARCustomerRackQuoteHeader.sql" />
+    <Build Include="dbo\Tables\tblARCustomerRackQuoteItem.sql" />
+    <Build Include="dbo\Tables\tblARCustomerRackQuoteVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1658,7 +1662,6 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\2_SalesOrderDetailDefault.sql" />
     <None Include="Scripts\Post-Deployment\EM\002_UpdateMenuuEntityType.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql" />
-    <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateEarningDeductionTaxId.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
