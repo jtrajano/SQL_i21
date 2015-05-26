@@ -1632,6 +1632,11 @@
     <Build Include="dbo\Stored Procedures\uspQMAddProductPropertyDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetProductValueDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTestProperty.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\4_UpdateInvoiceOrderShipVia.sql" />
+    <Build Include="dbo\Tables\tblARCustomerRackQuoteVendor.sql" />
+    <Build Include="dbo\Tables\tblARCustomerRackQuoteCategory.sql" />
+    <Build Include="dbo\Tables\tblARCustomerRackQuoteHeader.sql" />
+    <Build Include="dbo\Tables\tblARCustomerRackQuoteItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
