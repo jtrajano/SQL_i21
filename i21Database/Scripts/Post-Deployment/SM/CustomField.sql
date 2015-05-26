@@ -41,5 +41,19 @@ BEGIN
 	print('/*******************  END Creating Account Custom Table *******************/')
 END
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE object_id = object_id('cstLGLoad'))
+BEGIN
+	print('/*******************  BEGIN Creating Load Custom Table *******************/')
+	EXEC('
+		CREATE TABLE [dbo].[cstLGLoad]
+		(
+			[intId] INT NOT NULL,
+			CONSTRAINT [PK_cstLGLoad] PRIMARY KEY CLUSTERED ([intId] ASC),
+			CONSTRAINT [FK_cstLGLoad_tblLGLoad] FOREIGN KEY ([intId]) REFERENCES [dbo].[tblLGLoad] ([intLoadId]) ON DELETE CASCADE
+		);
+	')
+	print('/*******************  END Creating Load Custom Table *******************/')
+END
+
 GO
 print('/*******************  END Creating Custom Field Tables *******************/')
