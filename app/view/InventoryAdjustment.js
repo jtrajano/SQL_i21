@@ -503,8 +503,14 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     flex: 1
                                                                 },
                                                                 {
+                                                                    dataIndex: 'dblQty',
+                                                                    dataType: 'numeric',
+                                                                    text: 'On Hand',
+                                                                    flex: 1
+                                                                },
+                                                                {
                                                                     dataIndex: 'dblCost',
-                                                                    dataType: 'float',
+                                                                    dataType: 'numeric',
                                                                     text: 'Cost',
                                                                     flex: 1
                                                                 }
