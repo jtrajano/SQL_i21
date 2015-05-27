@@ -14,3 +14,4 @@ FROM
 	SELECT intResult as intResultId, strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intEntityId
 	FROM tblGLPostResult
 ) BatchPostingResult
+WHERE strDescription IS NOT NULL
