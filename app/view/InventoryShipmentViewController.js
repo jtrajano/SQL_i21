@@ -248,6 +248,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
+            include: 'ShipFromLocation, ' +
+                'tblARCustomer, ' +
+                'ShipToLocation, ' +
+                'tblICInventoryShipmentItems.vyuICGetShipmentItemSource, ' +
+                'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot, ' +
+                'tblICInventoryShipmentItems.tblICItem, ' +
+                'tblICInventoryShipmentItems.tblICItemUOM.tblICUnitMeasure',
             createRecord: me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.attachment.Manager', {

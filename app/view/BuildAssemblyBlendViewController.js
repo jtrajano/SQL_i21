@@ -129,6 +129,9 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
+            include: 'tblICBuildAssemblyDetails.tblICItem, ' +
+                'tblICBuildAssemblyDetails.tblICItemUOM.tblICUnitMeasure, ' +
+                'tblICBuildAssemblyDetails.tblSMCompanyLocationSubLocation',
             createRecord : me.createRecord,
             binding: me.config.binding,
             details: [

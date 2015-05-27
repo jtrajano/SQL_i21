@@ -246,6 +246,15 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
+            include: 'tblICInventoryTransferDetails.tblICItem, ' +
+                'tblICInventoryTransferDetails.tblICItemUOM, ' +
+                'tblICInventoryTransferDetails.tblICLot, ' +
+                'tblICInventoryTransferDetails.tblSMTaxCode, ' +
+                'tblICInventoryTransferDetails.FromSubLocation, ' +
+                'tblICInventoryTransferDetails.FromStorageLocation, ' +
+                'tblICInventoryTransferDetails.ToSubLocation, ' +
+                'tblICInventoryTransferDetails.ToStorageLocation, ' +
+                'tblICInventoryTransferNotes',
             createRecord : me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.attachment.Manager', {

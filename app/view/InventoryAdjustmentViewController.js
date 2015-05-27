@@ -369,6 +369,22 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
+            include: 'tblICInventoryAdjustmentDetails.tblSMCompanyLocationSubLocation, ' +
+                'tblICInventoryAdjustmentDetails.tblICStorageLocation, ' +
+                'tblICInventoryAdjustmentDetails.Item, ' +
+                'tblICInventoryAdjustmentDetails.NewItem, ' +
+                'tblICInventoryAdjustmentDetails.Lot, ' +
+                'tblICInventoryAdjustmentDetails.NewLot, ' +
+                'tblICInventoryAdjustmentDetails.ItemUOM.tblICUnitMeasure, ' +
+                'tblICInventoryAdjustmentDetails.NewItemUOM.tblICUnitMeasure, ' +
+                'tblICInventoryAdjustmentDetails.WeightUOM.tblICUnitMeasure, ' +
+                'tblICInventoryAdjustmentDetails.NewWeightUOM.tblICUnitMeasure, ' +
+                'tblICInventoryAdjustmentDetails.OldLotStatus, ' +
+                'tblICInventoryAdjustmentDetails.NewLotStatus, ' +
+                'tblICInventoryAdjustmentDetails.NewLocation, ' +
+                'tblICInventoryAdjustmentDetails.NewSubLocation, ' +
+                'tblICInventoryAdjustmentDetails.NewStorageLocation, ' +
+                'tblICInventoryAdjustmentNotes',
             createRecord : me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
