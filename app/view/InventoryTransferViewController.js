@@ -200,15 +200,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 colTare: 'dblTareWeight',
                 colNet: 'dblNetWeight',
                 colNewLotID: {
-                    dataIndex: 'strNewLotNumber',
-                    editor: {
-                        store: '{newLot}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryTransfer.selection.intItemId}',
-                            conjunction: 'and'
-                        }]
-                    }
+                    dataIndex: 'strNewLotId'
                 },
                 colCost: 'dblCost',
                 colTaxCode: {
