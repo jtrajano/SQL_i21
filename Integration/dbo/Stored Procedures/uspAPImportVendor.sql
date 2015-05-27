@@ -499,8 +499,8 @@ BEGIN
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
 		
-		INSERT [dbo].[tblEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess])
-		VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0)/**/
+		INSERT [dbo].[tblEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
+		VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, 1)/**/
 
 		INSERT INTO [dbo].[tblAPImportedVendors]
 			VALUES(@originVendor, 1)
