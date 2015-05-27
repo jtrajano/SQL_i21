@@ -8,7 +8,8 @@ GO
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
-EXEC('
+EXEC(
+'
 CREATE PROCEDURE [dbo].[uspAPImportVendor]
 	@VendorId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
@@ -167,25 +168,8 @@ BEGIN
 	--1 Time synchronization here
 	PRINT ''1 Time Vendor Synchronization''
 
-	--Make a copy of all imported vendor
-	
-	EXEC(''
-	INSERT INTO tblAPImportedVendors
-	SELECT ssvnd_vnd_no, 1 FROM ssvndmst A
-		where ssvnd_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
-
-	INSERT INTO tblAPImportedVendors
-	SELECT DISTINCT A.apchk_vnd_no, 1
-	FROM apchkmst A	
-		WHERE A.apchk_vnd_no IN (
-			SELECT
-			DISTINCT B.apivc_vnd_no
-			FROM apivcmst B
-			WHERE B.apivc_vnd_no NOT IN (SELECT ssvnd_vnd_no FROM ssvndmst)
-		)
-		AND apchk_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
-	'')
-	
+	--Make a copy of all imported vendor	
+		
 	DECLARE @originVendor NVARCHAR(50)
 
 	--Entities
@@ -263,10 +247,27 @@ BEGIN
     DECLARE @strTaxState				NVARCHAR(50) 
 
 	--Import only those are not yet imported
+	/*SELECT ssvnd_vnd_no INTO #tmpssvndmst 
+	FROM ssvndmst A
+	where ssvnd_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )*/
+
 	SELECT ssvnd_vnd_no INTO #tmpssvndmst 
 	FROM ssvndmst A
-	where ssvnd_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
-	
+		where ssvnd_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
+
+
+	INSERT INTO #tmpssvndmst  (ssvnd_vnd_no)	
+	SELECT DISTINCT A.apchk_vnd_no
+	FROM apchkmst A	
+		WHERE A.apchk_vnd_no IN (
+			SELECT
+			DISTINCT B.apivc_vnd_no
+			FROM apivcmst B
+			WHERE B.apivc_vnd_no NOT IN (SELECT ssvnd_vnd_no FROM ssvndmst)
+		)
+		AND apchk_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
+
+
 	WHILE (EXISTS(SELECT 1 FROM #tmpssvndmst))
 	BEGIN
 		
@@ -473,17 +474,18 @@ BEGIN
 		--Create contact record only if there is contact for vendor
 		SET @ContactEntityId = SCOPE_IDENTITY()		
 		
+		DECLARE @EntityContactId INT
+		SET @EntityContactId = @ContactEntityId
 
-		INSERT INTO tblEntityToContact( intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact)
-		VALUES (@EntityId, @ContactEntityId, 0, 1)
+		/*INSERT INTO tblEntityToContact( intEntityId, intEntityContactId, ysnPortalAccess, ysnDefaultContact)
+		VALUES (@EntityId, @ContactEntityId, 0, 1)*/
 
 
 		--insert into tblEntityType
 		INSERT INTO tblEntityType ( intEntityId, strType, intConcurrencyId)
 		VALUES (@EntityId, ''Vendor'', 0)
 
-		DECLARE @EntityContactId INT
-		SET @EntityContactId = SCOPE_IDENTITY()
+		
 
 		INSERT [dbo].[tblEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTaxCodeId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
 		VALUES								(@EntityId, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTaxCodeId, @intTermsId, @intWarehouseId, 1)
@@ -495,9 +497,13 @@ BEGIN
 		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, ISNULL(@intPaymentMethodId,0), @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @dblCreditLimit, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dtmCreated, @strTaxState)
 
 		DECLARE @VendorIdentityId INT
-		SET @VendorIdentityId = SCOPE_IDENTITY()
-		/*INSERT [dbo].[tblEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess])
-		VALUES							  (@VendorIdentityId, @EntityContactId, @EntityLocationId, 0)*/
+		SET @VendorIdentityId = SCOPE_IDENTITY()		
+		
+		INSERT [dbo].[tblEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess])
+		VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0)/**/
+
+		INSERT INTO [dbo].[tblAPImportedVendors]
+			VALUES(@originVendor, 1)
 
 		IF(@@ERROR <> 0) 
 		BEGIN
