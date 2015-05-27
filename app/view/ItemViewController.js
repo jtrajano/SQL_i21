@@ -1416,31 +1416,39 @@ Ext.define('Inventory.view.ItemViewController', {
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
         if (obj.dataIndex === 'ysnStockUnit'){
             var grid = obj.up('grid');
+            var win = obj.up('window');
             var current = grid.view.getRecord(rowIndex);
+            var uomConversion = win.viewModel.storeInfo.uomConversion;
 
             if (checked === true){
                 var uoms = grid.store.data.items;
-                var currUOM = current.get('tblICUnitMeasure');
-                if (currUOM) {
-                    var conversions = currUOM.vyuICGetUOMConversions;
-                    if (!conversions) {
-                        conversions = currUOM.data.vyuICGetUOMConversions;
-                    }
+                if (uoms) {
                     uoms.forEach(function(uom){
                         if (uom === current){
                             current.set('dblUnitQty', 1);
                         }
                         if (uom !== current){
                             uom.set('ysnStockUnit', false);
-                        }
-                        if (conversions){
-                            var exists = Ext.Array.findBy(conversions, function(row) {
-                                if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
-                                    return true;
+                            if (uomConversion) {
+                                var index = uomConversion.data.findIndexBy(function (row) {
+                                    if (row.get('intUnitMeasureId') === current.get('intUnitMeasureId')) {
+                                        return true;
+                                    }
+                                });
+                                if (index >= 0) {
+                                    var stockUOM = uomConversion.getAt(index);
+                                    var conversions = stockUOM.data.vyuICGetUOMConversions;
+                                    if (conversions) {
+                                        var selectedUOM = Ext.Array.findBy(conversions, function (row) {
+                                            if (row.intUnitMeasureId === uom.get('intUnitMeasureId')) {
+                                                return true;
+                                            }
+                                        });
+                                        if (selectedUOM) {
+                                            uom.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                                        }
+                                    }
                                 }
-                            });
-                            if (exists) {
-                                uom.set('dblUnitQty', exists.dblConversionToStock);
                             }
                         }
                     });
