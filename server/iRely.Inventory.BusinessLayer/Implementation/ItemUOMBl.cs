@@ -66,7 +66,10 @@ namespace iRely.Inventory.BusinessLayer
                         strUnitMeasure = UOM.strUnitMeasure,
                         strUnitType = UOM.strUnitType,
                         intItemId = ItemUOM.intItemId,
-                        dblUnitQty = ItemUOM.dblUnitQty ?? 0
+                        dblUnitQty = ItemUOM.dblUnitQty ?? 0,
+                        ysnStockUnit = ItemUOM.ysnStockUnit,
+                        ysnAllowPurchase = ItemUOM.ysnAllowPurchase,
+                        ysnAllowSale = ItemUOM.ysnAllowSale
                     }
                 )
                 .Filter(param, true);

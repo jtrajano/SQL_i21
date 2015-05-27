@@ -104,36 +104,28 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                                 column: 'intLocationId',
                                 value: '{current.intFromLocationId}',
                                 conjunction: 'and'
-                            },
-                            {
-                                column: 'dblOnHand',
-                                value: '0',
-                                condition: 'gt',
-                                conjunction: 'and'
                             }
                         ]
                     }
                 },
                 colDescription: 'strItemDescription',
-                colLotID: {
-                    dataIndex: 'strLotNumber',
-                    editor: {
-                        store: '{lot}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryTransfer.selection.intItemId}',
-                            conjunction: 'and'
-                        }]
-                    }
-                },
                 colFromSubLocation: {
                     dataIndex: 'strFromSubLocationName',
                     editor: {
                         store: '{fromSubLocation}',
                         defaultFilters: [{
-                            column: 'intCompanyLocationId',
+                            column: 'intItemId',
+                            value: '{currentDetailItem.intItemId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intLocationId',
                             value: '{current.intFromLocationId}',
                             conjunction: 'and'
+                        },{
+                            column: 'dblOnHand',
+                            value: '0',
+                            conjunction: 'and',
+                            condition: 'gt'
                         }]
                     }
                 },
@@ -142,21 +134,67 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     editor: {
                         store: '{fromStorageLocation}',
                         defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{currentDetailItem.intItemId}',
+                            conjunction: 'and'
+                        },{
                             column: 'intLocationId',
                             value: '{current.intFromLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intSubLocationId',
+                            value: '{currentDetailItem.intFromSubLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'dblOnHand',
+                            value: '0',
+                            conjunction: 'and',
+                            condition: 'gt'
+                        }]
+                    }
+                },
+                colLotID: {
+                    dataIndex: 'strLotNumber',
+                    editor: {
+                        store: '{lot}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{currentDetailItem.intItemId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intLocationId',
+                            value: '{current.intFromLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intSubLocationId',
+                            value: '{currentDetailItem.intFromSubLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intStorageLocationId',
+                            value: '{currentDetailItem.intFromStorageLocationId}',
                             conjunction: 'and'
                         }]
                     }
                 },
+                colAvailableQty: 'dblAvailableQty',
+                colAvailableUOM: 'strAvailableUOM',
+
                 colToSubLocation: {
                     dataIndex: 'strToSubLocationName',
                     editor: {
                         store: '{toSubLocation}',
-                        defaultFilters: [{
-                            column: 'intCompanyLocationId',
-                            value: '{current.intToLocationId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryTransfer.selection.intItemId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intFrom',
+                                value: '{grdInventoryTransfer.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colToStorage: {
@@ -170,9 +208,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         }]
                     }
                 },
-                colAvailableQty: 'dblAvailableQty',
-                colAvailableUOM: 'strAvailableUOM',
-
                 colTransferQty: 'dblQuantity',
                 colTransferUOM: {
                     dataIndex: 'strUnitMeasure',
@@ -239,7 +274,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             window : win,
             store  : store,
             include: 'tblICInventoryTransferDetails.tblICItem, ' +
-                'tblICInventoryTransferDetails.tblICItemUOM, ' +
+                'tblICInventoryTransferDetails.tblICItemUOM.tblICUnitMeasure, ' +
+                'tblICInventoryTransferDetails.WeightUOM.tblICUnitMeasure, ' +
                 'tblICInventoryTransferDetails.tblICLot, ' +
                 'tblICInventoryTransferDetails.tblSMTaxCode, ' +
                 'tblICInventoryTransferDetails.FromSubLocation, ' +
@@ -271,16 +307,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             ]
         });
 
-//        var cepItem = grdInventoryTransfer.getPlugin('cepItem');
-//        if (cepItem){
-//            cepItem.on({
-//                validateedit: me.onEditDetails,
-//                scope: me
-//            });
-//        }
-
-        var colAvailableQty = grdInventoryTransfer.columns[7];
-        var colAvailableUOM = grdInventoryTransfer.columns[8];
+        var colAvailableQty = grdInventoryTransfer.columns[5];
+        var colAvailableUOM = grdInventoryTransfer.columns[6];
         colAvailableQty.renderer = this.AvailableQtyRenderer;
         colAvailableUOM.renderer = this.AvailableUOMRenderer;
         return win.context;
@@ -330,7 +358,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
     },
 
     AvailableQtyRenderer: function (value, metadata, record) {
-        if (!metadata) return;
+        if (!metadata) return value;
         var grid = metadata.column.up('grid');
         var win = grid.up('window');
         var items = win.viewModel.storeInfo.itemStock;
@@ -342,7 +370,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     var index = items.data.findIndexBy(function (row) {
                         if (row.get('intItemId') === record.get('intItemId') &&
                             row.get('intLocationId') === currentMaster.get('intFromLocationId') &&
-                            row.get('intItemUOMId') === record.get('intItemUOMId') &&
                             row.get('intSubLocationId') === record.get('intFromSubLocationId') &&
                             row.get('intStorageLocationId') === record.get('intFromStorageLocationId')) {
                             return true;
@@ -355,10 +382,12 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 }
             }
         }
+
+        return value;
     },
 
     AvailableUOMRenderer: function (value, metadata, record) {
-        if (!metadata) return;
+        if (!metadata) return value;
         var grid = metadata.column.up('grid');
         var win = grid.up('window');
         var items = win.viewModel.storeInfo.itemStock;
@@ -370,7 +399,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     var index = items.data.findIndexBy(function (row) {
                         if (row.get('intItemId') === record.get('intItemId') &&
                             row.get('intLocationId') === currentMaster.get('intFromLocationId') &&
-                            row.get('intItemUOMId') === record.get('intItemUOMId') &&
                             row.get('intSubLocationId') === record.get('intFromSubLocationId') &&
                             row.get('intStorageLocationId') === record.get('intFromStorageLocationId')) {
                             return true;
@@ -383,6 +411,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 }
             }
         }
+        return value;
     },
 
     onTransferDetailSelect: function(combo, records, eOpts) {
@@ -396,22 +425,24 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 
         if (combo.itemId === 'cboItem') {
             current.set('intItemId', records[0].get('intItemId'));
-            current.set('strItemDescription', records[0].get('strItemDescription'));
-            current.set('strFromSubLocationName', records[0].get('strSubLocationName'));
+            current.set('strItemDescription', records[0].get('strDescription'));
+        }
+        else if (combo.itemId === 'cboLot') {
+            current.set('intLotId', records[0].get('intLotId'));
+            current.set('dblAvailableQty', records[0].get('dblQty'));
+            current.set('strAvailableUOM', records[0].get('strItemUOM'));
+        }
+        else if (combo.itemId === 'cboFromSubLocation') {
             current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
             current.set('strFromStorageLocationName', records[0].get('strStorageLocationName'));
             current.set('intFromStorageLocationId', records[0].get('intStorageLocationId'));
             current.set('dblAvailableQty', records[0].get('dblOnHand'));
             current.set('strAvailableUOM', records[0].get('strUnitMeasure'));
         }
-        else if (combo.itemId === 'cboLot') {
-            current.set('intLotId', records[0].get('intLotId'));
-        }
-        else if (combo.itemId === 'cboFromSubLocation') {
-            current.set('intFromSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
-        }
         else if (combo.itemId === 'cboFromStorage') {
             current.set('intFromStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('dblAvailableQty', records[0].get('dblOnHand'));
+            current.set('strAvailableUOM', records[0].get('strUnitMeasure'));
         }
         else if (combo.itemId === 'cboToSubLocation') {
             current.set('intToSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
@@ -431,36 +462,28 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         else if (combo.itemId === 'cboTaxCode') {
             current.set('intTaxCodeId', records[0].get('intTaxCodeId'));
         }
+
+        win.viewModel.data.currentDetailItem = current;
     },
 
-    onEditDetails: function(editor, context, eOpts) {
+    onDetailSelectionChange: function(selModel, selected, eOpts) {
+        if (selModel) {
+            var win = selModel.view.grid.up('window');
+            var vm = win.viewModel;
 
-    },
-
-    onDetailGridColumnBeforeRender: function(column) {
-        var me = this,
-            win = column.up('window'),
-            grid = column.up('grid'),
-            plugin = grid.getPlugin('cepItem'),
-            current = plugin.getActiveRecord();
-
-        if (!column) return false;
-
-        column.getRenderer = function(record) {
-            if (!record) return false;
-            if (!current) return false;
-
-            var columnId = column.itemId;
-
-            switch (columnId) {
-                case 'colAvailableQty':
-
-                    break;
-                case 'colAvailableUOM':
-
-                    break;
+            if (selected.length > 0) {
+                var current = selected[0];
+                if (current.dummy) {
+                    vm.data.currentDetailItem = null;
+                }
+                else {
+                    vm.data.currentDetailItem = current
+                }
             }
-        };
+            else {
+                vm.data.currentDetailItem = null;
+            }
+        }
     },
 
     onViewItemClick: function(button, e, eOpts) {
@@ -618,12 +641,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             "#cboTaxCode": {
                 select: this.onTransferDetailSelect
             },
-            "#colAvailableQty": {
-                beforerender: this.onDetailGridColumnBeforeRender
-            },
-            "#colAvailableUOM": {
-                beforerender: this.onDetailGridColumnBeforeRender
-            },
             "#btnPost": {
                 click: this.onPostClick
             },
@@ -632,6 +649,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             },
             "#btnViewItem": {
                 click: this.onViewItemClick
+            },
+            "#grdInventoryTransfer": {
+                selectionchange: this.onDetailSelectionChange
             }
         });
     }

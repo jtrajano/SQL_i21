@@ -8,6 +8,7 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'i21.store.TaxCodeBuffered',
         'i21.store.UserListBuffered',
         'i21.store.ShipViaBuffered',
+        'Inventory.store.BufferedItemStockView',
         'Inventory.store.BufferedItemStockUOMView',
         'Inventory.store.BufferedStorageLocation',
         'Inventory.store.BufferedLot',
@@ -58,16 +59,16 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             type: 'icbuffereditemstockuomview'
         },
         item: {
-            type: 'icbuffereditemstockuomview'
+            type: 'icbuffereditemstockview'
         },
         lot: {
             type: 'icbufferedlot'
         },
         fromSubLocation: {
-            type: 'smcompanylocationsublocationbuffered'
+            type: 'icbuffereditemstockuomview'
         },
         fromStorageLocation: {
-            type: 'icbufferedstoragelocation'
+            type: 'icbuffereditemstockuomview'
         },
         toSubLocation: {
             type: 'smcompanylocationsublocationbuffered'
