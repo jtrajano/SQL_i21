@@ -54,5 +54,30 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public override async Task<BusinessResult<tblICItemLocation>> SaveAsync(bool continueOnConflict)
+        {
+            var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
+            var msg = result.Exception.Message;
+
+            if (result.HasError)
+            {
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemLocation'"))
+                {
+                    msg = "Location must be unique per Item.";
+                }
+            }
+
+            return new BusinessResult<tblICItemLocation>()
+            {
+                success = !result.HasError,
+                message = new MessageResult()
+                {
+                    statusText = msg,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            };
+        }
     }
 }
