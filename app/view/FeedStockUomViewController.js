@@ -23,6 +23,7 @@ Ext.define('Inventory.view.FeedStockUomViewController', {
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
             store: Ext.create('Inventory.store.FeedStockUom'),
+            include: 'tblICUnitMeasure',
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
                 title: 'Feed Stock UOM',

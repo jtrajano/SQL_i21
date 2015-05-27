@@ -27,9 +27,12 @@ namespace iRely.Inventory.BusinessLayer
             var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
             var msg = result.Exception.Message;
 
-            if (result.BaseException.Message.Contains("Cannot insert the value NULL into column 'intCostingMethod'"))
+            if (result.HasError)
             {
-                msg = "Please specify a valid Costing Method.";
+                if (result.BaseException.Message.Contains("Cannot insert the value NULL into column 'intCostingMethod'"))
+                {
+                    msg = "Please specify a valid Costing Method.";
+                }
             }
 
             return new BusinessResult<tblICCategory>()

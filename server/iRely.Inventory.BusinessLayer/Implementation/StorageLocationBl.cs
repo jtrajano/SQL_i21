@@ -2,6 +2,9 @@
 using iRely.GlobalComponentEngine.BusinessLayer;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,5 +21,18 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+
+        public override async Task<SearchResult> Search(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetStorageLocation>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intStorageLocationId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }

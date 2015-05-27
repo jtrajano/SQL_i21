@@ -27,21 +27,24 @@ namespace iRely.Inventory.BusinessLayer
             var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
             var msg = result.Exception.Message;
 
-            if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
+            if (result.HasError)
             {
-                msg = "Account Category must be unique.";
-            }
-            else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItem_strItemNo'"))
-            {
-                msg = "Item No must be unique.";
-            }
-            else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemPricing'"))
-            {
-                msg = "Item Pricing must be unique per location.";
-            }
-            else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemUOM'"))
-            {
-                msg = "UOM must be unique per Item.";
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemAccount'"))
+                {
+                    msg = "Account Category must be unique.";
+                }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItem_strItemNo'"))
+                {
+                    msg = "Item No must be unique.";
+                }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemPricing'"))
+                {
+                    msg = "Item Pricing must be unique per location.";
+                }
+                else if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICItemUOM'"))
+                {
+                    msg = "UOM must be unique per Item.";
+                }
             }
 
             return new BusinessResult<tblICItem>()

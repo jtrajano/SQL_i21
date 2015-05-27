@@ -61,6 +61,7 @@ Ext.define('Inventory.view.FuelTaxClassViewController', {
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
+            include: 'tblICFuelTaxClassProductCodes',
             binding: me.config.binding,
             details: [
                 {

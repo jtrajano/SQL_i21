@@ -77,6 +77,9 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
+            include: 'tblICCertificationCommodities.tblICCommodity, ' +
+                'tblICCertificationCommodities.tblSMCurrency, ' +
+                'tblICCertificationCommodities.tblICUnitMeasure',
             binding: me.config.binding,
             details: [
                 {
@@ -149,7 +152,7 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
             "#cboCurrency": {
                 select: this.onCommoditySelect
             },
-            "#cboPerUnitMeasure": {
+            "#colPerUOM": {
                 select: this.onCommoditySelect
             }
         });

@@ -66,6 +66,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             binding: me.config.binding,
             window : win,
             store  : store,
+            include: 'tblICUnitMeasureConversions.StockUnitMeasure, vyuICGetUOMConversions',
             details: [
                 {
                     key: 'tblICUnitMeasureConversions',

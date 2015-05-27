@@ -155,6 +155,15 @@ Ext.define('Inventory.view.StorageUnitViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
+            include: 'tblICStorageLocationCategories.tblICCategory, ' +
+                'tblICStorageLocationMeasurements.tblICMeasurement, ' +
+                'tblICStorageLocationMeasurements.tblICReadingPoint, ' +
+                'tblICStorageLocationSkus.tblICItem, ' +
+                'tblICStorageLocationSkus.tblICSku, ' +
+                'tblICStorageLocationSkus.tblICContainer, ' +
+                'tblICStorageLocationSkus.tblICLotStatus, ' +
+                'tblICStorageLocationContainers.tblICContainer, ' +
+                'tblICStorageLocationContainers.tblICContainerType',
             binding: me.config.binding,
             createRecord : me.createRecord,
             details: [
