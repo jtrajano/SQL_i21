@@ -156,7 +156,7 @@ BEGIN
 
 		--Insert new record to tblAPImportedVendors
 		INSERT INTO tblAPImportedVendors
-		SELECT @VendorId
+		SELECT @VendorId, 0
 	END
 
 RETURN;
@@ -171,23 +171,21 @@ BEGIN
 	
 	EXEC(''
 	INSERT INTO tblAPImportedVendors
-	SELECT ssvnd_vnd_no FROM ssvndmst A
-	LEFT JOIN tblAPImportedVendors B
-	ON A.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS AND B.strVendorId IS NULL
+	SELECT ssvnd_vnd_no, 1 FROM ssvndmst A
+		where ssvnd_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
 
 	INSERT INTO tblAPImportedVendors
-	SELECT DISTINCT A.apchk_vnd_no
-	FROM apchkmst A
-	LEFT JOIN tblAPImportedVendors B
-	ON A.apchk_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS AND B.strVendorId IS NULL
+	SELECT DISTINCT A.apchk_vnd_no, 1
+	FROM apchkmst A	
 		WHERE A.apchk_vnd_no IN (
-		SELECT
-		DISTINCT B.apivc_vnd_no
-		FROM apivcmst B
-		WHERE B.apivc_vnd_no NOT IN (SELECT ssvnd_vnd_no FROM ssvndmst)
-	)
+			SELECT
+			DISTINCT B.apivc_vnd_no
+			FROM apivcmst B
+			WHERE B.apivc_vnd_no NOT IN (SELECT ssvnd_vnd_no FROM ssvndmst)
+		)
+		AND apchk_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
 	'')
-
+	
 	DECLARE @originVendor NVARCHAR(50)
 
 	--Entities
@@ -267,8 +265,7 @@ BEGIN
 	--Import only those are not yet imported
 	SELECT ssvnd_vnd_no INTO #tmpssvndmst 
 	FROM ssvndmst A
-	LEFT JOIN tblAPImportedVendors B
-	ON A.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = B.strVendorId COLLATE Latin1_General_CI_AS AND B.strVendorId IS NULL
+	where ssvnd_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
 	
 	WHILE (EXISTS(SELECT 1 FROM #tmpssvndmst))
 	BEGIN
@@ -499,8 +496,8 @@ BEGIN
 
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()
-		INSERT [dbo].[tblEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess])
-		VALUES							  (@VendorIdentityId, @EntityContactId, @EntityLocationId, 0)
+		/*INSERT [dbo].[tblEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess])
+		VALUES							  (@VendorIdentityId, @EntityContactId, @EntityLocationId, 0)*/
 
 		IF(@@ERROR <> 0) 
 		BEGIN
