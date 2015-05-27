@@ -272,8 +272,8 @@ EXEC('
 			 (SELECT TOP 1 
 				   @siteId
 				   ,@tk_level
-				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - dblEstimatedPercentLeft) * dblTotalCapacity
-				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - dblEstimatedPercentLeft) * dblTotalCapacity
+				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - @tk_level) * dblTotalCapacity
+				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - @tk_level) * dblTotalCapacity
 				   ,intProduct
 				   ,0
 				   ,0
