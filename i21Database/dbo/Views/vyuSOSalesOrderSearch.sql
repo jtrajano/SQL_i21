@@ -24,7 +24,10 @@ CompLoc.strLocationName,
 0.000000 AS dblPaymentAmount,
 SO.intQuoteTemplateId,
 QT.strTemplateName,
-SO.ysnPleminaryQuote
+SO.ysnPleminaryQuote,
+SO.strLostQuoteCompetitor,
+SO.strLostQuoteReason,
+SO.strLostQuoteComment
 FROM         
 dbo.tblSOSalesOrder AS SO INNER JOIN
 dbo.tblARCustomer AS Cus ON SO.[intEntityCustomerId] = Cus.[intEntityCustomerId] INNER JOIN
