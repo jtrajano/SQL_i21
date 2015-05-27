@@ -162,7 +162,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 colToStorage: {
                     dataIndex: 'strToStorageLocationName',
                     editor: {
-                        store: '{fromStorageLocation}',
+                        store: '{toStorageLocation}',
                         defaultFilters: [{
                             column: 'intLocationId',
                             value: '{current.intToLocationId}',
