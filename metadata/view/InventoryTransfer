@@ -1151,7 +1151,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter143",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1203,19 +1203,19 @@
                                                             "\t\tdataIndex: 'strItemNo',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Item Number',",
-                                                            "\t\tflex: 1",
+                                                            "\t\twidth: 100",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strType',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Item Type',",
-                                                            "\t\tflex: 1",
+                                                            "\t\twidth: 100",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strItemDescription',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Description',",
-                                                            "\t\tflex: 1",
+                                                            "\t\twidth: 120",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strLotTracking',",
@@ -1227,36 +1227,44 @@
                                                             "\t\tdataIndex: 'strSubLocationName',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Sub Location',",
-                                                            "\t\tflex: 1",
+                                                            "\t\twidth: 100",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'strStorageLocationName',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Storage Location',",
-                                                            "\t\tflex: 1",
+                                                            "\t\twidth: 100",
                                                             "\t},",
                                                             "\t{",
                                                             "\t\tdataIndex: 'dblOnHand',",
                                                             "\t\tdataType: 'float',",
                                                             "\t\ttext: 'On Hand',",
-                                                            "\t\tflex: 1",
+                                                            "\t\twidth: 100",
                                                             "\t}",
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
                                                         "displayField": "strItemNo",
                                                         "itemId": "cboItem",
+                                                        "matchFieldWidth": false,
+                                                        "pickerWidth": 625,
                                                         "valueField": "strItemNo"
                                                     },
                                                     "name": "MyComboBox1",
                                                     "configAlternates": {
-                                                        "columns": "array"
+                                                        "columns": "array",
+                                                        "pickerWidth": "number"
                                                     },
                                                     "designerId": "18b37e3e-3c05-4b0a-a8db-eb6757ed3604",
                                                     "customConfigs": [
                                                         {
                                                             "group": "(Custom Properties)",
                                                             "name": "columns",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "pickerWidth",
                                                             "type": "string"
                                                         }
                                                     ]
@@ -2337,7 +2345,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter144",
                                                     "designerId": "dc8288c0-74ca-4def-b42c-feb73cdf1f4d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2514,7 +2522,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging19",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -557,19 +557,19 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     dataIndex: 'strItemNo',
                                                                     dataType: 'string',
                                                                     text: 'Item Number',
-                                                                    flex: 1
+                                                                    width: 100
                                                                 },
                                                                 {
                                                                     dataIndex: 'strType',
                                                                     dataType: 'string',
                                                                     text: 'Item Type',
-                                                                    flex: 1
+                                                                    width: 100
                                                                 },
                                                                 {
                                                                     dataIndex: 'strItemDescription',
                                                                     dataType: 'string',
                                                                     text: 'Description',
-                                                                    flex: 1
+                                                                    width: 120
                                                                 },
                                                                 {
                                                                     dataIndex: 'strLotTracking',
@@ -581,22 +581,24 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
                                                                     text: 'Sub Location',
-                                                                    flex: 1
+                                                                    width: 100
                                                                 },
                                                                 {
                                                                     dataIndex: 'strStorageLocationName',
                                                                     dataType: 'string',
                                                                     text: 'Storage Location',
-                                                                    flex: 1
+                                                                    width: 100
                                                                 },
                                                                 {
                                                                     dataIndex: 'dblOnHand',
                                                                     dataType: 'float',
                                                                     text: 'On Hand',
-                                                                    flex: 1
+                                                                    width: 100
                                                                 }
                                                             ],
+                                                            pickerWidth: 625,
                                                             itemId: 'cboItem',
+                                                            matchFieldWidth: false,
                                                             displayField: 'strItemNo',
                                                             valueField: 'strItemNo'
                                                         }

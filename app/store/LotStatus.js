@@ -20,10 +20,10 @@ Ext.define('Inventory.store.LotStatus', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/LotStatus/GetLotStatuses',
-                    update: '../Inventory/api/LotStatus/PutLotStatuses',
-                    create: '../Inventory/api/LotStatus/PostLotStatuses',
-                    destroy: '../Inventory/api/LotStatus/DeleteLotStatuses'
+                    read: '../Inventory/api/LotStatus/Get',
+                    update: '../Inventory/api/LotStatus/Put',
+                    create: '../Inventory/api/LotStatus/Post',
+                    destroy: '../Inventory/api/LotStatus/Delete'
                 },
                 reader: {
                     type: 'json',

@@ -701,12 +701,6 @@ Ext.define('Inventory.view.Commodity', {
                                                                     dataType: 'string',
                                                                     text: 'Unit Type',
                                                                     flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'ysnDefault',
-                                                                    dataType: 'boolean',
-                                                                    text: 'Default',
-                                                                    flex: 1
                                                                 }
                                                             ],
                                                             itemId: 'cboUOM',

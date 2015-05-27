@@ -22,7 +22,7 @@ Ext.define('Inventory.view.InventoryTagViewController', {
             title:  'Search Inventory Tag',
             type: 'Inventory.Tag',
             api: {
-                read: '../Inventory/api/Tag/SearchTags'
+                read: '../Inventory/api/Tag/Search'
             },
             columns: [
                 {dataIndex: 'intTagId',text: "Tag Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

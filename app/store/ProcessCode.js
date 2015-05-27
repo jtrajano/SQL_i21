@@ -20,10 +20,10 @@ Ext.define('Inventory.store.ProcessCode', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/RinProcess/GetRinProcesses',
-                    update: '../Inventory/api/RinProcess/PutRinProcesses',
-                    create: '../Inventory/api/RinProcess/PostRinProcesses',
-                    destroy: '../Inventory/api/RinProcess/DeleteRinProcesses'
+                    read: '../Inventory/api/ProcessCode/Get',
+                    update: '../Inventory/api/ProcessCode/Put',
+                    create: '../Inventory/api/ProcessCode/Post',
+                    destroy: '../Inventory/api/ProcessCode/Delete'
                 },
                 reader: {
                     type: 'json',

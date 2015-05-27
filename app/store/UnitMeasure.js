@@ -21,10 +21,10 @@ Ext.define('Inventory.store.UnitMeasure', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/UnitMeasure/GetUnitMeasures',
-                    update: '../Inventory/api/UnitMeasure/PutUnitMeasures',
-                    create: '../Inventory/api/UnitMeasure/PostUnitMeasures',
-                    destroy: '../Inventory/api/UnitMeasure/DeleteUnitMeasures'
+                    read: '../Inventory/api/UnitMeasure/Get',
+                    update: '../Inventory/api/UnitMeasure/Put',
+                    create: '../Inventory/api/UnitMeasure/Post',
+                    destroy: '../Inventory/api/UnitMeasure/Delete'
                 },
                 reader: {
                     type: 'json',

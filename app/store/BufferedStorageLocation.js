@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedStorageLocation', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/StorageLocation/GetStorageLocations'
+                    read: '../Inventory/api/StorageLocation/Search'
                 },
                 reader: {
                     type: 'json',

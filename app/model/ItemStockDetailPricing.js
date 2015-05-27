@@ -8,6 +8,8 @@ Ext.define('Inventory.model.ItemStockDetailPricing', {
         'Ext.data.Field'
     ],
 
+    idProperty: 'intItemPricingId',
+
     fields: [
         { name: 'intItemPricingId', type: 'int'},
         { name: 'intItemId', type: 'int',

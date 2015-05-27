@@ -480,19 +480,19 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                     {
                                         dataIndex: 'strSubLocationName',
                                         dataType: 'string',
-                                        text: 'Sub Location Name',
+                                        text: 'Sub Location',
+                                        flex: 2
+                                    },
+                                    {
+                                        dataIndex: 'strStorageLocation',
+                                        dataType: 'string',
+                                        text: 'Storage Location',
                                         flex: 2
                                     },
                                     {
                                         dataIndex: 'dblOnHand',
                                         dataType: 'float',
                                         text: 'On Hand',
-                                        flex: 1
-                                    },
-                                    {
-                                        dataIndex: 'dblOnOrder',
-                                        dataType: 'float',
-                                        text: 'On Order',
                                         flex: 1
                                     }
                                 ],
@@ -506,7 +506,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                             itemId: 'colStock',
                             width: 70,
                             align: 'right',
-                            text: 'Stock'
+                            text: 'On Hand'
                         },
                         {
                             xtype: 'numbercolumn',

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6E9BBE31-E2DD-4A82-8519-29AFC4615179}</ProjectGuid>
+    <ProjectGuid>{24827E37-D24E-4C49-858B-9127DD775958}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>iRely.Inventory.Model</RootNamespace>
@@ -31,21 +31,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework">
-      <HintPath>..\..\..\resources\references\EntityFramework.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
-      <HintPath>..\..\..\resources\references\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="InteractivePreGeneratedViews">
+      <HintPath>..\..\..\Resources\references\InteractivePreGeneratedViews.dll</HintPath>
     </Reference>
     <Reference Include="iRely.Common">
-      <HintPath>..\..\..\resources\references\iRely.Common.dll</HintPath>
+      <HintPath>..\..\..\Resources\references\iRely.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.ComponentModel.DataAnnotations, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Security" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -53,178 +52,128 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ExternalTablesMap.cs" />
+    <Compile Include="Configuration\tblICBrandMap.cs" />
+    <Compile Include="Configuration\tblICBuildAssemblyMap.cs" />
+    <Compile Include="Configuration\tblICCategoryMap.cs" />
+    <Compile Include="Configuration\tblICCertificationMap.cs" />
+    <Compile Include="Configuration\tblICCommodityMap.cs" />
+    <Compile Include="Configuration\tblICCountGroupMap.cs" />
+    <Compile Include="Configuration\tblICDocumentMap.cs" />
+    <Compile Include="Configuration\tblICFuelTaxClassMap.cs" />
+    <Compile Include="Configuration\tblICFuelTypeMap.cs" />
+    <Compile Include="Configuration\tblICInventoryAdjustmentMap.cs" />
+    <Compile Include="Configuration\tblICInventoryReceiptMap.cs" />
+    <Compile Include="Configuration\tblICInventoryShipmentMap.cs" />
+    <Compile Include="Configuration\tblICInventoryTransferMap.cs" />
+    <Compile Include="Configuration\tblICItemAccountMap.cs" />
+    <Compile Include="Configuration\tblICItemAssemblyMap.cs" />
+    <Compile Include="Configuration\tblICItemBundleMap.cs" />
+    <Compile Include="Configuration\tblICItemCertificationMap.cs" />
+    <Compile Include="Configuration\tblICItemCommodityCostMap.cs" />
+    <Compile Include="Configuration\tblICItemContractDocumentMap.cs" />
+    <Compile Include="Configuration\tblICItemContractMap.cs" />
+    <Compile Include="Configuration\tblICItemCustomerXrefMap.cs" />
+    <Compile Include="Configuration\tblICItemFactoryMap.cs" />
+    <Compile Include="Configuration\tblICItemKitDetailMap.cs" />
+    <Compile Include="Configuration\tblICItemKitMap.cs" />
+    <Compile Include="Configuration\tblICItemLocationMap.cs" />
+    <Compile Include="Configuration\tblICItemMap.cs" />
+    <Compile Include="Configuration\tblICItemNoteMap.cs" />
+    <Compile Include="Configuration\tblICItemOwnerMap.cs" />
+    <Compile Include="Configuration\tblICItemPOSMap.cs" />
+    <Compile Include="Configuration\tblICItemPricingLevelMap.cs" />
+    <Compile Include="Configuration\tblICItemPricingMap.cs" />
+    <Compile Include="Configuration\tblICItemSpecialPricingMap.cs" />
+    <Compile Include="Configuration\tblICItemStockMap.cs" />
+    <Compile Include="Configuration\tblICItemSubstitutionMap.cs" />
+    <Compile Include="Configuration\tblICItemUOMMap.cs" />
+    <Compile Include="Configuration\tblICItemUPCMap.cs" />
+    <Compile Include="Configuration\tblICItemVendorXrefMap.cs" />
+    <Compile Include="Configuration\tblICLineOfBusinessMap.cs" />
+    <Compile Include="Configuration\tblICLotMap.cs" />
+    <Compile Include="Configuration\tblICLotStatusMap.cs" />
+    <Compile Include="Configuration\tblICManufacturerMap.cs" />
+    <Compile Include="Configuration\tblICPatronageCategoryMap.cs" />
+    <Compile Include="Configuration\tblICRinFeedStockMap.cs" />
+    <Compile Include="Configuration\tblICRinFeedStockUOMMap.cs" />
+    <Compile Include="Configuration\tblICRinFuelCategoryMap.cs" />
+    <Compile Include="Configuration\tblICRinFuelMap.cs" />
+    <Compile Include="Configuration\tblICRinProcessMap.cs" />
+    <Compile Include="Configuration\tblICStatusMap.cs" />
+    <Compile Include="Configuration\tblICStockReservationMap.cs" />
+    <Compile Include="Configuration\tblICStorageLocationMap.cs" />
+    <Compile Include="Configuration\tblICStorageUnitTypeMap.cs" />
+    <Compile Include="Configuration\tblICTagMap.cs" />
+    <Compile Include="Configuration\tblICUnitMeasureMap.cs" />
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
-    <Compile Include="Mappings\tblICStatusMap.cs" />
-    <Compile Include="Mappings\vyuICGetPostedLotMap.cs" />
-    <Compile Include="Mappings\tblICInventoryTransferMap.cs" />
-    <Compile Include="Mappings\tblICBuildAssemblyMap.cs" />
-    <Compile Include="Mappings\tblICInventoryAdjustmentMap.cs" />
-    <Compile Include="Mappings\tblICItemCommodityCostMap.cs" />
-    <Compile Include="Mappings\tblICStockReservationMap.cs" />
-    <Compile Include="Mappings\tblICCategoryUOMMap.cs" />
-    <Compile Include="Mappings\tblICInventoryShipmentMap.cs" />
-    <Compile Include="Mappings\tblICLotMap.cs" />
-    <Compile Include="Mappings\tblICEquipmentLengthMap.cs" />
-    <Compile Include="Mappings\tblICItemFactoryMap.cs" />
-    <Compile Include="Mappings\tblICItemOwnerMap.cs" />
-    <Compile Include="Mappings\tblICContainerMap.cs" />
-    <Compile Include="Mappings\tblICContainerTypeMap.cs" />
-    <Compile Include="Mappings\tblICMeasurementMap.cs" />
-    <Compile Include="Mappings\tblICReadingPointMap.cs" />
-    <Compile Include="Mappings\tblICRestrictionMap.cs" />
-    <Compile Include="Mappings\tblICSkuMap.cs" />
-    <Compile Include="Mappings\tblICItemSubstitutionMap.cs" />
-    <Compile Include="Mappings\tblICStorageLocationMap.cs" />
-    <Compile Include="Mappings\tblICLotStatusMap.cs" />
-    <Compile Include="Mappings\tblICLineOfBusinessMap.cs" />
-    <Compile Include="Mappings\tblICManufacturingCellMap.cs" />
-    <Compile Include="Mappings\tblICPackTypeMap.cs" />
-    <Compile Include="Mappings\tblICItemBundleMap.cs" />
-    <Compile Include="Mappings\tblICItemAssemblyMap.cs" />
-    <Compile Include="Mappings\tblICItemKitDetailMap.cs" />
-    <Compile Include="Mappings\tblICItemKitMap.cs" />
-    <Compile Include="Mappings\tblICCommodityAttributeMap.cs" />
-    <Compile Include="Mappings\tblICCountGroupMap.cs" />
-    <Compile Include="Mappings\tblICMaterialNMFCMap.cs" />
-    <Compile Include="Mappings\tblICFuelTaxClassMap.cs" />
-    <Compile Include="Mappings\ExternalTablesMap.cs" />
-    <Compile Include="Mappings\tblICInventoryReceiptMap.cs" />
-    <Compile Include="Mappings\tblICCommodityAccountMap.cs" />
-    <Compile Include="Mappings\tblICItemNoteMap.cs" />
-    <Compile Include="Mappings\tblICItemAccountMap.cs" />
-    <Compile Include="Mappings\tblICItemStockMap.cs" />
-    <Compile Include="Mappings\tblICItemSpecialPricingMap.cs" />
-    <Compile Include="Mappings\tblICItemPricingLevelMap.cs" />
-    <Compile Include="Mappings\tblICItemPricingMap.cs" />
-    <Compile Include="Mappings\tblICDocumentMap.cs" />
-    <Compile Include="Mappings\tblICCertificationMap.cs" />
-    <Compile Include="Mappings\tblICItemVendorXrefMap.cs" />
-    <Compile Include="Mappings\tblICItemContractDocumentMap.cs" />
-    <Compile Include="Mappings\tblICItemContractMap.cs" />
-    <Compile Include="Mappings\tblICItemCustomerXrefMap.cs" />
-    <Compile Include="Mappings\tblICItemCertificationMap.cs" />
-    <Compile Include="Mappings\tblICItemUPCMap.cs" />
-    <Compile Include="Mappings\tblICItemManufacturingUOMMap.cs" />
-    <Compile Include="Mappings\tblICItemPOSMap.cs" />
-    <Compile Include="Mappings\tblICItemLocationMap.cs" />
-    <Compile Include="Mappings\tblICItemUOMMap.cs" />
-    <Compile Include="Mappings\tblICBrandMap.cs" />
-    <Compile Include="Mappings\tblICCatalogMap.cs" />
-    <Compile Include="Mappings\tblICCategoryAccountMap.cs" />
-    <Compile Include="Mappings\tblICCategoryMap.cs" />
-    <Compile Include="Mappings\tblICCategoryLocationMap.cs" />
-    <Compile Include="Mappings\tblICCategoryVendorMap.cs" />
-    <Compile Include="Mappings\tblICCommodityGroupMap.cs" />
-    <Compile Include="Mappings\tblICCommodityMap.cs" />
-    <Compile Include="Mappings\tblICCommodityUnitMeasureMap.cs" />
-    <Compile Include="Mappings\tblICFuelTypeMap.cs" />
-    <Compile Include="Mappings\tblICItemMap.cs" />
-    <Compile Include="Mappings\tblICManufacturerMap.cs" />
-    <Compile Include="Mappings\tblICPatronageCategoryMap.cs" />
-    <Compile Include="Mappings\tblICReasonCodeMap.cs" />
-    <Compile Include="Mappings\tblICReasonCodeWorkCenterMap.cs" />
-    <Compile Include="Mappings\tblICRinFeedStockMap.cs" />
-    <Compile Include="Mappings\tblICRinFeedStockUOMMap.cs" />
-    <Compile Include="Mappings\tblICRinFuelMap.cs" />
-    <Compile Include="Mappings\tblICRinFuelCategoryMap.cs" />
-    <Compile Include="Mappings\tblICRinProcessMap.cs" />
-    <Compile Include="Mappings\tblICTagMap.cs" />
-    <Compile Include="Mappings\tblICUnitMeasureMap.cs" />
-    <Compile Include="Mappings\tblICStorageUnitTypeMap.cs" />
+    <Compile Include="Metadata\ExternalTables.cs" />
+    <Compile Include="Metadata\tblICBrand.cs" />
+    <Compile Include="Metadata\tblICBuildAssembly.cs" />
+    <Compile Include="Metadata\tblICCategory.cs" />
+    <Compile Include="Metadata\tblICCertification.cs" />
+    <Compile Include="Metadata\tblICCommodity.cs" />
+    <Compile Include="Metadata\tblICCountGroup.cs" />
+    <Compile Include="Metadata\tblICDocument.cs" />
+    <Compile Include="Metadata\tblICFuelTaxClass.cs" />
+    <Compile Include="Metadata\tblICFuelType.cs" />
+    <Compile Include="Metadata\tblICInventoryAdjustment.cs" />
+    <Compile Include="Metadata\tblICInventoryReceipt.cs" />
+    <Compile Include="Metadata\tblICInventoryShipment.cs" />
+    <Compile Include="Metadata\tblICInventoryTransfer.cs" />
+    <Compile Include="Metadata\tblICItem.cs" />
+    <Compile Include="Metadata\tblICItemAccount.cs" />
+    <Compile Include="Metadata\tblICItemAssembly.cs" />
+    <Compile Include="Metadata\tblICItemBundle.cs" />
+    <Compile Include="Metadata\tblICItemCertification.cs" />
+    <Compile Include="Metadata\tblICItemCommodityCost.cs" />
+    <Compile Include="Metadata\tblICItemContract.cs" />
+    <Compile Include="Metadata\tblICItemContractDocument.cs" />
+    <Compile Include="Metadata\tblICItemCustomerXref.cs" />
+    <Compile Include="Metadata\tblICItemFactory.cs" />
+    <Compile Include="Metadata\tblICItemKit.cs" />
+    <Compile Include="Metadata\tblICItemKitDetail.cs" />
+    <Compile Include="Metadata\tblICItemLocation.cs" />
+    <Compile Include="Metadata\tblICItemNote.cs" />
+    <Compile Include="Metadata\tblICItemOwner.cs" />
+    <Compile Include="Metadata\tblICItemPOS.cs" />
+    <Compile Include="Metadata\tblICItemPricing.cs" />
+    <Compile Include="Metadata\tblICItemPricingLevel.cs" />
+    <Compile Include="Metadata\tblICItemSpecialPricing.cs" />
+    <Compile Include="Metadata\tblICItemStock.cs" />
+    <Compile Include="Metadata\tblICItemSubstitution.cs" />
+    <Compile Include="Metadata\tblICItemUOM.cs" />
+    <Compile Include="Metadata\tblICItemUPC.cs" />
+    <Compile Include="Metadata\tblICItemVendorXref.cs" />
+    <Compile Include="Metadata\tblICLineOfBusiness.cs" />
+    <Compile Include="Metadata\tblICLot.cs" />
+    <Compile Include="Metadata\tblICLotStatus.cs" />
+    <Compile Include="Metadata\tblICManufacturer.cs" />
+    <Compile Include="Metadata\tblICPatronageCategory.cs" />
+    <Compile Include="Metadata\tblICRinFeedStock.cs" />
+    <Compile Include="Metadata\tblICRinFeedStockUOM.cs" />
+    <Compile Include="Metadata\tblICRinFuel.cs" />
+    <Compile Include="Metadata\tblICRinFuelCategory.cs" />
+    <Compile Include="Metadata\tblICRinProcess.cs" />
+    <Compile Include="Metadata\tblICStatus.cs" />
+    <Compile Include="Metadata\tblICStockReservation.cs" />
+    <Compile Include="Metadata\tblICStorageLocation.cs" />
+    <Compile Include="Metadata\tblICStorageUnitType.cs" />
+    <Compile Include="Metadata\tblICTag.cs" />
+    <Compile Include="Metadata\tblICUnitMeasure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Stored Procedures\Posting\PostInventoryShipment.cs" />
-    <Compile Include="Stored Procedures\Posting\PostInventoryTransfer.cs" />
+    <Compile Include="Stored Procedures\DuplicateItem.cs" />
     <Compile Include="Stored Procedures\Posting\PostBuildAssembly.cs" />
     <Compile Include="Stored Procedures\Posting\PostInventoryAdjustment.cs" />
     <Compile Include="Stored Procedures\Posting\PostInventoryReceipt.cs" />
-    <Compile Include="Stored Procedures\DuplicateItem.cs" />
-    <Compile Include="Tables\tblICStatus.cs" />
-    <Compile Include="Tables\tblICInventoryTransfer.cs" />
-    <Compile Include="Tables\tblICBuildAssembly.cs" />
-    <Compile Include="Tables\tblICInventoryAdjustment.cs" />
-    <Compile Include="Tables\tblICItemCommodityCost.cs" />
-    <Compile Include="Tables\tblICStockReservation.cs" />
-    <Compile Include="Tables\tblICCategoryUOM.cs" />
-    <Compile Include="Tables\tblICInventoryShipment.cs" />
-    <Compile Include="Tables\tblICLot.cs" />
-    <Compile Include="Tables\tblICEquipmentLength.cs" />
-    <Compile Include="Tables\tblICItemFactory.cs" />
-    <Compile Include="Tables\tblICItemOwner.cs" />
-    <Compile Include="Tables\tblICSku.cs" />
-    <Compile Include="Tables\tblICRestriction.cs" />
-    <Compile Include="Tables\tblICReadingPoint.cs" />
-    <Compile Include="Tables\tblICMeasurement.cs" />
-    <Compile Include="Tables\tblICContainerType.cs" />
-    <Compile Include="Tables\tblICContainer.cs" />
-    <Compile Include="Tables\tblICItemSubstitution.cs" />
-    <Compile Include="Tables\tblICStorageLocation.cs" />
-    <Compile Include="Tables\tblICLotStatus.cs" />
-    <Compile Include="Tables\tblICLineOfBusiness.cs" />
-    <Compile Include="Tables\tblICManufacturingCell.cs" />
-    <Compile Include="Tables\tblICPackType.cs" />
-    <Compile Include="Tables\tblICCommodityAttribute.cs" />
-    <Compile Include="Tables\tblICItemBundle.cs" />
-    <Compile Include="Tables\tblICItemAssembly.cs" />
-    <Compile Include="Tables\tblICItemKitDetail.cs" />
-    <Compile Include="Tables\tblICItemKit.cs" />
-    <Compile Include="Tables\tblICCountGroup.cs" />
-    <Compile Include="Tables\tblICMaterialNMFC.cs" />
-    <Compile Include="Tables\tblICFuelTaxClass.cs" />
-    <Compile Include="Tables\ExternalTables.cs" />
-    <Compile Include="Tables\tblICInventoryReceipt.cs" />
-    <Compile Include="Tables\tblICCommodityAccount.cs" />
-    <Compile Include="Tables\tblICItemStock.cs" />
-    <Compile Include="Tables\tblICItemNote.cs" />
-    <Compile Include="Tables\tblICItemSpecialPricing.cs" />
-    <Compile Include="Tables\tblICItemAccount.cs" />
-    <Compile Include="Tables\tblICItemPricingLevel.cs" />
-    <Compile Include="Tables\tblICItemPricing.cs" />
-    <Compile Include="Tables\tblICDocument.cs" />
-    <Compile Include="Tables\tblICCertification.cs" />
-    <Compile Include="Tables\tblICItemCertification.cs" />
-    <Compile Include="Tables\tblICItemContractDocument.cs" />
-    <Compile Include="Tables\tblICItemContract.cs" />
-    <Compile Include="Tables\tblICItemVendorXref.cs" />
-    <Compile Include="Tables\tblICItemCustomerXref.cs" />
-    <Compile Include="Tables\tblICItemManufacturingUOM.cs" />
-    <Compile Include="Tables\tblICItemPOS.cs" />
-    <Compile Include="Tables\tblICItemLocation.cs" />
-    <Compile Include="Tables\tblICItemUOM.cs" />
-    <Compile Include="Tables\tblICBrand.cs" />
-    <Compile Include="Tables\tblICCatalog.cs" />
-    <Compile Include="Tables\tblICCategory.cs" />
-    <Compile Include="Tables\tblICCategoryAccount.cs" />
-    <Compile Include="Tables\tblICCategoryLocation.cs" />
-    <Compile Include="Tables\tblICCategoryVendor.cs" />
-    <Compile Include="Tables\tblICCommodity.cs" />
-    <Compile Include="Tables\tblICCommodityGroup.cs" />
-    <Compile Include="Tables\tblICCommodityUnitMeasure.cs" />
-    <Compile Include="Tables\tblICFuelType.cs" />
-    <Compile Include="Tables\tblICItem.cs" />
-    <Compile Include="Tables\tblICItemUPC.cs" />
-    <Compile Include="Tables\tblICManufacturer.cs" />
-    <Compile Include="Tables\tblICPatronageCategory.cs" />
-    <Compile Include="Tables\tblICReasonCode.cs" />
-    <Compile Include="Tables\tblICReasonCodeWorkCenter.cs" />
-    <Compile Include="Tables\tblICRinFeedStock.cs" />
-    <Compile Include="Tables\tblICRinFeedStockUOM.cs" />
-    <Compile Include="Tables\tblICRinFuel.cs" />
-    <Compile Include="Tables\tblICRinFuelCategory.cs" />
-    <Compile Include="Tables\tblICRinProcess.cs" />
-    <Compile Include="Tables\tblICTag.cs" />
-    <Compile Include="Tables\tblICUnitMeasure.cs" />
-    <Compile Include="Tables\tblICStorageUnitType.cs" />
-    <Compile Include="Views\vyuICGetPostedLot.cs" />
+    <Compile Include="Stored Procedures\Posting\PostInventoryShipment.cs" />
+    <Compile Include="Stored Procedures\Posting\PostInventoryTransfer.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

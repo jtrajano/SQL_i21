@@ -22,7 +22,7 @@ Ext.define('Inventory.model.ItemUPC', {
                         proxy: {
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemUPC/GetItemUPCs'
+                                read: '../Inventory/api/ItemUPC/Get'
                             },
                             reader: {
                                 type: 'json',

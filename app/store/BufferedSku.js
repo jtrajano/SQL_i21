@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedSku', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Sku/GetSkus'
+                    read: '../Inventory/api/Sku/Search'
                 },
                 reader: {
                     type: 'json',

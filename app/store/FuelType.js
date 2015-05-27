@@ -20,10 +20,10 @@ Ext.define('Inventory.store.FuelType', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/FuelType/GetFuelTypes',
-                    update: '../Inventory/api/FuelType/PutFuelTypes',
-                    create: '../Inventory/api/FuelType/PostFuelTypes',
-                    destroy: '../Inventory/api/FuelType/DeleteFuelTypes'
+                    read: '../Inventory/api/FuelType/Get',
+                    update: '../Inventory/api/FuelType/Put',
+                    create: '../Inventory/api/FuelType/Post',
+                    destroy: '../Inventory/api/FuelType/Delete'
                 },
                 reader: {
                     type: 'json',

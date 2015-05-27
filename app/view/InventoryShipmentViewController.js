@@ -7,7 +7,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             title:  'Search Inventory Shipment',
             type: 'Inventory.InventoryShipment',
             api: {
-                read: '../Inventory/api/Shipment/SearchShipments'
+                read: '../Inventory/api/InventoryShipment/Search'
             },
             columns: [
                 {dataIndex: 'intInventoryShipmentId',text: "Shipment Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
@@ -368,7 +368,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
             current.set('dblQuantity', records[0].get('dblQtyOrdered'));
             current.set('strOrderUOM', records[0].get('strUnitMeasure'));
-            current.set('dblOrderQty', records[0].get('dblQtyOrdered'));
+            current.set('dblQtyOrdered', records[0].get('dblQtyOrdered'));
             current.set('dblUnitPrice', records[0].get('dblPrice'));
 
             switch(records[0].get('strLotTracking')) {
@@ -466,7 +466,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
-                postURL             : '../Inventory/api/Shipment/Ship',
+                postURL             : '../Inventory/api/InventoryShipment/Ship',
                 strTransactionId    : strShipmentNumber,
                 isPost              : !posted,
                 isRecap             : false,

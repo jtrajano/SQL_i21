@@ -20,10 +20,10 @@ Ext.define('Inventory.store.Commodity', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Commodity/GetCommodities',
-                    update: '../Inventory/api/Commodity/PutCommodities',
-                    create: '../Inventory/api/Commodity/PostCommodities',
-                    destroy: '../Inventory/api/Commodity/DeleteCommodities'
+                    read: '../Inventory/api/Commodity/Get',
+                    update: '../Inventory/api/Commodity/Put',
+                    create: '../Inventory/api/Commodity/Post',
+                    destroy: '../Inventory/api/Commodity/Delete'
                 },
                 reader: {
                     type: 'json',

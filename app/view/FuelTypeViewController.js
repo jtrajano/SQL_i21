@@ -22,7 +22,7 @@ Ext.define('Inventory.view.FuelTypeViewController', {
             title:  'Search Fuel Type',
             type: 'Inventory.FuelType',
             api: {
-                read: '../Inventory/api/FuelType/SearchFuelTypes'
+                read: '../Inventory/api/FuelType/Search'
             },
             columns: [
                 {dataIndex: 'intFuelTypeId',text: "Fuel Type", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

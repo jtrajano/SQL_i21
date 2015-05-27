@@ -7,7 +7,7 @@ Ext.define('Inventory.view.CategoryViewController', {
             title: 'Search Category',
             type: 'Inventory.Category',
             api: {
-                read: '../Inventory/api/Category/SearchCategories'
+                read: '../Inventory/api/Category/Search'
             },
             columns: [
                 {dataIndex: 'intCategoryId', text: "Category Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
@@ -416,8 +416,10 @@ Ext.define('Inventory.view.CategoryViewController', {
             return;
 
         var grid = combo.up('grid');
+        var win = combo.up('window');
         var plugin = grid.getPlugin('cepDetailUOM');
         var current = plugin.getActiveRecord();
+        var uomConversion = win.viewModel.storeInfo.uomConversion;
 
         if (combo.column.itemId === 'colDetailUnitMeasure')
         {
@@ -433,19 +435,25 @@ Ext.define('Inventory.view.CategoryViewController', {
                 }
             });
             if (exists) {
-                var currUOM = exists.get('tblICUnitMeasure');
-                if (currUOM) {
-                    var conversions = currUOM.vyuICGetUOMConversions;
-                    if (!conversions) {
-                        conversions = currUOM.data.vyuICGetUOMConversions;
-                    }
-                    var selectedUOM = Ext.Array.findBy(conversions, function (row) {
-                        if (row.intUnitMeasureId === records[0].get('intUnitMeasureId')) {
+                if (uomConversion) {
+                    var index = uomConversion.data.findIndexBy(function (row) {
+                        if (row.get('intUnitMeasureId') === exists.get('intUnitMeasureId')) {
                             return true;
                         }
                     });
-                    if (selectedUOM) {
-                        current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                    if (index >= 0) {
+                        var stockUOM = uomConversion.getAt(index);
+                        var conversions = stockUOM.data.vyuICGetUOMConversions;
+                        if (conversions) {
+                            var selectedUOM = Ext.Array.findBy(conversions, function (row) {
+                                if (row.intUnitMeasureId === current.get('intUnitMeasureId')) {
+                                    return true;
+                                }
+                            });
+                            if (selectedUOM) {
+                                current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                            }
+                        }
                     }
                 }
             }

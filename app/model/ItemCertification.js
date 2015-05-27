@@ -20,9 +20,10 @@ Ext.define('Inventory.model.ItemCertification', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
+                            extraParams: { include: 'tblICCertification' },
                             type: 'rest',
                             api: {
-                                read: '../Inventory/api/ItemCertification/GetItemCertifications'
+                                read: '../Inventory/api/ItemCertification/Get'
                             },
                             reader: {
                                 type: 'json',

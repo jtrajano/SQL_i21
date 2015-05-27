@@ -22,7 +22,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
             title:  'Search Inventory UOMs',
             type: 'Inventory.InventoryUOM',
             api: {
-                read: '../Inventory/api/UnitMeasure/SearchUnitMeasures'
+                read: '../Inventory/api/UnitMeasure/Search'
             },
             columns: [
                 {dataIndex: 'intUnitMeasureId',text: "UOM Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

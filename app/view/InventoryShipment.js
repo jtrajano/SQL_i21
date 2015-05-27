@@ -803,42 +803,36 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     dataIndex: 'strSalesOrderNumber',
                                                                                     dataType: 'string',
                                                                                     text: 'Sales Order',
-                                                                                    flex: 1,
                                                                                     width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strItemNo',
                                                                                     dataType: 'string',
                                                                                     text: 'Item No',
-                                                                                    flex: 1,
                                                                                     width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strItemDescription',
                                                                                     dataType: 'string',
                                                                                     text: 'Description',
-                                                                                    flex: 1,
                                                                                     width: 120
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strLotTracking',
                                                                                     dataType: 'string',
                                                                                     text: 'Lot Tracking',
-                                                                                    flex: 1,
                                                                                     width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'strUnitMeasure',
                                                                                     dataType: 'string',
                                                                                     text: 'Item UOM Id',
-                                                                                    flex: 1,
                                                                                     width: 100
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'dblQtyOrdered',
                                                                                     dataType: 'float',
                                                                                     text: 'Qty Ordered',
-                                                                                    flex: 1,
                                                                                     width: 100
                                                                                 },
                                                                                 {
@@ -854,7 +848,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     hidden: true
                                                                                 }
                                                                             ],
+                                                                            pickerWidth: 625,
                                                                             itemId: 'cboOrderNumber',
+                                                                            width: 500,
+                                                                            matchFieldWidth: false,
                                                                             displayField: 'strSalesOrderNumber',
                                                                             valueField: 'strSalesOrderNumber'
                                                                         }

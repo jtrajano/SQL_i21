@@ -22,7 +22,7 @@ Ext.define('Inventory.view.CommodityViewController', {
             title:  'Search Commodity',
             type: 'Inventory.Commodity',
             api: {
-                read: '../Inventory/api/Commodity/SearchCommodities'
+                read: '../Inventory/api/Commodity/Search'
             },
             columns: [
                 {dataIndex: 'intCommodityId',text: "Commodity Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},
@@ -266,8 +266,10 @@ Ext.define('Inventory.view.CommodityViewController', {
             return;
 
         var grid = combo.up('grid');
+        var win = combo.up('window');
         var plugin = grid.getPlugin('cepUOM');
         var current = plugin.getActiveRecord();
+        var uomConversion = win.viewModel.storeInfo.uomConversion;
 
         if (combo.column.itemId === 'colUOMCode')
         {
@@ -281,19 +283,25 @@ Ext.define('Inventory.view.CommodityViewController', {
                 }
             });
             if (exists) {
-                var currUOM = exists.get('tblICUnitMeasure');
-                if (currUOM) {
-                    var conversions = currUOM.vyuICGetUOMConversions;
-                    if (!conversions) {
-                        conversions = currUOM.data.vyuICGetUOMConversions;
-                    }
-                    var selectedUOM = Ext.Array.findBy(conversions, function (row) {
-                        if (row.intUnitMeasureId === records[0].get('intUnitMeasureId')) {
+                if (uomConversion) {
+                    var index = uomConversion.data.findIndexBy(function (row) {
+                        if (row.get('intUnitMeasureId') === exists.get('intUnitMeasureId')) {
                             return true;
                         }
                     });
-                    if (selectedUOM) {
-                        current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                    if (index >= 0) {
+                        var stockUOM = uomConversion.getAt(index);
+                        var conversions = stockUOM.data.vyuICGetUOMConversions;
+                        if (conversions) {
+                            var selectedUOM = Ext.Array.findBy(conversions, function (row) {
+                                if (row.intUnitMeasureId === current.get('intUnitMeasureId')) {
+                                    return true;
+                                }
+                            });
+                            if (selectedUOM) {
+                                current.set('dblUnitQty', selectedUOM.dblConversionToStock);
+                            }
+                        }
                     }
                 }
             }
@@ -326,8 +334,10 @@ Ext.define('Inventory.view.CommodityViewController', {
 
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
         var grid = obj.up('grid');
+        var win = obj.up('window');
         var current = grid.view.getRecord(rowIndex);
         var uoms = grid.store.data.items;
+
 
         if (obj.dataIndex === 'ysnStockUnit'){
             if (checked === true){

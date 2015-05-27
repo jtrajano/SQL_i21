@@ -845,6 +845,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'intLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'strItemNo',
                                                                                     dataType: 'string',
                                                                                     text: 'Item Number',
@@ -916,7 +922,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intItemUOMId',
+                                                                                    dataIndex: 'intItemUnitMeasureId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Unit Of Measure Id',
                                                                                     hidden: true
@@ -978,13 +984,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'intLocationId',
-                                                                                    dataType: 'numeric',
-                                                                                    text: 'Location Id',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'intItemUnitMeasureId',
+                                                                                    dataIndex: 'intItemUOMId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Item UOM Id',
                                                                                     hidden: true
@@ -1127,6 +1127,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'container',
                                                                 flex: 2,
+                                                                hidden: true,
                                                                 itemId: 'pnlLotTracking',
                                                                 width: 100,
                                                                 layout: {
@@ -1227,13 +1228,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             hidden: true
                                                                                         },
                                                                                         {
-                                                                                            dataIndex: 'intLocationId',
-                                                                                            dataType: 'numeric',
-                                                                                            text: 'Location Id',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'intItemUnitMeasureId',
+                                                                                            dataIndex: 'intItemUOMId',
                                                                                             dataType: 'numeric',
                                                                                             text: 'Item UOM Id',
                                                                                             hidden: true

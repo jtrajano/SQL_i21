@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedCategoryAccount', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/CategoryAccount/GetCategoryAccounts'
+                    read: '../Inventory/api/CategoryAccount/Search'
                 },
                 reader: {
                     type: 'json',

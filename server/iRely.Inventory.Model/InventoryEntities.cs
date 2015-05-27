@@ -1,41 +1,35 @@
-﻿using System;
-using System.Text;
-using System.Linq;
-using System.Collections;
+﻿using iRely.Common;
+using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Net;
-using System.Web;
-using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace iRely.Inventory.Model
 {
     public partial class InventoryEntities : DbContext
     {
-        public InventoryEntities(string connectionString)
-            : base(connectionString)
+        static InventoryEntities()
         {
-
+            Database.SetInitializer<InventoryEntities>(null);
         }
 
-        // On this contructor function, comment the ": base(iRely.Common.Security.GetCompanyName())" when generating a new view. 
-        // If compiling for QC or Production, uncomment it. 
         public InventoryEntities()
             : base(iRely.Common.Security.GetCompanyName())
         {
+            Database.SetInitializer<InventoryEntities>(null);
             this.Configuration.ProxyCreationEnabled = false;
         }
         
         public DbSet<tblICBrand> tblICBrands { get; set; }
-        public DbSet<tblICCatalog> tblICCatalogs { get; set; }
+        public DbSet<tblICBuildAssembly> tblICBuildAssemblys { get; set; }
+        public DbSet<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
         public DbSet<tblICCategory> tblICCategorys { get; set; }
         public DbSet<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
         public DbSet<tblICCategoryLocation> tblICCategoryLocations { get; set; }
-        public DbSet<tblICCategoryVendor> tblICCategoryVendors { get; set; }
         public DbSet<tblICCategoryUOM> tblICCategoryUOMs { get; set; }
+        public DbSet<tblICCategoryVendor> tblICCategoryVendors { get; set; }
         public DbSet<tblICCertification> tblICCertifications { get; set; }
         public DbSet<tblICCertificationCommodity> tblICCertificationCommoditys { get; set; }
         public DbSet<tblICCommodity> tblICCommoditys { get; set; }
@@ -43,8 +37,11 @@ namespace iRely.Inventory.Model
         public DbSet<tblICCommodityAttribute> tblICCommodityAttributes { get; set; }
         public DbSet<tblICCommodityGroup> tblICCommodityGroups { get; set; }
         public DbSet<tblICCommodityUnitMeasure> tblICCommodityUnitMeasures { get; set; }
+        public DbSet<tblICContainer> tblICContainers { get; set; }
+        public DbSet<tblICContainerType> tblICContainerTypes { get; set; }
         public DbSet<tblICCountGroup> tblICCountGroups { get; set; }
         public DbSet<tblICDocument> tblICDocuments { get; set; }
+        public DbSet<tblICEquipmentLength> tblICEquipmentLengths { get; set; }
         public DbSet<tblICFuelTaxClass> tblICFuelTaxClasss { get; set; }
         public DbSet<tblICFuelTaxClassProductCode> tblICFuelTaxClassProductCodes { get; set; }
         public DbSet<tblICFuelType> tblICFuelTypes { get; set; }
@@ -53,16 +50,15 @@ namespace iRely.Inventory.Model
         public DbSet<tblICItemAssembly> tblICItemAssemblys { get; set; }
         public DbSet<tblICItemBundle> tblICItemBundles { get; set; }
         public DbSet<tblICItemCertification> tblICItemCertifications { get; set; }
+        public DbSet<tblICItemCommodityCost> tblICItemCommodityCosts { get; set; }
         public DbSet<tblICItemContract> tblICItemContracts { get; set; }
         public DbSet<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
         public DbSet<tblICItemCustomerXref> tblICItemCustomerXrefs { get; set; }
-        public DbSet<tblICItemFactory> tblICItemFactories { get; set; }
+        public DbSet<tblICItemFactory> tblICItemFactorys { get; set; }
         public DbSet<tblICItemFactoryManufacturingCell> tblICItemFactoryManufacturingCells { get; set; }
         public DbSet<tblICItemKit> tblICItemKits { get; set; }
         public DbSet<tblICItemKitDetail> tblICItemKitDetails { get; set; }
         public DbSet<tblICItemLocation> tblICItemLocations { get; set; }
-        public DbSet<tblICItemManufacturingUOM> tblICItemManufacturingUOMs { get; set; }
-        public DbSet<tblICItemCommodityCost> tblICItemCommodityCosts { get; set; }
         public DbSet<tblICItemNote> tblICItemNotes { get; set; }
         public DbSet<tblICItemOwner> tblICItemOwners { get; set; }
         public DbSet<tblICItemPOSCategory> tblICItemPOSCategorys { get; set; }
@@ -77,104 +73,76 @@ namespace iRely.Inventory.Model
         public DbSet<tblICItemUPC> tblICItemUPCs { get; set; }
         public DbSet<tblICItemVendorXref> tblICItemVendorXrefs { get; set; }
         public DbSet<tblICLineOfBusiness> tblICLineOfBusinesss { get; set; }
+        public DbSet<tblICLot> tblICLots { get; set; }
         public DbSet<tblICLotStatus> tblICLotStatuss { get; set; }
         public DbSet<tblICManufacturer> tblICManufacturers { get; set; }
         public DbSet<tblICManufacturingCell> tblICManufacturingCells { get; set; }
-        public DbSet<tblICManufacturingCellPackType> tblICManufacturingCellPackTypes { get; set; }
         public DbSet<tblICMaterialNMFC> tblICMaterialNMFCs { get; set; }
-        public DbSet<tblICPackType> tblICPackTypes { get; set; }
-        public DbSet<tblICPackTypeDetail> tblICPackTypeDetails { get; set; }
+        public DbSet<tblICMeasurement> tblICMeasurements { get; set; }
         public DbSet<tblICPatronageCategory> tblICPatronageCategorys { get; set; }
+        public DbSet<tblICReadingPoint> tblICReadingPoints { get; set; }
         public DbSet<tblICReasonCode> tblICReasonCodes { get; set; }
         public DbSet<tblICReasonCodeWorkCenter> tblICReasonCodeWorkCenters { get; set; }
+        public DbSet<tblICRestriction> tblICRestrictions { get; set; }
         public DbSet<tblICRinFeedStock> tblICRinFeedStocks { get; set; }
         public DbSet<tblICRinFeedStockUOM> tblICRinFeedStockUOMs { get; set; }
         public DbSet<tblICRinFuel> tblICRinFuels { get; set; }
         public DbSet<tblICRinFuelCategory> tblICRinFuelCategorys { get; set; }
         public DbSet<tblICRinProcess> tblICRinProcesss { get; set; }
+        public DbSet<tblICSku> tblICSkus { get; set; }
+        public DbSet<tblICStatus> tblICStatuss { get; set; }
+        public DbSet<tblICStockReservation> tblICStockReservations { get; set; }
         public DbSet<tblICStorageLocation> tblICStorageLocations { get; set; }
-        public DbSet<tblICStorageLocationCategory> tblICStorageLocationCategories { get; set; }
+        public DbSet<tblICStorageLocationCategory> tblICStorageLocationCategorys { get; set; }
+        public DbSet<tblICStorageLocationContainer> tblICStorageLocationContainers { get; set; }
         public DbSet<tblICStorageLocationMeasurement> tblICStorageLocationMeasurements { get; set; }
         public DbSet<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }
-        public DbSet<tblICStorageLocationContainer> tblICStorageLocationContainers { get; set; }
         public DbSet<tblICStorageUnitType> tblICStorageUnitTypes { get; set; }
         public DbSet<tblICTag> tblICTags { get; set; }
         public DbSet<tblICUnitMeasure> tblICUnitMeasures { get; set; }
         public DbSet<tblICUnitMeasureConversion> tblICUnitMeasureConversions { get; set; }
-        public DbSet<tblICLot> tblICLots { get; set; }
-        
-        public DbSet<tblICContainer> tblICContainers { get; set; }
-        public DbSet<tblICContainerType> tblICContainerTypes { get; set; }
-        public DbSet<tblICMeasurement> tblICMeasurements { get; set; }
-        public DbSet<tblICReadingPoint> tblICReadingPoints { get; set; }
-        public DbSet<tblICRestriction> tblICRestrictions { get; set; }
-        public DbSet<tblICSku> tblICSkus { get; set; }
-        public DbSet<tblICEquipmentLength> tblICEquipmentLengths { get; set; }
-
-        public DbSet<tblICInventoryReceipt> tblICInventoryReceipts { get; set; }
-        public DbSet<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
-        public DbSet<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
-        public DbSet<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
-        public DbSet<tblICInventoryReceiptItemTax> tblICInventoryReceiptItemTaxes { get; set; }
-
-        public DbSet<tblICInventoryShipment> tblICInventoryShipments { get; set; }
-        public DbSet<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
-        public DbSet<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
-
-        public DbSet<tblICInventoryAdjustment> tblICInventoryAdjustments { get; set; }
-        public DbSet<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
-        public DbSet<tblICInventoryAdjustmentNote> tblICInventoryAdjustmentNotes { get; set; }
-
-        public DbSet<tblICInventoryTransfer> tblICInventoryTransfers { get; set; }
-        public DbSet<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
-        public DbSet<tblICInventoryTransferNote> tblICInventoryTransferNotes { get; set; }
-
-        public DbSet<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
-        public DbSet<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
-
-        public DbSet<tblICStatus> tblICStatuses { get; set; }
-        public DbSet<tblICStockReservation> tblICStockReservations { get; set; }
-
-        public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
-        public DbSet<tblGLAccount> tblGLAccounts { get; set; }
-        public DbSet<tblGLAccountCategory> tblGLAccountCategories { get; set; }
-        public DbSet<vyuAPVendor> vyuAPVendors { get; set; }
-        public DbSet<tblARCustomer> tblARCustomers { get; set; }
-        public DbSet<tblSMCountry> tblSMCountries { get; set; }
-        public DbSet<tblSMCurrency> tblSMCurrencies { get; set; }
-        public DbSet<tblEntityLocation> tblEntityLocations { get; set; }
-
-        public DbSet<tblSTPaidOut> tblSTPaidOut { get; set; }
-        public DbSet<tblSTStore> tblSTStore { get; set; }
-        public DbSet<tblSTSubcategoryClass> tblSTSubcategoryClasses { get; set; }
-        public DbSet<tblSTSubcategoryFamily> tblSTSubcategoryFamilies { get; set; }
-        public DbSet<tblSTSubcategoryRegProd> tblSTSubcategoryRegProds { get; set; }
-
-        public DbSet<tblGRStorageType> tblGRStorageTypes { get; set; }
-        public DbSet<tblSTPromotionSalesList> tblSTPromotionSalesLists { get; set; }
 
         public DbSet<vyuICGetItemStock> vyuICGetItemStocks { get; set; }
         public DbSet<vyuICGetItemStockUOM> vyuICGetItemStockUOMs { get; set; }
         public DbSet<vyuICGetItemAccount> vyuICGetItemAccounts { get; set; }
         public DbSet<vyuICGetItemPricing> vyuICGetItemPricings { get; set; }
+        public DbSet<vyuICGetReceiptItemSource> vyuICGetReceiptItemSources { get; set; }
+        public DbSet<vyuICGetShipmentItemSource> vyuICGetShipmentItemSources { get; set; }
+        public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
+        public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
+        public DbSet<vyuICGetStorageLocation> vyuICGetStorageLocations { get; set; }
+        public DbSet<vyuICGetPostedLot> vyuICGetPostedLots { get; set; }
+
+        public DbSet<tblEntityLocation> tblEntityLocations { get; set; }
+        public DbSet<tblSMCompanyLocation> tblSMCompanyLocations { get; set; }
+        public DbSet<tblSMCountry> tblSMCountries { get; set; }
+        public DbSet<tblSMCurrency> tblSMCurrencies { get; set; }
         public DbSet<tblSMStartingNumber> tblSMStartingNumbers { get; set; }
         public DbSet<tblSMFreightTerm> tblSMFreightTerms { get; set; }
         public DbSet<tblSMCompanyLocationSubLocation> tblSMCompanyLocationSubLocations { get; set; }
         public DbSet<tblSMTaxCode> tblSMTaxCodes { get; set; }
+        public DbSet<vyuSMGetLocationPricingLevel> vyuSMGetLocationPricingLevels { get; set; }
+
+        public DbSet<tblGLAccount> tblGLAccounts { get; set; }
+        public DbSet<tblGLAccountCategory> tblGLAccountCategories { get; set; }
+
+        public DbSet<tblARCustomer> tblARCustomers { get; set; }
+        public DbSet<vyuAPVendor> vyuAPVendors { get; set; }
+        
+        public DbSet<tblSTPaidOut> tblSTPaidOut { get; set; }
+        public DbSet<tblSTStore> tblSTStore { get; set; }
+        public DbSet<tblSTSubcategoryClass> tblSTSubcategoryClasses { get; set; }
+        public DbSet<tblSTSubcategoryFamily> tblSTSubcategoryFamilies { get; set; }
+        public DbSet<tblSTSubcategoryRegProd> tblSTSubcategoryRegProds { get; set; }
+        public DbSet<tblSTPromotionSalesList> tblSTPromotionSalesLists { get; set; }
+
+        public DbSet<tblGRStorageType> tblGRStorageTypes { get; set; }
 
         public DbSet<tblMFQAProperty> tblMFQAProperties { get; set; }
-        public DbSet<vyuSMGetLocationPricingLevel> vyuSMGetLocationPricingLevels { get; set; }
-        public DbSet<vyuICGetReceiptItemSource> vyuICGetReceiptItemSources { get; set; }
-        public DbSet<vyuICGetShipmentItemSource> vyuICGetShipmentItemSources { get; set; }
-        public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
-        public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }	
-        public DbSet<vyuICGetStorageLocation> vyuICGetStorageLocations { get; set; }
-        public DbSet<vyuICGetPostedLot> vyuICGetPostedLots { get; set; }
-
-        protected override void OnModelCreating(DbModelBuilder modelBuilder) 
+        
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Configurations.Add(new tblICBrandMap());
-            modelBuilder.Configurations.Add(new tblICCatalogMap());
             modelBuilder.Configurations.Add(new tblICCategoryMap());
             modelBuilder.Configurations.Add(new tblICCategoryAccountMap());
             modelBuilder.Configurations.Add(new tblICCategoryLocationMap());
@@ -205,7 +173,6 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICItemKitMap());
             modelBuilder.Configurations.Add(new tblICItemKitDetailMap());
             modelBuilder.Configurations.Add(new tblICItemLocationMap());
-            modelBuilder.Configurations.Add(new tblICItemManufacturingUOMMap());
             modelBuilder.Configurations.Add(new tblICItemCommodityCostMap());
             modelBuilder.Configurations.Add(new tblICItemNoteMap());
             modelBuilder.Configurations.Add(new tblICItemOwnerMap());
@@ -224,10 +191,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICLotStatusMap());
             modelBuilder.Configurations.Add(new tblICManufacturerMap());
             modelBuilder.Configurations.Add(new tblICManufacturingCellMap());
-            modelBuilder.Configurations.Add(new tblICManufacturingCellPackTypeMap());
             modelBuilder.Configurations.Add(new tblICMaterialNMFCMap());
-            modelBuilder.Configurations.Add(new tblICPackTypeMap());
-            modelBuilder.Configurations.Add(new tblICPackTypeDetailMap());
             modelBuilder.Configurations.Add(new tblICPatronageCategoryMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeMap());
             modelBuilder.Configurations.Add(new tblICReasonCodeWorkCenterMap());
@@ -329,8 +293,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetShipmentItemSourceMap());
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
-            modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());			
-            modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());			
+            modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
+            modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());	
         }
     }
 }

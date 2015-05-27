@@ -7,7 +7,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             title: 'Search Inventory Transfer',
             type: 'Inventory.InventoryTransfer',
             api: {
-                read: '../Inventory/api/Transfer/SearchTransfers'
+                read: '../Inventory/api/InventoryTransfer/Search'
             },
             columns: [
                 {dataIndex: 'intInventoryTransferId', text: "Inventory Transfer Id", flex: 1, defaultSort: true, dataType: 'numeric', key: true, hidden: true},
@@ -99,11 +99,19 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'strItemNo',
                     editor: {
                         store: '{item}',
-                        defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{current.intFromLocationId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intFromLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'dblOnHand',
+                                value: '0',
+                                condition: 'gt',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colDescription: 'strItemDescription',

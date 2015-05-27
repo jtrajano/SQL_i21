@@ -20,10 +20,10 @@ Ext.define('Inventory.store.Adjustment', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Adjustment/GetAdjustments',
-                    update: '../Inventory/api/Adjustment/PutAdjustments',
-                    create: '../Inventory/api/Adjustment/PostAdjustments',
-                    destroy: '../Inventory/api/Adjustment/DeleteAdjustments'
+                    read: '../Inventory/api/InventoryAdjustment/Get',
+                    update: '../Inventory/api/InventoryAdjustment/Put',
+                    create: '../Inventory/api/InventoryAdjustment/Post',
+                    destroy: '../Inventory/api/InventoryAdjustment/Delete'
                 },
                 reader: {
                     type: 'json',

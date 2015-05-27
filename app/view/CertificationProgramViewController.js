@@ -22,7 +22,7 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
             title:  'Search Certification Programs',
             type: 'Inventory.CertificationProgram',
             api: {
-                read: '../Inventory/api/Certification/SearchCertifications'
+                read: '../Inventory/api/Certification/Search'
             },
             columns: [
                 {dataIndex: 'intCertificationId',text: "Certification Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

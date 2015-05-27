@@ -19,21 +19,15 @@ Ext.define('Inventory.store.BufferedUnitMeasure', {
             batchActions: true,
             remoteFilter: true,
             proxy: {
+                extraParams: { include: 'tblICUnitMeasureConversions.StockUnitMeasure, vyuICGetUOMConversions' },
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/UnitMeasure/GetUnitMeasures',
-                    update: '../Inventory/api/UnitMeasure/PutUnitMeasures',
-                    create: '../Inventory/api/UnitMeasure/PostUnitMeasures',
-                    destroy: '../Inventory/api/UnitMeasure/DeleteUnitMeasures'
+                    read: '../Inventory/api/UnitMeasure/Search'
                 },
                 reader: {
                     type: 'json',
                     rootProperty: 'data',
                     messageProperty: 'message'
-                },
-                writer: {
-                    type: 'json',
-                    allowSingle: false
                 }
             }
         }, cfg)]);

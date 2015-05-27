@@ -22,7 +22,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
             title:  'Search Storage Locations',
             type: 'Inventory.StorageLocation',
             api: {
-                read: '../Inventory/api/StorageLocation/SearchStorageLocations'
+                read: '../Inventory/api/StorageLocation/Search'
             },
             columns: [
                 {dataIndex: 'intStorageLocationId',text: "Storage Location Id", flex: 1, defaultSort:true, dataType: 'numeric', key: true, hidden: true},

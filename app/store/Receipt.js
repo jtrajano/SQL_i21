@@ -20,10 +20,10 @@ Ext.define('Inventory.store.Receipt', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Receipt/GetReceipts',
-                    update: '../Inventory/api/Receipt/PutReceipts',
-                    create: '../Inventory/api/Receipt/PostReceipts',
-                    destroy: '../Inventory/api/Receipt/DeleteReceipts'
+                    read: '../Inventory/api/InventoryReceipt/Get',
+                    update: '../Inventory/api/InventoryReceipt/Put',
+                    create: '../Inventory/api/InventoryReceipt/Post',
+                    destroy: '../Inventory/api/InventoryReceipt/Delete'
                 },
                 reader: {
                     type: 'json',

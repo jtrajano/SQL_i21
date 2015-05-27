@@ -20,10 +20,10 @@ Ext.define('Inventory.store.ItemLocation', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/ItemLocation/GetItemLocations',
-                    update: '../Inventory/api/ItemLocation/PutItemLocations',
-                    create: '../Inventory/api/ItemLocation/PostItemLocations',
-                    destroy: '../Inventory/api/ItemLocation/DeleteItemLocations'
+                    read: '../Inventory/api/ItemLocation/Get',
+                    update: '../Inventory/api/ItemLocation/Put',
+                    create: '../Inventory/api/ItemLocation/Post',
+                    destroy: '../Inventory/api/ItemLocation/Delete'
                 },
                 reader: {
                     type: 'json',

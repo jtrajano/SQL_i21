@@ -7,7 +7,6 @@ Ext.define('Inventory.model.Item', {
     requires: [
         'Inventory.model.ItemUOM',
         'Inventory.model.ItemLocation',
-        'Inventory.model.ItemUPC',
         'Inventory.model.ItemVendorXref',
         'Inventory.model.ItemCustomerXref',
         'Inventory.model.ItemContract',
