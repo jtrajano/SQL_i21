@@ -89,6 +89,7 @@ BEGIN
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
+				,intTransactionDetailId = 1
 				,strTransactionId = 'SALE-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
@@ -107,7 +108,8 @@ BEGIN
 				,dblSalesPrice 
 				,intCurrencyId 
 				,dblExchangeRate 
-				,intTransactionId 
+				,intTransactionId
+				,intTransactionDetailId 
 				,strTransactionId 
 				,strBatchId 
 				,intTransactionTypeId 
@@ -126,6 +128,7 @@ BEGIN
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
+				,intTransactionDetailId = 1
 				,strTransactionId = 'SALE-000001'
 				,strBatchId = 'BATCH-000001'
 				,intTransactionTypeId = @SalesType
@@ -155,6 +158,7 @@ BEGIN
 				,intCurrencyId 
 				,dblExchangeRate 
 				,intTransactionId 
+				,intTransactionDetailId
 				,strTransactionId 
 				,strBatchId 
 				,intTransactionTypeId 
@@ -173,6 +177,7 @@ BEGIN
 				,intCurrencyId 
 				,dblExchangeRate 
 				,intTransactionId 
+				,intTransactionDetailId
 				,strTransactionId 
 				,strBatchId 
 				,intTransactionTypeId 

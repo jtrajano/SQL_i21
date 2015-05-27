@@ -89,6 +89,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId 
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -105,7 +106,8 @@ BEGIN
 				,dblSalesPrice			= 0  
 				,intCurrencyId			= 1
 				,dblExchangeRate		= 1  
-				,intTransactionId		= ''
+				,intTransactionId		= 1
+				,intTransactionDetailId = 1
 				,strTransactionId		= 'SHIPMENT-00001'
 				,intTransactionTypeId	= @InventoryShipment  
 				,intLotId				= 1

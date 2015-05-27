@@ -40,12 +40,14 @@ BEGIN
 	DECLARE @intCreatedEntityId AS INT  
 	DECLARE @ysnAllowUserSelfPost AS BIT   
 	DECLARE @ysnTransactionPostedFlag AS BIT  
+	DECLARE @ysnShipmentRequired AS BIT
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryTransferId
 			,@ysnTransactionPostedFlag = ysnPosted
 			,@dtmDate = dtmTransferDate
 			,@intCreatedEntityId = intEntityId
+			,@ysnShipmentRequired = ISNULL(ysnShipmentRequired, 0)
 	FROM	dbo.tblICInventoryTransfer
 	WHERE	strTransferNo = @strTransactionId
 END  
@@ -94,22 +96,38 @@ BEGIN
 END
 
 -- Check if all Items are avaiable under the To Location
-SELECT TOP 1 Detail.intItemId, Header.intToLocationId, Item.strItemNo, Location.strLocationName
-INTO #tempValidateItemLocation
-FROM tblICInventoryTransferDetail Detail
-INNER JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
-INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Header.intToLocationId
-WHERE Detail.intInventoryTransferId = @intTransactionId AND ISNULL(dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId), -1) = -1
+SELECT TOP 1 
+		Detail.intItemId, 
+		Header.intToLocationId, 
+		Item.strItemNo, 
+		Location.strLocationName
+INTO	#tempValidateItemLocation
+FROM	tblICInventoryTransferDetail Detail	INNER JOIN tblICInventoryTransfer Header 
+			ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+		INNER JOIN tblICItem Item 
+			ON Item.intItemId = Detail.intItemId
+		INNER JOIN tblSMCompanyLocation Location 
+			ON Location.intCompanyLocationId = Header.intToLocationId
+WHERE	Detail.intInventoryTransferId = @intTransactionId 
+		AND ISNULL(dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId), -1) = -1
+
 IF EXISTS(SELECT TOP 1 1 FROM #tempValidateItemLocation)
 BEGIN
 	DECLARE @ItemId NVARCHAR(100),
 		@LocationId NVARCHAR(100)
-	SELECT TOP 1 @ItemId = strItemNo, @LocationId = strLocationName FROM #tempValidateItemLocation
-	IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tempValidateItemLocation')) DROP TABLE #tempValidateItemLocation
+
+	SELECT TOP 1 
+			@ItemId = strItemNo, 
+			@LocationId = strLocationName 
+	FROM	#tempValidateItemLocation
+
+	IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tempValidateItemLocation')) 
+	DROP TABLE #tempValidateItemLocation
+	
 	RAISERROR(51099, 11, 1, @ItemId, @LocationId)  
 	GOTO Post_Exit  
 END
+
 IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tempValidateItemLocation')) DROP TABLE #tempValidateItemLocation
 
 -- Check Company preference: Allow User Self Post  
@@ -161,165 +179,153 @@ EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1  
 BEGIN  
-	-- Get the items to post  
-	DECLARE @ItemsForRemovalPost AS ItemCostingTableType  
-	INSERT INTO @ItemsForRemovalPost (  
-			intItemId  
-			,intItemLocationId 
-			,intItemUOMId  
-			,dtmDate  
-			,dblQty  
-			,dblUOMQty  
-			,dblCost  
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
-	) 
-	SELECT Detail.intItemId  
-			,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
-			,Detail.intItemUOMId  
-			,Header.dtmTransferDate
-			,Detail.dblQuantity * -1
-			,ItemUOM.dblUnitQty
-			,Detail.dblCost  
-			,0
-			,NULL
-			,1
-			,@intTransactionId 
-			,@strTransactionId
-			,@INVENTORY_TRANSFER_TYPE
-			,Detail.intLotId 
-			,Detail.intFromSubLocationId
-			,Detail.intFromStorageLocationId
-	FROM tblICInventoryTransferDetail Detail
-	LEFT JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-
-	-- Call the post routine 
+	-- Process the "From" Stock 
 	BEGIN 
-		-- Call the post routine 
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-		)
+		DECLARE @ItemsForRemovalPost AS ItemCostingTableType  
+		INSERT INTO @ItemsForRemovalPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId  
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		) 
+		SELECT	Detail.intItemId  
+				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
+				,Detail.intItemUOMId  
+				,Header.dtmTransferDate
+				,Detail.dblQuantity * -1
+				,ItemUOM.dblUnitQty
+				,Detail.dblCost  
+				,0
+				,NULL
+				,1
+				,@intTransactionId 
+				,Detail.intInventoryTransferDetailId
+				,@strTransactionId
+				,@INVENTORY_TRANSFER_TYPE
+				,Detail.intLotId 
+				,Detail.intFromSubLocationId
+				,Detail.intFromStorageLocationId
+		FROM	tblICInventoryTransferDetail Detail LEFT JOIN tblICInventoryTransfer Header 
+					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+				LEFT JOIN tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+
 		EXEC	dbo.uspICPostCosting  
 				@ItemsForRemovalPost  
 				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,NULL 
 				,@intUserId
 	END
 
-	-- Get the assembly item to post  
-	DECLARE @ItemsForTransferPost AS ItemCostingTableType  
-	INSERT INTO @ItemsForTransferPost (  
-			intItemId  
-			,intItemLocationId 
-			,intItemUOMId  
-			,dtmDate  
-			,dblQty  
-			,dblUOMQty  
-			,dblCost  
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
-	) 
-	SELECT Detail.intItemId  
-			,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
-			,Detail.intItemUOMId  
-			,Header.dtmTransferDate
-			,Detail.dblQuantity
-			,ItemUOM.dblUnitQty
-			,Detail.dblCost  
-			,0
-			,NULL
-			,1
-			,@intTransactionId 
-			,@strTransactionId
-			,@INVENTORY_TRANSFER_TYPE
-			,Detail.intLotId
-			,Detail.intToSubLocationId
-			,Detail.intToStorageLocationId
-	FROM tblICInventoryTransferDetail Detail
-	LEFT JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-
-	-- Call the post routine 
+	-- Process the "To" Stock 
+	IF @ysnShipmentRequired = 0 
 	BEGIN 
+		DECLARE @ItemsForTransferPost AS ItemCostingTableType  
+		INSERT INTO @ItemsForTransferPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		) 
+		SELECT Detail.intItemId  
+				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
+				,Detail.intItemUOMId  
+				,Header.dtmTransferDate
+				,FromStock.dblQty * -1
+				,FromStock.dblUOMQty
+				,FromStock.dblCost
+				,0
+				,NULL
+				,1
+				,@intTransactionId 
+				,Detail.intInventoryTransferDetailId
+				,@strTransactionId
+				,@INVENTORY_TRANSFER_TYPE
+				,Detail.intNewLotId
+				,Detail.intToSubLocationId
+				,Detail.intToStorageLocationId
+		FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
+					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+				INNER JOIN dbo.tblICInventoryTransaction FromStock
+					ON Detail.intInventoryTransferDetailId = FromStock.intTransactionDetailId
+					AND Detail.intInventoryTransferId = FromStock.intTransactionId
+					AND FromStock.intItemId = Detail.intItemId
+				LEFT JOIN tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+		WHERE	ISNULL(FromStock.ysnIsUnposted, 0) = 0
+				AND FromStock.strBatchId = @strBatchId
+
 		-- Call the post routine 
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-		)
 		EXEC	dbo.uspICPostCosting  
 				@ItemsForTransferPost  
 				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,NULL 
 				,@intUserId
+
+		SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = NULL 
 	END
 
+	-----------------------------------------
+	-- Generate the g/l entries
+	-----------------------------------------
+	INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+	)
+	EXEC dbo.uspICCreateGLEntries 
+		@strBatchId
+		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+		,@intUserId
 END   	
-
-select * from @ItemsForTransferPost
-
-
 
 --------------------------------------------------------------------------------------------  
 -- If UNPOST, call the Unpost routines  
@@ -373,7 +379,6 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 1
 BEGIN 
-	select * from @GLEntries
 	ROLLBACK TRAN @TransactionName
 	EXEC dbo.uspCMPostRecap @GLEntries
 	COMMIT TRAN @TransactionName

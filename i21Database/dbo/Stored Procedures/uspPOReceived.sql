@@ -85,6 +85,7 @@ BEGIN
 				,dblQty
 				,dblUOMQty
 				,intTransactionId
+				,intTransactionDetailId
 				,strTransactionId
 				,intTransactionTypeId
 		)
@@ -96,6 +97,7 @@ BEGIN
 				,dblQty					= ReceiptItem.dblOpenReceive * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END -- dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
 				,dblUOMQty				= ItemUOM.dblUnitQty   --1 -- Keep value as one (1). The dblQty is converted manually by using the fnCalculateQtyBetweenUOM function.
 				,intTransactionId		= Receipt.intInventoryReceiptId
+				,intTransactionDetailId = ReceiptItem.intInventoryReceiptItemId
 				,strTransactionId		= Receipt.strReceiptNumber
 				,intTransactionTypeId	= -1 -- any value
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem

@@ -142,7 +142,7 @@ BEGIN
 	DECLARE @AccountCategoryId_InventoryInTransit AS INT = 46
 
 	DECLARE @AccountCategoryName_InventoryAdjustment AS NVARCHAR(100) = 'Inventory Adjustment'
-	DECLARE @AccountCategoryId_InventoryAdjustment AS INT = 59
+	DECLARE @AccountCategoryId_InventoryAdjustment AS INT = 50
 
 	-- Declare the item categories
 	DECLARE @HotItems AS INT = 1

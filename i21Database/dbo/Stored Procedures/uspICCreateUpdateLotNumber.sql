@@ -319,6 +319,8 @@ BEGIN
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
 			AND LotMaster.strLotNumber = LotToUpdate.strLotNumber 
+			AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+			AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 
 		-- If matched, update the lot record 
 		WHEN MATCHED THEN 

@@ -66,6 +66,7 @@ BEGIN
 			,@intCurrencyId AS INT
 			,@dblExchangeRate AS NUMERIC(18,6)
 			,@intTransactionId AS INT
+			,@intTransactionDetailId AS INT
 			,@strTransactionId AS NVARCHAR(20)
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
@@ -84,6 +85,7 @@ BEGIN
 			[intCurrencyId] INT NULL,
 			[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
 			[intTransactionId] INT NOT NULL, 
+			[intTransactionDetailId] INT NULL, 
 			[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
@@ -106,6 +108,7 @@ BEGIN
 			[intCurrencyId] INT NULL,
 			[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
 			[intTransactionId] INT NOT NULL, 
+			[intTransactionDetailId] INT NULL, 
 			[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
@@ -140,6 +143,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -158,6 +162,7 @@ BEGIN
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[intTransactionId]
+				,[intTransactionDetailId]
 				,[strTransactionId]
 				,[strBatchId]
 				,[intTransactionTypeId]
@@ -178,6 +183,7 @@ BEGIN
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[intTransactionId]
+				,[intTransactionDetailId]
 				,[strTransactionId]
 				,[strBatchId]
 				,[intTransactionTypeId]

@@ -154,8 +154,8 @@ BEGIN
 			,intDetailId		
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
-			,strLotNumber			= TransferItem.strNewLotId
-			,strLotAlias			= TransferItem.strNewLotId
+			,strLotNumber			= ISNULL(TransferItem.strNewLotId, Lot.strLotNumber) 
+			,strLotAlias			= Lot.strLotAlias
 			,intItemId				= TransferItem.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= TransferItem.intToSubLocationId

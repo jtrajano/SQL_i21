@@ -137,6 +137,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -154,6 +155,7 @@ BEGIN
 			, NULL
 			, 1
 			, @intTransactionId
+			, Detail.intBuildAssemblyDetailId
 			, @strTransactionId
 			, @BUILD_ASSEMBLY_TYPE
 			, NULL
@@ -188,6 +190,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -204,6 +207,7 @@ BEGIN
 			, 0
 			, NULL
 			, 1
+			, @intTransactionId
 			, @intTransactionId
 			, @strTransactionId
 			, @BUILD_ASSEMBLY_TYPE

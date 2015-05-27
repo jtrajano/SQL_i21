@@ -71,6 +71,7 @@ BEGIN
 				,intCurrencyId			= PO.intCurrencyId
 				,dblExchangeRate		= 1
 				,intTransactionId		= PO.intPurchaseId
+				,intTransactionDetailId = PODetail.intPurchaseDetailId
 				,strTransactionId		= PO.strPurchaseOrderNumber
 				,intTransactionTypeId	= CAST(NULL AS INT) 
 				,intLotId				= CAST(NULL AS INT) 
@@ -146,6 +147,7 @@ BEGIN
 				,intCurrencyId			= @Currency_USD
 				,dblExchangeRate		= 1
 				,intTransactionId		= 1
+				,intTransactionDetailId = 1
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
@@ -163,6 +165,7 @@ BEGIN
 				,intCurrencyId			= @Currency_USD
 				,dblExchangeRate		= 1
 				,intTransactionId		= 1
+				,intTransactionDetailId = 2
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
@@ -180,6 +183,7 @@ BEGIN
 				,intCurrencyId			= @Currency_USD
 				,dblExchangeRate		= 1
 				,intTransactionId		= 1
+				,intTransactionDetailId  = 3
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
@@ -197,6 +201,7 @@ BEGIN
 				,intCurrencyId			= @Currency_USD
 				,dblExchangeRate		= 1
 				,intTransactionId		= 1
+				,intTransactionDetailId = 4
 				,strTransactionId		= N'PO-10001'
 				,intTransactionTypeId	= @intPurchaseOrderType
 				,intLotId				= NULL 
@@ -219,6 +224,7 @@ BEGIN
 			,intCurrencyId
 			,dblExchangeRate
 			,intTransactionId
+			,intTransactionDetailId
 			,strTransactionId
 			,intTransactionTypeId
 			,intLotId

@@ -103,6 +103,7 @@ BEGIN
 				,intCurrencyId = @USD  
 				,dblExchangeRate = 1  
 				,intTransactionId = 1  
+				,intTransactionDetailId = 1
 				,strTransactionId = 'PURCHASE-000001'  
 				,intTransactionTypeId = @PurchaseType  
 				,intLotId = NULL  
@@ -122,6 +123,7 @@ BEGIN
 				,intCurrencyId = @USD  
 				,dblExchangeRate = 1  
 				,intTransactionId = 1  
+				,intTransactionDetailId = 2
 				,strTransactionId = 'SALE-000001'  
 				,intTransactionTypeId = @SalesType  
 				,intLotId = NULL  
@@ -141,6 +143,7 @@ BEGIN
 				,intCurrencyId = @USD  
 				,dblExchangeRate = 1  
 				,intTransactionId = 1  
+				,intTransactionDetailId = 3
 				,strTransactionId = 'SALE-000002'  
 				,intTransactionTypeId = @SalesType  
 				,intLotId = NULL  
@@ -160,6 +163,7 @@ BEGIN
 				,intCurrencyId = @USD  
 				,dblExchangeRate = 1  
 				,intTransactionId = 1  
+				,intTransactionDetailId = 4
 				,strTransactionId = 'SALE-000003'  
 				,intTransactionTypeId = @SalesType  
 				,intLotId = NULL  
@@ -179,6 +183,7 @@ BEGIN
 				,intCurrencyId = @USD  
 				,dblExchangeRate = 1  
 				,intTransactionId = 1  
+				,intTransactionDetailId = 5
 				,strTransactionId = 'SALE-000004'  
 				,intTransactionTypeId = @SalesType  
 				,intLotId = NULL  
@@ -197,7 +202,8 @@ BEGIN
 				,dblSalesPrice = 0  
 				,intCurrencyId = @USD  
 				,dblExchangeRate = 1  
-				,intTransactionId = 1  
+				,intTransactionId = 1 
+				,intTransactionDetailId = 6 
 				,strTransactionId = 'PURCHASE-000002'  
 				,intTransactionTypeId = @PurchaseType  
 				,intLotId = NULL  
@@ -216,7 +222,8 @@ BEGIN
 				,dblSalesPrice = 0  
 				,intCurrencyId = @USD  
 				,dblExchangeRate = 1  
-				,intTransactionId = 1  
+				,intTransactionId = 1 
+				,intTransactionDetailId = 7 
 				,strTransactionId = 'PURCHASE-000003'  
 				,intTransactionTypeId = @PurchaseType  
 				,intLotId = NULL  
@@ -236,6 +243,7 @@ BEGIN
 				,intCurrencyId = @USD  
 				,dblExchangeRate = 1  
 				,intTransactionId = 1  
+				,intTransactionDetailId = 8
 				,strTransactionId = 'PURCHASE-000004'  
 				,intTransactionTypeId = @PurchaseType  
 				,intLotId = NULL  
