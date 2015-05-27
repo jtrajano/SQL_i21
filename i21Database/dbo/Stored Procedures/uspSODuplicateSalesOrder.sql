@@ -44,6 +44,11 @@ BEGIN
            ,[strBillToZipCode]
            ,[strBillToCountry]
            ,[intEntityId]
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strLostQuoteComment]
+		   ,[strLostQuoteCompetitor]
+		   ,[strLostQuoteReason]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -83,6 +88,11 @@ BEGIN
            ,[strBillToZipCode]
            ,[strBillToCountry]
            ,@UserId
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strLostQuoteComment]
+		   ,[strLostQuoteCompetitor]
+		   ,[strLostQuoteReason]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
