@@ -71,9 +71,8 @@ SELECT intSalesOrderId, strTransactionType FROM INSERTED ORDER BY intSalesOrderI
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
-	
-	--EXEC uspARFixStartingNumbers 17
-	--IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
+	SELECT TOP 1 @intSalesOrderId = intSalesOrderId, @strTransactionType = strTransactionType FROM @inserted
+
 	IF(@strTransactionType IS NOT NULL AND @strTransactionType = 'Order')
 		BEGIN
 			EXEC uspSMGetStartingNumber 29, @SalesOrderNumber OUT
@@ -82,8 +81,6 @@ BEGIN
 		BEGIN
 			EXEC uspSMGetStartingNumber 51, @SalesOrderNumber OUT
 		END
-
-	SELECT TOP 1 @intSalesOrderId = intSalesOrderId FROM @inserted
 	
 	IF(@SalesOrderNumber IS NOT NULL)
 	BEGIN
