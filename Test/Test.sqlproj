@@ -612,6 +612,14 @@
     <Build Include="testi21Database\Stored Procedures\test fnGetItemGLAccount function for getting the gl account from category.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnGetItemGLAccount function for getting the gl account from commodity.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnGetItemGLAccount function for getting the gl account from item level.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for inventory transfer table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransfer for one item and shipment NOT required.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransfer with no detail items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransfer for one item and shipment required.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for missing Contra Account on Inventory Transfer with Shipment required.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for allowing a missing Contra Account on Inventory Transfer.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransfer on getting the batch id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransfer for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
