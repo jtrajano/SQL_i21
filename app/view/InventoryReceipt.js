@@ -873,6 +873,48 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     dataType: 'string',
                                                                                     text: 'Lot Tracking',
                                                                                     hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strReceiveUOMType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Receive UOM Type',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strReceiveUOM',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Receive UOM',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strStockUOM',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Stock UOM',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblLastCost',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Last Cost',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblReceiveUOMConvFactor',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Receive UOM Conversion Factor',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intReceiveUOMId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Receive UOM Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intStockUOMId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Stock UOM Id',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboItem',

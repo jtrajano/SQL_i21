@@ -1460,7 +1460,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter1",
+                                                                    "name": "filter16",
                                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1684,6 +1684,48 @@
                                                                             "\t\tdataIndex: 'strLotTracking',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Lot Tracking',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strReceiveUOMType',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Receive UOM Type',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strReceiveUOM',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Receive UOM',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strStockUOM',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Stock UOM',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'dblLastCost',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\ttext: 'Last Cost',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'dblReceiveUOMConvFactor',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\ttext: 'Receive UOM Conversion Factor',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intReceiveUOMId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Receive UOM Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intStockUOMId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Stock UOM Id',",
                                                                             "\t\thidden: true",
                                                                             "\t}",
                                                                             "]"
@@ -2424,7 +2466,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter11",
+                                                                            "name": "filter17",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3545,7 +3587,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter12",
+                                                    "name": "filter18",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4382,7 +4424,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter19",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4826,7 +4868,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging12",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
