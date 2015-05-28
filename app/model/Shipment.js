@@ -46,7 +46,6 @@ Ext.define('Inventory.model.Shipment', {
     ],
 
     validators: [
-        {type: 'presence', field: 'strBOLNumber'},
         {type: 'presence', field: 'dtmShipDate'},
         {type: 'presence', field: 'intOrderType'},
         {type: 'presence', field: 'intShipFromLocationId'},
