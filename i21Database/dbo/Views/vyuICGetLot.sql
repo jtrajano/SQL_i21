@@ -17,7 +17,9 @@ SELECT Lot.intLotId
 	, SubLocation.strSubLocationName
 	, Lot.intStorageLocationId
 	, strStorageLocation = StorageLocation.strName
-	, Lot.dblQty
+	, dblQty = ISNULL(Lot.dblQty, 0)
+	, dblReservedQty = ISNULL(Reserve.dblTotalQty, 0)
+	, dblAvailableQty = ISNULL(Lot.dblQty, 0) - ISNULL(Reserve.dblTotalQty, 0)
 	, Lot.dblLastCost
 	, Lot.dtmExpiryDate
 	, Lot.strLotAlias
@@ -58,3 +60,24 @@ LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLoca
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = Lot.intLotStatusId
 LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = Lot.intWeightUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+LEFT JOIN (
+		SELECT intItemId
+			, intItemLocationId
+			, intItemUOMId
+			, intSubLocationId
+			, intStorageLocationId
+			, intLotId
+			, dblTotalQty = SUM(dblQty)
+		FROM tblICStockReservation
+		GROUP BY intItemId
+			, intItemLocationId
+			, intItemUOMId
+			, intSubLocationId
+			, intStorageLocationId
+			, intLotId
+	) Reserve ON Reserve.intItemId = Lot.intItemId
+	AND Reserve.intItemLocationId = Lot.intItemLocationId
+	AND Reserve.intItemUOMId = Lot.intItemUOMId
+	AND Reserve.intSubLocationId = Lot.intSubLocationId
+	AND Reserve.intStorageLocationId = Lot.intStorageLocationId
+	AND Reserve.intLotId = Lot.intLotId
