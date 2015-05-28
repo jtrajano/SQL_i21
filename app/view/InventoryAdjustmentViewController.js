@@ -873,7 +873,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
-                postURL             : '../Inventory/api/Adjustment/Post',
+                postURL             : '../Inventory/api/InventoryAdjustment/PostTransaction',
                 strTransactionId    : strAdjustmentNo,
                 isPost              : !posted,
                 isRecap             : false,
@@ -908,7 +908,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../Inventory/api/Adjustment/Post',
+                postURL: '../Inventory/api/InventoryAdjustment/PostTransaction',
                 strTransactionId: currentRecord.get('strAdjustmentNo'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,
