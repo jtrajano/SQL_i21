@@ -206,13 +206,13 @@ EXEC('
 		
 			--update runout and forecasted date
 			UPDATE tblTMSite
-			SET dtmRunOutDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((@tk_level / @tk_w_dau) AS INT)) 
-				,dtmForecastedDelivery = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST(((@tk_level - ISNULL(dblTotalReserve,0)) / @tk_w_dau) AS INT)) 
+			SET dtmRunOutDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((dblTotalCapacity * @tk_level / 100 / @tk_w_dau) AS INT)) 
+				,dtmForecastedDelivery = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((((dblTotalCapacity * @tk_level / 100) - ISNULL(dblTotalReserve,0)) / @tk_w_dau) AS INT)) 
 			WHERE intSiteID = @siteId
 		
 			--update DD Between Delivery
 			UPDATE tblTMSite
-			SET dblDegreeDayBetweenDelivery = dblBurnRate * (dblTotalCapacity * @tk_level - dblTotalReserve)
+			SET dblDegreeDayBetweenDelivery = dblBurnRate * ((dblTotalCapacity * @tk_level / 100) - dblTotalReserve)
 			WHERE intSiteID = @siteId
 		
 			--update next degree day Delivery
@@ -272,8 +272,8 @@ EXEC('
 			 (SELECT TOP 1 
 				   @siteId
 				   ,@tk_level
-				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - dblEstimatedPercentLeft) * dblTotalCapacity
-				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - dblEstimatedPercentLeft) * dblTotalCapacity
+				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - @tk_level) * dblTotalCapacity / 100
+				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - @tk_level) * dblTotalCapacity / 100
 				   ,intProduct
 				   ,0
 				   ,0

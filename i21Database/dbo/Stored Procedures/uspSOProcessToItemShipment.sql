@@ -12,7 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
  
 DECLARE	 @ShipmentId INT
-		,@ShipmentNumber NVARCHAR(100);
+		--,@ShipmentNumber NVARCHAR(100);
 
 
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Complete') 
@@ -61,7 +61,7 @@ WHERE
 	
 
 SET @InventoryShipmentId = @ShipmentId;
-SELECT @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
+--SELECT @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
 
 RETURN 1;
 

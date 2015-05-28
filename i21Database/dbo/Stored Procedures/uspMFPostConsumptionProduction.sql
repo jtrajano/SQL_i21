@@ -278,6 +278,8 @@ BEGIN
 		,NULL
 		,@intUserId
 
+	Update @GLEntries Set dblDebit=(Select sum(dblCredit) from @GLEntries where strTransactionType='Consume') where strTransactionType='Produce'
+
 	EXEC dbo.uspGLBookEntries @GLEntries
 		,1
 END

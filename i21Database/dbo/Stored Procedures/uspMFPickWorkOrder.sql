@@ -147,7 +147,7 @@ AND ri.intConsumptionMethodId in (2,3)
 			SELECT @intLotId = intLotId
 				,@dblQty = dblQty
 			FROM @tblLot
-			WHERE @intLotRecordKey = @intLotRecordKey
+			WHERE intLotRecordKey = @intLotRecordKey
 			
 			Select @intSequenceNo=Max(intSequenceNo)+1 From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId
 			
