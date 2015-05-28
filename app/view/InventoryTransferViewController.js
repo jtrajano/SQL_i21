@@ -185,13 +185,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         store: '{toSubLocation}',
                         defaultFilters: [
                             {
-                                column: 'intItemId',
-                                value: '{grdInventoryTransfer.selection.intItemId}',
-                                conjunction: 'and'
-                            },
-                            {
-                                column: 'intFrom',
-                                value: '{grdInventoryTransfer.selection.intItemId}',
+                                column: 'intCompanyLocationId',
+                                value: '{current.intToLocationId}',
                                 conjunction: 'and'
                             }
                         ]
@@ -201,11 +196,18 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'strToStorageLocationName',
                     editor: {
                         store: '{toStorageLocation}',
-                        defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{current.intToLocationId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intToLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{currentDetailItem.intToSubLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
                 colTransferQty: 'dblQuantity',
