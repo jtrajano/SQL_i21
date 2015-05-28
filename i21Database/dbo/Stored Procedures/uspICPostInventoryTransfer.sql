@@ -113,7 +113,7 @@ FROM	tblICInventoryTransferDetail Detail	INNER JOIN tblICInventoryTransfer Heade
 			ON Location.intCompanyLocationId = Header.intToLocationId
 WHERE	Detail.intInventoryTransferId = @intTransactionId 
 		AND ISNULL(dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId), -1) = -1
-
+		 
 IF EXISTS(SELECT TOP 1 1 FROM #tempValidateItemLocation)
 BEGIN
 	DECLARE @ItemId NVARCHAR(100),
@@ -220,11 +220,35 @@ BEGIN
 		) 
 		SELECT	Detail.intItemId  
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
-				,Detail.intItemUOMId  
+				,intItemUOMId = 
+					CASE	WHEN Lot.intLotId IS NOT NULL THEN 
+								CASE	WHEN LotWeightUOM.intItemUOMId IS NOT NULL THEN LotWeightUOM.intItemUOMId
+										WHEN LotItemUOM.intItemUOMId IS NOT NULL THEN LotItemUOM.intItemUOMId
+								END 
+							ELSE Detail.intItemUOMId
+					END 
 				,Header.dtmTransferDate
-				,Detail.dblQuantity * -1
-				,ItemUOM.dblUnitQty
-				,Detail.dblCost  
+				,dblQty = -1 * 
+					CASE	WHEN ISNULL(Detail.intLotId, 0) <> 0  THEN 
+									CASE	-- The item has no weight UOM. Transfer it by the quantity provided. 
+											WHEN ISNULL(Lot.intWeightUOMId, 0) = 0  THEN 												
+												Detail.dblQuantity
+											
+											-- The item has a weight UOM. 
+											ELSE 
+												-- If there is weight value (non-zero), use it. 
+												dbo.fnCalculateQtyBetweenUOM(LotItemUOM.intItemUOMId, LotWeightUOM.intItemUOMId, Detail.dblQuantity)												
+									END 
+								ELSE	
+									Detail.dblQuantity
+						END 
+				,dblUOMQty = 
+					CASE	WHEN Lot.intLotId IS NULL THEN ItemUOM.dblUnitQty
+							WHEN LotWeightUOM.intItemUOMId IS NOT NULL THEN LotWeightUOM.dblUnitQty
+							WHEN LotItemUOM.intItemUOMId IS NOT NULL THEN LotItemUOM.dblUnitQty
+							ELSE ItemUOM.dblUnitQty
+					END 
+				,ISNULL(Detail.dblCost, 0)
 				,0
 				,NULL
 				,1
@@ -235,10 +259,18 @@ BEGIN
 				,Detail.intLotId 
 				,Detail.intFromSubLocationId
 				,Detail.intFromStorageLocationId
-		FROM	tblICInventoryTransferDetail Detail LEFT JOIN tblICInventoryTransfer Header 
+		FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-				LEFT JOIN tblICItemUOM ItemUOM 
+				LEFT JOIN dbo.tblICItemUOM ItemUOM
 					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+				LEFT JOIN dbo.tblICLot Lot
+					ON Lot.intLotId = Detail.intLotId
+					AND Lot.intItemId = Detail.intItemId
+				LEFT JOIN tblICItemUOM LotItemUOM
+					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+				LEFT JOIN tblICItemUOM LotWeightUOM
+					ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+		WHERE	Header.intInventoryTransferId = @intTransactionId
 
 		-----------------------------------------
 		-- Generate the g/l entries
@@ -302,11 +334,11 @@ BEGIN
 		) 
 		SELECT Detail.intItemId  
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
-				,Detail.intItemUOMId  
+				,FromStock.intItemUOMId  
 				,Header.dtmTransferDate
 				,FromStock.dblQty * -1
 				,FromStock.dblUOMQty
-				,FromStock.dblCost
+				,ISNULL(FromStock.dblCost, 0)
 				,0
 				,NULL
 				,1
@@ -327,6 +359,7 @@ BEGIN
 					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
 		WHERE	ISNULL(FromStock.ysnIsUnposted, 0) = 0
 				AND FromStock.strBatchId = @strBatchId
+				AND Header.intInventoryTransferId = @intTransactionId
 
 		-- Clear the GL entries 
 		DELETE FROM @GLEntries
@@ -434,8 +467,15 @@ END
 -- 4. Commit the save point 
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
-BEGIN 
-	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
+BEGIN 	
+	COMMIT TRAN @TransactionName
+	
+	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
+	IF @@ERROR <> 0 
+	BEGIN		
+		ROLLBACK TRAN @TransactionName
+		GOTO Post_Exit
+	END
 
 	UPDATE	dbo.tblICInventoryTransfer  
 	SET		ysnPosted = @ysnPost

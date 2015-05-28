@@ -66,7 +66,7 @@ END
 IF (@intItemId IS NOT NULL)
 BEGIN 
 	-- There is not enough stocks for %s
-	RAISERROR(51040, 11, 1, @strItemNo) 
+	RAISERROR(51040, 11, 1, @strItemNo)   
 END 
 ELSE 
 BEGIN 
