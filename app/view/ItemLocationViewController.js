@@ -50,7 +50,12 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 store: '{storageLocation}',
                 defaultFilters: [{
                     column: 'intLocationId',
-                    value: '{current.intLocationId}'
+                    value: '{current.intLocationId}',
+                    conjunction: 'and'
+                },{
+                    column: 'intSubLocationId',
+                    value: '{current.intSubLocationId}',
+                    conjunction: 'and'
                 }]
             },
             cboIssueUom: {
