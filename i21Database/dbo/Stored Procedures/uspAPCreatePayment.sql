@@ -8,7 +8,8 @@
 	@datePaid DATETIME = NULL,
 	@isPost BIT = 0,
 	@post BIT = 0,
-	@billId NVARCHAR(MAX)
+	@billId NVARCHAR(MAX),
+	@createdPaymentId INT = NULL OUTPUT
 AS
 BEGIN
 
@@ -175,4 +176,5 @@ BEGIN
 	N'@paymentId INT',
 	 @paymentId = @paymentId;
 	 
+	 SET @createdPaymentId = @paymentId
 END
