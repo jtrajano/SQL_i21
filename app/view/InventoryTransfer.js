@@ -838,7 +838,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 {
                                                                     dataIndex: 'strSubLocationName',
                                                                     dataType: 'string',
-                                                                    text: 'Sub Location Name',
+                                                                    text: 'Sub Location',
                                                                     flex: 1
                                                                 },
                                                                 {
@@ -871,7 +871,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 {
                                                                     dataIndex: 'strName',
                                                                     dataType: 'string',
-                                                                    text: 'Name',
+                                                                    text: 'Storage Location',
                                                                     flex: 1
                                                                 },
                                                                 {
