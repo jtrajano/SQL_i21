@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFUpdateWorkOrder] (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE [dbo].[uspMFUpdateWorkOrder] (@strXML NVARCHAR(MAX),@intConcurrencyId Int Output)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -90,7 +90,7 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-	SELECT @intPrevExecutionOrder = intExecutionOrder
+	SELECT @intPrevExecutionOrder = intExecutionOrder,@intConcurrencyId=ISNULL(intConcurrencyId,0)+1
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -142,6 +142,7 @@ BEGIN TRY
 		,intSupervisorId = @intSupervisorId
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = @intUserId
+		,intConcurrencyId=@intConcurrencyId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	COMMIT TRANSACTION
