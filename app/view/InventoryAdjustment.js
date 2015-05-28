@@ -513,7 +513,62 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'numeric',
                                                                     text: 'Last Cost',
                                                                     flex: 1
-                                                                }
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblWeight',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Weight',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblWeightPerQty',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Weight Per Qty',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intItemUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intWeightUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Weight UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLotStatusId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Lot Status Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strItemUOM',
+                                                                    dataType: 'string',
+                                                                    text: 'Item UOM',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strWeightUOM',
+                                                                    dataType: 'string',
+                                                                    text: 'Weight UOM',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLotStatus',
+                                                                    dataType: 'string',
+                                                                    text: 'Lot Status',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dtmExpiryDate',
+                                                                    dataType: 'datetime',
+                                                                    text: 'Expiry Date',
+                                                                    hidden: true
+                                                                },
+                                                                
                                                             ],
                                                             itemId: 'cboLotNumber',
                                                             displayField: 'strLotNumber',
