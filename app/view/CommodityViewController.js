@@ -163,6 +163,16 @@ Ext.define('Inventory.view.CommodityViewController', {
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
+            include: 'tblICCommodityUnitMeasures.tblICUnitMeasure, ' +
+                'tblICCommodityAccounts.tblGLAccount, ' +
+                'tblICCommodityClassVariants, ' +
+                'tblICCommodityGrades, ' +
+                'tblICCommodityOrigins, ' +
+                'tblICCommodityProductLines, ' +
+                'tblICCommodityProductTypes, ' +
+                'tblICCommodityRegions, ' +
+                'tblICCommoditySeasons, ' +
+                'tblICCommodityGroups',
             binding: me.config.binding,
             details: [
                 {

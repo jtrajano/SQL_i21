@@ -218,6 +218,12 @@ Ext.define('Inventory.view.CategoryViewController', {
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
             store  : store,
+            include: 'tblICCategoryAccounts.tblGLAccount, ' +
+                'tblICCategoryAccounts.tblGLAccountCategory, ' +
+                'tblICCategoryLocations.tblSMCompanyLocation, ' +
+                'tblICCategoryVendors.vyuAPVendor, ' +
+                'tblICCategoryVendors.tblICCategoryLocation.tblSMCompanyLocation, ' +
+                'tblICCategoryUOMs.tblICUnitMeasure',
             createRecord : me.createRecord,
             binding: me.config.binding,
             details: [
