@@ -44,6 +44,7 @@ BEGIN TRY
 		,@intItemId = intItemId
 		,@dblQuantity = dblQuantity
 		,@intItemUOMId = intItemUOMId
+		,@dtmExpectedDate=dtmExpectedDate
 		,@intExecutionOrder = intExecutionOrder
 		,@intUserId = intUserId
 		,@strLotNumber = strLotNumber
@@ -140,6 +141,7 @@ BEGIN TRY
 		,intParentWorkOrderId = @intParentWorkOrderId
 		,intSalesRepresentativeId = @intSalesRepresentativeId
 		,intSupervisorId = @intSupervisorId
+		,intCustomerId = @intCustomerId
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = @intUserId
 		,intConcurrencyId=@intConcurrencyId
