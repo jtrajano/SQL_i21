@@ -1236,7 +1236,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
         current.set('strUnitType', po.get('strStockUOMType'));
 
-        if (po.get('strStockUOMType') === 'Weight') {
+        if (po.get('strStockUOMType') === 'Weight' && po.get('strLotTracking') !== 'No') {
             current.set('intWeightUOMId', po.get('intStockUOM'));
             current.set('strWeightUOM', po.get('strStockUOM'));
             current.set('dblWeightUOMConvFactor', po.get('dblStockUOMCF'));
