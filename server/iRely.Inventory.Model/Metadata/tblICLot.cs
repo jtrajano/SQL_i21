@@ -28,6 +28,8 @@ namespace iRely.Inventory.Model
         public int? intStorageLocationId { get; set; }
         public string strStorageLocation { get; set; }
         public decimal? dblQty { get; set; }
+        public decimal? dblReservedQty { get; set; }
+        public decimal? dblAvailableQty { get; set; }
         public decimal? dblLastCost { get; set; }
         public DateTime? dtmExpiryDate { get; set; }
         public string strLotAlias { get; set; }

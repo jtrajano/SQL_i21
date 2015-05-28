@@ -265,19 +265,41 @@
                             "userConfig": {
                                 "designer|displayName": null,
                                 "height": 57,
-                                "hidden": true,
                                 "icon": null,
                                 "iconAlign": "top",
-                                "iconCls": "large-duplicate",
-                                "itemId": "btnDuplicate",
+                                "iconCls": "large-recap",
+                                "itemId": "btnRecap",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
-                                "text": "Duplicate",
+                                "text": "Recap",
                                 "width": 59
                             },
                             "name": "MyButton1",
                             "designerId": "b22e08af-ed6f-410f-9f9d-10c680a1ecb6"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-invoice",
+                                "itemId": "btnInvoice",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Invoice",
+                                "width": 59
+                            },
+                            "name": "MyButton8",
+                            "designerId": "88edf2c6-c766-433e-86ff-fc04b240b472"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -1644,7 +1666,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter126",
+                                                                    "name": "filter110",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2126,32 +2148,6 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "align": "right",
-                                                                "dataIndex": "dblDifference",
-                                                                "dataType": "numeric",
-                                                                "format": "0,000.##",
-                                                                "itemId": "colDifference",
-                                                                "text": "Difference",
-                                                                "width": 81
-                                                            },
-                                                            "name": "MyNumberColumn2",
-                                                            "designerId": "03ffd8f0-a8ca-48f6-aa2a-e36ca32fa13c",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "dataType",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Number",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "align": "right",
                                                                 "dataIndex": "dblUnitPrice",
                                                                 "dataType": "numeric",
                                                                 "format": "0,000.##",
@@ -2364,7 +2360,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter127",
+                                                                    "name": "filter111",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2536,64 +2532,7 @@
                                                                 "width": 100
                                                             },
                                                             "name": "MyColumn5",
-                                                            "designerId": "0c15caa2-b649-405d-853f-b5bb41fcb750",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intItemUOMId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Unit Of Measure Id',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Unit Measure',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strUnitType',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Unit Type',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\txtype: 'checkcolumn',",
-                                                                            "\t\tdataIndex: 'ysnStockUnit',",
-                                                                            "\t\tdataType: 'boolean',",
-                                                                            "\t\ttext: 'Stock Unit',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strUnitMeasure",
-                                                                        "itemId": "cboLotUOM",
-                                                                        "valueField": "strUnitMeasure"
-                                                                    },
-                                                                    "name": "MyComboBox79",
-                                                                    "configAlternates": {
-                                                                        "columns": "array"
-                                                                    },
-                                                                    "designerId": "70fbdbe4-3c83-437f-be2d-d141fa5c58f3",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                }
-                                                            ]
+                                                            "designerId": "0c15caa2-b649-405d-853f-b5bb41fcb750"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Column",
@@ -2610,58 +2549,7 @@
                                                                 "width": 100
                                                             },
                                                             "name": "MyColumn11",
-                                                            "designerId": "847070f1-a4f2-4389-91ea-fa8c4938fae2",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intItemUOMId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Unit Of Measure Id',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Unit Measure',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\txtype: 'checkcolumn',",
-                                                                            "\t\tdataIndex: 'ysnStockUnit',",
-                                                                            "\t\tdataType: 'boolean',",
-                                                                            "\t\ttext: 'Stock Unit',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strUnitMeasure",
-                                                                        "itemId": "cboLotWeightUOM",
-                                                                        "valueField": "strUnitMeasure"
-                                                                    },
-                                                                    "name": "MyComboBox83",
-                                                                    "configAlternates": {
-                                                                        "columns": "array"
-                                                                    },
-                                                                    "designerId": "0a402dc5-6b87-479f-92a1-c69fb08421b6",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                }
-                                                            ]
+                                                            "designerId": "847070f1-a4f2-4389-91ea-fa8c4938fae2"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Number",
@@ -2930,7 +2818,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter128",
+                                                                    "name": "filter112",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3184,7 +3072,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter129",
+                                                    "name": "filter113",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3361,7 +3249,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging113",
+                    "name": "statusbarpaging13",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -365,6 +365,8 @@ namespace iRely.Inventory.Model
         public string strStorageLocationName { get; set; }
         public decimal? dblOnHand { get; set; }
         public decimal? dblOnOrder { get; set; }
+        public decimal? dblReservedQty { get; set; }
+        public decimal? dblAvailableQty { get; set; }
     }
 
 }

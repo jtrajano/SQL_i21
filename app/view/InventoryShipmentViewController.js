@@ -178,7 +178,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }]
                     }
                 },
-//                colDifference: '',
                 colUnitPrice: 'dblUnitPrice',
 //                colTaxCode: '',
 //                colTaxAmount: '',
@@ -200,6 +199,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{currentShipmentItem.intItemId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intSubLocationId',
+                            value: '{currentShipmentItem.intSubLocationId}',
                             conjunction: 'and'
                         }]
                     }
@@ -388,6 +391,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     break;
             }
         }
+        else if (combo.itemId === 'cboSubLocation') {
+            current.set('intSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
+        }
     },
 
     onLotSelect: function(combo, records, eOpts) {
@@ -498,62 +504,61 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         });
     },
 
-//    onRecapClick: function(button, e, eOpts) {
-//        var me = this;
-//        var win = button.up('window');
-//        var cboCurrency = win.down('#cboCurrency');
-//        var context = win.context;
-//
-//        var doRecap = function(recapButton, currentRecord, currency){
-//
-//            // Call the buildRecapData to generate the recap data
-//            CashManagement.common.BusinessRules.buildRecapData({
-//                postURL: '../Inventory/api/Receipt/Receive',
-//                strTransactionId: currentRecord.get('strReceiptNumber'),
-//                ysnPosted: currentRecord.get('ysnPosted'),
-//                scope: me,
-//                success: function(){
-//                    // If data is generated, show the recap screen.
-//                    CashManagement.common.BusinessRules.showRecap({
-//                        strTransactionId: currentRecord.get('strReceiptNumber'),
-//                        ysnPosted: currentRecord.get('ysnPosted'),
-//                        dtmDate: currentRecord.get('dtmReceiptDate'),
-//                        strCurrencyId: currency,
-//                        dblExchangeRate: 1,
-//                        scope: me,
-//                        postCallback: function(){
-//                            me.onReceiveClick(recapButton);
-//                        },
-//                        unpostCallback: function(){
-//                            me.onReceiveClick(recapButton);
-//                        }
-//                    });
-//                },
-//                failure: function(message){
-//                    // Show why recap failed.
-//                    var msgBox = iRely.Functions;
-//                    msgBox.showCustomDialog(
-//                        msgBox.dialogType.ERROR,
-//                        msgBox.dialogButtonType.OK,
-//                        message
-//                    );
-//                }
-//            });
-//        };
-//
-//        // If there is no data change, do the post.
-//        if (!context.data.hasChanges()){
-//            doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
-//            return;
-//        }
-//
-//        // Save has data changes first before doing the post.
-//        context.data.saveRecord({
-//            successFn: function() {
-//                doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
-//            }
-//        });
-//    },
+    onRecapClick: function(button, e, eOpts) {
+        var me = this;
+        var win = button.up('window');
+        var context = win.context;
+
+        var doRecap = function(recapButton, currentRecord, currency){
+
+            // Call the buildRecapData to generate the recap data
+            CashManagement.common.BusinessRules.buildRecapData({
+                postURL: '../Inventory/api/InventoryShipment/Ship',
+                strTransactionId: currentRecord.get('strShipmentNumber'),
+                ysnPosted: currentRecord.get('ysnPosted'),
+                scope: me,
+                success: function(){
+                    // If data is generated, show the recap screen.
+                    CashManagement.common.BusinessRules.showRecap({
+                        strTransactionId: currentRecord.get('strShipmentNumber'),
+                        ysnPosted: currentRecord.get('ysnPosted'),
+                        dtmDate: currentRecord.get('dtmShipDate'),
+                        strCurrencyId: null,
+                        dblExchangeRate: 1,
+                        scope: me,
+                        postCallback: function(){
+                            me.onShipClick(recapButton);
+                        },
+                        unpostCallback: function(){
+                            me.onShipClick(recapButton);
+                        }
+                    });
+                },
+                failure: function(message){
+                    // Show why recap failed.
+                    var msgBox = iRely.Functions;
+                    msgBox.showCustomDialog(
+                        msgBox.dialogType.ERROR,
+                        msgBox.dialogButtonType.OK,
+                        message
+                    );
+                }
+            });
+        };
+
+        // If there is no data change, do the post.
+        if (!context.data.hasChanges()){
+            doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+            return;
+        }
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+            }
+        });
+    },
 
     onAfterShip: function(success, message) {
         if (success === true) {
@@ -564,6 +569,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         else {
             iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
         }
+    },
+
+    onInvoiceClick: function(button, e, eOpts) {
+
     },
 
     init: function(application) {
@@ -597,6 +606,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#btnShip": {
                 click: this.onShipClick
+            },
+            "#btnRecap": {
+                click: this.onRecapClick
+            },
+            "#btnInvoice": {
+                click: this.onInvoiceClick
             }
         })
     }
