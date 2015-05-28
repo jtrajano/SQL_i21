@@ -20,6 +20,8 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Transfer Transaction' + CA
 
 -- Constants  
 DECLARE @INVENTORY_TRANSFER_TYPE AS INT = 12
+		,@INVENTORY_TRANSFER_WITH_SHIPMENT_TYPE AS INT = 13
+
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3 
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
 
@@ -36,11 +38,12 @@ SET @ysnPost = ISNULL(@ysnPost, 0)
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
-	DECLARE @intTransactionId AS INT  
-	DECLARE @intCreatedEntityId AS INT  
-	DECLARE @ysnAllowUserSelfPost AS BIT   
-	DECLARE @ysnTransactionPostedFlag AS BIT  
-	DECLARE @ysnShipmentRequired AS BIT
+			,@intTransactionId AS INT  
+			,@intCreatedEntityId AS INT  
+			,@ysnAllowUserSelfPost AS BIT   
+			,@ysnTransactionPostedFlag AS BIT  
+			,@ysnShipmentRequired AS BIT
+			,@intTransactionType AS INT 
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryTransferId
@@ -179,6 +182,20 @@ EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 1  
 BEGIN  
+	--	Initialize the transaction type and account-category-to-counter-inventory.
+	BEGIN 
+		-- If shipment required, change the transaction type to "Inventory Transfer with Shipment"
+		-- Otherwise, keep the transaction type to "Inventory Transfer"
+		SET @intTransactionType = 
+			CASE	WHEN @ysnShipmentRequired = 1 THEN @INVENTORY_TRANSFER_WITH_SHIPMENT_TYPE 
+					ELSE @INVENTORY_TRANSFER_TYPE 
+			END
+		
+		-- If shipment is not required, then set to NULL the "account category to counter inventory". 
+		SELECT @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = NULL 
+		WHERE @ysnShipmentRequired = 0
+	END
+	
 	-- Process the "From" Stock 
 	BEGIN 
 		DECLARE @ItemsForRemovalPost AS ItemCostingTableType  
@@ -214,7 +231,7 @@ BEGIN
 				,@intTransactionId 
 				,Detail.intInventoryTransferDetailId
 				,@strTransactionId
-				,@INVENTORY_TRANSFER_TYPE
+				,@intTransactionType
 				,Detail.intLotId 
 				,Detail.intFromSubLocationId
 				,Detail.intFromStorageLocationId
@@ -223,10 +240,40 @@ BEGIN
 				LEFT JOIN tblICItemUOM ItemUOM 
 					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
 
+		-----------------------------------------
+		-- Generate the g/l entries
+		-----------------------------------------
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+		)
 		EXEC	dbo.uspICPostCosting  
 				@ItemsForRemovalPost  
 				,@strBatchId  
-				,NULL 
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 				,@intUserId
 	END
 
@@ -281,50 +328,45 @@ BEGIN
 		WHERE	ISNULL(FromStock.ysnIsUnposted, 0) = 0
 				AND FromStock.strBatchId = @strBatchId
 
-		-- Call the post routine 
+		-- Clear the GL entries 
+		DELETE FROM @GLEntries
+
+		-----------------------------------------
+		-- Generate a new set of g/l entries
+		-----------------------------------------
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+		)
 		EXEC	dbo.uspICPostCosting  
 				@ItemsForTransferPost  
 				,@strBatchId  
-				,NULL 
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 				,@intUserId
-
-		SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = NULL 
 	END
-
-	-----------------------------------------
-	-- Generate the g/l entries
-	-----------------------------------------
-	INSERT INTO @GLEntries (
-			[dtmDate] 
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-	)
-	EXEC dbo.uspICCreateGLEntries 
-		@strBatchId
-		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-		,@intUserId
 END   	
 
 --------------------------------------------------------------------------------------------  

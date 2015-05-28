@@ -154,7 +154,7 @@ BEGIN
 			,intDetailId		
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
-			,strLotNumber			= ISNULL(TransferItem.strNewLotId, Lot.strLotNumber) 
+			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN Lot.strLotNumber ELSE TransferItem.strNewLotId END 
 			,strLotAlias			= Lot.strLotAlias
 			,intItemId				= TransferItem.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
