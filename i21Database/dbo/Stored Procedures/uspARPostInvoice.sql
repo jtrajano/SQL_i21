@@ -29,13 +29,13 @@ SET ANSI_WARNINGS OFF
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
  
-CREATE TABLE #tmpPostInvoiceData (
+DECLARE @PostInvoiceData TABLE  (
 	intInvoiceId int PRIMARY KEY,
 	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	UNIQUE (intInvoiceId)
 );
 
-CREATE TABLE #tmpInvalidInvoiceData (
+DECLARE @InvalidInvoiceData TABLE  (
 	strError NVARCHAR(100),
 	strTransactionType NVARCHAR(50),
 	strTransactionId NVARCHAR(50),
@@ -76,17 +76,17 @@ IF (@param IS NOT NULL)
 	BEGIN
 		IF(@param = 'all')
 		BEGIN
-			INSERT INTO #tmpPostInvoiceData SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice WHERE ysnPosted = 0 AND (strTransactionType = @transType OR @transType = 'all')
+			INSERT INTO @PostInvoiceData SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice WHERE ysnPosted = 0 AND (strTransactionType = @transType OR @transType = 'all')
 		END
 		ELSE
 		BEGIN
-			INSERT INTO #tmpPostInvoiceData SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@param))
+			INSERT INTO @PostInvoiceData SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@param))
 		END
 	END
 
 IF(@beginDate IS NOT NULL)
 	BEGIN
-		INSERT INTO #tmpPostInvoiceData
+		INSERT INTO @PostInvoiceData
 		SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice
 		WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @beginDate AND @endDate AND ysnPosted = 0
 		AND (strTransactionType = @transType OR @transType = 'all')
@@ -94,7 +94,7 @@ IF(@beginDate IS NOT NULL)
 
 IF(@beginTransaction IS NOT NULL)
 	BEGIN
-		INSERT INTO #tmpPostInvoiceData
+		INSERT INTO @PostInvoiceData
 		SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice
 		WHERE intInvoiceId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
 		AND (strTransactionType = @transType OR @transType = 'all')
@@ -105,7 +105,7 @@ IF(@exclude IS NOT NULL)
 	BEGIN
 		SELECT intID INTO #tmpInvoicesExclude FROM fnGetRowsFromDelimitedValues(@exclude)
 		DELETE FROM A
-		FROM #tmpPostInvoiceData A
+		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT * FROM #tmpInvoicesExclude B WHERE A.intInvoiceId = B.intID)
 	END
 
@@ -118,7 +118,7 @@ IF @recap = 0
 		IF @post = 1
 			BEGIN
 				--Fiscal Year
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'Unable to find an open fiscal year period to match the transaction date.',
 					A.strTransactionType,
@@ -128,13 +128,13 @@ IF @recap = 0
 				FROM
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
 					ISNULL(dbo.isOpenAccountingDate(A.dtmDate), 0) = 0
 
 				--zero amount
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'You cannot post an ' + A.strTransactionType + ' with zero amount.',
 					A.strTransactionType,
@@ -144,13 +144,13 @@ IF @recap = 0
 				FROM 
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
 					A.dblInvoiceTotal = 0.00
 					
 				--negative amount
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'You cannot post an ' + A.strTransactionType + ' with negative amount.',
 					A.strTransactionType,
@@ -160,13 +160,13 @@ IF @recap = 0
 				FROM 
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
 					A.dblInvoiceTotal < 0.00
 
 				--No Freight specified
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'No freight term has been specified.',
 					A.strTransactionType,
@@ -180,7 +180,7 @@ IF @recap = 0
 						ON Detail.intInvoiceId = A.intInvoiceId
 						AND A.strTransactionType = 'Invoice'
 				INNER JOIN
-					#tmpPostInvoiceData P
+					@PostInvoiceData P
 						ON A.intInvoiceId = P.intInvoiceId	
 				INNER JOIN
 					tblICItemUOM ItemUOM 
@@ -197,7 +197,7 @@ IF @recap = 0
 					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
 					
 				--UOM is required
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'UOM is required for item ' + Detail.strItemDescription + '.',
 					A.strTransactionType,
@@ -211,11 +211,8 @@ IF @recap = 0
 						ON Detail.intInvoiceId = A.intInvoiceId
 						AND A.strTransactionType = 'Invoice'
 				INNER JOIN
-					#tmpPostInvoiceData P
+					@PostInvoiceData P
 						ON A.intInvoiceId = P.intInvoiceId	
-				INNER JOIN
-					tblICItemUOM ItemUOM 
-						ON ItemUOM.intItemUOMId = Detail.intItemUOMId
 				LEFT OUTER JOIN
 					vyuICGetItemStock IST
 						ON Detail.intItemId = IST.intItemId 
@@ -229,7 +226,7 @@ IF @recap = 0
 
 
 				--No Terms specified
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'No terms has been specified.',
 					A.strTransactionType,
@@ -239,13 +236,13 @@ IF @recap = 0
 				FROM 
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
 					0 = A.intTermId
 
 				--NOT BALANCE
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'The debit and credit amounts are not balanced.',
 					A.strTransactionType,
@@ -255,13 +252,13 @@ IF @recap = 0
 				FROM 
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
 					ROUND(A.dblInvoiceTotal,2) <> ROUND(((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = A.intInvoiceId) + ISNULL(A.dblShipping,0.0) + ISNULL(A.dblTax,0.0)),2)
 
 				--ALREADY POSTED
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'The transaction is already posted.',
 					A.strTransactionType,
@@ -271,13 +268,13 @@ IF @recap = 0
 				FROM 
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
 					A.ysnPosted = 1
 
 				--Header Account ID
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
 					'The AR account is not specified.',
 					A.strTransactionType,
@@ -287,14 +284,14 @@ IF @recap = 0
 				FROM 
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
 					A.intAccountId IS NULL 
 					OR A.intAccountId = 0
 					
 				--Company Location
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'Company location of ' + A.strInvoiceNumber + ' was not set.'
 					,A.strTransactionType
@@ -304,7 +301,7 @@ IF @recap = 0
 				FROM
 					tblARInvoice A
 				INNER JOIN
-					#tmpPostInvoiceData P
+					@PostInvoiceData P
 						ON A.intInvoiceId = P.intInvoiceId						 
 				LEFT OUTER JOIN
 					tblSMCompanyLocation L
@@ -312,7 +309,7 @@ IF @recap = 0
 				WHERE L.intCompanyLocationId IS NULL
 				
 				--Freight Expenses Account
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'The Freight Income account of Company Location ' + L.strLocationName + ' was not set.'
 					,A.strTransactionType
@@ -322,7 +319,7 @@ IF @recap = 0
 				FROM
 					tblARInvoice A
 				INNER JOIN
-					#tmpPostInvoiceData P
+					@PostInvoiceData P
 						ON A.intInvoiceId = P.intInvoiceId						 
 				INNER JOIN
 					tblSMCompanyLocation L
@@ -335,7 +332,7 @@ IF @recap = 0
 					AND A.dblShipping <> 0.0	
 				
 				
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
 					'The Service Charge account of Company Location - ' + L.strLocationName + ' was not set.',
 					A.strTransactionType,
@@ -345,7 +342,7 @@ IF @recap = 0
 				FROM 
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				INNER JOIN
 					tblARInvoiceDetail D
@@ -359,7 +356,7 @@ IF @recap = 0
 					AND (L.intServiceCharges  IS NULL OR L.intServiceCharges  = 0)
 								
 								
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
 					'The Service Charge Account of item - ' + I.strItemNo + ' was not specified.',
 					A.strTransactionType,
@@ -369,7 +366,7 @@ IF @recap = 0
 				FROM 
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				INNER JOIN
 					tblARInvoiceDetail D
@@ -388,7 +385,7 @@ IF @recap = 0
 		IF @post = 0
 			BEGIN
 				--ALREADY HAVE PAYMENTS
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
 					A.strRecordNumber + ' payment was already made on this ' + C.strTransactionType + '.',
 					C.strTransactionType,
@@ -404,10 +401,10 @@ IF @recap = 0
 					tblARInvoice C
 						ON B.intInvoiceId = C.intInvoiceId
 				INNER JOIN 
-					#tmpPostInvoiceData D
+					@PostInvoiceData D
 						ON C.intInvoiceId = D.intInvoiceId
 
-				INSERT INTO #tmpInvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT 
 					'Unable to find an open fiscal year period to match the transaction date.',
 					A.strTransactionType,
@@ -417,7 +414,7 @@ IF @recap = 0
 				FROM 
 					tblARInvoice A 
 				INNER JOIN 
-					#tmpPostInvoiceData B
+					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE
 					ISNULL(dbo.isOpenAccountingDate(A.dtmDate), 0) = 0
@@ -425,7 +422,7 @@ IF @recap = 0
 			END
 
 		DECLARE @totalInvalid INT = 0
-		SELECT @totalInvalid = COUNT(*) FROM #tmpInvalidInvoiceData
+		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
 		IF(@totalInvalid > 0)
 			BEGIN
@@ -439,32 +436,32 @@ IF @recap = 0
 					,strBatchNumber
 					,intTransactionId
 				FROM
-					#tmpInvalidInvoiceData
+					@InvalidInvoiceData
 
 				SET @invalidCount = @totalInvalid
 
 				--DELETE Invalid Transaction From temp table
-				DELETE #tmpPostInvoiceData
-					FROM #tmpPostInvoiceData A
-						INNER JOIN #tmpInvalidInvoiceData
-							ON A.intInvoiceId = #tmpInvalidInvoiceData.intTransactionId
+				DELETE @PostInvoiceData
+					FROM @PostInvoiceData A
+						INNER JOIN @InvalidInvoiceData B
+							ON A.intInvoiceId = B.intTransactionId
 
 			END
 
 
 		DECLARE @totalRecords INT
-		SELECT @totalRecords = COUNT(*) FROM #tmpPostInvoiceData
+		SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
 			
 		IF(@totalInvalid >= 1)  
 			BEGIN			
 				DECLARE @ErrorMessage NVARCHAR(100)				
-				SELECT TOP 1 @ErrorMessage = strError FROM #tmpInvalidInvoiceData
+				SELECT TOP 1 @ErrorMessage = strError FROM @InvalidInvoiceData
 				RAISERROR(@ErrorMessage, 11, 1) 
 				SET @success = 0 
 				GOTO Post_Exit
 			END
 			
-		IF(@totalRecords >= 1)  
+		IF(@totalRecords = 0)  
 			BEGIN			
 				SET @success = 0 
 				GOTO Post_Exit
@@ -480,7 +477,7 @@ IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
 		FROM
 			tblGLDetailRecap GL
 		INNER JOIN 
-			#tmpPostInvoiceData I
+			@PostInvoiceData I
 				ON GL.intTransactionId = I.intInvoiceId 
 				AND GL.strTransactionId = I.strTransactionId
 		WHERE
@@ -549,7 +546,7 @@ IF @post = 1
 				ON Detail.intInvoiceId = Header.intInvoiceId
 				AND Header.strTransactionType = 'Invoice'
 		INNER JOIN
-			#tmpPostInvoiceData P
+			@PostInvoiceData P
 				ON Header.intInvoiceId = P.intInvoiceId	
 		INNER JOIN
 			tblICItemUOM ItemUOM 
@@ -662,7 +659,7 @@ IF @post = 1
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId 			
 			INNER JOIN 
-				#tmpPostInvoiceData	P
+				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
 					
 			--CREDIT MISC
@@ -709,7 +706,7 @@ IF @post = 1
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
 			INNER JOIN 
-				#tmpPostInvoiceData	P
+				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
 				tblSMCompanyLocation CL
@@ -755,7 +752,7 @@ IF @post = 1
 				tblARCustomer C
 					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
 			INNER JOIN 
-				#tmpPostInvoiceData	P
+				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId
 			INNER JOIN
 				tblICItem I
@@ -800,7 +797,7 @@ IF @post = 1
 				tblSMCompanyLocation L
 					ON A.intCompanyLocationId = L.intCompanyLocationId	
 			INNER JOIN 
-				#tmpPostInvoiceData	P
+				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId	
 			WHERE
 				A.dblShipping <> 0.0		
@@ -845,7 +842,7 @@ IF @post = 1
 				tblARCustomer C
 					ON A.intEntityCustomerId = C.intEntityCustomerId
 			INNER JOIN 
-				#tmpPostInvoiceData	P
+				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId				
 			LEFT OUTER JOIN
 				tblSMTaxCode TC
@@ -870,7 +867,7 @@ IF @post = 0
 		--		 intInvoiceId 
 		--		,strTransactionId 
 		--	FROM
-		--		#tmpPostInvoiceData 
+		--		@PostInvoiceData 
 		--	ORDER BY
 		--		intInvoiceId 
 
@@ -927,13 +924,13 @@ IF @post = 0
 		--END
 		
 		BEGIN			
-			CREATE TABLE #tmpUnPostInvoiceData (
+			DECLARE @UnPostInvoiceData TABLE  (
 				intInvoiceId int PRIMARY KEY,
 				strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 				UNIQUE (intInvoiceId)
 			);
 			
-			INSERT INTO #tmpUnPostInvoiceData(intInvoiceId, strTransactionId)
+			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
 			SELECT
 				 P.intInvoiceId
 				,P.strTransactionId
@@ -944,7 +941,7 @@ IF @post = 0
 					ON Detail.intInvoiceId = Header.intInvoiceId
 					AND Header.strTransactionType = 'Invoice'
 			INNER JOIN
-				#tmpPostInvoiceData P
+				@PostInvoiceData P
 					ON Header.intInvoiceId = P.intInvoiceId	
 			INNER JOIN
 				tblICItemUOM ItemUOM 
@@ -959,13 +956,13 @@ IF @post = 0
 				AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
 
-			WHILE EXISTS(SELECT TOP 1 NULL FROM #tmpUnPostInvoiceData ORDER BY intInvoiceId)
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
 				BEGIN
 				
 					DECLARE @intTransactionId INT
 							,@strTransactionId NVARCHAR(80);
 					
-					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM #tmpUnPostInvoiceData ORDER BY intInvoiceId
+					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId
 
 					-- Call the post routine 
 					INSERT INTO @GLEntries (
@@ -1001,7 +998,7 @@ IF @post = 0
 							,@batchId
 							,@UserEntityID
 							
-					DELETE FROM #tmpUnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
+					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												
 				END 
 																
@@ -1064,7 +1061,7 @@ IF @post = 0
 			FROM
 				tblGLDetail GL
 			INNER JOIN
-				#tmpPostInvoiceData P
+				@PostInvoiceData P
 					ON GL.intTransactionId = P.intInvoiceId 
 					AND GL.strTransactionId = P.strTransactionId
 			WHERE
@@ -1114,17 +1111,17 @@ IF @recap = 0
 				FROM
 					tblARInvoice 
 				WHERE 
-					intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
+					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 
 				UPDATE
 					tblGLDetail
 				SET
 					ysnIsUnposted = 1
 				FROM
-					#tmpPostInvoiceData
+					@PostInvoiceData P
 				WHERE
-					tblGLDetail.intTransactionId = #tmpPostInvoiceData.intInvoiceId
-					AND tblGLDetail.strTransactionId = #tmpPostInvoiceData.strTransactionId
+					tblGLDetail.intTransactionId = P.intInvoiceId
+					AND tblGLDetail.strTransactionId = P.strTransactionId
 
 				--Insert Successfully unposted transactions.
 				INSERT INTO tblARPostResult(
@@ -1142,7 +1139,7 @@ IF @recap = 0
 				FROM
 					tblARInvoice A
 				WHERE
-					intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
+					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 					
 				--Update tblHDTicketHoursWorked ysnBilled
 				UPDATE
@@ -1150,9 +1147,8 @@ IF @recap = 0
 				SET
 					ysnBilled = 0
 				WHERE
-					intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)			
+					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)			
 
-		COMMIT TRAN @TransactionName
 			END
 		ELSE
 			BEGIN
@@ -1167,7 +1163,7 @@ IF @recap = 0
 					,dblPayment = 0.000000
 					,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 				WHERE
-					tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
+					tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 
 				--Insert Successfully posted transactions.
 				INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1180,7 +1176,7 @@ IF @recap = 0
 				FROM
 					tblARInvoice A
 				WHERE
-					intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
+					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 				
 				--Update tblHDTicketHoursWorked ysnBilled					
 				UPDATE
@@ -1188,7 +1184,7 @@ IF @recap = 0
 				SET
 					ysnBilled = 1
 				WHERE
-					intInvoiceId IN (SELECT intInvoiceId FROM #tmpPostInvoiceData)
+					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 				
 			END
 			
@@ -1197,7 +1193,8 @@ IF @recap = 0
     
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPostInvoiceData')) DROP TABLE #tmpPostInvoiceData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvalidInvoiceData')) DROP TABLE #tmpInvalidInvoiceData
+	--IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..@PostInvoiceData')) DROP TABLE @PostInvoiceData
+	--IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..@InvalidInvoiceData')) DROP TABLE @InvalidInvoiceData
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvoicesExclude')) DROP TABLE #tmpInvoicesExclude
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpUnPostInvoiceData')) DROP TABLE #tmpUnPostInvoiceData 
+	RETURN;
+	--IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..@UnPostInvoiceData')) DROP TABLE @UnPostInvoiceData 
