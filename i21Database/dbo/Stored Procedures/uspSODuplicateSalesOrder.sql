@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspSODuplicateSalesOrder]
+	@TransactionType NVARCHAR(20) = '',
 	@SalesOrderId	INT = 0,
 	@UserId			INT = 0,
 	@NewSalesOrderId INT = NULL OUTPUT
@@ -16,6 +17,12 @@ BEGIN
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]
+		   ,[intOrderedById]
+		   ,[intSplitId]
+		   ,[intFreightTermId]
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strBOLNumber]
            ,[dblSalesOrderSubtotal]
            ,[dblShipping]
            ,[dblTax]
@@ -43,7 +50,7 @@ BEGIN
            ,[strBillToState]
            ,[strBillToZipCode]
            ,[strBillToCountry]
-           ,[intEntityId]
+           ,[intEntityId]		   
         )
 	SELECT
 			[intEntityCustomerId]
@@ -55,6 +62,12 @@ BEGIN
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]
+		   ,[intOrderedById]
+		   ,[intSplitId]
+		   ,[intFreightTermId]
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strBOLNumber]
            ,[dblSalesOrderSubtotal]
            ,[dblShipping]
            ,[dblTax]
