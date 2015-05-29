@@ -124,7 +124,6 @@ BEGIN TRY
 		,intItemId = @intItemId
 		,dblQuantity = @dblQuantity
 		,intItemUOMId = @intItemUOMId
-		,intStatusId = 1
 		,intManufacturingCellId = @intManufacturingCellId
 		,intStorageLocationId = @intStorageLocationId
 		,intSubLocationId = @intSubLocationId
@@ -146,6 +145,17 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 		,intConcurrencyId=@intConcurrencyId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	UPDATE dbo.tblMFWorkOrderProductSpecification
+	SET strParameterName = x.strParameterName
+		,strParameterValue = x.strParameterValue
+		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+	FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
+			intWorkOrderProductSpecificationId INT
+			,strParameterName NVARCHAR(50)
+			,strParameterValue NVARCHAR(MAX)
+			) x
+	WHERE tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId = x.intWorkOrderProductSpecificationId
 
 	COMMIT TRANSACTION
 
