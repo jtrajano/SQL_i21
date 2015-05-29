@@ -1639,14 +1639,14 @@
     <Build Include="dbo\Tables\tblARCustomerRackQuoteItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessScaleTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
+    <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
+	<Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotInCustody.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotInCustodyTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostLotInCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLotCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotCustody.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotInCustodyTransaction.sql" />
-	<Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotInCustodyTransaction.sql" />    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
