@@ -38,6 +38,19 @@ IF NOT EXISTS(	SELECT 1
 		RAISERROR('There is no sellable item on this sales order.', 16, 1);
 		RETURN;
 	END
+	
+IF EXISTS(	SELECT 1 
+				FROM tblSOSalesOrderDetail A
+					INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+				WHERE
+					[intSalesOrderId] = @SalesOrderId 
+					AND (A.intItemUOMId IS NULL OR A.intItemUOMId = 0)
+					AND strType NOT IN ('Non-Inventory', 'Other Charge', 'Service')
+				)
+	BEGIN
+		RAISERROR('There UOM of one of the selected inventory item was not set', 16, 1);
+		RETURN;
+	END	
 
 
 DECLARE @icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @UserId);
