@@ -1639,6 +1639,7 @@
     <Build Include="dbo\Tables\tblARCustomerRackQuoteItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessScaleTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
