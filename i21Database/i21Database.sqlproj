@@ -1638,6 +1638,9 @@
     <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetContainerByContainerType.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetActualItemByProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetAttributeByManufacturingProcess.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
