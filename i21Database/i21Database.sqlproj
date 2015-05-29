@@ -1647,6 +1647,7 @@
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLotCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryLotInCustodyTransaction.sql" />    
+	<Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
