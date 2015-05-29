@@ -57,10 +57,70 @@ BEGIN
 			,@intCurrencyId AS INT
 			,@dblExchangeRate AS NUMERIC(18,6)
 			,@intTransactionId AS INT
+			,@intTransactionDetailId AS INT
 			,@strTransactionId AS NVARCHAR(20)
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
 			,@intUserId AS INT
+
+		CREATE TABLE expected (
+			[intInventoryTransactionId] INT NOT NULL, 
+			[intItemId] INT NOT NULL,
+			[intItemUOMId] INT NOT NULL,
+			[intItemLocationId] INT NOT NULL,
+			[intSubLocationId] INT NULL,
+			[intStorageLocationId] INT NULL,
+			[dtmDate] DATETIME NOT NULL, 
+			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblValue] NUMERIC(18, 6) NULL, 
+			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[intCurrencyId] INT NULL,
+			[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
+			[intTransactionId] INT NOT NULL, 
+			[intTransactionDetailId] INT NULL, 
+			[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+			[intTransactionTypeId] INT NOT NULL, 
+			[intLotId] INT NULL, 
+			[dtmCreated] DATETIME NULL, 
+			[intCreatedUserId] INT NULL, 
+			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
+		)
+
+		CREATE TABLE actual (
+			[intInventoryTransactionId] INT NOT NULL, 
+			[intItemId] INT NOT NULL,
+			[intItemUOMId] INT NOT NULL,
+			[intItemLocationId] INT NOT NULL,
+			[intSubLocationId] INT NULL,
+			[intStorageLocationId] INT NULL,
+			[dtmDate] DATETIME NOT NULL, 
+			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[dblValue] NUMERIC(18, 6) NULL, 
+			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+			[intCurrencyId] INT NULL,
+			[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
+			[intTransactionId] INT NOT NULL, 
+			[intTransactionDetailId] INT NULL, 
+			[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
+			[intTransactionTypeId] INT NOT NULL, 
+			[intLotId] INT NULL, 
+			[dtmCreated] DATETIME NULL, 
+			[intCreatedUserId] INT NULL, 
+			[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
+		)
+		
+		CREATE TABLE ExpectedInventoryLotOut (
+			intId INT
+			,intInventoryLotId INT 
+			,intInventoryTransactionId INT
+			,dblQty NUMERIC(18,6)
+		)
 
 		SET	@intItemId = @WetGrains
 		SET @intItemLocationId = @NewHaven
@@ -74,66 +134,12 @@ BEGIN
 		SET @intCurrencyId = @USD
 		SET @dblExchangeRate = 1
 		SET @intTransactionId = 1
+		SET @intTransactionDetailId = 1
 		SET @strTransactionId = 'PURCHASE-00001'
 		SET @strBatchId = 'BATCH-00001'
 		SET @intTransactionTypeId = @PurchaseTransactionType
 		SET @intUserId = 1
-
-		CREATE TABLE expected (
-			[intInventoryTransactionId] INT NOT NULL, 
-			[intItemId] INT NOT NULL,
-			[intItemLocationId] INT NOT NULL,
-			[intItemUOMId] INT NOT NULL,
-			[intSubLocationId] INT NULL,
-			[intStorageLocationId] INT NULL,
-			[dtmDate] DATETIME NOT NULL, 
-			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[dblValue] NUMERIC(18, 6) NULL, 
-			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[intCurrencyId] INT NULL,
-			[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
-			[intTransactionId] INT NOT NULL, 
-			[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
-			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
-			[intTransactionTypeId] INT NOT NULL, 
-			[intLotId] INT NULL, 
-			[intCreatedUserId] INT NULL, 
-			[intConcurrencyId] INT NOT NULL DEFAULT 1
-		)
-
-		CREATE TABLE actual (
-			[intInventoryTransactionId] INT NOT NULL, 
-			[intItemId] INT NOT NULL,
-			[intItemLocationId] INT NOT NULL,
-			[intItemUOMId] INT NOT NULL,
-			[intSubLocationId] INT NULL,
-			[intStorageLocationId] INT NULL,
-			[dtmDate] DATETIME NOT NULL, 
-			[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[dblValue] NUMERIC(18, 6) NULL, 
-			[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-			[intCurrencyId] INT NULL,
-			[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
-			[intTransactionId] INT NOT NULL, 
-			[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
-			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
-			[intTransactionTypeId] INT NOT NULL, 
-			[intLotId] INT NULL, 
-			[intCreatedUserId] INT NULL, 
-			[intConcurrencyId] INT NOT NULL DEFAULT 1	
-		)
 		
-		CREATE TABLE ExpectedInventoryLotOut (
-			intId INT
-			,intInventoryLotId INT 
-			,intInventoryTransactionId INT
-			,dblQty NUMERIC(18,6)
-		)
-
 		INSERT INTO expected (
 				[intInventoryTransactionId]
 				,[intItemId]
@@ -150,6 +156,7 @@ BEGIN
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[intTransactionId]
+				,[intTransactionDetailId] 
 				,[strTransactionId]
 				,[strBatchId]
 				,[intTransactionTypeId]
@@ -172,6 +179,7 @@ BEGIN
 				,[intCurrencyId] = @USD
 				,[dblExchangeRate] = 1
 				,[intTransactionId] = @intTransactionId
+				,[intTransactionDetailId] = @intTransactionDetailId
 				,[strTransactionId] = @strTransactionId
 				,[strBatchId] = @strBatchId
 				,[intTransactionTypeId] = @PurchaseTransactionType
@@ -197,6 +205,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -222,6 +231,7 @@ BEGIN
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[intTransactionId]
+				,[intTransactionDetailId] 
 				,[strTransactionId]
 				,[strBatchId]
 				,[intTransactionTypeId]
@@ -244,6 +254,7 @@ BEGIN
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[intTransactionId]
+				,[intTransactionDetailId] 
 				,[strTransactionId]
 				,[strBatchId]
 				,[intTransactionTypeId]

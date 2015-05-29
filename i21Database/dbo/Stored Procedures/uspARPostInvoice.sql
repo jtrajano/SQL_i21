@@ -701,13 +701,13 @@ BEGIN
 		strTransactionId = A.strInvoiceNumber, 
 		intTransactionId = A.intInvoiceId, 
 		intAccountId = (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
-									AND B.intSalesAccountId IS NOT NULL
-									AND B.intSalesAccountId <> 0
-									THEN
-										B.intSalesAccountId
-									ELSE
-										B.intAccountId
-						END),							
+						AND B.intSalesAccountId IS NOT NULL
+						AND B.intSalesAccountId <> 0
+						THEN
+							B.intSalesAccountId
+						ELSE
+							(CASE WHEN B.intAccountId IS NOT NULL AND B.intAccountId <> 0 THEN B.intAccountId ELSE CL.intServiceCharges END)
+			END),						
 		strDescription = A.strComments,
 		strReference = C.strCustomerNumber,
 		dtmTransactionDate = A.dtmDate,
@@ -736,7 +736,10 @@ BEGIN
 		tblARCustomer C
 			ON A.[intEntityCustomerId] = C.intEntityCustomerId
 	LEFT JOIN Units U
-			ON A.intAccountId = U.intAccountId 			
+			ON A.intAccountId = U.intAccountId 	
+					LEFT OUTER JOIN
+	tblSMCompanyLocation CL
+		ON A.intCompanyLocationId = CL.intCompanyLocationId 		
 	INNER JOIN 
 		#tmpPostInvoiceData	P
 			ON A.intInvoiceId = P.intInvoiceId
@@ -1376,7 +1379,7 @@ ELSE
 							THEN
 								B.intSalesAccountId
 							ELSE
-								B.intAccountId
+								(CASE WHEN B.intAccountId IS NOT NULL AND B.intAccountId <> 0 THEN B.intAccountId ELSE CL.intServiceCharges END)
 				END),
 			strDescription = A.strComments,
 			strReference = C.strCustomerNumber,
@@ -1407,7 +1410,10 @@ ELSE
 				ON A.[intEntityCustomerId] = C.intEntityCustomerId
 		LEFT JOIN 
 			Units U
-				ON A.intAccountId = U.intAccountId 			
+				ON A.intAccountId = U.intAccountId
+		LEFT OUTER JOIN
+			tblSMCompanyLocation CL
+				ON A.intCompanyLocationId = CL.intCompanyLocationId  			
 		INNER JOIN 
 			#tmpPostInvoiceData	P
 				ON A.intInvoiceId = P.intInvoiceId 

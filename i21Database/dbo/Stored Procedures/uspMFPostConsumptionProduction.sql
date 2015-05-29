@@ -35,6 +35,7 @@ BEGIN
 		,@strLifeTimeType NVARCHAR(50)
 		,@intLifeTime INT
 		,@dtmExpiryDate DATETIME
+		,@dtmPlannedDate datetime
 
 	SELECT TOP 1 @intTransactionId = intWorkOrderId
 		,@strTransactionId = strWorkOrderNo
@@ -42,6 +43,7 @@ BEGIN
 		,@intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
+		,@dtmPlannedDate=dtmPlannedDate
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -60,6 +62,7 @@ BEGIN
 		,intCurrencyId
 		,dblExchangeRate
 		,intTransactionId
+		,intTransactionDetailId
 		,strTransactionId
 		,intTransactionTypeId
 		,intLotId
@@ -69,7 +72,7 @@ BEGIN
 	SELECT intItemId = l.intItemId
 		,intItemLocationId = l.intItemLocationId
 		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
-		,dtmDate = GetDate()
+		,dtmDate = @dtmPlannedDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ItemUOM.dblUnitQty
 		,dblCost = l.dblLastCost
@@ -77,6 +80,7 @@ BEGIN
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
 		,intTransactionId = @intTransactionId
+		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
 		,strTransactionId = @strTransactionId
 		,intTransactionTypeId = @INVENTORY_CONSUME
 		,intLotId = l.intLotId
@@ -165,7 +169,7 @@ BEGIN
 		,dblWeight = @dblWeight
 		,intWeightUOMId = @intWeightUOMId
 		,dtmExpiryDate = @dtmExpiryDate
-		,dtmManufacturedDate = GetDate()
+		,dtmManufacturedDate = @dtmPlannedDate
 		,intOriginId = NULL
 		,strBOLNo = NULL
 		,strVessel = NULL
@@ -210,7 +214,7 @@ BEGIN
 	SELECT intItemId = @intItemId
 		,intItemLocationId = @intItemLocationId
 		,intItemUOMId = @intItemUOMId
-		,dtmDate = GetDate()
+		,dtmDate = @dtmPlannedDate
 		,dblQty = @dblQty
 		,dblUOMQty = CASE 
 			WHEN (@intWeightUOMId = @intItemUOMId)
@@ -275,6 +279,8 @@ BEGIN
 	EXEC dbo.uspICCreateGLEntries @strBatchId
 		,NULL
 		,@intUserId
+
+	Update @GLEntries Set dblDebit=(Select sum(dblCredit) from @GLEntries where strTransactionType='Consume') where strTransactionType='Produce'
 
 	EXEC dbo.uspGLBookEntries @GLEntries
 		,1

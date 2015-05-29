@@ -9,7 +9,7 @@
     [intCompanyLocationId] INT             NULL,
     [intEntitySalespersonId]     INT             NOT NULL,
     [dtmShipDate]          DATETIME        NULL,
-    [intShipViaId]         INT             NOT NULL,
+    [intShipViaId]         INT             NULL,
     [strPONumber]          NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,
     [intTermId]            INT             NOT NULL,
     [dblInvoiceSubtotal]   NUMERIC (18, 6) NULL,

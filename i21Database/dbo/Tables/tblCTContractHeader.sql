@@ -35,6 +35,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [ysnSubstituteItem] BIT NULL, 
     [ysnUnlimitedQuantity] BIT NULL, 
     [ysnMaxPrice] BIT NULL, 
+    [intINCOLocationTypeId] INT NULL, 
+    [intCountryId] INT NULL, 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [intContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),

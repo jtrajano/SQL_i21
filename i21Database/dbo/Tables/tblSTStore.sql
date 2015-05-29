@@ -42,7 +42,7 @@
     [ysnShiftPhysicalQuantitySold] BIT NULL, 
     [strHandheldDeviceModel] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [strDepositLookupType] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
-    [intDefaultPaidoutId] INT NULL, 
+    [intDefaultPaidoutId] INT NULL,
     [intCustomerChargeMopId] INT NULL, 
     [intCashTransctionMopId] INT NULL, 
     [ysnAllowMassPriceChanges] BIT NULL, 
@@ -114,10 +114,10 @@
     CONSTRAINT [FK_tblSTStore_tblEntity_intEndVendorNumberId] FOREIGN KEY ([intEndVendorNumberId]) REFERENCES [tblEntity]([intEntityId]), 
 	CONSTRAINT [FK_tblSTStore_tblICCategory_intLoyaltyDiscountCategoryId] FOREIGN KEY ([intLoyaltyDiscountCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
 	CONSTRAINT [FK_tblSTStore_tblSTRegister] FOREIGN KEY ([intRegisterId]) REFERENCES [tblSTRegister]([intRegisterId]),
+	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intDefaultPaidoutId] FOREIGN KEY ([intDefaultPaidoutId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
 	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intCustomerChargeMopId] FOREIGN KEY ([intCustomerChargeMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
-	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intCashTransctionMopId] FOREIGN KEY ([intCashTransctionMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]),
-	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intLoyaltyDiscountMopId] FOREIGN KEY ([intLoyaltyDiscountMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]),
-	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intRemovePropCardMopId] FOREIGN KEY ([intRemovePropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]),
-	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intAddPropCardMopId] FOREIGN KEY ([intAddPropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]),
-	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intDefaultPaidoutId] FOREIGN KEY ([intDefaultPaidoutId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId])
+	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intCashTransctionMopId] FOREIGN KEY ([intCashTransctionMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
+	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intLoyaltyDiscountMopId] FOREIGN KEY ([intLoyaltyDiscountMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
+	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intRemovePropCardMopId] FOREIGN KEY ([intRemovePropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId]), 
+	CONSTRAINT [FK_tblSTStore_tblSTPaymentOption_intAddPropCardMopId] FOREIGN KEY ([intAddPropCardMopId]) REFERENCES [tblSTPaymentOption]([intPaymentOptionId])
    );

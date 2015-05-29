@@ -139,6 +139,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId 
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -156,6 +157,7 @@ BEGIN
 			,NULL
 			,1.00
 			,@intTransactionId
+			,Detail.intInventoryShipmentItemId
 			,@strTransactionId
 			,@INVENTORY_SHIPMENT_TYPE
 			,DetailLot.intLotId 

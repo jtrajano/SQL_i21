@@ -32,6 +32,7 @@ BEGIN
 			,intCurrencyId			= SO.intCurrencyId
 			,dblExchangeRate		= 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 			,intTransactionId		= SO.intSalesOrderId
+			,intTransactionDetailId	= SODetail.intSalesOrderDetailId
 			,strTransactionId		= SO.strSalesOrderNumber
 			,intTransactionTypeId	= @SALES_ORDER
 			,intLotId				= NULL 

@@ -175,7 +175,7 @@ BEGIN
 			,@intUserId						= 1 
 			,@intInventoryAdjustmentId		= @intInventoryAdjustmentId OUTPUT  
 	END 
-
+	
 	-- Assert 
 	BEGIN 
 		DECLARE @expected_InventoryAdjustment_Id AS INT = 14
@@ -369,7 +369,7 @@ BEGIN
 		FROM dbo.tblICLot 
 		WHERE intLotId = @ManualLotGrains_Lot_100001
 
-	END 
+	END 	
 
 	EXEC tSQLt.AssertEqualsTable 'expected_tblICInventoryAdjustment', 'actual_tblICInventoryAdjustment'
 	EXEC tSQLt.AssertEqualsTable 'expected_tblICInventoryAdjustmentDetail', 'actual_tblICInventoryAdjustmentDetail'

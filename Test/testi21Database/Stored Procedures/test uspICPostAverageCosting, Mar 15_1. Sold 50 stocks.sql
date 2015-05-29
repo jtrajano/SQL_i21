@@ -81,6 +81,7 @@ BEGIN
 			,@intCurrencyId AS INT
 			,@dblExchangeRate AS NUMERIC(18,6)
 			,@intTransactionId AS INT
+			,@intTransactionDetailId AS INT
 			,@strTransactionId AS NVARCHAR(20)
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
@@ -106,6 +107,7 @@ BEGIN
 			[intCurrencyId] INT NULL,
 			[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
 			[intTransactionId] INT NOT NULL, 
+			[intTransactionDetailId] INT NULL,
 			[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
@@ -130,6 +132,7 @@ BEGIN
 			[intCurrencyId] INT NULL,
 			[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
 			[intTransactionId] INT NOT NULL, 
+			[intTransactionDetailId] INT NULL,
 			[strTransactionId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 			[intTransactionTypeId] INT NOT NULL, 
@@ -158,6 +161,7 @@ BEGIN
 			SET @intCurrencyId = @USD
 			SET @dblExchangeRate = 1
 			SET @intTransactionId = 1
+			SET @intTransactionDetailId = 1
 			SET @strTransactionId = 'PURCHASE-00001'
 			SET @strBatchId = 'BATCH-00001'
 			SET @intTransactionTypeId = @PurchaseTransactionType
@@ -181,6 +185,7 @@ BEGIN
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[intTransactionId]
+					,[intTransactionDetailId] 
 					,[strTransactionId]
 					,[strBatchId]
 					,[intTransactionTypeId]
@@ -203,6 +208,7 @@ BEGIN
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
+					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
@@ -226,6 +232,7 @@ BEGIN
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[intTransactionId]
+					,[intTransactionDetailId] 
 					,[strTransactionId]
 					,[strBatchId]
 					,[intTransactionTypeId]
@@ -247,6 +254,7 @@ BEGIN
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
+					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
@@ -304,6 +312,7 @@ BEGIN
 			SET @intCurrencyId = @USD
 			SET @dblExchangeRate = 1
 			SET @intTransactionId = 1
+			SET @intTransactionDetailId = 2
 			SET @strTransactionId = 'PURCHASE-00002'
 			SET @strBatchId = 'BATCH-00002'
 			SET @intTransactionTypeId = @PurchaseTransactionType
@@ -327,6 +336,7 @@ BEGIN
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[intTransactionId]
+					,[intTransactionDetailId] 
 					,[strTransactionId]
 					,[strBatchId]
 					,[intTransactionTypeId]
@@ -349,6 +359,7 @@ BEGIN
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
+					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
@@ -372,6 +383,7 @@ BEGIN
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[intTransactionId]
+					,[intTransactionDetailId] 
 					,[strTransactionId]
 					,[strBatchId]
 					,[intTransactionTypeId]
@@ -393,6 +405,7 @@ BEGIN
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
+					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
@@ -450,6 +463,7 @@ BEGIN
 			SET @intCurrencyId = @USD
 			SET @dblExchangeRate = 1
 			SET @intTransactionId = 1
+			SET @intTransactionDetailId = 3
 			SET @strTransactionId = 'PURCHASE-00003'
 			SET @strBatchId = 'BATCH-00003'
 			SET @intTransactionTypeId = @PurchaseTransactionType
@@ -473,6 +487,7 @@ BEGIN
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[intTransactionId]
+					,[intTransactionDetailId] 
 					,[strTransactionId]
 					,[strBatchId]
 					,[intTransactionTypeId]
@@ -495,6 +510,7 @@ BEGIN
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
+					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
@@ -518,6 +534,7 @@ BEGIN
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[intTransactionId]
+					,[intTransactionDetailId] 
 					,[strTransactionId]
 					,[strBatchId]
 					,[intTransactionTypeId]
@@ -539,6 +556,7 @@ BEGIN
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
+					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @PurchaseTransactionType
@@ -596,6 +614,7 @@ BEGIN
 			SET @intCurrencyId = @USD
 			SET @dblExchangeRate = 1
 			SET @intTransactionId = 1
+			SET @intTransactionDetailId = 4
 			SET @strTransactionId = 'SALES-00001'
 			SET @strBatchId = 'BATCH-00004'
 			SET @intTransactionTypeId = @SalesTransactionType
@@ -619,6 +638,7 @@ BEGIN
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[intTransactionId]
+					,[intTransactionDetailId] 
 					,[strTransactionId]
 					,[strBatchId]
 					,[intTransactionTypeId]
@@ -641,6 +661,7 @@ BEGIN
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
+					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @intTransactionTypeId
@@ -664,6 +685,7 @@ BEGIN
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[intTransactionId]
+					,[intTransactionDetailId] 
 					,[strTransactionId]
 					,[strBatchId]
 					,[intTransactionTypeId]
@@ -685,6 +707,7 @@ BEGIN
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
+					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @intTransactionTypeId
@@ -755,6 +778,7 @@ BEGIN
 			SET @intCurrencyId = @USD
 			SET @dblExchangeRate = 1
 			SET @intTransactionId = 1
+			SET @intTransactionDetailId = 5
 			SET @strTransactionId = 'SALES-00002'
 			SET @strBatchId = 'BATCH-00005'
 			SET @intTransactionTypeId = @SalesTransactionType
@@ -778,6 +802,7 @@ BEGIN
 					,[intCurrencyId]
 					,[dblExchangeRate]
 					,[intTransactionId]
+					,[intTransactionDetailId] 
 					,[strTransactionId]
 					,[strBatchId]
 					,[intTransactionTypeId]
@@ -800,6 +825,7 @@ BEGIN
 					,[intCurrencyId] = @USD
 					,[dblExchangeRate] = 1
 					,[intTransactionId] = @intTransactionId
+					,[intTransactionDetailId] = @intTransactionDetailId
 					,[strTransactionId] = @strTransactionId
 					,[strBatchId] = @strBatchId
 					,[intTransactionTypeId] = @intTransactionTypeId
@@ -835,6 +861,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -860,6 +887,7 @@ BEGIN
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[intTransactionId]
+				,[intTransactionDetailId] 
 				,[strTransactionId]
 				,[strBatchId]
 				,[intTransactionTypeId]
@@ -882,6 +910,7 @@ BEGIN
 				,[intCurrencyId]
 				,[dblExchangeRate]
 				,[intTransactionId]
+				,[intTransactionDetailId] 
 				,[strTransactionId]
 				,[strBatchId]
 				,[intTransactionTypeId]

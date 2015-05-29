@@ -89,6 +89,7 @@ BEGIN
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
+				,intTransactionDetailId = 1
 				,strTransactionId = 'PURCHASE-000001'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
@@ -107,6 +108,7 @@ BEGIN
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
+				,intTransactionDetailId = 2
 				,strTransactionId = 'PURCHASE-000002'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL

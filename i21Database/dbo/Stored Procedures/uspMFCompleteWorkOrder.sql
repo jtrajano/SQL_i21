@@ -286,7 +286,7 @@ BEGIN TRY
 			,@dtmCurrentDate
 			,@intUserId
 			,@strVendorLotNo
-			,@dtmPlannedDate
+			,DateAdd(mi,DateDiff(mi,GetUTCDATE(),GetDate()),@dtmPlannedDate)
 			,@intPlannedShiftId
 			,@dtmPlannedDate
 			,ISNULL(@intExecutionOrder, 1)

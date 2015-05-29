@@ -24,6 +24,7 @@ BEGIN
 				,@intCurrencyId AS INT						= 11
 				,@dblExchangeRate AS NUMERIC (38, 20)		= 12
 				,@intTransactionId AS INT					= 13
+				,@intTransactionDetailId AS INT				= 13
 				,@strTransactionId AS NVARCHAR(40)			= '14'
 				,@strBatchId AS NVARCHAR(20)				= '15'
 				,@intTransactionTypeId AS INT				= 16
@@ -50,6 +51,7 @@ BEGIN
 			,intCurrencyId INT
 			,dblExchangeRate NUMERIC (38, 20)
 			,intTransactionId INT
+			,intTransactionDetailId INT
 			,strTransactionId NVARCHAR(40)
 			,strBatchId NVARCHAR(20)
 			,intTransactionTypeId INT
@@ -77,6 +79,7 @@ BEGIN
 			,intCurrencyId INT
 			,dblExchangeRate NUMERIC (38, 20)
 			,intTransactionId INT
+			,intTransactionDetailId INT
 			,strTransactionId NVARCHAR(40)
 			,strBatchId NVARCHAR(20)
 			,intTransactionTypeId INT
@@ -104,6 +107,7 @@ BEGIN
 			,intCurrencyId
 			,dblExchangeRate
 			,intTransactionId
+			,intTransactionDetailId 
 			,strTransactionId
 			,strBatchId
 			,intTransactionTypeId
@@ -130,6 +134,7 @@ BEGIN
 			,intCurrencyId						= @intCurrencyId
 			,dblExchangeRate					= @dblExchangeRate
 			,intTransactionId					= @intTransactionId
+			,intTransactionDetailId				= @intTransactionDetailId
 			,strTransactionId					= @strTransactionId
 			,strBatchId							= @strBatchId
 			,intTransactionTypeId				= @intTransactionTypeId
@@ -161,6 +166,7 @@ BEGIN
 				,@intCurrencyId
 				,@dblExchangeRate
 				,@intTransactionId
+				,@intTransactionDetailId
 				,@strTransactionId
 				,@strBatchId
 				,@intTransactionTypeId
@@ -190,6 +196,7 @@ BEGIN
 			,intCurrencyId
 			,dblExchangeRate
 			,intTransactionId
+			,intTransactionDetailId
 			,strTransactionId
 			,strBatchId
 			,intTransactionTypeId
@@ -216,6 +223,7 @@ BEGIN
 			,intCurrencyId
 			,dblExchangeRate
 			,intTransactionId
+			,intTransactionDetailId
 			,strTransactionId
 			,strBatchId
 			,intTransactionTypeId

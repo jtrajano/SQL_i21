@@ -202,9 +202,9 @@ BEGIN
 				ON P.strGLAccount = GL.strExternalId
 		LEFT OUTER JOIN
 			tblSMPaymentMethod PM
-				ON P.[strPaymentMethodCode] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethodCode] 
+				ON P.[strPaymentMethod] COLLATE Latin1_General_CI_AS = PM.[strPaymentMethod] 
 		WHERE
-			PM.[strPaymentMethodCode] IS NULL
+			PM.[strPaymentMethod] IS NULL
 		ORDER BY
 			P.[strPaymentMethodCode]
 
