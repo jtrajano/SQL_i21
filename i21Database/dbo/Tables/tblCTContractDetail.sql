@@ -62,9 +62,18 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dtmEventStartDate] [datetime] NULL,
 	[dtmPlannedAvailabilityDate] [datetime] NULL,
 	[dtmUpdatedAvailabilityDate]  [datetime] NULL,
-	[intFixationById] INT NULL,
 	[intBookId] INT NULL,
 	[intSubBookId] INT NULL,
+
+	[intContainerTypeId] INT NULL,
+	[intNumberOfContainers] INT NULL,
+	[intInvoiceCurrencyId] [int] NULL,
+	[dtmFXValidFrom]  [datetime] NULL,
+	[dtmFXValidTo]  [datetime] NULL,
+	[strFXRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dblAssumedFX] [numeric](8, 4) NULL,
+	[strFixationBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
@@ -98,5 +107,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId] FOREIGN KEY ([intPriceItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intWeightPerUnitItemUOMId_intItemUOMId] FOREIGN KEY ([intWeightPerUnitItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intPackingTypeItemUOMId_intItemUOMId] FOREIGN KEY ([intPackingTypeItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intPackingTypeItemUOMId_intItemUOMId] FOREIGN KEY ([intPackingTypeItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intInvoiceCurrencyId_intCurrencyId] FOREIGN KEY ([intInvoiceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblCTContractDetail_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblLGContainerType]([intContainerTypeId]),
 ) 
