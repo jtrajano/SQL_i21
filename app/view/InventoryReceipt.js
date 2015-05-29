@@ -1703,7 +1703,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                     {
                                         xtype: 'panel',
                                         itemId: 'pgeFreightInvoice',
-                                        bodyPadding: 10,
+                                        bodyPadding: 5,
                                         title: 'Freight & Invoice',
                                         layout: {
                                             type: 'hbox',
@@ -1711,57 +1711,91 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         },
                                         items: [
                                             {
-                                                xtype: 'panel',
-                                                flex: 1,
-                                                itemId: 'pnlFreightCalculation',
+                                                xtype: 'gridpanel',
+                                                flex: 2.5,
+                                                itemId: 'grdCost',
                                                 margin: '0 5 0 0',
-                                                bodyPadding: 10,
-                                                title: 'Freight Calculation',
-                                                layout: {
-                                                    type: 'vbox',
-                                                    align: 'stretch'
-                                                },
-                                                items: [
+                                                title: 'Costs',
+                                                dockedItems: [
                                                     {
-                                                        xtype: 'combobox',
-                                                        itemId: 'cboCalculationBasis',
-                                                        fieldLabel: 'Calculation Basis',
-                                                        labelWidth: 130,
-                                                        displayField: 'strDescription',
-                                                        valueField: 'strDescription'
-                                                    },
-                                                    {
-                                                        xtype: 'numeric',
-                                                        itemId: 'txtUnitsWeightMiles',
-                                                        fieldLabel: 'Units / Weight / Miles',
-                                                        labelWidth: 130
-                                                    },
-                                                    {
-                                                        xtype: 'numeric',
-                                                        itemId: 'txtFreightRate',
-                                                        fieldLabel: 'Freight Rate',
-                                                        labelWidth: 130
-                                                    },
-                                                    {
-                                                        xtype: 'numeric',
-                                                        itemId: 'txtFuelSurcharge',
-                                                        fieldLabel: 'Fuel Surcharge %',
-                                                        labelWidth: 130
-                                                    },
-                                                    {
-                                                        xtype: 'numeric',
-                                                        itemId: 'txtCalculatedFreight',
-                                                        fieldLabel: 'Calculated Freight',
-                                                        labelWidth: 130,
-                                                        readOnly: true
+                                                        xtype: 'toolbar',
+                                                        dock: 'top',
+                                                        itemId: 'tlbGridOptions',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            padding: '0 0 0 1'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnInsert',
+                                                                iconCls: 'small-add',
+                                                                text: 'Insert'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnRemove',
+                                                                iconCls: 'small-delete',
+                                                                text: 'Remove'
+                                                            },
+                                                            {
+                                                                xtype: 'tbseparator'
+                                                            },
+                                                            {
+                                                                xtype: 'filter1'
+                                                            }
+                                                        ]
                                                     }
-                                                ]
+                                                ],
+                                                columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        text: 'Cost Type'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 88,
+                                                        text: 'Inventory Cost'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        text: 'Cost Method'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 76,
+                                                        text: 'Rate'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 78,
+                                                        text: 'UOM'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        text: 'On Cost Type'
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        text: 'Vendor',
+                                                        flex: 1
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        width: 90,
+                                                        text: 'Amount'
+                                                    }
+                                                ],
+                                                viewConfig: {
+                                                    itemId: 'grvCost'
+                                                }
                                             },
                                             {
                                                 xtype: 'panel',
                                                 flex: 1,
                                                 itemId: 'pnlInvoiceDetail',
-                                                margin: '0 5 0 0',
                                                 bodyPadding: 10,
                                                 title: 'Invoice Detail',
                                                 layout: {
@@ -1780,7 +1814,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'numeric',
                                                         itemId: 'txtInvoiceAmount',
                                                         fieldLabel: 'Invoice Amount',
-                                                        labelWidth: 130
+                                                        labelWidth: 130,
+                                                        hideTrigger: true
                                                     },
                                                     {
                                                         xtype: 'numeric',
@@ -1805,7 +1840,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         xtype: 'numberfield',
                                                         itemId: 'txtCheckNo',
                                                         fieldLabel: 'Check No',
-                                                        labelWidth: 130
+                                                        labelWidth: 130,
+                                                        hideTrigger: true
                                                     },
                                                     {
                                                         xtype: 'datefield',
@@ -1821,10 +1857,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         readOnly: true
                                                     }
                                                 ]
-                                            },
-                                            {
-                                                xtype: 'container',
-                                                flex: 1
                                             }
                                         ]
                                     },
