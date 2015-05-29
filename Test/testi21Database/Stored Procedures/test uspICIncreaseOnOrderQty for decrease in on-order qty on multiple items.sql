@@ -77,8 +77,8 @@ BEGIN
 				,dblQty 
 				,dblUOMQty 
 				,dblCost 
-				,dblSalesPrice 
 				,dblValue 
+				,dblSalesPrice 
 				,intCurrencyId 
 				,dblExchangeRate 
 				,intTransactionId 
@@ -86,7 +86,7 @@ BEGIN
 				,intTransactionTypeId 
 				,intLotId 
 				,intSubLocationId 
-				,intStorageLocationId 
+				,intStorageLocationId
 		)
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location

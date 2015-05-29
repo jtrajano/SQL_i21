@@ -18,6 +18,7 @@ USING	(
 					'Build Assembly'
 					,'Consume'
 					,'Produce'
+					,'Inventory Transfer'
 					-- NOTE: Add in this line any additional transaction types that has no counter account category.
 				)
 ) AS B

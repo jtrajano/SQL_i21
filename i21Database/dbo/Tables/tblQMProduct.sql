@@ -3,7 +3,7 @@
 	[intProductId] INT NOT NULL IDENTITY, 
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMProduct_intConcurrencyId] DEFAULT 0, 
 	[intProductTypeId] INT NOT NULL, 
-	[intProductValueId] INT, 
+	[intProductValueId] INT NULL CONSTRAINT [DF_tblQMProduct_intProductValueId] DEFAULT 0, 
 	[strDirections] NVARCHAR(1000) COLLATE Latin1_General_CI_AS, 
 	[strNote] NVARCHAR(500) COLLATE Latin1_General_CI_AS, 
 

@@ -47,6 +47,7 @@ DECLARE @intId AS INT
 		,@intCurrencyId AS INT 
 		,@dblExchangeRate AS DECIMAL (38, 20) 
 		,@intTransactionId AS INT
+		,@intTransactionDetailId AS INT 
 		,@strTransactionId AS NVARCHAR(40) 
 		,@intTransactionTypeId AS INT 
 		,@intLotId AS INT
@@ -90,6 +91,7 @@ SELECT  intId
 		,intCurrencyId
 		,dblExchangeRate
 		,intTransactionId
+		,intTransactionDetailId
 		,strTransactionId
 		,intTransactionTypeId
 		,intLotId
@@ -113,6 +115,7 @@ FETCH NEXT FROM loopItems INTO
 	,@intCurrencyId
 	,@dblExchangeRate
 	,@intTransactionId
+	,@intTransactionDetailId
 	,@strTransactionId
 	,@intTransactionTypeId
 	,@intLotId
@@ -151,6 +154,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -174,6 +178,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -197,6 +202,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -221,6 +227,7 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 			,@intTransactionId
+			,@intTransactionDetailId
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
@@ -409,6 +416,7 @@ BEGIN
 		,@intCurrencyId
 		,@dblExchangeRate
 		,@intTransactionId
+		,@intTransactionDetailId
 		,@strTransactionId
 		,@intTransactionTypeId
 		,@intLotId

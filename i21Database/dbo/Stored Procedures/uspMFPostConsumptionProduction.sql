@@ -60,6 +60,7 @@ BEGIN
 		,intCurrencyId
 		,dblExchangeRate
 		,intTransactionId
+		,intTransactionDetailId
 		,strTransactionId
 		,intTransactionTypeId
 		,intLotId
@@ -77,6 +78,7 @@ BEGIN
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
 		,intTransactionId = @intTransactionId
+		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
 		,strTransactionId = @strTransactionId
 		,intTransactionTypeId = @INVENTORY_CONSUME
 		,intLotId = l.intLotId
@@ -275,6 +277,8 @@ BEGIN
 	EXEC dbo.uspICCreateGLEntries @strBatchId
 		,NULL
 		,@intUserId
+
+	Update @GLEntries Set dblDebit=(Select sum(dblCredit) from @GLEntries where strTransactionType='Consume') where strTransactionType='Produce'
 
 	EXEC dbo.uspGLBookEntries @GLEntries
 		,1

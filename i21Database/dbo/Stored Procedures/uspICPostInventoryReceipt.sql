@@ -173,6 +173,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId   
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -250,6 +251,7 @@ BEGIN
 			,intCurrencyId = Header.intCurrencyId  
 			,dblExchangeRate = 1  
 			,intTransactionId = Header.intInventoryReceiptId  
+			,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 			,strTransactionId = Header.strReceiptNumber  
 			,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 			,intLotId = DetailItemLot.intLotId 

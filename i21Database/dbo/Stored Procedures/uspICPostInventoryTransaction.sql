@@ -13,6 +13,7 @@
 	,@intCurrencyId INT
 	,@dblExchangeRate NUMERIC (38, 20)
 	,@intTransactionId INT
+	,@intTransactionDetailId INT 
 	,@strTransactionId NVARCHAR(40)
 	,@strBatchId NVARCHAR(20)
 	,@intTransactionTypeId INT
@@ -47,6 +48,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intCurrencyId] 
 		,[dblExchangeRate] 
 		,[intTransactionId] 
+		,[intTransactionDetailId]
 		,[strTransactionId] 
 		,[strBatchId] 
 		,[intTransactionTypeId] 
@@ -74,6 +76,7 @@ SELECT	[intItemId]							= @intItemId
 		,[intCurrencyId]					= @intCurrencyId
 		,[dblExchangeRate]					= ISNULL(@dblExchangeRate, 1)
 		,[intTransactionId]					= @intTransactionId
+		,[intTransactionDetailId]			= @intTransactionDetailId
 		,[strTransactionId]					= @strTransactionId
 		,[strBatchId]						= @strBatchId
 		,[intTransactionTypeId]				= @intTransactionTypeId

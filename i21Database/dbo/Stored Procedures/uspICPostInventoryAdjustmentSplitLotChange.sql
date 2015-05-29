@@ -34,6 +34,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId  
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -76,6 +77,7 @@ BEGIN
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
+			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
 			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_TYPE
 			,intLotId				= Detail.intLotId
@@ -130,6 +132,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -218,6 +221,7 @@ BEGIN
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
 			,intTransactionId		= Header.intInventoryAdjustmentId
+			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
 			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_TYPE
 			,intLotId				= Detail.intNewLotId
@@ -258,6 +262,7 @@ SELECT	intItemId
 		,intCurrencyId  
 		,dblExchangeRate  
 		,intTransactionId  
+		,intTransactionDetailId
 		,strTransactionId  
 		,intTransactionTypeId  
 		,intLotId 

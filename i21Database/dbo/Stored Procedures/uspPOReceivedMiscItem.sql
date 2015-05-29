@@ -41,6 +41,7 @@ BEGIN
 			,dblQty
 			,dblUOMQty
 			,intTransactionId
+			,intTransactionDetailId
 			,strTransactionId
 			,intTransactionTypeId
 	)
@@ -52,6 +53,7 @@ BEGIN
 			,dblQty					= B.dblQtyReceived * CASE WHEN @posted = 1 THEN -1 ELSE 1 END -- dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
 			,dblUOMQty				= 1   --1 -- Keep value as one (1). The dblQty is converted manually by using the fnCalculateQtyBetweenUOM function.
 			,intTransactionId		= A.intBillId
+			,intTransactionDetailId = B.intBillDetailId
 			,strTransactionId		= A.strBillId
 			,intTransactionTypeId	= -1 -- any value
 	FROM	dbo.tblAPBill A

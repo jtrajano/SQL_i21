@@ -253,3 +253,15 @@ BEGIN
 		')
 	END
 END
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intEntityVendorId' AND object_id = object_id('tblICInventoryReceipt'))
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intVendorId' AND object_id = object_id('tblICInventoryReceipt'))
+	BEGIN
+		EXEC ('ALTER TABLE tblICInventoryReceipt ADD intEntityVendorId INT NULL')
+		EXEC('
+		UPDATE tblICInventoryReceipt
+		SET intEntityVendorId = intVendorId
+		')
+	END
+END

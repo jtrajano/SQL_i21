@@ -8,7 +8,7 @@
     [intCurrencyId]         INT             NOT NULL,
     [intCompanyLocationId]  INT             NULL,
     [intEntitySalespersonId]      INT             NOT NULL,
-    [intShipViaId]          INT             NOT NULL,
+    [intShipViaId]          INT             NULL,
     [strPONumber]           NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
 	[strBOLNumber]			NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL, 
     [intTermId]             INT             NOT NULL,
@@ -71,16 +71,15 @@ SELECT intSalesOrderId, strTransactionType FROM INSERTED ORDER BY intSalesOrderI
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
-	
 	SELECT TOP 1 @intSalesOrderId = intSalesOrderId, @strTransactionType = strTransactionType FROM @inserted
 
-	IF(@strTransactionType IS NOT NULL AND @strTransactionType = 'Quote')
+	IF(@strTransactionType IS NOT NULL AND @strTransactionType = 'Order')
 		BEGIN
-			EXEC uspSMGetStartingNumber 51, @SalesOrderNumber OUT
+			EXEC uspSMGetStartingNumber 29, @SalesOrderNumber OUT
 		END
 	ELSE
 		BEGIN
-			EXEC uspSMGetStartingNumber 29, @SalesOrderNumber OUT
+			EXEC uspSMGetStartingNumber 51, @SalesOrderNumber OUT
 		END
 	
 	IF(@SalesOrderNumber IS NOT NULL)

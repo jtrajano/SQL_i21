@@ -4,7 +4,6 @@
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMProductTest_intConcurrencyId] DEFAULT 0, 
 	[intProductId] INT NOT NULL, 
 	[intTestId] INT NOT NULL, 
-	[intSequenceNo] INT NOT NULL CONSTRAINT [DF_tblQMProductTest_intSequenceNo] DEFAULT 1, 
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProductTest_dtmCreated] DEFAULT GetDate(),

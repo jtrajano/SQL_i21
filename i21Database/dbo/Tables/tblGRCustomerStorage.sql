@@ -2,7 +2,7 @@
 (
 	[intCustomerStorageId] INT NOT NULL  IDENTITY, 
     [intConcurrencyId] INT NOT NULL, 
-    [intEntityId] INT NOT NULL, 
+    [intEntityId] INT NULL, 
 	[intCommodityId] INT NOT NULL, 
     [intStorageScheduleId] INT NULL, 
     [intStorageTypeId] INT NULL, 

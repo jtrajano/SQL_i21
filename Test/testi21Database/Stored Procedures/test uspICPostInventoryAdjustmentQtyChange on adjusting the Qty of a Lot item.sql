@@ -127,6 +127,7 @@ BEGIN
 				,intCurrencyId  
 				,dblExchangeRate  
 				,intTransactionId  
+				,intTransactionDetailId  
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -146,6 +147,7 @@ BEGIN
 				,intCurrencyId			= NULL 
 				,dblExchangeRate		= 1
 				,intTransactionId		= 2
+				,intTransactionDetailId = 1
 				,strTransactionId		= 'ADJ-2'
 				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_TYPE
 				,intLotId				= @ManualLotGrains_Lot_100001
@@ -169,6 +171,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId 
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 

@@ -87,18 +87,17 @@ BEGIN
 				,dblQty 
 				,dblUOMQty 
 				,dblCost 
-				,dblSalesPrice 
 				,dblValue 
+				,dblSalesPrice 
 				,intCurrencyId 
 				,dblExchangeRate 
 				,intTransactionId 
 				,strTransactionId 
 				,intTransactionTypeId 
 				,intLotId 
-				,intSubLocationId 
-				,intStorageLocationId 
+				,intSubLocationId
+				,intStorageLocationId
 		)
-
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
 				,intItemUOMId = @WetGrains_BushelUOMId

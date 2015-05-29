@@ -23,10 +23,16 @@ BEGIN
        
      WHILE(EXISTS(SELECT TOP 1 1 FROM #Temp))  
       BEGIN  
-       DECLARE @MaxNumber int  
-       DECLARE @TopLocId int  
+       DECLARE @MaxNumber1 int  
+       DECLARE @MaxNumber2 int  
+	   DECLARE @GreaterNumber int
+
+	   DECLARE @TopLocId int  
        SELECT @TopLocId = intCompanyLocationId FROM #Temp ORDER BY intCompanyLocationId  
-       SELECT @MaxNumber = MAX([agloc_loc_no]) FROM aglocmst  
+       SELECT @MaxNumber1 = MAX([agloc_loc_no]) FROM aglocmst  
+	   SELECT @MaxNumber2 = MAX([strLocationNumber]) FROM tblSMCompanyLocation  
+
+	   SELECT @GreaterNumber = CASE WHEN @MaxNumber1 > @MaxNumber2 THEN @MaxNumber1 ELSE @MaxNumber2 END
          
        --IF(EXISTS(SELECT NULL FROM aglocmst WHERE ISNUMERIC([agloc_loc_no]) = 0) OR @MaxNumber > 998)  
        -- BEGIN  
@@ -35,9 +41,9 @@ BEGIN
        --ELSE  
        -- BEGIN  
   
-         --UPDATE tblSMCompanyLocation -- Uncomment Once strLocationNumberhas been adde to strLocationNumber  
-         --SET strLocationNumber = @MaxNumber + 1  
-         --WHERE intCompanyLocationId = @TopLocId  
+         UPDATE tblSMCompanyLocation -- Uncomment Once strLocationNumberhas been adde to strLocationNumber  
+         SET strLocationNumber = @GreaterNumber + 1  
+         WHERE intCompanyLocationId = @TopLocId  
         --END  
           
        DELETE FROM #Temp WHERE intCompanyLocationId = @TopLocId  
@@ -71,7 +77,7 @@ BEGIN
     BEGIN  
      IF (@ToOrigin = 1)     
       INSERT INTO @RecordsToProcess(strName, strNumber)
-      SELECT CL.[strLocationName], CL.[strLocationNumber]  
+      SELECT CL.[strLocationName], ISNULL(CL.[strLocationNumber], ''000'')   
       FROM fnGetRowsFromDelimitedValues(@LocationNumbers) T  
       INNER JOIN tblSMCompanyLocation CL ON T.[intID] = CL.[intCompanyLocationId]  
      ELSE  
@@ -491,7 +497,7 @@ BEGIN
       tblSMCompanyLocation CL  
      INNER JOIN
       @RecordsToAdd A  
-       ON CL.[strLocationNumber] = A.strNumber  COLLATE Latin1_General_CI_AS     
+       ON ISNULL(CL.[strLocationNumber], ''000'') = A.strNumber  COLLATE Latin1_General_CI_AS AND CL.strLocationName = A.strName COLLATE Latin1_General_CI_AS
      LEFT JOIN  
       tblGLCOACrossReference CA  
        ON CL.[intCashAccount] = CA.[inti21Id]  
@@ -833,7 +839,7 @@ BEGIN
       tblSMCompanyLocation CL  
      INNER JOIN
       @RecordsToUpdate U  
-       ON CL.[strLocationNumber] = U.strNumber COLLATE Latin1_General_CI_AS      
+       ON ISNULL(CL.[strLocationNumber], ''000'') = U.strNumber COLLATE Latin1_General_CI_AS AND CL.strLocationName = U.strName COLLATE Latin1_General_CI_AS  
      LEFT JOIN  
       tblGLCOACrossReference CA  
        ON CL.[intCashAccount] = CA.[inti21Id]  

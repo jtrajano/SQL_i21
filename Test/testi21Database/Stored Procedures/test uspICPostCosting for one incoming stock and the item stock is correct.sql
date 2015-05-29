@@ -96,6 +96,7 @@ BEGIN
 				,intCurrencyId 
 				,dblExchangeRate 
 				,intTransactionId 
+				,intTransactionDetailId 
 				,strTransactionId 
 				,intTransactionTypeId 
 				,intLotId 
@@ -114,6 +115,7 @@ BEGIN
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
+				,intTransactionDetailId = 1
 				,strTransactionId = 'PURCHASE-000001'
 				,intTransactionTypeId = @PurchaseType
 				,intLotId = NULL
@@ -131,8 +133,7 @@ BEGIN
 				,intItemLocationId = @Default_Location
 				,dblAverageCost = dbo.fnCalculateAverageCost(100, 14.00, 100, 22.00) 
 				,dblUnitOnHand = 200
-	END 
-	
+	END 	
 	
 	-- Act
 	BEGIN 	

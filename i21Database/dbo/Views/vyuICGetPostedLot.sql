@@ -18,14 +18,7 @@ SELECT	intLotId				= Lot.intLotId
 		,strItemUOM				= UOM.strUnitMeasure
 		,intWeightUOMId			= Lot.intWeightUOMId
 		,strWeightUOM			= WeightUOM.strUnitMeasure
-		,dblQty					= (
-					SELECT	SUM(ISNULL(PostedLot.dblStockIn, 0) - ISNULL(PostedLot.dblStockOut, 0))
-					FROM	dbo.tblICInventoryLot PostedLot
-					WHERE	PostedLot.intLotId = Lot.intLotId
-							AND PostedLot.intItemId = Lot.intItemId
-							AND PostedLot.intItemLocationId = Lot.intItemLocationId
-							AND ISNULL(PostedLot.ysnIsUnposted, 0) = 0 
-				)
+		,dblQty					= Lot.dblQty
 		,dblWeight				= Lot.dblWeight
 		,dblWeightPerQty		= Lot.dblWeightPerQty
 		,dblCost				= (

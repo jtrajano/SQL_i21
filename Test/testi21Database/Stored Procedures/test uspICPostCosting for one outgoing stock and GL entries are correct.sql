@@ -91,7 +91,8 @@ BEGIN
 				,dblValue 
 				,intCurrencyId 
 				,dblExchangeRate 
-				,intTransactionId 
+				,intTransactionId
+				,intTransactionDetailId 				 
 				,strTransactionId 
 				,intTransactionTypeId 
 				,intLotId 
@@ -110,6 +111,7 @@ BEGIN
 				,intCurrencyId = @USD
 				,dblExchangeRate = 1
 				,intTransactionId = 1
+				,intTransactionDetailId = 1
 				,strTransactionId = 'SALE-000001'
 				,intTransactionTypeId = @SalesType
 				,intLotId = NULL
