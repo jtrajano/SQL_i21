@@ -3388,4 +3388,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLoyaltyDiscountMopId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="3c8d9cb2-cb66-49d7-b792-a97c06d6706e" ChangeDateTime="05/29/2015 12:06:27">
+    <Property Name="ElementName" Value="[dbo].[tblSTRegister].[intFuelDriveOffMop]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRegister]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFuelDriveOffMopId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="94b21604-644b-49bd-b81c-839c27c71056" ChangeDateTime="05/29/2015 12:06:40">
+    <Property Name="ElementName" Value="[dbo].[tblSTRegister].[intDiscountMop]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRegister]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDiscountMopId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="64462768-3669-41fb-9d36-84e3228d2774" ChangeDateTime="05/29/2015 12:07:01">
+    <Property Name="ElementName" Value="[dbo].[tblSTRegister].[intDebitCardMop]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRegister]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDebitCardMopId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9f2e944e-65d2-4020-b76b-3464f4702ff3" ChangeDateTime="05/29/2015 12:07:05">
+    <Property Name="ElementName" Value="[dbo].[tblSTRegister].[intLotteryWinnersMop]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRegister]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLotteryWinnersMopId" />
+  </Operation>
 </Operations>
