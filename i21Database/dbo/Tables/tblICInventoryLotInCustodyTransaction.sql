@@ -27,7 +27,9 @@ When adding or reducing the stock qty of an item under the company's custody, th
 		[intCurrencyId] INT NULL,
 		[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL,
 		[intTransactionId] INT NOT NULL, 
+		[intTransactionDetailId] INT NULL, 
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[intInventoryLotInCustodyId] INT NULL , 
 		[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTransactionTypeId] INT NOT NULL, 		
 		[ysnIsUnposted] BIT NULL,
@@ -37,6 +39,7 @@ When adding or reducing the stock qty of an item under the company's custody, th
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryLotInCustodyTransaction] PRIMARY KEY ([intInventoryLotInCustodyTransactionId]),
 		CONSTRAINT [FK_tblICInventoryLotInCustodyTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+		CONSTRAINT [FK_tblICInventoryLotInCustodyTransaction_tblICInventoryLotInCustody] FOREIGN KEY ([intInventoryLotInCustodyId]) REFERENCES [tblICInventoryLotInCustody]([intInventoryLotInCustodyId]),
 		CONSTRAINT [FK_tblICInventoryLotInCustodyTransaction_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 		CONSTRAINT [FK_tblICInventoryLotInCustodyTransaction_tblICInventoryTransactionType] FOREIGN KEY ([intTransactionTypeId]) REFERENCES [tblICInventoryTransactionType]([intTransactionTypeId]),
 		CONSTRAINT [FK_tblICInventoryLotInCustodyTransaction_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]) 

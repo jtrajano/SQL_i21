@@ -1636,17 +1636,25 @@
     <Build Include="dbo\Stored Procedures\uspSCProcessScaleTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingReport.sql" />
     <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
-	<Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotInCustody.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotInCustodyTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostLotInCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLotCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotCustody.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotInCustodyTransaction.sql" />    
-	<Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotInCustodyTransaction.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainerByContainerType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByManufacturingProcess.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostLotInFromCustody.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostLotOutFromCustody.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

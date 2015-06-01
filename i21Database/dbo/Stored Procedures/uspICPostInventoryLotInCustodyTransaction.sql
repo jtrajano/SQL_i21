@@ -13,12 +13,14 @@
 	,@intCurrencyId INT
 	,@dblExchangeRate NUMERIC (38, 20)
 	,@intTransactionId INT
+	,@intTransactionDetailId INT 
 	,@strTransactionId NVARCHAR(40)
 	,@strBatchId NVARCHAR(20)
 	,@intTransactionTypeId INT
 	,@intLotId INT
 	,@strTransactionForm NVARCHAR (255)
 	,@intUserId INT
+	,@SourceInventoryLotInCustodyId INT 
 	,@InventoryLotInCustodyTransactionId INT OUTPUT 
 AS
 
@@ -44,6 +46,7 @@ INSERT INTO dbo.tblICInventoryLotInCustodyTransaction (
 		,[intCurrencyId] 
 		,[dblExchangeRate] 
 		,[intTransactionId] 
+		,[intTransactionDetailId]
 		,[strTransactionId] 
 		,[strBatchId] 
 		,[intTransactionTypeId] 
@@ -54,6 +57,7 @@ INSERT INTO dbo.tblICInventoryLotInCustodyTransaction (
 		,[dtmCreated] 
 		,[intCreatedUserId] 
 		,[intConcurrencyId] 
+		,[intInventoryLotInCustodyId]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -68,6 +72,7 @@ SELECT	[intItemId]							= @intItemId
 		,[intCurrencyId]					= @intCurrencyId
 		,[dblExchangeRate]					= ISNULL(@dblExchangeRate, 1)
 		,[intTransactionId]					= @intTransactionId
+		,[intTransactionDetailId]			= @intTransactionDetailId
 		,[strTransactionId]					= @strTransactionId
 		,[strBatchId]						= @strBatchId
 		,[intTransactionTypeId]				= @intTransactionTypeId
@@ -78,31 +83,9 @@ SELECT	[intItemId]							= @intItemId
 		,[dtmCreated]						= GETDATE()
 		,[intCreatedUserId]					= @intUserId
 		,[intConcurrencyId]					= 1
+		,[intInventoryLotInCustodyId]		= @SourceInventoryLotInCustodyId
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 
 
 SET @InventoryLotInCustodyTransactionId = SCOPE_IDENTITY();
-
---IF @intLotId IS NOT NULL 
---BEGIN 
---	DECLARE @ActiveLotStatus AS INT = 1
---	EXEC dbo.uspICPostInventoryLotTransaction
---		@intItemId 
---		,@intLotId 
---		,@intItemLocationId 
---		,@intItemUOMId 
---		,@intSubLocationId 
---		,@intStorageLocationId 
---		,@dtmDate 
---		,@dblQty 
---		,@dblCost
---		,@intTransactionId 
---		,@strTransactionId 
---		,@strBatchId 
---		,@ActiveLotStatus 
---		,@intTransactionTypeId 
---		,@strTransactionForm 
---		,@intUserId 
---		,NULL  
---END

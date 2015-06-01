@@ -17,6 +17,7 @@ CREATE PROCEDURE [dbo].[uspICPostLotInCustody]
 	,@intCurrencyId AS INT
 	,@dblExchangeRate AS NUMERIC(18,6)
 	,@intTransactionId AS INT
+	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
@@ -94,12 +95,14 @@ BEGIN
 					,@intCurrencyId = @intCurrencyId
 					,@dblExchangeRate = @dblExchangeRate
 					,@intTransactionId = @intTransactionId
+					,@intTransactionDetailId = @intTransactionDetailId
 					,@strTransactionId = @strTransactionId
 					,@strBatchId = @strBatchId
 					,@intTransactionTypeId = @intTransactionTypeId
 					,@intLotId = @intLotId 
 					,@strTransactionForm = @TransactionTypeName
 					,@intUserId = @intUserId
+					,@SourceInventoryLotInCustodyId = @UpdatedInventoryLotInCustodyId
 					,@InventoryLotInCustodyTransactionId = @NewInventoryLotInCustodyTransactionId OUTPUT			
 			
 			-- Reduce the remaining qty
@@ -142,12 +145,14 @@ BEGIN
 			,@intCurrencyId = @intCurrencyId
 			,@dblExchangeRate = @dblExchangeRate
 			,@intTransactionId = @intTransactionId
+			,@intTransactionDetailId = @intTransactionDetailId
 			,@strTransactionId = @strTransactionId
 			,@strBatchId = @strBatchId
 			,@intTransactionTypeId = @intTransactionTypeId
 			,@intLotId = @intLotId 
 			,@strTransactionForm = @TransactionTypeName
 			,@intUserId = @intUserId
+			,@SourceInventoryLotInCustodyId = @NewInventoryLotInCustodyId 
 			,@InventoryLotInCustodyTransactionId = @NewInventoryLotInCustodyTransactionId OUTPUT			
 	END 
 END 

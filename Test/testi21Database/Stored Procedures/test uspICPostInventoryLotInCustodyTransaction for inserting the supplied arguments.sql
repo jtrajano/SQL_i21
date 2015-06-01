@@ -27,12 +27,14 @@ BEGIN
 			,@intCurrencyId AS INT 
 			,@dblExchangeRate AS DECIMAL (38, 20) 
 			,@intTransactionId AS INT 
+			,@intTransactionDetailId AS INT 
 			,@strTransactionId AS NVARCHAR(40) 
 			,@strBatchId AS NVARCHAR(20) 
 			,@intTransactionTypeId AS INT 
 			,@strTransactionForm AS NVARCHAR (255) 
 			,@intCreatedUserId AS INT
 			,@intUserId AS INT 
+			,@SourceInventoryLotInCustodyId AS INT
 			,@InventoryLotInCustodyTransactionId AS INT
 			
 		SELECT 
@@ -51,6 +53,7 @@ BEGIN
 			,@intCurrencyId = 12
 			,@dblExchangeRate = 13
 			,@intTransactionId = 14
+			,@intTransactionDetailId = 13
 			,@strTransactionId = '15'
 			,@strBatchId = '16'
 			,@intTransactionTypeId = 17
@@ -75,6 +78,7 @@ BEGIN
 			,[intCurrencyId] INT 
 			,[dblExchangeRate] DECIMAL (38, 20) 
 			,[intTransactionId] INT 
+			,[intTransactionDetailId] INT 
 			,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS 
 			,[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS 
 			,[intTransactionTypeId] INT 
@@ -102,6 +106,7 @@ BEGIN
 			,[intCurrencyId] INT 
 			,[dblExchangeRate] DECIMAL (38, 20) 
 			,[intTransactionId] INT 
+			,[intTransactionDetailId] INT 
 			,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS 
 			,[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS 
 			,[intTransactionTypeId] INT 
@@ -129,6 +134,7 @@ BEGIN
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[intTransactionId]
+			,[intTransactionDetailId] 
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]
@@ -155,6 +161,7 @@ BEGIN
 			,[intCurrencyId]						= @intCurrencyId
 			,[dblExchangeRate]						= @dblExchangeRate
 			,[intTransactionId]						= @intTransactionId
+			,[intTransactionDetailId]				= @intTransactionDetailId
 			,[strTransactionId]						= @strTransactionId
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= @intTransactionTypeId
@@ -169,7 +176,7 @@ BEGIN
 	-- Act 
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
-		EXEC dbo.uspICPostInventoryLotInCustodyTransaction
+		EXEC dbo.uspICPostInventoryLotInCustodyTransaction		
 			@intItemId 
 			,@intItemLocationId 
 			,@intItemUOMId 
@@ -183,15 +190,16 @@ BEGIN
 			,@dblSalesPrice 
 			,@intCurrencyId 
 			,@dblExchangeRate 
-			,@intTransactionId 
+			,@intTransactionId
+			,@intTransactionDetailId 
 			,@strTransactionId 
 			,@strBatchId 
 			,@intTransactionTypeId 
 			,@intLotId 
 			,@strTransactionForm 
 			,@intUserId 
-			,@InventoryLotInCustodyTransactionId OUTPUT 			
-
+			,@SourceInventoryLotInCustodyId 
+			,@InventoryLotInCustodyTransactionId OUTPUT 		
 	END 
 
 	-- Assert
@@ -213,6 +221,7 @@ BEGIN
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[intTransactionId]
+			,[intTransactionDetailId]
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]
@@ -239,6 +248,7 @@ BEGIN
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[intTransactionId]
+			,[intTransactionDetailId]
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]

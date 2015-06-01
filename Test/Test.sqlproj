@@ -628,6 +628,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotCustody is successful with positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryLotInCustodyTransaction for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryLotInCustodyTransaction for inserting the supplied arguments.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostLotInCustody for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

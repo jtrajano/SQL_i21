@@ -18,7 +18,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInLotCustody]
 	,@intUserId AS INT
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 	 
-	,@InventoryLotInCustodyId AS INT OUTPUT 
+	,@SourceInventoryLotInCustodyId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -33,7 +33,7 @@ SET @dblQty = ABS(@dblQty)
 -- Initialize the remaining qty, cost used, Lot id to NULL
 SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
-SET @InventoryLotInCustodyId = NULL;
+SET @SourceInventoryLotInCustodyId = NULL;
 
 DECLARE @intInventoryLotInCustodyId AS INT 
 
@@ -69,11 +69,10 @@ WHERE	Lot_Custody.intItemId = @intItemId
 		AND (Lot_Custody.dblStockIn - Lot_Custody.dblStockOut) > 0 
 
 UPDATE	Lot_Custody
-	SET	Lot_Custody.dblStockOut = ISNULL(Lot_Custody.dblStockOut, 0) 
+SET		Lot_Custody.dblStockOut = ISNULL(Lot_Custody.dblStockOut, 0) 
 					+ CASE	WHEN (Lot_Custody.dblStockIn - Lot_Custody.dblStockOut) >= @dblQty THEN @dblQty
 							ELSE (Lot_Custody.dblStockIn - Lot_Custody.dblStockOut) 
 					END 
-
 		,Lot_Custody.intConcurrencyId = ISNULL(Lot_Custody.intConcurrencyId, 0) + 1
 
 		-- update the remaining qty
@@ -87,6 +86,6 @@ UPDATE	Lot_Custody
 FROM	dbo.tblICInventoryLotInCustody Lot_Custody
 WHERE	intInventoryLotInCustodyId = @intInventoryLotInCustodyId;
 
-SET @InventoryLotInCustodyId = @intInventoryLotInCustodyId; 
+SET @SourceInventoryLotInCustodyId = @intInventoryLotInCustodyId; 
 
 _Exit: 
