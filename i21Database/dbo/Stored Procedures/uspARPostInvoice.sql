@@ -103,10 +103,17 @@ IF(@beginTransaction IS NOT NULL)
 --Removed excluded Invoices to post/unpost
 IF(@exclude IS NOT NULL)
 	BEGIN
-		SELECT intID INTO #tmpInvoicesExclude FROM fnGetRowsFromDelimitedValues(@exclude)
+		DECLARE @InvoicesExclude TABLE  (
+			intInvoiceId INT
+		);
+
+		INSERT INTO @InvoicesExclude
+		SELECT intID FROM fnGetRowsFromDelimitedValues(@exclude)
+
+
 		DELETE FROM A
 		FROM @PostInvoiceData A
-		WHERE EXISTS(SELECT * FROM #tmpInvoicesExclude B WHERE A.intInvoiceId = B.intID)
+		WHERE EXISTS(SELECT * FROM @InvoicesExclude B WHERE A.intInvoiceId = B.intInvoiceId)
 	END
 
 --------------------------------------------------------------------------------------------  
@@ -596,6 +603,12 @@ IF @post = 1
 					,@batchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@UserEntityID
+					
+			IF(@@ERROR <> 0)  
+			BEGIN			
+				SET @success = 0 
+				GOTO Post_Exit
+			END	
 		END
 		
 		BEGIN 
@@ -998,6 +1011,12 @@ IF @post = 0
 							,@batchId
 							,@UserEntityID
 							
+					IF(@@ERROR <> 0)  
+						BEGIN			
+							SET @success = 0 
+							GOTO Post_Exit
+						END	
+			
 					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												
 				END 
@@ -1083,6 +1102,11 @@ IF @recap = 1
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
 		EXEC dbo.uspCMPostRecap @GLEntries
+		IF(@@ERROR <> 0)  
+			BEGIN			
+				SET @success = 0 
+				GOTO Post_Exit
+			END	
 		COMMIT TRAN @TransactionName
 	END 
 
@@ -1095,6 +1119,11 @@ IF @recap = 1
 IF @recap = 0
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @post
+		IF(@@ERROR <> 0)  
+			BEGIN			
+				SET @success = 0 
+				GOTO Post_Exit
+			END
 		 
 		IF @post = 0
 			BEGIN
@@ -1189,12 +1218,9 @@ IF @recap = 0
 			END
 			
 		COMMIT TRAN @TransactionName
-	END 
-    
+	END
+	    
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
-	--IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..@PostInvoiceData')) DROP TABLE @PostInvoiceData
-	--IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..@InvalidInvoiceData')) DROP TABLE @InvalidInvoiceData
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvoicesExclude')) DROP TABLE #tmpInvoicesExclude
 	RETURN;
-	--IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..@UnPostInvoiceData')) DROP TABLE @UnPostInvoiceData 
+	
