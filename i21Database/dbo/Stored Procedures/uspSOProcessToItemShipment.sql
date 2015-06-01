@@ -15,9 +15,9 @@ DECLARE	 @ShipmentId INT
 		--,@ShipmentNumber NVARCHAR(100);
 
 
-IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Complete') 
+IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
 	BEGIN
-		RAISERROR('Sales Order already completed.', 16, 1)
+		RAISERROR('Sales Order already closed.', 16, 1)
 		RETURN;
 	END
 
@@ -65,12 +65,7 @@ IF @@ERROR > 0
 	RETURN 0;
 
 
-UPDATE
-	tblSOSalesOrder
-SET
-	strOrderStatus = 'In Process'
-WHERE
-	[intSalesOrderId] = @SalesOrderId
+EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
 	
 
 SET @InventoryShipmentId = @ShipmentId;

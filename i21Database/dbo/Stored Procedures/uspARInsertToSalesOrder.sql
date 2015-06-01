@@ -77,7 +77,7 @@ BEGIN
 		,ROUND([dblAmountDue],2)
 		,ROUND([dblPayment],2)		
 		,'Order'
-		,[strOrderStatus]
+		,'Open'
 		,[intAccountId]
 		,[dtmProcessDate]
 		,0

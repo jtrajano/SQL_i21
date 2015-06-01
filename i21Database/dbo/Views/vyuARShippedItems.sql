@@ -80,7 +80,7 @@ CROSS APPLY
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
-		AND SO.[strOrderStatus]	<> 'Complete'
+		AND SO.[strOrderStatus]	<> 'Closed'
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]
 		,ISI.[intLineNo]
@@ -156,4 +156,4 @@ LEFT OUTER JOIN
 	tblICStorageLocation SL
 		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId] 		
 WHERE
-	SO.[strOrderStatus] <> 'Complete'
+	SO.[strOrderStatus] <> 'Closed'

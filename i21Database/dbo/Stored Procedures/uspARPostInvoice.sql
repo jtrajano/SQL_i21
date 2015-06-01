@@ -1217,6 +1217,50 @@ IF @recap = 0
 				
 			END
 			
+		BEGIN			
+			DECLARE @OrderToUpdate TABLE (intSalesOrderId INT);
+			
+			INSERT INTO @OrderToUpdate(intSalesOrderId)
+			SELECT DISTINCT
+				 SODetail.intSalesOrderId
+			FROM
+				tblSOSalesOrderDetail SODetail
+			INNER JOIN 
+				tblARInvoiceDetail Detail
+					ON SODetail.intSalesOrderDetailId = Detail.intSalesOrderDetailId 
+			INNER JOIN
+				tblARInvoice Header
+					ON Detail.intInvoiceId = Header.intInvoiceId
+					AND Header.strTransactionType = 'Invoice'
+			INNER JOIN
+				@PostInvoiceData P
+					ON Header.intInvoiceId = P.intInvoiceId	
+			WHERE 
+				Detail.intSalesOrderDetailId IS NOT NULL 
+				AND Detail.intSalesOrderDetailId <> 0
+				
+
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderToUpdate ORDER BY intSalesOrderId)
+				BEGIN
+				
+					DECLARE @intSalesOrderId INT;
+					
+					SELECT TOP 1 @intSalesOrderId = intSalesOrderId FROM @OrderToUpdate ORDER BY intSalesOrderId
+
+					EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
+							
+					IF(@@ERROR <> 0)  
+						BEGIN			
+							SET @success = 0 
+							GOTO Post_Exit
+						END	
+			
+					DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId AND intSalesOrderId = @intSalesOrderId 
+												
+				END 
+																
+		END				
+			
 		COMMIT TRAN @TransactionName
 	END
 	    

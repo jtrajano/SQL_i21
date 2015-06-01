@@ -76,7 +76,7 @@ BEGIN
            ,[dblAmountDue]
            ,[dblPayment]
            ,[strTransactionType]
-           ,'Pending'
+           ,'Open'
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
