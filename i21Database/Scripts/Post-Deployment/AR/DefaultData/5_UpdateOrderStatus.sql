@@ -4,7 +4,7 @@
 print('/*******************  BEGIN - Change tblSOSalesOrder strOrderStatus ''Complete'' to ''Closed''  *******************/')
 GO
 
-UPDATE tblSOSalesOrder SET strOrderStatus = 'Closed' WHERE strOrderStatus = 'Complete'
+UPDATE tblSOSalesOrder SET strOrderStatus = 'Closed' WHERE strOrderStatus = 'Complete' AND strTransactionType = 'Order'
 
 GO
 print('/*******************  END - Change tblSOSalesOrder strOrderStatus ''Complete'' to ''Closed''  *******************/')
@@ -23,6 +23,7 @@ FROM
 	tblSOSalesOrder SO
 WHERE 
 	SO.strOrderStatus NOT IN ('Closed','Complete')
+	 AND strTransactionType = 'Order'
 				
 
 WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderToUpdate ORDER BY intSalesOrderId)
