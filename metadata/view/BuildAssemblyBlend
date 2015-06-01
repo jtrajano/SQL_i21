@@ -958,7 +958,7 @@
                                             "\t\tflex: 2",
                                             "\t},",
                                             "    {",
-                                            "\t\tdataIndex: 'strStorageLocation',",
+                                            "\t\tdataIndex: 'strStorageLocationName',",
                                             "\t\tdataType: 'string',",
                                             "\t\ttext: 'Storage Location',",
                                             "\t\tflex: 2",
