@@ -35,6 +35,7 @@ BEGIN
 		,@strLifeTimeType NVARCHAR(50)
 		,@intLifeTime INT
 		,@dtmExpiryDate DATETIME
+		,@dtmPlannedDate datetime
 
 	SELECT TOP 1 @intTransactionId = intWorkOrderId
 		,@strTransactionId = strWorkOrderNo
@@ -42,6 +43,7 @@ BEGIN
 		,@intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
+		,@dtmPlannedDate=dtmPlannedDate
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -70,7 +72,7 @@ BEGIN
 	SELECT intItemId = l.intItemId
 		,intItemLocationId = l.intItemLocationId
 		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
-		,dtmDate = GetDate()
+		,dtmDate = @dtmPlannedDate
 		,dblQty = (- cl.dblQuantity)
 		,dblUOMQty = ItemUOM.dblUnitQty
 		,dblCost = l.dblLastCost
@@ -167,7 +169,7 @@ BEGIN
 		,dblWeight = @dblWeight
 		,intWeightUOMId = @intWeightUOMId
 		,dtmExpiryDate = @dtmExpiryDate
-		,dtmManufacturedDate = GetDate()
+		,dtmManufacturedDate = @dtmPlannedDate
 		,intOriginId = NULL
 		,strBOLNo = NULL
 		,strVessel = NULL
@@ -212,7 +214,7 @@ BEGIN
 	SELECT intItemId = @intItemId
 		,intItemLocationId = @intItemLocationId
 		,intItemUOMId = @intItemUOMId
-		,dtmDate = GetDate()
+		,dtmDate = @dtmPlannedDate
 		,dblQty = @dblQty
 		,dblUOMQty = CASE 
 			WHEN (@intWeightUOMId = @intItemUOMId)
