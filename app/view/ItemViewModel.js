@@ -5,7 +5,6 @@ Ext.define('Inventory.view.ItemViewModel', {
     requires: [
         'Inventory.store.BufferedCompactItem',
         'Inventory.store.BufferedManufacturer',
-        'Inventory.store.BufferedManufacturingCell',
         'Inventory.store.BufferedCategory',
         'Inventory.store.BufferedPatronageCategory',
         'Inventory.store.BufferedInventoryTag',
@@ -34,7 +33,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         'i21.store.CountryBuffered',
         'i21.store.TaxGroupMasterBuffered',
         'GeneralLedger.store.BufAccountId',
-        'GeneralLedger.store.BufAccountCategoryGroup'
+        'GeneralLedger.store.BufAccountCategoryGroup',
+        'Manufacturing.store.BufferedManufacturingCell'
     ],
 
     stores: {
@@ -605,7 +605,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'companylocationbuffered'
         },
         factoryManufacturingCell: {
-            type: 'icbufferedmanufacturingcell'
+            type: 'mfbufferedmanufacturingcell'
         },
         owner: {
             type: 'customerbuffered'
