@@ -380,6 +380,17 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
         }
     },
 
+    onItemBeforeQuery: function(obj) {
+        if (obj.combo) {
+
+            var proxy = obj.combo.store.proxy;
+            proxy.setExtraParams({
+                include: 'tblICItemAssemblies.AssemblyItem',
+                columns: 'intItemId:strItemNo:strType:strDescription:strLotTracking:tblICItemAssemblies'
+            });
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboItemNumber" : {

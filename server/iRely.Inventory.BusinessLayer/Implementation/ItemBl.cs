@@ -164,11 +164,9 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<SearchResult> GetAssemblyItems(GetParameter param)
         {
             var query = _db.GetQuery<tblICItem>()
-                    .Include("tblICItemAssemblies.AssemblyItem")
-                    .Include("tblICItemAssemblies.tblICItemUOM.tblICUnitMeasure")
                     .Where(p => p.strType == "Assembly/Blend" && p.strLotTracking == "No")
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+            var data = await query.Execute(param, "intItemId").ToListAsync();
 
             return new SearchResult()
             {
