@@ -9,5 +9,6 @@
     [ysnDPOwnedType] BIT NOT NULL DEFAULT 0, 
     [ysnGrainBankType] BIT NOT NULL DEFAULT 0, 
     [ysnCustomerStorage] BIT NOT NULL DEFAULT 0, 
-    CONSTRAINT [PK_tblGRStorageType_intStorageScheduleTypeId] PRIMARY KEY ([intStorageScheduleTypeId])  
+    CONSTRAINT [PK_tblGRStorageType_intStorageScheduleTypeId] PRIMARY KEY ([intStorageScheduleTypeId]), 
+    CONSTRAINT [UQ_tblGRStorageType_strStorageTypeCode] UNIQUE ([strStorageTypeCode])  
 )

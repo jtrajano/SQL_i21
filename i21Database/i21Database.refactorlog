@@ -3367,4 +3367,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblMFPackType]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="cc28d2e4-2987-442f-bbf7-f10f634a9b9e" ChangeDateTime="06/01/2015 13:32:25">
+    <Property Name="ElementName" Value="[dbo].[AK_tblGRStorageType_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblGRStorageType_strStorageTypeCode]" />
+  </Operation>
 </Operations>
