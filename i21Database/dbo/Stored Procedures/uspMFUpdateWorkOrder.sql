@@ -146,16 +146,31 @@ BEGIN TRY
 		,intConcurrencyId=@intConcurrencyId
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	UPDATE dbo.tblMFWorkOrderProductSpecification
-	SET strParameterName = x.strParameterName
-		,strParameterValue = x.strParameterValue
-		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+	INSERT INTO dbo.tblMFWorkOrderProductSpecification (
+		intWorkOrderId
+		,strParameterName
+		,strParameterValue
+		,intConcurrencyId
+		)
+	SELECT @intWorkOrderId
+		,strParameterName
+		,strParameterValue
+		,1
 	FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
 			intWorkOrderProductSpecificationId INT
 			,strParameterName NVARCHAR(50)
 			,strParameterValue NVARCHAR(MAX)
 			) x
-	WHERE tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId = x.intWorkOrderProductSpecificationId
+	WHERE x.intWorkOrderProductSpecificationId = 0
+
+	DELETE
+	FROM dbo.tblMFWorkOrderProductSpecification
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND NOT EXISTS (
+			SELECT x.intWorkOrderProductSpecificationId
+			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (intWorkOrderProductSpecificationId INT) x
+			WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId
+			)
 
 	COMMIT TRANSACTION
 
