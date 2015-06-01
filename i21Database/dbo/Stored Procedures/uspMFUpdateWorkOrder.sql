@@ -160,16 +160,29 @@ BEGIN TRY
 			intWorkOrderProductSpecificationId INT
 			,strParameterName NVARCHAR(50)
 			,strParameterValue NVARCHAR(MAX)
+			,strRowState nvarchar(50)
 			) x
-	WHERE x.intWorkOrderProductSpecificationId = 0
+	WHERE x.intWorkOrderProductSpecificationId = 0 and x.strRowState='INSERT'
+
+	Update tblMFWorkOrderProductSpecification
+	Set strParameterName=x.strParameterName
+		,strParameterValue=x.strParameterValue
+		,intConcurrencyId=Isnull(intConcurrencyId,0)+1
+	FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
+			intWorkOrderProductSpecificationId INT
+			,strParameterName NVARCHAR(50)
+			,strParameterValue NVARCHAR(MAX)
+			,strRowState nvarchar(50)
+			) x
+	WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='UPDATE'
 
 	DELETE
 	FROM dbo.tblMFWorkOrderProductSpecification
 	WHERE intWorkOrderId = @intWorkOrderId
-		AND NOT EXISTS (
-			SELECT x.intWorkOrderProductSpecificationId
-			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (intWorkOrderProductSpecificationId INT) x
-			WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (intWorkOrderProductSpecificationId INT,strRowState nvarchar(50)) x
+			WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='DELETE'
 			)
 
 	COMMIT TRANSACTION
