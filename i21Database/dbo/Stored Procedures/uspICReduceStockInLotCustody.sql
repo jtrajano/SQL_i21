@@ -37,6 +37,25 @@ SET @InventoryLotInCustodyId = NULL;
 
 DECLARE @intInventoryLotInCustodyId AS INT 
 
+-- Validate for negative stock 
+SELECT TOP  1 
+		@intInventoryLotInCustodyId = intInventoryLotInCustodyId
+FROM	dbo.tblICInventoryLotInCustody Lot_Custody
+WHERE	Lot_Custody.intItemId = @intItemId
+		AND Lot_Custody.intItemLocationId = @intItemLocationId
+		AND Lot_Custody.intItemUOMId = @intItemUOMId
+		AND Lot_Custody.intLotId = @intLotId
+		AND ISNULL(Lot_Custody.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+		AND ISNULL(Lot_Custody.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
+		AND (Lot_Custody.dblStockIn - Lot_Custody.dblStockOut) < 0 
+
+IF @intInventoryLotInCustodyId IS NOT NULL 
+BEGIN 
+	-- Negative stock quantity is not allowed.
+	RAISERROR(50029, 11, 1) 
+	GOTO _Exit;
+END 
+
 -- Get the available stock in custody. 
 SELECT TOP  1 
 		@intInventoryLotInCustodyId = intInventoryLotInCustodyId
@@ -48,13 +67,6 @@ WHERE	Lot_Custody.intItemId = @intItemId
 		AND ISNULL(Lot_Custody.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 		AND ISNULL(Lot_Custody.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 		AND (Lot_Custody.dblStockIn - Lot_Custody.dblStockOut) > 0 
-
-IF @intInventoryLotInCustodyId IS NULL 
-BEGIN 
-	-- Throw an error.
-	-- TODO Cannot allow negative stock on Items in custody.
-	GOTO _Exit;
-END 
 
 UPDATE	Lot_Custody
 	SET	Lot_Custody.dblStockOut = ISNULL(Lot_Custody.dblStockOut, 0) 

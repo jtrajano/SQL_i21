@@ -15,9 +15,9 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLotCustody
 	,@intStorageLocationId AS INT
 	,@dblQty NUMERIC(18,6) 
 	,@dblCost AS NUMERIC(18,6)
-	,@intUserId AS INT
 	,@strTransactionId AS NVARCHAR(40)
 	,@intTransactionId AS INT 
+	,@intUserId AS INT
 	,@NewInventoryLotInCustodyId AS INT OUTPUT 
 AS
 
