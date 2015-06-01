@@ -65,30 +65,17 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
 
-	SELECT	CASE	WHEN	CH.intContractTypeId  =	1	
-					THEN	'BUYER :  ' + CHAR(9)+ @strCompanyName + ', '  + CHAR(13)+CHAR(10) +
-							REPLICATE(' ',18)+ REPLACE(ISNULL(@strAddress,''),CHAR(10), +CHAR(10) + REPLICATE(' ',18)) + ', ' + CHAR(13)+CHAR(10) +
-							REPLICATE(' ',18)+ ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
-					WHEN	CH.intContractTypeId  =	2
-					THEN	'SELLER : ' + CHAR(9)+ LTRIM(RTRIM(EY.strName)) + ', ' + CHAR(13)+CHAR(10) +
-							REPLICATE(' ',18)+ REPLACE(ISNULL(LTRIM(RTRIM(EL.strAddress)),''),CHAR(10), +CHAR(10) + REPLICATE(' ',18)) + ', ' + CHAR(13)+CHAR(10) +
-							REPLICATE(' ',18)+ ISNULL(LTRIM(RTRIM(EL.strCity)),'') + 
-							ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strState)) = '' THEN NULL ELSE LTRIM(RTRIM(strState)) END,'') + 
-							ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(strZipCode)) END,'') + 
-							ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END,'')
-			END		AS	strA,
-			CASE	WHEN	CH.intContractTypeId  =	2	
-					THEN	'BUYER :' + CHAR(9)+ @strCompanyName + ', '  + CHAR(13)+CHAR(10) +
-							REPLICATE(' ',18)+ REPLACE(ISNULL(@strAddress,''),CHAR(10), +CHAR(10) + REPLICATE(' ',18)) + ', ' + CHAR(13)+CHAR(10) +
-							REPLICATE(' ',18)+ ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
-					WHEN	CH.intContractTypeId  =	1
-					THEN	'SELLER : ' + CHAR(9)+ LTRIM(RTRIM(EY.strName)) + ', ' + CHAR(13)+CHAR(10) +
-							REPLICATE(' ',18)+ REPLACE(ISNULL(LTRIM(RTRIM(EL.strAddress)),''),CHAR(10), +CHAR(10) + REPLICATE(' ',18)) + ', ' + CHAR(13)+CHAR(10) +
-							REPLICATE(' ',18)+ ISNULL(LTRIM(RTRIM(EL.strCity)),'') + 
-							ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strState)) = '' THEN NULL ELSE LTRIM(RTRIM(strState)) END,'') + 
-							ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(strZipCode)) END,'') + 
-							ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END,'')
-			END		AS	strB,
+	SELECT	@strCompanyName + ', '  + CHAR(13)+CHAR(10) +
+			ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
+			ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
+			AS	strA,
+			LTRIM(RTRIM(EY.strName)) + ', ' + CHAR(13)+CHAR(10) +
+			ISNULL(LTRIM(RTRIM(EL.strAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+			ISNULL(LTRIM(RTRIM(EL.strCity)),'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strState)) = '' THEN NULL ELSE LTRIM(RTRIM(strState)) END,'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(strZipCode)) END,'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END,'')
+			AS	strB,
 			CH.dtmContractDate,
 			CH.intContractNumber,
 			CH.intContractHeaderId,
@@ -98,21 +85,23 @@ BEGIN TRY
 					WHEN	CH.intContractTypeId  =	2
 					THEN	'We confirm SALES to you as follows :'
 			END		AS	strConfirm,
-			CASE	WHEN	CH.intContractTypeId  =	2	
-					THEN	@strCompanyName
-					WHEN	CH.intContractTypeId  =	1
-					THEN	EY.strName
-			END		AS	strBuyer,
-			CASE	WHEN	CH.intContractTypeId  =	1	
-					THEN	@strCompanyName
-					WHEN	CH.intContractTypeId  =	2
-					THEN	EY.strName
-			END		AS	strSeller,
+			@strCompanyName AS	strE,
+			EY.strName		AS	strF,
 			CASE	WHEN	CH.intContractTypeId  =	1	
 					THEN	'PURCHASE CONTRACT CONFIRMATION'
 					WHEN	CH.intContractTypeId  =	2
 					THEN	'SALES CONTRACT CONFIRMATION'
 			END		AS	strHeading,
+			CASE	WHEN	CH.intContractTypeId  =	1	
+					THEN	'BUYER'
+					WHEN	CH.intContractTypeId  =	2
+					THEN	'SELLER'
+			END		AS	strC,
+			CASE	WHEN	CH.intContractTypeId  =	1	
+					THEN	'SELLER'
+					WHEN	CH.intContractTypeId  =	2
+					THEN	'BUYER'
+			END		AS	strD,
 			TX.strText
 	FROM	tblCTContractHeader CH
 	JOIN	vyuCTEntity			EY	ON	EY.intEntityId	=	CH.intEntityId
