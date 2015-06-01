@@ -147,19 +147,7 @@ BEGIN TRY
 	FROM dbo.tblICStorageLocation
 	WHERE intStorageLocationId = @intStorageLocationId
 
-	IF @ysnAllowMultipleLot = 1
-	BEGIN
-		IF (
-				@strOutputLotNumber = ''
-				OR @strOutputLotNumber IS NULL
-				)
-			AND @strLotTracking <> 'Yes - Serial Number'
-		BEGIN
-			EXEC dbo.uspSMGetStartingNumber 24
-				,@strOutputLotNumber OUTPUT
-		END
-	END
-	ELSE IF @ysnAllowMultipleLot = 0
+	IF @ysnAllowMultipleLot = 0
 		AND @ysnMergeOnMove = 1
 	BEGIN
 		SELECT @strOutputLotNumber = strLotNumber
@@ -170,11 +158,6 @@ BEGIN TRY
 			AND intLotStatusId = 1
 			AND dtmExpiryDate > Getdate()
 
-		IF @strOutputLotNumber IS NULL or @strOutputLotNumber =''
-		BEGIN
-			EXEC dbo.uspSMGetStartingNumber 24
-				,@strOutputLotNumber OUTPUT
-		END
 	END
 	ELSE IF EXISTS (
 			SELECT *
@@ -193,6 +176,16 @@ BEGIN TRY
 	BEGIN
 		PRINT 'Call Lot Move'
 	END
+
+	IF (
+				@strOutputLotNumber = ''
+				OR @strOutputLotNumber IS NULL
+				)
+			AND @strLotTracking <> 'Yes - Serial Number'
+		BEGIN
+			EXEC dbo.uspSMGetStartingNumber 24
+				,@strOutputLotNumber OUTPUT
+		END
 
 	IF EXISTS (
 			SELECT *
