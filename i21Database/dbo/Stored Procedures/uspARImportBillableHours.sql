@@ -146,7 +146,6 @@ LEFT OUTER JOIN
 		
 INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
-	,[intCompanyLocationId]
 	,[intItemId]
 	,[strItemDescription]
 	,[intItemUOMId]
@@ -161,7 +160,6 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intConcurrencyId])
 SELECT
 	I.[intInvoiceId]											--[intInvoiceId]
-	,V.[intCompanyLocationId]									--[intCompanyLocationId]
 	,V.[intItemId]												--[intItemId]
 	,V.[strTicketNumber] + ' - ' + V.[strJobCode]				--strItemDescription]
 	,NULL														--[intItemUOMId]

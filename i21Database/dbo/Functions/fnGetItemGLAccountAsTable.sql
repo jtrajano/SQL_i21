@@ -1,5 +1,4 @@
-﻿
-CREATE FUNCTION [dbo].[fnGetItemGLAccountAsTable] (
+﻿CREATE FUNCTION [dbo].[fnGetItemGLAccountAsTable] (
 	@intItemId INT
 	,@intItemLocationId INT
 	,@strAccountCategory NVARCHAR(255)
@@ -37,7 +36,7 @@ RETURN (
 																
 															-- Join in this sub-query will get the base-account id 
 															INNER JOIN (
-																SELECT	intAccountId = ISNULL(ItemLevel.intAccountId, ISNULL(CategoryLevel.intAccountId, CompanyLocationLevel.intAccountId))
+																SELECT	intAccountId = ISNULL(ItemLevel.intAccountId, ISNULL(CommodityLevel.intAccountId, ISNULL(CategoryLevel.intAccountId, CompanyLocationLevel.intAccountId)))
 																FROM	(
 																			-- Get the base acccount at the item-level
 																			SELECT	TOP 1 
@@ -48,6 +47,21 @@ RETURN (
 																			WHERE	tblICItemAccount.intItemId = @intItemId
 																					AND AccntCategory.strAccountCategory = @strAccountCategory
 																		) AS ItemLevel
+																		FULL JOIN (
+																			-- Get the base account at the Commodity level. 
+																			SELECT	TOP 1 
+																					CommodityAccounts.intAccountId
+																			FROM	dbo.tblICItem Item INNER JOIN dbo.tblICCommodity Commodity
+																						ON Item.intCommodityId = Commodity.intCommodityId
+																					INNER JOIN dbo.tblICCommodityAccount CommodityAccounts
+																						ON Commodity.intCommodityId = CommodityAccounts.intCommodityId
+																					INNER JOIN dbo.tblGLAccountCategory AccntCategory
+																						ON CommodityAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
+																			WHERE	Item.intItemId = @intItemId
+																					AND AccntCategory.strAccountCategory = @strAccountCategory
+																					AND Item.strType = 'Commodity'
+																		) AS CommodityLevel
+																			ON 1 = 1
 																		FULL JOIN (
 																			-- Get the base account at the Category level.
 																			SELECT	TOP 1 
@@ -60,15 +74,7 @@ RETURN (
 																						ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
 																			WHERE	Item.intItemId = @intItemId
 																					AND AccntCategory.strAccountCategory = @strAccountCategory 
-																			--FROM	dbo.tblICItemLocation ItemLocation INNER JOIN dbo.tblICCategory Category
-																			--			ON ItemLocation.intCategoryId = Category.intCategoryId
-																			--		INNER JOIN tblICCategoryAccount CategoryAccounts
-																			--			ON Category.intCategoryId = CategoryAccounts.intCategoryId
-																			--		INNER JOIN dbo.tblGLAccountCategory AccntCategory
-																			--			ON CategoryAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
-																			--WHERE	ItemLocation.intItemId = @intItemId
-																			--		AND ItemLocation.intItemLocationId = @intItemLocationId
-																			--		AND AccntCategory.strAccountCategory = @strAccountCategory 			
+																					AND Item.strType <> 'Commodity'
 																		) AS CategoryLevel
 																			ON CategoryLevel.intAccountId = CategoryLevel.intAccountId
 																		FULL JOIN (
@@ -77,7 +83,6 @@ RETURN (
                                                                             FROM    tblICItemLocation 
                                                                             WHERE    tblICItemLocation.intItemLocationId = @intItemLocationId
                                                                                     AND tblICItemLocation.intItemId = @intItemId
-
 																		) AS CompanyLocationLevel
 																			ON CompanyLocationLevel.intAccountId = CompanyLocationLevel.intAccountId
 

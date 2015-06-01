@@ -11,9 +11,7 @@
 	[intManufacturerId] INT NULL,
     [intFamilyId] INT NULL, 
     [intClassId] INT NULL, 
-	[strFamily] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
-	[strClass] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
-    [strUpcCode] NVARCHAR(14) COLLATE Latin1_General_CI_AS NULL,
+    [intItemUOMId] INT NULL, 
     [strUpcDescription] NVARCHAR(60) COLLATE Latin1_General_CI_AS NULL,
     [ysnPromo] BIT NULL, 
     [strPriceMethod] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
@@ -36,5 +34,6 @@
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]) ,
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTSubcategory_intFamilyId] FOREIGN KEY ([intFamilyId]) REFERENCES [tblSTSubcategory]([intSubcategoryId]), 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTSubcategory_intClassId] FOREIGN KEY ([intClassId]) REFERENCES [tblSTSubcategory]([intSubcategoryId]), 
-    CONSTRAINT [AK_tblSTRetailPriceAdjustmentDetail] UNIQUE NONCLUSTERED ([intCompanyLocationId],[strRegion],[strDestrict],[intVendorId],[intCategoryId],[intFamilyId],[intClassId],[strUpcCode],[strPriceType]) 
+	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+    CONSTRAINT [AK_tblSTRetailPriceAdjustmentDetail] UNIQUE NONCLUSTERED ([intCompanyLocationId],[strRegion],[strDestrict],[intVendorId],[intCategoryId],[intFamilyId],[intClassId],[intItemUOMId],[strPriceType]) 
 )

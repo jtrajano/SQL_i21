@@ -130,7 +130,13 @@ BEGIN
 	set @constraint = ''
 	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblARCustomerProductVersion' and OBJECT_NAME(referenced_object_id) = 'tblARCustomer' 
 	if(@constraint <> '')
-		print('ALTER TABLE tblARCustomerProductVersion DROP CONSTRAINT [' + @constraint +']' )
+		exec('ALTER TABLE tblARCustomerProductVersion DROP CONSTRAINT [' + @constraint +']' )
+	
+	set @constraint = ''
+	select @constraint = name from sys.foreign_keys WHERE  OBJECT_NAME(parent_object_id) = 'tblCTContractHeader' and OBJECT_NAME(referenced_object_id) = 'tblARSalesperson'
+	if(@constraint <> '')
+		exec('ALTER TABLE tblCTContractHeader DROP CONSTRAINT [' + @constraint +']' )
+
 
 	print 'Adding tblEntityContact columns to tblEntity'
 	exec(N'	
@@ -346,16 +352,7 @@ END
 
 
 
-	print 'Moving linking to entity id instead of vendor id'
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact' AND [COLUMN_NAME] = 'intVendorId') 
-	BEGIN
-		exec(N'	
-				update a set a.intVendorId = b.intEntityId
-					from tblAPVendorToContact a
-						join tblAPVendor b
-							on a.intVendorId = b.intVendorId')
-	END
-
+	
 	
 	
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact') 
@@ -371,18 +368,39 @@ END
 	END
 	
 
-	
+	print 'Fix Vendor BadData '
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact') 
+	BEGIN
+		exec(N'UPDATE A SET A.intDefaultContactId = B.intContactId
+				FROM tblAPVendor A
+					JOIN tblAPVendorToContact B
+						on A.intVendorId = B.intVendorId 
+					where A.intDefaultContactId <> B.intContactId
+				')
+	END
+
 		
 	print 'Update vendor to contact default contact column'
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact' AND [COLUMN_NAME] = 'ysnDefaultContact') 
 	BEGIN
+		print 'Updating vendor to contact default contact column'
 		exec(N' update b set b.ysnDefaultContact = 1 
 					from tblAPVendor a
 						join tblAPVendorToContact b
 							on a.intDefaultContactId = b.intContactId ')
 	END
 
-	
+	print 'Moving linking to entity id instead of vendor id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		exec(N'	
+				update a set a.intVendorId = b.intEntityId
+					from tblAPVendorToContact a
+						join tblAPVendor b
+							on a.intVendorId = b.intVendorId')
+	END
+
+
 	print 'Update Linking of tblAPBill from vendor id to entity id'
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPBill' AND [COLUMN_NAME] = 'intVendorId') 
 	BEGIN
@@ -564,6 +582,21 @@ END
 							on a.intContactId = b.intContactId	')
 	END
 	
+	print 'Update Linking of tblAPVendor default contact from entity contact to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendor' AND [COLUMN_NAME] = 'intDefaultContactId') 
+	BEGIN
+
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'intContactId') 
+		BEGIN
+			exec(N'						
+				UPDATE a set a.intDefaultContactId = b.intEntityId
+					from tblAPVendor a 
+						join tblEntityContact b 
+							on a.intDefaultContactId = b.intContactId		')	
+		END
+				
+	END
+
 	print 'Update Linking of tblAPVendorToContact from entity contact to entity id'
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendorToContact' AND [COLUMN_NAME] = 'intContactId') 
 	BEGIN
@@ -584,22 +617,6 @@ END
 							on a.intContactId = b.intContactId		')		
 	END
 
-
-	print 'Update Linking of tblAPVendor default contact from entity contact to entity id'
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPVendor' AND [COLUMN_NAME] = 'intDefaultContactId') 
-	BEGIN
-
-		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEntityContact' AND [COLUMN_NAME] = 'intContactId') 
-		BEGIN
-			exec(N'						
-				UPDATE a set a.intDefaultContactId = b.intEntityId
-					from tblAPVendor a 
-						join tblEntityContact b 
-							on a.intDefaultContactId = b.intContactId		')	
-		END
-				
-	END
-
 	print 'Update Linking of tblARCustomer salesperson from salespersonid to entityid '
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomer' AND [COLUMN_NAME] = 'intSalespersonId') 
 	BEGIN
@@ -610,14 +627,23 @@ END
 							on a.intSalespersonId = b.intSalespersonId	')
 	END
 
+	-- Create the new intEntityVendorId column in tblICInventoryReceipt
+	IF	EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt') 
+		AND NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intEntityVendorId') 
+	BEGIN 
+		EXEC ('ALTER TABLE tblICInventoryReceipt ADD intEntityVendorId INT NULL')
+	END
+
 	print 'Update Linking of tblICInventoryReceipt intVendorId from intVendorId to entityid '
-	 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
-	 BEGIN
-		  exec(N' UPDATE a set a.intVendorId = b.intEntityId
-					 from tblICInventoryReceipt a 
-						  join tblAPVendor b 
-							on a.intVendorId = b.intVendorId')
-	 END
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		
+
+	exec(N' UPDATE a set a.intEntityVendorId = b.intEntityId
+				from tblICInventoryReceipt a 
+					join tblAPVendor b 
+					on a.intVendorId = b.intVendorId')
+	END
 
 	 print 'Update Linking of tblAPPayment intVendorId from intVendorId to entityid '
 	 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPPayment' AND [COLUMN_NAME] = 'intVendorId') 
@@ -762,14 +788,14 @@ END
 						on a.intVendorId =  b.intVendorId ')
 	END
 
-	print 'Update Linking of tblICInventoryReceipt from vendor id to entity id'
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
-	BEGIN
-		exec(N' update a set a.intVendorId = b.intEntityId
-				from tblICInventoryReceipt a
-					join tblAPVendor b
-						on a.intVendorId =  b.intVendorId ')
-	END
+	--print 'Update Linking of tblICInventoryReceipt from vendor id to entity id'
+	--IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
+	--BEGIN
+	--	exec(N' update a set a.intVendorId = b.intEntityId
+	--			from tblICInventoryReceipt a
+	--				join tblAPVendor b
+	--					on a.intVendorId =  b.intVendorId ')
+	--END
 
 	print 'Update Linking of tblICLot from vendor id to entity id'
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICLot' AND [COLUMN_NAME] = 'intVendorId') 
@@ -796,6 +822,16 @@ END
 				from tblARCustomerProductVersion a
 					join tblARCustomer b
 						on a.intCustomerId =  b.intCustomerId ')
+	END			
+
+
+	print 'Update Linking of tblCTContractHeader from salesperson id to entity id'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblCTContractHeader' AND [COLUMN_NAME] = 'intSalespersonId') 
+	BEGIN
+		exec(N' update a set a.intSalespersonId = b.intEntityId
+				from tblCTContractHeader a
+					join tblARSalesperson b
+						on a.intSalespersonId =  b.intSalespersonId ')
 	END			
 
 END

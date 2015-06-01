@@ -21,14 +21,21 @@ SELECT	intLotId				= Lot.intLotId
 		,dblQty					= Lot.dblQty
 		,dblWeight				= Lot.dblWeight
 		,dblWeightPerQty		= Lot.dblWeightPerQty
-		,dblCost				= PostedLot.dblCost  
+		,dblCost				= (
+				SELECT	TOP 1 
+						dblCost 
+				FROM	dbo.tblICInventoryLot PostedLot
+				WHERE	PostedLot.intLotId = Lot.intLotId
+						AND PostedLot.intItemId = Lot.intItemId
+						AND PostedLot.intItemLocationId = Lot.intItemLocationId
+						AND ISNULL(PostedLot.ysnIsUnposted, 0) = 0 
+				ORDER BY intInventoryLotId DESC 
+			)
 		,dtmExpiryDate			= Lot.dtmExpiryDate
 		,intLotStatusId			= Lot.intLotStatusId
 		,strLotStatus			= LotStatus.strSecondaryStatus
 		,strLotPrimaryStatus	= LotStatus.strPrimaryStatus
-FROM	dbo.tblICLot Lot INNER JOIN dbo.tblICInventoryLot PostedLot
-			ON Lot.intLotId = PostedLot.intLotId
-			AND ISNULL(PostedLot.ysnIsUnposted, 0) = 0 
+FROM	dbo.tblICLot Lot 
 		LEFT JOIN tblICItem Item 
 			ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblSMCompanyLocation Location 

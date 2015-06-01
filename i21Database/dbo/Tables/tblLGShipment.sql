@@ -52,6 +52,8 @@
 [strSampleComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
 [strOtherComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
 
+[intCompanyLocationId] INT NOT NULL, 
+[intCommodityId] INT NOT NULL, 
 
 CONSTRAINT [PK_tblLGShipment_intShipmentId] PRIMARY KEY ([intShipmentId]), 
 CONSTRAINT [UK_tblLGShipment_intTrackingNumber] UNIQUE ([intTrackingNumber]),
@@ -65,5 +67,7 @@ CONSTRAINT [FK_tblLGShipment_tblEntity_intShippingLineEntityId_intEntityId] FORE
 CONSTRAINT [FK_tblLGShipment_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 CONSTRAINT [FK_tblLGShipment_tblEntity_intForwardingAgentEntityId_intEntityId] FOREIGN KEY ([intForwardingAgentEntityId]) REFERENCES [tblEntity]([intEntityId]),
 CONSTRAINT [FK_tblLGShipment_tblSMCurrency_intInsuranceCurrencyId_intCurrencyID] FOREIGN KEY ([intInsuranceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
-CONSTRAINT [FK_tblLGShipmentInStore_tblEntity_intTruckerEntityId] FOREIGN KEY ([intTruckerEntityId]) REFERENCES [tblEntity]([intEntityId])
+CONSTRAINT [FK_tblLGShipmentInStore_tblEntity_intTruckerEntityId] FOREIGN KEY ([intTruckerEntityId]) REFERENCES [tblEntity]([intEntityId]),
+CONSTRAINT [FK_tblLGShipment_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
+CONSTRAINT [FK_tblLGShipment_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])
 )

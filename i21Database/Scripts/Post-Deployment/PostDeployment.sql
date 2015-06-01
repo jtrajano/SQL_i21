@@ -27,6 +27,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\11_FreightTerms.sql
 :r .\SM\DefaultData\12_ReminderList.sql
 :r .\SM\DefaultData\13_ShortcutKey.sql
+:r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.sql
 
 -- Canned Report
@@ -52,6 +53,20 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\DeliveryFill.sql
 :r .\TM\Reports\DataSource\DeliveryFill.sql
 :r .\TM\Reports\DefaultCriteria\DeliveryFill.sql
+:r .\TM\Reports\SubReportSettings\DeliveryFill.sql
+
+:r .\TM\Reports\FieldSelection\DeviceLeaseDetail.sql
+:r .\TM\Reports\Layout\DeviceLeaseDetail.sql
+:r .\TM\Reports\DataSource\DeviceLeaseDetail.sql
+:r .\TM\Reports\DefaultCriteria\DeviceLeaseDetail.sql
+
+:r .\TM\Reports\Layout\DeviceActions.sql
+:r .\TM\Reports\DataSource\DeviceActions.sql
+
+:r .\TM\Reports\Layout\ProductTotals.sql
+:r .\TM\Reports\DataSource\ProductTotals.sql
+
+:r .\TM\Reports\DataSource\CustomerListByRoute.sql
 
 
 -- Canned Panels
@@ -82,6 +97,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\EntityTableDataFix.sql
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
 :R .\AR\DefaultData\2_SalesOrderDetailDefault.sql
+:R .\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql
+:r .\AR\DefaultData\4_UpdateInvoiceOrderShipVia.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -97,13 +114,15 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePOAddressInfo.sql
 
 -- Inventory 
-:r .\IC\1_InventoryTransactionTypes.sql 
-:r .\IC\2_MaterialNMFC.sql 
-:r .\IC\3_DefaultData.sql 
-:r .\IC\4_CostingMethods.sql 
-:r .\IC\5_LotStatus.sql
-:r .\IC\6_FixBlankLotNumber.sql
-:r .\IC\7_Status.sql
+:r .\IC\01_InventoryTransactionTypes.sql 
+:r .\IC\02_MaterialNMFC.sql 
+:r .\IC\03_DefaultData.sql 
+:r .\IC\04_CostingMethods.sql 
+:r .\IC\05_LotStatus.sql
+:r .\IC\06_FixBlankLotNumber.sql
+:r .\IC\07_Status.sql
+:r .\IC\08_InventoryTransactionPostingIntegration.sql
+:r .\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql
 :r .\IC\PatchFor_1510_to_1520.sql
 
 --Help Desk

@@ -12,7 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
  
 DECLARE	 @ShipmentId INT
-		,@ShipmentNumber NVARCHAR(100);
+		--,@ShipmentNumber NVARCHAR(100);
 
 
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Complete') 
@@ -38,12 +38,25 @@ IF NOT EXISTS(	SELECT 1
 		RAISERROR('There is no sellable item on this sales order.', 16, 1);
 		RETURN;
 	END
+	
+IF EXISTS(	SELECT 1 
+				FROM tblSOSalesOrderDetail A
+					INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+				WHERE
+					[intSalesOrderId] = @SalesOrderId 
+					AND (A.intItemUOMId IS NULL OR A.intItemUOMId = 0)
+					AND strType NOT IN ('Non-Inventory', 'Other Charge', 'Service')
+				)
+	BEGIN
+		RAISERROR('There UOM of one of the selected inventory item was not set', 16, 1);
+		RETURN;
+	END	
 
 
 DECLARE @icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @UserId);
 
-EXEC dbo.uspICProcessToItemShipment
-		@intSourceTransactionId = @SalesOrderId
+EXEC dbo.uspICProcessToInventoryShipment
+		 @intSourceTransactionId = @SalesOrderId
 		,@strSourceType = 'Sales Order'
 		,@intUserId = @icUserId
 		,@InventoryShipmentId = @ShipmentId OUTPUT
@@ -55,13 +68,13 @@ IF @@ERROR > 0
 UPDATE
 	tblSOSalesOrder
 SET
-	strOrderStatus = 'Pending'
+	strOrderStatus = 'In Process'
 WHERE
 	[intSalesOrderId] = @SalesOrderId
 	
 
 SET @InventoryShipmentId = @ShipmentId;
-SELECT @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
+--SELECT @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
 
 RETURN 1;
 

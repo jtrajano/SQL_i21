@@ -16,6 +16,7 @@ CREATE PROCEDURE [dbo].[uspICPostLIFO]
 	,@intCurrencyId AS INT
 	,@dblExchangeRate AS NUMERIC(18,6)
 	,@intTransactionId AS INT
+	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
@@ -103,6 +104,7 @@ BEGIN
 					,@intCurrencyId = @intCurrencyId
 					,@dblExchangeRate = @dblExchangeRate
 					,@intTransactionId = @intTransactionId
+					,@intTransactionDetailId = @intTransactionDetailId
 					,@strTransactionId = @strTransactionId
 					,@strBatchId = @strBatchId
 					,@intTransactionTypeId = @intTransactionTypeId
@@ -156,6 +158,7 @@ BEGIN
 				,@intCurrencyId = @intCurrencyId
 				,@dblExchangeRate = @dblExchangeRate
 				,@intTransactionId = @intTransactionId
+				,@intTransactionDetailId = @intTransactionDetailId
 				,@strTransactionId = @strTransactionId
 				,@strBatchId = @strBatchId
 				,@intTransactionTypeId = @intTransactionTypeId
@@ -213,6 +216,7 @@ BEGIN
 						,@intCurrencyId = @intCurrencyId
 						,@dblExchangeRate = @dblExchangeRate
 						,@intTransactionId = @intTransactionId
+						,@intTransactionDetailId = @intTransactionDetailId
 						,@strTransactionId = @strTransactionId
 						,@strBatchId = @strBatchId
 						,@intTransactionTypeId = @Inventory_Write_Off_Sold
@@ -241,6 +245,7 @@ BEGIN
 						,@intCurrencyId = @intCurrencyId
 						,@dblExchangeRate = @dblExchangeRate
 						,@intTransactionId = @intTransactionId
+						,@intTransactionDetailId = @intTransactionDetailId
 						,@strTransactionId = @strTransactionId
 						,@strBatchId = @strBatchId
 						,@intTransactionTypeId = @Inventory_Revalue_Sold

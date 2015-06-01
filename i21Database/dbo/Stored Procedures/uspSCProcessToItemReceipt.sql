@@ -4,8 +4,9 @@ CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	,@intUserId AS INT
 	,@dblNetUnits AS DECIMAL (13,3)
 	,@dblCost AS DECIMAL (9,5)
-	,@intLineNo AS INT
-	,@intEntityId AS INT 
+	,@intEntityId AS INT
+	,@intContractId AS INT
+	,@strDistributionOption AS NVARCHAR(3)
 	,@InventoryReceiptId AS INT OUTPUT 
 AS
 
@@ -24,10 +25,49 @@ DECLARE @SourceType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 DECLARE @SourceType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 DECLARE @SourceType_Direct AS NVARCHAR(100) = 'Direct'
 DECLARE @strTransactionId NVARCHAR(40) = NULL
+DECLARE @strDummyDistributionOption AS NVARCHAR(3) = NULL
 
-DECLARE @ItemsForItemReceipt AS ItemCostingTableType 
+DECLARE @ItemsForItemReceipt AS ItemCostingTableType
+DECLARE @intTicketId AS INT = @intSourceTransactionId
+DECLARE @dblRemainingUnits AS DECIMAL (13,3)
+DECLARE @LineItems AS ScaleTransactionTableType
+
+DECLARE @ErrMsg                    NVARCHAR(MAX),
+              @dblBalance          NUMERIC(12,4),                    
+              @intItemId           INT,
+              @dblNewBalance       NUMERIC(12,4),
+              @strInOutFlag        NVARCHAR(4),
+              @dblQuantity         NUMERIC(12,4),
+              @strAdjustmentNo     NVARCHAR(50)
 
 BEGIN TRY
+		IF @strDistributionOption = 'CNT'
+		BEGIN
+			INSERT INTO @LineItems (
+			intContractDetailId,
+			dblUnitsDistributed,
+			dblUnitsRemaining,
+			dblCost)
+			EXEC dbo.uspCTUpdationFromTicketDistribution 
+			 @intTicketId
+			,@intEntityId
+			,@dblNetUnits
+			,@intContractId
+			,@intUserId
+		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
+		IF(@dblRemainingUnits IS NULL)
+		BEGIN
+		SET @dblRemainingUnits = @dblNetUnits
+		END
+		IF(@dblRemainingUnits > 0)
+		BEGIN
+			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDummyDistributionOption
+			IF (@dblRemainingUnits = @dblNetUnits)
+			RETURN
+		END
+		UPDATE @LineItems set intTicketId = @intTicketId
+		END
+
 	-- Get the items to process
 	INSERT INTO @ItemsForItemReceipt (
 		intItemId
@@ -41,6 +81,7 @@ BEGIN TRY
 		,intCurrencyId
 		,dblExchangeRate
 		,intTransactionId
+		,intTransactionDetailId
 		,strTransactionId
 		,intTransactionTypeId
 		,intLotId
@@ -48,23 +89,24 @@ BEGIN TRY
 		,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion. 
 	)
 	EXEC dbo.uspSCGetScaleItemForItemReceipt 
-		 @intSourceTransactionId
+		 @intTicketId
+		,@strSourceType
+		,@intUserId
 		,@dblNetUnits
 		,@dblCost
-		,@strSourceType
-
+		,@intEntityId
+		,@intContractId
+		,@strDistributionOption
+		,@LineItems
 	-- Validate the items to receive 
 	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 
-	select * from @ItemsForItemReceipt
-	select @strSourceType, @SourceType_Direct
 	-- Add the items to the item receipt 
 	IF @strSourceType = @SourceType_Direct
 	BEGIN 
-		EXEC dbo.uspSCAddScaleTicketToItemReceipt @intSourceTransactionId, @intUserId, @dblNetUnits, @dblCost, @intLineNo, @intEntityId, @InventoryReceiptId OUTPUT; 
+		EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @InventoryReceiptId OUTPUT; 
 	END
 
-	select @InventoryReceiptId 
 	BEGIN 
 	SELECT	@strTransactionId = IR.strReceiptNumber
 	FROM	dbo.tblICInventoryReceipt IR	        

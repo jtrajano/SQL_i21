@@ -42,7 +42,7 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
 		,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
 		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
-		,@ADJUSTMENT_TYPE_LotIdChange AS INT = 5
+		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
 
 -- Read the transaction info   
@@ -125,14 +125,16 @@ BEGIN
 	END  
 END   
 
+-- Get the next batch number
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
+IF @@ERROR <> 0 GOTO Post_Exit    
+
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
 BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
 
--- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -154,10 +156,12 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblValue 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
 				,intTransactionId  
+				,intTransactionDetailId  
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -181,10 +185,12 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblValue 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
-				,intTransactionId  
+				,intTransactionId 
+				,intTransactionDetailId   
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -208,10 +214,12 @@ BEGIN
 				,dblQty  
 				,dblUOMQty  
 				,dblCost  
+				,dblValue 
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
 				,intTransactionId  
+				,intTransactionDetailId   
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -235,7 +243,7 @@ BEGIN
 	-----------------------------------
 	--  Call Split Lot Change
 	-----------------------------------
-	IF @adjustmentType = @ADJUSTMENT_TYPE_LotIdChange
+	IF @adjustmentType = @ADJUSTMENT_TYPE_SplitLot
 	BEGIN 
 		INSERT INTO @ItemsForAdjust (  
 				intItemId  
@@ -244,11 +252,13 @@ BEGIN
 				,dtmDate  
 				,dblQty  
 				,dblUOMQty  
-				,dblCost  
+				,dblCost
+				,dblValue
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
 				,intTransactionId  
+				,intTransactionDetailId   
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -257,6 +267,7 @@ BEGIN
 		)  	
 		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
 				@intTransactionId
+				,@intUserId
 	END 
 
 	-----------------------------------
@@ -272,7 +283,7 @@ BEGIN
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
+	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
 	BEGIN 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -315,7 +326,7 @@ END
 IF @ysnPost = 0   
 BEGIN   
 	-- Call the unpost routine 
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
+	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
 	BEGIN 
 		-- Call the post routine 
 		INSERT INTO @GLEntries (
@@ -378,7 +389,7 @@ END
 --------------------------------------------------------------------------------------------  
 IF	@ysnRecap = 1	
 BEGIN 
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange)
+	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
 		EXEC dbo.uspCMPostRecap @GLEntries

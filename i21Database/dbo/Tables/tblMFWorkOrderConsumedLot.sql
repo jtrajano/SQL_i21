@@ -19,7 +19,6 @@
 	intContainerId INT,
 	strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	ysnFeedSent BIT,
-	intTransactionId INT,
 	dtmActualInputDateTime DATETIME,
 	[dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL,

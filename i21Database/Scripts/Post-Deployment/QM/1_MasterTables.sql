@@ -262,7 +262,6 @@ BEGIN
 END
 GO
 
-/*
 -- Product Type
 GO
 IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 1)
@@ -299,4 +298,4 @@ BEGIN
 	VALUES(5,'Transfer','Transfer',1)
 END
 GO
-*/
+

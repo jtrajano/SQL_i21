@@ -12,6 +12,8 @@
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	[dtmPostedDate] DATETIME NULL, 
 	[dtmUnpostedDate] DATETIME NULL, 
+	[intSourceId] INT NULL, 
+	[intSourceTransactionTypeId] INT NULL, 
     CONSTRAINT [PK_tblICInventoryAdjustment] PRIMARY KEY ([intInventoryAdjustmentId]), 
     CONSTRAINT [AK_tblICInventoryAdjustment_strAdjustmentNo] UNIQUE ([strAdjustmentNo]), 
     CONSTRAINT [FK_tblICInventoryAdjustment_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 

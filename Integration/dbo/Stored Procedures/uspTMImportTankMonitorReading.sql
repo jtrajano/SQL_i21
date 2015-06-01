@@ -42,29 +42,30 @@ EXEC('
 		DECLARE @BurnRateChangePercent NUMERIC(18,6)
 		DECLARE @BurnRateAverage NUMERIC(18,6)
 		DECLARE @rpt_date_ti DATETIME
+		DECLARE @strOrderNumber NVARCHAR(50)
 	
 		SET @rpt_date_ti = @str_rpt_date_ti
  
 		SET @resultLog = ''''
-		IF(ISNULL(@customerid,'''') = '''')BEGIN
-			SET @resultLog = @resultLog +  ''Failed customerid validation'' + char(10)
-			RETURN 
-		END
+		--IF(ISNULL(@customerid,'''') = '''')BEGIN
+		--	SET @resultLog = @resultLog +  ''Failed customerid validation'' + char(10)
+		--	RETURN 
+		--END
 	
 		SET @resultLog = @resultLog +  ''passed customerid validation'' + char(10)
 	
-		IF(ISNULL(@ts_cat_1,'''') = '''')BEGIN
-			SET @resultLog = @resultLog +  ''Failed Tank Monitor Serial validation'' + char(10)
-			RETURN
-		END
+		--IF(ISNULL(@ts_cat_1,'''') = '''')BEGIN
+		--	SET @resultLog = @resultLog +  ''Failed Tank Monitor Serial validation'' + char(10)
+		--	RETURN
+		--END
 	
 		SET @resultLog = @resultLog + ''passed Tank Monitor Serial validation'' + char(10)
 	
-		IF(ISNULL(@ts_tankserialnum,'''') = '''')
-		BEGIN 
-			SET @resultLog = @resultLog + ''Failed Tank Serial validation'' + char(10)
-			RETURN 
-		END
+		--IF(ISNULL(@ts_tankserialnum,'''') = '''')
+		--BEGIN 
+		--	SET @resultLog = @resultLog + ''Failed Tank Serial validation'' + char(10)
+		--	RETURN 
+		--END
 		SET @resultLog = @resultLog +  ''passed Tank Serial validation'' + char(10)
 	
 		IF(@tx_nosensor <> 0) RETURN 10
@@ -135,15 +136,15 @@ EXEC('
 		SET @TankMonitorEventID = (SELECT TOP 1 intEventTypeID FROM tblTMEventType WHERE strEventType = ''Event-021'')
 	
 		--Check for previous tank monitor reading or duplicate reading
-		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading = @rpt_date_ti))	
+		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading = @rpt_date_ti AND intSiteID = @siteId ))	
 		BEGIN
 			SET @resultLog = @resultLog + ''Duplicate Reading'' + char(10)
 			SET @resultLog = @resultLog + ''Exception: Duplicate Reading'' + char(10)
 			RETURN
 		END
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent 
-					WHERE (intEventTypeID = @TankMonitorEventID AND strDescription LIKE ''%'' + CAST(@rpt_date_ti AS NVARCHAR(25)) + ''%'')
-						OR (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading > @rpt_date_ti))	
+					WHERE ((intEventTypeID = @TankMonitorEventID AND strDescription LIKE ''%'' + CAST(@rpt_date_ti AS NVARCHAR(25)) + ''%'')
+						OR (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading > @rpt_date_ti)) AND intSiteID = @siteId)	
 		BEGIN
 			SET @resultLog = @resultLog + ''Reading date is less than the current reading'' + char(10)
 			RETURN 
@@ -205,13 +206,13 @@ EXEC('
 		
 			--update runout and forecasted date
 			UPDATE tblTMSite
-			SET dtmRunOutDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((@tk_level / @tk_w_dau) AS INT)) 
-				,dtmForecastedDelivery = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST(((@tk_level - ISNULL(dblTotalReserve,0)) / @tk_w_dau) AS INT)) 
+			SET dtmRunOutDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((dblTotalCapacity * @tk_level / 100 / @tk_w_dau) AS INT)) 
+				,dtmForecastedDelivery = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((((dblTotalCapacity * @tk_level / 100) - ISNULL(dblTotalReserve,0)) / @tk_w_dau) AS INT)) 
 			WHERE intSiteID = @siteId
 		
 			--update DD Between Delivery
 			UPDATE tblTMSite
-			SET dblDegreeDayBetweenDelivery = dblBurnRate * (dblTotalCapacity * @tk_level - dblTotalReserve)
+			SET dblDegreeDayBetweenDelivery = dblBurnRate * ((dblTotalCapacity * @tk_level / 100) - dblTotalReserve)
 			WHERE intSiteID = @siteId
 		
 			--update next degree day Delivery
@@ -250,7 +251,8 @@ EXEC('
 			END	
 		
 			PRINT ''Create Call entry''
-			INSERT INTO [i1520WG].[dbo].[tblTMDispatch]
+			EXEC uspTMGetNextWillCallStartingNumber @strOrderNumber OUTPUT
+			INSERT INTO [dbo].[tblTMDispatch]
 				   ([intSiteID]
 				   ,[dblPercentLeft]
 				   ,[dblQuantity]
@@ -265,12 +267,13 @@ EXEC('
 				   ,[dtmCallInDate]
 				   ,[intUserID]
 				   ,[intDeliveryTermID]
+				   ,[strOrderNumber] 
 			  )		   
 			 (SELECT TOP 1 
 				   @siteId
 				   ,@tk_level
-				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - dblEstimatedPercentLeft) * dblTotalCapacity
-				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - dblEstimatedPercentLeft) * dblTotalCapacity
+				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - @tk_level) * dblTotalCapacity / 100
+				   ,(ISNULL((SELECT TOP 1 vwitm_deflt_percnt FROM vwitmmst WHERE A4GLIdentity = intProduct),0) - @tk_level) * dblTotalCapacity / 100
 				   ,intProduct
 				   ,0
 				   ,0
@@ -281,6 +284,7 @@ EXEC('
 				   ,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)
 				   ,@userID
 				   ,intDeliveryTermID
+				   ,@strOrderNumber
 			FROM tblTMSite
 			WHERE intSiteID = 	@siteId  
 			)

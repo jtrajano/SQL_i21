@@ -36,6 +36,7 @@ BEGIN TRY
 		,intCurrencyId
 		,dblExchangeRate
 		,intTransactionId
+		,intTransactionDetailId
 		,strTransactionId
 		,intTransactionTypeId
 		,intLotId
@@ -52,7 +53,7 @@ BEGIN TRY
 	-- Add the items to the item receipt 
 	IF @strSourceType = @SourceType_PurchaseOrder
 	BEGIN 
-		EXEC dbo.uspICAddPurchaseOrderToItemReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
 	END
 
 END TRY

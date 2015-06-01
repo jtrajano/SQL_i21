@@ -1,9 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCAddScaleTicketToItemReceipt]
 	 @intTicketId AS INT
 	,@intUserId AS INT
-	,@dblNetUnits AS DECIMAL (13,3)
-	,@dblCost AS DECIMAL (9,5)
-	,@intLineNo AS INT
+	,@Items ItemCostingTableType READONLY
 	,@intEntityId AS INT
 	,@InventoryReceiptId AS INT OUTPUT 
 AS
@@ -108,7 +106,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dblUnitWeightMile		= 0 -- TODO Not sure where to get this from PO
 		,dblFreightRate			= SC.dblFreightRate -- TODO I assume dblShipping is the Freight Rate. 
 		,dblFuelSurcharge		= 0 
-		,dblInvoiceAmount		= @dblNetUnits * @dblCost
+		,dblInvoiceAmount		= 0
 		,ysnInvoicePaid			= 0 
 		,intCheckNo				= NULL 
 		,dteCheckDate			= NULL 
@@ -154,13 +152,13 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intConcurrencyId
 )
 SELECT	intInventoryReceiptId	= @InventoryReceiptId
-		,intLineNo				= @intLineNo
+		,intLineNo				= 1
 		,intSourceId			= @intTicketId
 		,intItemId				= SC.intItemId
 		,intSubLocationId		= NULL
-		,dblOrderQty			= @dblNetUnits
-		,dblOpenReceive			= @dblNetUnits
-		,dblReceived			= @dblNetUnits
+		,dblOrderQty			= LI.dblQty
+		,dblOpenReceive			= LI.dblQty
+		,dblReceived			= LI.dblQty
 		,intUnitMeasureId		= ItemUOM.intItemUOMId
 		,intWeightUOMId			=	(
 										SELECT	TOP 1 
@@ -172,11 +170,11 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 												AND tblICUnitMeasure.strUnitType = 'Weight'
 												AND dbo.fnGetItemLotType(SC.intItemId) IN (1,2)
 									)
-		,dblUnitCost			= @dblCost
-		,dblLineTotal			= @dblNetUnits * @dblCost
+		,dblUnitCost			= LI.dblCost
+		,dblLineTotal			= LI.dblQty * LI.dblCost
 		,intSort				= 1
 		,intConcurrencyId		= 1
-FROM	dbo.tblSCTicket SC INNER JOIN dbo.tblICItemUOM ItemUOM			
+FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = SC.intItemId
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM

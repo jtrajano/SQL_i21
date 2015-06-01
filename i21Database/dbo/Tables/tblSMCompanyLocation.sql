@@ -69,7 +69,7 @@
 	[strPrintonInvoice] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPrintContractBalance] BIT NULL DEFAULT (1),
 	[strJohnDeereMerchant] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[strInvoiceComments] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strInvoiceComments] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[ysnUseOrderNumberforInvoiceNumber] BIT NULL DEFAULT (1),
 	[ysnOverrideOrderInvoiceNumber] BIT NULL DEFAULT (1),
 	[ysnPrintInvoiceMedTags] BIT NULL DEFAULT (1),

@@ -31,10 +31,22 @@ AS
 		L.strLocationName,
 		P.strPaymentMethod,
 		0.000000						AS dblPaymentAmount,
-		SV.strName						AS strShipVia,
+		SV.strShipVia,
 		SE.strName						AS strSalesPerson,
 		E.strEmail						AS strCustomerEmail,
-		CUR.strCurrency				
+		CUR.strCurrency,		
+		ELB.strLocationName				AS strBillToLocationName,
+		ELB.strAddress					AS strBillToAddress,
+		ELB.strCity						AS strBillToCity,
+		ELB.strState					AS strBillToState,
+		ELB.strZipCode					AS strBillToZipCode,
+		ELB.strCountry					AS strBillToCountry,
+		ELS.strLocationName				AS strShipToLocationName,
+		ELS.strAddress					AS strShipToAddress,
+		ELS.strCity						AS strShipToCity,
+		ELS.strState					AS strShipToState,
+		ELS.strZipCode					AS strShipToZipCode,
+		ELS.strCountry					AS strShipToCountry
 	FROM         
 		dbo.tblARInvoice AS I 
 	INNER JOIN
@@ -44,6 +56,10 @@ AS
 		dbo.tblEntityToContact AS EC ON C.intEntityCustomerId = EC.intEntityId AND EC.ysnDefaultContact = 1
 	LEFT OUTER JOIN
 		dbo.tblEntity AS E ON EC.intEntityContactId = E.intEntityId
+	LEFT OUTER JOIN
+		dbo.tblEntityLocation AS ELB ON C.intBillToId = ELB.intEntityLocationId
+	LEFT OUTER JOIN
+		dbo.tblEntityLocation AS ELS ON C.intShipToId = ELS.intEntityLocationId		
 	INNER JOIN
 		dbo.tblEntity AS CE 
 			ON C.[intEntityCustomerId] = CE.intEntityId 

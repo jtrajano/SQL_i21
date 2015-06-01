@@ -65,11 +65,11 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
 
-	SELECT	CASE	WHEN	CH.intPurchaseSale  =	1	
+	SELECT	CASE	WHEN	CH.intContractTypeId  =	1	
 					THEN	'BUYER :  ' + CHAR(9)+ @strCompanyName + ', '  + CHAR(13)+CHAR(10) +
 							REPLICATE(' ',18)+ REPLACE(ISNULL(@strAddress,''),CHAR(10), +CHAR(10) + REPLICATE(' ',18)) + ', ' + CHAR(13)+CHAR(10) +
 							REPLICATE(' ',18)+ ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
-					WHEN	CH.intPurchaseSale  =	2
+					WHEN	CH.intContractTypeId  =	2
 					THEN	'SELLER : ' + CHAR(9)+ LTRIM(RTRIM(EY.strName)) + ', ' + CHAR(13)+CHAR(10) +
 							REPLICATE(' ',18)+ REPLACE(ISNULL(LTRIM(RTRIM(EL.strAddress)),''),CHAR(10), +CHAR(10) + REPLICATE(' ',18)) + ', ' + CHAR(13)+CHAR(10) +
 							REPLICATE(' ',18)+ ISNULL(LTRIM(RTRIM(EL.strCity)),'') + 
@@ -77,11 +77,11 @@ BEGIN TRY
 							ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(strZipCode)) END,'') + 
 							ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END,'')
 			END		AS	strA,
-			CASE	WHEN	CH.intPurchaseSale  =	2	
+			CASE	WHEN	CH.intContractTypeId  =	2	
 					THEN	'BUYER :' + CHAR(9)+ @strCompanyName + ', '  + CHAR(13)+CHAR(10) +
 							REPLICATE(' ',18)+ REPLACE(ISNULL(@strAddress,''),CHAR(10), +CHAR(10) + REPLICATE(' ',18)) + ', ' + CHAR(13)+CHAR(10) +
 							REPLICATE(' ',18)+ ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
-					WHEN	CH.intPurchaseSale  =	1
+					WHEN	CH.intContractTypeId  =	1
 					THEN	'SELLER : ' + CHAR(9)+ LTRIM(RTRIM(EY.strName)) + ', ' + CHAR(13)+CHAR(10) +
 							REPLICATE(' ',18)+ REPLACE(ISNULL(LTRIM(RTRIM(EL.strAddress)),''),CHAR(10), +CHAR(10) + REPLICATE(' ',18)) + ', ' + CHAR(13)+CHAR(10) +
 							REPLICATE(' ',18)+ ISNULL(LTRIM(RTRIM(EL.strCity)),'') + 
@@ -93,24 +93,24 @@ BEGIN TRY
 			CH.intContractNumber,
 			CH.intContractHeaderId,
 			EY.strNumber,
-			CASE	WHEN	CH.intPurchaseSale  =	1	
+			CASE	WHEN	CH.intContractTypeId  =	1	
 					THEN	'We confirm PURCHASE from you as follows :'
-					WHEN	CH.intPurchaseSale  =	2
+					WHEN	CH.intContractTypeId  =	2
 					THEN	'We confirm SALES to you as follows :'
 			END		AS	strConfirm,
-			CASE	WHEN	CH.intPurchaseSale  =	2	
+			CASE	WHEN	CH.intContractTypeId  =	2	
 					THEN	@strCompanyName
-					WHEN	CH.intPurchaseSale  =	1
+					WHEN	CH.intContractTypeId  =	1
 					THEN	EY.strName
 			END		AS	strBuyer,
-			CASE	WHEN	CH.intPurchaseSale  =	1	
+			CASE	WHEN	CH.intContractTypeId  =	1	
 					THEN	@strCompanyName
-					WHEN	CH.intPurchaseSale  =	2
+					WHEN	CH.intContractTypeId  =	2
 					THEN	EY.strName
 			END		AS	strSeller,
-			CASE	WHEN	CH.intPurchaseSale  =	1	
+			CASE	WHEN	CH.intContractTypeId  =	1	
 					THEN	'PURCHASE CONTRACT CONFIRMATION'
-					WHEN	CH.intPurchaseSale  =	2
+					WHEN	CH.intContractTypeId  =	2
 					THEN	'SALES CONTRACT CONFIRMATION'
 			END		AS	strHeading,
 			TX.strText

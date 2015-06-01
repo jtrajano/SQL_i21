@@ -12,13 +12,13 @@ AS
 			D.intConcurrencyId,
 			D.dblBalance,
 			D.dblBalance * -1 AS dblAdjAmount,
-			CASE	WHEN D.intPricingType = 1 THEN D.dblCashPrice
-					WHEN D.intPricingType = 2 THEN D.dblBasis
-					WHEN D.intPricingType = 3 THEN D.dblFutures
+			CASE	WHEN D.intPricingTypeId = 1 THEN D.dblCashPrice
+					WHEN D.intPricingTypeId = 2 THEN D.dblBasis
+					WHEN D.intPricingTypeId = 3 THEN D.dblFutures
 			ELSE 
 				NULL
 			END		AS	dblContractPrice,
-			P.Name	AS	strPricingType,
+			P.strPricingType,
 			UM1.strUnitMeasure	AS strQuantityUOM,
 			UM2.strUnitMeasure	AS strPriceUOM,
 			CAST(NULL AS NUMERIC(8,4))	AS	dblCancellationPrice,
@@ -32,15 +32,15 @@ AS
 			H.intContractNumber,
 			E.strName	AS strCustomerVendor,
 			I.strItemNo,
-			T.Name	AS	strContractType,
+			T.strContractType,
 			M.strFutureMonth
 			
 	FROM	tblCTContractDetail		D
 	JOIN	tblCTContractHeader		H	ON	D.intContractHeaderId	=	H.intContractHeaderId
-	JOIN	tblCTContractType		T	ON	T.Value					=	H.intPurchaseSale
+	JOIN	tblCTContractType		T	ON	T.intContractTypeId		=	H.intContractTypeId
 	JOIN	tblEntity				E	ON	H.intEntityId			=	E.intEntityId
 	JOIN	tblICItem				I	ON	I.intItemId				=	D.intItemId
-	JOIN	tblCTPricingType		P	ON	P.Value					=	D.intPricingType
+	JOIN	tblCTPricingType		P	ON	P.intPricingTypeId		=	D.intPricingTypeId
 	JOIN	tblICUnitMeasure		UM1 ON	UM1.intUnitMeasureId	=	D.intUnitMeasureId		LEFT
 	JOIN	tblICUnitMeasure		UM2 ON	UM2.intUnitMeasureId	=	D.intPriceUOMId			LEFT
 	JOIN	tblRKFuturesMonth		M	ON	M.intFutureMonthId		=	D.intFutureMonthId

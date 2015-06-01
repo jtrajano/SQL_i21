@@ -111,7 +111,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_tblICBrand] FOREIGN KEY ([intBrandId]) REFERENCES [tblICBrand]([intBrandId]), 
 		CONSTRAINT [FK_tblICItem_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-		CONSTRAINT [FK_tblICItem_tblICPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICPackType]([intPackTypeId]), 
+		CONSTRAINT [FK_tblICItem_tblICPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblMFPackType]([intPackTypeId]), 
 		CONSTRAINT [FK_tblICItem_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]), 
 		CONSTRAINT [FK_tblICItem_tblICFuelTaxClass] FOREIGN KEY ([intFuelTaxClassId]) REFERENCES [tblICFuelTaxClass]([intFuelTaxClassId]), 
 		CONSTRAINT [FK_tblICItem_tblICRinFuelCategory] FOREIGN KEY ([intRINFuelTypeId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]), 
@@ -119,7 +119,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
 		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
 		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
-		CONSTRAINT [FK_tblICItem_tblSMTaxGroupMaster] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId])  
+		CONSTRAINT [FK_tblICItem_tblSMTaxGroupMaster] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
+		CONSTRAINT [FK_tblICItem_tblSMCountry] FOREIGN KEY ([intOriginId]) REFERENCES [tblSMCountry]([intCountryID])  
 	);
 	GO
 

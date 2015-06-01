@@ -21,7 +21,7 @@ SELECT
  ,B.dblCost
  ,B.dblTotal
  ,B.dtmExpectedDate
- ,B.[strMiscDescription]
+ ,B.[strMiscDescription] AS strDescription
  ,B.strPONumber
  ,B.intLineNo
  ,C.strVendorId
@@ -29,7 +29,7 @@ SELECT
  ,D.strItemNo
  ,D.strLotTracking
  ,H.strUnitMeasure AS strUOM
- ,E.dblUnitQty AS dblItemUOMCF
+ ,ISNULL(E.dblUnitQty,0) AS dblItemUOMCF
  ,intStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId),0)
  ,strStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId)
  ,strStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId)
@@ -46,3 +46,4 @@ FROM tblPOPurchase A
  LEFT JOIN tblICUnitMeasure H ON E.intUnitMeasureId = H.intUnitMeasureId
  LEFT JOIN tblSMCompanyLocationSubLocation F ON B.intSubLocationId = F.intCompanyLocationSubLocationId
  LEFT JOIN tblICStorageLocation G ON B.intStorageLocationId = G.intStorageLocationId
+ WHERE D.strType NOT IN ('Service','Software','Non-Inventory','Other Charge')

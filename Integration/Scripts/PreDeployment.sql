@@ -51,7 +51,7 @@
 :r ..\dbo\Views\vwcmtmst.sql
 :r ..\dbo\Views\vwcntmst.sql
 :r "..\dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql"
-:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
+
 
 -- CUSTOMER PORTAL
 :r ..\dbo\Views\vyuCPAgcusMst.sql
@@ -117,6 +117,7 @@
 :r "..\dbo\Functions\fnTMGetSalesTax.sql"
 :r "..\dbo\Functions\fnTMGetContractForCustomer.sql"
 :r "..\dbo\Functions\fnTMGetSpecialPricing.sql"
+:r "..\dbo\Stored Procedures\uspTMImportTankMonitorReading.sql"
 
 
 --:r "..\dbo\Functions\fnGetVendorLastName.sql"

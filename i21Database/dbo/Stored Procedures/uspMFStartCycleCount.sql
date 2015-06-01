@@ -11,6 +11,8 @@ BEGIN TRY
 		,@intItemId INT
 		,@intUserId INT
 		,@intCycleCountSessionId INT
+		,@ysnIncludeOutputItem bit
+		,@strExcludeItemType nvarchar(MAX)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -19,11 +21,15 @@ BEGIN TRY
 		,@intSubLocationId = intSubLocationId
 		,@intUserId = intUserId
 		,@intWorkOrderId = intWorkOrderId
+		,@ysnIncludeOutputItem=ysnIncludeOutputItem
+		,@strExcludeItemType=strExcludeItemType
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLocationId INT
 			,intSubLocationId INT
 			,intUserId INT
 			,intWorkOrderId INT
+			,ysnIncludeOutputItem bit
+			,strExcludeItemType nvarchar(MAX)
 			)
 
 	DECLARE @intUserSecurityID INT
@@ -43,7 +49,7 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
-				AND ysnTrueUp = 1
+				AND intCountStatusId = 13
 			)
 	BEGIN
 		RAISERROR (
@@ -201,7 +207,7 @@ BEGIN TRY
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)
-				AND W.ysnTrueUp = 0
+				AND intCountStatusId <> 13
 			)
 	BEGIN
 		SELECT TOP 1 @strProductItem = Product.strItemNo + ' - ' + Product.strDescription
@@ -237,7 +243,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND W.ysnTrueUp = 0
+			AND intCountStatusId <> 13
 		ORDER BY W.dtmPlannedDate DESC
 			,W.intPlannedShiftId DESC
 
@@ -275,7 +281,7 @@ BEGIN TRY
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)
-				AND W.ysnTrueUp = 0
+				AND intCountStatusId <> 13
 				AND (
 					CASE 
 						WHEN intPlannedShiftId IS NOT NULL
@@ -319,7 +325,7 @@ BEGIN TRY
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
-			AND W.ysnTrueUp = 0
+			AND intCountStatusId <> 13
 			AND (
 				CASE 
 					WHEN intPlannedShiftId IS NOT NULL
@@ -360,6 +366,7 @@ BEGIN TRY
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
+		AND ri.intRecipeItemTypeId = 1
 	
 	UNION
 	
@@ -371,6 +378,24 @@ BEGIN TRY
 		AND R.ysnActive = 1
 		AND RI.intRecipeItemTypeId = 1
 		AND R.intLocationId = @intLocationId
+
+	if @ysnIncludeOutputItem=1
+	Begin
+		INSERT INTO @tblICItem (intItemId)
+		SELECT ri.intItemId
+		FROM dbo.tblMFRecipeItem ri
+		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		WHERE r.ysnActive = 1
+			AND r.intItemId = @intItemId
+			AND r.intLocationId = @intLocationId
+			AND ri.intRecipeItemTypeId = 2
+
+	End
+
+	DELETE tempItem 
+	FROM @tblICItem tempItem 
+	JOIN tblICItem I on I.intItemId=tempItem.intItemId
+	Where I.strType in (Select Item COLLATE Latin1_General_CI_AS from dbo.fnSplitString(@strExcludeItemType,','))
 
 	BEGIN TRANSACTION
 
@@ -430,10 +455,38 @@ BEGIN TRY
 	WHERE MP.intManufacturingProcessId = @intManufacturingProcessId
 
 	UPDATE dbo.tblMFWorkOrder
-	SET ysnCountStarted = 1
+	SET intCountStatusId  = 10
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT CC.intCycleCountSessionId
+		,CC.intCycleCountId
+		,CC.intMachineId
+		,M.strName AS strMachineName
+		,M.intSubLocationId
+		,SL.strSubLocationName 
+		,CC.intLotId
+		,CC.intItemId
+		,I.strItemNo
+		,I.strDescription
+		,CC.dblQuantity
+		,CC.dblSystemQty
+		,CC.intCreatedUserId 
+		,U.strUserName strCreatedUser
+		,CC.dtmCreated
+		,CC.intLastModifiedUserId
+		,U1.strUserName strLastModifiedUser
+		,CC.dtmLastModified
+		,CC.intConcurrencyId
+	FROM dbo.tblMFProcessCycleCount CC
+	JOIN dbo.tblMFMachine M ON M.intMachineId = CC.intMachineId
+	JOIN dbo.tblICItem I ON I.intItemId = CC.intItemId
+	JOIN dbo.tblSMUserSecurity U ON U.intUserSecurityID = CC.intCreatedUserId
+	JOIN dbo.tblSMUserSecurity U1 ON U1.intUserSecurityID = CC.intCreatedUserId
+	JOIN dbo.tblSMCompanyLocationSubLocation SL on SL.intCompanyLocationSubLocationId =M.intSubLocationId
+	WHERE intCycleCountSessionId = @intCycleCountSessionId
+
 
 	COMMIT TRANSACTION
 

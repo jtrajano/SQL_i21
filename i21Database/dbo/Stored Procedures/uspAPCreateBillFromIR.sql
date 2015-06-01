@@ -85,7 +85,8 @@ BEGIn
 		[ysnPaid],
 		[intTransactionType],
 		[dblDiscount],
-		[dblWithheld]
+		[dblWithheld],
+		[intStoreLocationId]
 	)
 	OUTPUT inserted.intBillId, @receiptId INTO #tmpReceiptBillIds(intBillId, intInventoryReceiptId)
 	SELECT
@@ -111,7 +112,8 @@ BEGIn
 		[ysnPaid]				=	0,
 		[intTransactionType]	=	1,
 		[dblDiscount]			=	0,
-		[dblWithheld]			=	0
+		[dblWithheld]			=	0,
+		[intStoreLocationId]	=	A.intLocationId
 	FROM tblICInventoryReceipt A
 	OUTER APPLY 
 	(
@@ -127,8 +129,8 @@ BEGIn
 	INSERT INTO tblAPBillDetail(
 		[intBillId],
 		[intItemId],
-		[intItemReceiptId],
-		[intPODetailId],
+		[intInventoryReceiptItemId],
+		[intPurchaseDetailId],
 		[dblQtyOrdered],
 		[dblQtyReceived],
 		[intAccountId],
@@ -137,16 +139,16 @@ BEGIn
 		[intLineNo]
 	)
 	SELECT
-		[intBillId]				=	@generatedBillId,
-		[intItemId]				=	B.intItemId,
-		[intItemReceiptId]		=	B.intInventoryReceiptItemId,
-		[intPODetailId]			=	B.intLineNo,
-		[dblQtyOrdered]			=	B.dblOpenReceive - B.dblBillQty,
-		[dblQtyReceived]		=	B.dblOpenReceive - B.dblBillQty,
-		[intAccountId]			=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
-		[dblTotal]				=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
-		[dblCost]				=	B.dblUnitCost,
-		[intLineNo]				=	B.intSort
+		[intBillId]					=	@generatedBillId,
+		[intItemId]					=	B.intItemId,
+		[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
+		[intPODetailId]				=	B.intLineNo,
+		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
+		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
+		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
+		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
+		[dblCost]					=	B.dblUnitCost,
+		[intLineNo]					=	B.intSort
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId

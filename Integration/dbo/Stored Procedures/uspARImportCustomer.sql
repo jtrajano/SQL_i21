@@ -342,9 +342,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			--Import only those are not yet imported
 			SELECT agcus_key INTO #tmpagcusmst 
 				FROM agcusmst
-			LEFT JOIN tblARCustomer
-				ON agcusmst.agcus_key COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
-			WHERE tblARCustomer.strCustomerNumber IS NULL
+					where agcus_key COLLATE Latin1_General_CI_AS not in ( select strCustomerNumber from tblARCustomer) 
 			ORDER BY agcusmst.agcus_key
 
 			WHILE (EXISTS(SELECT 1 FROM #tmpagcusmst))
@@ -616,8 +614,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			WHERE tblARCustomer.strCustomerNumber IS NULL
 		END
 		
-	END
-	'
+	END'	
 )
 END
 
@@ -922,11 +919,9 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 			DECLARE @Counter INT = 0
 
 			--Import only those are not yet imported
-			SELECT TOP 10 ptcus_cus_no INTO #tmpptcusmst
+			SELECT ptcus_cus_no INTO #tmpptcusmst
 				FROM ptcusmst
-			LEFT JOIN tblARCustomer
-				ON ptcusmst.ptcus_cus_no COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
-			WHERE tblARCustomer.strCustomerNumber IS NULL
+					where ptcus_cus_no COLLATE Latin1_General_CI_AS not in ( select strCustomerNumber from tblARCustomer) 
 			ORDER BY ptcusmst.ptcus_cus_no
 
 			WHILE (EXISTS(SELECT 1 FROM #tmpptcusmst))
@@ -1200,7 +1195,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ON ptcusmst.ptcus_cus_no COLLATE Latin1_General_CI_AS = tblARCustomer.strCustomerNumber COLLATE Latin1_General_CI_AS
 			WHERE tblARCustomer.strCustomerNumber IS NULL
 		END
-	END
-	'
+	END'
+
 )
 END

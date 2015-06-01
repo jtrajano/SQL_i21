@@ -7,47 +7,19 @@ CREATE TABLE [dbo].[tblCTCostType](
 	[ysnAccrue] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnAccrue]  DEFAULT ((0)),
 	[ysnMTM] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnMTM]  DEFAULT ((0)),
 	[ysnPrice] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnPrice]  DEFAULT ((0)),
-	[intCostMethod] [int] NOT NULL,
+	[intCostMethodId] [int] NOT NULL,
 	[dblAmount] [numeric](12, 4) NOT NULL,
 	[intUnitMeasureId] [int] NULL,
 	[intCurrencyId] [int] NOT NULL,
 	[ysnFreightRelated] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnFreightRelated]  DEFAULT ((0)),
 	[ysnActive] [bit] NOT NULL CONSTRAINT [DF_tblCTCostType_ysnActive]  DEFAULT ((1)),
- CONSTRAINT [PK_tblCTCostType_intCostTypeId] PRIMARY KEY CLUSTERED 
-(
-	[intCostTypeId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
-    CONSTRAINT [UQ_tblCTCostType_intFreightTermId_strCostTypeName] UNIQUE ([intFreightTermId], [strCostTypeName])
-) ON [PRIMARY]
-
-GO
-
-ALTER TABLE [dbo].[tblCTCostType]  WITH CHECK ADD  CONSTRAINT [FK_tblCTCostType_tblCTCostMethod_intCostMethod] FOREIGN KEY([intCostMethod])
-REFERENCES [dbo].[tblCTCostMethod] ([Value])
-GO
-
-ALTER TABLE [dbo].[tblCTCostType] CHECK CONSTRAINT [FK_tblCTCostType_tblCTCostMethod_intCostMethod]
-GO
-
-ALTER TABLE [dbo].[tblCTCostType]  WITH CHECK ADD  CONSTRAINT [FK_tblCTCostType_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId])
-REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
-GO
-
-ALTER TABLE [dbo].[tblCTCostType] CHECK CONSTRAINT [FK_tblCTCostType_tblICUnitMeasure_intUnitMeasureId]
-GO
-
-ALTER TABLE [dbo].[tblCTCostType]  WITH CHECK ADD  CONSTRAINT [FK_tblCTCostType_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])
-REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
-GO
-
-ALTER TABLE [dbo].[tblCTCostType] CHECK CONSTRAINT [FK_tblCTCostType_tblSMCurrency_intCurrencyId]
-GO
-
-ALTER TABLE [dbo].[tblCTCostType]  WITH CHECK ADD  CONSTRAINT [FK_tblCTCostType_tblSMFreightTerms_intFreightTermId] FOREIGN KEY([intFreightTermId])
-REFERENCES [dbo].[tblSMFreightTerms] ([intFreightTermId])
-GO
-
-ALTER TABLE [dbo].[tblCTCostType] CHECK CONSTRAINT [FK_tblCTCostType_tblSMFreightTerms_intFreightTermId]
-GO
-
-
+	[intOnCostTypeId]  [int] NULL,
+	[intAccountCategoryId]  [int] NULL,
+	CONSTRAINT [PK_tblCTCostType_intCostTypeId] PRIMARY KEY CLUSTERED ([intCostTypeId] ASC),
+	CONSTRAINT [FK_tblCTCostType_tblCTCostMethod_intCostMethodId] FOREIGN KEY ([intCostMethodId]) REFERENCES [tblCTCostMethod]([intCostMethodId]),
+	CONSTRAINT [FK_tblCTCostType_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblCTCostType_tblSMFreightTerms_intFreightTermId] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
+	CONSTRAINT [FK_tblCTCostType_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblCTCostType_tblCTCostType_intCostTypeId_intOnCostTypeId] FOREIGN KEY ([intOnCostTypeId]) REFERENCES [tblCTCostType]([intCostTypeId]),
+	CONSTRAINT [FK_tblCTCostType_tblGLAccountCategory_intAccountCategoryId] FOREIGN KEY ([intAccountCategoryId]) REFERENCES [tblGLAccountCategory]([intAccountCategoryId])
+)

@@ -9,7 +9,8 @@ SELECT
 ,Loc.strAddress
 ,Loc.strCity
 ,Loc.strState
-,Loc.strZipCode 
+,Loc.strZipCode
+,Cus.ysnTaxExempt 
 ,Cus.ysnActive
 ,Cus.intSalespersonId
 ,Cus.intCurrencyId
@@ -27,11 +28,14 @@ SELECT
 ,BillToLoc.strState as strBillToState
 ,BillToLoc.strZipCode as strBillToZipCode
 ,BillToLoc.strCountry as strBillToCountry
+,Cus.intShipToId
+,Cus.intBillToId
+,Loc.intFreightTermId
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 LEFT JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
 --LEFT JOIN tblEntityContact as Con ON CusToCon.[intEntityContactId] = Con.[intEntityContactId]
 LEFT JOIN tblEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]
-LEFT JOIN tblEntityLocation as Loc ON Cus.intDefaultLocationId = Loc.intEntityLocationId
+LEFT JOIN tblEntityLocation as Loc ON Cus.intEntityCustomerId = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
 LEFT JOIN tblEntityLocation as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId
 LEFT JOIN tblEntityLocation as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId

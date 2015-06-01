@@ -17,6 +17,9 @@
 	,@ysnCreateNewLot BIT = 1
 	,@ysnFGProduction BIT = 0
 	,@ysnIgnoreTolerance BIT = 1
+	,@intMachineId int
+	,@ysnLotAlias bit=0
+	,@strLotAlias nvarchar(50)
 	)
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -35,6 +38,7 @@ BEGIN TRY
 		,@strStatus NVARCHAR(50)
 		,@ysnAllowMultipleItem BIT
 		,@ysnAllowMultipleLot BIT
+		,@ysnMergeOnMove BIT
 		,@intExistingiItemId INT
 		,@intExistingStorageLocationId INT
 		,@strExistingStorageLocationName NVARCHAR(50)
@@ -218,6 +222,7 @@ BEGIN TRY
 
 	SELECT @ysnAllowMultipleItem = ysnAllowMultipleItem
 		,@ysnAllowMultipleLot = ysnAllowMultipleLot
+		,@ysnMergeOnMove = ysnMergeOnMove
 	FROM dbo.tblICStorageLocation
 	WHERE intStorageLocationId = @intStorageLocationId
 
@@ -240,6 +245,7 @@ BEGIN TRY
 	END
 	ELSE IF @ysnAllowMultipleLot = 0
 		AND @ysnAllowMultipleItem = 1
+		AND @ysnMergeOnMove=0
 	BEGIN
 		IF EXISTS (
 				SELECT 1
@@ -290,7 +296,7 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE strLotNumber = @strLotNumber
 
-	IF @intLotId IS NOT NULL
+	IF @intLotId IS NOT NULL AND @ysnMergeOnMove=0
 	BEGIN
 		SELECT @strExistingStorageLocationName = strName
 		FROM dbo.tblICStorageLocation
@@ -527,6 +533,53 @@ BEGIN TRY
 
 			RETURN
 		END
+		If @intMachineId is NOt null
+		Begin
+
+			Declare @dblBatchSize numeric(18,6),@intBatchSizeUOMId int,@intUnitMeasureId int
+
+			Select @intUnitMeasureId=intUnitMeasureId 
+			from dbo.tblICItemUOM 
+			Where intItemUOMId=@intItemUOMId
+
+			Select @dblBatchSize=dblBatchSize,@intBatchSizeUOMId=intBatchSizeUOMId
+			From dbo.tblMFMachine
+			Where intMachineId=@intMachineId
+
+			If @dblBatchSize is not null and @intBatchSizeUOMId is not null
+			Begin
+				If @intBatchSizeUOMId=@intUnitMeasureId and @dblQuantity>@dblBatchSize
+				Begin
+					RAISERROR (
+					51121
+					,11
+					,1
+					)
+				End
+			End
+		End
+		If @ysnLotAlias=1 and @strLotAlias=''
+		Begin
+					RAISERROR (
+					51122
+					,11
+					,1
+					,@strItemNo
+					)
+	
+		End
+
+		If @intWorkOrderId is null
+		Begin
+					RAISERROR (
+					51123
+					,11
+					,1
+					,@strItemNo
+					)
+	
+		end
+
 
 	END
 END TRY

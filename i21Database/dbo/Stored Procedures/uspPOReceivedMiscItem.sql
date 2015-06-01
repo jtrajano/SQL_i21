@@ -15,7 +15,7 @@ BEGIN
 	SELECT @posted = ysnPosted FROM tblAPBill WHERE intBillId = @billId;
 
 	SELECT	B.intBillId
-			,B.intPODetailId
+			,B.[intPurchaseDetailId]
 			,B.dblQtyReceived
 			,B.intItemId
 			,A.ysnPosted
@@ -27,7 +27,50 @@ BEGIN
 	WHERE	A.intBillId= @billId
 	AND C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 
-	--SELECT TOP 1 @posted = ysnPosted FROM #tmpReceivedPOMiscItems
+	
+	--UPDATING ON ORDER QUANTITY
+	DECLARE @ItemToUpdateOnOrderQty ItemCostingTableType
+
+	-- Get the list. 
+	INSERT INTO @ItemToUpdateOnOrderQty (
+			dtmDate
+			,intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intSubLocationId
+			,dblQty
+			,dblUOMQty
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intTransactionTypeId
+	)
+	SELECT	dtmDate					= A.dtmDate
+			,intItemId				= B.intItemId
+			,intItemLocationId		= ItemLocation.intItemLocationId
+			,intItemUOMId			= C.intUnitOfMeasureId
+			,intSubLocationId		= C.intSubLocationId
+			,dblQty					= B.dblQtyReceived * CASE WHEN @posted = 1 THEN -1 ELSE 1 END -- dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
+			,dblUOMQty				= 1   --1 -- Keep value as one (1). The dblQty is converted manually by using the fnCalculateQtyBetweenUOM function.
+			,intTransactionId		= A.intBillId
+			,intTransactionDetailId = B.intBillDetailId
+			,strTransactionId		= A.strBillId
+			,intTransactionTypeId	= -1 -- any value
+	FROM	dbo.tblAPBill A
+			INNER JOIN dbo.tblAPBillDetail B
+				ON A.intBillId = B.intBillId
+			INNER JOIN tblPOPurchaseDetail C
+				ON B.intPurchaseDetailId = C.intPurchaseDetailId
+			LEFT JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intItemId = B.intItemId
+				AND ItemLocation.intLocationId = A.intShipToId				
+			LEFT JOIN dbo.tblICItemUOM	ItemUOM
+				ON ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId
+	WHERE	A.intBillId = @billId
+
+	-- Call the stored procedure that updates the on order qty. 
+	EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
+
 
 	UPDATE	A
 	SET		A.dblQtyReceived = CASE	WHEN	 @posted = 1 THEN (A.dblQtyReceived + B.dblQtyReceived) 
@@ -35,7 +78,7 @@ BEGIN
 							END
 	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOMiscItems B 
 				ON A.intItemId = B.intItemId 
-				AND A.intPurchaseDetailId = B.intPODetailId
+				AND A.intPurchaseDetailId = B.[intPurchaseDetailId]
 
 	--Validate
 	IF(@@ROWCOUNT != (SELECT COUNT(*) FROM #tmpReceivedPOMiscItems))
@@ -50,9 +93,9 @@ BEGIN
 	WHILE @counter != @countReceivedMisc
 	BEGIN
 		SET @counter = @counter + 1;
-		SELECT TOP(1) @purchaseId = intPurchaseId, @purchaseDetailId = intPODetailId FROM #tmpReceivedPOMiscItems A INNER JOIN tblPOPurchaseDetail B ON A.intPODetailId = B.intPurchaseDetailId
+		SELECT TOP(1) @purchaseId = intPurchaseId, @purchaseDetailId = B.[intPurchaseDetailId] FROM #tmpReceivedPOMiscItems A INNER JOIN tblPOPurchaseDetail B ON A.[intPurchaseDetailId] = B.intPurchaseDetailId
 		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
-		DELETE FROM #tmpReceivedPOMiscItems WHERE intPODetailId = @purchaseDetailId
+		DELETE FROM #tmpReceivedPOMiscItems WHERE [intPurchaseDetailId] = @purchaseDetailId
 	END
 
 END

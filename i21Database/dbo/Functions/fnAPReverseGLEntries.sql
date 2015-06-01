@@ -62,6 +62,7 @@ BEGIN
 		,[dtmDateEntered]
 		,[dtmTransactionDate]
 		,[strJournalLineDescription]
+		,[intJournalLineNo]
 		,[ysnIsUnposted]
 		,[intConcurrencyId]
 		,[intUserId]
@@ -88,6 +89,7 @@ BEGIN
 		,dtmDateEntered = GETDATE()
 		,[dtmTransactionDate]
 		,[strJournalLineDescription]
+		,[intJournalLineNo]
 		,ysnIsUnposted = 1
 		,[intConcurrencyId]
 		,intUserId = @intUserId
@@ -97,7 +99,7 @@ BEGIN
 		,[intEntityId] = @intUserId
 	FROM	tblGLDetail 
 	WHERE	intTransactionId IN (SELECT intTransactionId FROM @tmpTransacions)
-	AND strTransactionType = @transactionType
+	AND strTransactionForm = @transactionType
 	AND ysnIsUnposted = 0
 	ORDER BY intGLDetailId
 

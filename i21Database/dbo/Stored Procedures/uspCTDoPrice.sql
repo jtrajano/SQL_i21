@@ -82,12 +82,12 @@ BEGIN TRY
 		(
 				intConcurrencyId,		intContractHeaderId,	intContractSeq,			intCompanyLocationId,
 				dtmStartDate,			intItemId,				dtmEndDate,				intFreightTermId,
-				intShipViaId,			dblQuantity,			intUnitMeasureId,		intPricingType,
+				intShipViaId,			dblQuantity,			intUnitMeasureId,		intPricingTypeId,
 				dblFutures,				dblBasis,				intFutureMarketId,		intFutureMonthId,
 				dblCashPrice,			intCurrencyId,			dblRate,				strCurrencyReference,
-				intMarketZoneId,		intDiscountType,		intDiscountId,			intContractOptHeaderId,
+				intMarketZoneId,		intDiscountTypeId,		intDiscountId,			intContractOptHeaderId,
 				strBuyerSeller,			intBillTo,				intFreightRateId,		strFobBasis,
-				intGrade,				strRemark,				dblOriginalQty,			dblBalance,
+				intRailGradeId,			strRemark,				dblOriginalQty,			dblBalance,
 				dblIntransitQty,		dblScheduleQty,			intPriceUOMId,			intLoadingPortId,
 				intDestinationPortId,	strShippingTerm,		intShippingLineId,		strVessel,
 				intDestinationCityId,	intShipperId
@@ -95,12 +95,12 @@ BEGIN TRY
 		SELECT 
 				1,						intContractHeaderId,	@ContractSeq,			intCompanyLocationId,
 				dtmStartDate,			intItemId,				dtmEndDate,				intFreightTermId,
-				intShipViaId,			@CurrentQty-@Quantity,	intUnitMeasureId,		intPricingType,
+				intShipViaId,			@CurrentQty-@Quantity,	intUnitMeasureId,		intPricingTypeId,
 				dblFutures,				dblBasis,				intFutureMarketId,		intFutureMonthId,
 				dblCashPrice,			intCurrencyId,			dblRate,				strCurrencyReference,
-				intMarketZoneId,		intDiscountType,		intDiscountId,			intContractOptHeaderId,
+				intMarketZoneId,		intDiscountTypeId,		intDiscountId,			intContractOptHeaderId,
 				strBuyerSeller,			intBillTo,				intFreightRateId,		strFobBasis,
-				intGrade,				strRemark,				dblOriginalQty,			dblBalance,
+				intRailGradeId,			strRemark,				dblOriginalQty,			dblBalance,
 				dblIntransitQty,		dblScheduleQty,			intPriceUOMId,			intLoadingPortId,
 				intDestinationPortId,	strShippingTerm,		intShippingLineId,		strVessel,
 				intDestinationCityId,	intShipperId
@@ -113,24 +113,24 @@ BEGIN TRY
 		INSERT INTO tblCTContractCost
 		(
 				intConcurrencyId,	intContractDetailId,	intCostTypeId,			intVendorId,	
-				intCostMethod,		dblRate,				intUnitMeasureId,		intCurrencyId,	
+				intCostMethodId,		dblRate,				intUnitMeasureId,		intCurrencyId,	
 				ysnAccrue,			ysnMTM,					ysnPrice
 		)
 		SELECT 
 				1,					@NewContractDetailId,	intCostTypeId,			intVendorId,	
-				intCostMethod,		dblRate,				intUnitMeasureId,		intCurrencyId,	
+				intCostMethodId,		dblRate,				intUnitMeasureId,		intCurrencyId,	
 				ysnAccrue,			ysnMTM,					ysnPrice				
 		FROM	tblCTContractCost 
 		WHERE	intContractDetailId = @ContractDetailId
 		
 		INSERT INTO tblCTContractOption
 		(
-				intConcurrencyId,	intContractDetailId,	intBuySell,				intPutCall,		dblStrike,
-				dblPremium,			dblServiceFee,			dtmExpiration,			dblTargetPrice,	intPremFee
+				intConcurrencyId,	intContractDetailId,	intBuySellId,			intPutCallId,	dblStrike,
+				dblPremium,			dblServiceFee,			dtmExpiration,			dblTargetPrice,	intPremFeeId
 		)
 		SELECT 
-				intConcurrencyId,	@NewContractDetailId,	intBuySell,				intPutCall,		dblStrike,
-				dblPremium,			dblServiceFee,			dtmExpiration,			dblTargetPrice,	intPremFee				
+				intConcurrencyId,	@NewContractDetailId,	intBuySellId,			intPutCallId,	dblStrike,
+				dblPremium,			dblServiceFee,			dtmExpiration,			dblTargetPrice,	intPremFeeId				
 		FROM	tblCTContractOption 
 		WHERE	intContractDetailId = @ContractDetailId
 		
@@ -143,7 +143,7 @@ BEGIN TRY
 				intFutureMonthId		=	@intFutureMonthId	,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
-				intPricingType			=	@intPricingType	,
+				intPricingTypeId		=	@intPricingType	,
 				dtmStartDate			=	@StartDate,
 				dtmEndDate				=	@EndDate
 		WHERE	intContractDetailId		=	@ContractDetailId
@@ -159,7 +159,7 @@ BEGIN TRY
 				intFutureMonthId		=	@intFutureMonthId,
 				intContractOptHeaderId	=	@ContractOptHeaderId,
 				intConcurrencyId		=	intConcurrencyId + 1,
-				intPricingType			=	@intPricingType		,
+				intPricingTypeId		=	@intPricingType		,
 				dtmStartDate			=	@StartDate,
 				dtmEndDate				=	@EndDate
 		WHERE	intContractDetailId		=	@ContractDetailId

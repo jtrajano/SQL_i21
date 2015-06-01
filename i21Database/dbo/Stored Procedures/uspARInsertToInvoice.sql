@@ -34,12 +34,14 @@ BEGIN
 		,[intPaymentMethodId]
 		,[intAccountId]
 		,[intEntityId]
+		,[intShipToLocationId]
 		,[strShipToLocationName]
 		,[strShipToAddress]
 		,[strShipToCity]
 		,[strShipToState]
 		,[strShipToZipCode]
 		,[strShipToCountry]
+		,[intBillToLocationId]
 		,[strBillToLocationName]
 		,[strBillToAddress]
 		,[strBillToCity]
@@ -70,12 +72,14 @@ BEGIN
 		,0 --Payment Method
 		,[intAccountId]
 		,@UserId
+		,[intShipToLocationId]
 		,[strShipToLocationName]
 		,[strShipToAddress]
 		,[strShipToCity]
 		,[strShipToState]
 		,[strShipToZipCode]
 		,[strShipToCountry]
+		,[intBillToLocationId]
 		,[strBillToLocationName]
 		,[strBillToAddress]
 		,[strBillToCity]
@@ -111,7 +115,6 @@ BEGIN
 			
 			INSERT INTO [tblARInvoiceDetail]
 				([intInvoiceId]
-				,[intCompanyLocationId]
 				,[intItemId]
 				,[strItemDescription]
 				,[intItemUOMId]
@@ -127,7 +130,6 @@ BEGIN
 				,[intConcurrencyId])
 			SELECT 	
 				 @NewInvoiceId				--[intInvoiceId]
-				,[intCompanyLocationId]		--[intCompanyLocationId]
 				,[intItemId]				--[intItemId]
 				,[strItemDescription]		--[strItemDescription]
 				,[intItemUOMId]				--[intItemUOMId]

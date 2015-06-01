@@ -214,7 +214,7 @@ GO
 			,[strTransactionType]	= N'Purchase Order'
 			,[strPrefix]			= N'PO-'
 			,[intNumber]			= 1
-			,[strModule]			= 'AccountsPayable'
+			,[strModule]			= 'Accounts Payable'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Purchase Order')
@@ -443,13 +443,50 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Inbound Shipments')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 48
+			,[strTransactionType]	= N'Site Number'
+			,[strPrefix]			= N''
+			,[intNumber]			= 99
+			,[strModule]			= 'Entity Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Site Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 49
+			,[strTransactionType]	= N'Pick Lots'
+			,[strPrefix]			= N'PL'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Lots')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 50
+			,[strTransactionType]	= N'Delivery Orders'
+			,[strPrefix]			= N'DO'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Orders')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 51
+			,[strTransactionType]	= N'Quote'
+			,[strPrefix]			= N'QU-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Receivable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Quote')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
 GO
 	-- Update the intNumber to update what really should be the current value
 	UPDATE tblSMStartingNumber
-	SET intNumber = x.intNumber
+	SET intNumber = x.intNumber,
+	strPrefix = x.strPrefix
 	FROM tmpSMStartingNumber x
 	WHERE tblSMStartingNumber.strTransactionType = x.strTransactionType
 GO

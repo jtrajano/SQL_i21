@@ -126,6 +126,10 @@ END
 --		GOTO Post_Exit    
 --END 
 
+-- Get the next batch number
+EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
+IF @@ERROR <> 0 GOTO Post_Exit;
+
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
@@ -150,9 +154,6 @@ BEGIN
 	END
 END
 
--- Get the next batch number
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
-
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------  
@@ -172,6 +173,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId   
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -249,6 +251,7 @@ BEGIN
 			,intCurrencyId = Header.intCurrencyId  
 			,dblExchangeRate = 1  
 			,intTransactionId = Header.intInventoryReceiptId  
+			,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
 			,strTransactionId = Header.strReceiptNumber  
 			,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 			,intLotId = DetailItemLot.intLotId 

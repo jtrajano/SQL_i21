@@ -61,15 +61,16 @@ BEGIN
 								ELSE 
 									@dblQty / @dblUnitQtyTo
 						END
+
 					WHEN @dblUnitQtyTo = 1 THEN 
-						CASE	WHEN FLOOR(@dblUnitQtyFrom) = 0 THEN 
+						CASE	WHEN FLOOR(@dblUnitQtyFrom) = 0 AND @dblUnitQtyFrom > 0.1 THEN 
 									@dblQty / @dblUnitQtyFrom
-								ELSE 
-									@dblQty * @dblUnitQtyFrom			
+								ELSE
+									@dblQty * @dblUnitQtyFrom
 						END
 
 					WHEN @dblUnitQtyFrom <> 1 AND @dblUnitQtyTo <> 1 THEN
-						CASE	WHEN FLOOR(@dblUnitQtyTo) = 0 THEN 
+						CASE	WHEN FLOOR(@dblUnitQtyFrom) > 0  AND FLOOR(@dblUnitQtyTo) = 0 THEN 
 									@dblQty * @dblUnitQtyFrom * @dblUnitQtyTo
 								ELSE 
 									@dblQty * @dblUnitQtyFrom / @dblUnitQtyTo

@@ -2,6 +2,7 @@
 (
 	[intWorkOrderId] INT NOT NULL IDENTITY(1,1), 
     [strWorkOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL , 
+	[dtmOrderDate] DATETIME NULL, 
     [intItemId] INT NOT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
     [intItemUOMId] INT NOT NULL, 
@@ -39,7 +40,7 @@
     [strCustomerOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strERPOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intSalesOrderLineItemId] INT NULL, 
-    [strLotId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strVendorLotNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intOrderHeaderId] INT NULL, 
     [strBOLNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -57,10 +58,8 @@
 	intManufacturingProcessId INT, 
 	intSupervisorId INT,
 	intSubLocationId INT,
-	strVendorLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	ysnTrueUp BIT CONSTRAINT DF_tblMFWorkOrder_strVendorLotNumber DEFAULT((0)),
 	ysnIngredientAvailable bit CONSTRAINT [DF_tblMFWorkOrder_ysnIngredientAvailable] DEFAULT 1,
-	ysnCountStarted BIT CONSTRAINT DF_tblMFWorkOrder_ysnCountStarted DEFAULT((0)),
+	intCountStatusId INT NULL, 
 	CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -71,5 +70,6 @@
 	CONSTRAINT [FK_tblMFWorkOrder_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
 	CONSTRAINT [FK_tblMFWorkOrder_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblMFManufacturingProcess_intManufacturingProcessId] FOREIGN KEY([intManufacturingProcessId]) REFERENCES dbo.tblMFManufacturingProcess (intManufacturingProcessId),
-	 CONSTRAINT FK_tblMFWorkOrder_tblSMCompanyLocationSubLocation_intSubLocationId FOREIGN KEY(intSubLocationId) REFERENCES dbo.tblSMCompanyLocationSubLocation (intCompanyLocationSubLocationId)
+	CONSTRAINT FK_tblMFWorkOrder_tblSMCompanyLocationSubLocation_intSubLocationId FOREIGN KEY(intSubLocationId) REFERENCES dbo.tblSMCompanyLocationSubLocation (intCompanyLocationSubLocationId),
+	CONSTRAINT [FK_tblMFWorkOrder_intCountStatusId_tblMFWorkOrderStatus_intStatusId] FOREIGN KEY ([intCountStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId]), 
 )

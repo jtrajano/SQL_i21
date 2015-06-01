@@ -137,6 +137,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -148,51 +149,26 @@ BEGIN
 			, Detail.intItemUOMId
 			, AssemblyItem.dtmBuildDate
 			, (ISNULL(Detail.dblQuantity, 0) * ISNULL(AssemblyItem.dblBuildQuantity, 0)) * -1
-			, (ISNULL(Detail.dblQuantity, 0) * ISNULL(AssemblyItem.dblBuildQuantity, 0)) * -1
+			, ItemUOM.dblUnitQty
 			, Detail.dblCost
 			, 0
 			, NULL
 			, 1
 			, @intTransactionId
+			, Detail.intBuildAssemblyDetailId
 			, @strTransactionId
 			, @BUILD_ASSEMBLY_TYPE
 			, NULL
 			, Detail.intSubLocationId
 			, NULL
-	FROM tblICBuildAssemblyDetail Detail
-	LEFT JOIN tblICBuildAssembly AssemblyItem ON AssemblyItem.intBuildAssemblyId = Detail.intBuildAssemblyId
-	WHERE Detail.intBuildAssemblyId = @intTransactionId
+	FROM	tblICBuildAssemblyDetail Detail LEFT JOIN tblICBuildAssembly AssemblyItem 
+				ON AssemblyItem.intBuildAssemblyId = Detail.intBuildAssemblyId
+			LEFT JOIN tblICItemUOM ItemUOM 
+				ON ItemUOM.intItemUOMId = AssemblyItem.intItemUOMId
+	WHERE	Detail.intBuildAssemblyId = @intTransactionId
 
 	-- Call the post routine 
 	BEGIN 
-		-- Call the post routine 
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-		)
 		EXEC	dbo.uspICPostCosting  
 				@ItemsForPost  
 				,@strBatchId  
@@ -214,6 +190,7 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
+			,intTransactionDetailId
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
@@ -225,56 +202,65 @@ BEGIN
 			, Item.intItemUOMId
 			, Item.dtmBuildDate
 			, ISNULL(Item.dblBuildQuantity, 0)
-			, ISNULL(Item.dblBuildQuantity, 0)
-			, dbo.fnGetTotalStockValueFromTransactionBatch(@intTransactionId, @strBatchId) / ISNULL(Item.dblBuildQuantity, 0)
+			, ItemUOM.dblUnitQty
+			, -1 * dbo.fnGetTotalStockValueFromTransactionBatch(@intTransactionId, @strBatchId) / ISNULL(Item.dblBuildQuantity, 0)
 			, 0
 			, NULL
 			, 1
+			, @intTransactionId
 			, @intTransactionId
 			, @strTransactionId
 			, @BUILD_ASSEMBLY_TYPE
 			, NULL
 			, Item.intSubLocationId
 			, NULL
-	FROM tblICBuildAssembly Item
-	WHERE Item.intBuildAssemblyId = @intTransactionId
+	FROM	tblICBuildAssembly Item LEFT JOIN tblICItemUOM ItemUOM 
+				ON ItemUOM.intItemUOMId = Item.intItemUOMId
+	WHERE	Item.intBuildAssemblyId = @intTransactionId
 
 	-- Call the post routine 
 	BEGIN 
-		-- Call the post routine 
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-		)
 		EXEC	dbo.uspICPostCosting  
 				@AssemblyItemForPost  
 				,@strBatchId  
 				,NULL
 				,@intUserId
 	END
+
+	-----------------------------------------
+	-- Generate the g/l entries
+	-----------------------------------------
+	INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+	)
+	EXEC dbo.uspICCreateGLEntries 
+		@strBatchId
+		,NULL
+		,@intUserId
 
 END   
 

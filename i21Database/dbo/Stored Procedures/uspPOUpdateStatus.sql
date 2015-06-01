@@ -50,8 +50,8 @@ BEGIN
 											THEN 3 --Closed
 										WHEN dbo.fnPOHasItemReceipt(A.intPurchaseId, NULL) = 0 AND dbo.fnPOHasBill(A.intPurchaseId, NULL) = 0
 											THEN 1 --Open
-										WHEN (dbo.fnPOHasItemReceipt(A.intPurchaseId, 0) = 1 AND dbo.fnPOHasItemReceipt(A.intPurchaseId, 1) = 0) OR 
-												(dbo.fnPOHasBill(A.intPurchaseId, 0) = 1 AND dbo.fnPOHasBill(A.intPurchaseId, 1) = 0)
+										WHEN (dbo.fnPOHasItemReceipt(A.intPurchaseId, 0) = 1 AND dbo.fnPOHasItemReceipt(A.intPurchaseId, 1) = 0 AND dbo.fnPOHasBill(A.intPurchaseId,1) = 0) OR 
+												(dbo.fnPOHasBill(A.intPurchaseId, 0) = 1 AND dbo.fnPOHasBill(A.intPurchaseId, 1) = 0 AND dbo.fnPOHasItemReceipt(A.intPurchaseId, 1) = 0)
 											THEN 7 --Pending
 										WHEN dbo.fnPOHasItemReceipt(A.intPurchaseId, 1) = 1 OR dbo.fnPOHasBill(A.intPurchaseId, 1) = 1
 											THEN 2 --Partial

@@ -39,3 +39,34 @@ GO
 PRINT 'END Drop AK_tblGRStorageType_strStorageType'
 
 GO
+PRINT 'BEGIN Drop PK_tblRKMarketExchange'
+
+IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'PK_tblRKMarketExchange' AND type = 'PK' AND parent_object_id = OBJECT_ID('tblRKMarketExchange', 'U'))
+BEGIN
+	IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE WHERE CONSTRAINT_NAME = 'FK_tblRKElectronicPricing_tblRKMarketExchange')
+	BEGIN
+		EXEC('
+			ALTER TABLE tblRKElectronicPricing
+			DROP CONSTRAINT FK_tblRKElectronicPricing_tblRKMarketExchange		
+		');
+	END	
+	EXEC('
+		ALTER TABLE tblRKMarketExchange
+		DROP CONSTRAINT PK_tblRKMarketExchange		
+	');
+END
+GO
+PRINT 'END Drop PK_tblRKMarketExchange'
+GO
+
+PRINT 'BEGIN Drop FK_tblRKElectronicPricing_tblRKFutureMarket'
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE WHERE CONSTRAINT_NAME = 'FK_tblRKElectronicPricing_tblRKFutureMarket')
+	BEGIN
+		EXEC('
+			ALTER TABLE tblRKElectronicPricing
+			DROP CONSTRAINT FK_tblRKElectronicPricing_tblRKFutureMarket		
+		');
+	END	
+GO
+PRINT 'END Drop FK_tblRKElectronicPricing_tblRKFutureMarket'
+GO

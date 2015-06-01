@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspSODuplicateSalesOrder]
+	@TransactionType NVARCHAR(20) = '',
 	@SalesOrderId	INT = 0,
 	@UserId			INT = 0,
 	@NewSalesOrderId INT = NULL OUTPUT
@@ -16,6 +17,12 @@ BEGIN
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]
+		   ,[intOrderedById]
+		   ,[intSplitId]
+		   ,[intFreightTermId]
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strBOLNumber]
            ,[dblSalesOrderSubtotal]
            ,[dblShipping]
            ,[dblTax]
@@ -29,19 +36,21 @@ BEGIN
            ,[dtmProcessDate]
            ,[ysnProcessed]
            ,[strComments]
+		   ,[intShipToLocationId]
            ,[strShipToLocationName]
            ,[strShipToAddress]
            ,[strShipToCity]
            ,[strShipToState]
            ,[strShipToZipCode]
            ,[strShipToCountry]
+		   ,[intBillToLocationId]
            ,[strBillToLocationName]
            ,[strBillToAddress]
            ,[strBillToCity]
            ,[strBillToState]
            ,[strBillToZipCode]
            ,[strBillToCountry]
-           ,[intEntityId]
+           ,[intEntityId]		   
         )
 	SELECT
 			[intEntityCustomerId]
@@ -53,6 +62,12 @@ BEGIN
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]
+		   ,[intOrderedById]
+		   ,[intSplitId]
+		   ,[intFreightTermId]
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strBOLNumber]
            ,[dblSalesOrderSubtotal]
            ,[dblShipping]
            ,[dblTax]
@@ -66,12 +81,14 @@ BEGIN
            ,NULL --Processed Date
            ,0 --Processed
            ,[strComments] + ' DUP: ' + [strSalesOrderNumber]
+		   ,[intShipToLocationId]
            ,[strShipToLocationName]
            ,[strShipToAddress]
            ,[strShipToCity]
            ,[strShipToState]
            ,[strShipToZipCode]
            ,[strShipToCountry]
+		   ,[intBillToLocationId]
            ,[strBillToLocationName]
            ,[strBillToAddress]
            ,[strBillToCity]
@@ -107,7 +124,6 @@ BEGIN
 			
 			INSERT INTO [tblSOSalesOrderDetail]
 			   (	[intSalesOrderId]
-				   ,[intCompanyLocationId]
 				   ,[intItemId]
 				   ,[strItemDescription]
 				   ,[intItemUOMId]
@@ -123,10 +139,10 @@ BEGIN
 				   ,[intCOGSAccountId]
 				   ,[intSalesAccountId]
 				   ,[intInventoryAccountId]
+				   ,[intStorageLocationId]
 				)
 			SELECT 
 					@NewSalesOrderId
-				   ,[intCompanyLocationId]
 				   ,[intItemId]
 				   ,[strItemDescription]
 				   ,[intItemUOMId]
@@ -142,6 +158,7 @@ BEGIN
 				   ,[intCOGSAccountId]
 				   ,[intSalesAccountId]
 				   ,[intInventoryAccountId]
+				   ,[intStorageLocationId]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

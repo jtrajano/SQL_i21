@@ -32,6 +32,7 @@ BEGIN
 			,intCurrencyId = PO.intCurrencyId
 			,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 			,intTransactionId = PO.intPurchaseId
+			,intTransactionDetailId = PODetail.intPurchaseDetailId
 			,strTransactionId = PO.strPurchaseOrderNumber
 			,intTransactionTypeId = @intPurchaseOrderType 
 			,intLotId = NULL 

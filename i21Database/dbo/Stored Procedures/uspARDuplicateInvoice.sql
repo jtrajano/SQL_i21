@@ -119,7 +119,6 @@ BEGIN
 			
 			INSERT INTO [tblARInvoiceDetail]
 				([intInvoiceId]
-				,[intCompanyLocationId]
 				,[intItemId]
 				,[strItemDescription]
 				,[intItemUOMId]
@@ -135,7 +134,6 @@ BEGIN
 				,[intConcurrencyId])
 			SELECT 	
 				 @NewId						--[intInvoiceId]
-				,[intCompanyLocationId]		--[intCompanyLocationId]
 				,[intItemId]				--[intItemId]
 				,[strItemDescription]		--[strItemDescription]
 				,[intItemUOMId]				--[intItemUOMId]

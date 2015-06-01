@@ -40,7 +40,7 @@ SET @strmessage = 'The transaction is already cleared.'
 EXEC sp_addmessage 50009,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50010) EXEC sp_dropmessage 50010, 'us_english'	
-SET @strmessage = 'The bank account is inactive.'
+SET @strmessage = 'The bank account or its associated GL account is inactive.'
 EXEC sp_addmessage 50010,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50011) EXEC sp_dropmessage 50011, 'us_english'	
@@ -120,7 +120,7 @@ SET @strmessage = 'Negative stock quantity is not allowed.'
 EXEC sp_addmessage 50029,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50030) EXEC sp_dropmessage 50030, 'us_english'	
-SET @strmessage = 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
+SET @strmessage = 'Unable to generate the Transaction Id. Please ask your local administrator to check the starting numbers setup.'
 EXEC sp_addmessage 50030,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50031) EXEC sp_dropmessage 50031, 'us_english'	
@@ -438,3 +438,83 @@ EXEC sp_addmessage 51108,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51109) EXEC sp_dropmessage 51109, 'us_english'	
 SET @strmessage = 'The cycle count for this run is already started by ''%s'' on ''%s''. you cannot continue. The current run already cyclecounted by another user. you cannot continue.'
 EXEC sp_addmessage 51109,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51110) EXEC sp_dropmessage 51110, 'us_english'	
+SET @strmessage = 'Lot quantity should be greater than zero.'
+EXEC sp_addmessage 51110,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51111) EXEC sp_dropmessage 51111, 'us_english'	
+SET @strmessage = 'No open runs for the target item ''%s''. Cannot consume.'
+EXEC sp_addmessage 51111,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51112) EXEC sp_dropmessage 51112, 'us_english'	
+SET @strmessage = 'Lot can not be blank.'
+EXEC sp_addmessage 51112,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51113) EXEC sp_dropmessage 51113, 'us_english'	
+SET @strmessage = 'Please select a valid lot'
+EXEC sp_addmessage 51113,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51114) EXEC sp_dropmessage 51114, 'us_english'	
+SET @strmessage = 'Input item ''%s'' does not belong to recipe of ''%s'' , Cannot proceed.'
+EXEC sp_addmessage 51114,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51115) EXEC sp_dropmessage 51115, 'us_english'	
+SET @strmessage = 'No mapped staging location found, cannot stage.'
+EXEC sp_addmessage 51115,11,@strmessage,'us_english','False'   
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51116) EXEC sp_dropmessage 51116, 'us_english'	
+SET @strmessage = 'The quantity must not exceed the lot quantity.'
+EXEC sp_addmessage 51116,11,@strmessage,'us_english','False'   
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51117) EXEC sp_dropmessage 51117, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.'
+EXEC sp_addmessage 51117,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51118) EXEC sp_dropmessage 51118, 'us_english'	
+SET @strmessage = 'The lot status is invalid.'
+EXEC sp_addmessage 51118,11,@strmessage,'us_english','False'   
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51119) EXEC sp_dropmessage 51119, 'us_english'	
+SET @strmessage = 'Unable to generate Lot Number. Please ask your local administrator to check the starting numbers setup.'
+EXEC sp_addmessage 51119,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51120) EXEC sp_dropmessage 51120, 'us_english'	
+SET @strmessage = 'Unable to generate the Batch Id. Please ask your local administrator to check the starting numbers setup.'
+EXEC sp_addmessage 51120,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51121) EXEC sp_dropmessage 51121, 'us_english'	
+SET @strmessage = 'Entered quantity is greater than the configured batch size for the machine'
+EXEC sp_addmessage 51121,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51122) EXEC sp_dropmessage 51122, 'us_english'	
+SET @strmessage = 'Lot Alias for Item ID ''%s'' Cannot be blank.'
+EXEC sp_addmessage 51122,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51123) EXEC sp_dropmessage 51123, 'us_english'	
+SET @strmessage = 'No open runs for the target item ''%s''. Cannot produce.'
+EXEC sp_addmessage 51123,11,@strmessage,'us_english','False'  
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51124) EXEC sp_dropmessage 51124, 'us_english'	
+SET @strmessage = 'Internal Error. The source transaction type provided is invalid or not supported.'
+EXEC sp_addmessage 51124,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51125) EXEC sp_dropmessage 51125, 'us_english'	
+SET @strmessage = 'Internal Error. The source transaction id is invalid.'
+EXEC sp_addmessage 51125,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51126) EXEC sp_dropmessage 51126, 'us_english'	
+SET @strmessage = 'Internal Error. The new expiry date is invalid.'
+EXEC sp_addmessage 51126,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51127) EXEC sp_dropmessage 51127, 'us_english'	
+SET @strmessage = 'Internal Error. The Adjust By Quantity is required to be a negative value.'
+EXEC sp_addmessage 51127,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51128) EXEC sp_dropmessage 51128, 'us_english'	
+SET @strmessage = 'Internal Error. The new sub-location is invalid.'
+EXEC sp_addmessage 51128,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51129) EXEC sp_dropmessage 51129, 'us_english'	
+SET @strmessage = 'Internal Error. The new storage location is invalid.'
+EXEC sp_addmessage 51129,11,@strmessage,'us_english','False'

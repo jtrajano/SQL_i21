@@ -8,7 +8,7 @@
 	[intCommodityId] INT NOT NULL, 
 	[intFutureMarketId] INT NOT NULL, 
 	[intFutureMonthId] int NOT NULL, 
-	[intBrokerId] INT NOT NULL, 
+	[intEntityId] INT NOT NULL, 
 	[intBrokerageAccountId] INT NOT NULL, 
 	[intBookId] INT NULL, 
     [intSubBookId] INT NULL
@@ -20,7 +20,7 @@
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId]),
 	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-
+	CONSTRAINT [FK_tblRKMatchFuturesPSHeader_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),
     CONSTRAINT [UK_tblRKMatchFuturesPSHeader_intMatchNo] UNIQUE (intMatchNo)
 )
 

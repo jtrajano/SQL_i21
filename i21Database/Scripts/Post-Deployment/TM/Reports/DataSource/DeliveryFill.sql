@@ -192,34 +192,34 @@ WHERE vwcus_active_yn = ''Y'' and C.ysnActive = 1
 ' 
 WHERE intReportId = @intReportId
 
---------------------Update Field Selection (tblRMCriteriaField)--------------------------------------------------------------
----------------------------------------------------------------------------------------------------------
----Check and add ysnPending
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblRMCriteriaField WHERE intReportId = @intReportId AND strFieldName = 'ysnPending')
-BEGIN
-	INSERT INTO [tblRMCriteriaField]
-           ([intReportId]
-           ,[intCriteriaFieldSelectionId]
-           ,[strFieldName]
-           ,[strDataType]
-           ,[strDescription]
-           ,[strConditions]
-           ,[ysnIsRequired]
-           ,[ysnShow]
-           ,[ysnAllowSort]
-           ,[ysnEditCondition])
-     SELECT
-           [intReportId] = @intReportId
-           ,[intCriteriaFieldSelectionId] = (SELECT TOP 1 intCriteriaFieldSelectionId FROM [tblRMCriteriaFieldSelection] WHERE strName = 'True/False')
-           ,[strFieldName] = 'ysnPending'
-           ,[strDataType] = 'Bool'
-           ,[strDescription] = 'Pending'
-           ,[strConditions] = NULL
-           ,[ysnIsRequired] = 0
-           ,[ysnShow] = 1
-           ,[ysnAllowSort] = 0
-           ,[ysnEditCondition] = 1
-END
+----------------------Update Field Selection (tblRMCriteriaField)--------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
+-----Check and add ysnPending
+--IF NOT EXISTS (SELECT TOP 1 1 FROM tblRMCriteriaField WHERE intReportId = @intReportId AND strFieldName = 'ysnPending')
+--BEGIN
+--	INSERT INTO [tblRMCriteriaField]
+--           ([intReportId]
+--           ,[intCriteriaFieldSelectionId]
+--           ,[strFieldName]
+--           ,[strDataType]
+--           ,[strDescription]
+--           ,[strConditions]
+--           ,[ysnIsRequired]
+--           ,[ysnShow]
+--           ,[ysnAllowSort]
+--           ,[ysnEditCondition])
+--     SELECT
+--           [intReportId] = @intReportId
+--           ,[intCriteriaFieldSelectionId] = (SELECT TOP 1 intCriteriaFieldSelectionId FROM [tblRMCriteriaFieldSelection] WHERE strName = 'True/False')
+--           ,[strFieldName] = 'ysnPending'
+--           ,[strDataType] = 'Bool'
+--           ,[strDescription] = 'Pending'
+--           ,[strConditions] = NULL
+--           ,[ysnIsRequired] = 0
+--           ,[ysnShow] = 1
+--           ,[ysnAllowSort] = 0
+--           ,[ysnEditCondition] = 1
+--END
 
 GO
 print N'END Update Delivery Fill Report Datasource'

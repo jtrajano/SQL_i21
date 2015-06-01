@@ -73,8 +73,8 @@ BEGIN
 			@strItemNo					= Item.strItemNo
 			,@intItemId					= Item.intItemId
 			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
-			,@LotQty					= ItemLot.TotalLotQty
-			,@LotQtyInItemUOM			= ItemLot.TotalLotQtyInItemUOM
+			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
+			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
 			,@OpenReceiveQtyInItemUOM	= dbo.fnCalculateQtyBetweenUOM (
 											ReceiptItem.intUnitMeasureId
 											,ReceiptItem.intUnitMeasureId
@@ -104,7 +104,7 @@ BEGIN
 				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) IN (@LotType_Manual, @LotType_Serial)	
 			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ROUND(ItemLot.TotalLotQtyInItemUOM, 2) <>
+			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 2) <>
 				ROUND(dbo.fnCalculateQtyBetweenUOM (
 					ReceiptItem.intUnitMeasureId
 					,ReceiptItem.intUnitMeasureId
