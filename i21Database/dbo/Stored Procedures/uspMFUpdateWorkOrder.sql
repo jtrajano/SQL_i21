@@ -162,7 +162,7 @@ BEGIN TRY
 			,strParameterValue NVARCHAR(MAX)
 			,strRowState nvarchar(50)
 			) x
-	WHERE x.intWorkOrderProductSpecificationId = 0 and x.strRowState='INSERT'
+	WHERE x.intWorkOrderProductSpecificationId = 0 and x.strRowState='ADDED'
 
 	Update tblMFWorkOrderProductSpecification
 	Set strParameterName=x.strParameterName
@@ -174,7 +174,7 @@ BEGIN TRY
 			,strParameterValue NVARCHAR(MAX)
 			,strRowState nvarchar(50)
 			) x
-	WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='UPDATE'
+	WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='MODIFIED'
 
 	DELETE
 	FROM dbo.tblMFWorkOrderProductSpecification
