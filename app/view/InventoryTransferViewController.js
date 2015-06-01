@@ -275,15 +275,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
-            include: 'tblICInventoryTransferDetails.tblICItem, ' +
-                'tblICInventoryTransferDetails.tblICItemUOM.tblICUnitMeasure, ' +
-                'tblICInventoryTransferDetails.WeightUOM.tblICUnitMeasure, ' +
-                'tblICInventoryTransferDetails.tblICLot, ' +
-                'tblICInventoryTransferDetails.tblSMTaxCode, ' +
-                'tblICInventoryTransferDetails.FromSubLocation, ' +
-                'tblICInventoryTransferDetails.FromStorageLocation, ' +
-                'tblICInventoryTransferDetails.ToSubLocation, ' +
-                'tblICInventoryTransferDetails.ToStorageLocation, ' +
+            include: 'tblICInventoryTransferDetails.vyuICGetInventoryTransferDetail, ' +
                 'tblICInventoryTransferNotes',
             createRecord : me.createRecord,
             binding: me.config.binding,
@@ -309,10 +301,10 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             ]
         });
 
-        var colAvailableQty = grdInventoryTransfer.columns[5];
-        var colAvailableUOM = grdInventoryTransfer.columns[6];
-        colAvailableQty.renderer = this.AvailableQtyRenderer;
-        colAvailableUOM.renderer = this.AvailableUOMRenderer;
+//        var colAvailableQty = grdInventoryTransfer.columns[5];
+//        var colAvailableUOM = grdInventoryTransfer.columns[6];
+//        colAvailableQty.renderer = this.AvailableQtyRenderer;
+//        colAvailableUOM.renderer = this.AvailableUOMRenderer;
         return win.context;
 
     },

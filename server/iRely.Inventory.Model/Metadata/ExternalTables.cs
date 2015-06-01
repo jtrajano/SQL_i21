@@ -236,9 +236,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
 
-        public ICollection<tblICInventoryTransferDetail> FromTransferDetails { get; set; }
-        public ICollection<tblICInventoryTransferDetail> ToTransferDetails { get; set; }
-
         public ICollection<tblICInventoryAdjustmentDetail> InventoryAdjustmentNewSubLocations { get; set; }
     }
 
@@ -260,8 +257,6 @@ namespace iRely.Inventory.Model
         public int? intSalesTaxAccountId { get; set; }
         public int? intPurchaseTaxAccountId { get; set; }
         public string strTaxableByOtherTaxes { get; set; }
-
-        public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
     }
 
     public class tblEntityLocation : BaseEntity
