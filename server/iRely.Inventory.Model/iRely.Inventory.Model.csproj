@@ -107,7 +107,6 @@
     <Compile Include="Configuration\tblICTagMap.cs" />
     <Compile Include="Configuration\tblICUnitMeasureMap.cs" />
     <Compile Include="InventoryEntities.cs" />
-    <Compile Include="InventoryEntities.Views.cs" />
     <Compile Include="Metadata\ExternalTables.cs" />
     <Compile Include="Metadata\tblICBrand.cs" />
     <Compile Include="Metadata\tblICBuildAssembly.cs" />
