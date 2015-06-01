@@ -3416,4 +3416,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLotteryWinnersMopId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ae553758-c3ad-41f0-b7df-82c41cfb4d8e" ChangeDateTime="06/01/2015 05:35:39">
+    <Property Name="ElementName" Value="[dbo].[tblTMPreferenceCompany].[ysnSalesperson]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMPreferenceCompany]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnSalespersonDriver" />
+  </Operation>
 </Operations>
