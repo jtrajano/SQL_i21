@@ -4539,8 +4539,8 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        itemId: 'colAssemblyComponent',
                                                         dataIndex: 'string',
+                                                        itemId: 'colAssemblyComponent',
                                                         text: 'Component',
                                                         flex: 2,
                                                         editor: {
@@ -4583,6 +4583,13 @@ Ext.define('Inventory.view.Item', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colAssemblyDescription',
+                                                        dataIndex: 'string',
+                                                        text: 'Description',
+                                                        flex: 2
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colAssemblyQuantity',
                                                         width: 65,
@@ -4594,13 +4601,6 @@ Ext.define('Inventory.view.Item', {
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colAssemblyDescription',
-                                                        dataIndex: 'string',
-                                                        text: 'Description',
-                                                        flex: 2
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
