@@ -102,6 +102,7 @@ namespace iRely.Inventory.Model
         public DbSet<tblICUnitMeasure> tblICUnitMeasures { get; set; }
         public DbSet<tblICUnitMeasureConversion> tblICUnitMeasureConversions { get; set; }
 
+        public DbSet<vyuICGetInventoryTransferDetail> vyuICGetInventoryTransferDetails { get; set; }
         public DbSet<vyuICGetItemStock> vyuICGetItemStocks { get; set; }
         public DbSet<vyuICGetItemStockUOM> vyuICGetItemStockUOMs { get; set; }
         public DbSet<vyuICGetItemAccount> vyuICGetItemAccounts { get; set; }
@@ -279,6 +280,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblGRStorageTypeMap());
             modelBuilder.Configurations.Add(new tblSTPromotionSalesListMap());
 
+            modelBuilder.Configurations.Add(new vyuICGetInventoryTransferDetailMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetItemAccountMap());
