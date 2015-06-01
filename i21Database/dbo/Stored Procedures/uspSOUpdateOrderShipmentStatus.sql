@@ -9,22 +9,40 @@ SET @OrderStatus = 'Open'
 DECLARE @IsOpen BIT = 0
 SET @IsOpen = (	SELECT COUNT(1) 
 					FROM
-						tblSOSalesOrderDetail
+						tblSOSalesOrderDetail					
 					WHERE
 						[intSalesOrderId] = @SalesOrderId 
-						AND NOT EXISTS(	SELECT NULL 
-										FROM
-											tblICInventoryReceiptItem
-										WHERE
-											intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
-											AND intSourceId = @SalesOrderId
-										)
-						AND NOT EXISTS(	SELECT NULL 
+						AND (NOT EXISTS(	SELECT NULL 
+											FROM
+												tblICInventoryShipmentItem
+											WHERE
+												intLineNo = tblSOSalesOrderDetail.[intSalesOrderDetailId]
+												AND intSourceId = @SalesOrderId
+											)
+							AND
+							EXISTS(			SELECT NULL 
+											FROM 
+												tblICItem 
+											WHERE
+												tblICItem.[intItemId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]
+												AND tblICItem.strType IN ('Inventory')
+											)
+						)
+						AND (NOT EXISTS(	SELECT NULL 
 										FROM
 											tblARInvoiceDetail 
 										WHERE
 											intSalesOrderDetailId = tblSOSalesOrderDetail.intSalesOrderDetailId
-										)										
+										)
+							AND
+							EXISTS(			SELECT NULL 
+											FROM 
+												tblICItem 
+											WHERE
+												tblICItem.[intItemId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]
+												AND tblICItem.strType NOT IN ('Inventory')
+											)										
+						)										
 					)
 					
 IF @IsOpen <> 0
@@ -42,7 +60,7 @@ SET @HasShipment = (	SELECT COUNT(1)
 							[intSalesOrderId] = @SalesOrderId 
 							AND EXISTS(	SELECT NULL 
 										FROM
-											tblICInventoryReceiptItem
+											tblICInventoryShipmentItem
 										WHERE
 											intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
 											AND intSourceId = @SalesOrderId
@@ -147,7 +165,7 @@ SET @PartialShipmentCount = (	SELECT COUNT(1)
 									AND ISNULL([dblQtyOrdered],0.00) > 0
 									--AND EXISTS(	SELECT NULL 
 									--			FROM
-									--				tblICInventoryReceiptItem
+									--				tblICInventoryShipmentItem
 									--			WHERE
 									--				intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
 									--				AND intSourceId = @SalesOrderId
@@ -162,7 +180,7 @@ SET @CompletedShipmentCount = (	SELECT COUNT(1)
 									AND ISNULL([dblQtyShipped],0.00) >= ISNULL([dblQtyOrdered],0.00)									
 									--AND EXISTS(	SELECT NULL 
 									--			FROM
-									--				tblICInventoryReceiptItem
+									--				tblICInventoryShipmentItem
 									--			WHERE
 									--				intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
 									--				AND intSourceId = @SalesOrderId
