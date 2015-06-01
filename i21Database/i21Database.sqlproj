@@ -1641,6 +1641,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetContainerByContainerType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByManufacturingProcess.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

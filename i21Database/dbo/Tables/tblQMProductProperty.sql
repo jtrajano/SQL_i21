@@ -10,6 +10,7 @@
 	[intSequenceNo] INT NOT NULL CONSTRAINT [DF_tblQMProductProperty_intSequenceNo] DEFAULT 1, 
 	[intComputationTypeId] INT NOT NULL CONSTRAINT [DF_tblQMProductProperty_intComputationTypeId] DEFAULT 1, 
 	[strFormulaField] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[strIsMandatory] NVARCHAR(20) COLLATE Latin1_General_CI_AS DEFAULT 'No', 
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProductProperty_dtmCreated] DEFAULT GetDate(),
