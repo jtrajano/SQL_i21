@@ -121,6 +121,7 @@ namespace iRely.Inventory.Model
         public int? intShipFromLocationId { get; set; }
         public string strShipFromLocation { get; set; }
         public int? intEntityCustomerId { get; set; }
+        public string strCustomerId { get; set; }
         public string strCustomerName { get; set; }
         public int? intShipToLocationId { get; set; }
         public string strShipToLocation { get; set; }
