@@ -410,6 +410,10 @@ Ext.define('Inventory.view.Item', {
                                                                                 dataType: 'string',
                                                                                 text: 'Description',
                                                                                 flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'tblICCategoryUOMs',
+                                                                                hidden: true
                                                                             }
                                                                         ],
                                                                         itemId: 'cboCategory',

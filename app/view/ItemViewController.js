@@ -659,10 +659,19 @@ Ext.define('Inventory.view.ItemViewController', {
                     dataIndex: 'strItemNo',
                     editor: {
                         store: '{assemblyItem}',
-                        defaultFilters: [{
-                            column: 'strLotTracking',
-                            value: 'No'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'strLotTracking',
+                                value: 'No',
+                                conjunction: 'and'
+                            }
+//                            ,
+//                            {
+//                                column: 'strType',
+//                                value: 'Inventory|^|Raw Material|^|Finished Good',
+//                                conjunction: 'or'
+//                            }
+                        ]
                     }
                 },
                 colAssemblyQuantity: 'dblQuantity',

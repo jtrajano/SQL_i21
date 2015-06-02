@@ -107,7 +107,21 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         itemCategory: {
-            type: 'icbufferedcategory'
+            type: 'icbufferedcategory',
+            proxy: {
+                extraParams: {
+                    include: 'tblICCategoryUOMs.tblICUnitMeasure, '
+                },
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/Category/Search'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
         },
         lotTracking: {
             autoLoad: true,

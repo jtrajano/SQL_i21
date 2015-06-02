@@ -758,7 +758,11 @@
                                                                     "\t\tdataType: 'string',",
                                                                     "\t\ttext: 'Description',",
                                                                     "\t\tflex: 1",
-                                                                    "\t}",
+                                                                    "\t},",
+                                                                    "    {",
+                                                                    "        dataIndex: 'tblICCategoryUOMs',",
+                                                                    "        hidden: true",
+                                                                    "    }",
                                                                     "]"
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
