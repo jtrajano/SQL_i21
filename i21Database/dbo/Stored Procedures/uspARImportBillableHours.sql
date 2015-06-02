@@ -161,7 +161,7 @@ INSERT INTO [tblARInvoiceDetail]
 SELECT
 	I.[intInvoiceId]											--[intInvoiceId]
 	,V.[intItemId]												--[intItemId]
-	,V.[strTicketNumber] + ' - ' + V.[strJobCode]				--strItemDescription]
+	,IC.[strDescription]										--strItemDescription] 
 	,NULL														--[intItemUOMId]
 	,V.[intHours]												--[dblQtyOrdered]
 	,V.[intHours]												--[dblQtyShipped]
@@ -180,6 +180,9 @@ INNER JOIN
 INNER JOIN
 	@TicketHoursWorked HW
 		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+INNER JOIN
+	tblICItem IC
+		ON V.[intItemId] = IC.[intItemId] 
 LEFT OUTER JOIN
 	vyuARGetItemAccount Acct
 		ON V.[intItemId] = Acct.[intItemId]
