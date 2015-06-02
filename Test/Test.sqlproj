@@ -629,6 +629,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryLotInCustodyTransaction for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryLotInCustodyTransaction for inserting the supplied arguments.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostLotInCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for add-sell it-unpost add.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

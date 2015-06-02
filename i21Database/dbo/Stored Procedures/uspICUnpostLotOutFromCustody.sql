@@ -9,6 +9,18 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+BEGIN 
+	CREATE TABLE #tmpInventoryTransactionStockToReverse (
+		intInventoryLotInCustodyTransactionId INT NOT NULL 
+		,intTransactionId INT NULL 
+		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+		,intTransactionTypeId INT NOT NULL 
+		,intInventoryLotInCustodyId INT 
+		,dblQty NUMERIC(38,20)
+	)
+END 
+
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
@@ -20,15 +32,19 @@ DECLARE @AVERAGECOST AS INT = 1
 -- While at it, update the ysnIsUnposted to true. 
 -- Then grab the updated records and store it to the #tmpInventoryTransactionStockToReverse temp table
 INSERT INTO #tmpInventoryTransactionStockToReverse (
-		intInventoryTransactionId
+		intInventoryLotInCustodyTransactionId
 		,intTransactionId
 		,strTransactionId
 		,intTransactionTypeId
+		,intInventoryLotInCustodyId
+		,dblQty
 )
 SELECT	Changes.intInventoryLotInCustodyTransactionId
 		,Changes.intTransactionId
 		,Changes.strTransactionId
 		,Changes.intTransactionTypeId
+		,Changes.intInventoryLotInCustodyId
+		,Changes.dblQty
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -63,20 +79,25 @@ FROM	(
 					, Inserted.intTransactionId
 					, Inserted.strTransactionId
 					, Inserted.intTransactionTypeId
+					, Inserted.intInventoryLotInCustodyId
+					, Inserted.dblQty
 		) AS Changes (
 			Action
 			, intInventoryLotInCustodyTransactionId
 			, intTransactionId
 			, strTransactionId
 			, intTransactionTypeId
+			, intInventoryLotInCustodyId
+			, dblQty
 		)
 WHERE	Changes.Action = 'UPDATE'
 ;
 
--- If there are Lot out records, update the costing bucket. Return the out-qty back to the bucket where it came from. 
+-- Update the lot cost bucket. 
 UPDATE	LotBucket_In_Custody
-SET		LotBucket_In_Custody.dblStockOut = ISNULL(LotBucket_In_Custody.dblStockOut, 0) - Lot_Transactions_In_Custody.dblQty
-FROM	dbo.tblICInventoryLotInCustody LotBucket_In_Custody INNER JOIN dbo.tblICInventoryLotInCustodyTransaction Lot_Transactions_In_Custody
-			ON LotBucket_In_Custody.intInventoryLotInCustodyId = Lot_Transactions_In_Custody.intInventoryLotInCustodyId
-WHERE	ISNULL(LotBucket_In_Custody.ysnIsUnposted, 0) = 0
+SET		LotBucket_In_Custody.dblStockOut = ISNULL(LotBucket_In_Custody.dblStockOut, 0) - Reversal.dblQty
+FROM	dbo.tblICInventoryLotInCustody LotBucket_In_Custody INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+			ON LotBucket_In_Custody.intTransactionId = Reversal.intTransactionId
+			AND LotBucket_In_Custody.strTransactionId = Reversal.strTransactionId
+			AND LotBucket_In_Custody.intInventoryLotInCustodyId = Reversal.intInventoryLotInCustodyId
 ;

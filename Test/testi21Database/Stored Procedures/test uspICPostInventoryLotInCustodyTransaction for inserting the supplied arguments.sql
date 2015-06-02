@@ -34,7 +34,7 @@ BEGIN
 			,@strTransactionForm AS NVARCHAR (255) 
 			,@intCreatedUserId AS INT
 			,@intUserId AS INT 
-			,@SourceInventoryLotInCustodyId AS INT
+			,@intInventoryLotInCustodyId AS INT
 			,@InventoryLotInCustodyTransactionId AS INT
 			
 		SELECT 
@@ -58,8 +58,8 @@ BEGIN
 			,@strBatchId = '16'
 			,@intTransactionTypeId = 17
 			,@strTransactionForm = '18'
-			,@intCreatedUserId = 19
-			,@intUserId = 19
+			,@intInventoryLotInCustodyId = 19
+			,@intUserId = 20
 
 		CREATE TABLE expected (
 			[intInventoryLotInCustodyTransactionId] INT 
@@ -80,6 +80,7 @@ BEGIN
 			,[intTransactionId] INT 
 			,[intTransactionDetailId] INT 
 			,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS 
+			,[intInventoryLotInCustodyId] INT
 			,[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS 
 			,[intTransactionTypeId] INT 
 			,[ysnIsUnposted] BIT 
@@ -108,6 +109,7 @@ BEGIN
 			,[intTransactionId] INT 
 			,[intTransactionDetailId] INT 
 			,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS 
+			,[intInventoryLotInCustodyId] INT
 			,[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS 
 			,[intTransactionTypeId] INT 
 			,[ysnIsUnposted] BIT 
@@ -135,6 +137,7 @@ BEGIN
 			,[dblExchangeRate]
 			,[intTransactionId]
 			,[intTransactionDetailId] 
+			,[intInventoryLotInCustodyId]
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]
@@ -162,13 +165,14 @@ BEGIN
 			,[dblExchangeRate]						= @dblExchangeRate
 			,[intTransactionId]						= @intTransactionId
 			,[intTransactionDetailId]				= @intTransactionDetailId
+			,[intInventoryLotInCustodyId]			= @intInventoryLotInCustodyId
 			,[strTransactionId]						= @strTransactionId
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= @intTransactionTypeId
 			,[ysnIsUnposted]						= 0
 			,[strTransactionForm]					= @strTransactionForm
 			,[dtmCreated]							= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[intCreatedUserId]						= @intCreatedUserId
+			,[intCreatedUserId]						= @intUserId
 			,[intConcurrencyId]						= 1
 
 	END 
@@ -177,29 +181,29 @@ BEGIN
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
 		EXEC dbo.uspICPostInventoryLotInCustodyTransaction		
-			@intItemId 
-			,@intItemLocationId 
-			,@intItemUOMId 
-			,@intSubLocationId 
-			,@intStorageLocationId 
-			,@dtmDate 
-			,@dblQty 
-			,@dblUOMQty 
-			,@dblCost 
-			,@dblValue 
-			,@dblSalesPrice 
-			,@intCurrencyId 
-			,@dblExchangeRate 
+			@intItemId
+			,@intItemLocationId
+			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@dtmDate
+			,@dblQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblValue
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
 			,@intTransactionId
-			,@intTransactionDetailId 
-			,@strTransactionId 
+			,@intTransactionDetailId
+			,@strTransactionId
 			,@strBatchId 
 			,@intTransactionTypeId 
 			,@intLotId 
 			,@strTransactionForm 
 			,@intUserId 
-			,@SourceInventoryLotInCustodyId 
-			,@InventoryLotInCustodyTransactionId OUTPUT 		
+			,@intInventoryLotInCustodyId 
+			,@InventoryLotInCustodyTransactionId OUTPUT 
 	END 
 
 	-- Assert
@@ -222,6 +226,7 @@ BEGIN
 			,[dblExchangeRate]
 			,[intTransactionId]
 			,[intTransactionDetailId]
+			,[intInventoryLotInCustodyId]
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]
@@ -249,6 +254,7 @@ BEGIN
 			,[dblExchangeRate]
 			,[intTransactionId]
 			,[intTransactionDetailId]
+			,[intInventoryLotInCustodyId]
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]

@@ -29,7 +29,7 @@ BEGIN
 			,@strTransactionForm AS NVARCHAR (255) 
 			,@intCreatedUserId AS INT
 			,@intUserId AS INT 
-			,@SourceInventoryLotInCustodyId AS INT
+			,@intInventoryLotInCustodyId AS INT
 			,@InventoryLotInCustodyTransactionId AS INT
 
 		-- Declare the variables for the Item UOM Ids
@@ -56,6 +56,7 @@ BEGIN
 			,intTransactionId INT
 			,intTransactionDetailId INT
 			,strTransactionId NVARCHAR(40)
+			,intInventoryLotInCustodyId INT
 			,strBatchId NVARCHAR(20)
 			,intTransactionTypeId INT
 			,intLotId INT
@@ -84,6 +85,7 @@ BEGIN
 			,intTransactionId INT
 			,intTransactionDetailId INT
 			,strTransactionId NVARCHAR(40)
+			,intInventoryLotInCustodyId INT
 			,strBatchId NVARCHAR(20)
 			,intTransactionTypeId INT
 			,intLotId INT
@@ -121,7 +123,7 @@ BEGIN
 			,@intLotId 
 			,@strTransactionForm 
 			,@intUserId 
-			,@SourceInventoryLotInCustodyId 
+			,@intInventoryLotInCustodyId 
 			,@InventoryLotInCustodyTransactionId OUTPUT 
 	END 
 

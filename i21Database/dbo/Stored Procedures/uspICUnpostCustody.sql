@@ -16,12 +16,12 @@ SET ANSI_WARNINGS OFF
 
 -- Create the temp table 
 CREATE TABLE #tmpInventoryTransactionStockToReverse (
-	intInventoryTransactionId INT NOT NULL 
+	intInventoryLotInCustodyTransactionId INT NOT NULL 
 	,intTransactionId INT NULL 
 	,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-	,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-	,intRelatedTransactionId INT NULL 
 	,intTransactionTypeId INT NOT NULL 
+	,intInventoryLotInCustodyId INT 
+	,dblQty NUMERIC(38,20)
 )
 
 -- Create the variables for the internal transaction types used by costing. 
@@ -153,7 +153,7 @@ BEGIN
 			,[intConcurrencyId]						= 1
 			,[intInventoryLotInCustodyId]			= ActualTransaction.intInventoryLotInCustodyId
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryLotInCustodyTransaction ActualTransaction
-				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId	
+				ON ItemTransactionsToReverse.intInventoryLotInCustodyTransactionId = ActualTransaction.intInventoryLotInCustodyTransactionId	
 
 END
 
