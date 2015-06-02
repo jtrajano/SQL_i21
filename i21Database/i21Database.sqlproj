@@ -1643,6 +1643,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\CustomerListByRoute.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\5_UpdateOrderStatus.sql" />
+    <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

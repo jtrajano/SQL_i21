@@ -30,7 +30,10 @@ OE.strName AS strOrderedByName,
 SO.intSplitId,
 CS.strSplitNumber,
 SO.intEntitySalespersonId,
-CASE WHEN SP.strSalespersonId = '' THEN NTT.strEntityNo ELSE SP.strSalespersonId END AS strSalespersonId
+CASE WHEN SP.strSalespersonId = '' THEN NTT.strEntityNo ELSE SP.strSalespersonId END AS strSalespersonId,
+SO.strLostQuoteCompetitor,
+SO.strLostQuoteReason,
+SO.strLostQuoteComment
 FROM         
 dbo.tblSOSalesOrder AS SO INNER JOIN
 dbo.tblARCustomer AS Cus ON SO.[intEntityCustomerId] = Cus.[intEntityCustomerId] INNER JOIN

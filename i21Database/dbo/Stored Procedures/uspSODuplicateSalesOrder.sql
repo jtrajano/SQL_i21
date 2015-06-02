@@ -20,8 +20,6 @@ BEGIN
 		   ,[intOrderedById]
 		   ,[intSplitId]
 		   ,[intFreightTermId]
-		   ,[intQuoteTemplateId]
-		   ,[ysnPleminaryQuote]
 		   ,[strBOLNumber]
            ,[dblSalesOrderSubtotal]
            ,[dblShipping]
@@ -50,7 +48,12 @@ BEGIN
            ,[strBillToState]
            ,[strBillToZipCode]
            ,[strBillToCountry]
-           ,[intEntityId]		   
+           ,[intEntityId]
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strLostQuoteComment]
+		   ,[strLostQuoteCompetitor]
+		   ,[strLostQuoteReason]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -65,8 +68,6 @@ BEGIN
 		   ,[intOrderedById]
 		   ,[intSplitId]
 		   ,[intFreightTermId]
-		   ,[intQuoteTemplateId]
-		   ,[ysnPleminaryQuote]
 		   ,[strBOLNumber]
            ,[dblSalesOrderSubtotal]
            ,[dblShipping]
@@ -96,6 +97,11 @@ BEGIN
            ,[strBillToZipCode]
            ,[strBillToCountry]
            ,@UserId
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strLostQuoteComment]
+		   ,[strLostQuoteCompetitor]
+		   ,[strLostQuoteReason]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId

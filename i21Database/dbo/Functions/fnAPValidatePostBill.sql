@@ -5,7 +5,7 @@
 )
 RETURNS @returntable TABLE
 (
-	strError NVARCHAR(100),
+	strError NVARCHAR(200),
 	strTransactionType NVARCHAR(50),
 	strTransactionId NVARCHAR(50),
 	intTransactionId INT
