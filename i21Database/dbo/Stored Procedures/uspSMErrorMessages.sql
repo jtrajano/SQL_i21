@@ -518,3 +518,23 @@ EXEC sp_addmessage 51128,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51129) EXEC sp_dropmessage 51129, 'us_english'	
 SET @strmessage = 'Internal Error. The new storage location is invalid.'
 EXEC sp_addmessage 51129,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51130) EXEC sp_dropmessage 51130, 'us_english'	
+SET @strmessage = 'Production run already trued up.'
+EXEC sp_addmessage 51130,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51131) EXEC sp_dropmessage 51131, 'us_english'	
+SET @strmessage = 'Cycle count entries for the run not available, cannot proceed.'
+EXEC sp_addmessage 51131,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51132) EXEC sp_dropmessage 51132, 'us_english'	
+SET @strmessage = 'Cycle count qty is not saved. Please save cycle count before true up.'
+EXEC sp_addmessage 51132,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51133) EXEC sp_dropmessage 51133, 'us_english'	
+SET @strmessage = 'Production run(s) prior to the current run has not been trued up, True up the earlier runs and proceed.'
+EXEC sp_addmessage 51133,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51134) EXEC sp_dropmessage 51134, 'us_english'	
+SET @strmessage = 'No default consumption unit configured, cannot consume.'
+EXEC sp_addmessage 51134,11,@strmessage,'us_english','False'
