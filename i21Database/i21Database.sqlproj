@@ -1642,6 +1642,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByManufacturingProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />
+    <Build Include="dbo\Tables\tblCTContractCertification.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
