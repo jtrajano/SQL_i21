@@ -4539,8 +4539,8 @@ Ext.define('Inventory.view.Item', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
                                                         itemId: 'colAssemblyComponent',
+                                                        dataIndex: 'string',
                                                         text: 'Component',
                                                         flex: 2,
                                                         editor: {
@@ -4636,6 +4636,11 @@ Ext.define('Inventory.view.Item', {
                                                                     dataType: 'boolean',
                                                                     text: 'Stock Unit',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblUnitQty',
+                                                                    dataType: 'float',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboAssemblyUOM',
