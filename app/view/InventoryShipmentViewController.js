@@ -552,14 +552,14 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         // If there is no data change, do the post.
         if (!context.data.hasChanges()){
-            doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+            doRecap(button, win.viewModel.data.current, null);
             return;
         }
 
         // Save has data changes first before doing the post.
         context.data.saveRecord({
             successFn: function() {
-                doRecap(button, win.viewModel.data.current, cboCurrency.getRawValue());
+                doRecap(button, win.viewModel.data.current, null);
             }
         });
     },
