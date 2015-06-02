@@ -414,6 +414,7 @@ Ext.define('Inventory.view.CategoryViewController', {
         filterItem.setValue(categoryId);
         filterItem.config.value = categoryId;
         filterItem.initialConfig.value = categoryId;
+        grdLocation.store.getProxy().setExtraParams({include:'tblSMCompanyLocation'});
         grdLocation.store.load();
     },
 

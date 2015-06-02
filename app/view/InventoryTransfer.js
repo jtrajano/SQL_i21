@@ -733,7 +733,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         itemId: 'colLotID',
                                                         width: 100,
                                                         dataIndex: 'strLotID',
-                                                        text: 'Lot ID',
+                                                        text: 'Lot Number',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1019,9 +1019,9 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colNewLotID',
-                                                        width: 75,
+                                                        width: 100,
                                                         dataIndex: 'strNewLotID',
-                                                        text: 'New Lot ID',
+                                                        text: 'New Lot Number',
                                                         editor: {
                                                             xtype: 'textfield'
                                                         }

@@ -121,6 +121,40 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetAssemblyComponents(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICItem>()
+                .Include(p => p.tblICBrand)
+                .Include(p => p.tblICManufacturer)
+                .Select(p => new ItemVM
+                {
+                    intItemId = p.intItemId,
+                    strItemNo = p.strItemNo,
+                    strType = p.strType,
+                    strDescription = p.strDescription,
+                    strStatus = p.strStatus,
+                    strModelNo = p.strModelNo,
+                    strLotTracking = p.strLotTracking,
+                    strBrand = p.tblICBrand.strBrandCode,
+                    strManufacturer = p.tblICManufacturer.strManufacturer,
+                    strTracking = p.strInventoryTracking
+                })
+                .Where(p => p.strType == "Inventory" || p.strType == "Raw Material" || p.strType == "Finished Good")
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        /// <summary>
         /// Get Item Stock
         /// </summary>
         /// <param name="param"></param>
@@ -164,11 +198,9 @@ namespace iRely.Inventory.BusinessLayer
         public async Task<SearchResult> GetAssemblyItems(GetParameter param)
         {
             var query = _db.GetQuery<tblICItem>()
-                    .Include("tblICItemAssemblies.AssemblyItem")
-                    .Include("tblICItemAssemblies.tblICItemUOM.tblICUnitMeasure")
                     .Where(p => p.strType == "Assembly/Blend" && p.strLotTracking == "No")
                 .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+            var data = await query.Execute(param, "intItemId").ToListAsync();
 
             return new SearchResult()
             {

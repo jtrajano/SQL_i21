@@ -22,6 +22,19 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
+        public override async Task<SearchResult> Search(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICCategory>()
+                .Filter(param, true);
+            var data = await query.Execute(param, "intCategoryId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
         public override async Task<BusinessResult<tblICCategory>> SaveAsync(bool continueOnConflict)
         {
             var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);

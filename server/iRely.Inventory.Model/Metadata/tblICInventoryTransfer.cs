@@ -71,8 +71,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemNo))
-                    if (tblICItem != null)
-                        return tblICItem.strItemNo;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strItemNo;
                     else
                         return null;
                 else
@@ -90,8 +90,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemDesc))
-                    if (tblICItem != null)
-                        return tblICItem.strDescription;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strItemDescription;
                     else
                         return null;
                 else
@@ -109,8 +109,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_lotNo))
-                    if (tblICLot != null)
-                        return tblICLot.strLotNumber;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strLotNumber;
                     else
                         return null;
                 else
@@ -121,25 +121,6 @@ namespace iRely.Inventory.Model
                 _lotNo = value;
             }
         }
-        private string _newLotNo;
-        [NotMapped]
-        public string strNewLotNumber
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_newLotNo))
-                    if (NewLot != null)
-                        return NewLot.strLotNumber;
-                    else
-                        return null;
-                else
-                    return _newLotNo;
-            }
-            set
-            {
-                _newLotNo = value;
-            }
-        }
         private string _fromSubLocation;
         [NotMapped]
         public string strFromSubLocationName
@@ -147,8 +128,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_fromSubLocation))
-                    if (FromSubLocation != null)
-                        return FromSubLocation.strSubLocationName;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strFromSubLocationName;
                     else
                         return null;
                 else
@@ -166,8 +147,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_toSubLocation))
-                    if (ToSubLocation != null)
-                        return ToSubLocation.strSubLocationName;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strToSubLocationName;
                     else
                         return null;
                 else
@@ -185,8 +166,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_fromStorageLocation))
-                    if (FromStorageLocation != null)
-                        return FromStorageLocation.strName;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strFromStorageLocationName;
                     else
                         return null;
                 else
@@ -204,8 +185,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_toStorageLocation))
-                    if (ToStorageLocation != null)
-                        return ToStorageLocation.strName;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strToStorageLocationName;
                     else
                         return null;
                 else
@@ -223,8 +204,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_uom))
-                    if (tblICItemUOM != null)
-                        return tblICItemUOM.strUnitMeasure;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strUnitMeasure;
                     else
                         return null;
                 else
@@ -242,8 +223,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_weightUOM))
-                    if (WeightUOM != null)
-                        return WeightUOM.strUnitMeasure;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strWeightUOM;
                     else
                         return null;
                 else
@@ -261,8 +242,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_taxCode))
-                    if (tblSMTaxCode != null)
-                        return tblSMTaxCode.strTaxCode;
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strTaxCode;
                     else
                         return null;
                 else
@@ -274,18 +255,40 @@ namespace iRely.Inventory.Model
             }
         }
 
-        public tblICInventoryTransfer tblICInventoryTransfer { get; set; }
 
-        public tblICItem tblICItem { get; set; }
-        public tblICLot tblICLot { get; set; }
-        public tblICLot NewLot { get; set; }
-        public tblSMCompanyLocationSubLocation FromSubLocation { get; set; }
-        public tblSMCompanyLocationSubLocation ToSubLocation { get; set; }
-        public tblICStorageLocation FromStorageLocation { get; set; }
-        public tblICStorageLocation ToStorageLocation { get; set; }
-        public tblICItemUOM tblICItemUOM { get; set; }
-        public tblICItemUOM WeightUOM { get; set; }
-        public tblSMTaxCode tblSMTaxCode { get; set; }
+        [NotMapped]
+        public decimal dblAvailableQty
+        {
+            get
+            {
+                if (vyuICGetInventoryTransferDetail != null)
+                    return vyuICGetInventoryTransferDetail.dblOnHand ?? 0;
+                else
+                    return 0;
+            }
+        }
+        private string _availableUOM;
+        [NotMapped]
+        public string strAvailableUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_availableUOM))
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strAvailableUOM;
+                    else
+                        return null;
+                else
+                    return _availableUOM;
+            }
+            set
+            {
+                _availableUOM = value;
+            }
+        }
+
+        public vyuICGetInventoryTransferDetail vyuICGetInventoryTransferDetail { get; set; }
+        public tblICInventoryTransfer tblICInventoryTransfer { get; set; }
     }
 
     public class tblICInventoryTransferNote : BaseEntity
@@ -297,6 +300,28 @@ namespace iRely.Inventory.Model
         public int? intSort { get; set; }
 
         public tblICInventoryTransfer tblICInventoryTransfer { get; set; }
+    }
+
+    public class vyuICGetInventoryTransferDetail
+    {
+        public int? intInventoryTransferDetailId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public string strLotNumber { get; set; }
+        public string strFromSubLocationName { get; set; }
+        public string strToSubLocationName { get; set; }
+        public string strFromStorageLocationName { get; set; }
+        public string strToStorageLocationName { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strWeightUOM { get; set; }
+        public string strTaxCode { get; set; }
+        public string strAvailableUOM { get; set; }
+        public decimal? dblOnHand { get; set; }
+        public decimal? dblOnOrder { get; set; }
+        public decimal? dblReservedQty { get; set; }
+        public decimal? dblAvailableQty { get; set; }
+
+        public tblICInventoryTransferDetail tblICInventoryTransferDetail { get; set; }
     }
 
     public class TransferVM

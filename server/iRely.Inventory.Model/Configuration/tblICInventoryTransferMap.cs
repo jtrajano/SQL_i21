@@ -77,36 +77,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblFreightAmount).HasColumnName("dblFreightAmount").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
 
-            this.HasOptional(p => p.tblICItem)
-                .WithMany(p => p.tblICInventoryTransferDetails)
-                .HasForeignKey(p => p.intItemId);
-            this.HasOptional(p => p.tblICLot)
-                .WithMany(p => p.tblICInventoryTransferDetails)
-                .HasForeignKey(p => p.intLotId);
-            this.HasOptional(p => p.NewLot)
-                .WithMany(p => p.NewTransferDetails)
-                .HasForeignKey(p => p.intNewLotId);
-            this.HasOptional(p => p.FromSubLocation)
-                .WithMany(p => p.FromTransferDetails)
-                .HasForeignKey(p => p.intFromSubLocationId);
-            this.HasOptional(p => p.ToSubLocation)
-                .WithMany(p => p.ToTransferDetails)
-                .HasForeignKey(p => p.intToSubLocationId);
-            this.HasOptional(p => p.FromStorageLocation)
-                .WithMany(p => p.FromTransferDetails)
-                .HasForeignKey(p => p.intFromStorageLocationId);
-            this.HasOptional(p => p.ToStorageLocation)
-                .WithMany(p => p.ToTransferDetails)
-                .HasForeignKey(p => p.intToStorageLocationId);
-            this.HasOptional(p => p.tblICItemUOM)
-                .WithMany(p => p.tblICInventoryTransferDetails)
-                .HasForeignKey(p => p.intItemUOMId);
-            this.HasOptional(p => p.WeightUOM)
-                .WithMany(p => p.WeightTransferDetails)
-                .HasForeignKey(p => p.intItemWeightUOMId);
-            this.HasOptional(p => p.tblSMTaxCode)
-                .WithMany(p => p.tblICInventoryTransferDetails)
-                .HasForeignKey(p => p.intTaxCodeId);
+            this.HasOptional(p => p.vyuICGetInventoryTransferDetail)
+                .WithRequired(p => p.tblICInventoryTransferDetail);
         }
     }
 
@@ -124,6 +96,34 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strNoteType).HasColumnName("strNoteType");
             this.Property(t => t.strNotes).HasColumnName("strNotes");
             this.Property(t => t.intSort).HasColumnName("intSort");
+        }
+    }
+
+    public class vyuICGetInventoryTransferDetailMap : EntityTypeConfiguration<vyuICGetInventoryTransferDetail>
+    {
+        public vyuICGetInventoryTransferDetailMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryTransferDetailId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryTransferDetailStock");
+            this.Property(t => t.intInventoryTransferDetailId).HasColumnName("intInventoryTransferDetailId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
+            this.Property(t => t.strFromSubLocationName).HasColumnName("strFromSubLocationName");
+            this.Property(t => t.strToSubLocationName).HasColumnName("strToSubLocationName");
+            this.Property(t => t.strFromStorageLocationName).HasColumnName("strFromStorageLocationName");
+            this.Property(t => t.strToStorageLocationName).HasColumnName("strToStorageLocationName");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
+            this.Property(t => t.strTaxCode).HasColumnName("strTaxCode");
+            this.Property(t => t.strAvailableUOM).HasColumnName("strAvailableUOM");
+            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand").HasPrecision(18, 6);
+            this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder").HasPrecision(18, 6);
+            this.Property(t => t.dblReservedQty).HasColumnName("dblReservedQty").HasPrecision(18, 6);
+            this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty").HasPrecision(18, 6);
         }
     }
 }

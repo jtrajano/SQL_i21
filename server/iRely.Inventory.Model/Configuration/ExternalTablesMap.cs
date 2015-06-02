@@ -393,7 +393,7 @@ namespace iRely.Inventory.Model
             this.HasKey(t => t.intManufacturingCellId);
 
             // Table & Column Mappings
-            this.ToTable("tblICManufacturingCell");
+            this.ToTable("tblMFManufacturingCell");
             this.Property(t => t.dblStdCapacity).HasColumnName("dblStdCapacity").HasPrecision(18, 6);
             this.Property(t => t.dblStdLineEfficiency).HasColumnName("dblStdLineEfficiency").HasPrecision(18, 6);
             this.Property(t => t.intLocationId).HasColumnName("intLocationId");

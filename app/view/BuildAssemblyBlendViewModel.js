@@ -11,8 +11,22 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewModel', {
     ],
 
     stores: {
-        item:{
-            type: 'icbufferedassemblyitem'
+        item: {
+            type: 'icbufferedassemblyitem',
+            proxy: {
+                extraParams: {
+                    include: 'tblICItemAssemblies.AssemblyItem, tblICItemAssemblies.tblICItemUOM.tblICUnitMeasure'
+                },
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/Item/GetAssemblyItems'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
         },
         itemUOM:{
             type: 'icbuffereditemunitmeasure'

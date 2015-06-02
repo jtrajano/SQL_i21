@@ -200,7 +200,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemCommodityCost> tblICItemCommodityCosts { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> NewAdjustmentDetails { get; set; }
-        public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }		
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
                 
@@ -363,6 +362,9 @@ namespace iRely.Inventory.Model
         public string strSubLocationName { get; set; }
         public int? intStorageLocationId { get; set; }
         public string strStorageLocationName { get; set; }
+        public int? intLotId { get; set; }
+        public string strLotNumber { get; set; }
+        public string strLotAlias { get; set; }
         public decimal? dblOnHand { get; set; }
         public decimal? dblOnOrder { get; set; }
         public decimal? dblReservedQty { get; set; }

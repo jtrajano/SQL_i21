@@ -80,4 +80,29 @@ namespace iRely.Inventory.Model
         public tblICManufacturingCell tblICManufacturingCell { get; set; }
         public tblICItemFactory tblICItemFactory { get; set; }
     }
+
+    public class ItemFactoryVM
+    {
+        public int intItemFactoryId { get; set; }
+        public int intItemId { get; set; }
+        public int? intFactoryId { get; set; }
+        public bool ysnDefault { get; set; }
+        public int? intSort { get; set; }
+        public string strLocationName { get; set; }
+    }
+
+    public class ItemFactoryManufacturingCellVM
+    {
+        public int intItemFactoryManufacturingCellId { get; set; }
+        public int intItem { get; set; }
+        public int intFactoryId { get; set; }
+        public int intItemFactoryId { get; set; }
+        public int? intManufacturingCellId { get; set; }
+        public bool ysnDefault { get; set; }
+        public int? intPreference { get; set; }
+        public int? intSort { get; set; }
+        public string strCellName { get; set; }
+
+
+    }
 }

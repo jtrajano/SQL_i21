@@ -1327,6 +1327,7 @@
                                     "codeClass": null,
                                     "userConfig": {
                                         "container|align": "stretch",
+                                        "designer|displayName": "container",
                                         "layout": "vbox",
                                         "layout|flex": 1
                                     },
@@ -1342,6 +1343,7 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "container|align": "stretch",
+                                                "designer|displayName": "container",
                                                 "layout": "vbox",
                                                 "layout|flex": 1,
                                                 "width": 100
@@ -1460,7 +1462,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter1",
                                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2466,7 +2468,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter17",
+                                                                            "name": "filter11",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3587,7 +3589,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter12",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3665,7 +3667,7 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "bodyPadding": 10,
+                                "bodyPadding": 5,
                                 "container|align": "stretch",
                                 "itemId": "pgeFreightInvoice",
                                 "layout": "hbox",
@@ -3685,131 +3687,223 @@
                                     "designerId": "12932a6d-5607-48aa-8183-42947bfb66c4"
                                 },
                                 {
-                                    "type": "Ext.panel.Panel",
+                                    "type": "Ext.grid.Panel",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "bodyPadding": 10,
-                                        "container|align": "stretch",
-                                        "designer|displayName": "container",
-                                        "itemId": "pnlFreightCalculation",
-                                        "layout": "vbox",
-                                        "layout|flex": 1,
-                                        "layout|margins": null,
+                                        "itemId": "grdCost",
+                                        "layout|flex": 2.5,
                                         "margin": "0 5 0 0",
-                                        "title": "Freight Calculation"
+                                        "title": "Costs"
                                     },
-                                    "name": "MyPanel10",
-                                    "designerId": "3e018261-75b3-4216-8b85-276ec4c4e7b6",
+                                    "name": "MyGridPanel1",
+                                    "designerId": "0438a394-4749-4971-9585-08e9b6010121",
                                     "cn": [
                                         {
-                                            "type": "Ext.form.field.ComboBox",
+                                            "type": "Ext.toolbar.Toolbar",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "dockedItems",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "displayField": "strDescription",
-                                                "fieldLabel": "Calculation Basis",
-                                                "itemId": "cboCalculationBasis",
-                                                "labelWidth": 130,
-                                                "layout|flex": null,
-                                                "layout|margins": null,
-                                                "name": null,
-                                                "readOnly": null,
-                                                "valueField": "strDescription",
-                                                "width": null
+                                                "container|padding": "0 0 0 1",
+                                                "dock": "top",
+                                                "itemId": "tlbGridOptions"
                                             },
-                                            "name": "MyComboBox5",
-                                            "designerId": "4b5ab35f-9076-49a6-bde8-55ad9b3d0a6b"
+                                            "name": "MyToolbar51",
+                                            "designerId": "19ff3e58-3869-483b-aea2-77879a0461b1",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-add",
+                                                        "itemId": "btnInsert",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Insert"
+                                                    },
+                                                    "name": "MyButton10",
+                                                    "designerId": "b0566f83-b124-4db3-9815-61c15df70f45"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-delete",
+                                                        "itemId": "btnRemove",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Remove"
+                                                    },
+                                                    "name": "MyButton23",
+                                                    "designerId": "fb0f5848-4a90-43aa-ac34-d1edbf65c90c"
+                                                },
+                                                {
+                                                    "type": "Ext.toolbar.Separator",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|displayName": "separator",
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MySeparator2",
+                                                    "designerId": "924cfd45-2494-480c-8d46-2f94ae4419e3"
+                                                },
+                                                {
+                                                    "type": "linkedinstance",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "filter13",
+                                                    "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
+                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                }
+                                            ]
                                         },
                                         {
-                                            "type": "Ext.form.field.Number",
+                                            "type": "Ext.grid.column.Column",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": "numeric",
-                                                "fieldLabel": "Units / Weight / Miles",
-                                                "itemId": "txtUnitsWeightMiles",
-                                                "labelWidth": 130,
-                                                "layout|flex": null,
-                                                "layout|margins": null,
-                                                "name": null,
-                                                "readOnly": null,
-                                                "width": null
+                                                "text": "Cost Type"
                                             },
-                                            "name": "MyNumberField1",
-                                            "designerId": "85092c0e-e861-434b-b506-c3869676eb0e"
+                                            "name": "MyColumn5",
+                                            "designerId": "6a241270-7605-401f-9c42-aa318999ab90"
                                         },
                                         {
-                                            "type": "Ext.form.field.Number",
+                                            "type": "Ext.grid.column.Column",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": "numeric",
-                                                "fieldLabel": "Freight Rate",
-                                                "itemId": "txtFreightRate",
-                                                "labelWidth": 130,
-                                                "layout|flex": null,
-                                                "layout|margins": null,
-                                                "name": null,
-                                                "readOnly": null,
-                                                "width": null
+                                                "text": "Inventory Cost",
+                                                "width": 88
                                             },
-                                            "name": "MyNumberField2",
-                                            "designerId": "8771499f-d9d8-42dd-a8a8-73f8218f5389"
+                                            "name": "MyColumn10",
+                                            "designerId": "fb289591-d8ec-4b4c-a3a5-1aa240c36f8a"
                                         },
                                         {
-                                            "type": "Ext.form.field.Number",
+                                            "type": "Ext.grid.column.Column",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": "numeric",
-                                                "fieldLabel": "Fuel Surcharge %",
-                                                "itemId": "txtFuelSurcharge",
-                                                "labelWidth": 130,
-                                                "layout|flex": null,
-                                                "layout|margins": null,
-                                                "name": null,
-                                                "readOnly": null,
-                                                "width": null
+                                                "text": "Cost Method"
                                             },
-                                            "name": "MyNumberField3",
-                                            "designerId": "db45c115-4ffb-44cc-b5f6-93c3dabc0b58"
+                                            "name": "MyColumn11",
+                                            "designerId": "2ebceaa3-4fd9-4a5b-a4e3-1d53cae99fec"
                                         },
                                         {
-                                            "type": "Ext.form.field.Number",
+                                            "type": "Ext.grid.column.Column",
                                             "reference": {
-                                                "name": "items",
+                                                "name": "columns",
                                                 "type": "array"
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": "numeric",
-                                                "fieldLabel": "Calculated Freight",
-                                                "itemId": "txtCalculatedFreight",
-                                                "labelWidth": 130,
-                                                "layout|flex": null,
-                                                "layout|margins": null,
-                                                "name": null,
-                                                "readOnly": true,
-                                                "width": null
+                                                "text": "Rate",
+                                                "width": 76
                                             },
-                                            "name": "MyNumberField9",
-                                            "designerId": "1f92c382-0c6e-4bd8-9156-598527acbba8"
+                                            "name": "MyColumn35",
+                                            "designerId": "238379ca-17ad-4da0-a364-1891c68233fe"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "UOM",
+                                                "width": 78
+                                            },
+                                            "name": "MyColumn45",
+                                            "designerId": "98ed099e-cb6a-4d6e-9f30-aa13eb8e16ee"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "On Cost Type"
+                                            },
+                                            "name": "MyColumn46",
+                                            "designerId": "1e4be1c3-9c82-4374-adce-c39a14bcecc9"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "flex": 1,
+                                                "text": "Vendor"
+                                            },
+                                            "name": "MyColumn47",
+                                            "designerId": "8fa09d01-4ad2-4906-8b40-26d1b9471f60"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "text": "Amount",
+                                                "width": 90
+                                            },
+                                            "name": "MyColumn48",
+                                            "designerId": "6f2f7675-ad09-49ce-b5c5-1f84bb703780"
+                                        },
+                                        {
+                                            "type": "Ext.grid.View",
+                                            "reference": {
+                                                "name": "viewConfig",
+                                                "type": "object"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "itemId": "grvCost"
+                                            },
+                                            "name": "MyGridView41",
+                                            "designerId": "35ec9921-8e71-403d-a2df-e935efd8b448"
                                         }
                                     ]
                                 },
@@ -3828,7 +3922,7 @@
                                         "layout": "vbox",
                                         "layout|flex": 1,
                                         "layout|margins": null,
-                                        "margin": "0 5 0 0",
+                                        "margin": null,
                                         "title": "Invoice Detail"
                                     },
                                     "name": "MyPanel11",
@@ -3842,7 +3936,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": "numeric",
+                                                "designer|createAlias": "numericfield",
                                                 "fieldLabel": "Calculated Amount",
                                                 "itemId": "txtCalculatedAmount",
                                                 "labelWidth": 130,
@@ -3863,8 +3957,9 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": "numeric",
+                                                "designer|createAlias": "numericfield",
                                                 "fieldLabel": "Invoice Amount",
+                                                "hideTrigger": true,
                                                 "itemId": "txtInvoiceAmount",
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
@@ -3884,7 +3979,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": "numeric",
+                                                "designer|createAlias": "numericfield",
                                                 "fieldLabel": "Difference",
                                                 "itemId": "txtDifference",
                                                 "labelWidth": 130,
@@ -3941,6 +4036,7 @@
                                             "userConfig": {
                                                 "designer|createAlias": null,
                                                 "fieldLabel": "Check No",
+                                                "hideTrigger": true,
                                                 "itemId": "txtCheckNo",
                                                 "labelWidth": 130,
                                                 "layout|flex": null,
@@ -3981,7 +4077,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "designer|createAlias": "numeric",
+                                                "designer|createAlias": "numericfield",
                                                 "fieldLabel": "Invoice Margin %",
                                                 "itemId": "txtInvoiceMargin",
                                                 "labelWidth": 130,
@@ -3992,23 +4088,12 @@
                                                 "width": null
                                             },
                                             "name": "MyNumberField8",
+                                            "configAlternates": {
+                                                "decimalToDisplay": "number"
+                                            },
                                             "designerId": "1031199f-6b77-4f15-8201-9772a2bf44c2"
                                         }
                                     ]
-                                },
-                                {
-                                    "type": "Ext.container.Container",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "designer|displayName": "container",
-                                        "layout|flex": 1
-                                    },
-                                    "name": "MyContainer14",
-                                    "designerId": "95d03fdb-c57f-4606-885f-e3cac3463e6e"
                                 }
                             ]
                         },
@@ -4424,7 +4509,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter19",
+                                                    "name": "filter14",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4868,7 +4953,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging1",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

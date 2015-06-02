@@ -410,6 +410,10 @@ Ext.define('Inventory.view.Item', {
                                                                                 dataType: 'string',
                                                                                 text: 'Description',
                                                                                 flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'tblICCategoryUOMs',
+                                                                                hidden: true
                                                                             }
                                                                         ],
                                                                         itemId: 'cboCategory',
@@ -4583,6 +4587,13 @@ Ext.define('Inventory.view.Item', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colAssemblyDescription',
+                                                        dataIndex: 'string',
+                                                        text: 'Description',
+                                                        flex: 2
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colAssemblyQuantity',
                                                         width: 65,
@@ -4594,13 +4605,6 @@ Ext.define('Inventory.view.Item', {
                                                             fieldStyle: 'text-align:right',
                                                             hideTrigger: true
                                                         }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colAssemblyDescription',
-                                                        dataIndex: 'string',
-                                                        text: 'Description',
-                                                        flex: 2
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
@@ -4636,6 +4640,11 @@ Ext.define('Inventory.view.Item', {
                                                                     dataType: 'boolean',
                                                                     text: 'Stock Unit',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblUnitQty',
+                                                                    dataType: 'float',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboAssemblyUOM',
