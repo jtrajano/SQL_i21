@@ -2,6 +2,7 @@
 (
 	[intWorkOrderConsumedLotId] INT NOT NULL IDENTITY(1,1), 
     [intWorkOrderId] INT NOT NULL, 
+	intItemId int null,
     [intLotId] INT NOT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
     [intItemUOMId] INT NOT NULL, 
@@ -27,6 +28,7 @@
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderConsumedLot_intConcurrencyId] DEFAULT 0, 
 	CONSTRAINT [PK_tblMFWorkOrderConsumedLot_intWorkOrderConsumedLotId] PRIMARY KEY ([intWorkOrderConsumedLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICItem_inItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICLot_inLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblMFWorkOrderConsumedLot_tblICItemUOM_intIssuedItemUOMId] FOREIGN KEY ([intItemIssuedUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),

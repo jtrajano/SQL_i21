@@ -2,6 +2,7 @@
 (
 	[intWorkOrderProducedLotId] INT NOT NULL IDENTITY(1,1), 
     [intWorkOrderId] INT NOT NULL, 
+	intItemId int null,
     [intLotId] INT NOT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
     [intItemUOMId] INT NOT NULL,
@@ -32,6 +33,7 @@
 	strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	CONSTRAINT [PK_tblMFWorkOrderProducedLot_intWorkOrderProducedLotId] PRIMARY KEY ([intWorkOrderProducedLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICItem_inItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICLot_inLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICItemUOM_intItemUOMId_intPhysicalItemUOMId] FOREIGN KEY ([intPhysicalItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),

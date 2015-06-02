@@ -1644,6 +1644,10 @@
     <Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />
     <Build Include="dbo\Tables\tblCTContractCertification.sql" />
     <Build Include="dbo\Tables\tblMFItemMachine.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCalculateYield.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPostWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidatePostWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetStageDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
