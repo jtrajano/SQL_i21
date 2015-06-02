@@ -10,12 +10,11 @@ Type the overview for the table here.
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblMFManufacturingCell]
+	CREATE TABLE [dbo].[tblICManufacturingCell]
 	(
 		[intManufacturingCellId] INT NOT NULL IDENTITY, 
 		[strCellName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-		[intSubLocationId] INT NULL,
 		[intLocationId] INT NULL, 
 		[ysnActive] BIT NULL DEFAULT ((0)), 
 		[dblStdCapacity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -23,17 +22,12 @@ Type the overview for the table here.
 		[intStdCapacityRateId] INT NULL, 
 		[dblStdLineEfficiency] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[ysnIncludeSchedule] BIT NULL DEFAULT ((0)), 
-		[intCreatedUserId] [int] NULL,
-		[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblMFManufacturingCell_dtmCreated] DEFAULT GetDate(),
-		[intLastModifiedUserId] [int] NULL,
-		[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblMFManufacturingCell_dtmLastModified] DEFAULT GetDate(),		 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
-		CONSTRAINT [PK_tblMFManufacturingCell] PRIMARY KEY ([intManufacturingCellId]), 
-		CONSTRAINT [UQ_tblMFManufacturingCell_strCellName] UNIQUE ([strCellName]), 
-		CONSTRAINT [FK_tblMFManufacturingCell_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
-		CONSTRAINT [FK_tblMFManufacturingCell_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
-		CONSTRAINT [FK_tblMFManufacturingCell_StandardUnitMeasure] FOREIGN KEY ([intStdUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblMFManufacturingCell_CapacityUnitMeasure] FOREIGN KEY ([intStdCapacityRateId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [PK_tblICManufacturingCell] PRIMARY KEY ([intManufacturingCellId]), 
+		CONSTRAINT [AK_tblICManufacturingCell_strCellName] UNIQUE ([strCellName]), 
+		CONSTRAINT [FK_tblICManufacturingCell_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
+		CONSTRAINT [FK_tblICManufacturingCell_StandardUnitMeasure] FOREIGN KEY ([intStdUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [FK_tblICManufacturingCell_CapacityUnitMeasure] FOREIGN KEY ([intStdCapacityRateId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	)
 
 	GO
@@ -42,7 +36,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'intManufacturingCellId'
 	GO
@@ -51,7 +45,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'strCellName'
 	GO
@@ -60,7 +54,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'strDescription'
 	GO
@@ -69,7 +63,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'intLocationId'
 	GO
@@ -78,7 +72,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = 'ysnActive'
 	GO
@@ -87,7 +81,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'dblStdCapacity'
 	GO
@@ -96,7 +90,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'intStdUnitMeasureId'
 	GO
@@ -105,7 +99,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'intStdCapacityRateId'
 	GO
@@ -114,7 +108,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'dblStdLineEfficiency'
 	GO
@@ -123,7 +117,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'ysnIncludeSchedule'
 	GO
@@ -132,6 +126,6 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCell',
+		@level1name = N'tblICManufacturingCell',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'

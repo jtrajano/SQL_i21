@@ -16,7 +16,7 @@
 		CONSTRAINT [PK_tblMFMachinePackType] PRIMARY KEY ([intMachinePackTypeId]), 
 		CONSTRAINT [AK_tblMFMachinePackType_intMachineId_intPackTypeId] UNIQUE ([intMachineId],[intPackTypeId]), 
 		CONSTRAINT [FK_tblMFMachinePackType_tblMFMachine] FOREIGN KEY ([intMachineId]) REFERENCES [tblMFMachine]([intMachineId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblMFMachinePackType_tblICPackType] FOREIGN KEY ([intPackTypeId]) REFERENCES [tblMFPackType]([intPackTypeId]), 
+		CONSTRAINT [FK_tblMFMachinePackType_tblICPackType] FOREIGN KEY ([intPackTypeId]) REFERENCES [tblICPackType]([intPackTypeId]), 
 		CONSTRAINT [FK_tblMFMachinePackType_tblICUnitMeasure_intMachineUOMId] FOREIGN KEY ([intMachineUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [FK_tblMFMachinePackType_tblICUnitMeasure_intMachineRateUOMId] FOREIGN KEY ([intMachineRateUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
 		 

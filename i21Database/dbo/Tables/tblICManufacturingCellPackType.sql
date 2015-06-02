@@ -10,7 +10,7 @@ Type the overview for the table here.
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblMFManufacturingCellPackType]
+	CREATE TABLE [dbo].[tblICManufacturingCellPackType]
 	(
 		[intManufacturingCellPackTypeId] INT NOT NULL IDENTITY, 
 		[intManufacturingCellId] INT NOT NULL, 
@@ -21,11 +21,10 @@ Type the overview for the table here.
 		[dblLineEfficiencyRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
-		CONSTRAINT [PK_tblMFManufacturingCellPackType] PRIMARY KEY ([intManufacturingCellPackTypeId]), 
-		CONSTRAINT [FK_tblMFManufacturingCellPackType_tblICManufacturingCell] FOREIGN KEY ([intManufacturingCellId]) REFERENCES [tblMFManufacturingCell]([intManufacturingCellId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblMFManufacturingCellPackType_tblMFPackType] FOREIGN KEY ([intPackTypeId]) REFERENCES [tblMFPackType]([intPackTypeId]),
-		CONSTRAINT [FK_tblMFManufacturingCellPackType_CapacityUnitMeasure] FOREIGN KEY ([intLineCapacityUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblMFManufacturingCellPackType_CapacityRateUnitMeasure] FOREIGN KEY ([intLineCapacityRateUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+		CONSTRAINT [PK_tblICManufacturingCellPackType] PRIMARY KEY ([intManufacturingCellPackTypeId]), 
+		CONSTRAINT [FK_tblICManufacturingCellPackType_tblICManufacturingCell] FOREIGN KEY ([intManufacturingCellId]) REFERENCES [tblICManufacturingCell]([intManufacturingCellId]) ON DELETE CASCADE, 
+		CONSTRAINT [FK_tblICManufacturingCellPackType_CapacityUnitMeasure] FOREIGN KEY ([intLineCapacityUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [FK_tblICManufacturingCellPackType_CapacityRateUnitMeasure] FOREIGN KEY ([intLineCapacityRateUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 	)
 
 	GO
@@ -34,7 +33,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCellPackType',
+		@level1name = N'tblICManufacturingCellPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'intManufacturingCellPackTypeId'
 	GO
@@ -43,7 +42,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCellPackType',
+		@level1name = N'tblICManufacturingCellPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'intManufacturingCellId'
 	GO
@@ -52,7 +51,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCellPackType',
+		@level1name = N'tblICManufacturingCellPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'intPackTypeId'
 	GO
@@ -61,7 +60,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCellPackType',
+		@level1name = N'tblICManufacturingCellPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'dblLineCapacity'
 	GO
@@ -70,7 +69,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCellPackType',
+		@level1name = N'tblICManufacturingCellPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'intLineCapacityUnitMeasureId'
 	GO
@@ -79,7 +78,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCellPackType',
+		@level1name = N'tblICManufacturingCellPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'intLineCapacityRateUnitMeasureId'
 	GO
@@ -88,7 +87,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCellPackType',
+		@level1name = N'tblICManufacturingCellPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'dblLineEfficiencyRate'
 	GO
@@ -97,7 +96,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCellPackType',
+		@level1name = N'tblICManufacturingCellPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'intSort'
 	GO
@@ -106,6 +105,6 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFManufacturingCellPackType',
+		@level1name = N'tblICManufacturingCellPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'

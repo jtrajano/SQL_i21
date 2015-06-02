@@ -1,4 +1,4 @@
-﻿﻿CREATE VIEW dbo.vyuSOSalesOrderSearch
+﻿CREATE VIEW dbo.vyuSOSalesOrderSearch
 AS
 SELECT     
 SO.intSalesOrderId, 

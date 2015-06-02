@@ -10,7 +10,7 @@ Type the overview for the table here.
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblMFPackTypeDetail]
+	CREATE TABLE [dbo].[tblICPackTypeDetail]
 	(
 		[intPackTypeDetailId] INT NOT NULL IDENTITY, 
 		[intPackTypeId] INT NOT NULL, 
@@ -19,10 +19,10 @@ Type the overview for the table here.
 		[dblConversionFactor] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
-		CONSTRAINT [PK_tblMFPackTypeDetail] PRIMARY KEY ([intPackTypeDetailId]), 
-		CONSTRAINT [FK_tblMFPackTypeDetail_tblICPackType] FOREIGN KEY ([intPackTypeId]) REFERENCES [tblMFPackType]([intPackTypeId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblMFPackTypeDetail_SourceUnitMeasure] FOREIGN KEY ([intSourceUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblMFPackTypeDetail_TargetUnitMeasure] FOREIGN KEY ([intTargetUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
+		CONSTRAINT [PK_tblICPackTypeDetail] PRIMARY KEY ([intPackTypeDetailId]), 
+		CONSTRAINT [FK_tblICPackTypeDetail_tblICPackType] FOREIGN KEY ([intPackTypeId]) REFERENCES [tblICPackType]([intPackTypeId]) ON DELETE CASCADE, 
+		CONSTRAINT [FK_tblICPackTypeDetail_SourceUnitMeasure] FOREIGN KEY ([intSourceUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [FK_tblICPackTypeDetail_TargetUnitMeasure] FOREIGN KEY ([intTargetUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
 	)
 
 	GO
@@ -31,7 +31,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFPackTypeDetail',
+		@level1name = N'tblICPackTypeDetail',
 		@level2type = N'COLUMN',
 		@level2name = N'intPackTypeDetailId'
 	GO
@@ -40,7 +40,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFPackTypeDetail',
+		@level1name = N'tblICPackTypeDetail',
 		@level2type = N'COLUMN',
 		@level2name = N'intPackTypeId'
 	GO
@@ -49,7 +49,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFPackTypeDetail',
+		@level1name = N'tblICPackTypeDetail',
 		@level2type = N'COLUMN',
 		@level2name = N'intSourceUnitMeasureId'
 	GO
@@ -58,7 +58,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFPackTypeDetail',
+		@level1name = N'tblICPackTypeDetail',
 		@level2type = N'COLUMN',
 		@level2name = N'intTargetUnitMeasureId'
 	GO
@@ -67,7 +67,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFPackTypeDetail',
+		@level1name = N'tblICPackTypeDetail',
 		@level2type = N'COLUMN',
 		@level2name = N'dblConversionFactor'
 	GO
@@ -76,7 +76,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFPackTypeDetail',
+		@level1name = N'tblICPackTypeDetail',
 		@level2type = N'COLUMN',
 		@level2name = N'intSort'
 	GO
@@ -85,6 +85,6 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblMFPackTypeDetail',
+		@level1name = N'tblICPackTypeDetail',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
