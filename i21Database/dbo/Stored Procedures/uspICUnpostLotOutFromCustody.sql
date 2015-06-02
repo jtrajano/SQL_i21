@@ -93,6 +93,17 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
+IF EXISTS (
+	SELECT	TOP 1 1
+	FROM	dbo.tblICInventoryLotInCustody LotBucket_In_Custody INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+			ON LotBucket_In_Custody.intInventoryLotInCustodyId = Reversal.intInventoryLotInCustodyId
+	WHERE	ISNULL(LotBucket_In_Custody.ysnIsUnposted, 0) = 1
+)
+BEGIN 
+	-- Unable to unpost the transaction.
+	RAISERROR(51130, 11, 1)
+END 
+
 -- Update the lot cost bucket. 
 UPDATE	LotBucket_In_Custody
 SET		LotBucket_In_Custody.dblStockOut = ISNULL(LotBucket_In_Custody.dblStockOut, 0) - Reversal.dblQty

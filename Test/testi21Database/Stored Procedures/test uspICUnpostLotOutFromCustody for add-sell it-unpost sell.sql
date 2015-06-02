@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostLotInFromCustody for add-unpost add]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostLotOutFromCustody for add-sell it-unpost sell]
 AS
 BEGIN
 	-- Declare the variables for grains (item)
@@ -185,6 +185,7 @@ BEGIN
 				,dblCost                                 
 				,strTransactionId                         
 				,intTransactionId 
+				,ysnIsUnposted
 		)
 		SELECT	intItemId					= @WetGrains
 				,intItemLocationId			= @WetGrains_DefaultLocation
@@ -193,10 +194,11 @@ BEGIN
 				,intSubLocationId			= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId		= @StorageSilo_RM_DL
 				,dblStockIn					= 25
-				,dblStockOut				= 0
+				,dblStockOut				= 0			-- < From 20, it will become 0. 
 				,dblCost					= 3.00
 				,strTransactionId			= 'InvRcpt-0000001'
 				,intTransactionId			= 6
+				,ysnIsUnposted				= 0
 		UNION ALL 
 		SELECT	intItemId					= @WetGrains
 				,intItemLocationId			= @WetGrains_DefaultLocation
@@ -209,6 +211,7 @@ BEGIN
 				,dblCost					= 2.75
 				,strTransactionId			= 'InvRcpt-0000002'
 				,intTransactionId			= 7
+				,ysnIsUnposted				= 0
 
 		-- Add fake data for tblICInventoryLotInCustodyTransaction
 		INSERT INTO dbo.tblICInventoryLotInCustodyTransaction (
@@ -281,7 +284,31 @@ BEGIN
 				,strBatchId						= 'BATCH-0002'
 				,intTransactionTypeId			= @InventoryReceipt
 				,ysnIsUnposted					= 0
-				,strTransactionForm				= 'Inventory Receipt'					
+				,strTransactionForm				= 'Inventory Receipt'
+		UNION ALL
+		SELECT
+				intItemId						= @WetGrains
+				,intItemLocationId				= @WetGrains_DefaultLocation
+				,intItemUOMId					= @WetGrains_BushelUOM
+				,intSubLocationId				= @Raw_Materials_SubLocation_DefaultLocation
+				,intStorageLocationId			= @StorageSilo_RM_DL
+				,intLotId						= 12345
+				,dtmDate						= '1/10/2014'
+				,dblQty							= -20
+				,dblUOMQty						= @BushelUnitQty
+				,dblCost						= 3.00
+				,dblValue						= 0.00
+				,dblSalesPrice					= 12.14
+				,intCurrencyId					= NULL 
+				,dblExchangeRate				= 1
+				,intTransactionId				= 8
+				,intTransactionDetailId			= NULL 
+				,strTransactionId				= 'InvShip-0000002'
+				,intInventoryLotInCustodyId		= 1
+				,strBatchId						= 'BATCH-0003'
+				,intTransactionTypeId			= @InventoryShipment
+				,ysnIsUnposted					= 0
+				,strTransactionForm				= 'Inventory Shipment'
 
 		INSERT INTO expectedLotInCustody (
 				strTransactionId
@@ -293,8 +320,8 @@ BEGIN
 		)
 		SELECT	strTransactionId = 'InvRcpt-0000001'
 				,intTransactionId = 6
-				,dblStockIn = 25			-- < This is expected. The stock needs to have an offset. 
-				,dblStockOut = 25
+				,dblStockIn = 25
+				,dblStockOut = 0
 				,dblCost = 3.00
 				,intLotId = 12345
 		UNION ALL 
@@ -304,33 +331,17 @@ BEGIN
 				,dblStockOut = 0
 				,dblCost = 2.75
 				,intLotId = 12345
-
-		-- Setup the expected data for transactions to reverse 
-		INSERT INTO expectedTransactionToReverse (
-				intInventoryLotInCustodyTransactionId 
-				,intTransactionId 
-				,strTransactionId 
-				,intTransactionTypeId 
-				,intInventoryLotInCustodyId 
-				,dblQty 
-		)
-		SELECT	intInventoryLotInCustodyTransactionId	= 1
-				,intTransactionId						= 6
-				,strTransactionId						= 'InvRcpt-0000001'
-				,intTransactionTypeId					= @InventoryReceipt
-				,intInventoryLotInCustodyId				= 1
-				,dblQty									= 25
 	END 
-	
+
 	-- Act
 	BEGIN 
 		-- Call the uspICUnpostLotOut
-		SET @strTransactionId = 'InvRcpt-0000001'
-		SET @intTransactionId = 6
+		SET @strTransactionId = 'InvShip-0000001'
+		SET @intTransactionId = 8
 		
-		EXEC dbo.uspICUnpostLotInFromCustody @strTransactionId, @intTransactionId
+		EXEC dbo.uspICUnpostLotOutFromCustody @strTransactionId, @intTransactionId
 	END 
-	
+
 	-- Assert
 	BEGIN 
 		-- Get the date from the temporary table. 
