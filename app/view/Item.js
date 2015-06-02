@@ -3221,6 +3221,91 @@ Ext.define('Inventory.view.Item', {
                                                                 ]
                                                             }
                                                         ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        itemId: 'pgeCost',
+                                                        bodyPadding: 7,
+                                                        title: 'Cost',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboFreightTerms',
+                                                                        fieldLabel: 'Freight Terms',
+                                                                        labelWidth: 105
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkInventoryCost',
+                                                                        fieldLabel: 'Inventory Cost',
+                                                                        labelWidth: 105
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkAccrue',
+                                                                        fieldLabel: 'Accrue',
+                                                                        labelWidth: 105
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkMTM',
+                                                                        fieldLabel: 'MTM',
+                                                                        labelWidth: 105
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkPrice',
+                                                                        fieldLabel: 'Price',
+                                                                        labelWidth: 105
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboCostMethod',
+                                                                        fieldLabel: 'Cost Method',
+                                                                        labelWidth: 105
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboOnCostType',
+                                                                        fieldLabel: 'On Cost Type',
+                                                                        labelWidth: 105
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        itemId: 'txtAmount',
+                                                                        fieldLabel: 'Amount',
+                                                                        labelWidth: 105,
+                                                                        hideTrigger: true
+                                                                    },
+                                                                    {
+                                                                        xtype: 'combobox',
+                                                                        itemId: 'cboUOM',
+                                                                        fieldLabel: 'UOM',
+                                                                        labelWidth: 105
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                }
+                                                            }
+                                                        ]
                                                     }
                                                 ]
                                             }
