@@ -194,7 +194,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 
     		DECLARE @postdate DATE,@intJournalId INT,@strJournalId VARCHAR(10),
     				@glije_date VARCHAR(20),@intAccountId INT,@intAccountId1 INT, @strDescription VARCHAR(50),@strDescription1 VARCHAR(50),@dtmDate DATE,
-    				@glije_amt DECIMAL(12,2) ,@glije_units DECIMAL(10,2),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(12,2),@credit DECIMAL(12,2),
+    				@glije_amt DECIMAL(12,2) ,@glije_units DECIMAL(16,2),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(12,2),@credit DECIMAL(12,2),
     				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),@totalDebit DECIMAL(18,2),@totalCredit DECIMAL(18,2),
     				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT,@journalCount INT = 0,@orig_glije_dr_cr_ind CHAR(1)
 
