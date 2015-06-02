@@ -14,7 +14,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {dataIndex: 'strShipmentNumber', text: 'Shipment Number', flex: 1,  dataType: 'string'},
                 {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1,  dataType: 'date', xtype: 'datecolumn'},
                 {dataIndex: 'strOrderType',text: 'Order Type', flex: 1,  dataType: 'int'},
-                {dataIndex: 'strBOLNumber', text: 'BOL Number', flex: 1,  dataType: 'string'}
+                {dataIndex: 'strCustomerId',text: 'Customer', flex: 1,  dataType: 'string'},
+                {dataIndex: 'strCustomerName',text: 'Customer Name', flex: 1,  dataType: 'string'}
             ]
         },
         binding: {
@@ -394,6 +395,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         else if (combo.itemId === 'cboSubLocation') {
             current.set('intSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
         }
+        else if (combo.itemId === 'cboUOM') {
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
+        }
     },
 
     onLotSelect: function(combo, records, eOpts) {
@@ -587,6 +591,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onCustomerSelect
             },
             "#cboOrderNumber": {
+                select: this.onOrderNumberSelect
+            },
+            "#cboSubLocation": {
+                select: this.onOrderNumberSelect
+            },
+            "#cboUOM": {
                 select: this.onOrderNumberSelect
             },
             "#grdInventoryShipment": {

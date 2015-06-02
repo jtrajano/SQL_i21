@@ -1135,6 +1135,11 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'intSubLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'strLotNumber',
                                                                                     dataType: 'string',
                                                                                     text: 'Lot Number',
@@ -1183,16 +1188,16 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'strUOM',
                                                                         itemId: 'colLotUOM',
                                                                         width: 100,
+                                                                        dataIndex: 'strUOM',
                                                                         text: 'UOM'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        dataIndex: 'strWeightUOM',
                                                                         itemId: 'colLotWeightUOM',
                                                                         width: 100,
+                                                                        dataIndex: 'strWeightUOM',
                                                                         text: 'Weight UOM'
                                                                     },
                                                                     {
