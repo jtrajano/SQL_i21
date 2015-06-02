@@ -331,19 +331,37 @@ BEGIN
 				,dblStockOut = 0
 				,dblCost = 2.75
 				,intLotId = 12345
+
+		-- Setup the expected data to reverse
+		INSERT INTO expectedTransactionToReverse (
+				intInventoryLotInCustodyTransactionId
+				,intTransactionId
+				,strTransactionId
+				,intTransactionTypeId
+				,intInventoryLotInCustodyId
+				,dblQty
+		)
+		SELECT	intInventoryLotInCustodyTransactionId	= 3
+				,intTransactionId						= 8
+				,strTransactionId						= 'InvShip-0000002'
+				,intTransactionTypeId					= @InventoryShipment
+				,intInventoryLotInCustodyId				= 1
+				,dblQty									= -20
+
 	END 
 
 	-- Act
 	BEGIN 
-		-- Call the uspICUnpostLotOut
-		SET @strTransactionId = 'InvShip-0000001'
-		SET @intTransactionId = 8
-		
+		-- Call the uspICUnpostLotOutFromCustody
+		SET @strTransactionId = 'InvShip-0000002'
+		SET @intTransactionId = 8	
+
 		EXEC dbo.uspICUnpostLotOutFromCustody @strTransactionId, @intTransactionId
 	END 
 
 	-- Assert
 	BEGIN 
+
 		-- Get the date from the temporary table. 
 		INSERT INTO actualTransactionToReverse (
 				intInventoryLotInCustodyTransactionId
