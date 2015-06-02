@@ -142,7 +142,7 @@ GO
 GO
 
 UPDATE tblFRColumnDesign SET strColumnType = 'GL Amounts' 
-	WHERE strColumnType = 'Calculation'
+	WHERE strColumnType IN ('Calculation','Segment Filter')
 
 GO
 	PRINT N'END RENAME COLUMN TYPE'
