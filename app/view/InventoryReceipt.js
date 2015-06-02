@@ -1804,21 +1804,21 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'numeric',
+                                                        xtype: 'numericfield',
                                                         itemId: 'txtCalculatedAmount',
                                                         fieldLabel: 'Calculated Amount',
                                                         labelWidth: 130,
                                                         readOnly: true
                                                     },
                                                     {
-                                                        xtype: 'numeric',
+                                                        xtype: 'numericfield',
                                                         itemId: 'txtInvoiceAmount',
                                                         fieldLabel: 'Invoice Amount',
                                                         labelWidth: 130,
                                                         hideTrigger: true
                                                     },
                                                     {
-                                                        xtype: 'numeric',
+                                                        xtype: 'numericfield',
                                                         itemId: 'txtDifference',
                                                         fieldLabel: 'Difference',
                                                         labelWidth: 130,
@@ -1850,7 +1850,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelWidth: 130
                                                     },
                                                     {
-                                                        xtype: 'numeric',
+                                                        xtype: 'numericfield',
                                                         itemId: 'txtInvoiceMargin',
                                                         fieldLabel: 'Invoice Margin %',
                                                         labelWidth: 130,
