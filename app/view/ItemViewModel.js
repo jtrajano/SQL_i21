@@ -572,7 +572,18 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         assemblyItem: {
-            type: 'icbufferedcompactitem'
+            type: 'icbufferedcompactitem',
+            proxy: {
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/Item/GetAssemblyComponents'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
         },
         assemblyUOM: {
             type: 'icbuffereditemunitmeasure'

@@ -665,12 +665,6 @@ Ext.define('Inventory.view.ItemViewController', {
                                 value: 'No',
                                 conjunction: 'and'
                             }
-//                            ,
-//                            {
-//                                column: 'strType',
-//                                value: 'Inventory|^|Raw Material|^|Finished Good',
-//                                conjunction: 'or'
-//                            }
                         ]
                     }
                 },
